@@ -3,6 +3,7 @@ import { swaggerUI } from "@hono/swagger-ui";
 import { withSecurity } from "./middleware/security.js";
 import { withErrors } from "./middleware/errors.js";
 import { healthApp } from "./routes/health.js";
+import { usersApp } from "./modules/users";
 
 const app = new OpenAPIHono();
 
@@ -14,10 +15,12 @@ app.use("*", withSecurity);
 app.doc("/openapi.json", {
   openapi: "3.1.0",
   info: { title: "Elepad API", version: "1.0.0" },
+  tags: [{ name: "users" }],
 });
 
 // mount routes
 app.route("/", healthApp);
+app.route("/users", usersApp);
 
 // Swagger UI
 app.get(
