@@ -4,7 +4,7 @@ import { config } from "./config.js";
 
 const server = serve({ fetch: app.fetch, port: config.port }, () => {
   console.log(`🚀 API running on http://localhost:${config.port}`);
-  console.log(`📜 Swagger UI at http://localhost:${config.port}/docs`);
+  console.log(`📜 Swagger UI at http://localhost:${config.port}`);
 });
 
 // graceful shutdown

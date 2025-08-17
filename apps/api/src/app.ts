@@ -20,14 +20,9 @@ app.doc("/openapi.json", {
 
 // mount routes
 app.route("/", healthApp);
-app.route("/users", usersApp);
+app.route("/", usersApp);
 
 // Swagger UI
-app.get(
-  "/docs",
-  swaggerUI({
-    url: "/openapi.json",
-  }),
-);
+app.get("/", swaggerUI({ url: "/openapi.json" }));
 
 export default app;

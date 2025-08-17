@@ -48,6 +48,7 @@ Para levantar la app en un entorno de desarrollo:
 
 ```bash
 npm install
+npx supabase start
 npm run dev
 ```
 
