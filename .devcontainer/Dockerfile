@@ -1,11 +1,11 @@
 # ✅ Base: comes with Node 20, npm, non-root "node" user, and devcontainer niceties
 FROM mcr.microsoft.com/devcontainers/javascript-node:20
 
+USER root
+
 # ------------------------------------------------------------------------------
 # System deps for native modules & Android tooling
 # ------------------------------------------------------------------------------
-USER root
-
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     openjdk-17-jdk \
     python3-minimal \

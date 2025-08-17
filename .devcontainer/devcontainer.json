@@ -9,28 +9,30 @@
   ],
   "postCreateCommand": "npm install",
 
-  "forwardPorts": [3000, 5173, 8787, 8081, 19000, 19001, 19002, 5432],
+  // Forward only ports that are served *inside* the app container
+  "forwardPorts": [8787, 8081, 19000, 19001, 19002, 5432],
   "portsAttributes": {
-    "3000": { "label": "Web App (Next/Vite)" },
-    "5173": { "label": "Vite Dev Server" },
-    "8787": { "label": "API (Hono)" },
-    "8081": { "label": "Metro Bundler" },
-    "19000": { "label": "Expo DevTools (UI)" },
-    "19001": { "label": "Expo Debug (LAN)" },
-    "19002": { "label": "Expo DevTools (WS)" },
-    "5432": { "label": "PostgreSQL" }
+    "8787": { "label": "Hono API", "requireLocalPort": true },
+    "8081": { "label": "Metro Bundler", "requireLocalPort": true },
+    "19000": { "label": "Expo DevTools (UI)", "requireLocalPort": true },
+    "19001": { "label": "Expo Debug (LAN)", "requireLocalPort": true },
+    "19002": { "label": "Expo DevTools (WS)", "requireLocalPort": true }
   },
+  // Avoid VS Code auto-forwarding random ports
+  "otherPortsAttributes": { "onAutoForward": "ignore" },
 
   "customizations": {
     "vscode": {
       "settings": {
         "editor.formatOnSave": true,
-        "eslint.workingDirectories": [{ "mode": "auto" }]
+        "eslint.workingDirectories": [{ "mode": "auto" }],
+        // Make sure the forward ports listen on localhost (not LAN)
+        "remote.localPortHost": "localhost",
+        "remote.autoForwardPorts": true
       },
       "extensions": [
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
-        "GraphQL.vscode-graphql",
         "ms-azuretools.vscode-docker",
         "ms-vscode.vscode-typescript-next"
       ]

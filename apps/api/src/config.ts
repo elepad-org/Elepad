@@ -9,6 +9,6 @@ export const config = {
   supabaseSecretKey: process.env.SUPABASE_SECRET_KEY ?? "",
 };
 
-export const createDatabaseClient = () => {
+export const createSupabaseClient = () => {
   return createClient(config.supabaseUrl, config.supabaseSecretKey);
 };

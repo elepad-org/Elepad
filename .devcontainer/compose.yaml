@@ -1,41 +1,23 @@
-version: "3.9"
-
 services:
   app:
     build:
-      context: .. # build from repo root
+      context: .. # repo root
       dockerfile: .devcontainer/Dockerfile
     volumes:
-      - ..:/workspaces/elepad:cached # mount repo root
+      - ..:/workspaces/elepad:cached
+      - /var/run/docker.sock:/var/run/docker.sock # allow supabase CLI to start containers
     command: sleep infinity
-    depends_on:
-      - db
     environment:
       DATABASE_URL: postgres://elepad:elepad@db:5432/elepad
       EXPO_USE_DEV_SERVER: "1"
       ANDROID_SDK_ROOT: /opt/android-sdk
       ANDROID_HOME: /opt/android-sdk
       JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # reach host-published ports from container
     ports:
-      - "3000:3000" # Web App (Next/Vite)
-      - "5173:5173" # Vite Dev Server
-      - "8787:8787" # API (Hono)
-      - "8081:8081" # React Native Metro Bundler
-      - "19000:19000" # Expo DevTools (UI)
-      - "19001:19001" # Expo Debug (LAN)
-      - "19002:19002" # Expo DevTools (Websocket)
-
-  db:
-    image: postgres:16
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: elepad
-      POSTGRES_PASSWORD: elepad
-      POSTGRES_DB: elepad
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    ports:
-      - "5432:5432" # PostgreSQL Database
-
-volumes:
-  pgdata:
+      - "28081:8081" # React Native Metro
+      - "28787:8787" # Hono API
+      - "29000:19000" # Expo DevTools (UI)
+      - "29001:19001" # Expo Debug (LAN)
+      - "29002:19002" # Expo DevTools (WS)
