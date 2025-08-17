@@ -12,11 +12,10 @@ import { useColorScheme } from "react-native";
 import { configureApiClient } from "@elepad/api-client/src/runtime";
 import {
   Provider as PaperProvider,
-  MD3DarkTheme as PaperDark,
-  MD3LightTheme as PaperLight,
   adaptNavigationTheme,
 } from "react-native-paper";
 import SpaceMono from "@/assets/fonts/SpaceMono-Regular.ttf";
+import { lightTheme, darkTheme } from "@/styles/theme";
 
 const queryClient = new QueryClient();
 
@@ -38,38 +37,15 @@ export default function RootLayout() {
     },
   });
 
-  // 🎨 Elepad brand colors (you can tweak to your palette)
-  const brand = {
-    primary: "rgb(0,108,247)",
-    secondary: "rgb(0,170,142)",
-  };
-
-  // Paper themes with brand colors
-  const paperLight = {
-    ...PaperLight,
-    colors: {
-      ...PaperLight.colors,
-      primary: brand.primary,
-      secondary: brand.secondary,
-    },
-  };
-  const paperDark = {
-    ...PaperDark,
-    colors: {
-      ...PaperDark.colors,
-      primary: brand.primary,
-      secondary: brand.secondary,
-    },
-  };
-
-  // Sync React Navigation theme with Paper
   const { LightTheme: AdaptedNavLight, DarkTheme: AdaptedNavDark } =
     adaptNavigationTheme({
       reactNavigationLight: NavLight,
       reactNavigationDark: NavDark,
+      materialLight: lightTheme,
+      materialDark: darkTheme,
     });
 
-  const paperTheme = colorScheme === "dark" ? paperDark : paperLight;
+  const paperTheme = colorScheme === "dark" ? darkTheme : lightTheme;
   const navTheme = colorScheme === "dark" ? AdaptedNavDark : AdaptedNavLight;
 
   return (

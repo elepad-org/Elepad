@@ -70,6 +70,10 @@ Se aplicarán **prácticas de DevOps** en el desarrollo de Elepad para poder tra
 Servicios de terceros:
 
 - [Supabase](https://supabase.com/dashboard/project/sdnmoweppzszpxyggdyg).
+  - Database: una base de datos PostgreSQL gestionada.
+  - Storage: para audios, imagenes, videos.
+  - Auth: para autenticar usuarios.
+  - Edge Functions: para ejecutar llamadas a la API.
 
 Herramientas de desarrollo:
 
@@ -80,7 +84,7 @@ Herramientas de desarrollo:
 
 ### 📂 Estructura del Repositorio
 
-Estructura de monorepo utilizando Turborepo.
+Estructura de monorepo:
 
 ```yaml
 ├── apps          # Aplicaciones
@@ -90,6 +94,8 @@ Estructura de monorepo utilizando Turborepo.
     ├── api-client    # Hooks de Tanstack Query generados con `orval`
     └── assets        # Imágenes de Elepad
 ```
+
+Utilizamos Turborepo (un sistema de build) para ejecutar procesos en varias subcarpetas a la vez.
 
 El código de `packages/api-client` es autogenerado utilizando `orval`. Al utilizar el comando `npm run dev`:
 

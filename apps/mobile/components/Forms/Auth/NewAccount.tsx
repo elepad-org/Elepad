@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { View, StyleSheet } from "react-native";
-import { Text, TextInput, Button, Surface, RadioButton } from "react-native-paper";
+import {
+  Text,
+  TextInput,
+  Button,
+  Surface,
+  RadioButton,
+} from "react-native-paper";
 import useAuth from "@/hooks/useAuth";
 
 type Props = { onBack: () => void };
@@ -74,7 +80,9 @@ export default function NewAccount({ onBack }: Props) {
           >
             <View style={styles.radioRow}>
               <RadioButton value="si" />
-              <Text style={styles.radioLabel}>Sí, pertenezco a un grupo familiar</Text>
+              <Text style={styles.radioLabel}>
+                Sí, pertenezco a un grupo familiar
+              </Text>
             </View>
             <View style={styles.radioRow}>
               <RadioButton value="no" />
