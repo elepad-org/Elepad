@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM"],
+    "moduleResolution": "Bundler",
+    "baseUrl": ".",
+    "paths": { "@/*": ["src/*"] },
+    "noUncheckedIndexedAccess": true,
+    "noEmit": false,
+    "outDir": "dist",
+    "resolveJsonModule": true
+  },
+  "include": ["src", "scripts/emit-openapi.ts"]
+}

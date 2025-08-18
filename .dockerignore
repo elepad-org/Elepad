@@ -1,0 +1,11 @@
+node_modules
+.git
+.vscode
+dist
+build
+.expo
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

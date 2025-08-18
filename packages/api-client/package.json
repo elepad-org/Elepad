@@ -1,0 +1,22 @@
+{
+  "name": "@elepad/api-client",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "src/gen/client.ts",
+  "types": "src/gen/client.ts",
+  "private": true,
+  "scripts": {
+    "build": "orval",
+    "dev": "NODE_ENV=development orval --watch"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "^5.85.3",
+    "react": "19.0.0",
+    "react-native-paper": "^5.14.5"
+  },
+  "devDependencies": {
+    "@elepad/api": "*",
+    "orval": "^7.11.2"
+  },
+  "packageManager": "npm@11.5.2"
+}

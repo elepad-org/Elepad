@@ -1,0 +1,33 @@
+{
+  "name": "@elepad/api",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/app.ts",
+  "types": "src/app.ts",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node dist/src/server.js",
+    "build": "tsc && tsx scripts/emit-openapi.ts",
+    "dev": "tsx watch src/server.ts",
+    "lint": "eslint . && tsc --noEmit",
+    "clean": "rm -rf dist openapi.json",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "@hono/swagger-ui": "^0.2.1",
+    "@hono/zod-openapi": "^0.16.4",
+    "@supabase/supabase-js": "^2.55.0",
+    "dotenv": "^16.4.5",
+    "hono": "^4.6.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.1",
+    "typescript": "~5.8.3"
+  },
+  "packageManager": "npm@11.5.2"
+}

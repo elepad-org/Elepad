@@ -1,0 +1,36 @@
+{
+  "name": "elepad",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "start": "turbo run start",
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write . --ignore-path .gitignore"
+  },
+  "devDependencies": {
+    "eslint": "^9.25.0",
+    "eslint-config-prettier": "^9.1.0",
+    "orval": "^7.11.2",
+    "prettier": "^3.1.1",
+    "turbo": "^2.5.6",
+    "typescript": "^5.9.2",
+    "supabase": "^2.34.3"
+  },
+  "packageManager": "npm@11.5.2",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.55.0",
+    "@typescript-eslint/eslint-plugin": "^8.39.1",
+    "@typescript-eslint/parser": "^8.39.1",
+    "eslint-plugin-react": "^7.37.5"
+  }
+}
