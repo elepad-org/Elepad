@@ -49,27 +49,27 @@ Se aplicarán **técnicas ágiles** y **prácticas DevOps** en el desarrollo de 
 
 1. Instalar dependencias y configurar Supabase:
 
-    ```bash
-    npm install
-    npx supabase login
-    npx supabase link --project-ref sdnmoweppzszpxyggdyg
-    npx supabase db reset
-    npx supabase start
-    ```
+   ```bash
+   npm install
+   npx supabase login
+   npx supabase link --project-ref sdnmoweppzszpxyggdyg
+   npx supabase db reset
+   npx supabase start
+   ```
 
 2. Levantar la app en modo desarrollo:
 
-    ```bash
-    npx supabase start
-    npm run dev
-    ```
+   ```bash
+   npx supabase start
+   npm run dev
+   ```
 
 3. Compilar y ejecutar la versión buildeada:
 
-    ```bash
-    npm run build
-    npm run start
-    ```
+   ```bash
+   npm run build
+   npm run start
+   ```
 
 Si se desea utilizar el **devcontainer** configurado, se debe agregar `sudo` a algunos comandos de `supabase` ya que la CLI también gestiona contenedores.
 
@@ -77,7 +77,7 @@ Si se desea utilizar el **devcontainer** configurado, se debe agregar `sudo` a a
 
 - **Lenguajes, frameworks y librerías**: Nodejs, TypeScript, React Native, Expo, React Native Paper, Hono.
 - **Dev tools**: npm, Turborepo, eslint, Prettier, OpenAPI, orval.
-- **Servicios**: [Supabase](https://supabase.com/dashboard/project/sdnmoweppzszpxyggdyg) (Database, Storage, Auth, Edge Functions).
+- **Servicios**: [Supabase](https://supabase.com/dashboard/project/sdnmoweppzszpxyggdyg) (Database, Storage, Auth), [Google Cloud](https://console.cloud.google.com/auth/clients?project=elepad-mobile) (OAuth), [Expo](https://expo.dev/accounts/elepad-org/projects/elepad).
 
 ### 📂 Estructura del Repositorio
 

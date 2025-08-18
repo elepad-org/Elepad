@@ -1,7 +1,8 @@
 import type { MiddlewareHandler } from "hono";
 
-export const withSecurity: MiddlewareHandler = async (c, next) => {
-  // CORS (simple default; tighten for prod)
+export const withHeaders: MiddlewareHandler = async (c, next) => {
+  // CORS (simple default)
+  // TODO: find out if it should be tighter for prod
   c.header("Access-Control-Allow-Origin", "*");
   c.header("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
   c.header("Access-Control-Allow-Headers", "Content-Type,Authorization");
@@ -13,5 +14,6 @@ export const withSecurity: MiddlewareHandler = async (c, next) => {
   c.header("X-XSS-Protection", "0");
 
   if (c.req.method === "OPTIONS") return c.body(null, 204);
+
   await next();
 };

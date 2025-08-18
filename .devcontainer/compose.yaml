@@ -15,6 +15,7 @@ services:
       JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
     extra_hosts:
       - "host.docker.internal:host-gateway" # reach host-published ports from container
+    # Agregar un '2' al inicio de cada puerto para evitar conflictos
     ports:
       - "28081:8081" # React Native Metro
       - "28787:8787" # Hono API

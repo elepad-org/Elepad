@@ -1,17 +1,40 @@
+import { supabase } from "@/lib/supabase";
 import { useState } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Alert } from "react-native";
 import { Text, TextInput, Button, Surface } from "react-native-paper";
-import useAuth from "@/hooks/useAuth";
+import { makeRedirectUri } from "expo-auth-session";
 
 type Props = { onBack: () => void };
 
 export default function LogIn({ onBack }: Props) {
-  const { login } = useAuth();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
-    login({ username, password });
+  const handleLogin = async () => {
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) {
+      Alert.alert(error.message);
+    }
+    setLoading(false);
+  };
+
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    const redirectTo = makeRedirectUri({ scheme: "elepad" });
+    console.log(redirectTo);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo },
+    });
+    if (error) {
+      Alert.alert(error.message);
+    }
+    setLoading(false);
   };
 
   return (
@@ -23,13 +46,15 @@ export default function LogIn({ onBack }: Props) {
 
         <TextInput
           mode="outlined"
-          label="Nombre de usuario"
-          value={username}
-          onChangeText={setUsername}
+          label="Email"
+          value={email}
+          onChangeText={setEmail}
           autoCapitalize="none"
           autoCorrect={false}
+          keyboardType="email-address"
           returnKeyType="next"
           style={styles.input}
+          disabled={loading}
         />
 
         <TextInput
@@ -39,17 +64,31 @@ export default function LogIn({ onBack }: Props) {
           onChangeText={setPassword}
           secureTextEntry
           returnKeyType="go"
-          onSubmitEditing={handleSubmit}
+          onSubmitEditing={handleLogin}
           style={styles.input}
+          disabled={loading}
         />
 
         <Button
           mode="contained"
-          onPress={handleSubmit}
+          onPress={handleLogin}
           style={styles.button}
           contentStyle={styles.buttonContent}
+          loading={loading}
+          disabled={loading}
         >
           Entrar
+        </Button>
+
+        <Button
+          mode="contained"
+          onPress={handleGoogleLogin}
+          style={styles.button}
+          contentStyle={styles.buttonContent}
+          loading={loading}
+          disabled={loading}
+        >
+          Entrar con Google
         </Button>
 
         <Button
@@ -57,6 +96,7 @@ export default function LogIn({ onBack }: Props) {
           onPress={onBack}
           style={styles.backButton}
           labelStyle={styles.backLabel}
+          disabled={loading}
         >
           Volver
         </Button>

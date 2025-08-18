@@ -1,32 +1,24 @@
+import { supabase } from "@/lib/supabase";
 import { useState } from "react";
-import { View, StyleSheet } from "react-native";
-import {
-  Text,
-  TextInput,
-  Button,
-  Surface,
-  RadioButton,
-} from "react-native-paper";
-import useAuth from "@/hooks/useAuth";
+import { View, StyleSheet, Alert } from "react-native";
+import { Text, TextInput, Button, Surface } from "react-native-paper";
 
 type Props = { onBack: () => void };
 
 export default function NewAccount({ onBack }: Props) {
-  const { newUser } = useAuth();
-  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [belongsGroup, setBelongsGroup] = useState<"si" | "no">("no");
-  const [groupCode, setGroupCode] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
-    newUser({
-      username,
-      email,
-      password,
-      belongsGroup: belongsGroup === "si",
-      groupCode: belongsGroup === "si" ? groupCode : undefined,
-    });
+  const handleSignUp = async () => {
+    setLoading(true);
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) {
+      Alert.alert(error.message);
+    } else {
+      Alert.alert("Success", "Please check your email for confirmation.");
+    }
+    setLoading(false);
   };
 
   return (
@@ -38,17 +30,6 @@ export default function NewAccount({ onBack }: Props) {
 
         <TextInput
           mode="outlined"
-          label="Nombre de usuario"
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-          autoCorrect={false}
-          returnKeyType="next"
-          style={styles.input}
-        />
-
-        <TextInput
-          mode="outlined"
           label="Correo electrónico"
           value={email}
           onChangeText={setEmail}
@@ -57,6 +38,7 @@ export default function NewAccount({ onBack }: Props) {
           keyboardType="email-address"
           returnKeyType="next"
           style={styles.input}
+          disabled={loading}
         />
 
         <TextInput
@@ -66,51 +48,28 @@ export default function NewAccount({ onBack }: Props) {
           onChangeText={setPassword}
           secureTextEntry
           returnKeyType="go"
-          onSubmitEditing={handleSubmit}
+          onSubmitEditing={handleSignUp}
           style={styles.input}
+          disabled={loading}
         />
-
-        <Surface style={styles.groupCard} elevation={0}>
-          <Text variant="titleSmall" style={styles.groupTitle}>
-            ¿Pertenecés a un grupo familiar?
-          </Text>
-          <RadioButton.Group
-            onValueChange={(v) => setBelongsGroup(v as "si" | "no")}
-            value={belongsGroup}
-          >
-            <View style={styles.radioRow}>
-              <RadioButton value="si" />
-              <Text style={styles.radioLabel}>
-                Sí, pertenezco a un grupo familiar
-              </Text>
-            </View>
-            <View style={styles.radioRow}>
-              <RadioButton value="no" />
-              <Text style={styles.radioLabel}>No</Text>
-            </View>
-          </RadioButton.Group>
-
-          {belongsGroup === "si" && (
-            <TextInput
-              mode="outlined"
-              label="Código del grupo"
-              value={groupCode}
-              onChangeText={setGroupCode}
-              style={[styles.input, { marginTop: 8 }]}
-            />
-          )}
-        </Surface>
 
         <Button
           mode="contained"
-          onPress={handleSubmit}
+          onPress={handleSignUp}
           style={styles.button}
           contentStyle={styles.buttonContent}
+          loading={loading}
+          disabled={loading}
         >
           Crear Cuenta
         </Button>
 
-        <Button mode="text" onPress={onBack} style={styles.backButton}>
+        <Button
+          mode="text"
+          onPress={onBack}
+          style={styles.backButton}
+          disabled={loading}
+        >
           Volver
         </Button>
       </View>
@@ -132,23 +91,6 @@ const styles = StyleSheet.create({
   },
   input: {
     marginVertical: 8,
-  },
-  groupCard: {
-    backgroundColor: "#f5f5f5",
-    borderRadius: 12,
-    padding: 12,
-    marginTop: 8,
-  },
-  groupTitle: {
-    marginBottom: 4,
-  },
-  radioRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 4,
-  },
-  radioLabel: {
-    marginLeft: 4,
   },
   button: {
     marginTop: 12,

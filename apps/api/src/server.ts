@@ -2,9 +2,9 @@ import { serve } from "@hono/node-server";
 import app from "./app.js";
 import { config } from "./config.js";
 
-const server = serve({ fetch: app.fetch, port: config.port }, () => {
-  console.log(`🚀 API running on http://localhost:${config.port}`);
-  console.log(`📜 Swagger UI at http://localhost:${config.port}`);
+const server = serve({ fetch: app.fetch, port: config.port }, (info) => {
+  console.log(`🚀 API running on http://localhost:${info.port}`);
+  console.log(`📜 Swagger UI at http://localhost:${info.port}`);
 });
 
 // graceful shutdown

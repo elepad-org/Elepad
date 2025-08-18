@@ -1,15 +1,15 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { swaggerUI } from "@hono/swagger-ui";
-import { withSecurity } from "./middleware/security.js";
+import { withHeaders } from "./middleware/headers.js";
 import { withErrors } from "./middleware/errors.js";
 import { healthApp } from "./routes/health.js";
 import { usersApp } from "./modules/users";
 
-const app = new OpenAPIHono();
+const app = new OpenAPIHono().basePath("/api");
 
 // global middleware
 app.use("*", withErrors);
-app.use("*", withSecurity);
+app.use("*", withHeaders);
 
 // OpenAPI document + Swagger UI
 app.doc("/openapi.json", {
@@ -23,6 +23,6 @@ app.route("/", healthApp);
 app.route("/", usersApp);
 
 // Swagger UI
-app.get("/", swaggerUI({ url: "/openapi.json" }));
+app.get("/", swaggerUI({ url: "/api/openapi.json" }));
 
 export default app;

@@ -1,8 +1,8 @@
 import { z } from "zod";
 import type { CreateUserInput } from "./schema";
-import { createDatabaseClient } from "config";
+import { createSupabaseClient } from "@/config";
 
-const db = createDatabaseClient();
+const db = createSupabaseClient();
 
 export const usersRepo = {
   async insert(user: z.input<typeof CreateUserInput>) {
@@ -17,9 +17,6 @@ export const usersRepo = {
       console.error("Error creating the user: ", error);
       return undefined;
     }
-    // Remove this
-    console.log(data);
-
     return data;
   },
   async findById(id: string) {
@@ -32,9 +29,6 @@ export const usersRepo = {
       console.error("Error creating the user: ", error);
       return undefined;
     }
-    // Remove this
-    console.log(data);
-
     return data;
   },
 };

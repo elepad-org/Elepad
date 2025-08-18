@@ -1,3 +1,4 @@
+import { AuthProvider } from "@/hooks/useAuth";
 import {
   DarkTheme as NavDark,
   DefaultTheme as NavLight,
@@ -16,6 +17,7 @@ import {
 } from "react-native-paper";
 import SpaceMono from "@/assets/fonts/SpaceMono-Regular.ttf";
 import { lightTheme, darkTheme } from "@/styles/theme";
+import { supabase } from "@/lib/supabase";
 
 const queryClient = new QueryClient();
 
@@ -32,8 +34,9 @@ export default function RootLayout() {
     // TODO: read from a config.ts file, and make that file read from env
     baseUrl: process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:8787/api",
     // TODO: add auth only when that is implemented on the backend
-    getToken: () => {
-      return undefined;
+    getToken: async () => {
+      const { data } = await supabase.auth.getSession();
+      return data.session?.access_token;
     },
   });
 
@@ -49,16 +52,18 @@ export default function RootLayout() {
   const navTheme = colorScheme === "dark" ? AdaptedNavDark : AdaptedNavLight;
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <PaperProvider theme={paperTheme}>
-        <NavigationThemeProvider value={navTheme}>
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-          <StatusBar style="auto" />
-        </NavigationThemeProvider>
-      </PaperProvider>
-    </QueryClientProvider>
+    <AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <PaperProvider theme={paperTheme}>
+          <NavigationThemeProvider value={navTheme}>
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="+not-found" />
+            </Stack>
+            <StatusBar style="auto" />
+          </NavigationThemeProvider>
+        </PaperProvider>
+      </QueryClientProvider>
+    </AuthProvider>
   );
 }
