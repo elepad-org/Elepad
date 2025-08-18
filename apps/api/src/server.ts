@@ -3,8 +3,8 @@ import app from "./app.js";
 import { config } from "./config.js";
 
 const server = serve({ fetch: app.fetch, port: config.port }, (info) => {
-  console.log(`🚀 API running on http://localhost:${info.port}`);
-  console.log(`📜 Swagger UI at http://localhost:${info.port}`);
+  console.log(`🚀 API running on http://localhost:${info.port}/api`);
+  console.log(`📜 Swagger UI at http://localhost:${info.port}/api`);
 });
 
 // graceful shutdown
