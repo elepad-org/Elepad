@@ -47,7 +47,15 @@ Se aplicarán **técnicas ágiles** y **prácticas DevOps** en el desarrollo de 
 
 ### 🚀 Cómo Levantar la Aplicación
 
-1. Instalar dependencias y configurar Supabase:
+1. Definir archivos `.env` con variables de entorno según los siguientes archivos de ejemplo:
+
+   ```bash
+   supabase/.env.example
+   apps/api/.env.example
+   apps/mobile/.env.example
+   ```
+
+2. Instalar dependencias y configurar Supabase:
 
    ```bash
    npm install
@@ -57,14 +65,14 @@ Se aplicarán **técnicas ágiles** y **prácticas DevOps** en el desarrollo de 
    npx supabase db reset
    ```
 
-2. Levantar la app en modo desarrollo:
+3. Levantar la app en modo desarrollo:
 
    ```bash
    npx supabase start
    npm run dev
    ```
 
-3. Compilar y ejecutar la versión buildeada:
+4. Compilar y ejecutar la versión buildeada:
 
    ```bash
    npm run build
