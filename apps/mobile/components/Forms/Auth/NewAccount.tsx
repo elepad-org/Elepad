@@ -7,13 +7,19 @@ type Props = { onBack: () => void };
 
 export default function NewAccount({ onBack }: Props) {
   const [email, setEmail] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async () => {
     setLoading(true);
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { displayName } }, // The user avatar is set to a default image I guess...
+    });
     if (error) {
+      console.log(error)
       Alert.alert(error.message);
     } else {
       Alert.alert("Success", "Please check your email for confirmation.");
@@ -27,6 +33,18 @@ export default function NewAccount({ onBack }: Props) {
         <Text variant="headlineMedium" style={styles.title}>
           Crear Cuenta
         </Text>
+
+        <TextInput
+          mode="outlined"
+          label="Nombre de usuario"
+          value={displayName}
+          onChangeText={setDisplayName}
+          autoCapitalize="none"
+          autoCorrect={false}
+          returnKeyType="next"
+          style={styles.input}
+          disabled={loading}
+        />
 
         <TextInput
           mode="outlined"
