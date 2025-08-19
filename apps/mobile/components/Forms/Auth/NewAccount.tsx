@@ -13,15 +13,16 @@ export default function NewAccount({ onBack }: Props) {
 
   const handleSignUp = async () => {
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { error, data } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { displayName } }, // The user avatar is set to a default image I guess...
+      options: { data: { displayName, passwordHash:password } }, // The user avatar is set to a default image I guess...
     });
     if (error) {
       console.log(error)
       Alert.alert(error.message);
     } else {
+      console.log("User created:", data);
       Alert.alert("Success", "Please check your email for confirmation.");
     }
     setLoading(false);
