@@ -5,7 +5,8 @@ dotenv.config();
 export const config = {
   port: Number(process.env.PORT ?? 8787),
   env: process.env.NODE_ENV ?? "development",
-  supabaseUrl: process.env.SUPABASE_URL ?? "http://localhost:54321",
+  supabaseUrl:
+    process.env.SUPABASE_URL ?? "https://sdnmoweppzszpxyggdyg.supabase.co",
   supabaseSecretKey: process.env.SUPABASE_SECRET_KEY ?? "",
 };
 

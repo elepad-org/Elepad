@@ -5,7 +5,6 @@ services:
       dockerfile: .devcontainer/Dockerfile
     volumes:
       - ..:/workspaces/elepad:cached
-      - /var/run/docker.sock:/var/run/docker.sock # allow supabase CLI to start containers
     command: sleep infinity
     environment:
       DATABASE_URL: postgres://elepad:elepad@db:5432/elepad

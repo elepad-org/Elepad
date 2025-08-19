@@ -61,14 +61,13 @@ Se aplicarán **técnicas ágiles** y **prácticas DevOps** en el desarrollo de 
    npm install
    npx supabase login
    npx supabase link --project-ref sdnmoweppzszpxyggdyg
-   npx supabase start
-   npx supabase db reset
    ```
+
+   Se usa un [proyecto de desarrollo](https://supabase.com/dashboard/project/sdnmoweppzszpxyggdyg) de Supabase. Si se prefiere tener un stack local propio con Docker, se puede ejecutar `npx supabase start && npx supabase db reset`.
 
 3. Levantar la app en modo desarrollo:
 
    ```bash
-   npx supabase start
    npm run dev
    ```
 
@@ -80,6 +79,8 @@ Se aplicarán **técnicas ágiles** y **prácticas DevOps** en el desarrollo de 
    ```
 
 Si se desea trabajar desde el **devcontainer** configurado, se debe agregar `sudo` a algunos comandos de `supabase` ya que la CLI gestiona contenedores por fuera del contenedor.
+
+Nota: para el despliegue se utiliza otro [proyecto de producción](https://supabase.com/dashboard/org/oabegetinldkjgxchssx) de Supabase.
 
 ### 🔨 Herramientas
 
