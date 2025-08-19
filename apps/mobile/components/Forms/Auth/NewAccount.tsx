@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { useState } from "react";
 import { View, StyleSheet, Alert } from "react-native";
-import { Text, TextInput, Button, Surface } from "react-native-paper";
+import { Surface, TextInput, Button, Text, Portal, Dialog } from "react-native-paper";
 
 type Props = { onBack: () => void };
 
@@ -11,19 +11,35 @@ export default function NewAccount({ onBack }: Props) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Modal states
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+
+  // Function to get modal error message based on status code (could be more, just saw these)
+  const getErrorMessage = (error: any) => {
+    if (error.code === 'weak_password') return "La contraseña es muy débil. Debe tener al menos 6 caracteres.";
+    if( error.code === 'validation_failed') return "El correo electrónico no es válido.";
+    if (error.code === 'email_exists') return "Este correo ya está asociado a una cuenta.";
+    if (error.code === 'email_address_invalid') return "La dirección de correo no es válida.";
+    return error.message || "Ocurrió un error inesperado. Intente nuevamente por favor."; // This is for status 500 (supabase gets lazy)
+  };
+
+
   const handleSignUp = async () => {
     setLoading(true);
     const { error, data } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { displayName, passwordHash:password } }, // The user avatar is set to a default image I guess...
+      options: { data: { displayName, passwordHash:password } },
     });
     if (error) {
-      console.log(error)
-      Alert.alert(error.message);
+      console.log(error);
+      setModalMessage(getErrorMessage(error));
+      setModalVisible(true);
     } else {
       console.log("User created:", data);
-      Alert.alert("Success", "Please check your email for confirmation.");
+      setModalMessage("Cuenta creada. Revisa tu correo para confirmar.");
+      setModalVisible(true);
     }
     setLoading(false);
   };
@@ -92,6 +108,18 @@ export default function NewAccount({ onBack }: Props) {
           Volver
         </Button>
       </View>
+
+      <Portal>
+        <Dialog visible={modalVisible} onDismiss={() => setModalVisible(false)}>
+          <Dialog.Title>Atención</Dialog.Title>
+          <Dialog.Content>
+            <Text>{modalMessage}</Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setModalVisible(false)}>Cerrar</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </Surface>
   );
 }
