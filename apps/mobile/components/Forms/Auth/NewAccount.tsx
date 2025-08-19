@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { useState } from "react";
 import { View, StyleSheet, Alert } from "react-native";
-import { Surface, TextInput, Button, Text, Portal, Dialog } from "react-native-paper";
+import { Surface, TextInput, Button, Text, Portal, Dialog, ActivityIndicator  } from "react-native-paper";
 
 type Props = { onBack: () => void };
 
@@ -14,6 +14,10 @@ export default function NewAccount({ onBack }: Props) {
   // Modal states
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
+  const [isError, setIsError] = useState(false);
+
+  // Login state
+  const [loginLoading, setLoginLoading] = useState(false);
 
   // Function to get modal error message based on status code (could be more, just saw these)
   const getErrorMessage = (error: any) => {
@@ -23,7 +27,6 @@ export default function NewAccount({ onBack }: Props) {
     if (error.code === 'email_address_invalid') return "La dirección de correo no es válida.";
     return error.message || "Ocurrió un error inesperado. Intente nuevamente por favor."; // This is for status 500 (supabase gets lazy)
   };
-
 
   const handleSignUp = async () => {
     setLoading(true);
@@ -35,13 +38,37 @@ export default function NewAccount({ onBack }: Props) {
     if (error) {
       console.log(error);
       setModalMessage(getErrorMessage(error));
-      setModalVisible(true);
+      setIsError(true);
     } else {
-      console.log("User created:", data);
-      setModalMessage("Cuenta creada. Revisa tu correo para confirmar.");
-      setModalVisible(true);
+      setModalMessage("Ya creamos tu cuenta. Revisa tu correo para confirmar que te pertenece.\n Luego puedes hacer clic en este boton.");
+      setIsError(false);
     }
+    setModalVisible(true);
     setLoading(false);
+  };
+
+  const handleLogin = async () => {
+    setLoginLoading(true);
+    const { error, data } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setModalMessage("⚠️ Error al iniciar sesión.\n Verifica que hayas confirmado tu correo, luego intenta nuevamente.");
+      setIsError(true);
+      setLoginLoading(false);
+
+      // TODO: Could be nice if on error, the modal redirects to LogIn view
+
+      return;
+    }
+    
+    setModalVisible(false);
+    setLoginLoading(false);
+
+    // TODO: Add a navigate or redirect to HomePage
+
   };
 
   return (
@@ -111,12 +138,22 @@ export default function NewAccount({ onBack }: Props) {
 
       <Portal>
         <Dialog visible={modalVisible} onDismiss={() => setModalVisible(false)}>
-          <Dialog.Title>Atención</Dialog.Title>
+          <Dialog.Title>{isError ? "Error" : "Éxito"}</Dialog.Title>
           <Dialog.Content>
             <Text>{modalMessage}</Text>
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setModalVisible(false)}>Cerrar</Button>
+            {isError ? (
+              <Button onPress={() => setModalVisible(false)}>Cerrar</Button>
+            ) : (
+              <Button onPress={handleLogin} disabled={loginLoading}>
+                {loginLoading ? (
+                  <ActivityIndicator animating={true} size="small" />
+                ) : (
+                  "Iniciar Sesión"
+                )}
+              </Button>
+            )}
           </Dialog.Actions>
         </Dialog>
       </Portal>
