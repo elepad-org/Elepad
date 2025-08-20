@@ -1,29 +1,44 @@
 import LogIn from "@/components/Forms/Auth/LogIn";
 import NewAccount from "@/components/Forms/Auth/NewAccount";
-import React, { useState, useRef } from "react";
-import { ImageBackground, StyleSheet, View, Animated } from "react-native";
-import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
-import { Button, Text, useTheme } from "react-native-paper";
+import { useAuth } from "@/hooks/useAuth";
+import { Redirect } from "expo-router";
+import React, { useRef, useState } from "react";
+import { Animated, ImageBackground, StyleSheet, View } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { Button, Text, useTheme, ActivityIndicator } from "react-native-paper";
 import elephantsImg from "@/assets/images/elefantes_juntos.png";
 import logoImg from "@/assets/images/logoblanco.png";
 
-export default function HomeScreen() {
+export default function LandingScreen() {
   const theme = useTheme();
+  const { session, loading } = useAuth();
   const [view, setView] = useState<"buttons" | "login" | "newaccount">(
-    "buttons",
+    "buttons"
   );
   const fadeAnim = useRef(new Animated.Value(1)).current;
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
+
+  if (session) {
+    return <Redirect href="/home" />;
+  }
 
   const goToView = (target: "buttons" | "login" | "newaccount") => {
     Animated.timing(fadeAnim, {
       toValue: 0,
-      duration: 300,
+      duration: 250,
       useNativeDriver: true,
     }).start(() => {
       setView(target);
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 300,
+        duration: 250,
         useNativeDriver: true,
       }).start();
     });
@@ -50,9 +65,7 @@ export default function HomeScreen() {
           <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
             {view === "buttons" && (
               <>
-                <View
-                  style={{ flexDirection: "row", justifyContent: "center" }}
-                >
+                <View style={styles.buttonsRow}>
                   <Button
                     mode="contained"
                     icon="login"
@@ -66,9 +79,7 @@ export default function HomeScreen() {
                   </Button>
                 </View>
 
-                <View
-                  style={{ flexDirection: "row", justifyContent: "center" }}
-                >
+                <View style={styles.registerRow}>
                   <Text
                     variant="titleMedium"
                     style={[styles.buttonNew, { color: "white" }]}
@@ -107,6 +118,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  center: { flex: 1, justifyContent: "center", alignItems: "center" },
   logoContainer: {
     width: 300,
     height: 300,
@@ -116,7 +128,6 @@ const styles = StyleSheet.create({
   title: {
     color: "white",
     textAlign: "center",
-    // original sizes approximated with MD3 variants + style
     fontWeight: "bold",
   },
   sessionButton: {
@@ -124,6 +135,8 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     marginTop: 300,
   },
+  buttonsRow: { flexDirection: "row", justifyContent: "center" },
+  registerRow: { flexDirection: "row", justifyContent: "center" },
   buttonNew: {
     fontWeight: "bold",
     textAlign: "center",

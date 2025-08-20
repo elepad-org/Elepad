@@ -6,7 +6,7 @@ import {
 } from "@react-navigation/native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 import { useColorScheme } from "react-native";
@@ -17,7 +17,10 @@ import {
 } from "react-native-paper";
 import SpaceMono from "@/assets/fonts/SpaceMono-Regular.ttf";
 import { lightTheme, darkTheme } from "@/styles/theme";
-import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/hooks/useAuth";
+import { useEffect, useRef } from "react";
+import type { Theme as NavigationTheme } from "@react-navigation/native";
+import type { MD3Theme } from "react-native-paper";
 
 const queryClient = new QueryClient();
 
@@ -34,10 +37,10 @@ export default function RootLayout() {
     // TODO: read from a config.ts file, and make that file read from env
     baseUrl: process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:8787/api",
     // TODO: add auth only when that is implemented on the backend
-    getToken: async () => {
-      const { data } = await supabase.auth.getSession();
-      return data.session?.access_token;
-    },
+    // getToken: async () => {
+    //   const { data } = await supabase.auth.getSession();
+    //   return data.session?.access_token;
+    // },
   });
 
   const { LightTheme: AdaptedNavLight, DarkTheme: AdaptedNavDark } =
@@ -53,17 +56,46 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <QueryClientProvider client={queryClient}>
-        <PaperProvider theme={paperTheme}>
-          <NavigationThemeProvider value={navTheme}>
-            <Stack>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" />
-            </Stack>
-            <StatusBar style="auto" />
-          </NavigationThemeProvider>
-        </PaperProvider>
-      </QueryClientProvider>
+      <AuthGate navTheme={navTheme} paperTheme={paperTheme} />
     </AuthProvider>
+  );
+}
+
+type GateProps = { navTheme: NavigationTheme; paperTheme: MD3Theme };
+
+function AuthGate({ navTheme, paperTheme }: GateProps) {
+  const { session, loading } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+  const lastSessionRef = useRef<boolean | null>(null);
+
+  // Evitar loops: solo navegar si cambia el estado de sesión
+  useEffect(() => {
+    if (loading) return;
+    const isAuthed = !!session;
+    if (lastSessionRef.current === isAuthed) return;
+    lastSessionRef.current = isAuthed;
+
+    const inTabs = segments[0] === "(tabs)";
+    if (!isAuthed && inTabs) {
+      router.replace("/");
+    } else if (isAuthed && !inTabs) {
+      router.replace("/(tabs)/home");
+    }
+  }, [loading, session, segments, router]);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <PaperProvider theme={paperTheme}>
+        <NavigationThemeProvider value={navTheme}>
+          <Stack>
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          <StatusBar style="auto" />
+        </NavigationThemeProvider>
+      </PaperProvider>
+    </QueryClientProvider>
   );
 }
