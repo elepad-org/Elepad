@@ -5,6 +5,7 @@ import {
   View,
   SafeAreaView,
   StatusBar,
+  ScrollView,
   FlatList,
 } from "react-native";
 import { ActivityIndicator, Text, Button, Avatar } from "react-native-paper";
@@ -12,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import ActivitiesList from "../../components/ActivitiesList";
+import CalendarView from "@/components/CalendarView";
 
 const colors = {
   primary: "#7fb3d3",
@@ -57,9 +59,13 @@ export default function HomeScreen() {
         />
       </View>
 
-      <View style={styles.contentContainer}>
-        <ActivitiesList />
-      </View>
+      <ScrollView style={styles.contentContainer}>
+        <View >
+          <ActivitiesList />
+         
+          <CalendarView />
+        </View>
+      </ScrollView>
       <Button
         mode="contained"
         style={styles.logout}
@@ -101,7 +107,9 @@ export default function HomeScreen() {
         >
           Ir a Home 3
         </Button>
+        
       </View>
+
     </SafeAreaView>
   );
 }
