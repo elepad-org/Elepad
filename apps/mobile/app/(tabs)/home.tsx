@@ -1,8 +1,23 @@
 import React from "react";
-import { Alert, StyleSheet, View } from "react-native";
-import { ActivityIndicator, Text, Button } from "react-native-paper";
+import {
+  Alert,
+  StyleSheet,
+  View,
+  SafeAreaView,
+  StatusBar,
+  FlatList,
+} from "react-native";
+import { ActivityIndicator, Text, Button, Avatar } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "expo-router";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import ActivitiesList from "../../components/ActivitiesList";
+
+const colors = {
+  primary: "#7fb3d3",
+  white: "#f9f9f9ff",
+  background: "#F4F7FF",
+};
 
 export default function HomeScreen() {
   const { user, loading, signOut } = useAuth();
@@ -17,18 +32,34 @@ export default function HomeScreen() {
   }
 
   const displayName =
-    (user?.user_metadata?.displayName as string | undefined) ||
-    user?.email ||
-    "usuario";
+    (user?.user_metadata?.displayName as string) || user?.email || "Usuario";
 
   return (
-    <View style={styles.container}>
-      <Text variant="headlineMedium" style={styles.text}>
-        Bienvenid@ {displayName}
-      </Text>
-      <Text style={styles.subtitle}>
-        Este es tu inicio. Pronto agregaremos más funcionalidades aquí.
-      </Text>
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
+
+      {/* --- Header --- */}
+      <View style={styles.header}>
+        <MaterialCommunityIcons name="menu" size={40} color={colors.white} />
+        <View>
+          <Text
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={styles.headerTitle}
+            // TODO: If the name is too long it should be truncated, otherwise it will overflow the menu item and the avatar
+          >
+            Bienvenido {displayName}
+          </Text>
+        </View>
+        <Avatar.Image
+          size={50}
+          source={{ uri: "https://i.pravatar.cc/150?u=a042581f4e29030" }}
+        />
+      </View>
+
+      <View style={styles.contentContainer}>
+        <ActivitiesList />
+      </View>
       <Button
         mode="contained"
         style={styles.logout}
@@ -42,14 +73,69 @@ export default function HomeScreen() {
       >
         Cerrar sesión
       </Button>
-    </View>
+      <View
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-around",
+          marginBottom: 20,
+        }}
+      >
+        <Button
+          mode="contained"
+          style={styles.logout}
+          icon="logout"
+          onPress={async () => {
+            router.navigate("/home2");
+          }}
+        >
+          Ir a Home 2
+        </Button>
+        <Button
+          mode="contained"
+          style={styles.logout}
+          icon="logout"
+          onPress={async () => {
+            router.navigate("/home3");
+          }}
+        >
+          Ir a Home 3
+        </Button>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 24, justifyContent: "center" },
-  text: { textAlign: "center", fontWeight: "bold" },
-  subtitle: { marginTop: 12, textAlign: "center" },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.primary,
+  },
+  header: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 20,
+    paddingTop: "12%",
+    paddingBottom: "20%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: colors.white,
+  },
+  contentContainer: {
+    flex: 1,
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    marginTop: -40,
+    paddingTop: 10,
+  },
+  listContainer: {
+    padding: 8,
+  },
   logout: { marginTop: 32, alignSelf: "center", borderRadius: 8 },
 });
