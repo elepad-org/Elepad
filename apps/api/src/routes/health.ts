@@ -1,9 +1,11 @@
 import { OpenAPIHono, z } from "@hono/zod-openapi";
+import { createSupabaseClient } from "@/config";
 
 const HealthSchema = z.object({
   ok: z.boolean(),
   uptime: z.number(),
   ts: z.string(),
+  dbOk: z.boolean().optional(),
 });
 
 export const healthApp = new OpenAPIHono().openapi(
@@ -22,13 +24,18 @@ export const healthApp = new OpenAPIHono().openapi(
     },
     tags: ["Health"],
   },
-  (c) =>
-    c.json(
+  async (c) => {
+    const supabase = createSupabaseClient();
+    const { error } = await supabase.storage.listBuckets();
+    const dbOk = !error;
+    return c.json(
       {
         ok: true,
         uptime: process.uptime(),
         ts: new Date().toISOString(),
+        dbOk,
       },
-      200,
-    ),
+      200
+    );
+  }
 );
