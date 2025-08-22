@@ -5,7 +5,7 @@ export default function TabLayout() {
   return (
     <Tabs screenOptions={{ headerShown: false }}>
       <Tabs.Screen
-        name="index"
+        name="home"
         options={{
           title: "Home",
           tabBarIcon: ({ focused, color, size }) => (
@@ -30,6 +30,20 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="config"
+        options={{
+          title: "Config",
+          tabBarIcon: ({ focused, color, size }) => (
+            <Icon
+              source={focused ? "cog" : "cog-outline"}
+              color={color}
+              size={size}
+            />
+          ),
+        }}
+      />
     </Tabs>
+    
   );
 }

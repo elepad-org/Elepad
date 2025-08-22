@@ -7,7 +7,6 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 import { useColorScheme } from "react-native";
 import { configureApiClient } from "@elepad/api-client/src/runtime";
@@ -17,7 +16,6 @@ import {
 } from "react-native-paper";
 import SpaceMono from "@/assets/fonts/SpaceMono-Regular.ttf";
 import { lightTheme, darkTheme } from "@/styles/theme";
-import { supabase } from "@/lib/supabase";
 
 const queryClient = new QueryClient();
 
@@ -34,10 +32,10 @@ export default function RootLayout() {
     // TODO: read from a config.ts file, and make that file read from env
     baseUrl: process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:8787/api",
     // TODO: add auth only when that is implemented on the backend
-    getToken: async () => {
-      const { data } = await supabase.auth.getSession();
-      return data.session?.access_token;
-    },
+    // getToken: async () => {
+    //   const { data } = await supabase.auth.getSession();
+    //   return data.session?.access_token;
+    // },
   });
 
   const { LightTheme: AdaptedNavLight, DarkTheme: AdaptedNavDark } =
@@ -57,10 +55,11 @@ export default function RootLayout() {
         <PaperProvider theme={paperTheme}>
           <NavigationThemeProvider value={navTheme}>
             <Stack>
+              <Stack.Screen name="index" options={{ headerShown: false }} />
+              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="+not-found" />
             </Stack>
-            <StatusBar style="auto" />
           </NavigationThemeProvider>
         </PaperProvider>
       </QueryClientProvider>
