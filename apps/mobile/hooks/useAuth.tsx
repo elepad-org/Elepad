@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { Session, User } from "@supabase/supabase-js";
+import { useRouter } from "expo-router";
 import {
   PropsWithChildren,
   createContext,
@@ -21,6 +22,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const setData = async () => {
@@ -34,17 +36,23 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      if (session) router.replace("/home");
     };
+
+    setData();
 
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        if (session) {
+          router.replace("/home");
+        } else {
+          router.replace("/login");
+        }
       }
     );
-
-    setData();
 
     return () => {
       listener?.subscription.unsubscribe();
@@ -53,6 +61,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
   const signOut = async () => {
     try {
+      console.log("Cerrando sesión:", user?.email);
       const { error } = await supabase.auth.signOut();
       if (error) {
         const maybeCode = (error as unknown as { code?: string }).code;

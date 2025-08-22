@@ -69,7 +69,6 @@ export default function HomeScreen() {
         style={styles.logout}
         icon="logout"
         onPress={async () => {
-          console.log("Cerrando sesión:", displayName);
           await signOut();
           router.replace("/");
           Alert.alert("Sesión cerrada", "Has cerrado sesión correctamente.");

@@ -4,7 +4,7 @@ import { View, StyleSheet, Alert } from "react-native";
 import { Text, TextInput, Button, Surface } from "react-native-paper";
 import { makeRedirectUri } from "expo-auth-session";
 
-type Props = { onBack: () => void };
+type Props = { onBack?: () => void };
 
 export default function LogIn({ onBack }: Props) {
   const [email, setEmail] = useState("");
@@ -19,6 +19,8 @@ export default function LogIn({ onBack }: Props) {
     });
     if (error) {
       Alert.alert(error.message);
+    } else {
+      console.log("Inicio de sesión:", email);
     }
     setLoading(false);
   };
@@ -91,15 +93,17 @@ export default function LogIn({ onBack }: Props) {
           Entrar con Google
         </Button>
 
-        <Button
-          mode="text"
-          onPress={onBack}
-          style={styles.backButton}
-          labelStyle={styles.backLabel}
-          disabled={loading}
-        >
-          Volver
-        </Button>
+        {onBack && (
+          <Button
+            mode="text"
+            onPress={onBack}
+            style={styles.backButton}
+            labelStyle={styles.backLabel}
+            disabled={loading}
+          >
+            Volver
+          </Button>
+        )}
       </View>
     </Surface>
   );
