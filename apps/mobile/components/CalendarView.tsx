@@ -1,10 +1,5 @@
 import React, { useMemo, useState } from "react";
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  FlatList,
-} from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { Card, List, Text } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -30,17 +25,19 @@ const mockEvents: EventItem[] = [
 const weekDaysShort = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sab", "Dom"];
 
 function getMonthMatrix(year: number, monthIndex: number) {
-
   const firstDay = new Date(year, monthIndex, 1);
   const lastDay = new Date(year, monthIndex + 1, 0);
   const daysInMonth = lastDay.getDate();
 
   const startWeekday = (firstDay.getDay() + 6) % 7; // 0..6 where 0 = Monday
   const totalCells = Math.ceil((startWeekday + daysInMonth) / 7) * 7;
-  const matrix: (number | null)[] = Array.from({ length: totalCells }, (_, i) => {
-    const dayNumber = i - startWeekday + 1;
-    return dayNumber >= 1 && dayNumber <= daysInMonth ? dayNumber : null;
-  });
+  const matrix: (number | null)[] = Array.from(
+    { length: totalCells },
+    (_, i) => {
+      const dayNumber = i - startWeekday + 1;
+      return dayNumber >= 1 && dayNumber <= daysInMonth ? dayNumber : null;
+    }
+  );
   // split into weeks
   const weeks: (number | null)[][] = [];
   for (let i = 0; i < matrix.length; i += 7) {
@@ -68,13 +65,17 @@ const CalendarView: React.FC = () => {
     return map;
   }, []);
 
-  const weeks = useMemo(() => getMonthMatrix(viewYear, viewMonth), [viewYear, viewMonth]);
+  const weeks = useMemo(
+    () => getMonthMatrix(viewYear, viewMonth),
+    [viewYear, viewMonth]
+  );
 
   const monthLabel = useMemo(
     () =>
-      new Intl.DateTimeFormat("es-ES", { month: "long", year: "numeric" }).format(
-        new Date(viewYear, viewMonth, 1)
-      ),
+      new Intl.DateTimeFormat("es-ES", {
+        month: "long",
+        year: "numeric",
+      }).format(new Date(viewYear, viewMonth, 1)),
     [viewYear, viewMonth]
   );
 
@@ -103,7 +104,8 @@ const CalendarView: React.FC = () => {
     const hasEvents = !!eventsByDate[dateStr];
     const isSelected = selectedDate === dateStr;
     const isToday =
-      dateStr === `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+      dateStr ===
+      `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
 
     return (
       <View>
@@ -117,12 +119,13 @@ const CalendarView: React.FC = () => {
           onPress={() => setSelectedDate(dateStr)}
           activeOpacity={0.7}
         >
-          <Text style={[styles.dayNumber, isSelected && styles.dayNumberSelected]}>
+          <Text
+            style={[styles.dayNumber, isSelected && styles.dayNumberSelected]}
+          >
             {day}
           </Text>
           {hasEvents && <View style={styles.dot} />}
         </TouchableOpacity>
-
       </View>
     );
   };
@@ -131,9 +134,7 @@ const CalendarView: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>
-        Calendario
-      </Text>
+      <Text style={styles.heading}>Calendario</Text>
       <View style={styles.header}>
         <TouchableOpacity onPress={handlePrev} style={styles.navBtn}>
           <MaterialCommunityIcons name="chevron-left" size={28} color="#444" />
@@ -165,36 +166,44 @@ const CalendarView: React.FC = () => {
       </View>
 
       <View style={{ marginTop: 12 }}>
-        <Text style={styles.sectionTitle}>
-          Eventos — {selectedDate}
-        </Text>
+        <Text style={styles.sectionTitle}>Eventos — {selectedDate}</Text>
 
         {selectedEvents.length === 0 ? (
           <Card style={styles.noEventsCard}>
             <Card.Content>
-              <Text style={{ color: "#666" }}>No hay eventos para este día.</Text>
+              <Text style={{ color: "#666" }}>
+                No hay eventos para este día.
+              </Text>
             </Card.Content>
           </Card>
         ) : (
-          <FlatList
-            data={selectedEvents.sort((a, b) => a.time.localeCompare(b.time))}
-            keyExtractor={(i) => i.id}
-            renderItem={({ item }) => (
-              <List.Item
-                title={item.title}
-                titleStyle={{ color: "#333" }}
-                description={(item.description ? `${item.description}` : "No hay detalles de la actividad")}
-                descriptionStyle={{ color: "#666" }}
-                left={() => (
-                  <View style={styles.eventTimeContainer}>
-                    <Text style={styles.eventTimeText}>{item.time}</Text>
-                  </View>
-                )}
-              />
-            )}
-            ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-            contentContainerStyle={{ paddingBottom: 8 }}
-          />
+          <View style={{ paddingBottom: 8 }}>
+            {selectedEvents
+              .slice()
+              .sort((a, b) => a.time.localeCompare(b.time))
+              .map((item, idx) => (
+                <View key={item.id}>
+                  <List.Item
+                    title={item.title}
+                    titleStyle={{ color: "#333" }}
+                    description={
+                      item.description
+                        ? `${item.description}`
+                        : "No hay detalles de la actividad"
+                    }
+                    descriptionStyle={{ color: "#666" }}
+                    left={() => (
+                      <View style={styles.eventTimeContainer}>
+                        <Text style={styles.eventTimeText}>{item.time}</Text>
+                      </View>
+                    )}
+                  />
+                  {idx < selectedEvents.length - 1 && (
+                    <View style={{ height: 8 }} />
+                  )}
+                </View>
+              ))}
+          </View>
         )}
       </View>
     </View>
@@ -205,7 +214,6 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 12,
     paddingTop: 8,
-    
   },
   heading: {
     fontSize: 20,
@@ -227,9 +235,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     marginBottom: 6,
   },
-  weekDayText: { width: 36, textAlign: "center", color: "#666", fontWeight: "600" },
+  weekDayText: {
+    width: 36,
+    textAlign: "center",
+    color: "#666",
+    fontWeight: "600",
+  },
   calendarGrid: {},
-  weekRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 6 },
+  weekRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 6,
+  },
   dayWrapper: { width: 36 },
   dayCell: {
     width: 36,
@@ -255,7 +272,12 @@ const styles = StyleSheet.create({
     bottom: -4,
     alignSelf: "center",
   },
-  sectionTitle: { fontSize: 16, fontWeight: "700", marginBottom: 6, color: "#444" },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 6,
+    color: "#444",
+  },
   noEventsCard: { padding: 8, backgroundColor: "#fff" },
   eventTimeContainer: {
     width: 64,

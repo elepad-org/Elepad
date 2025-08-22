@@ -1,6 +1,6 @@
 import React from "react";
-import { View, StyleSheet, FlatList } from "react-native";
-import { Card, Text, List, Avatar, Chip } from "react-native-paper";
+import { View, StyleSheet } from "react-native";
+import { Card, Text, List, Chip } from "react-native-paper";
 
 type Activity = {
   id: string;
@@ -29,20 +29,21 @@ const ActivitiesList = () => {
       pendingText: "#4a5568",
       completedChip: "rgba(76, 175, 80, 0.2)",
       pendingChip: "rgba(255, 193, 7, 0.3)",
-    }
+    };
 
     const cardStyle = {
-      backgroundColor: item.status === "Completada"
-        ? colors.completedCard
-        : colors.pendingCard,
+      backgroundColor:
+        item.status === "Completada"
+          ? colors.completedCard
+          : colors.pendingCard,
     };
-    const textColor = item.status === "Completada"
-      ? colors.completedText
-      : colors.pendingText;
+    const textColor =
+      item.status === "Completada" ? colors.completedText : colors.pendingText;
     const chipStyle = {
-      backgroundColor: item.status === "Completada"
-        ? colors.completedChip
-        : colors.pendingChip,
+      backgroundColor:
+        item.status === "Completada"
+          ? colors.completedChip
+          : colors.pendingChip,
     };
 
     return (
@@ -50,14 +51,13 @@ const ActivitiesList = () => {
         <List.Item
           title={item.title}
           description={item.time}
-          
           right={() => (
             <Chip
-              icon={item.status == 'Completada' ? "check" : "clock-outline"}
+              icon={item.status == "Completada" ? "check" : "clock-outline"}
               style={[styles.chip, chipStyle]}
               textStyle={{ color: textColor, fontWeight: "bold" }}
             >
-              {item.status == 'Completada' ? "Completada" : "Pendiente"}
+              {item.status == "Completada" ? "Completada" : "Pendiente"}
             </Chip>
           )}
           titleStyle={{ color: "#2b2b2bff", fontWeight: "800", fontSize: 16 }}
@@ -70,13 +70,14 @@ const ActivitiesList = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Actividades de hoy</Text>
-      <FlatList
-        data={mockActivities}
-        keyExtractor={(i) => i.id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.list}
-        ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
-      />
+      <View style={styles.list}>
+        {mockActivities.map((item, idx) => (
+          <View key={item.id}>
+            {renderItem({ item })}
+            {idx < mockActivities.length - 1 && <View style={{ height: 8 }} />}
+          </View>
+        ))}
+      </View>
     </View>
   );
 };

@@ -6,7 +6,6 @@ import {
   SafeAreaView,
   StatusBar,
   ScrollView,
-  FlatList,
 } from "react-native";
 import { ActivityIndicator, Text, Button, Avatar } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
@@ -60,9 +59,8 @@ export default function HomeScreen() {
       </View>
 
       <ScrollView style={styles.contentContainer}>
-        <View >
+        <View>
           <ActivitiesList />
-         
           <CalendarView />
         </View>
       </ScrollView>
@@ -107,9 +105,7 @@ export default function HomeScreen() {
         >
           Ir a Home 3
         </Button>
-        
       </View>
-
     </SafeAreaView>
   );
 }
