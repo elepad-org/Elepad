@@ -105,9 +105,21 @@ export default function LogIn({ onBack }: Props) {
 							style={styles.continueButton}
 							labelStyle={styles.continueLabel}
 						>
-							Continue
+							Continuar
 						</Button>
 					</Animated.View>
+          <View style={styles.orRow}>
+						<View style={styles.line} />
+						<Text style={styles.orText}>or</Text>
+						<View style={styles.line} />
+					</View>
+
+					<TouchableOpacity style={styles.googleButton}  activeOpacity={0.8}>
+						<View style={styles.gIconWrap}>
+							<Text style={styles.gIcon}>G</Text>
+						</View>
+						<Text style={styles.googleText}>Continuar con Google</Text>
+					</TouchableOpacity>
 
 
         <TextInput
