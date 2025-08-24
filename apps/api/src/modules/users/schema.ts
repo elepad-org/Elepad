@@ -9,3 +9,11 @@ export const User = z
     groupId: z.string().uuid().optional(),
   })
   .openapi("User");
+
+export const UpdateUserInput = z
+  .object({
+    displayName: z.string().min(1).optional(),
+    avatarUrl: z.string().url().optional(),
+  })
+  .strict()
+  .openapi("UpdateUserInput");

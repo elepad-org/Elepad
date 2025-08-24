@@ -36,4 +36,21 @@ export const usersRepo = {
     }
     return data;
   },
+  async update(
+    id: string,
+    updates: { displayName?: string; avatarUrl?: string }
+  ) {
+    const { data, error } = await db
+      .from("users")
+      .update(updates)
+      .eq("id", id)
+      .select("id, email, displayName, avatarUrl, groupId")
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error updating the user: ", error);
+      throw new Error(error.message);
+    }
+    return data ?? undefined;
+  },
 };
