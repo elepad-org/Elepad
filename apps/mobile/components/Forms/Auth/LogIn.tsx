@@ -1,17 +1,11 @@
 import { supabase } from "@/lib/supabase";
-import { View, StyleSheet, Alert } from "react-native";
+import { View, StyleSheet, Alert, Image, TouchableOpacity } from "react-native";
 import { Text, TextInput, Button, Surface } from "react-native-paper";
 import { makeRedirectUri } from "expo-auth-session";
 import React, { useState, useRef } from "react";
-import {
-	Image,
-	TouchableOpacity,
-	Platform,
-	Animated,
-	Easing,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import logoBlue from "@/assets/images/bbb.png";
+import { Platform, Animated } from "react-native";
+import googleLogo from "@/assets/images/google.png";
+import { Link } from "expo-router";
 
 
 type Props = { onBack?: () => void };
@@ -59,20 +53,8 @@ export default function LogIn({ onBack }: Props) {
         <Text style={styles.subheading}>Ingresa tu email y tu contraseña</Text>
 
         <TextInput
-          mode="outlined"
-          label="Email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          autoCorrect={false}
-          keyboardType="email-address"
-          returnKeyType="next"
-          style={styles.input}
-          disabled={loading}
-        />
-        <TextInput
 						mode="outlined"
-						placeholder="email@domain.com"
+						placeholder="Email"
 						value={email}
 						onChangeText={setEmail}
 						keyboardType="email-address"
@@ -80,6 +62,7 @@ export default function LogIn({ onBack }: Props) {
             returnKeyType="next"
 						style={styles.input}
 						outlineStyle={styles.inputOutline as any}
+            disabled={loading}
             dense  
 					/>
           <TextInput
@@ -93,6 +76,7 @@ export default function LogIn({ onBack }: Props) {
 						style={styles.input}
 						outlineStyle={styles.inputOutline as any}
             onSubmitEditing={handleLogin}
+            disabled={loading}
             dense  
 					/>
           <Animated.View style={{
@@ -104,123 +88,45 @@ export default function LogIn({ onBack }: Props) {
 							contentStyle={styles.continueContent}
 							style={styles.continueButton}
 							labelStyle={styles.continueLabel}
+              onPress={handleLogin}
+              loading={loading}
+              disabled={loading}
 						>
 							Continuar
 						</Button>
 					</Animated.View>
           <View style={styles.orRow}>
 						<View style={styles.line} />
-						<Text style={styles.orText}>or</Text>
+						<Text style={styles.orText}>o</Text>
 						<View style={styles.line} />
 					</View>
 
-					<TouchableOpacity style={styles.googleButton}  activeOpacity={0.8}>
-						<View style={styles.gIconWrap}>
-							<Text style={styles.gIcon}>G</Text>
-						</View>
-						<Text style={styles.googleText}>Continuar con Google</Text>
-					</TouchableOpacity>
-
-
-        <TextInput
-          mode="outlined"
-          label="Clave"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          returnKeyType="go"
-          onSubmitEditing={handleLogin}
-          style={styles.input}
-          disabled={loading}
-        />
-
-        <Button
-          mode="contained"
-          onPress={handleLogin}
-          style={styles.button}
-          contentStyle={styles.buttonContent}
-          loading={loading}
-          disabled={loading}
-        >
-          Entrar
-        </Button>
-
-        <Button
-          mode="contained"
-          onPress={handleGoogleLogin}
-          style={styles.button}
-          contentStyle={styles.buttonContent}
-          loading={loading}
-          disabled={loading}
-        >
-          Entrar con Google
-        </Button>
-
-        {onBack && (
-          <Button
-            mode="text"
-            onPress={onBack}
-            style={styles.backButton}
-            labelStyle={styles.backLabel}
-            disabled={loading}
-          >
-            Volver
-          </Button>
-        )}
+							<TouchableOpacity
+								style={styles.googleButton}
+								activeOpacity={0.85}
+								onPress={handleGoogleLogin}
+								disabled={loading}
+							>
+								<View style={styles.gIconWrap}>
+									<Image source={googleLogo} style={styles.gIconImage} resizeMode="contain" />
+								</View>
+								<Text style={styles.googleText}>Continuar con Google</Text>
+							</TouchableOpacity>
+				
+                <Link
+                    href={{ pathname: "/" }}
+                    accessibilityRole="button"
+                    >
+                    <Text style={styles.inlineBack}>Volver</Text>
+              </Link>
       </View>
-      <View style={styles.container}>
-				
-
-						<View style={styles.card}>
-				
-					<TextInput
-						mode="outlined"
-						placeholder="email@domain.com"
-						value={email}
-						onChangeText={setEmail}
-						keyboardType="email-address"
-						autoCapitalize="none"
-						style={styles.input}
-						outlineStyle={styles.inputOutline as any}
-					/>
-
-					<Animated.View style={{
-						transform: [{ scale: buttonScale }],
-						width: '100%',
-					}}>
-						<Button
-							mode="contained"
-							contentStyle={styles.continueContent}
-							style={styles.continueButton}
-							labelStyle={styles.continueLabel}
-						>
-							Continue
-						</Button>
-					</Animated.View>
-
-					<View style={styles.orRow}>
-						<View style={styles.line} />
-						<Text style={styles.orText}>or</Text>
-						<View style={styles.line} />
-					</View>
-
-					<TouchableOpacity style={styles.googleButton}  activeOpacity={0.8}>
-						<View style={styles.gIconWrap}>
-							<Text style={styles.gIcon}>G</Text>
-						</View>
-						<Text style={styles.googleText}>Continue with Google</Text>
-					</TouchableOpacity>
-
-					<Text style={styles.footer}>Si tienes cuenta, haz click aqui</Text>
-				</View>
-			</View>
     </Surface>
   );
 }
 
 const styles = StyleSheet.create({
   surface: {
-    marginTop: 200,
+    marginTop: 235,
     marginHorizontal: 16,
     borderRadius: 20,
     backgroundColor: "#FFF9F1"
@@ -256,7 +162,7 @@ const styles = StyleSheet.create({
 			fontSize: 44,
 			fontWeight: "400",
 			letterSpacing: 8,
-			fontFamily: "JosefinSans-Variable",
+			fontFamily: "Montserrat",
 		},
 		separatorWrap: { width: "100%", alignItems: "center", marginTop: 6 },
 		separator: { width: "60%", height: 1, backgroundColor: "#111", opacity: 0.9 },
@@ -289,33 +195,40 @@ const styles = StyleSheet.create({
 	orText: { marginHorizontal: 12, color: "#999" },
 	googleButton: {
 		marginTop: 14,
-		width: "100%",
-		backgroundColor: "white",
+    marginBottom: 20,
+		width: '100%',
+		backgroundColor: '#FEFEFE',
 		borderRadius: 8,
-		paddingVertical: 10,
-		paddingHorizontal: 14,
-		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "center",
-		shadowColor: "#000",
+		paddingVertical: 12,
+		paddingHorizontal: 16,
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'center',
+		shadowColor: '#000',
 		shadowOffset: { width: 0, height: 1 },
-		shadowOpacity: Platform.OS === "ios" ? 0.08 : 0.15,
+		shadowOpacity: Platform.OS === 'ios' ? 0.08 : 0.15,
 		shadowRadius: 6,
 		elevation: 2,
 	},
 	gIconWrap: {
-		width: 28,
-		height: 28,
-		borderRadius: 14,
-		backgroundColor: "#FFFFFF",
-		alignItems: "center",
-		justifyContent: "center",
-		marginRight: 10,
-		borderWidth: 0.5,
-		borderColor: "#E6E3E0",
+		position: 'absolute',
+		left: 16,
+		width: 30,
+		height: 30,
+		borderRadius: 15,
+		backgroundColor: '#FFFFFF',
+		alignItems: 'center',
+		justifyContent: 'center',
 	},
-	gIcon: { fontWeight: "700", color: "#DB4437" },
-		googleText: { fontSize: 15, color: "#333", fontFamily: "Montserrat", fontWeight: "600" },
+	gIconImage: { width: 18, height: 18 },
+	googleText: { fontSize: 15, fontFamily: 'Montserrat', fontWeight: '600' },
+	inlineBack: {
+		marginTop: 22,
+		textAlign: 'center',
+		fontFamily: 'Montserrat',
+		fontSize: 14,
+		color: '#666',
+	},
 		footer: { marginTop: 18, color: "#B2AFAE", fontSize: 13, fontFamily: "Montserrat", fontWeight: "600" },
 });
 
