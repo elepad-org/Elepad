@@ -58,4 +58,11 @@ const styles = StyleSheet.create({
     lineHeight: 60,
     textDecorationLine: "underline",
   },
+  inlineBack: {
+		marginTop: 22,
+		textAlign: 'center',
+		fontFamily: 'Montserrat',
+		fontSize: 14,
+		color: '#666',
+	},
 });
