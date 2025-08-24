@@ -2,6 +2,7 @@ import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import { usersService } from "./service";
 import { withHeaders } from "@/middleware/headers";
 import { UpdateUserInput, User } from "./schema";
+// La subida de archivos se delega al servicio
 
 const app = new OpenAPIHono();
 
@@ -44,6 +45,18 @@ const updateUserRoute = createRoute({
         "application/json": {
           schema: UpdateUserInput,
         },
+        "multipart/form-data": {
+          // Permitimos cualquier tipo para que Zod no rechace el File
+          schema: z
+            .object({
+              displayName: z.string().min(1).optional(),
+              avatarFile: z
+                .any()
+                .optional()
+                .openapi({ type: "string", format: "binary" }),
+            })
+            .partial(),
+        },
       },
     },
   },
@@ -77,12 +90,22 @@ const updateUserRoute = createRoute({
 
 app.openapi(updateUserRoute, async (c) => {
   const { id } = c.req.valid("param");
-  const body = c.req.valid("json");
+  const contentType = c.req.header("content-type") || "";
   try {
+    if (contentType.includes("multipart/form-data")) {
+      const form = await c.req.formData();
+      const updated = await usersService.updateWithFile(id, form);
+      if (!updated) return c.json({ error: "User not found" }, 404);
+      return c.json(updated, 200);
+    }
+
+    // JSON por defecto
+    const body = c.req.valid("json");
     const updated = await usersService.update(id, body);
     if (!updated) return c.json({ error: "User not found" }, 404);
     return c.json(updated, 200);
-  } catch {
+  } catch (e) {
+    console.error(e);
     return c.json({ error: "Internal Server Error" }, 500);
   }
 });

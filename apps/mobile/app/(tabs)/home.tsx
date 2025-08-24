@@ -21,7 +21,7 @@ const colors = {
 };
 
 export default function HomeScreen() {
-  const { user, loading, signOut } = useAuth();
+  const { userElepad, loading, signOut } = useAuth();
   const router = useRouter();
 
   if (loading) {
@@ -33,7 +33,7 @@ export default function HomeScreen() {
   }
 
   const displayName =
-    (user?.user_metadata?.displayName as string) || user?.email || "Usuario";
+    (userElepad?.displayName as string) || userElepad?.email || "Usuario";
 
   return (
     <SafeAreaView style={styles.safeArea}>
