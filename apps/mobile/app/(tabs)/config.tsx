@@ -39,6 +39,7 @@ export default function ConfigScreen() {
   const [formName, setFormName] = useState(displayName);
   const [saving, setSaving] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [photoOpen, setPhotoOpen] = useState(false);
 
   const getInitials = (name: string) =>
     name
@@ -71,8 +72,7 @@ export default function ConfigScreen() {
               icon="pencil"
               size={16}
               onPress={() => {
-                setFormName(displayName);
-                setEditOpen(true);
+                setPhotoOpen(true);
               }}
               iconColor="#fff"
               containerColor={colors.primary}
@@ -137,6 +137,7 @@ export default function ConfigScreen() {
           </Button>
         </View>
         <Portal>
+          {/* Dialog: editar nombre */}
           <Dialog visible={editOpen} onDismiss={() => setEditOpen(false)}>
             <Dialog.Title>Editar nombre</Dialog.Title>
             <Dialog.Content>
@@ -186,6 +187,38 @@ export default function ConfigScreen() {
                   }
                 }}
               >
+                Guardar
+              </Button>
+            </Dialog.Actions>
+          </Dialog>
+
+          {/* Dialog: actualizar foto de perfil */}
+          <Dialog visible={photoOpen} onDismiss={() => setPhotoOpen(false)}>
+            <Dialog.Title>Actualizar foto de perfil</Dialog.Title>
+            <Dialog.Content>
+              <View style={styles.photoPreviewContainer}>
+                {avatarUrl ? (
+                  <Avatar.Image size={96} source={{ uri: avatarUrl }} />
+                ) : (
+                  <Avatar.Text size={96} label={getInitials(displayName)} />
+                )}
+              </View>
+              <View style={styles.photoActionsRow}>
+                <Button mode="outlined" icon="image" onPress={() => {}}>
+                  Galería
+                </Button>
+                <Button mode="outlined" icon="camera" onPress={() => {}}>
+                  Cámara
+                </Button>
+              </View>
+              <Text style={styles.helperText}>
+                Selecciona una imagen desde tu dispositivo. Aún no se guardará
+                nada hasta confirmar.
+              </Text>
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Button onPress={() => setPhotoOpen(false)}>Cancelar</Button>
+              <Button mode="contained" onPress={() => setPhotoOpen(false)}>
                 Guardar
               </Button>
             </Dialog.Actions>
@@ -254,5 +287,19 @@ const styles = StyleSheet.create({
   },
   successSnackbar: {
     backgroundColor: "green",
+  },
+  photoPreviewContainer: {
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  photoActionsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 8,
+    marginBottom: 8,
+  },
+  helperText: {
+    marginTop: 4,
+    color: "#6b7280",
   },
 });
