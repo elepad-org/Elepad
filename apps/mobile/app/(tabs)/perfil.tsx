@@ -17,7 +17,7 @@ import {
 } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { updateUser } from "@elepad/api-client/src/gen/client";
-import { EditNameDialog, UpdatePhotoDialog } from "./PerfilDialogs";
+import { EditNameDialog, UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import ProfileHeader from "@/components/ProfileHeader";
 
 const colors = {
