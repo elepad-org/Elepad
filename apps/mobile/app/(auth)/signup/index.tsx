@@ -5,8 +5,7 @@ import { useRef } from "react";
 import { Animated, ImageBackground, StyleSheet, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Text, ActivityIndicator, useTheme } from "react-native-paper";
-import elephantsImg from "@/assets/images/elefantes_juntos.png";
-import logoImg from "@/assets/images/logoblanco.png";
+import bh from "@/assets/images/bh5.png";
 
 export default function SignupScreen() {
   const { session, loading } = useAuth();
@@ -30,50 +29,12 @@ export default function SignupScreen() {
     <View style={styles.container}>
       <StatusBar style="light" translucent />
       <ImageBackground
-        source={elephantsImg}
+        source={bh}
         resizeMode="cover"
         style={{ flex: 1 }}
       >
-        <ImageBackground
-          source={logoImg}
-          resizeMode="contain"
-          style={styles.logoContainer}
-        >
-          <Text variant="headlineLarge" style={styles.title}>
-            ELEPAD
-          </Text>
-        </ImageBackground>
-
         <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
-          <NewAccount onBack={() => router.replace("/login")} />
-          <View style={styles.registerRow}>
-            <Text
-              variant="titleMedium"
-              style={[styles.buttonNew, { color: "white" }]}
-            >
-              ¿Ya tienes cuenta?{" "}
-            </Text>
-            <Link
-              href={{ pathname: "/login" }}
-              accessibilityRole="button"
-              style={styles.buttonAqui}
-            >
-              <Text
-                variant="titleMedium"
-                style={[
-                  styles.buttonAqui,
-                  {
-                    color: theme.colors.primary,
-                    textDecorationLine: "underline",
-                  },
-                ]}
-                accessibilityRole="button"
-                accessibilityLabel="Crear cuenta nueva"
-              >
-                Inicia sesión
-              </Text>
-            </Link>
-          </View>
+          <NewAccount onBack={() => router.replace("/")} />
         </Animated.View>
       </ImageBackground>
     </View>

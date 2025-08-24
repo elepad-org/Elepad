@@ -34,6 +34,13 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permitir a Elepad acceder a tus fotos para elegir un avatar.",
+          "cameraPermission": "Permitir a Elepad usar la cámara para tomar una foto de perfil."
+        }
       ]
     ],
     "experiments": {
