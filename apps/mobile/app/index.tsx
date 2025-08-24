@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: "#FFF9F1" },
   container: { flex: 1, alignItems: "center" },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  logoWrap: { alignItems: "center", marginTop: 100 },
+  logoWrap: { alignItems: "center", marginTop: 115 },
   logo: { width: 185, height: 185 },
   brand: {
     marginTop: 20,

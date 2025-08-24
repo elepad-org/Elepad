@@ -5,8 +5,7 @@ import { useRef } from "react";
 import { Animated, ImageBackground, StyleSheet, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Text, ActivityIndicator, useTheme } from "react-native-paper";
-import elephantsImg from "@/assets/images/elefantes_juntos.png";
-import logoImg from "@/assets/images/logoblanco.png";
+import bh from "@/assets/images/bh.jpeg";
 
 export default function LoginScreen() {
   const { session, loading } = useAuth();
@@ -19,7 +18,7 @@ export default function LoginScreen() {
         <ActivityIndicator />
       </View>
     );
-  }
+  } 
 
   if (session) {
     return <Redirect href="/home" />;
@@ -29,19 +28,10 @@ export default function LoginScreen() {
     <View style={styles.container}>
       <StatusBar style="light" translucent />
       <ImageBackground
-        source={elephantsImg}
+        source={bh}
         resizeMode="cover"
         style={{ flex: 1 }}
       >
-        <ImageBackground
-          source={logoImg}
-          resizeMode="contain"
-          style={styles.logoContainer}
-        >
-          <Text variant="headlineLarge" style={styles.title}>
-            ELEPAD
-          </Text>
-        </ImageBackground>
 
         <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
           <LogIn />
