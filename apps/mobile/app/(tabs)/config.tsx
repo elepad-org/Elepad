@@ -18,9 +18,10 @@ import {
   Dialog,
   Portal,
   TextInput,
+  Snackbar,
 } from "react-native-paper";
-// import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useAuth } from "@/hooks/useAuth";
+import { updateUser } from "@elepad/api-client/src/gen/client";
 
 const colors = {
   primary: "#7fb3d3",
@@ -29,13 +30,15 @@ const colors = {
 };
 
 export default function ConfigScreen() {
-  const { userElepad } = useAuth();
+  const { userElepad, refreshUserElepad } = useAuth();
   const displayName = userElepad?.displayName?.trim() || "Usuario";
   const email = userElepad?.email || "-";
   const avatarUrl = userElepad?.avatarUrl || "";
-  const [name, setName] = useState(displayName);
+
   const [editOpen, setEditOpen] = useState(false);
   const [formName, setFormName] = useState(displayName);
+  const [saving, setSaving] = useState(false);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
 
   const getInitials = (name: string) =>
     name
@@ -62,13 +65,13 @@ export default function ConfigScreen() {
             {avatarUrl ? (
               <Avatar.Image size={112} source={{ uri: avatarUrl }} />
             ) : (
-              <Avatar.Text size={112} label={getInitials(name)} />
+              <Avatar.Text size={112} label={getInitials(displayName)} />
             )}
             <IconButton
               icon="pencil"
               size={16}
               onPress={() => {
-                setFormName(name);
+                setFormName(displayName);
                 setEditOpen(true);
               }}
               iconColor="#fff"
@@ -77,7 +80,7 @@ export default function ConfigScreen() {
             />
           </View>
           <Text variant="titleLarge" style={styles.name}>
-            {name}
+            {displayName}
           </Text>
           <Text variant="bodyMedium" style={styles.subtitle}>
             {email}
@@ -91,7 +94,7 @@ export default function ConfigScreen() {
               left={(props) => <List.Icon {...props} icon="account-edit" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
               onPress={() => {
-                setFormName(name);
+                setFormName(displayName);
                 setEditOpen(true);
               }}
             />
@@ -124,7 +127,7 @@ export default function ConfigScreen() {
             mode="contained"
             icon="pencil"
             onPress={() => {
-              setFormName(name);
+              setFormName(displayName);
               setEditOpen(true);
             }}
             contentStyle={styles.bottomButtonContent}
@@ -149,7 +152,6 @@ export default function ConfigScreen() {
             <Dialog.Actions>
               <Button
                 onPress={() => {
-                  setFormName(name);
                   setEditOpen(false);
                 }}
               >
@@ -157,16 +159,45 @@ export default function ConfigScreen() {
               </Button>
               <Button
                 mode="contained"
-                onPress={() => {
+                loading={saving}
+                disabled={
+                  saving ||
+                  !formName.trim() ||
+                  !userElepad?.id ||
+                  formName.trim() === displayName
+                }
+                onPress={async () => {
                   const next = formName.trim();
-                  if (next.length > 0) setName(next);
-                  setEditOpen(false);
+                  if (!next || !userElepad?.id) return;
+                  if (next === displayName) return;
+                  try {
+                    setSaving(true);
+                    await updateUser(userElepad.id, { displayName: next });
+                    setEditOpen(false);
+                    // Actualizar datos globales
+                    await refreshUserElepad?.();
+                    setSnackbarVisible(true);
+                  } catch (e: unknown) {
+                    const msg =
+                      e instanceof Error ? e.message : "Error al actualizar";
+                    console.warn(msg);
+                  } finally {
+                    setSaving(false);
+                  }
                 }}
               >
                 Guardar
               </Button>
             </Dialog.Actions>
           </Dialog>
+          <Snackbar
+            visible={snackbarVisible}
+            onDismiss={() => setSnackbarVisible(false)}
+            duration={2200}
+            style={styles.successSnackbar}
+          >
+            ✓ Perfil actualizado
+          </Snackbar>
         </Portal>
       </ScrollView>
     </SafeAreaView>
@@ -220,5 +251,8 @@ const styles = StyleSheet.create({
   },
   bottomButtonContent: {
     height: 48,
+  },
+  successSnackbar: {
+    backgroundColor: "green",
   },
 });
