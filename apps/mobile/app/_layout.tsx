@@ -9,6 +9,7 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import "react-native-reanimated";
 import { useColorScheme } from "react-native";
+import { useEffect } from "react";
 import { configureApiClient } from "@elepad/api-client/src/runtime";
 import {
   Provider as PaperProvider,
@@ -16,12 +17,29 @@ import {
 } from "react-native-paper";
 import SpaceMono from "@/assets/fonts/SpaceMono-Regular.ttf";
 import { lightTheme, darkTheme } from "@/styles/theme";
+import { supabase } from "@/lib/supabase";
 
 const queryClient = new QueryClient();
+
+// Caché en memoria del token para cumplir con la firma síncrona de getToken, solutions by el amigo
+let AUTH_TOKEN: string | undefined;
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({ SpaceMono });
+
+  // Mantener el token actualizado en AUTH_TOKEN de forma reactiva
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      AUTH_TOKEN = data.session?.access_token ?? undefined;
+    });
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        AUTH_TOKEN = session?.access_token ?? undefined;
+      }
+    );
+    return () => listener?.subscription?.unsubscribe?.();
+  }, []);
 
   if (!loaded) {
     // Async font loading only occurs in development.
@@ -31,11 +49,7 @@ export default function RootLayout() {
   configureApiClient({
     // TODO: read from a config.ts file, and make that file read from env
     baseUrl: process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:8787/api",
-    // TODO: add auth only when that is implemented on the backend
-    // getToken: async () => {
-    //   const { data } = await supabase.auth.getSession();
-    //   return data.session?.access_token;
-    // },
+    getToken: () => AUTH_TOKEN,
   });
 
   const { LightTheme: AdaptedNavLight, DarkTheme: AdaptedNavDark } =
