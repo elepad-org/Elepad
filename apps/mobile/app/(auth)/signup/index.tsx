@@ -5,8 +5,7 @@ import { useRef } from "react";
 import { Animated, ImageBackground, StyleSheet, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Text, ActivityIndicator, useTheme } from "react-native-paper";
-import elephantsImg from "@/assets/images/elefantes_juntos.png";
-import bh from "@/assets/images/bg4.jpeg";
+import bh from "@/assets/images/bh5.png";
 
 export default function SignupScreen() {
   const { session, loading } = useAuth();
