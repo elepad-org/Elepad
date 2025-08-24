@@ -45,7 +45,7 @@ export default function SignupScreen() {
         </ImageBackground>
 
         <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
-          <NewAccount onBack={() => router.replace("/login")} />
+          <NewAccount onBack={() => router.replace("/")} />
           <View style={styles.registerRow}>
             <Text
               variant="titleMedium"
