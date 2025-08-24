@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   StyleSheet,
   SafeAreaView,
   StatusBar,
   ScrollView,
   View,
+  Alert,
 } from "react-native";
 import {
   Appbar,
@@ -22,6 +23,8 @@ import {
 } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { updateUser } from "@elepad/api-client/src/gen/client";
+import * as ImagePicker from "expo-image-picker";
+import { patchUserFormData } from "@elepad/api-client/src/multipart";
 
 const colors = {
   primary: "#7fb3d3",
@@ -29,7 +32,7 @@ const colors = {
   background: "#F4F7FF",
 };
 
-export default function ConfigScreen() {
+export default function PerfilScreen() {
   const { userElepad, refreshUserElepad } = useAuth();
   const displayName = userElepad?.displayName?.trim() || "Usuario";
   const email = userElepad?.email || "-";
@@ -40,7 +43,50 @@ export default function ConfigScreen() {
   const [saving, setSaving] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [photoOpen, setPhotoOpen] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState<{
+    uri: string;
+    name: string;
+    type: string;
+  } | null>(null);
+  const [photoSaving, setPhotoSaving] = useState(false);
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+  const openGallery = async () => {
+    try {
+      // Cerrar el diálogo para evitar conflictos con el picker nativo en Android (un dolor de cabeza)
+      const wasOpen = photoOpen;
+      if (wasOpen) setPhotoOpen(false);
+      await sleep(150);
 
+      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (perm.status !== "granted") {
+        Alert.alert(
+          "Permiso requerido",
+          "Concede acceso a tus fotos para elegir una imagen."
+        );
+        if (wasOpen) setPhotoOpen(true);
+        return;
+      }
+      const res = await ImagePicker.launchImageLibraryAsync({
+        allowsEditing: true,
+        allowsMultipleSelection: false,
+        aspect: [1, 1],
+        quality: 0.9,
+      });
+      if (!res.canceled && res.assets?.[0]) {
+        const a = res.assets[0];
+        setSelectedPhoto({
+          uri: a.uri,
+          name: a.fileName || "avatar.jpg",
+          type: a.mimeType || "image/jpeg",
+        });
+      }
+      if (wasOpen) setPhotoOpen(true);
+    } catch (err) {
+      console.warn("ImagePicker error:", err);
+      Alert.alert("Error", "No se pudo abrir la galería.");
+      setPhotoOpen(true);
+    }
+  };
   const getInitials = (name: string) =>
     name
       .split(/\s+/)
@@ -49,6 +95,7 @@ export default function ConfigScreen() {
       .slice(0, 2)
       .join("")
       .toUpperCase() || "U";
+  const initials = useMemo(() => getInitials(displayName), [displayName]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -66,7 +113,7 @@ export default function ConfigScreen() {
             {avatarUrl ? (
               <Avatar.Image size={112} source={{ uri: avatarUrl }} />
             ) : (
-              <Avatar.Text size={112} label={getInitials(displayName)} />
+              <Avatar.Text size={112} label={initials} />
             )}
             <IconButton
               icon="pencil"
@@ -197,17 +244,40 @@ export default function ConfigScreen() {
             <Dialog.Title>Actualizar foto de perfil</Dialog.Title>
             <Dialog.Content>
               <View style={styles.photoPreviewContainer}>
-                {avatarUrl ? (
+                {selectedPhoto ? (
+                  <Avatar.Image size={96} source={{ uri: selectedPhoto.uri }} />
+                ) : avatarUrl ? (
                   <Avatar.Image size={96} source={{ uri: avatarUrl }} />
                 ) : (
-                  <Avatar.Text size={96} label={getInitials(displayName)} />
+                  <Avatar.Text size={96} label={initials} />
                 )}
               </View>
               <View style={styles.photoActionsRow}>
-                <Button mode="outlined" icon="image" onPress={() => {}}>
+                <Button mode="outlined" icon="image" onPress={openGallery}>
                   Galería
                 </Button>
-                <Button mode="outlined" icon="camera" onPress={() => {}}>
+                <Button
+                  mode="outlined"
+                  icon="camera"
+                  onPress={async () => {
+                    const camPerm =
+                      await ImagePicker.requestCameraPermissionsAsync();
+                    if (camPerm.status !== "granted") return;
+                    const res = await ImagePicker.launchCameraAsync({
+                      allowsEditing: true,
+                      aspect: [1, 1],
+                      quality: 0.9,
+                    });
+                    if (!res.canceled && res.assets?.[0]) {
+                      const a = res.assets[0];
+                      setSelectedPhoto({
+                        uri: a.uri,
+                        name: a.fileName || "avatar.jpg",
+                        type: a.mimeType || "image/jpeg",
+                      });
+                    }
+                  }}
+                >
                   Cámara
                 </Button>
               </View>
@@ -217,8 +287,43 @@ export default function ConfigScreen() {
               </Text>
             </Dialog.Content>
             <Dialog.Actions>
-              <Button onPress={() => setPhotoOpen(false)}>Cancelar</Button>
-              <Button mode="contained" onPress={() => setPhotoOpen(false)}>
+              <Button
+                onPress={() => {
+                  setSelectedPhoto(null);
+                  setPhotoOpen(false);
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                mode="contained"
+                loading={photoSaving}
+                disabled={!selectedPhoto || !userElepad?.id || photoSaving}
+                onPress={async () => {
+                  if (!selectedPhoto || !userElepad?.id) return;
+                  try {
+                    setPhotoSaving(true);
+                    const form = new FormData();
+                    // displayName opcional: mantener
+                    form.append("displayName", displayName);
+                    // En React Native, el objeto debe tener uri, name y type
+                    form.append("avatarFile", {
+                      uri: selectedPhoto.uri,
+                      name: selectedPhoto.name,
+                      type: selectedPhoto.type,
+                    } as unknown as Blob);
+                    await patchUserFormData(userElepad.id, form);
+                    setPhotoOpen(false);
+                    setSelectedPhoto(null);
+                    await refreshUserElepad?.();
+                    setSnackbarVisible(true);
+                  } catch (e) {
+                    console.warn(e);
+                  } finally {
+                    setPhotoSaving(false);
+                  }
+                }}
+              >
                 Guardar
               </Button>
             </Dialog.Actions>

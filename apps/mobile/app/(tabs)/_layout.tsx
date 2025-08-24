@@ -31,12 +31,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="config"
+        name="perfil/index"
         options={{
-          title: "Config",
+          title: "Perfil",
           tabBarIcon: ({ focused, color, size }) => (
             <Icon
-              source={focused ? "cog" : "cog-outline"}
+              source={focused ? "account" : "account-outline"}
               color={color}
               size={size}
             />
@@ -44,6 +44,5 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
-    
   );
 }
