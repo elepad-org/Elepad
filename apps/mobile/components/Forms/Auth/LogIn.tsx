@@ -42,7 +42,7 @@ export default function LogIn({ onBack }: Props) {
   return (
     <Surface style={styles.surface} elevation={2}>
       <View style={styles.container}>
-        <Text variant="headlineMedium" style={styles.title}>
+  <Text variant="headlineMedium" style={styles.title}>
           Iniciar Sesión
         </Text>
 
@@ -120,6 +120,8 @@ const styles = StyleSheet.create({
   },
   title: {
     marginBottom: 20,
+    fontFamily: 'Montserrat',
+    fontWeight: '600',
   },
   input: {
     marginVertical: 8,
@@ -136,5 +138,6 @@ const styles = StyleSheet.create({
   },
   backLabel: {
     fontSize: 16,
+    fontFamily: 'Montserrat',
   },
 });

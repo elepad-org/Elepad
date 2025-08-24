@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         if (session) {
           router.replace("/home");
         } else {
-          router.replace("/login");
+          router.replace("/");
         }
       }
     );

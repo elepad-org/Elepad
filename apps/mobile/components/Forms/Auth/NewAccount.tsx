@@ -196,6 +196,8 @@ const styles = StyleSheet.create({
   },
   title: {
     marginBottom: 20,
+    fontFamily: 'Montserrat',
+    fontWeight: '600',
   },
   input: {
     marginVertical: 8,
