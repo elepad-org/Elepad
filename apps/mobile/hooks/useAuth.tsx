@@ -78,7 +78,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
           router.replace("/home");
         } else {
           setUserElepad(null);
-          router.replace("/login");
+          router.replace("/");
         }
         setLoading(false);
       }

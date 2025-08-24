@@ -16,6 +16,8 @@ import {
   adaptNavigationTheme,
 } from "react-native-paper";
 import SpaceMono from "@/assets/fonts/SpaceMono-Regular.ttf";
+import JosefinSansVariable from "@/assets/fonts/JosefinSans-Variable.ttf";
+import MontserratRegular from "@/assets/fonts/Montserrat-Regular.ttf";
 import { lightTheme, darkTheme } from "@/styles/theme";
 import { supabase } from "@/lib/supabase";
 
@@ -26,7 +28,12 @@ let AUTH_TOKEN: string | undefined;
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const [loaded] = useFonts({ SpaceMono });
+  // Load all custom fonts (keys are the fontFamily names you'll use in styles)
+  const [loaded] = useFonts({
+    SpaceMono,
+    JosefinSans: JosefinSansVariable,
+    Montserrat: MontserratRegular,
+  });
 
   // Mantener el token actualizado en AUTH_TOKEN de forma reactiva
   useEffect(() => {
