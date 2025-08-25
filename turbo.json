@@ -2,6 +2,9 @@
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
   "tasks": {
+    "fix:mobile": {
+      "cache": false
+    },
     "dev": {
       "cache": false,
       "persistent": true
@@ -20,6 +23,10 @@
         "openapi.json"
       ],
       "dependsOn": ["^build"]
+    },
+    "build:edge": {
+      "dependsOn": ["build"],
+      "outputs": ["cloudflare-worker.js"]
     },
     "lint": {},
     "clean": {

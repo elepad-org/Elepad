@@ -1,19 +1,21 @@
 import { z } from "@hono/zod-openapi";
 
-export const User = z
+export const UserSchema = z
   .object({
-    id: z.string().uuid(),
-    email: z.string().email(),
+    id: z.uuid(),
+    email: z.email(),
     displayName: z.string().min(1),
-    avatarUrl: z.string().url().optional(),
-    groupId: z.string().uuid().optional(),
+    avatarUrl: z.url().optional(),
+    groupId: z.uuid().optional(),
   })
   .openapi("User");
+
+export type User = z.infer<typeof UserSchema>;
 
 export const UpdateUserInput = z
   .object({
     displayName: z.string().min(1).optional(),
-    avatarUrl: z.string().url().optional(),
+    avatarUrl: z.string().optional(),
   })
   .strict()
   .openapi("UpdateUserInput");

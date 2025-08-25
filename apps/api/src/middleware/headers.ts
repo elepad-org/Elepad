@@ -1,5 +1,9 @@
 import type { MiddlewareHandler } from "hono";
 
+/**
+ * This middleware sets common security and CORS headers.
+ * It also handles preflight OPTIONS requests.
+ */
 export const withHeaders: MiddlewareHandler = async (c, next) => {
   // CORS (simple default)
   // TODO: find out if it should be tighter for prod
