@@ -4,9 +4,6 @@
   "service": "app",
   "workspaceFolder": "/workspaces/elepad",
   "remoteUser": "node",
-  "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
-  },
   "mounts": [
     "source=devcontainer-cache-npm,target=/home/node/.npm,type=volume"
   ],

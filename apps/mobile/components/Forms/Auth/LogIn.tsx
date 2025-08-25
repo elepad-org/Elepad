@@ -34,7 +34,7 @@ export default function LogIn({ onBack }: Props) {
 
   const handleGoogleLogin = async () => {
     setLoading(true);
-    const redirectTo = makeRedirectUri({ scheme: "elepad" });
+    const redirectTo = makeRedirectUri({ scheme: "elepad", path: "/login" });
     console.log(redirectTo);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",

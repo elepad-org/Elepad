@@ -61,7 +61,7 @@ export default function NewAccount({ onBack }: Props) {
       setIsError(true);
     } else {
       setModalMessage(
-        "Ya creamos tu cuenta. Revisa tu correo para confirmar que te pertenece.\n Luego puedes hacer clic en este boton."
+        "Ya creamos tu cuenta. Revisa tu correo para confirmar que te pertenece.\n Luego puedes hacer clic en este boton.",
       );
       setIsError(false);
     }
@@ -78,7 +78,7 @@ export default function NewAccount({ onBack }: Props) {
 
     if (error) {
       setModalMessage(
-        "⚠️ Error al iniciar sesión.\n Verifica que hayas confirmado tu correo, luego intenta nuevamente."
+        "⚠️ Error al iniciar sesión.\n Verifica que hayas confirmado tu correo, luego intenta nuevamente.",
       );
       setIsError(true);
       setLoginLoading(false);

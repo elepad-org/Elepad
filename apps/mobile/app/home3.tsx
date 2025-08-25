@@ -9,7 +9,7 @@ const mockActivities = [
 ];
 
 export default function Home() {
-  const renderActivity = ({ item }: any) => {
+  const renderActivity = ({ item }) => {
     const isDone = item.status === "Completado";
     return (
       <Card
