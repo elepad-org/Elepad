@@ -1,0 +1,44 @@
+name: Deploy API to Cloudflare Workers
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-api:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api # all `run:` steps happen inside apps/api
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+    steps:
+      - name: 🏗️ Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🏗️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: 🏗️ Install dependencies
+        run: npm ci
+
+      - name: 📦 Bundle Hono API as a serverless function
+        run: npm run build:edge
+
+      - name: ⚙️ Push secrets to Cloudflare
+        run: |
+          echo "$SUPABASE_URL" | npx wrangler secret put SUPABASE_URL --config wrangler.toml
+          echo "$SUPABASE_SERVICE_ROLE_KEY" | npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY --config wrangler.toml
+
+      - name: 🚀 Publish to Cloudflare Workers
+        run: npx wrangler deploy --config wrangler.toml
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
