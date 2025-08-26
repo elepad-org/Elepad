@@ -1,10 +1,6 @@
 import { Stack } from "expo-router";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function AuthGroupLayout() {
-  return (
-    <SafeAreaProvider>
-      <Stack screenOptions={{ headerShown: false }} />
-    </SafeAreaProvider>
-  );
+  // TODO: find out if this layout is useful at all
+  return <Stack screenOptions={{ headerShown: false }} />;
 }

@@ -1,17 +1,15 @@
 import NewAccount from "@/components/Forms/Auth/NewAccount";
 import { useAuth } from "@/hooks/useAuth";
-import { Redirect, Link, useRouter } from "expo-router";
+import { Redirect } from "expo-router";
 import { useRef } from "react";
 import { Animated, ImageBackground, StyleSheet, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { Text, ActivityIndicator, useTheme } from "react-native-paper";
+import { ActivityIndicator } from "react-native-paper";
 import bh from "@/assets/images/bh5.png";
 
 export default function SignupScreen() {
   const { session, loading } = useAuth();
-  const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(1)).current;
-  const theme = useTheme();
 
   if (loading) {
     return (
@@ -28,13 +26,9 @@ export default function SignupScreen() {
   return (
     <View style={styles.container}>
       <StatusBar style="light" translucent />
-      <ImageBackground
-        source={bh}
-        resizeMode="cover"
-        style={{ flex: 1 }}
-      >
+      <ImageBackground source={bh} resizeMode="cover" style={{ flex: 1 }}>
         <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
-          <NewAccount onBack={() => router.replace("/")} />
+          <NewAccount />
         </Animated.View>
       </ImageBackground>
     </View>

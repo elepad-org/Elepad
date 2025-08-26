@@ -1,6 +1,12 @@
 import { supabase } from "@/lib/supabase";
 import { useState } from "react";
-import { View, StyleSheet, Alert, TouchableOpacity, Platform } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Alert,
+  TouchableOpacity,
+  Platform,
+} from "react-native";
 import { Text, TextInput, Button } from "react-native-paper";
 import { makeRedirectUri } from "expo-auth-session";
 
@@ -39,7 +45,9 @@ export default function LogIn({ onBack }: Props) {
   return (
     <View style={styles.card}>
       <Text style={styles.heading}>Iniciar Sesión</Text>
-      <Text style={styles.subheading}>Ingresa tu correo y contraseña para entrar</Text>
+      <Text style={styles.subheading}>
+        Ingresa tu correo y contraseña para entrar
+      </Text>
 
       <TextInput
         mode="outlined"
@@ -84,14 +92,23 @@ export default function LogIn({ onBack }: Props) {
         <View style={styles.line} />
       </View>
 
-      <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin} disabled={loading} activeOpacity={0.8}>
+      <TouchableOpacity
+        style={styles.googleButton}
+        onPress={handleGoogleLogin}
+        disabled={loading}
+        activeOpacity={0.8}
+      >
         <View style={styles.gIconWrap}>
           <Text style={styles.gIcon}>G</Text>
         </View>
         <Text style={styles.googleText}>Entrar con Google</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={onBack} disabled={loading} style={styles.backTouch}>
+      <TouchableOpacity
+        onPress={onBack}
+        disabled={loading}
+        style={styles.backTouch}
+      >
         <Text style={styles.backLabel}>Volver</Text>
       </TouchableOpacity>
     </View>
@@ -107,13 +124,40 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 12,
   },
-  heading: { fontSize: 20, fontFamily: "JosefinSans", fontWeight: "600", marginBottom: 6 },
-  subheading: { fontSize: 13, color: "#666", marginBottom: 12, textAlign: "center", fontFamily: "Montserrat", fontWeight: "600" },
-  input: { width: "100%", marginTop: 8, backgroundColor: "white", borderRadius: 8 },
-  continueButton: { marginTop: 12, width: "100%", borderRadius: 8, backgroundColor: "#5F76E8" },
+  heading: {
+    fontSize: 20,
+    fontFamily: "JosefinSans",
+    fontWeight: "600",
+    marginBottom: 6,
+  },
+  subheading: {
+    fontSize: 13,
+    color: "#666",
+    marginBottom: 12,
+    textAlign: "center",
+    fontFamily: "Montserrat",
+    fontWeight: "600",
+  },
+  input: {
+    width: "100%",
+    marginTop: 8,
+    backgroundColor: "white",
+    borderRadius: 8,
+  },
+  continueButton: {
+    marginTop: 12,
+    width: "100%",
+    borderRadius: 8,
+    backgroundColor: "#5F76E8",
+  },
   continueContent: { height: 48 },
   continueLabel: { fontSize: 16, fontWeight: "600" },
-  orRow: { width: "100%", flexDirection: "row", alignItems: "center", marginTop: 12 },
+  orRow: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 12,
+  },
   line: { flex: 1, height: 1, backgroundColor: "#E6E3E0" },
   orText: { marginHorizontal: 12, color: "#999" },
   googleButton: {
@@ -132,9 +176,24 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 2,
   },
-  gIconWrap: { width: 28, height: 28, borderRadius: 14, backgroundColor: "#FFFFFF", alignItems: "center", justifyContent: "center", marginRight: 10, borderWidth: 0.5, borderColor: "#E6E3E0" },
+  gIconWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+    borderWidth: 0.5,
+    borderColor: "#E6E3E0",
+  },
   gIcon: { fontWeight: "700", color: "#DB4437" },
-  googleText: { fontSize: 15, color: "#333", fontFamily: "Montserrat", fontWeight: "600" },
+  googleText: {
+    fontSize: 15,
+    color: "#333",
+    fontFamily: "Montserrat",
+    fontWeight: "600",
+  },
   backTouch: { marginTop: 12 },
   backLabel: { fontSize: 16, color: "#5F76E8" },
 });

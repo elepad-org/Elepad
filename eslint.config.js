@@ -1,22 +1,12 @@
-// eslint.config.ts
 import { defineConfig } from "eslint/config";
-import js from "@eslint/js"; // ESLint core recommended (flat)
 import globals from "globals";
 import typescriptParser from "@typescript-eslint/parser";
 import typescriptPlugin from "@typescript-eslint/eslint-plugin";
 import reactPlugin from "eslint-plugin-react";
+import gitignore from "eslint-config-flat-gitignore";
 
 export default defineConfig([
-  {
-    ignores: [
-      "**/node_modules/**",
-      "apps/*/dist/**",
-      "packages/*/dist/**",
-      "**/.turbo/**",
-      "**/build/**",
-      "**/.expo/**",
-    ],
-  },
+  gitignore(),
   {
     files: ["**/*.{ts,tsx}"],
     languageOptions: {

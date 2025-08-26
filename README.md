@@ -68,22 +68,23 @@ Si bien la planificación se debe documentar en español, en lo posible se inten
 
 Los GitHub Issues se pueden referenciar en commits: si hacemos `git commit -m "feat: implement #3"`, el `#3` será un enlace al Issue número 3 (elepad/Elepad#3).
 
-Siempre que sea conveniente se utilizará la siguiente **estructura de ramas**:
-
-- `prod`: la rama con el código fuente a desplegar.
-- `main`: la rama principal de desarrollo.
-- `feature/`: para nuevas funcionalidades y cambios (por ejemplo, `feature/add-login`).
-- `bugfix/`: para correcciones de errores (por ejemplo, `bugfix/fix-header-bug`).
-- `chore/`: para tareas que no implican cambios en el código, como actualización de dependencias o documentación (por ejemplo, `chore/update-deps`).
-
-Referencia: [https://conventional-branch.github.io/](https://conventional-branch.github.io/).
-
 En lo posible, los **mensajes de commits** tendrán la estructura `<type>: <description>` donde:
 
 - `<type>`: indica el tipo de cambio. Puede ser `fix`, `feat`, `refactor`, `docs`, `test`, `ci`, etc.
 - `<description>`: es un breve resumen de los cambios. Se escribe en infinitivo, describiendo lo que el commit va a hacer.
 
 Referencia: [https://www.conventionalcommits.org/](https://www.conventionalcommits.org/).
+
+Siempre que sea conveniente se utilizará la siguiente **estructura de ramas**:
+
+- `main`: la rama principal a donde apuntan las PRs. Debe tener cógido funcional ya que será desplegado.
+- `feature/`: para nuevas funcionalidades y cambios (por ejemplo, `feature/add-login`).
+- `bugfix/`: para correcciones de errores (por ejemplo, `bugfix/fix-header-bug`).
+- `chore/`: para tareas que no implican cambios en el código, como actualización de dependencias o documentación (por ejemplo, `chore/update-deps`).
+
+Referencia: [https://conventional-branch.github.io/](https://conventional-branch.github.io/).
+
+Las ramas se unen a main mediante Pull Requests. Es recomendable tildar la opción "Squash commits" al completar una PR para que el historial de commits sea más legible.
 
 Si en el código hay deuda técnica o cambios pendientes, se lo debe señalar con un comentario que diga `// TODO: ...` para que luego se lo pueda encontrar fácilmente. Ej: `// TODO: optimize this method's time complexity to O(n)`.
 

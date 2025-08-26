@@ -1,34 +1,38 @@
-import React from "react";
 import { View, StyleSheet, FlatList } from "react-native";
 import { Text, Card, Avatar } from "react-native-paper";
 
-const mockActivities = [
+type Activity = {
+  id: string;
+  title: string;
+  status: "Pendiente" | "Completado";
+};
+
+const mockActivities: Activity[] = [
   { id: "1", title: "Tomar medicamento", status: "Pendiente" },
   { id: "2", title: "Caminata diaria", status: "Completado" },
   { id: "3", title: "Llamar a la familia", status: "Pendiente" },
 ];
 
-export default function Home() {
-  const renderActivity = ({ item }) => {
-    const isDone = item.status === "Completado";
-    return (
-      <Card
-        style={[
-          styles.activityCard,
-          { backgroundColor: isDone ? "#38BDF8" : "#7DD3FC" }, // azul más intenso para completado, celeste suave para pendiente
-        ]}
-      >
-        <Card.Content>
-          <Text style={styles.activityTitle}>{item.title}</Text>
-          <Text style={styles.activityStatus}>{item.status}</Text>
-        </Card.Content>
-      </Card>
-    );
-  };
+const Item = ({ item }: { item: Activity }) => {
+  const isDone = item.status === "Completado";
+  return (
+    <Card
+      style={[
+        styles.activityCard,
+        { backgroundColor: isDone ? "#38BDF8" : "#7DD3FC" }, // azul intenso para completado, celeste suave para pendiente
+      ]}
+    >
+      <Card.Content>
+        <Text style={styles.activityTitle}>{item.title}</Text>
+        <Text style={styles.activityStatus}>{item.status}</Text>
+      </Card.Content>
+    </Card>
+  );
+};
 
+export default function Home() {
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <View>
           <Text
@@ -51,7 +55,7 @@ export default function Home() {
         <Text style={styles.sectionTitle}>Actividades de Hoy</Text>
         <FlatList
           data={mockActivities}
-          renderItem={renderActivity}
+          renderItem={({ item }) => <Item item={item} />}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.activitiesList}
         />
