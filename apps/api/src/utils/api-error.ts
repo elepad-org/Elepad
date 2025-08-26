@@ -1,5 +1,6 @@
 import { HTTPException } from "hono/http-exception";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
+import { z } from "@hono/zod-openapi";
 
 /**
  * ApiError represents a general API error.
@@ -55,7 +56,38 @@ export class ApiException extends HTTPException {
         headers: {
           "Content-Type": "application/json",
         },
-      },
+      }
     );
   }
+}
+
+/**
+ * Helper function to define OpenAPI error responses, just to reduce boilerplate.
+ * Usage:
+ *  ```
+ *    app.openapi({
+ *      method: "get",
+ *      path: "/example",
+ *      responses: {
+ *        404: openApiErrorResponse("Not Found"),
+ *      }
+ *    }
+ *  ```
+ */
+export function openApiErrorResponse(description = "Error response") {
+  return {
+    description,
+    content: {
+      "application/json": {
+        schema: z
+          .object({
+            error: z.object({
+              message: z.string(),
+              cause: z.any().optional(),
+            }),
+          })
+          .openapi("Error"),
+      },
+    },
+  };
 }

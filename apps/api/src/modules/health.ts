@@ -30,7 +30,7 @@ export const healthApp = new OpenAPIHono().openapi(
         ok: !error,
         timestamp: new Date().toISOString(),
       },
-      200,
+      200
     );
-  },
+  }
 );
