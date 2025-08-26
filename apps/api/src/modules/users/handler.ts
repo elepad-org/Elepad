@@ -36,7 +36,7 @@ usersApp.openapi(
     const { id } = c.req.valid("param");
     const user = await c.var.userService.getUserById(id);
     return c.json(user);
-  }
+  },
 );
 
 usersApp.openapi(
@@ -75,7 +75,7 @@ usersApp.openapi(
     }
 
     return c.json(updated, 200);
-  }
+  },
 );
 
 usersApp.openapi(
@@ -124,5 +124,5 @@ usersApp.openapi(
     const updated = await c.var.userService.updateUserAvatar(id, form);
     if (!updated) throw new ApiException(404, "User not found");
     return c.json(updated, 200);
-  }
+  },
 );

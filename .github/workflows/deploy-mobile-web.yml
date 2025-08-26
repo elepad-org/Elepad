@@ -9,16 +9,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🏗️ Checkout repository
+      - name: 📂 Checkout repository
         uses: actions/checkout@v4
 
-      - name: 🏗️ Setup Node.js
+      - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "npm"
 
-      - name: 🏗️ Setup EAS
+      - name: 🔧 Setup EAS
         uses: expo/expo-github-action@v8
         with:
           eas-version: latest

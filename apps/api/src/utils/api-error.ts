@@ -56,7 +56,7 @@ export class ApiException extends HTTPException {
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
   }
 }

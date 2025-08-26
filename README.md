@@ -66,7 +66,7 @@ El código de `packages/api-client` es autogenerado por orval, una herramienta q
 
 Si bien la planificación se debe documentar en español, en lo posible se intentará **desarrollar en inglés** para adoptar convenciones de la industria.
 
-Los GitHub Issues se pueden referenciar en commits: si hacemos `git commit -m "feat: implement #3"`, el `#3` será un enlace al Issue número 3 (elepad-org/Elepad#3).
+Los commits pueden referenciar GitHub Issues: si hacemos `git commit -m "feat: implement #3"`, el `#3` será un enlace al Issue número 3 (elepad-org/Elepad#3).
 
 En lo posible, los **mensajes de commits** tendrán la estructura `<type>: <description>` donde:
 
@@ -77,7 +77,7 @@ Referencia: [https://www.conventionalcommits.org/](https://www.conventionalcommi
 
 Siempre que sea conveniente se utilizará la siguiente **estructura de ramas**:
 
-- `main`: la rama principal a donde apuntan las PRs. Debe tener cógido funcional ya que será desplegado.
+- `main`: la rama principal a donde apuntan las PRs. Debe tener código funcional ya que será desplegado.
 - `feature/`: para nuevas funcionalidades y cambios (por ejemplo, `feature/add-login`).
 - `bugfix/`: para correcciones de errores (por ejemplo, `bugfix/fix-header-bug`).
 - `chore/`: para tareas que no implican cambios en el código, como actualización de dependencias o documentación (por ejemplo, `chore/update-deps`).
@@ -172,9 +172,9 @@ Es necesario:
 Una vez que las cuentas y proyectos de cada nube están creados y configurados, se utiliza GitHub Actions como pipeline de CI/CD para despliegues automáticos. Workflows actuales:
 
 - `deploy-api.yml`: despliega la API Hono a Cloudflare Workers.
-- `deploy-mobile-web.yml`: despliega la app mobile a EAS Hosting.
+- `deploy-mobile-web.yml`: despliega la app mobile a EAS Hosting (web).
 
-Desde GitHub Actions se actualizan las variables de entorno de cada nube. Es necesario definir en este repositorio los siguientes secrets:
+Desde GitHub Actions se actualizan todas las variables de entorno de cada nube. Es necesario definir en este repositorio los siguientes secrets:
 
 ```bash
 SUPABASE_URL

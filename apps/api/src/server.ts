@@ -2,8 +2,9 @@ import { serve } from "@hono/node-server";
 import app from "./app.js";
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
-import fs from "fs";
-import path from "path";
+
+// Generate OpenAPI spec on server startup.
+import "./emit-openapi.js";
 
 // Read environment variables from a .env file.
 // This works on NodeJS because the API runs as a server, so the `process` object is available.
@@ -18,29 +19,10 @@ if (!SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY environment variable.");
 }
 
-/**
- * Write the OpenAPI spec to a file.
- * This is useful for local development, so the api-client package is regenerated on every change.
- * This is needed in CI pipelines, since there is no server to serve the JSON from.
- */
-export function emitOpenApiSchema() {
-  const spec = app.getOpenAPIDocument({
-    openapi: "3.1.0",
-    info: { title: "Elepad API", version: "1.0.0" },
-  });
-
-  const outputPath = path.resolve(process.cwd(), "openapi.json");
-
-  fs.writeFileSync(outputPath, JSON.stringify(spec, null, 2));
-
-  console.log(`✅ OpenAPI schema generated at ${outputPath}`);
-}
-
 // Run the Hono API as a NodeJS server.
 const server = serve({ fetch: app.fetch, port: Number(PORT) }, (info) => {
   console.log(`🚀 API running on http://localhost:${info.port}`);
-  console.log(`📜 Swagger UI at http://localhost:${info.port}`);
-  emitOpenApiSchema();
+  console.log(`📜 Redoc UI at http://localhost:${info.port}`);
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
