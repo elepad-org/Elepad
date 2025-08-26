@@ -7,6 +7,7 @@ import { env } from "hono/adapter";
 import { logger } from "hono/logger";
 import { HTTPException } from "hono/http-exception";
 import { cors } from "hono/cors";
+import { familyGroupApp } from "./modules/familyGroups/handler.js";
 
 const app = new OpenAPIHono();
 
@@ -58,6 +59,7 @@ app.use("*", async (c, next) => {
 // Mount routes.
 app.route("/", healthApp);
 app.route("/", usersApp);
+app.route("/", familyGroupApp);
 
 // OpenAPI spec.
 app.doc("/openapi.json", {
