@@ -79,7 +79,7 @@ Siempre que sea conveniente se utilizará la siguiente **estructura de ramas**:
 
 - `main`: la rama principal a donde apuntan las PRs. Debe tener código funcional ya que será desplegado.
 - `feature/`: para nuevas funcionalidades y cambios (por ejemplo, `feature/add-login`).
-- `bugfix/`: para correcciones de errores (por ejemplo, `bugfix/fix-header-bug`).
+- `fix/`: para correcciones de errores (por ejemplo, `fix/fix-header-bug`).
 - `chore/`: para tareas que no implican cambios en el código, como actualización de dependencias o documentación (por ejemplo, `chore/update-deps`).
 
 Referencia: [https://conventional-branch.github.io/](https://conventional-branch.github.io/).

@@ -7,6 +7,7 @@ import { env } from "hono/adapter";
 import { logger } from "hono/logger";
 import { HTTPException } from "hono/http-exception";
 import { cors } from "hono/cors";
+import { swaggerUI } from "@hono/swagger-ui";
 
 const app = new OpenAPIHono();
 
@@ -19,7 +20,7 @@ app.use(
     origin: "*",
     allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
-  }),
+  })
 );
 
 // Log errors globally.
@@ -66,24 +67,7 @@ app.doc("/openapi.json", {
   tags: [{ name: "users" }],
 });
 
-// Serve OpenAPI documentation with Redoc, a better alternative to SwaggerUI.
-app.get("/", (c) => {
-  const html = `
-  <!DOCTYPE html>
-  <html>
-    <head>
-      <title>API Docs</title>
-      <meta charset="utf-8"/>
-      <meta name="viewport" content="width=device-width, initial-scale=1"/>
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,700"/>
-    </head>
-    <body>
-      <redoc spec-url="./openapi.json"></redoc>
-      <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js" crossorigin></script>
-    </body>
-  </html>
-  `;
-  return c.html(html);
-});
+// Serve OpenAPI documentation with SwaggerUI.
+app.get("/", swaggerUI({ url: "./openapi.json" }));
 
 export default app;
