@@ -28,7 +28,7 @@ export class ApiError extends Error {
 
 /**
  * ApiException represents API-specific errors.
- * It extends the HTTPException class from Hono so it can be used seamlessly in Hono apps.
+ * It extends the HTTPException Hono class so it can be used seamlessly in Hono apps.
  * Example usage:
  *  ```
  *    throw new ApiException(404, "User not found", { userId: id });
@@ -41,7 +41,7 @@ export class ApiException extends HTTPException {
     this.name = "ApiException";
   }
 
-  /** This method is called by Hono to get the response to send to the client. */
+  /** This method is called by Hono to get the Response to send to the client. */
   override getResponse(): Response {
     return new Response(
       JSON.stringify({

@@ -1,16 +1,35 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { withHeaders } from "./middleware/headers.js";
-import { withErrors } from "./middleware/errors.js";
-import { healthApp } from "./routes/health.js";
+import { healthApp } from "./modules/health.js";
 import { usersApp } from "./modules/users/handler.js";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { env } from "hono/adapter";
+import { logger } from "hono/logger";
+import { HTTPException } from "hono/http-exception";
+import { cors } from "hono/cors";
 
 const app = new OpenAPIHono();
 
 // Global middleware.
-app.use("*", withErrors);
+app.use(logger());
 app.use("*", withHeaders);
+app.use(
+  "*",
+  cors({
+    origin: "*",
+    allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+  }),
+);
+
+// Log errors globally.
+app.onError((err, c) => {
+  console.error(err);
+  if (err instanceof HTTPException) {
+    return err.getResponse();
+  }
+  return c.json(err, 500);
+});
 
 // Add type definitions to the Hono context. See: https://hono.dev/docs/api/context#contextvariablemap.
 declare module "hono" {
@@ -47,7 +66,7 @@ app.doc("/openapi.json", {
   tags: [{ name: "users" }],
 });
 
-// Serve OpenAPI documentation with Redoc, a better alternative to SwaggerUI
+// Serve OpenAPI documentation with Redoc, a better alternative to SwaggerUI.
 app.get("/", (c) => {
   const html = `
   <!DOCTYPE html>
