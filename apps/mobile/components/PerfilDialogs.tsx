@@ -1,8 +1,9 @@
-import React, { useState } from "react";
-import { Alert, View } from "react-native";
+import { useState } from "react";
+import { Alert, Platform, View } from "react-native";
 import { Avatar, Button, Dialog, Text, TextInput } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
-import { patchUserFormData } from "@elepad/api-client/src/multipart";
+import { patchUsersIdAvatar } from "@elepad/api-client";
+import { uriToBlob } from "@/lib/uriToBlob";
 
 type EditNameDialogProps = {
   visible: boolean;
@@ -65,7 +66,6 @@ type UpdatePhotoDialogProps = {
 export function UpdatePhotoDialog({
   visible,
   userId,
-  displayName,
   initials,
   currentAvatarUrl,
   onClose,
@@ -91,7 +91,7 @@ export function UpdatePhotoDialog({
       if (perm.status !== "granted") {
         Alert.alert(
           "Permiso requerido",
-          "Concede acceso a tus fotos para elegir una imagen."
+          "Concede acceso a tus fotos para elegir una imagen.",
         );
         if (wasOpen) setTimeout(() => onReopen(), 0);
         return;
@@ -153,7 +153,7 @@ export function UpdatePhotoDialog({
               if (camPerm.status !== "granted") {
                 Alert.alert(
                   "Permiso requerido",
-                  "Concede acceso a la cámara para tomar una foto."
+                  "Concede acceso a la cámara para tomar una foto.",
                 );
                 if (wasOpen) setTimeout(() => onReopen(), 0);
                 return;
@@ -199,19 +199,29 @@ export function UpdatePhotoDialog({
             if (!selectedPhoto || !userId) return;
             try {
               setSaving(true);
-              const form = new FormData();
-              form.append("displayName", displayName);
-              form.append("avatarFile", {
-                uri: selectedPhoto.uri,
-                name: selectedPhoto.name,
-                type: selectedPhoto.type,
-              } as unknown as Blob);
-              await patchUserFormData(userId, form);
+
+              if (Platform.OS === "web") {
+                // Build blob from local URI
+                const blob = await uriToBlob(selectedPhoto.uri);
+                await patchUsersIdAvatar(userId, { avatarFile: blob });
+              } else {
+                // Either React Native or Expo Go have trouble sending a Blob through the `fetch` inside `patchUsersIdAvatar`.
+                // However, we can create an object with Blob properties that seems to work well on mobile.
+                await patchUsersIdAvatar(userId, {
+                  avatarFile: {
+                    uri: selectedPhoto.uri,
+                    name: selectedPhoto.name,
+                    type: selectedPhoto.type,
+                  } as unknown as Blob,
+                });
+              }
+
               onClose();
               setSelectedPhoto(null);
               onSuccess?.();
             } catch (e) {
               console.warn(e);
+              Alert.alert("Error", "No se pudo guardar la imagen.");
             } finally {
               setSaving(false);
             }

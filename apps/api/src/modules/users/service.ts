@@ -1,41 +1,87 @@
-import { usersRepo } from "./repository";
-import type { z } from "zod";
-import type { UpdateUserInput } from "./schema";
-import { uploadProfileAvatar } from "@/services/storage";
+import { ApiException } from "@/utils/api-error";
+import type { UpdateUser } from "./schema";
+import { uploadUserAvatarImage as uploadUserAvatar } from "@/services/storage";
+import { SupabaseClient } from "@supabase/supabase-js";
 
-export const usersService = {
-  async getById(id: string) {
-    return usersRepo.findById(id);
-  },
+/**
+ * Service class to handle user-related operations.
+ * While more complex applications might use a repository layer to separate data access logic,
+ * elepad services will connect directly to Supabase to avoid having anemic services.
+ */
+export class UserService {
+  constructor(private supabase: SupabaseClient) {}
 
-  async update(id: string, payload: z.infer<typeof UpdateUserInput>) {
+  /**
+   * Get a user by their ID.
+   */
+  async getUserById(id: string) {
+    const { data, error } = await this.supabase
+      .from("users")
+      .select("id, email, displayName, avatarUrl, groupId")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error finding the user: ", error);
+      throw new ApiException(500, "Error finding the user");
+    }
+    if (!data) {
+      throw new ApiException(404, "User not found");
+    }
+    return data;
+  }
+
+  /**
+   * Update a user's information (except their avatar).
+   */
+  async update(id: string, payload: UpdateUser) {
     const updates: { displayName?: string; avatarUrl?: string } = {};
-    if (payload.displayName !== undefined)
+
+    if (payload.displayName !== undefined) {
       updates.displayName = payload.displayName;
-    if (payload.avatarUrl !== undefined) updates.avatarUrl = payload.avatarUrl;
-    return usersRepo.update(id, updates);
-  },
-  async updateWithFile(id: string, form: FormData) {
-    const displayName = form.get("displayName");
+    }
+
+    if (payload.avatarUrl !== undefined) {
+      updates.avatarUrl = payload.avatarUrl;
+    }
+
+    const { data, error } = await this.supabase
+      .from("users")
+      .update(updates)
+      .eq("id", id)
+      .select("id, email, displayName, avatarUrl, groupId")
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error updating the user: ", error);
+      throw new ApiException(500, "Error updating the user");
+    }
+
+    return data ?? undefined;
+  }
+
+  /**
+   * Verify if a FormDataEntryValue is a File (as opposed to a string).
+   */
+  isFile(value: FormDataEntryValue | null): value is File {
+    return !!value && typeof value === "object" && "arrayBuffer" in value;
+  }
+
+  /**
+   * Update ONLY the user's avatar.
+   */
+  async updateUserAvatar(id: string, form: FormData) {
     const avatarFile = form.get("avatarFile");
+    console.log(JSON.stringify(avatarFile, null, 2));
+    console.log(avatarFile instanceof File);
 
-    const updates: { displayName?: string; avatarUrl?: string } = {};
-    if (typeof displayName === "string" && displayName.trim().length > 0) {
-      updates.displayName = displayName.trim();
+    if (!this.isFile(avatarFile)) {
+      throw new ApiException(400, "Invalid or missing avatar file");
     }
 
-    const isFile = (v: FormDataEntryValue | null): v is File =>
-      !!v && typeof v === "object" && "arrayBuffer" in v;
+    const avatarUrl = await uploadUserAvatar(this.supabase, id, avatarFile);
 
-    if (isFile(avatarFile)) {
-      const url = await uploadProfileAvatar(id, avatarFile);
-      updates.avatarUrl = url;
-    }
-
-    if (!Object.keys(updates).length) {
-      return usersRepo.findById(id); // nada por actualizar, devolvemos el usuario actual
-    }
-
-    return usersRepo.update(id, updates);
-  },
-};
+    // Updating the avatar image implies updating the avatar url.
+    return this.update(id, { avatarUrl });
+  }
+}

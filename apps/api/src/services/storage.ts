@@ -1,17 +1,22 @@
-import { createSupabaseClient } from "@/config";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 const AVATAR_BUCKET = "profile-avatar";
 
-const sanitize = (name: string) => name.replace(/[^a-zA-Z0-9_.-]/g, "_");
+/** Turn the file name into an URL-compatible name. */
+function urlify(name: string) {
+  return name.replace(/[^a-zA-Z0-9_.-]/g, "_");
+}
 
-export async function uploadProfileAvatar(
+/**
+ * Uploads a profile avatar to Supabase Storage and returns the public URL.
+ */
+export async function uploadUserAvatarImage(
+  supabase: SupabaseClient,
   userId: string,
-  file: File
+  file: File,
 ): Promise<string> {
-  const supabase = createSupabaseClient();
   const originalName = file.name || `avatar-${Date.now()}`;
-  const safeName = sanitize(originalName);
-  const path = `${userId}/${Date.now()}-${safeName}`;
+  const path = `${userId}/${Date.now()}-${urlify(originalName)}`;
 
   const { error } = await supabase.storage
     .from(AVATAR_BUCKET)
@@ -19,7 +24,9 @@ export async function uploadProfileAvatar(
       contentType: file.type || "application/octet-stream",
       upsert: true,
     });
-  if (error) throw new Error(`Upload failed: ${error.message}`);
+  if (error) {
+    throw new Error(`Upload failed: ${error.message}`);
+  }
 
   const { data } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(path);
   return data.publicUrl;

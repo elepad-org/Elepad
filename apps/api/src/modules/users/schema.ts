@@ -12,10 +12,12 @@ export const UserSchema = z
 
 export type User = z.infer<typeof UserSchema>;
 
-export const UpdateUserInput = z
+export const UpdateUserSchema = z
   .object({
     displayName: z.string().min(1).optional(),
     avatarUrl: z.string().optional(),
   })
   .strict()
-  .openapi("UpdateUserInput");
+  .openapi("UpdateUser");
+
+export type UpdateUser = z.infer<typeof UpdateUserSchema>;
