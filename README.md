@@ -32,14 +32,14 @@ La planificación del proyecto se puede ver en varias partes:
   - [Planificación](https://docs.google.com/document/d/1NqHx6Go_-peDly_qNYltLgTfeM6FCRMo5ZNa35w0yvI).
   - [Diagramas técnicos](https://drive.google.com/file/d/1_6j1oftihcGSm7DQh2r-obAzsL51-S-g) (DER).
 - **Gestión del proyecto**
-  - [Backlog](https://github.com/users/elepad/projects/1/views/3).
-  - [Roadmap](https://github.com/users/elepad/projects/1/views/2) (avance del proyecto).
-  - [Tablero](https://github.com/users/elepad/projects/1/views/1) (de la release actual).
+  - [Backlog](https://github.com/orgs/elepad-org/projects/2/views/3).
+  - [Roadmap](https://github.com/orgs/elepad-org/projects/2/views/2) (avance del proyecto).
+  - [Tablero](https://github.com/orgs/elepad-org/projects/2/views/1) (de la release actual).
 - **Diseño**
   - [Canva](https://www.canva.com/design/DAGtndSDPec/fhyqoHBOG9PvgYRHk9xqmA/edit) (User Story Map).
   - [Figma](https://www.figma.com/design/rQOZ89Fed9UmfvBsExJyAo/Elepad-Mobile-App) (mockups de las vistas principales).
 
-En cada release se subirán sus historias de usuario al [listado de Issues](https://github.com/elepad/Elepad/issues?q=is%3Aissue) de este repositorio.
+En cada release se subirán sus historias de usuario al [listado de Issues](https://github.com/elepad-org/Elepad/issues?q=is%3Aissue) de este repositorio.
 
 ## 👨‍💻 Desarrollo
 
@@ -66,7 +66,7 @@ El código de `packages/api-client` es autogenerado por orval, una herramienta q
 
 Si bien la planificación se debe documentar en español, en lo posible se intentará **desarrollar en inglés** para adoptar convenciones de la industria.
 
-Los GitHub Issues se pueden referenciar en commits: si hacemos `git commit -m "feat: implement #3"`, el `#3` será un enlace al Issue número 3 (elepad/Elepad#3).
+Los GitHub Issues se pueden referenciar en commits: si hacemos `git commit -m "feat: implement #3"`, el `#3` será un enlace al Issue número 3 (elepad-org/Elepad#3).
 
 En lo posible, los **mensajes de commits** tendrán la estructura `<type>: <description>` donde:
 
