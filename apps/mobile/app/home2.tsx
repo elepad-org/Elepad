@@ -5,7 +5,6 @@ import { Card, Avatar, Surface, Chip } from "react-native-paper";
 const theme = {
   colors: {
     title: "#2d5a87",
-
     completedCard: "#c8e6c9",
     pendingCard: "#fff3cd",
     completedText: "#2d5a87",
@@ -53,8 +52,16 @@ const HomeScreen = () => {
     },
   ];
 
+  type Actividad = {
+    id: number;
+    titulo: string;
+    hora: string;
+    descripcion: string;
+    completado: boolean;
+  };
+
   // TODO: Refactor this as a new component
-  const ActividadCard = ({ actividad }) => {
+  const ActividadCard = ({ actividad }: { actividad: Actividad }) => {
     const { titulo, hora, descripcion, completado } = actividad;
     const isCompleted = completado;
 

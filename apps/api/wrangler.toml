@@ -1,0 +1,7 @@
+name = "api"
+main = "cloudflare-worker.js"
+compatibility_date = "2025-08-16"
+
+[observability]
+enabled = true
+head_sampling_rate = 1  # store 100% percent of logs

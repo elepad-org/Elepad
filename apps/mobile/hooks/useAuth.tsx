@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { Session, User } from "@supabase/supabase-js";
-import { getUser } from "@elepad/api-client/src/gen/client";
+import { getUsersId } from "@elepad/api-client/src/gen/client";
 import { useRouter } from "expo-router";
 import {
   PropsWithChildren,
@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   async function loadElepadUserById(userId: string) {
     try {
       console.log("Cargando usuario de Elepad:", userId);
-      const res = await getUser(userId);
+      const res = await getUsersId(userId);
       console.log("Datos del usuario:", res);
       const maybeStatus = (res as unknown as { status?: number }).status;
       const maybeData = (res as unknown as { data?: unknown }).data;
@@ -81,7 +81,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
           router.replace("/");
         }
         setLoading(false);
-      }
+      },
     );
 
     return () => {

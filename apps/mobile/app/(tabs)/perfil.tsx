@@ -16,7 +16,7 @@ import {
   Snackbar,
 } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
-import { updateUser } from "@elepad/api-client/src/gen/client";
+import { patchUsersId } from "@elepad/api-client/src/gen/client";
 import { EditNameDialog, UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import ProfileHeader from "@/components/ProfileHeader";
 
@@ -133,7 +133,7 @@ export default function PerfilScreen() {
               if (next === displayName) return;
               try {
                 setSaving(true);
-                await updateUser(userElepad.id, { displayName: next });
+                await patchUsersId(userElepad.id, { displayName: next });
                 setEditOpen(false);
                 await refreshUserElepad?.();
                 setSnackbarVisible(true);

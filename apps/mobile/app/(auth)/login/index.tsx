@@ -1,16 +1,15 @@
 import LogIn from "@/components/Forms/Auth/LogIn";
 import { useAuth } from "@/hooks/useAuth";
-import { Redirect, Link } from "expo-router";
+import { Redirect } from "expo-router";
 import { useRef } from "react";
 import { Animated, ImageBackground, StyleSheet, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { Text, ActivityIndicator, useTheme } from "react-native-paper";
+import { ActivityIndicator } from "react-native-paper";
 import bh from "@/assets/images/bh5.png";
 
 export default function LoginScreen() {
   const { session, loading } = useAuth();
   const fadeAnim = useRef(new Animated.Value(1)).current;
-  const theme = useTheme();
 
   if (loading) {
     return (
@@ -18,7 +17,7 @@ export default function LoginScreen() {
         <ActivityIndicator />
       </View>
     );
-  } 
+  }
 
   if (session) {
     return <Redirect href="/home" />;
@@ -27,11 +26,7 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <StatusBar style="light" translucent />
-      <ImageBackground
-        source={bh}
-        resizeMode="cover"
-        style={{ flex: 1 }}
-      >
+      <ImageBackground source={bh} resizeMode="cover" style={{ flex: 1 }}>
         <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
           <LogIn />
         </Animated.View>
@@ -59,10 +54,10 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
   },
   inlineBack: {
-		marginTop: 22,
-		textAlign: 'center',
-		fontFamily: 'Montserrat',
-		fontSize: 14,
-		color: '#666',
-	},
+    marginTop: 22,
+    textAlign: "center",
+    fontFamily: "Montserrat",
+    fontSize: 14,
+    color: "#666",
+  },
 });

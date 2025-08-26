@@ -36,7 +36,7 @@ function getMonthMatrix(year: number, monthIndex: number) {
     (_, i) => {
       const dayNumber = i - startWeekday + 1;
       return dayNumber >= 1 && dayNumber <= daysInMonth ? dayNumber : null;
-    }
+    },
   );
   // split into weeks
   const weeks: (number | null)[][] = [];
@@ -53,7 +53,7 @@ const CalendarView: React.FC = () => {
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth()); // 0..11
   const [selectedDate, setSelectedDate] = useState(
-    `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`
+    `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`,
   );
 
   const eventsByDate = useMemo(() => {
@@ -67,7 +67,7 @@ const CalendarView: React.FC = () => {
 
   const weeks = useMemo(
     () => getMonthMatrix(viewYear, viewMonth),
-    [viewYear, viewMonth]
+    [viewYear, viewMonth],
   );
 
   const monthLabel = useMemo(
@@ -76,7 +76,7 @@ const CalendarView: React.FC = () => {
         month: "long",
         year: "numeric",
       }).format(new Date(viewYear, viewMonth, 1)),
-    [viewYear, viewMonth]
+    [viewYear, viewMonth],
   );
 
   const handlePrev = () => {

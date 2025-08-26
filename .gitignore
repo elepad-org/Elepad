@@ -1,12 +1,14 @@
-# dependencies and outputs
+# dependencies and build outputs
 node_modules/
 dist/
+apps/api/openapi.json
+apps/api/cloudflare-worker.js
 
 # local configs and caches
 .vscode/
 .turbo/
+.wrangler/
 gen/
-openapi.json
 
 # env files
 .env
@@ -14,6 +16,7 @@ openapi.json
 .env.development.local
 .env.test.local
 .env.production.local
+.secrets
 
 # macOS
 .DS_Store

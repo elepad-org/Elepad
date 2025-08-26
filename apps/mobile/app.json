@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "elepad",
+    "slug": "elepad",
     "version": "1.0.0",
+    "scheme": "elepad",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "elepad",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "jsEngine": "hermes",
@@ -45,6 +45,13 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "owner": "elepad-org",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "c6ab8f28-28e4-4fcb-b8bb-536f375d9553"
+      }
     }
   }
 }

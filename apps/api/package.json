@@ -10,7 +10,8 @@
   },
   "scripts": {
     "start": "node dist/src/server.js",
-    "build": "tsc && tsx scripts/emit-openapi.ts",
+    "build": "tsc && tsx src/emit-openapi.ts",
+    "build:edge": "node esbuild.edge.js",
     "dev": "tsx watch src/server.ts",
     "lint": "eslint . && tsc --noEmit",
     "clean": "rm -rf dist openapi.json",
@@ -18,12 +19,11 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.13.7",
-    "@hono/swagger-ui": "^0.2.1",
-    "@hono/zod-openapi": "^0.16.4",
+    "@hono/swagger-ui": "^0.5.2",
+    "@hono/zod-openapi": "^1.1.0",
     "@supabase/supabase-js": "^2.55.0",
-    "dotenv": "^16.4.5",
-    "hono": "^4.6.0",
-    "zod": "^3.23.8"
+    "dotenv": "^17.2.1",
+    "hono": "^4.6.0"
   },
   "devDependencies": {
     "tsx": "^4.19.1",

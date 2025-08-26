@@ -1,20 +1,23 @@
-// middleware/auth.ts
-import { createSupabaseClient } from "@/config";
 import type { MiddlewareHandler } from "hono";
 
-const supabase = createSupabaseClient();
-
+/**
+ * This middleware checks for a valid Bearer token in the Authorization header.
+ * If the token is validated by Supabase, it attaches the user information to the context.
+ * If not, it responds with a 401 Unauthorized status.
+ */
 export const withAuth: MiddlewareHandler = async (c, next) => {
   const authHeader = c.req.header("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
     return c.json({ error: "Unauthorized" }, 401);
   }
 
+  // Discard the 'Bearer ' prefix
   const token = authHeader.split(" ")[1];
+
   const {
     data: { user },
     error,
-  } = await supabase.auth.getUser(token);
+  } = await c.var.supabase.auth.getUser(token);
 
   if (error || !user) {
     return c.json({ error: "Unauthorized" }, 401);

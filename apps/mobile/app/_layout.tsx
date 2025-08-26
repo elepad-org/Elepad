@@ -20,6 +20,7 @@ import JosefinSansVariable from "@/assets/fonts/JosefinSans-Variable.ttf";
 import MontserratRegular from "@/assets/fonts/Montserrat-Regular.ttf";
 import { lightTheme, darkTheme } from "@/styles/theme";
 import { supabase } from "@/lib/supabase";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 const queryClient = new QueryClient();
 
@@ -43,7 +44,7 @@ export default function RootLayout() {
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         AUTH_TOKEN = session?.access_token ?? undefined;
-      }
+      },
     );
     return () => listener?.subscription?.unsubscribe?.();
   }, []);
@@ -55,7 +56,7 @@ export default function RootLayout() {
 
   configureApiClient({
     // TODO: read from a config.ts file, and make that file read from env
-    baseUrl: process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:8787/api",
+    baseUrl: process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:8787",
     getToken: () => AUTH_TOKEN,
   });
 
@@ -71,19 +72,21 @@ export default function RootLayout() {
   const navTheme = colorScheme === "dark" ? AdaptedNavDark : AdaptedNavLight;
 
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClient}>
-        <PaperProvider theme={paperTheme}>
-          <NavigationThemeProvider value={navTheme}>
-            <Stack>
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" />
-            </Stack>
-          </NavigationThemeProvider>
-        </PaperProvider>
-      </QueryClientProvider>
-    </AuthProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <QueryClientProvider client={queryClient}>
+          <PaperProvider theme={paperTheme}>
+            <NavigationThemeProvider value={navTheme}>
+              <Stack>
+                <Stack.Screen name="index" options={{ headerShown: false }} />
+                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="+not-found" />
+              </Stack>
+            </NavigationThemeProvider>
+          </PaperProvider>
+        </QueryClientProvider>
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }
