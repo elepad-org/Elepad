@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { postFamilyGroupCreate } from "@elepad/api-client";
 import { Link } from "expo-router";
 import { useRef, useState } from "react";
 import { View, StyleSheet, Animated } from "react-native";
@@ -12,13 +13,27 @@ export default function NewAccount() {
 
   const handleSignUp = async () => {
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    console.log("Entrando")
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { displayName, passwordHash: password } },
     });
+    console.log("Procesado")
     if (error) {
       console.log(error);
+    }
+    if (!data.session) {
+      console.log("No se pudo crear un grupo familiar");
+      setLoading(false);
+      return;
+    }
+    console.log("Creando grupo")
+    const res = await postFamilyGroupCreate({name: displayName, ownerUserId: data.session.user.id});
+    console.log(res)
+
+    if (!res) {
+      console.log("No se pudo crear un grupo familiar");
     }
     setLoading(false);
   };
