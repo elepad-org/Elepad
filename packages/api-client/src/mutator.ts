@@ -1,25 +1,50 @@
 import { getApiBaseUrl, getAuthToken } from "./runtime";
 
+export class ApiError extends Error {
+  constructor(
+    public status: number,
+    public statusText: string,
+    public body?: { error?: string },
+  ) {
+    super(body?.error || `HTTP ${status}: ${statusText}`);
+    this.name = "ApiError";
+  }
+}
+
 export async function rnFetch<T>(
   url: string,
   init: RequestInit = {},
 ): Promise<T> {
+  const headers = new Headers(init.headers);
+
+  // Do not set Content-Type if the body is FormData (fetch will set it as multipart/form-data).
+  if (!(init.body instanceof FormData)) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  const token = getAuthToken();
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
   const res = await fetch(`${getApiBaseUrl()}${url}`, {
     ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(init.headers || {}),
-      ...(getAuthToken() ? { Authorization: `Bearer ${getAuthToken()}` } : {}),
-    },
+    headers,
   });
 
   if (!res.ok) {
-    // you can map your Hono error shape here if you like
-    const text = await res.text().catch(() => "");
-    throw new Error(`HTTP ${res.status}: ${text}`);
+    try {
+      const errorBody = await res.json();
+      throw new ApiError(res.status, res.statusText, errorBody);
+    } catch {
+      throw new ApiError(res.status, res.statusText);
+    }
   }
 
-  // handle empty bodies (204) gracefully
-  const bodyText = await res.text().catch(() => "");
-  return (bodyText ? JSON.parse(bodyText) : undefined) as T;
+  try {
+    const data = await res.json();
+    return data as T;
+  } catch {
+    return undefined as T;
+  }
 }

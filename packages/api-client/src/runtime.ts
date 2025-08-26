@@ -1,21 +1,23 @@
-type Cfg = {
+type ApiClientConfig = {
   baseUrl?: string;
   getToken?: () => string | undefined;
 };
 
-let cfg: Cfg = {};
+let config: ApiClientConfig = {};
 
-export function configureApiClient(next: Cfg) {
+export function configureApiClient(next: ApiClientConfig) {
   // strip trailing slashes to avoid "//" in URLs
-  cfg.baseUrl = next.baseUrl?.replace(/\/+$/, "");
-  cfg.getToken = next.getToken;
+  config.baseUrl = next.baseUrl?.replace(/\/+$/, "");
+  config.getToken = next.getToken;
 }
 
 export function getApiBaseUrl() {
-  if (!cfg.baseUrl) throw new Error("API base URL not configured");
-  return cfg.baseUrl!;
+  if (!config.baseUrl) {
+    throw new Error("API base URL not configured");
+  }
+  return config.baseUrl;
 }
 
 export function getAuthToken() {
-  return cfg.getToken?.();
+  return config.getToken?.();
 }

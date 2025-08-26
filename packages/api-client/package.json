@@ -7,7 +7,7 @@
   "private": true,
   "scripts": {
     "build": "orval",
-    "dev": "cross-env NODE_ENV=development orval --watch"
+    "dev": "orval --watch"
   },
   "peerDependencies": {
     "@tanstack/react-query": "^5.85.3",
