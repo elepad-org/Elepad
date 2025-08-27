@@ -1,6 +1,6 @@
-import React from "react";
 import { View, StyleSheet } from "react-native";
 import { Card, Text, List, Chip } from "react-native-paper";
+import { FONT } from "@/styles/theme";
 
 type Activity = {
   id: string;
@@ -55,12 +55,16 @@ const ActivitiesList = () => {
             <Chip
               icon={item.status == "Completada" ? "check" : "clock-outline"}
               style={[styles.chip, chipStyle]}
-              textStyle={{ color: textColor, fontWeight: "bold" }}
+              textStyle={{ color: textColor, fontFamily: FONT.bold }}
             >
               {item.status == "Completada" ? "Completada" : "Pendiente"}
             </Chip>
           )}
-          titleStyle={{ color: "#2b2b2bff", fontWeight: "800", fontSize: 16 }}
+          titleStyle={{
+            color: "#2b2b2bff",
+            fontFamily: FONT.extraBold,
+            fontSize: 16,
+          }}
           descriptionStyle={{ color: "#2b2b2bff", fontSize: 15 }}
         />
       </Card>
@@ -89,7 +93,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 20,
-    fontWeight: "700",
+    fontFamily: FONT.bold,
     marginBottom: 8,
     color: "#535353ff",
   },

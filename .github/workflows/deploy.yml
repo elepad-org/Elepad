@@ -1,12 +1,14 @@
-name: Deploy API to Cloudflare Workers and Update Supabase
+name: Deploy Mobile and API
 
 on:
   push:
     branches: [main]
 
 jobs:
-  deploy-api:
+  deploy:
+    name: Setup Node.js and install dependencies
     runs-on: ubuntu-latest
+
     steps:
       - name: 📂 Checkout repository
         uses: actions/checkout@v4
@@ -20,6 +22,34 @@ jobs:
       - name: 🏗️ Install dependencies
         run: npm ci
 
+      # ------------------------------------------------------
+      # Deploy Mobile app to EAS Hosting (web)
+      # ------------------------------------------------------
+      - name: 📦 Build api-client package and fix mobile app dependencies
+        run: npm run build
+
+      - name: 📦 Export for web
+        run: npx -w apps/mobile expo export --platform web
+        env:
+          EXPO_PUBLIC_API_URL: ${{ secrets.API_URL }}
+          EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          EXPO_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+
+      - name: 🔧 Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          packager: npm
+          token: ${{ secrets.EAS_TOKEN }}
+
+      - name: 🚀 Deploy to EAS Hosting
+        working-directory: apps/mobile
+        run: eas deploy --prod
+
+      # ------------------------------------------------------
+      # Deploy API to Cloudflare Workers and Update Supabase
+      # ------------------------------------------------------
       - name: 📦 Bundle Hono API as a serverless function
         run: npm -w apps/api run build:edge
 
@@ -38,15 +68,3 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-      - name: 🔗 Link Supabase project
-        run: npx supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_ID }}
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-
-      - name: 🗄️ Push database migrations to Supabase
-        run: npx supabase db push
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
