@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { FONT } from "@/styles/theme";
+import { postFamilyGroupCreate, postFamilyGroupLink } from "@elepad/api-client";
 import { Link } from "expo-router";
 import { useRef, useState } from "react";
 import { View, StyleSheet, Animated } from "react-native";
@@ -9,17 +10,41 @@ export default function NewAccount() {
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
+  const [familyCode, setFamilyCode] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async () => {
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { displayName, passwordHash: password } },
     });
     if (error) {
       console.log(error);
+    }
+    if (!data.session) {
+      console.log("No se pudo crear un grupo familiar");
+      setLoading(false);
+      return;
+    }
+    if (!familyCode) {
+      const res = await postFamilyGroupCreate({
+        name: displayName,
+        ownerUserId: data.session.user.id,
+      });
+      // TODO: The workflow when this fails needs to be defined!!
+      if (!res) {
+        console.log("No se pudo crear un grupo familiar");
+      }
+    } else {
+      const res = await postFamilyGroupLink({
+        groupCode: familyCode,
+        userId: data.session.user.id,
+      });
+      if (!res) {
+        console.log("No se pudo vincular al grupo familiar");
+      }
     }
     setLoading(false);
   };
@@ -52,6 +77,19 @@ export default function NewAccount() {
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
+          returnKeyType="next"
+          style={styles.input}
+          outlineStyle={styles.inputOutline}
+          disabled={loading}
+          dense
+        />
+        <TextInput
+          mode="outlined"
+          placeholder="AAA123"
+          value={familyCode}
+          onChangeText={setFamilyCode}
+          keyboardType="email-address"
+          autoCapitalize="characters"
           returnKeyType="next"
           style={styles.input}
           outlineStyle={styles.inputOutline}
