@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 28,
-    fontWeight: "bold",
+    fontFamily: "Montserrat_700",
     color: colors.white,
   },
   contentContainer: {

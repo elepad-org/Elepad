@@ -44,11 +44,11 @@ const styles = StyleSheet.create({
     marginHorizontal: "15%",
     marginTop: 50,
   },
-  title: { color: "white", textAlign: "center", fontWeight: "bold" },
+  title: { color: "white", textAlign: "center", fontFamily: "Montserrat_700" },
   registerRow: { flexDirection: "row", justifyContent: "center" },
-  buttonNew: { fontWeight: "bold", textAlign: "center", lineHeight: 60 },
+  buttonNew: { fontFamily: "Montserrat_600", textAlign: "center", lineHeight: 60 },
   buttonAqui: {
-    fontWeight: "bold",
+    fontFamily: "Montserrat_700",
     textAlign: "center",
     lineHeight: 60,
     textDecorationLine: "underline",
@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
   inlineBack: {
     marginTop: 22,
     textAlign: "center",
-    fontFamily: "Montserrat",
+    fontFamily: "Montserrat_400",
     fontSize: 14,
     color: "#666",
   },

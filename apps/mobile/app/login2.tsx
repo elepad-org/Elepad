@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     color: "#666",
     marginBottom: 12,
     textAlign: "center",
-    fontFamily: "Montserrat",
+    fontFamily: "Montserrat_400",
     fontWeight: "600",
   },
   input: {
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   googleText: {
     fontSize: 15,
     color: "#333",
-    fontFamily: "Montserrat",
+    fontFamily: "Montserrat_400",
     fontWeight: "600",
   },
   backTouch: { marginTop: 12 },

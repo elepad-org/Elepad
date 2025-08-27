@@ -18,6 +18,6 @@ export default function ExploreScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 24 },
-  title: { fontWeight: "bold", textAlign: "center", marginBottom: 12 },
+  title: { fontFamily: "Montserrat_700", textAlign: "center", marginBottom: 12 },
   paragraph: { textAlign: "center", marginTop: 4 },
 });

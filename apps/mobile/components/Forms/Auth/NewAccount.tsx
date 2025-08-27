@@ -115,8 +115,7 @@ const styles = StyleSheet.create({
   },
   title: {
     marginBottom: 20,
-    fontFamily: "Montserrat",
-    fontWeight: "600",
+    fontFamily: "Montserrat_600",
   },
   button: {
     marginTop: 12,
@@ -130,7 +129,7 @@ const styles = StyleSheet.create({
   },
   backLabel: {
     fontSize: 16,
-    fontFamily: "Montserrat",
+    fontFamily: "Montserrat_600",
   },
   safe: { flex: 1, backgroundColor: "#FFF9F1" },
   container: { flex: 1, alignItems: "center" },
@@ -139,9 +138,8 @@ const styles = StyleSheet.create({
   brand: {
     marginTop: 20,
     fontSize: 44,
-    fontWeight: "400",
     letterSpacing: 8,
-    fontFamily: "Montserrat",
+    fontFamily: "Montserrat_400",
   },
   separatorWrap: { width: "100%", alignItems: "center", marginTop: 6 },
   separator: { width: "60%", height: 1, backgroundColor: "#111", opacity: 0.9 },
@@ -154,9 +152,8 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 22,
-    fontWeight: "600",
     marginTop: 6,
-    fontFamily: "Montserrat",
+    fontFamily: "Montserrat_600",
     textAlign: "center",
   },
   subheading: {
@@ -164,8 +161,7 @@ const styles = StyleSheet.create({
     color: "#666",
     marginTop: 8,
     textAlign: "center",
-    fontFamily: "Montserrat",
-    fontWeight: "600",
+    fontFamily: "Montserrat_600",
   },
   input: {
     width: "100%",
@@ -182,7 +178,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#5278CD",
   },
   continueContent: { height: 48 },
-  continueLabel: { fontSize: 16, fontWeight: "600" },
+  continueLabel: { fontSize: 16, fontFamily: "Montserrat_600" },
   orRow: {
     width: "100%",
     flexDirection: "row",
@@ -195,7 +191,7 @@ const styles = StyleSheet.create({
   inlineBack: {
     marginTop: 22,
     textAlign: "center",
-    fontFamily: "Montserrat",
+    fontFamily: "Montserrat_400",
     fontSize: 14,
     color: "#666",
   },

@@ -5,7 +5,7 @@ import {
   ThemeProvider as NavigationThemeProvider,
 } from "@react-navigation/native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useFonts } from "expo-font";
+import { useAppFonts } from "@/hooks/useAppFonts";
 import { Stack } from "expo-router";
 import "react-native-reanimated";
 import { useColorScheme } from "react-native";
@@ -15,9 +15,6 @@ import {
   Provider as PaperProvider,
   adaptNavigationTheme,
 } from "react-native-paper";
-import SpaceMono from "@/assets/fonts/SpaceMono-Regular.ttf";
-import JosefinSansVariable from "@/assets/fonts/JosefinSans-Variable.ttf";
-import MontserratRegular from "@/assets/fonts/Montserrat-Regular.ttf";
 import { lightTheme, darkTheme } from "@/styles/theme";
 import { supabase } from "@/lib/supabase";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -29,12 +26,7 @@ let AUTH_TOKEN: string | undefined;
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  // Load all custom fonts (keys are the fontFamily names you'll use in styles)
-  const [loaded] = useFonts({
-    SpaceMono,
-    JosefinSans: JosefinSansVariable,
-    Montserrat: MontserratRegular,
-  });
+  const [loaded] = useAppFonts();
 
   // Mantener el token actualizado en AUTH_TOKEN de forma reactiva
   useEffect(() => {

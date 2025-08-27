@@ -121,7 +121,6 @@ const styles = StyleSheet.create({
   brand: {
     marginTop: 20,
     fontSize: 44,
-    fontWeight: "400",
     letterSpacing: 8,
     fontFamily: "JosefinSans-Variable",
   },
@@ -136,17 +135,15 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 18,
-    fontWeight: "600",
     marginTop: 6,
-    fontFamily: "Montserrat",
+    fontFamily: "Montserrat_600",
   },
   subheading: {
     fontSize: 13,
     color: "#666",
     marginTop: 8,
     textAlign: "center",
-    fontFamily: "Montserrat",
-    fontWeight: "600",
+    fontFamily: "Montserrat_600",
   },
   input: {
     width: "100%",
@@ -162,7 +159,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#5278CD",
   },
   continueContent: { height: 48 },
-  continueLabel: { fontSize: 16, fontWeight: "600" },
+  continueLabel: { fontSize: 16, fontFamily: "Montserrat_600" },
   orRow: {
     width: "100%",
     flexDirection: "row",
@@ -198,18 +195,16 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: "#E6E3E0",
   },
-  gIcon: { fontWeight: "700", color: "#DB4437" },
+  gIcon: { color: "#DB4437", fontFamily: "Montserrat_700" },
   googleText: {
     fontSize: 15,
     color: "#333",
-    fontFamily: "Montserrat",
-    fontWeight: "600",
+    fontFamily: "Montserrat_600",
   },
   footer: {
     marginTop: 18,
     color: "#B2AFAE",
     fontSize: 13,
-    fontFamily: "Montserrat",
-    fontWeight: "600",
+    fontFamily: "Montserrat_600",
   },
 });

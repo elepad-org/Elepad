@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 20,
-    fontWeight: "700",
+    fontFamily: "Montserrat_700",
     marginBottom: 8,
     color: "#494949ff",
   },
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   navBtn: { padding: 6 },
-  monthLabel: { fontSize: 18, fontWeight: "700", textTransform: "capitalize" },
+  monthLabel: { fontSize: 18, fontFamily: "Montserrat_700", textTransform: "capitalize" },
   weekDays: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     width: 36,
     textAlign: "center",
     color: "#666",
-    fontWeight: "600",
+    fontFamily: "Montserrat_600"
   },
   calendarGrid: {},
   weekRow: {
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
   },
   dayNumber: { color: "#333" },
   dayCellSelected: { backgroundColor: "#7fb3d3" },
-  dayNumberSelected: { color: "#fff", fontWeight: "700" },
+  dayNumberSelected: { color: "#fff", fontFamily: "Montserrat_700" },
   dayCellToday: { borderWidth: 1, borderColor: "#7fb3d3" },
   dot: {
     width: 6,
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: "700",
+    fontFamily: "Montserrat_700",
     marginBottom: 6,
     color: "#444",
   },
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  eventTimeText: { fontWeight: "700", color: "#333" },
+  eventTimeText: { fontFamily: "Montserrat_700", color: "#333" },
 });
 
 export default CalendarView;
