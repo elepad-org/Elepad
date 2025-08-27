@@ -15,7 +15,7 @@
     "format": "prettier --write . --ignore-path .gitignore",
     "fix:mobile": "turbo run fix:mobile",
     "gen:types": "turbo run gen:types",
-    "prepare": "husky"
+    "prepare": "husky && turbo run prepare"
   },
   "devDependencies": {
     "@types/react": "19.0.10",
