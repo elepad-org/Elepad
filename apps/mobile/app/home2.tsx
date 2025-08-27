@@ -1,4 +1,3 @@
-import React from "react";
 import { View, Text, FlatList, StyleSheet, SafeAreaView } from "react-native";
 import { Card, Avatar, Surface, Chip } from "react-native-paper";
 

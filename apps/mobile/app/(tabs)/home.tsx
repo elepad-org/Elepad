@@ -1,32 +1,25 @@
-import React from "react";
 import {
   Alert,
   StyleSheet,
   View,
-  SafeAreaView,
-  StatusBar,
   ScrollView,
 } from "react-native";
-import { ActivityIndicator, Text, Button, Avatar } from "react-native-paper";
+import { ActivityIndicator, Text, Button, Avatar, useTheme } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import ActivitiesList from "../../components/ActivitiesList";
 import CalendarView from "@/components/CalendarView";
-
-const colors = {
-  primary: "#7fb3d3",
-  white: "#f9f9f9ff",
-  background: "#F4F7FF",
-};
+import {ThemedSafeAreaView} from "@/components/ThemedSafeAreaView";
 
 export default function HomeScreen() {
   const { userElepad, loading, signOut } = useAuth();
   const router = useRouter();
+  const { colors } = useTheme();
 
   if (loading) {
     return (
-      <View style={styles.center}>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
         <ActivityIndicator />
       </View>
     );
@@ -36,17 +29,15 @@ export default function HomeScreen() {
     (userElepad?.displayName as string) || userElepad?.email || "Usuario";
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
-
+    <ThemedSafeAreaView style={styles.safeArea}>
       {/* --- Header --- */}
-      <View style={styles.header}>
-        <MaterialCommunityIcons name="menu" size={40} color={colors.white} />
+      <View style={[styles.header, { backgroundColor: colors.primary }]}>
+        <MaterialCommunityIcons name="menu" size={40} color={colors.onPrimary} />
         <View>
           <Text
             numberOfLines={1}
             ellipsizeMode="tail"
-            style={styles.headerTitle}
+            style={[styles.headerTitle, { color: colors.onPrimary }]}
             // TODO: If the name is too long it should be truncated, otherwise it will overflow the menu item and the avatar
           >
             Bienvenido {displayName}
@@ -58,7 +49,7 @@ export default function HomeScreen() {
         />
       </View>
 
-      <ScrollView style={styles.contentContainer}>
+      <ScrollView style={[styles.contentContainer, { backgroundColor: colors.background }]}>
         <View>
           <ActivitiesList />
           <CalendarView />
@@ -105,7 +96,7 @@ export default function HomeScreen() {
           Ir a Home 3
         </Button>
       </View>
-    </SafeAreaView>
+    </ThemedSafeAreaView>
   );
 }
 
@@ -113,10 +104,8 @@ const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   safeArea: {
     flex: 1,
-    backgroundColor: colors.primary,
   },
   header: {
-    backgroundColor: colors.primary,
     paddingHorizontal: 20,
     paddingTop: "12%",
     paddingBottom: "20%",
@@ -127,11 +116,9 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 28,
     fontWeight: "bold",
-    color: colors.white,
   },
   contentContainer: {
     flex: 1,
-    backgroundColor: colors.background,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     marginTop: -40,

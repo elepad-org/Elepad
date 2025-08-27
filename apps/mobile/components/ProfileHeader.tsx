@@ -1,4 +1,3 @@
-import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Avatar, IconButton, Text, useTheme } from "react-native-paper";
 
@@ -22,13 +21,13 @@ function getInitials(name: string) {
   );
 }
 
-export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
+export function ProfileHeader({
   name,
   email,
   avatarUrl,
   size = 112,
   onEditPhoto,
-}) => {
+}: ProfileHeaderProps) {
   const theme = useTheme();
 
   return (
@@ -44,9 +43,9 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             icon="pencil"
             size={16}
             onPress={onEditPhoto}
-            iconColor="#fff"
+            iconColor={theme.colors.onPrimary}
             containerColor={theme.colors.primary}
-            style={styles.avatarBadge}
+            style={[styles.avatarBadge, { borderColor: theme.colors.surface }]}
           />
         ) : null}
       </View>
@@ -54,7 +53,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         {name}
       </Text>
       {!!email && (
-        <Text variant="bodyMedium" style={styles.subtitle}>
+        <Text variant="bodyMedium" style={[styles.subtitle, { color: theme.colors.onSurfaceVariant }]}>
           {email}
         </Text>
       )}
@@ -77,13 +76,11 @@ const styles = StyleSheet.create({
     right: -2,
     bottom: -2,
     borderWidth: 2,
-    borderColor: "#fff",
   },
   name: {
     textAlign: "center",
   },
   subtitle: {
-    color: "#667085",
     textAlign: "center",
   },
 });

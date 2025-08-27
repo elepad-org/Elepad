@@ -1,8 +1,8 @@
 import { supabase } from "@/lib/supabase";
 import { View, StyleSheet, Alert, Image, TouchableOpacity } from "react-native";
-import { Text, TextInput, Button, Surface } from "react-native-paper";
+import { Text, TextInput, Button, Surface, useTheme } from "react-native-paper";
 import { makeRedirectUri } from "expo-auth-session";
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { Platform, Animated } from "react-native";
 import googleLogo from "@/assets/images/google.png";
 import { Link } from "expo-router";
@@ -11,6 +11,7 @@ export default function LogIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { colors } = useTheme();
 
   // Animated value for button scale
   const buttonScale = useRef(new Animated.Value(1)).current;
@@ -44,10 +45,10 @@ export default function LogIn() {
   };
 
   return (
-    <Surface style={styles.surface} elevation={2}>
+    <Surface style={[styles.surface, { backgroundColor: colors.surface }]} elevation={2}>
       <View style={styles.containerPadding}>
-        <Text style={styles.heading}>Iniciar Sesión</Text>
-        <Text style={styles.subheading}>Ingresa tu email y tu contraseña</Text>
+        <Text variant="headlineSmall" style={[styles.heading, { color: colors.onSurface }]}>Iniciar Sesión</Text>
+        <Text variant="bodyLarge" style={[styles.subheading, { color: colors.onSurfaceVariant }]}>Ingresa tu email y tu contraseña</Text>
 
         <TextInput
           mode="outlined"
@@ -85,7 +86,7 @@ export default function LogIn() {
           <Button
             mode="contained"
             contentStyle={styles.continueContent}
-            style={styles.continueButton}
+            style={[styles.continueButton, { backgroundColor: colors.primary }]}
             labelStyle={styles.continueLabel}
             onPress={handleLogin}
             loading={loading}
@@ -95,9 +96,9 @@ export default function LogIn() {
           </Button>
         </Animated.View>
         <View style={styles.orRow}>
-          <View style={styles.line} />
-          <Text style={styles.orText}>o</Text>
-          <View style={styles.line} />
+          <View style={[styles.line, { backgroundColor: colors.outline }]} />
+          <Text style={[styles.orText, { color: colors.onSurfaceVariant }]}>o</Text>
+          <View style={[styles.line, { backgroundColor: colors.outline }]} />
         </View>
 
         <TouchableOpacity
@@ -113,11 +114,11 @@ export default function LogIn() {
               resizeMode="contain"
             />
           </View>
-          <Text style={styles.googleText}>Continuar con Google</Text>
+          <Text style={[styles.googleText, { color: colors.onSurfaceVariant }]}>Continuar con Google</Text>
         </TouchableOpacity>
 
         <Link href={{ pathname: "/" }} accessibilityRole="button">
-          <Text style={styles.inlineBack}>Volver</Text>
+          <Text style={[styles.inlineBack, { color: colors.onSurfaceVariant }]}>Volver</Text>
         </Link>
       </View>
     </Surface>
@@ -129,64 +130,17 @@ const styles = StyleSheet.create({
     marginTop: 235,
     marginHorizontal: 16,
     borderRadius: 20,
-    backgroundColor: "#FFF9F1",
   },
   containerPadding: {
     padding: 20,
   },
-  title: {
-    marginBottom: 20,
-    fontFamily: "Montserrat",
-    fontWeight: "600",
-  },
-  button: {
-    marginTop: 12,
-    borderRadius: 12,
-  },
-  buttonContent: {
-    paddingVertical: 8,
-  },
-  backButton: {
-    marginTop: 8,
-  },
-  backLabel: {
-    fontSize: 16,
-    fontFamily: "Montserrat",
-  },
-  safe: { flex: 1, backgroundColor: "#FFF9F1" },
-  container: { flex: 1, alignItems: "center" },
-  logoWrap: { alignItems: "center" },
-  logo: { width: 185, height: 185 },
-  brand: {
-    marginTop: 20,
-    fontSize: 44,
-    fontWeight: "400",
-    letterSpacing: 8,
-    fontFamily: "Montserrat",
-  },
-  separatorWrap: { width: "100%", alignItems: "center", marginTop: 6 },
-  separator: { width: "60%", height: 1, backgroundColor: "#111", opacity: 0.9 },
-  card: {
-    width: "90%",
-    marginTop: 18,
-    padding: 20,
-    backgroundColor: "transparent",
-    alignItems: "center",
-  },
   heading: {
-    fontSize: 22,
-    fontWeight: "600",
     marginTop: 6,
-    fontFamily: "Montserrat",
     textAlign: "center",
   },
   subheading: {
-    fontSize: 13,
-    color: "#666",
     marginTop: 8,
     textAlign: "center",
-    fontFamily: "Montserrat",
-    fontWeight: "600",
   },
   input: {
     width: "100%",
@@ -199,7 +153,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
     width: "100%",
     borderRadius: 8,
-    backgroundColor: "#5278CD",
   },
   continueContent: { height: 48 },
   continueLabel: { fontSize: 16, fontWeight: "600" },
@@ -209,8 +162,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 12,
   },
-  line: { flex: 1, height: 1, backgroundColor: "#E6E3E0" },
-  orText: { marginHorizontal: 12, color: "#999" },
+  line: { flex: 1, height: 1 },
+  orText: { marginHorizontal: 12 },
   googleButton: {
     marginTop: 14,
     marginBottom: 20,
@@ -239,19 +192,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   gIconImage: { width: 18, height: 18 },
-  googleText: { fontSize: 15, fontFamily: "Montserrat", fontWeight: "600" },
+  googleText: { fontSize: 15, fontWeight: "600" },
   inlineBack: {
     marginTop: 22,
     textAlign: "center",
-    fontFamily: "Montserrat",
     fontSize: 14,
-    color: "#666",
-  },
-  footer: {
-    marginTop: 18,
-    color: "#B2AFAE",
-    fontSize: 13,
-    fontFamily: "Montserrat",
-    fontWeight: "600",
   },
 });

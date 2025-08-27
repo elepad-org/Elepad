@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Alert, Platform, View } from "react-native";
-import { Avatar, Button, Dialog, Text, TextInput } from "react-native-paper";
+import { Avatar, Button, Dialog, Text, TextInput, useTheme } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import { patchUsersIdAvatar } from "@elepad/api-client";
 import { uriToBlob } from "@/lib/uriToBlob";
@@ -78,6 +78,7 @@ export function UpdatePhotoDialog({
     type: string;
   }>(null);
   const [saving, setSaving] = useState(false);
+  const { colors } = useTheme();
 
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -177,7 +178,7 @@ export function UpdatePhotoDialog({
             Cámara
           </Button>
         </View>
-        <Text style={{ marginTop: 4, color: "#6b7280" }}>
+        <Text style={{ marginTop: 4, color: colors.onSurfaceVariant }}>
           Selecciona una imagen desde tu dispositivo. Aún no se guardará nada
           hasta confirmar.
         </Text>

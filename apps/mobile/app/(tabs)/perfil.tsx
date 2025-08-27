@@ -1,8 +1,6 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   StyleSheet,
-  SafeAreaView,
-  StatusBar,
   ScrollView,
   View,
 } from "react-native";
@@ -14,23 +12,20 @@ import {
   List,
   Portal,
   Snackbar,
+  useTheme,
 } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
 import { EditNameDialog, UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import ProfileHeader from "@/components/ProfileHeader";
-
-const colors = {
-  primary: "#7fb3d3",
-  white: "#f9f9f9ff",
-  background: "#F4F7FF",
-};
+import {ThemedSafeAreaView} from "@/components/ThemedSafeAreaView";
 
 export default function PerfilScreen() {
   const { userElepad, refreshUserElepad } = useAuth();
   const displayName = userElepad?.displayName?.trim() || "Usuario";
   const email = userElepad?.email || "-";
   const avatarUrl = userElepad?.avatarUrl || "";
+  const { colors } = useTheme();
 
   const [editOpen, setEditOpen] = useState(false);
   const [formName, setFormName] = useState(displayName);
@@ -48,14 +43,13 @@ export default function PerfilScreen() {
   const initials = useMemo(() => getInitials(displayName), [displayName]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
+    <ThemedSafeAreaView style={styles.safeArea}>
       <Appbar.Header
         mode="center-aligned"
         elevated
         style={{ backgroundColor: colors.primary }}
       >
-        <Appbar.Content title="Perfil" color="#fff" />
+        <Appbar.Content title="Perfil" color={colors.onPrimary} />
       </Appbar.Header>
       <ScrollView contentContainerStyle={styles.container}>
         <ProfileHeader
@@ -164,20 +158,19 @@ export default function PerfilScreen() {
             visible={snackbarVisible}
             onDismiss={() => setSnackbarVisible(false)}
             duration={2200}
-            style={styles.successSnackbar}
+            style={[styles.successSnackbar, { backgroundColor: colors.primary }]}
           >
             ✓ Perfil actualizado
           </Snackbar>
         </Portal>
       </ScrollView>
-    </SafeAreaView>
+    </ThemedSafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   container: {
     flexGrow: 1,
@@ -222,9 +215,7 @@ const styles = StyleSheet.create({
   bottomButtonContent: {
     height: 48,
   },
-  successSnackbar: {
-    backgroundColor: "green",
-  },
+  successSnackbar: {},
   photoPreviewContainer: {
     alignItems: "center",
     marginBottom: 16,

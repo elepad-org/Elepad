@@ -1,9 +1,16 @@
 import { Tabs } from "expo-router";
-import { Icon } from "react-native-paper";
+import { Icon, useTheme } from "react-native-paper";
 
 export default function TabLayout() {
+  const { colors } = useTheme();
+
   return (
-    <Tabs screenOptions={{ headerShown: false }}>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: colors.primary,
+      }}
+    >
       <Tabs.Screen
         name="home"
         options={{

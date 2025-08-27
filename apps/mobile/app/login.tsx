@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import {
   StyleSheet,
   View,
@@ -8,13 +8,14 @@ import {
   Animated,
   Easing,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Text, TextInput, Button } from "react-native-paper";
+import { Text, TextInput, Button, useTheme } from "react-native-paper";
 import logoBlue from "@/assets/images/bbb.png";
+import { ThemedSafeAreaView } from "@/components/ThemedSafeAreaView";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const buttonScale = useRef(new Animated.Value(1)).current;
+  const { colors } = useTheme();
 
   const handleContinue = () => {
     // Animación al presionar
@@ -44,20 +45,20 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
+    <ThemedSafeAreaView style={styles.safe}>
       <View style={styles.container}>
         <View style={styles.logoWrap}>
           <Image source={logoBlue} style={styles.logo} resizeMode="contain" />
-          <Text style={styles.brand}>ELEPAD</Text>
+          <Text variant="displayLarge" style={[styles.brand, { color: colors.onSurface }]}>ELEPAD</Text>
         </View>
 
         <View style={styles.separatorWrap}>
-          <View style={styles.separator} />
+          <View style={[styles.separator, { backgroundColor: colors.onSurface }]} />
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.heading}>Create an account</Text>
-          <Text style={styles.subheading}>
+          <Text variant="headlineSmall" style={[styles.heading, { color: colors.onSurface }]}>Create an account</Text>
+          <Text variant="bodyLarge" style={[styles.subheading, { color: colors.onSurfaceVariant }]}>
             Enter your email to sign up for this app
           </Text>
 
@@ -82,7 +83,7 @@ export default function LoginScreen() {
               mode="contained"
               onPress={handleContinue}
               contentStyle={styles.continueContent}
-              style={styles.continueButton}
+              style={[styles.continueButton, { backgroundColor: colors.primary }]}
               labelStyle={styles.continueLabel}
             >
               Continue
@@ -90,9 +91,9 @@ export default function LoginScreen() {
           </Animated.View>
 
           <View style={styles.orRow}>
-            <View style={styles.line} />
-            <Text style={styles.orText}>or</Text>
-            <View style={styles.line} />
+            <View style={[styles.line, { backgroundColor: colors.outline }]} />
+            <Text style={[styles.orText, { color: colors.onSurfaceVariant }]}>or</Text>
+            <View style={[styles.line, { backgroundColor: colors.outline }]} />
           </View>
 
           <TouchableOpacity
@@ -103,30 +104,27 @@ export default function LoginScreen() {
             <View style={styles.gIconWrap}>
               <Text style={styles.gIcon}>G</Text>
             </View>
-            <Text style={styles.googleText}>Continue with Google</Text>
+            <Text style={[styles.googleText, { color: colors.onSurfaceVariant }]}>Continue with Google</Text>
           </TouchableOpacity>
 
-          <Text style={styles.footer}>Si tienes cuenta, haz click aqui</Text>
+          <Text style={[styles.footer, { color: colors.onSurfaceVariant }]}>Si tienes cuenta, haz click aqui</Text>
         </View>
       </View>
-    </SafeAreaView>
+    </ThemedSafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#FFF9F1" },
+  safe: { flex: 1 },
   container: { flex: 1, alignItems: "center" },
   logoWrap: { alignItems: "center" },
   logo: { width: 185, height: 185 },
   brand: {
     marginTop: 20,
-    fontSize: 44,
-    fontWeight: "400",
     letterSpacing: 8,
-    fontFamily: "JosefinSans-Variable",
   },
   separatorWrap: { width: "100%", alignItems: "center", marginTop: 6 },
-  separator: { width: "60%", height: 1, backgroundColor: "#111", opacity: 0.9 },
+  separator: { width: "60%", height: 1, opacity: 0.9 },
   card: {
     width: "90%",
     marginTop: 18,
@@ -135,18 +133,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   heading: {
-    fontSize: 18,
-    fontWeight: "600",
     marginTop: 6,
-    fontFamily: "Montserrat",
   },
   subheading: {
-    fontSize: 13,
-    color: "#666",
     marginTop: 8,
     textAlign: "center",
-    fontFamily: "Montserrat",
-    fontWeight: "600",
   },
   input: {
     width: "100%",
@@ -159,7 +150,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
     width: "100%",
     borderRadius: 8,
-    backgroundColor: "#5278CD",
   },
   continueContent: { height: 48 },
   continueLabel: { fontSize: 16, fontWeight: "600" },
@@ -169,8 +159,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 12,
   },
-  line: { flex: 1, height: 1, backgroundColor: "#E6E3E0" },
-  orText: { marginHorizontal: 12, color: "#999" },
+  line: { flex: 1, height: 1 },
+  orText: { marginHorizontal: 12 },
   googleButton: {
     marginTop: 14,
     width: "100%",
@@ -201,15 +191,11 @@ const styles = StyleSheet.create({
   gIcon: { fontWeight: "700", color: "#DB4437" },
   googleText: {
     fontSize: 15,
-    color: "#333",
-    fontFamily: "Montserrat",
     fontWeight: "600",
   },
   footer: {
     marginTop: 18,
-    color: "#B2AFAE",
     fontSize: 13,
-    fontFamily: "Montserrat",
     fontWeight: "600",
   },
 });

@@ -11,7 +11,7 @@ This is a monorepo for the `elepad` project, which consists of a mobile applicat
 - To install all dependencies, run `npm install` at the root of the project.
 - To run the development servers for both the `api` and `mobile` apps, use `npm run dev`.
 - To build both apps, use `npm run build`.
-- To lint the entire project, use `npm run lint`.
+- To lint the entire project, use `npm run lint`. Your code changes must pass the lint with no errors.
 
 ### Project Structure
 

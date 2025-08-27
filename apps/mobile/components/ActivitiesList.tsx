@@ -1,6 +1,5 @@
-import React from "react";
 import { View, StyleSheet } from "react-native";
-import { Card, Text, List, Chip } from "react-native-paper";
+import { Card, Text, List, Chip, useTheme } from "react-native-paper";
 
 type Activity = {
   id: string;
@@ -16,34 +15,22 @@ const mockActivities: Activity[] = [
 ];
 
 const ActivitiesList = () => {
+  const { colors } = useTheme();
+
   const renderItem = ({ item }: { item: Activity }) => {
-    /* const cardStyle = [
-      styles.card,
-      item.status === 'Completada' ? styles.cardDone : styles.cardPending,
-    ]; */
-
-    const colors = {
-      completedCard: "#c8e6c9",
-      pendingCard: "#fff3cd",
-      completedText: "#2d5a87",
-      pendingText: "#4a5568",
-      completedChip: "rgba(76, 175, 80, 0.2)",
-      pendingChip: "rgba(255, 193, 7, 0.3)",
-    };
-
     const cardStyle = {
       backgroundColor:
         item.status === "Completada"
-          ? colors.completedCard
-          : colors.pendingCard,
+          ? colors.primaryContainer
+          : colors.secondaryContainer,
     };
-    const textColor =
-      item.status === "Completada" ? colors.completedText : colors.pendingText;
+    const textColor = 
+        item.status === "Completada" ? colors.onPrimaryContainer : colors.onSecondaryContainer;
     const chipStyle = {
       backgroundColor:
         item.status === "Completada"
-          ? colors.completedChip
-          : colors.pendingChip,
+          ? colors.primary
+          : colors.secondary,
     };
 
     return (
@@ -60,8 +47,8 @@ const ActivitiesList = () => {
               {item.status == "Completada" ? "Completada" : "Pendiente"}
             </Chip>
           )}
-          titleStyle={{ color: "#2b2b2bff", fontWeight: "800", fontSize: 16 }}
-          descriptionStyle={{ color: "#2b2b2bff", fontSize: 15 }}
+          titleStyle={{ color: textColor, fontWeight: "800", fontSize: 16 }}
+          descriptionStyle={{ color: textColor, fontSize: 15 }}
         />
       </Card>
     );
@@ -69,7 +56,7 @@ const ActivitiesList = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Actividades de hoy</Text>
+      <Text style={[styles.heading, { color: colors.onBackground }]}>Actividades de hoy</Text>
       <View style={styles.list}>
         {mockActivities.map((item, idx) => (
           <View key={item.id}>
@@ -91,7 +78,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
     marginBottom: 8,
-    color: "#535353ff",
   },
   list: {
     paddingBottom: 16,

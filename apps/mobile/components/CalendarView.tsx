@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
-import { Card, List, Text } from "react-native-paper";
+import { Card, List, Text, useTheme } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 type EventItem = {
@@ -55,6 +55,7 @@ const CalendarView: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(
     `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`,
   );
+  const { colors } = useTheme();
 
   const eventsByDate = useMemo(() => {
     const map: Record<string, EventItem[]> = {};
@@ -113,18 +114,18 @@ const CalendarView: React.FC = () => {
           key={dateStr}
           style={[
             styles.dayCell,
-            isSelected && styles.dayCellSelected,
-            isToday && styles.dayCellToday,
+            isSelected && [styles.dayCellSelected, { backgroundColor: colors.primary }],
+            isToday && [styles.dayCellToday, { borderColor: colors.primary }],
           ]}
           onPress={() => setSelectedDate(dateStr)}
           activeOpacity={0.7}
         >
           <Text
-            style={[styles.dayNumber, isSelected && styles.dayNumberSelected]}
+            style={[styles.dayNumber, { color: colors.onSurface }, isSelected && styles.dayNumberSelected]}
           >
             {day}
           </Text>
-          {hasEvents && <View style={styles.dot} />}
+          {hasEvents && <View style={[styles.dot, { backgroundColor: colors.secondary }]} />}
         </TouchableOpacity>
       </View>
     );
@@ -134,20 +135,20 @@ const CalendarView: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Calendario</Text>
+      <Text style={[styles.heading, { color: colors.onBackground }]}>Calendario</Text>
       <View style={styles.header}>
         <TouchableOpacity onPress={handlePrev} style={styles.navBtn}>
-          <MaterialCommunityIcons name="chevron-left" size={28} color="#444" />
+          <MaterialCommunityIcons name="chevron-left" size={28} color={colors.onSurface} />
         </TouchableOpacity>
-        <Text style={styles.monthLabel}>{monthLabel}</Text>
+        <Text style={[styles.monthLabel, { color: colors.onSurface }]}>{monthLabel}</Text>
         <TouchableOpacity onPress={handleNext} style={styles.navBtn}>
-          <MaterialCommunityIcons name="chevron-right" size={28} color="#444" />
+          <MaterialCommunityIcons name="chevron-right" size={28} color={colors.onSurface} />
         </TouchableOpacity>
       </View>
 
       <View style={styles.weekDays}>
         {weekDaysShort.map((wd) => (
-          <Text key={wd} style={styles.weekDayText}>
+          <Text key={wd} style={[styles.weekDayText, { color: colors.onSurface }]}>
             {wd}
           </Text>
         ))}
@@ -166,12 +167,12 @@ const CalendarView: React.FC = () => {
       </View>
 
       <View style={{ marginTop: 12 }}>
-        <Text style={styles.sectionTitle}>Eventos — {selectedDate}</Text>
+        <Text style={[styles.sectionTitle, { color: colors.onSurface }]}>Eventos — {selectedDate}</Text>
 
         {selectedEvents.length === 0 ? (
-          <Card style={styles.noEventsCard}>
+          <Card style={[styles.noEventsCard, { backgroundColor: colors.surface }]}>
             <Card.Content>
-              <Text style={{ color: "#666" }}>
+              <Text style={{ color: colors.onSurfaceVariant }}>
                 No hay eventos para este día.
               </Text>
             </Card.Content>
@@ -185,16 +186,16 @@ const CalendarView: React.FC = () => {
                 <View key={item.id}>
                   <List.Item
                     title={item.title}
-                    titleStyle={{ color: "#333" }}
+                    titleStyle={{ color: colors.onSurface }}
                     description={
                       item.description
                         ? `${item.description}`
                         : "No hay detalles de la actividad"
                     }
-                    descriptionStyle={{ color: "#666" }}
+                    descriptionStyle={{ color: colors.onSurfaceVariant }}
                     left={() => (
                       <View style={styles.eventTimeContainer}>
-                        <Text style={styles.eventTimeText}>{item.time}</Text>
+                        <Text style={[styles.eventTimeText, { color: colors.onSurface }]}>{item.time}</Text>
                       </View>
                     )}
                   />
@@ -219,7 +220,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
     marginBottom: 8,
-    color: "#494949ff",
   },
   header: {
     flexDirection: "row",
@@ -238,7 +238,6 @@ const styles = StyleSheet.create({
   weekDayText: {
     width: 36,
     textAlign: "center",
-    color: "#666",
     fontWeight: "600",
   },
   calendarGrid: {},
@@ -259,15 +258,14 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
   },
-  dayNumber: { color: "#333" },
-  dayCellSelected: { backgroundColor: "#7fb3d3" },
+  dayNumber: {},
+  dayCellSelected: {},
   dayNumberSelected: { color: "#fff", fontWeight: "700" },
-  dayCellToday: { borderWidth: 1, borderColor: "#7fb3d3" },
+  dayCellToday: { borderWidth: 1 },
   dot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#FF8C00",
     position: "absolute",
     bottom: -4,
     alignSelf: "center",
@@ -276,15 +274,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     marginBottom: 6,
-    color: "#444",
   },
-  noEventsCard: { padding: 8, backgroundColor: "#fff" },
+  noEventsCard: { padding: 8 },
   eventTimeContainer: {
     width: 64,
     alignItems: "center",
     justifyContent: "center",
   },
-  eventTimeText: { fontWeight: "700", color: "#333" },
+  eventTimeText: { fontWeight: "700" },
 });
 
 export default CalendarView;
