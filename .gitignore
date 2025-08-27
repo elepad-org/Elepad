@@ -3,12 +3,12 @@
 **/dist/
 apps/api/openapi.json
 apps/api/cloudflare-worker.js
+gen/
 
 # local configs and caches
 .vscode/
 .turbo/
 .wrangler/
-gen/
 
 # env files
 .env

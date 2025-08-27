@@ -5,8 +5,8 @@ export const UserSchema = z
     id: z.uuid(),
     email: z.email(),
     displayName: z.string().min(1),
-    avatarUrl: z.url().optional(),
-    groupId: z.uuid().optional(),
+    avatarUrl: z.url().nullable(),
+    groupId: z.uuid().nullable(),
   })
   .openapi("User");
 

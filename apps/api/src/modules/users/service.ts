@@ -2,6 +2,7 @@ import { ApiException } from "@/utils/api-error";
 import type { UpdateUser } from "./schema";
 import { uploadUserAvatarImage as uploadUserAvatar } from "@/services/storage";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { Database } from "@/supabase-types";
 
 /**
  * Service class to handle user-related operations.
@@ -9,7 +10,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
  * elepad services will connect directly to Supabase to avoid having anemic services.
  */
 export class UserService {
-  constructor(private supabase: SupabaseClient) {}
+  constructor(private supabase: SupabaseClient<Database>) {}
 
   /**
    * Get a user by their ID.

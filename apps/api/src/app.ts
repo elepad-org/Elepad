@@ -9,6 +9,7 @@ import { HTTPException } from "hono/http-exception";
 import { cors } from "hono/cors";
 import { swaggerUI } from "@hono/swagger-ui";
 import { familyGroupApp } from "./modules/familyGroups/handler.js";
+import { Database } from "./supabase-types.js";
 
 const app = new OpenAPIHono();
 
@@ -37,7 +38,7 @@ app.onError((err, c) => {
 declare module "hono" {
   interface ContextVariableMap {
     /** A supabase client will be available in the context of every request. */
-    supabase: SupabaseClient;
+    supabase: SupabaseClient<Database>;
   }
 }
 

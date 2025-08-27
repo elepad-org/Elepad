@@ -23,7 +23,7 @@ usersApp.openapi(
     method: "get",
     path: "/users/{id}",
     tags: ["users"],
-    request: { params: z.object({ id: z.string() }) },
+    request: { params: z.object({ id: z.uuid() }) },
     responses: {
       200: {
         description: "User",
@@ -45,7 +45,7 @@ usersApp.openapi(
     path: "/users/{id}",
     tags: ["users"],
     request: {
-      params: z.object({ id: z.string().uuid() }),
+      params: z.object({ id: z.uuid() }),
       body: {
         content: {
           "application/json": {

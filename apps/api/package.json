@@ -15,7 +15,8 @@
     "dev": "tsx watch src/server.ts",
     "lint": "eslint . && tsc --noEmit",
     "clean": "rm -rf dist openapi.json",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "gen:types": "supabase gen types typescript --project-id sdnmoweppzszpxyggdyg > src/supabase-types.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.7",

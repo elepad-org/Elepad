@@ -1,9 +1,10 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { ApiException } from "@/utils/api-error";
 import { NewFamilyGroup, AddUserWithCode } from "./schema";
+import { Database } from "@/supabase-types";
 
 export class FamilyGroupService {
-  constructor(private supabase: SupabaseClient) {}
+  constructor(private supabase: SupabaseClient<Database>) {}
 
   /**
    * Create a Family Group for the new User.
@@ -70,10 +71,12 @@ export class FamilyGroupService {
 
     if (userUpdate.error) {
       console.error("Error linking the user with the family group: ", error);
-      throw new ApiException(500, "Error linking the user with the family group");
+      throw new ApiException(
+        500,
+        "Error linking the user with the family group",
+      );
     }
 
     return true;
   }
-
 }
