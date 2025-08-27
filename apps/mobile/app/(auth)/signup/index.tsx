@@ -6,6 +6,7 @@ import { Animated, ImageBackground, StyleSheet, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator } from "react-native-paper";
 import bh from "@/assets/images/bh5.png";
+import { FONT } from "@/styles/theme";
 
 export default function SignupScreen() {
   const { session, loading } = useAuth();
@@ -44,11 +45,11 @@ const styles = StyleSheet.create({
     marginHorizontal: "15%",
     marginTop: 50,
   },
-  title: { color: "white", textAlign: "center", fontWeight: "bold" },
+  title: { color: "white", textAlign: "center", fontFamily: FONT.bold },
   registerRow: { flexDirection: "row", justifyContent: "center" },
-  buttonNew: { fontWeight: "bold", textAlign: "center", lineHeight: 60 },
+  buttonNew: { fontFamily: FONT.bold, textAlign: "center", lineHeight: 60 },
   buttonAqui: {
-    fontWeight: "bold",
+    fontFamily: FONT.bold,
     textAlign: "center",
     lineHeight: 60,
     textDecorationLine: "underline",

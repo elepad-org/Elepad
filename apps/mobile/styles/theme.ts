@@ -1,5 +1,18 @@
 import { MD3LightTheme, MD3DarkTheme } from "react-native-paper";
 
+/** The exact names of available font families. */
+export const FONT = {
+  thin: "Montserrat_100Thin",
+  extraLight: "Montserrat_200ExtraLight",
+  light: "Montserrat_300Light",
+  regular: "Montserrat_400Regular",
+  medium: "Montserrat_500Medium",
+  semiBold: "Montserrat_600SemiBold",
+  bold: "Montserrat_700Bold",
+  extraBold: "Montserrat_800ExtraBold",
+  black: "Montserrat_900Black",
+} as const;
+
 export const lightTheme = {
   ...MD3LightTheme,
   colors: {

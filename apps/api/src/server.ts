@@ -22,7 +22,7 @@ if (!SUPABASE_SERVICE_ROLE_KEY) {
 // Run the Hono API as a NodeJS server.
 const server = serve({ fetch: app.fetch, port: Number(PORT) }, (info) => {
   console.log(`🚀 API running on http://localhost:${info.port}`);
-  console.log(`📜 Redoc UI at http://localhost:${info.port}`);
+  console.log(`📜 Swagger UI at http://localhost:${info.port}`);
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 

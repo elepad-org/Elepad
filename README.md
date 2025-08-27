@@ -79,7 +79,7 @@ Siempre que sea conveniente se utilizará la siguiente **estructura de ramas**:
 
 - `main`: la rama principal a donde apuntan las PRs. Debe tener código funcional ya que será desplegado.
 - `feature/`: para nuevas funcionalidades y cambios (por ejemplo, `feature/add-login`).
-- `bugfix/`: para correcciones de errores (por ejemplo, `bugfix/fix-header-bug`).
+- `fix/`: para correcciones de errores (por ejemplo, `fix/fix-header-bug`).
 - `chore/`: para tareas que no implican cambios en el código, como actualización de dependencias o documentación (por ejemplo, `chore/update-deps`).
 
 Referencia: [https://conventional-branch.github.io/](https://conventional-branch.github.io/).
@@ -169,10 +169,10 @@ Es necesario:
 
 ### 🤖 Despliegue con GitHub Actions
 
-Una vez que las cuentas y proyectos de cada nube están creados y configurados, se utiliza GitHub Actions como pipeline de CI/CD para despliegues automáticos. Workflows actuales:
+Una vez que las cuentas y proyectos de cada nube están creados y configurados, se utiliza GitHub Actions como pipeline de CI/CD para despliegues automáticos. El workflow `deploy.yml` despliega:
 
-- `deploy-api.yml`: despliega la API Hono a Cloudflare Workers.
-- `deploy-mobile-web.yml`: despliega la app mobile a EAS Hosting (web).
+- La API Hono a Cloudflare Workers ([https://api.elepad.workers.dev/](https://api.elepad.workers.dev/)).
+- La app mobile a EAS Hosting ([https://ele.expo.app/](https://ele.expo.app/)).
 
 Desde GitHub Actions se actualizan todas las variables de entorno de cada nube. Es necesario definir en este repositorio los siguientes secrets:
 

@@ -6,6 +6,7 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { Button, Text, ActivityIndicator } from "react-native-paper";
 import logoBlue from "@/assets/images/bbb.png";
 import { useState } from "react";
+import { FONT } from "@/styles/theme";
 
 export default function IndexRedirect() {
   const { session, loading } = useAuth();
@@ -97,9 +98,8 @@ const styles = StyleSheet.create({
   brand: {
     marginTop: 20,
     fontSize: 44,
-    fontWeight: "400",
     letterSpacing: 8,
-    fontFamily: "Montserrat",
+    fontFamily: FONT.medium,
   },
   separatorWrap: { width: "100%", alignItems: "center", marginTop: 6 },
   separator: { width: "60%", height: 1, backgroundColor: "#111", opacity: 0.9 },
@@ -112,17 +112,15 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 18,
-    fontWeight: "600",
     marginTop: 6,
-    fontFamily: "Montserrat",
+    fontFamily: FONT.semiBold,
   },
   subheading: {
     fontSize: 13,
     color: "#666",
     marginTop: 8,
     textAlign: "center",
-    fontFamily: "Montserrat",
-    fontWeight: "600",
+    fontFamily: FONT.semiBold,
   },
   primaryButton: {
     marginTop: 20,
@@ -131,7 +129,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#5278CD",
   },
   primaryContent: { height: 48 },
-  primaryLabel: { fontSize: 16, fontWeight: "600" },
+  primaryLabel: { fontSize: 16 },
   secondaryButton: {
     marginTop: 14,
     width: "100%",
@@ -144,5 +142,5 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   secondaryContent: { height: 48 },
-  secondaryLabel: { fontSize: 16, fontWeight: "600", color: "#333" },
+  secondaryLabel: { fontSize: 16, color: "#333" },
 });

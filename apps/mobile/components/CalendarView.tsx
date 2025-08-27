@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { Card, List, Text } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { FONT } from "@/styles/theme";
 
 type EventItem = {
   id: string;
@@ -217,7 +218,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 20,
-    fontWeight: "700",
+    fontFamily: FONT.bold,
     marginBottom: 8,
     color: "#494949ff",
   },
@@ -228,7 +229,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   navBtn: { padding: 6 },
-  monthLabel: { fontSize: 18, fontWeight: "700", textTransform: "capitalize" },
+  monthLabel: {
+    fontSize: 18,
+    fontFamily: FONT.bold,
+    textTransform: "capitalize",
+  },
   weekDays: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -239,7 +244,7 @@ const styles = StyleSheet.create({
     width: 36,
     textAlign: "center",
     color: "#666",
-    fontWeight: "600",
+    fontFamily: FONT.semiBold,
   },
   calendarGrid: {},
   weekRow: {
@@ -261,7 +266,7 @@ const styles = StyleSheet.create({
   },
   dayNumber: { color: "#333" },
   dayCellSelected: { backgroundColor: "#7fb3d3" },
-  dayNumberSelected: { color: "#fff", fontWeight: "700" },
+  dayNumberSelected: { color: "#fff", fontFamily: FONT.bold },
   dayCellToday: { borderWidth: 1, borderColor: "#7fb3d3" },
   dot: {
     width: 6,
@@ -274,7 +279,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: "700",
+    fontFamily: FONT.bold,
     marginBottom: 6,
     color: "#444",
   },
@@ -284,7 +289,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  eventTimeText: { fontWeight: "700", color: "#333" },
+  eventTimeText: { fontFamily: FONT.bold, color: "#333" },
 });
 
 export default CalendarView;
