@@ -6,7 +6,6 @@ on:
 
 jobs:
   deploy:
-    name: Setup Node.js and install dependencies
     runs-on: ubuntu-latest
 
     steps:
