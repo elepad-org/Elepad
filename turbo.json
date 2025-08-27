@@ -31,6 +31,10 @@
     "lint": {},
     "clean": {
       "cache": false
+    },
+    "gen:types": {},
+    "prepare": {
+      "dependsOn": ["^prepare"]
     }
   }
 }

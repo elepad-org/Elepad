@@ -10,12 +10,15 @@
   },
   "scripts": {
     "start": "node dist/src/server.js",
-    "build": "tsc && tsx src/emit-openapi.ts",
+    "build": "tsc && npm run gen:openapi",
     "build:edge": "node esbuild.edge.js",
     "dev": "tsx watch src/server.ts",
     "lint": "eslint . && tsc --noEmit",
     "clean": "rm -rf dist openapi.json",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "gen:openapi": "tsx src/emit-openapi.ts",
+    "gen:types": "supabase gen types typescript --project-id sdnmoweppzszpxyggdyg > src/supabase-types.ts",
+    "prepare": "npm run gen:openapi"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.7",

@@ -18,7 +18,7 @@ export default function NewAccount() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { displayName, passwordHash: password } },
+      options: { data: { displayName } },
     });
     if (error) {
       console.log(error);
@@ -85,7 +85,7 @@ export default function NewAccount() {
         />
         <TextInput
           mode="outlined"
-          placeholder="AAA123"
+          placeholder="Código del grupo familiar"
           value={familyCode}
           onChangeText={setFamilyCode}
           keyboardType="email-address"
@@ -134,8 +134,12 @@ export default function NewAccount() {
           <View style={styles.line} />
         </View>
 
-        <Link href={{ pathname: "/" }} accessibilityRole="button">
-          <Text style={styles.inlineBack}>Volver</Text>
+        <Link
+          href={{ pathname: "/" }}
+          accessibilityRole="button"
+          style={styles.inlineBack}
+        >
+          Volver
         </Link>
       </View>
     </Surface>
@@ -228,7 +232,6 @@ const styles = StyleSheet.create({
   line: { flex: 1, height: 1, backgroundColor: "#E6E3E0" },
   orText: { marginHorizontal: 12, color: "#999" },
   inlineBack: {
-    marginTop: 22,
     textAlign: "center",
     fontFamily: FONT.regular,
     fontSize: 14,

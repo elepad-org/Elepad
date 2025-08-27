@@ -117,8 +117,12 @@ export default function LogIn() {
           <Text style={styles.googleText}>Continuar con Google</Text>
         </TouchableOpacity>
 
-        <Link href={{ pathname: "/" }} accessibilityRole="button">
-          <Text style={styles.inlineBack}>Volver</Text>
+        <Link
+          href={{ pathname: "/" }}
+          accessibilityRole="button"
+          style={styles.inlineBack}
+        >
+          Volver
         </Link>
       </View>
     </Surface>
@@ -238,7 +242,6 @@ const styles = StyleSheet.create({
   gIconImage: { width: 18, height: 18 },
   googleText: { fontSize: 15, fontFamily: FONT.semiBold },
   inlineBack: {
-    marginTop: 22,
     textAlign: "center",
     fontFamily: FONT.regular,
     fontSize: 14,

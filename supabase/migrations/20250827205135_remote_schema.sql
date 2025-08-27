@@ -1,5 +1,9 @@
 drop extension if exists "pg_net";
 
+alter table "public"."familyGroups" add column "code" text;
+
+alter table "public"."users" alter column "email" set not null;
+
 alter table "public"."users" alter column "id" drop default;
 
 alter table "public"."users" add constraint "users_id_fkey" FOREIGN KEY (id) REFERENCES auth.users(id) not valid;
@@ -14,8 +18,8 @@ CREATE OR REPLACE FUNCTION public.handle_new_user()
  SECURITY DEFINER
 AS $function$
 BEGIN
-  INSERT INTO public.users (id, email, "passwordHash", "displayName")
-  VALUES (NEW.id, NEW.email, NEW.raw_user_meta_data->>'passwordHash', NEW.raw_user_meta_data->>'displayName')
+  INSERT INTO public.users (id, email, "displayName")
+  VALUES (NEW.id, NEW.email, NEW.raw_user_meta_data->>'displayName')
   ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
 END;

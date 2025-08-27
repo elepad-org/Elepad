@@ -1,3 +1,4 @@
+import { Database } from "@/supabase-types";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 const AVATAR_BUCKET = "profile-avatar";
@@ -11,7 +12,7 @@ function urlify(name: string) {
  * Uploads a profile avatar to Supabase Storage and returns the public URL.
  */
 export async function uploadUserAvatarImage(
-  supabase: SupabaseClient,
+  supabase: SupabaseClient<Database>,
   userId: string,
   file: File,
 ): Promise<string> {

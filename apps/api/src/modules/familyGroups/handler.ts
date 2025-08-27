@@ -1,5 +1,5 @@
-import { OpenAPIHono, z } from "@hono/zod-openapi";
-import { AddUserWithCodeSchema, FamilyGroupSchema, NewFamilyGroupSchema } from "./schema";
+import { OpenAPIHono } from "@hono/zod-openapi";
+import { AddUserWithCodeSchema, NewFamilyGroupSchema } from "./schema";
 import { FamilyGroupService } from "./service";
 import { ApiException, openApiErrorResponse } from "@/utils/api-error";
 
@@ -49,7 +49,7 @@ familyGroupApp.openapi(
     }
 
     return c.json(created, 201);
-  }
+  },
 );
 
 familyGroupApp.openapi(
@@ -78,11 +78,12 @@ familyGroupApp.openapi(
   },
   async (c) => {
     const body = c.req.valid("json");
-    const linked = await c.var.familyGroupService.addUserToFamilyGroupWithCode(body);
+    const linked =
+      await c.var.familyGroupService.addUserToFamilyGroupWithCode(body);
     if (!linked) {
       throw new ApiException(500, "Internal Server Error");
     }
 
     return c.json(linked, 200);
-  }
+  },
 );
