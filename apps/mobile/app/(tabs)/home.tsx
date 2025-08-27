@@ -13,6 +13,7 @@ import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import ActivitiesList from "../../components/ActivitiesList";
 import CalendarView from "@/components/CalendarView";
+import { FONT } from "@/styles/theme";
 
 const colors = {
   primary: "#7fb3d3",
@@ -126,7 +127,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 28,
-    fontFamily: "Montserrat_700",
+    fontFamily: FONT.bold,
     color: colors.white,
   },
   contentContainer: {

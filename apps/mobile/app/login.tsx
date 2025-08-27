@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, TextInput, Button } from "react-native-paper";
 import logoBlue from "@/assets/images/bbb.png";
+import { FONT } from "@/styles/theme";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -136,14 +137,14 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 18,
     marginTop: 6,
-    fontFamily: "Montserrat_600",
+    fontFamily: FONT.semiBold,
   },
   subheading: {
     fontSize: 13,
     color: "#666",
     marginTop: 8,
     textAlign: "center",
-    fontFamily: "Montserrat_600",
+    fontFamily: FONT.semiBold,
   },
   input: {
     width: "100%",
@@ -159,7 +160,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#5278CD",
   },
   continueContent: { height: 48 },
-  continueLabel: { fontSize: 16, fontFamily: "Montserrat_600" },
+  continueLabel: { fontSize: 16, fontFamily: FONT.semiBold },
   orRow: {
     width: "100%",
     flexDirection: "row",
@@ -195,16 +196,16 @@ const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: "#E6E3E0",
   },
-  gIcon: { color: "#DB4437", fontFamily: "Montserrat_700" },
+  gIcon: { color: "#DB4437", fontFamily: FONT.bold },
   googleText: {
     fontSize: 15,
     color: "#333",
-    fontFamily: "Montserrat_600",
+    fontFamily: FONT.semiBold,
   },
   footer: {
     marginTop: 18,
     color: "#B2AFAE",
     fontSize: 13,
-    fontFamily: "Montserrat_600",
+    fontFamily: FONT.semiBold,
   },
 });

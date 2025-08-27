@@ -6,6 +6,7 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { Button, Text, ActivityIndicator } from "react-native-paper";
 import logoBlue from "@/assets/images/bbb.png";
 import { useState } from "react";
+import { FONT } from "@/styles/theme";
 
 export default function IndexRedirect() {
   const { session, loading } = useAuth();
@@ -98,7 +99,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 44,
     letterSpacing: 8,
-    fontFamily: "Montserrat_400",
+    fontFamily: FONT.medium,
   },
   separatorWrap: { width: "100%", alignItems: "center", marginTop: 6 },
   separator: { width: "60%", height: 1, backgroundColor: "#111", opacity: 0.9 },
@@ -112,14 +113,14 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 18,
     marginTop: 6,
-    fontFamily: "Montserrat_600",
+    fontFamily: FONT.semiBold,
   },
   subheading: {
     fontSize: 13,
     color: "#666",
     marginTop: 8,
     textAlign: "center",
-    fontFamily: "Montserrat_600",
+    fontFamily: FONT.semiBold,
   },
   primaryButton: {
     marginTop: 20,

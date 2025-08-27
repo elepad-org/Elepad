@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { Text, TextInput, Button } from "react-native-paper";
 import { makeRedirectUri } from "expo-auth-session";
+import { FONT } from "@/styles/theme";
 
 type Props = { onBack: () => void };
 
@@ -135,7 +136,7 @@ const styles = StyleSheet.create({
     color: "#666",
     marginBottom: 12,
     textAlign: "center",
-    fontFamily: "Montserrat_400",
+    fontFamily: FONT.regular,
     fontWeight: "600",
   },
   input: {
@@ -191,7 +192,7 @@ const styles = StyleSheet.create({
   googleText: {
     fontSize: 15,
     color: "#333",
-    fontFamily: "Montserrat_400",
+    fontFamily: FONT.regular,
     fontWeight: "600",
   },
   backTouch: { marginTop: 12 },

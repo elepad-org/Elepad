@@ -6,6 +6,7 @@ import { Animated, ImageBackground, StyleSheet, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator } from "react-native-paper";
 import bh from "@/assets/images/bh5.png";
+import { FONT } from "@/styles/theme";
 
 export default function LoginScreen() {
   const { session, loading } = useAuth();
@@ -44,11 +45,11 @@ const styles = StyleSheet.create({
     marginHorizontal: "15%",
     marginTop: 50,
   },
-  title: { color: "white", textAlign: "center", fontFamily: "Montserrat_700" },
+  title: { color: "white", textAlign: "center", fontFamily: FONT.bold },
   registerRow: { flexDirection: "row", justifyContent: "center" },
-  buttonNew: { fontFamily: "Montserrat_600", textAlign: "center", lineHeight: 60 },
+  buttonNew: { fontFamily: FONT.semiBold, textAlign: "center", lineHeight: 60 },
   buttonAqui: {
-    fontFamily: "Montserrat_700",
+    fontFamily: FONT.bold,
     textAlign: "center",
     lineHeight: 60,
     textDecorationLine: "underline",
@@ -56,7 +57,7 @@ const styles = StyleSheet.create({
   inlineBack: {
     marginTop: 22,
     textAlign: "center",
-    fontFamily: "Montserrat_400",
+    fontFamily: FONT.regular,
     fontSize: 14,
     color: "#666",
   },

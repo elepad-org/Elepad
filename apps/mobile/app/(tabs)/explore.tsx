@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Text } from "react-native-paper";
+import { FONT } from "@/styles/theme";
 
 export default function ExploreScreen() {
   return (
@@ -18,6 +19,6 @@ export default function ExploreScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 24 },
-  title: { fontFamily: "Montserrat_700", textAlign: "center", marginBottom: 12 },
+  title: { fontFamily: FONT.bold, textAlign: "center", marginBottom: 12 },
   paragraph: { textAlign: "center", marginTop: 4 },
 });

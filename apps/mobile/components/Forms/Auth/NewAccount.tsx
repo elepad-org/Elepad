@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { FONT } from "@/styles/theme";
 import { Link } from "expo-router";
 import { useRef, useState } from "react";
 import { View, StyleSheet, Animated } from "react-native";
@@ -115,7 +116,7 @@ const styles = StyleSheet.create({
   },
   title: {
     marginBottom: 20,
-    fontFamily: "Montserrat_600",
+    fontFamily: FONT.semiBold,
   },
   button: {
     marginTop: 12,
@@ -129,7 +130,7 @@ const styles = StyleSheet.create({
   },
   backLabel: {
     fontSize: 16,
-    fontFamily: "Montserrat_600",
+    fontFamily: FONT.semiBold,
   },
   safe: { flex: 1, backgroundColor: "#FFF9F1" },
   container: { flex: 1, alignItems: "center" },
@@ -139,7 +140,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 44,
     letterSpacing: 8,
-    fontFamily: "Montserrat_400",
+    fontFamily: FONT.regular,
   },
   separatorWrap: { width: "100%", alignItems: "center", marginTop: 6 },
   separator: { width: "60%", height: 1, backgroundColor: "#111", opacity: 0.9 },
@@ -153,7 +154,7 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 22,
     marginTop: 6,
-    fontFamily: "Montserrat_600",
+    fontFamily: FONT.semiBold,
     textAlign: "center",
   },
   subheading: {
@@ -161,7 +162,7 @@ const styles = StyleSheet.create({
     color: "#666",
     marginTop: 8,
     textAlign: "center",
-    fontFamily: "Montserrat_600",
+    fontFamily: FONT.semiBold,
   },
   input: {
     width: "100%",
@@ -178,7 +179,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#5278CD",
   },
   continueContent: { height: 48 },
-  continueLabel: { fontSize: 16, fontFamily: "Montserrat_600" },
+  continueLabel: { fontSize: 16, fontFamily: FONT.semiBold },
   orRow: {
     width: "100%",
     flexDirection: "row",
@@ -191,7 +192,7 @@ const styles = StyleSheet.create({
   inlineBack: {
     marginTop: 22,
     textAlign: "center",
-    fontFamily: "Montserrat_400",
+    fontFamily: FONT.regular,
     fontSize: 14,
     color: "#666",
   },
