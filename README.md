@@ -39,11 +39,11 @@ La planificación del proyecto se puede ver en varias partes:
   - [Canva](https://www.canva.com/design/DAGtndSDPec/fhyqoHBOG9PvgYRHk9xqmA/edit) (User Story Map).
   - [Figma](https://www.figma.com/design/rQOZ89Fed9UmfvBsExJyAo/Elepad-Mobile-App) (mockups de las vistas principales).
 
-En cada release se subirán sus historias de usuario al [listado de Issues](https://github.com/elepad-org/Elepad/issues?q=is%3Aissue) de este repositorio.
+En cada release se subirán las historias de usuario de esa release al [listado de Issues](https://github.com/elepad-org/Elepad/issues?q=is%3Aissue) de este repositorio.
 
 ## 👨‍💻 Desarrollo
 
-Se aplicarán **técnicas ágiles** y **prácticas DevOps** para trabajar de manera productiva y asincrónica. Los cinco miembros del equipo se mantendrán en comunicación constante durante el el desarrollo de Elepad.
+Se aplicarán **técnicas ágiles** y **prácticas DevOps** para trabajar de manera productiva y asíncrona. Los cinco miembros del equipo se mantendrán en comunicación constante durante el desarrollo de Elepad.
 
 ### 📂 Estructura del Repositorio
 
@@ -54,11 +54,10 @@ Se aplicarán **técnicas ágiles** y **prácticas DevOps** para trabajar de man
 ├── packages        # Paquetes comunes a las aplicaciones
 │   ├── api-client    # Hooks de Tanstack Query generados con orval
 │   └── assets        # Imágenes de la marca Elepad
-└── supabase        # Gestionar Supabase en entorno local
-    └── migrations
+└── supabase        # Para gestionar Supabase en entorno local
 ```
 
-Utilizamos una estructura de monorepo con [Turborepo](https://turborepo.com/docs) como sistema de build. Esto permite ejecutar procesos en varias subcarpetas a la vez. Con un solo comando `turbo run dev` se levanta el servidor back end y la app mobile a la vez.
+Utilizamos una estructura de monorepo con [Turborepo](https://turborepo.com/docs) como sistema de build. Esto permite ejecutar procesos en varias subcarpetas a la vez. Con un solo comando `turbo run dev` se levanta el servidor back end y la app mobile.
 
 El código de `packages/api-client` es autogenerado por orval, una herramienta que lee la descripción OpenAPI (en formato JSON) de nuestra API para generar un cliente con Tanstack Query.
 
@@ -77,6 +76,7 @@ Referencia: [https://www.conventionalcommits.org/](https://www.conventionalcommi
 
 Siempre que sea conveniente se utilizará la siguiente **estructura de ramas**:
 
+- `prod`: para disparar despliegues.
 - `main`: la rama principal a donde apuntan las PRs. Debe tener código funcional ya que será desplegado.
 - `feature/`: para nuevas funcionalidades y cambios (por ejemplo, `feature/add-login`).
 - `fix/`: para correcciones de errores (por ejemplo, `fix/fix-header-bug`).
@@ -84,7 +84,7 @@ Siempre que sea conveniente se utilizará la siguiente **estructura de ramas**:
 
 Referencia: [https://conventional-branch.github.io/](https://conventional-branch.github.io/).
 
-Las ramas se unen a main mediante Pull Requests. Es recomendable tildar la opción "Squash commits" al completar una PR para que el historial de commits sea más legible.
+Las ramas se unen a main mediante Pull Requests. Es recomendable tildar la opción **"Squash commits"** al completar una PR para que el historial de commits sea más legible.
 
 Si en el código hay deuda técnica o cambios pendientes, se lo debe señalar con un comentario que diga `// TODO: ...` para que luego se lo pueda encontrar fácilmente. Ej: `// TODO: optimize this method's time complexity to O(n)`.
 
@@ -96,7 +96,7 @@ Si en el código hay deuda técnica o cambios pendientes, se lo debe señalar co
 
 ## 🚀 Despliegue
 
-A continuación se muestra cómo configurar el entorno de desarrollo,
+A continuación se muestra cómo configurar el entorno de desarrollo y cómo desplegar la app.
 
 ### 🏗️ Entorno de Desarrollo
 
@@ -105,7 +105,16 @@ Pasos manuales previos:
 - Configurar un OAuth Client en Google Cloud para referenciar el client ID en la variable de entorno SUPABASE_AUTH_GOOGLE_CLIENT_ID.
 - Crear un proyecto en Supabase para vincularlo desde la `supabase` CLI.
 
-1. Definir archivos `.env` con variables de entorno según los siguientes archivos de ejemplo:
+Ahora:
+
+1. Clonar el repositorio:
+
+   ```bash
+   git clone https://github.com/elepad-org/Elepad.git
+   cd Elepad
+   ```
+
+2. Definir archivos `.env` con variables de entorno según los siguientes archivos de ejemplo:
 
    ```bash
    # apps/api/.env.example
@@ -113,7 +122,7 @@ Pasos manuales previos:
    # supabase/.env.example
    ```
 
-2. Instalar dependencias y configurar Supabase:
+3. Instalar dependencias y configurar Supabase:
 
    ```bash
    npm install
@@ -121,16 +130,16 @@ Pasos manuales previos:
    npx supabase link --project-ref sdnmoweppzszpxyggdyg
    ```
 
-   Se usa un [proyecto de desarrollo](https://supabase.com/dashboard/project/sdnmoweppzszpxyggdyg) de Supabase. Si se prefiere tener un stack local propio con Docker, se puede ejecutar `npx supabase start` para levantarlo y `npx supabase db pull` para actualizar la base de datos local.
+   Se usa un [proyecto de desarrollo](https://supabase.com/dashboard/project/sdnmoweppzszpxyggdyg) de Supabase. Si se prefiere tener un stack local con Docker, se puede ejecutar `npx supabase start` para levantarlo y `npx supabase db pull` para actualizar la base de datos local.
    Nota: para el despliegue se utiliza otro [proyecto de producción](https://supabase.com/dashboard/org/oabegetinldkjgxchssx).
 
-3. Levantar la app en modo desarrollo:
+4. Levantar la app en modo desarrollo:
 
    ```bash
    npm run dev
    ```
 
-4. Compilar y ejecutar la versión buildeada:
+5. Compilar y ejecutar la versión construida:
 
    ```bash
    npm run build
@@ -141,20 +150,20 @@ Si se desea trabajar desde el **devcontainer** configurado, se debe agregar `sud
 
 ### 📦 Despliegue Manual
 
-Para desplegar la aplicación a la nube por primera vez es necesario realizar algunos pasos a mano. Se asume que:
+Para desplegar la aplicación a la nube por primera vez es necesario realizar algunos pasos a mano. Se asume que ya se tiene:
 
-- Ya se tiene un entorno de desarrollo configurado.
-- Ya está creado el OAuth Client en Google Cloud.
-- Ya está creado el proyecto en Supabase.
+- Un entorno de desarrollo configurado.
+- Un OAuth Client en Google Cloud.
+- Un proyecto en Supabase.
 
 Es necesario:
 
-1. Crear una cuenta en Cloudflare para poder desplegar la API en un [Cloudflare Worker](https://dash.cloudflare.com/6eee324495e2fe7945478ecec8158c8e/workers/services/view/api/production/metrics). Luego, ejecutar:
+1. Crear una cuenta en Cloudflare para poder desplegar la API como un [Cloudflare Worker](https://dash.cloudflare.com/6eee324495e2fe7945478ecec8158c8e/workers/services/view/api/production/metrics). Luego, ejecutar:
 
    ```bash
-   npx -w apps/api wrangler login       # Iniciar sesión en la CLI
-   npx -w apps/api turbo run build:edge # Buildear la app
-   npx -w apps/api wrangler deploy      # Desplegar a CF Workers
+   npx -w apps/api wrangler login
+   npx -w apps/api turbo run build:edge
+   npx -w apps/api wrangler deploy
    npx -w apps/api wrangler secret put SUPABASE_URL
    npx -w apps/api wrangler secret put SUPABASE_SERVICE_ROLE_KEY
    ```

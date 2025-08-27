@@ -1,6 +1,6 @@
 # dependencies and build outputs
-node_modules/
-dist/
+**/node_modules/
+**/dist/
 apps/api/openapi.json
 apps/api/cloudflare-worker.js
 
