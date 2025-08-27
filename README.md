@@ -169,10 +169,10 @@ Es necesario:
 
 ### 🤖 Despliegue con GitHub Actions
 
-Una vez que las cuentas y proyectos de cada nube están creados y configurados, se utiliza GitHub Actions como pipeline de CI/CD para despliegues automáticos. Workflows actuales:
+Una vez que las cuentas y proyectos de cada nube están creados y configurados, se utiliza GitHub Actions como pipeline de CI/CD para despliegues automáticos. El workflow `deploy.yml` despliega:
 
-- `deploy-api.yml`: despliega la API Hono a Cloudflare Workers.
-- `deploy-mobile-web.yml`: despliega la app mobile a EAS Hosting (web).
+- La API Hono a Cloudflare Workers ([https://api.elepad.workers.dev/](https://api.elepad.workers.dev/)).
+- La app mobile a EAS Hosting ([https://ele.expo.app/](https://ele.expo.app/)).
 
 Desde GitHub Actions se actualizan todas las variables de entorno de cada nube. Es necesario definir en este repositorio los siguientes secrets:
 
