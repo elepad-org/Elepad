@@ -59,7 +59,6 @@ export default function NewAccount() {
 
         <TextInput
           mode="outlined"
-          label={"Nombre de Usuario"}
           placeholder="Nombre de usuario"
           value={displayName}
           onChangeText={setDisplayName}
@@ -73,7 +72,6 @@ export default function NewAccount() {
         />
         <TextInput
           mode="outlined"
-          label={"Correo"}
           placeholder="Correo "
           value={email}
           onChangeText={setEmail}
@@ -87,7 +85,6 @@ export default function NewAccount() {
         />
         <TextInput
           mode="outlined"
-          label={"Codigo de Grupo Familiar"}
           placeholder="AAA123"
           value={familyCode}
           onChangeText={setFamilyCode}
@@ -101,7 +98,6 @@ export default function NewAccount() {
         />
         <TextInput
           mode="outlined"
-          label={"Contraseña"}
           placeholder="Contraseña"
           value={password}
           onChangeText={setPassword}
