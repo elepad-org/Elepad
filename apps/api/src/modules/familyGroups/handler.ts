@@ -1,5 +1,5 @@
 import { OpenAPIHono, z } from "@hono/zod-openapi";
-import { FamilyGroupSchema, NewFamilyGroupSchema } from "./schema";
+import { AddUserWithCodeSchema, FamilyGroupSchema, NewFamilyGroupSchema } from "./schema";
 import { FamilyGroupService } from "./service";
 import { ApiException, openApiErrorResponse } from "@/utils/api-error";
 
@@ -49,5 +49,40 @@ familyGroupApp.openapi(
     }
 
     return c.json(created, 201);
+  }
+);
+
+familyGroupApp.openapi(
+  {
+    method: "post",
+    path: "/familyGroup/link",
+    tags: ["familyGroups"],
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: AddUserWithCodeSchema,
+          },
+        },
+        required: true,
+      },
+    },
+    responses: {
+      200: {
+        description: "User added to group successfully",
+      },
+      400: openApiErrorResponse("Invalid request"),
+      404: openApiErrorResponse("Group or User not found"),
+      500: openApiErrorResponse("Internal Server Error"),
+    },
+  },
+  async (c) => {
+    const body = c.req.valid("json");
+    const linked = await c.var.familyGroupService.addUserToFamilyGroupWithCode(body);
+    if (!linked) {
+      throw new ApiException(500, "Internal Server Error");
+    }
+
+    return c.json(linked, 200);
   }
 );

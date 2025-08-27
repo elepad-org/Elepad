@@ -28,3 +28,12 @@ export const UpdateFamilyGroupSchema = z
   .openapi("UpdateFamilyGroup");
 
 export type UpdateUser = z.infer<typeof UpdateFamilyGroupSchema>;
+
+export const AddUserWithCodeSchema = z
+  .object({
+    userId: z.uuid(),
+    groupCode: z.string().min(1),
+  })
+  .openapi("AddUserWithCode");
+
+export type AddUserWithCode = z.infer<typeof AddUserWithCodeSchema>;
