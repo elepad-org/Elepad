@@ -34,7 +34,7 @@ export type UpdateUser = z.infer<typeof UpdateFamilyGroupSchema>;
 export const AddUserWithCodeSchema = z
   .object({
     userId: z.uuid(),
-    groupCode: z.string().min(1),
+    invitationCode: z.string().min(1),
   })
   .openapi("AddUserWithCode");
 

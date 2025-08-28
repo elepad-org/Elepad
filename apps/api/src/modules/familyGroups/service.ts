@@ -79,7 +79,7 @@ export class FamilyGroupService {
     const { data, error } = await this.supabase
       .from("familyGroups")
       .select("id, expiresAt")
-      .eq("code", group.groupCode)
+      .eq("code", group.invitationCode)
       .single();
 
     if (error) {
@@ -93,9 +93,8 @@ export class FamilyGroupService {
     }
 
     const dateExpiresAt = new Date(data.expiresAt);
-    const adjustedDate = new Date(dateExpiresAt.getTime() - 3 * 60 * 60 * 1000); // Adjusting the timezone
 
-    if (adjustedDate < dateNow) {
+    if (dateExpiresAt < dateNow) {
       console.error("The invitation code has expired");
       throw new ApiException(400, "The invitation code has expired");
     }
