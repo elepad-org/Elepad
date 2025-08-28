@@ -39,7 +39,7 @@ export default function NewAccount() {
       }
     } else {
       const res = await postFamilyGroupLink({
-        groupCode: familyCode,
+        invitationCode: familyCode,
         userId: data.session.user.id,
       });
       if (!res) {

@@ -6,15 +6,14 @@ import {
   ScrollView,
   View,
 } from "react-native";
-import { Appbar, Button, Portal, Snackbar } from "react-native-paper";
-import { useRouter } from "expo-router";
+import { Appbar, Button, Divider, Portal, Snackbar } from "react-native-paper";
+import { Link, useRouter } from "expo-router";
 import {
   getFamilyGroupIdGroupInvite,
   getFamilyGroupIdGroupInviteResponse,
-  getPostFamilyGroupLinkUrl,
-  useGetFamilyGroupIdGroupInvite,
 } from "@elepad/api-client";
 import { useAuth } from "@/hooks/useAuth";
+import { FONT } from "@/styles/theme";
 
 const colors = {
   primary: "#7fb3d3",
@@ -63,6 +62,14 @@ export default function FamilyGroup() {
           >
             Crear enlace de invitación
           </Button>
+          <Divider style={{ marginVertical: 20 }} />
+          <Link
+            href={{ pathname: "/" }}
+            accessibilityRole="button"
+            style={styles.inlineBack}
+          >
+            Volver
+          </Link>
         </View>
         <Portal>
           <Snackbar
@@ -90,34 +97,6 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     justifyContent: "flex-start",
   },
-  profileHeader: {
-    alignItems: "center",
-    marginTop: 8,
-    marginBottom: 8,
-  },
-  avatarWrapper: {
-    position: "relative",
-    marginBottom: 12,
-  },
-  avatarBadge: {
-    position: "absolute",
-    right: -2,
-    bottom: -2,
-    borderWidth: 2,
-    borderColor: "#fff",
-  },
-  name: {
-    textAlign: "center",
-  },
-  subtitle: {
-    color: "#667085",
-    textAlign: "center",
-  },
-  menuCard: {
-    borderRadius: 16,
-    overflow: "hidden",
-    marginTop: 8,
-  },
   footer: {
     marginTop: 16,
   },
@@ -130,18 +109,10 @@ const styles = StyleSheet.create({
   successSnackbar: {
     backgroundColor: "green",
   },
-  photoPreviewContainer: {
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  photoActionsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 8,
-    marginBottom: 8,
-  },
-  helperText: {
-    marginTop: 4,
-    color: "#6b7280",
+  inlineBack: {
+    textAlign: "center",
+    fontFamily: FONT.regular,
+    fontSize: 14,
+    color: "#666",
   },
 });
