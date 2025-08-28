@@ -90,7 +90,7 @@ familyGroupApp.openapi(
 
 familyGroupApp.openapi(
   {
-    method: "post",
+    method: "get",
     path: "/familyGroup/{idGroup}/invite",
     tags: ["familyGroups"],
     request: {
