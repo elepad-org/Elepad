@@ -19,6 +19,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
 import { EditNameDialog, UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import ProfileHeader from "@/components/ProfileHeader";
+import { useRouter } from "expo-router";
 
 const colors = {
   primary: "#7fb3d3",
@@ -27,6 +28,8 @@ const colors = {
 };
 
 export default function PerfilScreen() {
+  const router = useRouter();
+
   const { userElepad, refreshUserElepad } = useAuth();
   const displayName = userElepad?.displayName?.trim() || "Usuario";
   const email = userElepad?.email || "-";
@@ -88,7 +91,9 @@ export default function PerfilScreen() {
               title="Grupo familiar"
               left={(props) => <List.Icon {...props} icon="account-group" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
-              onPress={() => {}}
+              onPress={() => {
+                router.navigate("/familyGroup");
+              }}
             />
             <Divider />
             <List.Item

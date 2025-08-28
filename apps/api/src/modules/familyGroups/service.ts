@@ -68,9 +68,7 @@ export class FamilyGroupService {
       throw new ApiException(500, "Error finding the family group");
     }
 
-    const link = `http://elepad.com/invite/${code}`; // TODO: Change to the real URL
-
-    return link;
+    return code;
   }
 
   async addUserToFamilyGroupWithCode(group: AddUserWithCode) {
