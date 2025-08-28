@@ -6,6 +6,8 @@ export const FamilyGroupSchema = z
     name: z.string().min(1),
     ownerUserId: z.uuid(),
     createdAt: z.date(), // TODO: Check how the date is represented
+    code: z.string().optional(),
+    expiresAt: z.date().optional(),
   })
   .openapi("FamilyGroup");
 
