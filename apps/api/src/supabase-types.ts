@@ -146,6 +146,7 @@ export type Database = {
         Row: {
           code: string | null;
           createdAt: string;
+          expiresAt: string | null;
           id: string;
           name: string;
           ownerUserId: string;
@@ -153,6 +154,7 @@ export type Database = {
         Insert: {
           code?: string | null;
           createdAt?: string;
+          expiresAt?: string | null;
           id?: string;
           name: string;
           ownerUserId: string;
@@ -160,6 +162,7 @@ export type Database = {
         Update: {
           code?: string | null;
           createdAt?: string;
+          expiresAt?: string | null;
           id?: string;
           name?: string;
           ownerUserId?: string;

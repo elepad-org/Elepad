@@ -90,7 +90,7 @@ export class FamilyGroupService {
       throw new ApiException(404, "Family Group not found");
     }
 
-    const dateExpiresAt = new Date(data.expiresAt);
+    const dateExpiresAt = new Date(data.expiresAt ?? dateNow);
 
     if (dateExpiresAt < dateNow) {
       console.error("The invitation code has expired");
