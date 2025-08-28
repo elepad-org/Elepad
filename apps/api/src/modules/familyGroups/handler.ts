@@ -1,4 +1,4 @@
-import { OpenAPIHono } from "@hono/zod-openapi";
+import { OpenAPIHono, z } from "@hono/zod-openapi";
 import { AddUserWithCodeSchema, NewFamilyGroupSchema } from "./schema";
 import { FamilyGroupService } from "./service";
 import { ApiException, openApiErrorResponse } from "@/utils/api-error";
@@ -85,5 +85,34 @@ familyGroupApp.openapi(
     }
 
     return c.json(linked, 200);
+  },
+);
+
+familyGroupApp.openapi(
+  {
+    method: "get",
+    path: "/familyGroup/{idGroup}/invite",
+    tags: ["familyGroups"],
+    request: {
+      params: z.object({ idGroup: z.uuid() }),
+    },
+    responses: {
+      200: {
+        description: "Invitation code created successfully",
+      },
+      400: openApiErrorResponse("Invalid request"),
+      404: openApiErrorResponse("Group not found"),
+      500: openApiErrorResponse("Internal Server Error"),
+    },
+  },
+  async (c) => {
+    const { idGroup } = c.req.valid("param");
+    const invitationCode =
+      await c.var.familyGroupService.createInvitation(idGroup);
+    if (!invitationCode) {
+      throw new ApiException(500, "Internal Server Error");
+    }
+
+    return c.json(invitationCode, 200);
   },
 );

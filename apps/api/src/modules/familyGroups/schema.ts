@@ -6,6 +6,8 @@ export const FamilyGroupSchema = z
     name: z.string().min(1),
     ownerUserId: z.uuid(),
     createdAt: z.date(), // TODO: Check how the date is represented
+    code: z.string().optional(),
+    expiresAt: z.date().optional(),
   })
   .openapi("FamilyGroup");
 
@@ -32,7 +34,7 @@ export type UpdateUser = z.infer<typeof UpdateFamilyGroupSchema>;
 export const AddUserWithCodeSchema = z
   .object({
     userId: z.uuid(),
-    groupCode: z.string().min(1),
+    invitationCode: z.string().min(1),
   })
   .openapi("AddUserWithCode");
 
