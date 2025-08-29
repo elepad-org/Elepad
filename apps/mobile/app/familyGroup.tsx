@@ -6,8 +6,15 @@ import {
   ScrollView,
   View,
 } from "react-native";
-import { Appbar, Button, Divider, Portal, Snackbar } from "react-native-paper";
-import { Link, useRouter } from "expo-router";
+import {
+  Appbar,
+  Button,
+  Divider,
+  Portal,
+  Snackbar,
+  Text,
+} from "react-native-paper";
+import { Link } from "expo-router";
 import {
   getFamilyGroupIdGroupInvite,
   getFamilyGroupIdGroupInviteResponse,
@@ -22,9 +29,7 @@ const colors = {
 };
 
 export default function FamilyGroup() {
-  const router = useRouter();
-
-  const { userElepad, refreshUserElepad } = useAuth();
+  const { userElepad } = useAuth();
   const [invitationCode, setInvitationCode] =
     useState<getFamilyGroupIdGroupInviteResponse>();
 
@@ -71,6 +76,12 @@ export default function FamilyGroup() {
             Volver
           </Link>
         </View>
+        {invitationCode && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Código de invitación</Text>
+            <Text style={styles.cardContent}>{String(invitationCode)}</Text>
+          </View>
+        )}
         <Portal>
           <Snackbar
             visible={snackbarVisible}
@@ -114,5 +125,22 @@ const styles = StyleSheet.create({
     fontFamily: FONT.regular,
     fontSize: 14,
     color: "#666",
+  },
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 16,
+    marginVertical: 12,
+    elevation: 2,
+  },
+  cardTitle: {
+    fontFamily: FONT.bold,
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  cardContent: {
+    fontFamily: FONT.regular,
+    fontSize: 14,
+    color: "#333",
   },
 });
