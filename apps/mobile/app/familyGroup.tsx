@@ -9,8 +9,8 @@ import {
   Image,
   ActivityIndicator,
 } from "react-native";
-import { Appbar, Button, Divider, Portal, Snackbar } from "react-native-paper";
-import { Link, useRouter } from "expo-router";
+import { Appbar, Button, Portal, Snackbar } from "react-native-paper";
+import { Link } from "expo-router";
 import {
   getFamilyGroupIdGroupInvite,
   getFamilyGroupIdGroupInviteResponse,
@@ -27,9 +27,7 @@ const colors = {
 };
 
 export default function FamilyGroup() {
-  const router = useRouter();
-
-  const { userElepad, refreshUserElepad } = useAuth();
+  const { userElepad } = useAuth();
   const [invitationCode, setInvitationCode] =
     useState<getFamilyGroupIdGroupInviteResponse>();
 
@@ -83,7 +81,7 @@ export default function FamilyGroup() {
           >
             Crear enlace de invitación
           </Button>
-          //Mostramos los miembros del grupo Familiar
+          {/* Mostramos los miembros del grupo Familiar */}
           <View style={styles.membersSection}>
             <Text style={styles.membersTitle}>Miembros del grupo</Text>
             {membersLoading ? (
