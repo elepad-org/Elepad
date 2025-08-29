@@ -5,19 +5,19 @@ import {
   StatusBar,
   ScrollView,
   View,
+  Text,
+  Image,
+  ActivityIndicator,
 } from "react-native";
 import { Appbar, Button, Divider, Portal, Snackbar } from "react-native-paper";
 import { Link, useRouter } from "expo-router";
 import {
   getFamilyGroupIdGroupInvite,
   getFamilyGroupIdGroupInviteResponse,
-} from "@elepad/api-client";
-import { useAuth } from "@/hooks/useAuth";
-import {
   useGetFamilyGroupIdGroupMembers,
   GetFamilyGroupIdGroupMembers200Item,
 } from "@elepad/api-client";
-import { Avatar, List, Text } from "react-native-paper";
+import { useAuth } from "@/hooks/useAuth";
 import { FONT } from "@/styles/theme";
 
 const colors = {
@@ -37,39 +37,14 @@ export default function FamilyGroup() {
 
   const [snackbarVisible, setSnackbarVisible] = useState(false);
 
-  //Con esto lo que hago es mockear miembros que dps muestro
+  // Fetch group members via the generated React Query hook
   const {
-    data: membersData,
+    data: membersRes,
     isLoading: membersLoading,
-    isError: membersError,
-    refetch: refetchMembers,
-  } = useGetFamilyGroupIdGroupMembers(groupId ?? "", {
-    query: { enabled: !!groupId },
-  });
+    error: membersError,
+  } = useGetFamilyGroupIdGroupMembers(groupId ?? "");
 
-  // Mock data fallback (useful for development without backend)
-  const mockMembers: GetFamilyGroupIdGroupMembers200Item[] = [
-    {
-      id: "dfccc337-1ef5-4cb8-aed5-5ad83dec4446",
-      displayName: "Maestro Kamacho",
-      avatarUrl: null,
-    },
-    {
-      id: "315e04f4-55fc-4514-a38d-3d01ce285860",
-      displayName: "Paulo Londra",
-      avatarUrl:
-        "https://sdnmoweppzszpxyggdyg.supabase.co/storage/v1/object/public/profile-avatar/315e04f4-55fc-4514-a38d-3d01ce285860/1756027531421-8b2c8918-ad02-40cf-9374-96f941994e7a.jpeg",
-    },
-    {
-      id: "add3955f-39f8-4d8f-b43f-4abe51745174",
-      displayName: "arrejinsixtoup",
-      avatarUrl: null,
-    },
-  ];
-
-  const membersToShow =
-    (membersData && Array.isArray(membersData.data) && membersData.data) ||
-    (__DEV__ ? mockMembers : []);
+  console.log(membersRes);
 
   const createInvitationCode = async () => {
     const link = await getFamilyGroupIdGroupInvite(groupId ?? "1");
@@ -120,40 +95,6 @@ export default function FamilyGroup() {
             {`Enlace de invitación generado correctamente: http://elepad.com/invite/${invitationCode} `}
           </Snackbar>
         </Portal>
-        <View>
-          <Text style={{ marginBottom: 8, fontFamily: FONT.bold }}>
-            Miembros
-          </Text>
-          {membersLoading && <Text>Cargando miembros...</Text>}
-          {membersError && (
-            <Text onPress={() => refetchMembers()} style={{ color: "red" }}>
-              Error cargando miembros. Tocar para reintentar.
-            </Text>
-          )}
-          {!membersLoading && membersToShow.length === 0 && (
-            <Text>No hay miembros en este grupo.</Text>
-          )}
-          {membersToShow.length > 0 && (
-            <View>
-              {membersToShow.map((m: GetFamilyGroupIdGroupMembers200Item) => (
-                <List.Item
-                  key={m.id}
-                  title={m.displayName}
-                  left={() => (
-                    <Avatar.Image
-                      size={40}
-                      source={
-                        m.avatarUrl
-                          ? { uri: m.avatarUrl }
-                          : require("../assets/images/bbb.png")
-                      }
-                    />
-                  )}
-                />
-              ))}
-            </View>
-          )}
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
