@@ -76,7 +76,55 @@ export default function FamilyGroup() {
           >
             Crear enlace de invitación
           </Button>
-          <Divider style={{ marginVertical: 20 }} />
+          //Mostramos los miembros del grupo Familiar
+          <View style={{ marginTop: 12, marginBottom: 12 }}>
+            <Text style={{ fontSize: 16, marginBottom: 8 }}>
+              Miembros del grupo
+            </Text>
+            {membersLoading ? (
+              <ActivityIndicator />
+            ) : membersError ? (
+              <Text style={{ color: "red" }}>Error cargando miembros</Text>
+            ) : (
+              (() => {
+                // La API/cliente puede devolver directamente un array o un objeto { data: [...] }
+                const membersArray:
+                  | GetFamilyGroupIdGroupMembers200Item[]
+                  | undefined = Array.isArray(membersRes)
+                  ? (membersRes as unknown as GetFamilyGroupIdGroupMembers200Item[])
+                  : Array.isArray(membersRes?.data)
+                    ? (membersRes.data as GetFamilyGroupIdGroupMembers200Item[])
+                    : undefined;
+
+                if (!membersArray || membersArray.length === 0) {
+                  return (
+                    <Text style={{ color: "#666" }}>
+                      No hay miembros para mostrar
+                    </Text>
+                  );
+                }
+
+                return membersArray.map((m) => (
+                  <View
+                    key={m.id}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginVertical: 6,
+                    }}
+                  >
+                    {m.avatarUrl ? (
+                      <Image
+                        source={{ uri: m.avatarUrl }}
+                        style={{ width: 40, height: 40, borderRadius: 20 }}
+                      />
+                    ) : null}
+                    <Text style={{ marginLeft: 8 }}>{m.displayName}</Text>
+                  </View>
+                ));
+              })()
+            )}
+          </View>
           <Link
             href={{ pathname: "/" }}
             accessibilityRole="button"
