@@ -114,4 +114,21 @@ export class FamilyGroupService {
 
     return true;
   }
+
+  /**
+   * Get members of a family group (id, displayName and avatarUrl).
+   */
+  async getMembers(idGroup: string) {
+    const { data, error } = await this.supabase
+      .from("users")
+      .select("id, displayName, avatarUrl")
+      .eq("groupId", idGroup);
+
+    if (error) {
+      console.error("Error fetching family group members: ", error);
+      throw new ApiException(500, "Error fetching family group members");
+    }
+
+    return data ?? [];
+  }
 }
