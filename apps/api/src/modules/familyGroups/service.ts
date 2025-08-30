@@ -102,6 +102,23 @@ export class FamilyGroupService {
   }
 
   /**
+   * Get members of a family group (id, displayName and avatarUrl).
+   */
+  async getMembers(idGroup: string) {
+    const { data, error } = await this.supabase
+      .from("users")
+      .select("id, displayName, avatarUrl")
+      .eq("groupId", idGroup);
+
+    if (error) {
+      console.error("Error fetching family group members: ", error);
+      throw new ApiException(500, "Error fetching family group members");
+    }
+
+    return data ?? [];
+  }
+
+  /**
    * Removes the user from the given group and ensures they are not left without a group.
    * If the user is left without a group, a personal group is automatically created
    * and assigned to them (users.groupId).

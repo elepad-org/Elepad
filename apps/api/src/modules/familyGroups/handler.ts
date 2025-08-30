@@ -119,6 +119,41 @@ familyGroupApp.openapi(
 
 familyGroupApp.openapi(
   {
+    method: "get",
+    path: "/familyGroup/{idGroup}/members",
+    tags: ["familyGroups"],
+    request: {
+      params: z.object({ idGroup: z.uuid() }),
+    },
+    responses: {
+      200: {
+        description: "List of members",
+        content: {
+          "application/json": {
+            schema: z.array(
+              z.object({
+                id: z.string().uuid(),
+                displayName: z.string(),
+                avatarUrl: z.string().nullable(),
+              }),
+            ),
+          },
+        },
+      },
+      400: openApiErrorResponse("Invalid request"),
+      404: openApiErrorResponse("Group not found"),
+      500: openApiErrorResponse("Internal Server Error"),
+    },
+  },
+  async (c) => {
+    const { idGroup } = c.req.valid("param");
+    const members = await c.var.familyGroupService.getMembers(idGroup);
+    return c.json(members, 200);
+  },
+);
+
+familyGroupApp.openapi(
+  {
     method: "delete",
     path: "/familyGroup/{idGroup}/member/{idUser}",
     tags: ["familyGroups"],

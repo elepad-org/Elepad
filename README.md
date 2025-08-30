@@ -21,7 +21,6 @@ Elepad ofrece una interfaz diseñada para todas las edades.
 ¿Tenés preguntas o sugerencias? ¡Nos encantaría escucharte!
 
 - Email: [proyectoelepad@gmail.com](mailto:proyectoelepad@gmail.com)
-- Sitio web: pendiente...
 
 ## 🗺️ Proyecto
 
@@ -86,12 +85,12 @@ Referencia: [https://conventional-branch.github.io/](https://conventional-branch
 
 Las ramas se unen a main mediante Pull Requests. Es recomendable tildar la opción **"Squash commits"** al completar una PR para que el historial de commits sea más legible.
 
-Si en el código hay deuda técnica o cambios pendientes, se lo debe señalar con un comentario que diga `// TODO: ...` para que luego se lo pueda encontrar fácilmente. Ej: `// TODO: optimize this method's time complexity to O(n)`.
+Si en el código hay deuda técnica o cambios pendientes, se lo debe señalar con un comentario que diga `// TODO:` para que luego se lo pueda encontrar fácilmente. Ej: `// TODO: optimize this method's time complexity to O(n)`.
 
 ### 🔨 Herramientas
 
-- **Lenguajes, frameworks y librerías**: Node.js, TypeScript, Hono, React Native, React Native Paper, Expo.
-- **Dev tools**: npm, Turborepo, eslint, Prettier, OpenAPI.
+- **Lenguajes, frameworks y librerías**: Node.js, JavaScript, TypeScript, Hono, React Native, React Native Paper, Expo.
+- **Dev tools**: npm, Turborepo, eslint, Prettier, OpenAPI, husky.
 - **Servicios**: [Supabase](https://supabase.com/dashboard/project/sdnmoweppzszpxyggdyg) (Database, Storage, Auth), [Google Cloud](https://console.cloud.google.com/auth/clients?project=elepad-mobile) (OAuth), [Expo EAS](https://expo.dev/accounts/elepad-org/projects/elepad), [Cloudflare Workers](https://dash.cloudflare.com/6eee324495e2fe7945478ecec8158c8e/workers-and-pages).
 
 ## 🚀 Despliegue
@@ -102,8 +101,10 @@ A continuación se muestra cómo configurar el entorno de desarrollo y cómo des
 
 Pasos manuales previos:
 
-- Configurar un OAuth Client en Google Cloud para referenciar el client ID en la variable de entorno SUPABASE_AUTH_GOOGLE_CLIENT_ID.
 - Crear un proyecto en Supabase para vincularlo desde la `supabase` CLI.
+- Aplicar las migraciones a la base de datos de Supabase.
+- Configurar un OAuth Client en Google Cloud para establecer la variable de entorno SUPABASE_AUTH_GOOGLE_CLIENT_ID.
+- En Supabase Auth, configurar las URLs de redirección y activar a Google como un Auth Provider.
 
 Ahora:
 
