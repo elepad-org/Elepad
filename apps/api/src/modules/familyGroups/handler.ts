@@ -116,3 +116,41 @@ familyGroupApp.openapi(
     return c.json(invitationCode, 200);
   },
 );
+
+familyGroupApp.openapi(
+  {
+    method: "delete",
+    path: "/familyGroup/{idGroup}/member/{idUser}",
+    tags: ["familyGroups"],
+    operationId: "removeUserFromFamilyGroup",
+    request: {
+      params: z.object({
+        idGroup: z.uuid(),
+        idUser: z.uuid(),
+      }),
+    },
+    responses: {
+      200: {
+        description:
+          "Member removed from group; ensures at least one group is maintained (new personal group created)",
+      },
+      400: openApiErrorResponse("Invalid request"),
+      404: openApiErrorResponse("Group or User not found"),
+      500: openApiErrorResponse("Internal Server Error"),
+    },
+  },
+  async (c) => {
+    const { idGroup, idUser } = c.req.valid("param");
+
+    const result = await c.var.familyGroupService.removeUserFromFamilyGroup(
+      idGroup,
+      idUser,
+    );
+
+    if (!result) {
+      throw new ApiException(500, "Internal Server Error");
+    }
+
+    return c.json(result, 200);
+  },
+);
