@@ -4,7 +4,6 @@
  */
 export async function uriToBlob(uri: string) {
   return new Promise<Blob>((resolve, reject) => {
-    console.log(uri);
     const xhr = new XMLHttpRequest();
     xhr.onload = () => resolve(xhr.response);
     xhr.onerror = () => reject(new TypeError("uriToBlob failed"));
