@@ -115,6 +115,7 @@ export default function PerfilScreen() {
         </View>
         <Portal>
           <EditNameDialog
+            title="Editar nombre"
             visible={editOpen}
             name={formName}
             saving={saving}

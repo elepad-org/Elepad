@@ -15,6 +15,7 @@ import {
   Portal,
   Snackbar,
   Text,
+  TextInput,
   IconButton,
   Dialog,
 } from "react-native-paper";
@@ -24,10 +25,13 @@ import {
   getFamilyGroupIdGroupInviteResponse,
   useGetFamilyGroupIdGroupMembers,
   useRemoveUserFromFamilyGroup,
+  usePatchFamilyGroupIdGroup,
 } from "@elepad/api-client";
 import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 import { useAuth } from "@/hooks/useAuth";
 import { FONT } from "@/styles/theme";
+import { useQueryClient } from "@tanstack/react-query";
+import { Pressable } from "react-native";
 
 const colors = {
   primary: "#7fb3d3",
@@ -43,6 +47,12 @@ export default function FamilyGroup() {
   const groupId = userElepad?.groupId;
 
   const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
+
+  const { mutate: updateGroupName, isPending: isUpdating } =
+    usePatchFamilyGroupIdGroup();
+  const queryClient = useQueryClient();
 
   // Confirmación de eliminación
   const [confirmVisible, setConfirmVisible] = useState(false);
@@ -145,8 +155,74 @@ export default function FamilyGroup() {
             if (!groupName) return null;
             return (
               <View style={styles.groupHeaderCard}>
-                <Text style={styles.groupHeaderSubtitle}>Grupo</Text>
-                <Text style={styles.groupHeaderTitle}>{groupName}</Text>
+                {isEditing ? (
+                  <View style={styles.editContainer}>
+                    <TextInput
+                      style={styles.nameInput}
+                      value={newGroupName}
+                      onChangeText={setNewGroupName}
+                      autoFocus
+                    />
+                    <View style={styles.editButtons}>
+                      <Button
+                        mode="text"
+                        onPress={() => setIsEditing(false)}
+                        disabled={isUpdating}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button
+                        mode="contained"
+                        onPress={() => {
+                          if (newGroupName.trim() && groupId) {
+                            updateGroupName(
+                              {
+                                idGroup: groupId,
+                                data: { name: newGroupName },
+                              },
+                              {
+                                onSuccess: () => {
+                                  queryClient.invalidateQueries({
+                                    queryKey: [
+                                      "familyGroup",
+                                      groupId,
+                                      "members",
+                                    ],
+                                  });
+                                  setIsEditing(false);
+                                  setSnackbarVisible(true);
+                                },
+                              },
+                            );
+                          }
+                        }}
+                        loading={isUpdating}
+                        disabled={isUpdating || !newGroupName.trim()}
+                      >
+                        Guardar
+                      </Button>
+                    </View>
+                  </View>
+                ) : (
+                  <Pressable
+                    onPress={() => {
+                      setNewGroupName(groupName || "");
+                      setIsEditing(true);
+                    }}
+                    style={styles.nameContainer}
+                  >
+                    <Text style={styles.groupHeaderSubtitle}>Grupo</Text>
+                    <View style={styles.nameRow}>
+                      <Text style={styles.groupHeaderTitle}>{groupName}</Text>
+                      <IconButton
+                        icon="pencil"
+                        size={20}
+                        iconColor="#64748b"
+                        style={styles.editIcon}
+                      />
+                    </View>
+                  </Pressable>
+                )}
               </View>
             );
           })()}
@@ -415,17 +491,42 @@ const styles = StyleSheet.create({
   groupHeaderCard: {
     backgroundColor: "#fff",
     borderRadius: 14,
-    paddingVertical: 16,
-    paddingHorizontal: 18,
+    padding: 16,
     marginTop: 12,
     marginBottom: 8,
-    alignItems: "center",
-    justifyContent: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.06,
     shadowRadius: 4,
     elevation: 1,
+  },
+  editContainer: {
+    width: "100%",
+  },
+  nameInput: {
+    backgroundColor: "#f8f9fa",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginBottom: 12,
+  },
+  editButtons: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 8,
+  },
+  nameContainer: {
+    alignItems: "center",
+    width: "100%",
+  },
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  editIcon: {
+    margin: 0,
+    padding: 0,
+    marginLeft: 8,
   },
   groupHeaderSubtitle: {
     fontFamily: FONT.regular,

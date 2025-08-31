@@ -6,6 +6,7 @@ import { patchUsersIdAvatar } from "@elepad/api-client";
 import { uriToBlob } from "@/lib/uriToBlob";
 
 type EditNameDialogProps = {
+  title: string;
   visible: boolean;
   name: string;
   saving?: boolean;
@@ -16,6 +17,7 @@ type EditNameDialogProps = {
 };
 
 export function EditNameDialog({
+  title,
   visible,
   name,
   saving,
@@ -26,7 +28,7 @@ export function EditNameDialog({
 }: EditNameDialogProps) {
   return (
     <Dialog visible={visible} onDismiss={onCancel}>
-      <Dialog.Title>Editar nombre</Dialog.Title>
+      <Dialog.Title>{title}</Dialog.Title>
       <Dialog.Content>
         <TextInput
           label="Nombre"
