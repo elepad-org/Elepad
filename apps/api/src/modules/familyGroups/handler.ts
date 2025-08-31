@@ -1,5 +1,9 @@
 import { OpenAPIHono, z } from "@hono/zod-openapi";
-import { AddUserWithCodeSchema, NewFamilyGroupSchema } from "./schema";
+import {
+  AddUserWithCodeSchema,
+  NewFamilyGroupSchema,
+  UpdateFamilyGroupSchema,
+} from "./schema";
 import { FamilyGroupService } from "./service";
 import { ApiException, openApiErrorResponse } from "@/utils/api-error";
 
@@ -195,5 +199,53 @@ familyGroupApp.openapi(
     }
 
     return c.json(result, 200);
+  },
+);
+
+// Endpoint para actualizar el nombre del grupo familiar
+familyGroupApp.openapi(
+  {
+    method: "patch",
+    path: "/familyGroup/{idGroup}",
+    tags: ["familyGroups"],
+    request: {
+      params: z.object({ idGroup: z.uuid() }),
+      body: {
+        content: {
+          "application/json": {
+            schema: UpdateFamilyGroupSchema,
+          },
+        },
+        required: true,
+      },
+    },
+    responses: {
+      200: {
+        description: "Group name updated successfully",
+        content: {
+          "application/json": {
+            schema: z.object({
+              id: z.string().uuid(),
+              name: z.string(),
+              ownerUserId: z.string().uuid(),
+            }),
+          },
+        },
+      },
+      400: openApiErrorResponse("Invalid request"),
+      404: openApiErrorResponse("Group not found"),
+      500: openApiErrorResponse("Internal Server Error"),
+    },
+  },
+  async (c) => {
+    const { idGroup } = c.req.valid("param");
+    const { name } = c.req.valid("json");
+
+    const updatedGroup = await c.var.familyGroupService.updateFamilyGroupName(
+      idGroup,
+      name,
+    );
+
+    return c.json(updatedGroup, 200);
   },
 );

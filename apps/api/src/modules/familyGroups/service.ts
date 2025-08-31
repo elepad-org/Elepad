@@ -168,11 +168,26 @@ export class FamilyGroupService {
     };
   }
 
-  /**
-   * Removes the user from the given group and ensures they are not left without a group.
-   * If the user is left without a group, a personal group is automatically created
-   * and assigned to them (users.groupId).
-   */
+  async updateFamilyGroupName(groupId: string, newName: string) {
+    const { data, error } = await this.supabase
+      .from("familyGroups")
+      .update({ name: newName })
+      .eq("id", groupId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error updating family group name:", error);
+      throw new ApiException(500, "Error updating family group name");
+    }
+
+    if (!data) {
+      throw new ApiException(404, "Family group not found");
+    }
+
+    return data;
+  }
+
   async removeUserFromFamilyGroup(
     groupId: string,
     userId: string,
