@@ -127,16 +127,24 @@ familyGroupApp.openapi(
     },
     responses: {
       200: {
-        description: "List of members",
+        description: "Group info with owner and members",
         content: {
           "application/json": {
-            schema: z.array(
-              z.object({
+            schema: z.object({
+              name: z.string(),
+              owner: z.object({
                 id: z.string().uuid(),
                 displayName: z.string(),
                 avatarUrl: z.string().nullable(),
               }),
-            ),
+              members: z.array(
+                z.object({
+                  id: z.string().uuid(),
+                  displayName: z.string(),
+                  avatarUrl: z.string().nullable(),
+                }),
+              ),
+            }),
           },
         },
       },

@@ -102,20 +102,70 @@ export class FamilyGroupService {
   }
 
   /**
-   * Get members of a family group (id, displayName and avatarUrl).
+   * Get group info: name, owner and members list (id, displayName, avatarUrl).
    */
-  async getMembers(idGroup: string) {
-    const { data, error } = await this.supabase
+  async getMembers(idGroup: string): Promise<{
+    name: string;
+    owner: { id: string; displayName: string; avatarUrl: string | null };
+    members: Array<{
+      id: string;
+      displayName: string;
+      avatarUrl: string | null;
+    }>;
+  }> {
+    // Traer grupo (para obtener name y ownerUserId)
+    const { data: group, error: groupErr } = await this.supabase
+      .from("familyGroups")
+      .select("name, ownerUserId")
+      .eq("id", idGroup)
+      .single();
+
+    if (groupErr || !group) {
+      console.error("Error fetching family group: ", groupErr);
+      throw new ApiException(404, "Group not found");
+    }
+
+    // Traer miembros del grupo
+    const { data: members, error: membersErr } = await this.supabase
       .from("users")
       .select("id, displayName, avatarUrl")
       .eq("groupId", idGroup);
 
-    if (error) {
-      console.error("Error fetching family group members: ", error);
+    if (membersErr) {
+      console.error("Error fetching family group members: ", membersErr);
       throw new ApiException(500, "Error fetching family group members");
     }
 
-    return data ?? [];
+    const membersList = members ?? [];
+    const filteredMembers = membersList.filter(
+      (u) => u.id !== group.ownerUserId,
+    );
+
+    // Obtener el owner a partir de ownerUserId
+    const ownerItem = membersList.find((u) => u.id === group.ownerUserId);
+    if (!ownerItem) {
+      // Si por algún motivo el owner no figura en la lista (inconsistencia), intentar consultarlo directo
+      const { data: ownerUser, error: ownerErr } = await this.supabase
+        .from("users")
+        .select("id, displayName, avatarUrl")
+        .eq("id", group.ownerUserId)
+        .single();
+      if (ownerErr || !ownerUser) {
+        console.error("Owner not found in users: ", ownerErr);
+        throw new ApiException(404, "Group owner not found");
+      }
+      return {
+        name: group.name,
+        owner: ownerUser,
+        members: filteredMembers,
+      };
+    }
+
+    return {
+      name: group.name,
+      owner: ownerItem,
+      members: filteredMembers,
+    };
   }
 
   /**

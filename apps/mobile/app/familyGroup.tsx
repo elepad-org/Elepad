@@ -23,9 +23,9 @@ import {
   getFamilyGroupIdGroupInvite,
   getFamilyGroupIdGroupInviteResponse,
   useGetFamilyGroupIdGroupMembers,
-  GetFamilyGroupIdGroupMembers200Item,
   useRemoveUserFromFamilyGroup,
 } from "@elepad/api-client";
+import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 import { useAuth } from "@/hooks/useAuth";
 import { FONT } from "@/styles/theme";
 
@@ -46,8 +46,11 @@ export default function FamilyGroup() {
 
   // Confirmación de eliminación
   const [confirmVisible, setConfirmVisible] = useState(false);
-  const [memberToRemove, setMemberToRemove] =
-    useState<GetFamilyGroupIdGroupMembers200Item | null>(null);
+  const [memberToRemove, setMemberToRemove] = useState<{
+    id: string;
+    displayName: string;
+    avatarUrl: string | null;
+  } | null>(null);
 
   // Fetch group members via the generated React Query hook
   const membersQuery = useGetFamilyGroupIdGroupMembers(groupId ?? "");
@@ -69,7 +72,11 @@ export default function FamilyGroup() {
     setSnackbarVisible(true);
   };
 
-  const openConfirm = (member: GetFamilyGroupIdGroupMembers200Item) => {
+  const openConfirm = (member: {
+    id: string;
+    displayName: string;
+    avatarUrl: string | null;
+  }) => {
     setMemberToRemove(member);
     setConfirmVisible(true);
   };
@@ -138,21 +145,56 @@ export default function FamilyGroup() {
           {/* Mostramos los miembros del grupo Familiar */}
           <View style={styles.membersSection}>
             <Text style={styles.membersTitle}>Miembros del grupo</Text>
+            {(() => {
+              const resp = membersQuery.data as unknown;
+              const groupInfo =
+                (resp as { data?: GetFamilyGroupIdGroupMembers200 })?.data ??
+                (resp as GetFamilyGroupIdGroupMembers200 | undefined);
+              if (!groupInfo) return null;
+              const o = groupInfo.owner;
+              return (
+                <View style={[styles.memberRow, { borderBottomWidth: 0 }]}>
+                  <View style={styles.memberInfo}>
+                    {o.avatarUrl ? (
+                      <Image
+                        source={{ uri: o.avatarUrl }}
+                        style={styles.memberAvatar}
+                      />
+                    ) : (
+                      <View style={styles.memberAvatarPlaceholder}>
+                        <Text style={styles.memberInitials}>
+                          {getInitials(o.displayName)}
+                        </Text>
+                      </View>
+                    )}
+                    <View>
+                      <Text style={styles.memberName}>{o.displayName}</Text>
+                      <Text style={{ color: "#64748b", fontSize: 12 }}>
+                        Owner
+                      </Text>
+                    </View>
+                  </View>
+                  <IconButton
+                    icon="delete"
+                    size={22}
+                    iconColor="#d32f2f"
+                    onPress={() => openConfirm(o)}
+                    accessibilityLabel={`Eliminar a ${o.displayName}`}
+                  />
+                </View>
+              );
+            })()}
             {membersQuery.isLoading ? (
               <ActivityIndicator style={styles.membersLoading} />
             ) : membersQuery.error ? (
               <Text style={styles.membersError}>Error cargando miembros</Text>
             ) : (
               (() => {
-                // La API/cliente puede devolver directamente un array o un objeto { data: [...] }
-                const membersArray:
-                  | GetFamilyGroupIdGroupMembers200Item[]
-                  | undefined = Array.isArray(membersQuery.data)
-                  ? (membersQuery.data as unknown as GetFamilyGroupIdGroupMembers200Item[])
-                  : Array.isArray(membersQuery.data?.data)
-                    ? (membersQuery.data
-                        .data as GetFamilyGroupIdGroupMembers200Item[])
-                    : undefined;
+                const resp = membersQuery.data as unknown;
+                const groupInfo =
+                  (resp as { data?: GetFamilyGroupIdGroupMembers200 })?.data ??
+                  (resp as GetFamilyGroupIdGroupMembers200 | undefined);
+                const membersArray = groupInfo?.members;
 
                 if (!membersArray || membersArray.length === 0) {
                   return (
