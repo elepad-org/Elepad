@@ -53,13 +53,7 @@ export default function PerfilScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
-      <Appbar.Header
-        mode="center-aligned"
-        elevated
-        style={{ backgroundColor: colors.primary }}
-      >
-        <Appbar.Content title="Perfil" color="#fff" />
-      </Appbar.Header>
+
       <ScrollView contentContainerStyle={styles.container}>
         <ProfileHeader
           name={displayName}

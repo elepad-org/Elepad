@@ -135,26 +135,9 @@ export default function FamilyGroup() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
-      <Appbar.Header
-        mode="center-aligned"
-        elevated
-        style={{ backgroundColor: colors.primary }}
-      >
-        <Appbar.Content title="Grupo Familiar" color="#fff" />
-      </Appbar.Header>
+
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.footer}>
-          <Button
-            mode="contained"
-            icon="account-multiple-plus"
-            onPress={() => {
-              createInvitationCode();
-            }}
-            contentStyle={styles.bottomButtonContent}
-            style={styles.bottomButton}
-          >
-            Crear enlace de invitación
-          </Button>
           {/* Nombre del grupo (centrado y lindo) */}
           {(() => {
             const groupInfo = selectGroupInfo();
@@ -255,6 +238,19 @@ export default function FamilyGroup() {
               })()
             )}
           </View>
+
+          <Button
+            mode="contained"
+            icon="account-multiple-plus"
+            onPress={() => {
+              createInvitationCode();
+            }}
+            contentStyle={styles.bottomButtonContent}
+            style={styles.bottomButton}
+          >
+            Crear enlace de invitación
+          </Button>
+
           {invitationCode && (
             <View style={styles.card}>
               <Text style={styles.cardTitle}>Código de invitación</Text>
@@ -265,7 +261,7 @@ export default function FamilyGroup() {
             </View>
           )}
           <Link
-            href={{ pathname: "/" }}
+            href={{ pathname: "/perfil" }}
             accessibilityRole="button"
             style={styles.inlineBack}
           >
@@ -342,6 +338,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontFamily: FONT.regular,
     fontSize: 14,
+    paddingVertical: 16,
     color: "#666",
   },
   /* Members list styles */
@@ -377,8 +374,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f1f5f9",
+    borderBottomWidth: 0,
   },
   memberInfo: {
     flexDirection: "row",
