@@ -30,7 +30,6 @@ import {
 import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 import { useAuth } from "@/hooks/useAuth";
 import { FONT } from "@/styles/theme";
-import { useQueryClient } from "@tanstack/react-query";
 import { Pressable } from "react-native";
 
 const colors = {
@@ -50,9 +49,8 @@ export default function FamilyGroup() {
   const [isEditing, setIsEditing] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
 
-  const { mutate: updateGroupName, isPending: isUpdating } =
-    usePatchFamilyGroupIdGroup();
-  const queryClient = useQueryClient();
+  const [isUpdating, setIsUpdating] = useState(false);
+  const patchFamilyGroup = usePatchFamilyGroupIdGroup(); // Este hook ya maneja la mutación
 
   // Confirmación de eliminación
   const [confirmVisible, setConfirmVisible] = useState(false);
@@ -173,31 +171,36 @@ export default function FamilyGroup() {
                       </Button>
                       <Button
                         mode="contained"
-                        onPress={() => {
-                          if (newGroupName.trim() && groupId) {
-                            updateGroupName(
-                              {
-                                idGroup: groupId,
-                                data: { name: newGroupName },
-                              },
-                              {
-                                onSuccess: () => {
-                                  queryClient.invalidateQueries({
-                                    queryKey: [
-                                      "familyGroup",
-                                      groupId,
-                                      "members",
-                                    ],
-                                  });
-                                  setIsEditing(false);
-                                  setSnackbarVisible(true);
-                                },
-                              },
-                            );
+                        onPress={async () => {
+                          if (!newGroupName.trim() || !groupId) return;
+                          if (newGroupName === groupName) {
+                            setIsEditing(false);
+                            return;
+                          }
+                          try {
+                            setIsUpdating(true);
+                            await patchFamilyGroup.mutateAsync({
+                              idGroup: groupId,
+                              data: { name: newGroupName },
+                            });
+                            setIsEditing(false);
+                            setSnackbarVisible(true);
+                            // Refrescar los datos manualmente
+                            if (membersQuery.refetch) {
+                              await membersQuery.refetch();
+                            }
+                          } catch (e: unknown) {
+                            const msg =
+                              e instanceof Error
+                                ? e.message
+                                : "Error al actualizar";
+                            console.warn(msg);
+                          } finally {
+                            setIsUpdating(false);
                           }
                         }}
                         loading={isUpdating}
-                        disabled={isUpdating || !newGroupName.trim()}
+                        disabled={!newGroupName.trim()}
                       >
                         Guardar
                       </Button>
