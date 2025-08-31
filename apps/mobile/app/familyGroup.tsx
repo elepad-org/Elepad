@@ -56,6 +56,19 @@ export default function FamilyGroup() {
   const membersQuery = useGetFamilyGroupIdGroupMembers(groupId ?? "");
   const removeMember = useRemoveUserFromFamilyGroup();
 
+  // Normaliza la respuesta del hook (envuelta en {data} o directa)
+  const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
+    const resp = membersQuery.data as
+      | { data?: GetFamilyGroupIdGroupMembers200 }
+      | GetFamilyGroupIdGroupMembers200
+      | undefined;
+    if (!resp) return undefined;
+    return (
+      (resp as { data?: GetFamilyGroupIdGroupMembers200 }).data ??
+      (resp as GetFamilyGroupIdGroupMembers200)
+    );
+  };
+
   const getInitials = (name: string) =>
     (name || "")
       .split(/\s+/)
@@ -142,14 +155,25 @@ export default function FamilyGroup() {
           >
             Crear enlace de invitación
           </Button>
+          {/* Nombre del grupo (centrado y lindo) */}
+          {(() => {
+            const groupInfo = selectGroupInfo();
+            const groupName = groupInfo?.name;
+            if (!groupName) return null;
+            return (
+              <View style={styles.groupHeaderCard}>
+                <Text style={styles.groupHeaderSubtitle}>Grupo</Text>
+                <Text style={styles.groupHeaderTitle}>{groupName}</Text>
+              </View>
+            );
+          })()}
           {/* Mostramos los miembros del grupo Familiar */}
           <View style={styles.membersSection}>
+            {/* Antes de los miembros debemos mostrar centrado y lindo el nombre del grupo */}
+
             <Text style={styles.membersTitle}>Miembros del grupo</Text>
             {(() => {
-              const resp = membersQuery.data as unknown;
-              const groupInfo =
-                (resp as { data?: GetFamilyGroupIdGroupMembers200 })?.data ??
-                (resp as GetFamilyGroupIdGroupMembers200 | undefined);
+              const groupInfo = selectGroupInfo();
               if (!groupInfo) return null;
               const o = groupInfo.owner;
               return (
@@ -190,10 +214,7 @@ export default function FamilyGroup() {
               <Text style={styles.membersError}>Error cargando miembros</Text>
             ) : (
               (() => {
-                const resp = membersQuery.data as unknown;
-                const groupInfo =
-                  (resp as { data?: GetFamilyGroupIdGroupMembers200 })?.data ??
-                  (resp as GetFamilyGroupIdGroupMembers200 | undefined);
+                const groupInfo = selectGroupInfo();
                 const membersArray = groupInfo?.members;
 
                 if (!membersArray || membersArray.length === 0) {
@@ -394,6 +415,34 @@ const styles = StyleSheet.create({
     padding: 16,
     marginVertical: 12,
     elevation: 2,
+  },
+  groupHeaderCard: {
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    marginTop: 12,
+    marginBottom: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  groupHeaderSubtitle: {
+    fontFamily: FONT.regular,
+    fontSize: 12,
+    color: "#64748b",
+    marginBottom: 4,
+    letterSpacing: 0.5,
+  },
+  groupHeaderTitle: {
+    fontFamily: FONT.bold,
+    fontSize: 20,
+    color: "#0f172a",
+    textAlign: "center",
   },
   cardTitle: {
     fontFamily: FONT.bold,
