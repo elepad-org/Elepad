@@ -217,18 +217,14 @@ export default function FamilyGroup() {
                     <Text style={styles.groupHeaderSubtitle}>
                       Grupo Familiar
                     </Text>
-                    <View style={styles.nameRow}>
-                      <View
-                        style={{ flexDirection: "row", alignItems: "center" }}
-                      >
-                        <Text style={styles.groupHeaderTitle}>{groupName}</Text>
-                        <IconButton
-                          icon="pencil"
-                          size={18}
-                          iconColor="#64748b"
-                          style={styles.editIcon}
-                        />
-                      </View>
+                    <View style={styles.nameRowContainer}>
+                      <Text style={styles.groupHeaderTitle}>{groupName}</Text>
+                      <IconButton
+                        icon="pencil"
+                        size={18}
+                        iconColor="#64748b"
+                        style={styles.editIcon}
+                      />
                     </View>
                   </Pressable>
                 )}
@@ -423,7 +419,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontFamily: FONT.regular,
     fontSize: 14,
-    paddingVertical: 16,
+    paddingVertical: 22,
     color: "#666",
   },
   /* Members list styles */
@@ -500,14 +496,13 @@ const styles = StyleSheet.create({
   },
   groupHeaderCard: {
     backgroundColor: "#fff",
-    borderRadius: 14,
+    borderRadius: 12,
     padding: 16,
-    marginTop: 12,
-    marginBottom: 8,
+    marginTop: 8,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
     elevation: 1,
   },
   editContainer: {
@@ -528,6 +523,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
   },
+  nameRowContainer: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+    paddingHorizontal: 32, // Reduced padding for better spacing
+  },
   nameRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -538,7 +541,8 @@ const styles = StyleSheet.create({
   editIcon: {
     margin: 0,
     padding: 0,
-    marginLeft: 4,
+    position: "absolute",
+    right: -7,
     height: 36,
     width: 36,
   },
@@ -548,13 +552,14 @@ const styles = StyleSheet.create({
     color: "#64748b",
     marginBottom: 4,
     letterSpacing: 0.5,
+    textAlign: "center",
   },
   groupHeaderTitle: {
     fontFamily: FONT.bold,
     fontSize: 20,
     color: "#0f172a",
     textAlign: "center",
-    marginRight: 2,
+    flex: 1,
   },
   cardTitle: {
     fontFamily: FONT.bold,
