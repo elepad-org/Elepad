@@ -218,13 +218,17 @@ export default function FamilyGroup() {
                       Grupo Familiar
                     </Text>
                     <View style={styles.nameRow}>
-                      <Text style={styles.groupHeaderTitle}>{groupName}</Text>
-                      <IconButton
-                        icon="pencil"
-                        size={20}
-                        iconColor="#64748b"
-                        style={styles.editIcon}
-                      />
+                      <View
+                        style={{ flexDirection: "row", alignItems: "center" }}
+                      >
+                        <Text style={styles.groupHeaderTitle}>{groupName}</Text>
+                        <IconButton
+                          icon="pencil"
+                          size={18}
+                          iconColor="#64748b"
+                          style={styles.editIcon}
+                        />
+                      </View>
                     </View>
                   </Pressable>
                 )}
@@ -528,11 +532,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    position: "relative",
+    width: "100%",
   },
   editIcon: {
     margin: 0,
     padding: 0,
-    marginLeft: 8,
+    marginLeft: 4,
+    height: 36,
+    width: 36,
   },
   groupHeaderSubtitle: {
     fontFamily: FONT.regular,
@@ -546,6 +554,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: "#0f172a",
     textAlign: "center",
+    marginRight: 2,
   },
   cardTitle: {
     fontFamily: FONT.bold,
