@@ -214,7 +214,9 @@ export default function FamilyGroup() {
                     }}
                     style={styles.nameContainer}
                   >
-                    <Text style={styles.groupHeaderSubtitle}>Grupo</Text>
+                    <Text style={styles.groupHeaderSubtitle}>
+                      Grupo Familiar
+                    </Text>
                     <View style={styles.nameRow}>
                       <Text style={styles.groupHeaderTitle}>{groupName}</Text>
                       <IconButton
@@ -435,8 +437,9 @@ const styles = StyleSheet.create({
   },
   membersTitle: {
     fontSize: 16,
-    fontFamily: FONT.regular,
-    marginBottom: 8,
+    fontFamily: FONT.bold,
+    paddingLeft: 10,
+    marginBottom: 10,
     color: "#0f172a",
   },
   membersLoading: {
