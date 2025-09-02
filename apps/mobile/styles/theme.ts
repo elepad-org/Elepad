@@ -1,4 +1,4 @@
-import { MD3LightTheme, MD3DarkTheme } from "react-native-paper";
+import { MD3LightTheme } from "react-native-paper";
 
 /** The exact names of available font families. */
 export const FONT = {
@@ -24,13 +24,7 @@ export const lightTheme = {
   },
 };
 
+// Elepad does not currently support dark mode, so we just copy the light theme.
 export const darkTheme = {
-  ...MD3DarkTheme,
-  colors: {
-    ...MD3DarkTheme.colors,
-    primary: "#fff",
-    background: "#151718",
-    text: "#ECEDEE",
-    surface: "#151718",
-  },
+  ...lightTheme,
 };
