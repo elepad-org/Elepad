@@ -1,18 +1,15 @@
 import React from "react";
 import {
-  Alert,
   StyleSheet,
   View,
   SafeAreaView,
   StatusBar,
   ScrollView,
+  Image,
 } from "react-native";
-import { ActivityIndicator, Text, Button, Avatar } from "react-native-paper";
+import { ActivityIndicator, Text, Avatar, Card } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
-import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import ActivitiesList from "../../components/ActivitiesList";
-import CalendarView from "@/components/CalendarView";
 import { FONT } from "@/styles/theme";
 
 const colors = {
@@ -22,8 +19,7 @@ const colors = {
 };
 
 export default function HomeScreen() {
-  const { userElepad, loading, signOut } = useAuth();
-  const router = useRouter();
+  const { userElepad, loading } = useAuth();
 
   if (loading) {
     return (
@@ -36,76 +32,66 @@ export default function HomeScreen() {
   const displayName =
     (userElepad?.displayName as string) || userElepad?.email || "Usuario";
 
+  const getInitials = (name: string) =>
+    name
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((n) => n[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "U";
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
 
       {/* --- Header --- */}
       <View style={styles.header}>
-        <MaterialCommunityIcons name="menu" size={40} color={colors.white} />
-        <View>
+        <View style={styles.welcomeTextContainer}>
+          <Text style={styles.welcomeGreeting}>¡Hola!</Text>
           <Text
             numberOfLines={1}
             ellipsizeMode="tail"
             style={styles.headerTitle}
-            // TODO: If the name is too long it should be truncated, otherwise it will overflow the menu item and the avatar
           >
-            Bienvenido {displayName}
+            {displayName}
           </Text>
         </View>
-        <Avatar.Image
-          size={50}
-          source={{ uri: "https://i.pravatar.cc/150?u=a042581f4e29030" }}
-        />
+        {userElepad?.avatarUrl ? (
+          <Avatar.Image size={50} source={{ uri: userElepad?.avatarUrl }} />
+        ) : (
+          <View style={styles.memberAvatarPlaceholder}>
+            <Text style={styles.memberInitials}>
+              {getInitials(displayName)}
+            </Text>
+          </View>
+        )}
       </View>
 
       <ScrollView style={styles.contentContainer}>
-        <View>
-          <ActivitiesList />
-          <CalendarView />
+        <View style={styles.developmentContainer}>
+          <Image
+            source={require("../../assets/images/elepad_mantenimiento.png")}
+            style={styles.heartImage}
+            resizeMode="contain"
+          />
+          <Card style={styles.developmentCard} mode="elevated">
+            <Card.Content>
+              <Text style={styles.developmentTitle}>
+                🚧 Página en desarrollo
+              </Text>
+              <Text style={styles.developmentText}>
+                ¡Hola! Esta página está en construcción. Próximamente verás
+                nuevas funcionalidades increíbles que harán tu experiencia aún
+                mejor.
+              </Text>
+              <Text style={styles.developmentSubtext}>
+                Mantente atento a las actualizaciones 🎉
+              </Text>
+            </Card.Content>
+          </Card>
         </View>
       </ScrollView>
-      <Button
-        mode="contained"
-        style={styles.logout}
-        icon="logout"
-        onPress={async () => {
-          await signOut();
-          router.replace("/");
-          Alert.alert("Sesión cerrada", "Has cerrado sesión correctamente.");
-        }}
-      >
-        Cerrar sesión
-      </Button>
-      <View
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-around",
-          marginBottom: 20,
-        }}
-      >
-        <Button
-          mode="contained"
-          style={styles.logout}
-          icon="logout"
-          onPress={async () => {
-            router.navigate("/home2");
-          }}
-        >
-          Ir a Home 2
-        </Button>
-        <Button
-          mode="contained"
-          style={styles.logout}
-          icon="logout"
-          onPress={async () => {
-            router.navigate("/home3");
-          }}
-        >
-          Ir a Home 3
-        </Button>
-      </View>
     </SafeAreaView>
   );
 }
@@ -125,10 +111,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
+  welcomeTextContainer: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  welcomeGreeting: {
+    fontSize: 16,
+    fontFamily: FONT.regular,
+    color: colors.white,
+    opacity: 0.9,
+  },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 24,
     fontFamily: FONT.bold,
     color: colors.white,
+    marginTop: 2,
   },
   contentContainer: {
     flex: 1,
@@ -137,6 +134,55 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 30,
     marginTop: -40,
     paddingTop: 10,
+  },
+  developmentContainer: {
+    padding: 20,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  heartImage: {
+    width: 120,
+    height: 120,
+    marginBottom: 24,
+  },
+  developmentCard: {
+    width: "100%",
+    backgroundColor: colors.white,
+    elevation: 3,
+  },
+  developmentTitle: {
+    fontSize: 24,
+    fontFamily: FONT.bold,
+    textAlign: "center",
+    color: colors.primary,
+    marginBottom: 16,
+  },
+  developmentText: {
+    fontSize: 16,
+    fontFamily: FONT.regular,
+    textAlign: "center",
+    lineHeight: 24,
+    color: "#666",
+    marginBottom: 12,
+  },
+  developmentSubtext: {
+    fontSize: 14,
+    fontFamily: FONT.medium,
+    textAlign: "center",
+    color: colors.primary,
+  },
+  memberAvatarPlaceholder: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: colors.white,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  memberInitials: {
+    fontSize: 18,
+    fontFamily: FONT.bold,
+    color: colors.primary,
   },
   listContainer: {
     padding: 8,
