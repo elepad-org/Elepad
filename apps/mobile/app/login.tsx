@@ -4,14 +4,12 @@ import {
   View,
   Image,
   TouchableOpacity,
-  Platform,
   Animated,
   Easing,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, TextInput, Button } from "react-native-paper";
 import logoBlue from "@/assets/images/bbb.png";
-import { FONT } from "@/styles/theme";
 import { COLORS, commonStyles } from "@/styles/shared";
 
 export default function LoginScreen() {
