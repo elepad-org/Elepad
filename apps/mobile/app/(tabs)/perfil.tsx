@@ -5,6 +5,7 @@ import {
   StatusBar,
   ScrollView,
   View,
+  Alert,
 } from "react-native";
 import {
   Button,
@@ -24,7 +25,7 @@ import { COLORS, commonStyles } from "@/styles/shared";
 export default function PerfilScreen() {
   const router = useRouter();
 
-  const { userElepad, refreshUserElepad } = useAuth();
+  const { userElepad, refreshUserElepad, signOut } = useAuth();
   const displayName = userElepad?.displayName?.trim() || "Usuario";
   const email = userElepad?.email || "-";
   const avatarUrl = userElepad?.avatarUrl || "";
@@ -105,6 +106,19 @@ export default function PerfilScreen() {
             style={styles.bottomButton}
           >
             Editar perfil
+          </Button>
+
+          <Button
+            mode="contained"
+            icon="logout"
+            onPress={async () => {
+              await signOut();
+              router.replace("/");
+            }}
+            contentStyle={styles.bottomButtonContent}
+            style={[styles.bottomButton, styles.logoutButton]}
+          >
+            Cerrar sesión
           </Button>
         </View>
         <Portal>
@@ -213,5 +227,9 @@ const styles = StyleSheet.create({
   helperText: {
     marginTop: 4,
     color: "#6b7280",
+  },
+  logoutButton: {
+    marginTop: 12,
+    backgroundColor: "#fca5a5", // rojo claro
   },
 });
