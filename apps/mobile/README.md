@@ -2,6 +2,69 @@
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
+## Style System
+
+The app uses a shared style system to maintain visual consistency and reduce code duplication across screens. The shared style system includes:
+
+### 1. Theme Constants
+
+Located in `/styles/theme.ts`, this file contains:
+
+- Font family definitions
+- Theme colors for light and dark modes
+
+### 2. Shared Styles
+
+Located in `/styles/shared.ts`, this file contains:
+
+- Common color definitions with semantic naming
+- Spacing constants for consistent layout
+- Border radius constants
+- Shadow utilities
+- Reusable style objects for common UI elements like:
+  - Layout containers (safeArea, container, footer)
+  - Cards and sections
+  - Buttons
+  - Text styles
+  - Form elements
+  - List items and member displays
+
+### How to Use Shared Styles
+
+1. Import the necessary styles in your component:
+
+   ```typescript
+   import { COLORS, commonStyles } from "@/styles/shared";
+   import { FONT } from "@/styles/theme";
+   ```
+
+2. Use the shared styles in your component's StyleSheet:
+
+   ```typescript
+   const styles = StyleSheet.create({
+     // Include all common styles
+     ...commonStyles,
+
+     // Override specific styles or add component-specific styles
+     container: {
+       ...commonStyles.container,
+       backgroundColor: COLORS.background,
+     },
+
+     // Add new styles specific to this component
+     myCustomStyle: {
+       // ...
+     },
+   });
+   ```
+
+3. When referencing colors, use the COLORS constant:
+   ```typescript
+   <View style={{ backgroundColor: COLORS.primary }} />
+   ```
+
+By using this shared style system, we maintain visual consistency across the app while reducing code duplication.
+
 ## Get started
 
 1. Install dependencies

@@ -10,7 +10,6 @@ import {
   Alert,
 } from "react-native";
 import {
-  Appbar,
   Button,
   Portal,
   Snackbar,
@@ -30,13 +29,10 @@ import {
 import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 import { useAuth } from "@/hooks/useAuth";
 import { FONT } from "@/styles/theme";
+import { COLORS, commonStyles } from "@/styles/shared";
 import { Pressable } from "react-native";
 
-const colors = {
-  primary: "#7fb3d3",
-  white: "#f9f9f9ff",
-  background: "#F4F7FF",
-};
+// Using shared COLORS from shared.ts
 
 export default function FamilyGroup() {
   const { userElepad } = useAuth();
@@ -142,7 +138,7 @@ export default function FamilyGroup() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.footer}>
@@ -393,55 +389,15 @@ export default function FamilyGroup() {
 }
 
 const styles = StyleSheet.create({
+  // Using common styles from shared.ts
+  ...commonStyles,
+
+  // Styles specific to this component or overrides
   safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
+    ...commonStyles.safeArea,
+    backgroundColor: COLORS.background,
   },
-  container: {
-    flexGrow: 1,
-    padding: 16,
-    paddingTop: 12,
-    justifyContent: "flex-start",
-  },
-  footer: {
-    marginTop: 16,
-  },
-  bottomButton: {
-    borderRadius: 10,
-  },
-  bottomButtonContent: {
-    height: 48,
-  },
-  successSnackbar: {
-    backgroundColor: "green",
-  },
-  inlineBack: {
-    textAlign: "center",
-    fontFamily: FONT.regular,
-    fontSize: 14,
-    paddingVertical: 22,
-    color: "#666",
-  },
-  /* Members list styles */
-  membersSection: {
-    marginTop: 12,
-    marginBottom: 12,
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  membersTitle: {
-    fontSize: 16,
-    fontFamily: FONT.bold,
-    paddingLeft: 10,
-    marginBottom: 10,
-    color: "#0f172a",
-  },
+
   membersLoading: {
     marginVertical: 8,
   },
@@ -449,88 +405,9 @@ const styles = StyleSheet.create({
     color: "red",
   },
   noMembersText: {
-    color: "#666",
+    color: COLORS.text.tertiary,
   },
-  memberRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 8,
-    borderBottomWidth: 0,
-  },
-  memberInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-    marginRight: 8,
-  },
-  memberAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginRight: 12,
-  },
-  memberAvatarPlaceholder: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginRight: 12,
-    backgroundColor: "#7fb3d3",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  memberInitials: {
-    color: "#fff",
-    fontWeight: "700",
-  },
-  memberName: {
-    fontSize: 15,
-    color: "#0f172a",
-  },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 16,
-    marginVertical: 12,
-    elevation: 2,
-  },
-  groupHeaderCard: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  editContainer: {
-    width: "100%",
-  },
-  nameInput: {
-    backgroundColor: "#f8f9fa",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    marginBottom: 12,
-  },
-  editButtons: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    gap: 8,
-  },
-  nameContainer: {
-    alignItems: "center",
-    width: "100%",
-  },
-  nameRowContainer: {
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-    paddingHorizontal: 32, // Reduced padding for better spacing
-  },
+
   nameRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -538,29 +415,7 @@ const styles = StyleSheet.create({
     position: "relative",
     width: "100%",
   },
-  editIcon: {
-    margin: 0,
-    padding: 0,
-    position: "absolute",
-    right: -7,
-    height: 36,
-    width: 36,
-  },
-  groupHeaderSubtitle: {
-    fontFamily: FONT.regular,
-    fontSize: 12,
-    color: "#64748b",
-    marginBottom: 4,
-    letterSpacing: 0.5,
-    textAlign: "center",
-  },
-  groupHeaderTitle: {
-    fontFamily: FONT.bold,
-    fontSize: 20,
-    color: "#0f172a",
-    textAlign: "center",
-    flex: 1,
-  },
+
   cardTitle: {
     fontFamily: FONT.bold,
     fontSize: 16,
@@ -574,6 +429,6 @@ const styles = StyleSheet.create({
   cardInfo: {
     fontFamily: FONT.regular,
     fontSize: 12,
-    color: "#666",
+    color: COLORS.text.tertiary,
   },
 });

@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, TextInput, Button } from "react-native-paper";
 import logoBlue from "@/assets/images/bbb.png";
 import { FONT } from "@/styles/theme";
+import { COLORS, commonStyles } from "@/styles/shared";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -107,7 +108,9 @@ export default function LoginScreen() {
             <Text style={styles.googleText}>Continue with Google</Text>
           </TouchableOpacity>
 
-          <Text style={styles.footer}>Si tienes cuenta, haz click aqui</Text>
+          <Text style={styles.footerText}>
+            Si tienes cuenta, haz click aqui
+          </Text>
         </View>
       </View>
     </SafeAreaView>
@@ -115,97 +118,19 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#FFF9F1" },
+  // Using common styles from shared.ts
+  ...commonStyles,
+
+  // Specific styles or overrides for this screen
+  safe: { flex: 1, backgroundColor: COLORS.loginBackground },
   container: { flex: 1, alignItems: "center" },
-  logoWrap: { alignItems: "center" },
-  logo: { width: 185, height: 185 },
-  brand: {
-    marginTop: 20,
-    fontSize: 44,
-    letterSpacing: 8,
-    fontFamily: "JosefinSans-Variable",
-  },
-  separatorWrap: { width: "100%", alignItems: "center", marginTop: 6 },
-  separator: { width: "60%", height: 1, backgroundColor: "#111", opacity: 0.9 },
   card: {
-    width: "90%",
-    marginTop: 18,
-    padding: 20,
-    backgroundColor: "transparent",
-    alignItems: "center",
+    ...commonStyles.loginCard,
   },
-  heading: {
-    fontSize: 18,
-    marginTop: 6,
-    fontFamily: FONT.semiBold,
-  },
-  subheading: {
-    fontSize: 13,
-    color: "#666",
-    marginTop: 8,
-    textAlign: "center",
-    fontFamily: FONT.semiBold,
-  },
-  input: {
-    width: "100%",
-    marginTop: 16,
-    backgroundColor: "white",
-    borderRadius: 8,
-  },
-  inputOutline: { borderRadius: 8 },
   continueButton: {
-    marginTop: 12,
-    width: "100%",
-    borderRadius: 8,
-    backgroundColor: "#5278CD",
+    ...commonStyles.continueButton,
   },
-  continueContent: { height: 48 },
-  continueLabel: { fontSize: 16, fontFamily: FONT.semiBold },
-  orRow: {
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 12,
-  },
-  line: { flex: 1, height: 1, backgroundColor: "#E6E3E0" },
-  orText: { marginHorizontal: 12, color: "#999" },
-  googleButton: {
-    marginTop: 14,
-    width: "100%",
-    backgroundColor: "white",
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: Platform.OS === "ios" ? 0.08 : 0.15,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  gIconWrap: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "#FFFFFF",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 10,
-    borderWidth: 0.5,
-    borderColor: "#E6E3E0",
-  },
-  gIcon: { color: "#DB4437", fontFamily: FONT.bold },
-  googleText: {
-    fontSize: 15,
-    color: "#333",
-    fontFamily: FONT.semiBold,
-  },
-  footer: {
-    marginTop: 18,
-    color: "#B2AFAE",
-    fontSize: 13,
-    fontFamily: FONT.semiBold,
+  footerText: {
+    ...commonStyles.footerText,
   },
 });

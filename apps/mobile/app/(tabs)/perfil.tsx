@@ -20,12 +20,7 @@ import { patchUsersId } from "@elepad/api-client/src/gen/client";
 import { EditNameDialog, UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import ProfileHeader from "@/components/ProfileHeader";
 import { useRouter } from "expo-router";
-
-const colors = {
-  primary: "#7fb3d3",
-  white: "#f9f9f9ff",
-  background: "#F4F7FF",
-};
+import { COLORS, commonStyles } from "@/styles/shared";
 
 export default function PerfilScreen() {
   const router = useRouter();
@@ -52,7 +47,7 @@ export default function PerfilScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
       <ScrollView contentContainerStyle={styles.container}>
         <ProfileHeader
@@ -175,16 +170,14 @@ export default function PerfilScreen() {
 }
 
 const styles = StyleSheet.create({
+  // Using common styles from shared.ts
+  ...commonStyles,
+
+  // Specific styles or overrides for this screen
   safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
+    ...commonStyles.safeArea,
   },
-  container: {
-    flexGrow: 1,
-    padding: 16,
-    paddingTop: 12,
-    justifyContent: "flex-start",
-  },
+
   profileHeader: {
     alignItems: "center",
     marginTop: 8,
@@ -199,7 +192,7 @@ const styles = StyleSheet.create({
     right: -2,
     bottom: -2,
     borderWidth: 2,
-    borderColor: "#fff",
+    borderColor: COLORS.white,
   },
   name: {
     textAlign: "center",
@@ -207,23 +200,6 @@ const styles = StyleSheet.create({
   subtitle: {
     color: "#667085",
     textAlign: "center",
-  },
-  menuCard: {
-    borderRadius: 16,
-    overflow: "hidden",
-    marginTop: 8,
-  },
-  footer: {
-    marginTop: 16,
-  },
-  bottomButton: {
-    borderRadius: 10,
-  },
-  bottomButtonContent: {
-    height: 48,
-  },
-  successSnackbar: {
-    backgroundColor: "green",
   },
   photoPreviewContainer: {
     alignItems: "center",
