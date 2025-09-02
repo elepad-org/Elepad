@@ -10,6 +10,7 @@ import {
 import { ActivityIndicator, Text, Avatar, Card } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { FONT } from "@/styles/theme";
+import elepadMantenimiento from "../../assets/images/elepad_mantenimiento.png";
 
 const colors = {
   primary: "#7fb3d3",
@@ -70,7 +71,7 @@ export default function HomeScreen() {
       <ScrollView style={styles.contentContainer}>
         <View style={styles.developmentContainer}>
           <Image
-            source={require("../../assets/images/elepad_mantenimiento.png")}
+            source={elepadMantenimiento}
             style={styles.heartImage}
             resizeMode="contain"
           />
