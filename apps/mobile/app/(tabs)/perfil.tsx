@@ -5,7 +5,6 @@ import {
   StatusBar,
   ScrollView,
   View,
-  Alert,
 } from "react-native";
 import {
   Button,

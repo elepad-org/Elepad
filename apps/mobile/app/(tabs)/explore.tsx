@@ -1,4 +1,3 @@
-import React from "react";
 import {
   StyleSheet,
   View,
@@ -7,10 +6,10 @@ import {
   ScrollView,
   Image,
 } from "react-native";
-import { ActivityIndicator, Text, Avatar, Card } from "react-native-paper";
+import { ActivityIndicator, Text, Card } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { FONT } from "@/styles/theme";
+import elepadMantenimiento from "../../assets/images/elepad_mantenimiento.png";
 
 const colors = {
   primary: "#7fb3d3",
@@ -19,7 +18,7 @@ const colors = {
 };
 
 export default function ExploreScreen() {
-  const { userElepad, loading } = useAuth();
+  const { loading } = useAuth();
 
   if (loading) {
     return (
@@ -29,18 +28,6 @@ export default function ExploreScreen() {
     );
   }
 
-  const displayName =
-    (userElepad?.displayName as string) || userElepad?.email || "Usuario";
-
-  const getInitials = (name: string) =>
-    name
-      .split(/\s+/)
-      .filter(Boolean)
-      .map((n) => n[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase() || "U";
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
@@ -48,7 +35,7 @@ export default function ExploreScreen() {
       <ScrollView style={styles.contentContainer}>
         <View style={styles.developmentContainer}>
           <Image
-            source={require("../../assets/images/elepad_mantenimiento.png")}
+            source={elepadMantenimiento}
             style={styles.heartImage}
             resizeMode="contain"
           />

@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import { ActivityIndicator, Text, Avatar, Card } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { FONT } from "@/styles/theme";
 
 const colors = {
