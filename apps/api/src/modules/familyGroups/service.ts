@@ -191,15 +191,16 @@ export class FamilyGroupService {
   async removeUserFromFamilyGroup(
     groupId: string,
     userId: string,
+    adminUserId: string,
   ): Promise<{
     removedFromGroupId: string;
     userId: string;
     createdNewGroup?: { id: string; name: string };
   } | null> {
-    // 1) Validate that the group exists (avoid assigning an invalid groupId)
+    // 1) Validate that the group exists and get owner info (avoid assigning an invalid groupId)
     const { data: group, error: groupErr } = await this.supabase
       .from("familyGroups")
-      .select("id")
+      .select("id, ownerUserId")
       .eq("id", groupId)
       .single();
 
@@ -211,7 +212,18 @@ export class FamilyGroupService {
       throw new ApiException(404, "Family Group not found");
     }
 
-    // 2) Validate that the user exists
+    // 2) Authorization check: Owner can remove anyone, members can only remove themselves
+    const isOwner = group.ownerUserId === adminUserId;
+    const isSelfRemoval = userId === adminUserId;
+
+    if (!isOwner && !isSelfRemoval) {
+      throw new ApiException(
+        403,
+        "You can only remove yourself from the group or be removed by the group owner",
+      );
+    }
+
+    // 3) Validate that the user exists
     const { data: user, error: userErr } = await this.supabase
       .from("users")
       .select("id, groupId, displayName")
@@ -226,12 +238,20 @@ export class FamilyGroupService {
       throw new ApiException(404, "User not found");
     }
 
-    // 3) If the user is not in that group, return a consistent 404
+    // 4) If the user is not in that group, return a consistent 404
     if (user.groupId !== groupId) {
       throw new ApiException(404, "User is not a member of this group");
     }
 
-    // 4) Unlink the user from the group (set groupId = null)
+    // 5) Prevent the owner from removing themselves (owners cannot leave their own group)
+    if (userId === group.ownerUserId && isSelfRemoval) {
+      throw new ApiException(
+        400,
+        "Group owner cannot remove themselves from the group",
+      );
+    }
+
+    // 6) Unlink the user from the group (set groupId = null)
     const { error: unlinkErr } = await this.supabase
       .from("users")
       .update({ groupId: null })
@@ -245,7 +265,7 @@ export class FamilyGroupService {
       `[FamilyGroups] User ${userId} removed from group ${groupId} at ${new Date().toISOString()}`,
     );
 
-    // 5) Validate if the user has another group assigned
+    // 7) Validate if the user has another group assigned
     // Given the current schema (users.groupId), if it's null, they have no group.
     const created = await this.createPersonalGroupForUser(
       userId,

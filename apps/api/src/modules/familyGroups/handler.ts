@@ -6,12 +6,14 @@ import {
 } from "./schema";
 import { FamilyGroupService } from "./service";
 import { ApiException, openApiErrorResponse } from "@/utils/api-error";
+import { withAuth } from "@/middleware/auth";
 
 export const familyGroupApp = new OpenAPIHono();
 
 declare module "hono" {
   interface ContextVariableMap {
     familyGroupService: FamilyGroupService;
+    user: { id: string };
   }
 }
 
@@ -164,6 +166,9 @@ familyGroupApp.openapi(
   },
 );
 
+// Apply auth middleware to the remove user endpoint
+familyGroupApp.use("/familyGroup/:idGroup/member/:idUser", withAuth);
+
 familyGroupApp.openapi(
   {
     method: "delete",
@@ -182,16 +187,22 @@ familyGroupApp.openapi(
           "Member removed from group; ensures at least one group is maintained (new personal group created)",
       },
       400: openApiErrorResponse("Invalid request"),
+      401: openApiErrorResponse("Unauthorized"),
+      403: openApiErrorResponse(
+        "You can only remove yourself from the group or be removed by the group owner",
+      ),
       404: openApiErrorResponse("Group or User not found"),
       500: openApiErrorResponse("Internal Server Error"),
     },
   },
   async (c) => {
     const { idGroup, idUser } = c.req.valid("param");
+    const adminUser = c.var.user;
 
     const result = await c.var.familyGroupService.removeUserFromFamilyGroup(
       idGroup,
       idUser,
+      adminUser.id,
     );
 
     if (!result) {
