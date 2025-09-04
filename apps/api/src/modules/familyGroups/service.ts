@@ -188,6 +188,88 @@ export class FamilyGroupService {
     return data;
   }
 
+  async transferOwnership(
+    groupId: string,
+    currentOwnerId: string,
+    newOwnerId: string,
+  ) {
+    // 1) Validate that the group exists and get current owner info
+    const { data: group, error: groupErr } = await this.supabase
+      .from("familyGroups")
+      .select("id, name, ownerUserId")
+      .eq("id", groupId)
+      .single();
+
+    if (groupErr) {
+      console.error("Error fetching family group:", groupErr);
+      throw new ApiException(500, "Error fetching the family group");
+    }
+
+    if (!group) {
+      throw new ApiException(404, "Family group not found");
+    }
+
+    // 2) Validate that the current user is the owner
+    if (group.ownerUserId !== currentOwnerId) {
+      throw new ApiException(
+        403,
+        "Only the current group owner can transfer ownership",
+      );
+    }
+
+    // 3) Validate that it's not the same owner
+    if (currentOwnerId === newOwnerId) {
+      throw new ApiException(400, "Cannot transfer ownership to the same user");
+    }
+
+    // 4) Validate that the new owner exists and is a member of the group
+    const { data: newOwner, error: newOwnerErr } = await this.supabase
+      .from("users")
+      .select("id, groupId, displayName")
+      .eq("id", newOwnerId)
+      .single();
+
+    if (newOwnerErr) {
+      console.error("Error fetching new owner:", newOwnerErr);
+      throw new ApiException(500, "Error validating new owner");
+    }
+
+    if (!newOwner) {
+      throw new ApiException(404, "New owner user not found");
+    }
+
+    if (newOwner.groupId !== groupId) {
+      throw new ApiException(400, "New owner must be a member of the group");
+    }
+
+    // 5) Transfer ownership
+    const { data, error } = await this.supabase
+      .from("familyGroups")
+      .update({ ownerUserId: newOwnerId })
+      .eq("id", groupId)
+      .select("id, name, ownerUserId, createdAt")
+      .single();
+
+    if (error) {
+      console.error("Error transferring ownership:", error);
+      throw new ApiException(500, "Error transferring ownership");
+    }
+
+    if (!data) {
+      throw new ApiException(500, "Failed to transfer ownership");
+    }
+
+    console.info(
+      `[FamilyGroups] Ownership of group ${groupId} transferred from ${currentOwnerId} to ${newOwnerId} at ${new Date().toISOString()}`,
+    );
+
+    return {
+      group: data,
+      previousOwner: { id: currentOwnerId },
+      newOwner: { id: newOwnerId, displayName: newOwner.displayName },
+    };
+  }
+
   async removeUserFromFamilyGroup(
     groupId: string,
     userId: string,
