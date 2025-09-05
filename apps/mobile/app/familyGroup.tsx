@@ -25,6 +25,7 @@ import {
   useGetFamilyGroupIdGroupMembers,
   useRemoveUserFromFamilyGroup,
   usePatchFamilyGroupIdGroup,
+  useTransferFamilyGroupOwnership,
 } from "@elepad/api-client";
 import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 import { useAuth } from "@/hooks/useAuth";
@@ -56,9 +57,19 @@ export default function FamilyGroup() {
     avatarUrl: string | null;
   } | null>(null);
 
+  // Transferir ownership
+  const [transferDialogVisible, setTransferDialogVisible] = useState(false);
+  const [selectedNewOwner, setSelectedNewOwner] = useState<{
+    id: string;
+    displayName: string;
+    avatarUrl: string | null;
+  } | null>(null);
+  const [confirmTransferVisible, setConfirmTransferVisible] = useState(false);
+
   // Fetch group members via the generated React Query hook
   const membersQuery = useGetFamilyGroupIdGroupMembers(groupId ?? "");
   const removeMember = useRemoveUserFromFamilyGroup();
+  const transferOwnership = useTransferFamilyGroupOwnership();
 
   // Normaliza la respuesta del hook (envuelta en {data} o directa)
   const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
@@ -133,6 +144,66 @@ export default function FamilyGroup() {
       Alert.alert("Error", msg);
     } finally {
       closeConfirm();
+    }
+  };
+
+  // Funciones para transferir ownership
+  const openTransferDialog = () => {
+    setTransferDialogVisible(true);
+  };
+
+  const closeTransferDialog = () => {
+    setTransferDialogVisible(false);
+    setSelectedNewOwner(null);
+  };
+
+  const selectNewOwner = (member: {
+    id: string;
+    displayName: string;
+    avatarUrl: string | null;
+  }) => {
+    setSelectedNewOwner(member);
+    setTransferDialogVisible(false);
+    setConfirmTransferVisible(true);
+  };
+
+  const closeConfirmTransfer = () => {
+    setConfirmTransferVisible(false);
+    setSelectedNewOwner(null);
+  };
+
+  const confirmTransferOwnership = async () => {
+    try {
+      if (!groupId || !selectedNewOwner?.id) {
+        Alert.alert("Error", "Faltan datos del grupo o del nuevo owner");
+        return;
+      }
+
+      await transferOwnership.mutateAsync({
+        idGroup: groupId,
+        data: { newOwnerId: selectedNewOwner.id },
+      });
+
+      // Refrescar la lista de miembros para mostrar los nuevos datos
+      await membersQuery.refetch();
+
+      Alert.alert(
+        "Transferencia exitosa",
+        `${selectedNewOwner.displayName} es ahora el nuevo administrador del grupo.`,
+      );
+    } catch (e: unknown) {
+      type MaybeApiError = {
+        data?: { error?: { message?: string } };
+        message?: string;
+      };
+      const err = e as MaybeApiError;
+      const msg =
+        err?.data?.error?.message ??
+        err?.message ??
+        "Error transfiriendo la administración";
+      Alert.alert("Error", msg);
+    } finally {
+      closeConfirmTransfer();
     }
   };
 
@@ -316,6 +387,29 @@ export default function FamilyGroup() {
             )}
           </View>
 
+          {/* Botón de transferir ownership (solo para el owner) */}
+          {(() => {
+            const groupInfo = selectGroupInfo();
+            const isOwner = groupInfo?.owner?.id === userElepad?.id;
+            const hasMembers =
+              groupInfo?.members && groupInfo.members.length > 0;
+
+            if (!isOwner || !hasMembers) return null;
+
+            return (
+              <Button
+                mode="outlined"
+                icon="account-switch"
+                onPress={openTransferDialog}
+                contentStyle={styles.bottomButtonContent}
+                style={[styles.bottomButton, { marginBottom: 12 }]}
+                textColor={COLORS.primary}
+              >
+                Transferir administración
+              </Button>
+            );
+          })()}
+
           <Button
             mode="contained"
             icon="account-multiple-plus"
@@ -379,6 +473,113 @@ export default function FamilyGroup() {
                 disabled={removeMember.isPending}
               >
                 SI
+              </Button>
+            </Dialog.Actions>
+          </Dialog>
+
+          {/* Diálogo para seleccionar nuevo owner */}
+          <Dialog
+            visible={transferDialogVisible}
+            onDismiss={closeTransferDialog}
+          >
+            <Dialog.Title>Transferir administración</Dialog.Title>
+            <Dialog.Content>
+              <Text style={{ marginBottom: 16 }}>
+                Selecciona el miembro que será el nuevo administrador del grupo:
+              </Text>
+              <ScrollView style={{ maxHeight: 300 }}>
+                {(() => {
+                  const groupInfo = selectGroupInfo();
+                  const membersArray = groupInfo?.members;
+
+                  if (!membersArray || membersArray.length === 0) {
+                    return (
+                      <Text style={styles.noMembersText}>
+                        No hay miembros disponibles
+                      </Text>
+                    );
+                  }
+
+                  return membersArray.map((member) => (
+                    <Pressable
+                      key={member.id}
+                      onPress={() => selectNewOwner(member)}
+                      style={[
+                        styles.memberRow,
+                        {
+                          borderBottomWidth: 1,
+                          borderBottomColor: "#e0e0e0",
+                          paddingVertical: 12,
+                        },
+                      ]}
+                    >
+                      <View style={styles.memberInfo}>
+                        {member.avatarUrl ? (
+                          <Image
+                            source={{ uri: member.avatarUrl }}
+                            style={styles.memberAvatar}
+                          />
+                        ) : (
+                          <View style={styles.memberAvatarPlaceholder}>
+                            <Text style={styles.memberInitials}>
+                              {getInitials(member.displayName)}
+                            </Text>
+                          </View>
+                        )}
+                        <Text style={styles.memberName}>
+                          {member.displayName}
+                        </Text>
+                      </View>
+                    </Pressable>
+                  ));
+                })()}
+              </ScrollView>
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Button onPress={closeTransferDialog}>Cancelar</Button>
+            </Dialog.Actions>
+          </Dialog>
+
+          {/* Diálogo de confirmación de transferencia */}
+          <Dialog
+            visible={confirmTransferVisible}
+            onDismiss={closeConfirmTransfer}
+          >
+            <Dialog.Title>Confirmar transferencia</Dialog.Title>
+            <Dialog.Content>
+              <Text>
+                ¿Está seguro que desea transferir la administración del grupo a{" "}
+                <Text style={{ fontWeight: "700" }}>
+                  {selectedNewOwner?.displayName}
+                </Text>
+                ?
+              </Text>
+              <Text
+                style={{
+                  marginTop: 12,
+                  fontStyle: "italic",
+                  color: "#d32f2f",
+                  fontSize: 14,
+                }}
+              >
+                ⚠️ Una vez realizada la transferencia, usted dejará de ser el
+                administrador y no podrá deshacer esta operación.
+              </Text>
+            </Dialog.Content>
+            <Dialog.Actions style={{ justifyContent: "space-between" }}>
+              <Button onPress={closeConfirmTransfer}>Cancelar</Button>
+              <Button
+                onPress={confirmTransferOwnership}
+                textColor="#ffffff"
+                mode="contained"
+                style={{
+                  backgroundColor: "#d32f2f",
+                  opacity: transferOwnership.isPending ? 0.7 : 1,
+                }}
+                disabled={transferOwnership.isPending}
+                loading={transferOwnership.isPending}
+              >
+                Transferir
               </Button>
             </Dialog.Actions>
           </Dialog>
