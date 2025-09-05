@@ -1,12 +1,12 @@
 import { useAuth } from "@/hooks/useAuth";
 import { Redirect, useRouter } from "expo-router";
 import React, { useRef } from "react";
-import { Animated, StyleSheet, View, Image, Platform } from "react-native";
+import { Animated, View, Image } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { Button, Text, ActivityIndicator } from "react-native-paper";
 import logoBlue from "@/assets/images/bbb.png";
 import { useState } from "react";
-import { FONT } from "@/styles/theme";
+import { COLORS, styles as baseStyles } from "@/styles/base";
 
 export default function IndexRedirect() {
   const { session, loading } = useAuth();
@@ -19,7 +19,7 @@ export default function IndexRedirect() {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <View style={baseStyles.center}>
         <ActivityIndicator />
       </View>
     );
@@ -32,38 +32,40 @@ export default function IndexRedirect() {
   return (
     <>
       <SafeAreaProvider>
-        <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
-          <View style={styles.container}>
+        <SafeAreaView
+          style={baseStyles.safeAreaLogin}
+          edges={["top", "left", "right"]}
+        >
+          <View style={baseStyles.container}>
             <View
               style={[
-                styles.logoWrap,
+                baseStyles.logoWrapWithMargin,
                 view !== "buttons" && { marginTop: 10 }, // sube el logo cuando hay formulario
               ]}
             >
               <Image
                 source={logoBlue}
-                style={styles.logo}
+                style={baseStyles.logo}
                 resizeMode="contain"
               />
-              <Text style={styles.brand}>ELEPAD</Text>
+              <Text style={baseStyles.brandMedium}>ELEPAD</Text>
             </View>
-            <View style={styles.separatorWrap}>
-              <View style={styles.separator} />
+            <View style={baseStyles.separatorWrap}>
+              <View style={baseStyles.separator} />
             </View>
-            <Animated.View style={[styles.card, { opacity: fadeAnim }]}>
+            <Animated.View style={[baseStyles.card, { opacity: fadeAnim }]}>
               {view === "buttons" && (
                 <>
-                  <Text style={styles.heading}>¡Bienvenido!</Text>
-                  <Text style={styles.subheading}>
+                  <Text style={baseStyles.heading}>¡Bienvenido!</Text>
+                  <Text style={baseStyles.subheading}>
                     Elige una opción para continuar
                   </Text>
 
                   <Button
                     mode="contained"
                     onPress={() => router.push("/login")}
-                    contentStyle={styles.primaryContent}
-                    style={styles.primaryButton}
-                    labelStyle={styles.primaryLabel}
+                    contentStyle={baseStyles.buttonContent}
+                    style={baseStyles.buttonPrimary}
                     accessibilityLabel="Ir a iniciar sesión"
                   >
                     Iniciar Sesión
@@ -72,9 +74,9 @@ export default function IndexRedirect() {
                   <Button
                     mode="contained"
                     onPress={() => router.push("/signup")}
-                    contentStyle={styles.secondaryContent}
-                    style={styles.secondaryButton}
-                    labelStyle={styles.secondaryLabel}
+                    contentStyle={baseStyles.buttonContent}
+                    style={baseStyles.buttonSecondary}
+                    labelStyle={{ color: "#333" }}
                     accessibilityLabel="Ir a crear cuenta"
                   >
                     Crear Cuenta
@@ -88,59 +90,3 @@ export default function IndexRedirect() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: "#FFF9F1" },
-  container: { flex: 1, alignItems: "center" },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  logoWrap: { alignItems: "center", marginTop: 115 },
-  logo: { width: 185, height: 185 },
-  brand: {
-    marginTop: 20,
-    fontSize: 44,
-    letterSpacing: 8,
-    fontFamily: FONT.medium,
-  },
-  separatorWrap: { width: "100%", alignItems: "center", marginTop: 6 },
-  separator: { width: "60%", height: 1, backgroundColor: "#111", opacity: 0.9 },
-  card: {
-    width: "90%",
-    marginTop: 18,
-    padding: 20,
-    backgroundColor: "transparent",
-    alignItems: "center",
-  },
-  heading: {
-    fontSize: 18,
-    marginTop: 6,
-    fontFamily: FONT.semiBold,
-  },
-  subheading: {
-    fontSize: 13,
-    color: "#666",
-    marginTop: 8,
-    textAlign: "center",
-    fontFamily: FONT.semiBold,
-  },
-  primaryButton: {
-    marginTop: 20,
-    width: "100%",
-    borderRadius: 8,
-    backgroundColor: "#5278CD",
-  },
-  primaryContent: { height: 48 },
-  primaryLabel: { fontSize: 16 },
-  secondaryButton: {
-    marginTop: 14,
-    width: "100%",
-    backgroundColor: "white",
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: Platform.OS === "ios" ? 0.08 : 0.15,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  secondaryContent: { height: 48 },
-  secondaryLabel: { fontSize: 16, color: "#333" },
-});
