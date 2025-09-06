@@ -165,7 +165,7 @@ export const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 44,
     letterSpacing: 8,
-    fontFamily: "JosefinSans-Variable",
+    fontFamily: FONT.lobster,
     color: COLORS.text,
   },
   brandMedium: {

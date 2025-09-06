@@ -17,6 +17,7 @@ import { Montserrat_600SemiBold_Italic } from "@expo-google-fonts/montserrat/600
 import { Montserrat_700Bold_Italic } from "@expo-google-fonts/montserrat/700Bold_Italic";
 import { Montserrat_800ExtraBold_Italic } from "@expo-google-fonts/montserrat/800ExtraBold_Italic";
 import { Montserrat_900Black_Italic } from "@expo-google-fonts/montserrat/900Black_Italic";
+import { Lobster_400Regular } from "@expo-google-fonts/lobster";
 import SpaceMono from "@/assets/fonts/SpaceMono-Regular.ttf";
 import JosefinSansVariable from "@/assets/fonts/JosefinSans-Variable.ttf";
 
@@ -24,6 +25,7 @@ export function useAppFonts() {
   let [loaded, error] = useFonts({
     SpaceMono,
     JosefinSans: JosefinSansVariable,
+    Lobster_400Regular,
     Montserrat_100Thin,
     Montserrat_200ExtraLight,
     Montserrat_300Light,
