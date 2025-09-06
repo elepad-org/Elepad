@@ -28,7 +28,6 @@ import {
 } from "@elepad/api-client";
 import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 import { useAuth } from "@/hooks/useAuth";
-import { FONT } from "@/styles/theme";
 import { COLORS, styles as baseStyles } from "@/styles/base";
 import { Pressable } from "react-native";
 
@@ -248,25 +247,16 @@ export default function FamilyGroup() {
         contentContainerStyle={baseStyles.container}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.footer}>
+        <View style={baseStyles.footer}>
           {(() => {
             const groupInfo = selectGroupInfo();
             const groupName = groupInfo?.name;
             if (!groupName) return null;
 
             return (
-              <View
-                style={{
-                  backgroundColor: COLORS.white,
-                  borderRadius: 8,
-                  marginTop: 20,
-                  marginBottom: 16,
-                  paddingVertical: 20,
-                  paddingHorizontal: 16,
-                }}
-              >
+              <View style={baseStyles.card}>
                 {isEditing ? (
-                  <View style={{ alignItems: "center", width: "100%" }}>
+                  <View style={baseStyles.center}>
                     <TextInput
                       style={[baseStyles.input, { marginTop: 8 }]}
                       value={newGroupName}
@@ -276,9 +266,10 @@ export default function FamilyGroup() {
                     <View
                       style={{
                         flexDirection: "row",
-                        justifyContent: "space-around",
+                        justifyContent: "space-between",
                         marginTop: 16,
                         width: "100%",
+                        gap: 12,
                       }}
                     >
                       <Button
@@ -550,8 +541,8 @@ export default function FamilyGroup() {
                 });
               }
             }}
-            contentStyle={styles.bottomButtonContent}
-            style={[styles.bottomButton, { marginBottom: 12 }]}
+            contentStyle={baseStyles.buttonContent}
+            style={[baseStyles.buttonSecondary, { marginBottom: 12 }]}
             buttonColor="#fff"
             textColor="#d32f2f"
           >
@@ -570,8 +561,8 @@ export default function FamilyGroup() {
                 mode="outlined"
                 icon="account-switch"
                 onPress={openTransferDialog}
-                contentStyle={styles.bottomButtonContent}
-                style={[styles.bottomButton, { marginBottom: 12 }]}
+                contentStyle={baseStyles.buttonContent}
+                style={[baseStyles.buttonSecondary, { marginBottom: 12 }]}
                 textColor={COLORS.primary}
               >
                 Transferir administración
@@ -648,7 +639,10 @@ export default function FamilyGroup() {
             visible={snackbarVisible}
             onDismiss={() => setSnackbarVisible(false)}
             duration={2200}
-            style={{ backgroundColor: COLORS.success, borderRadius: 8 }}
+            style={{
+              backgroundColor: snackbarError ? COLORS.error : COLORS.success,
+              borderRadius: 8,
+            }}
           >
             {snackbarMessage}
           </Snackbar>
@@ -708,7 +702,12 @@ export default function FamilyGroup() {
 
                   if (!membersArray || membersArray.length === 0) {
                     return (
-                      <Text style={styles.noMembersText}>
+                      <Text
+                        style={[
+                          baseStyles.subheading,
+                          { color: COLORS.textSecondary, fontStyle: "italic" },
+                        ]}
+                      >
                         No hay miembros disponibles
                       </Text>
                     );
@@ -719,28 +718,42 @@ export default function FamilyGroup() {
                       key={member.id}
                       onPress={() => selectNewOwner(member)}
                       style={[
-                        styles.memberRow,
+                        baseStyles.card,
                         {
                           borderBottomWidth: 1,
-                          borderBottomColor: "#e0e0e0",
+                          borderBottomColor: COLORS.border,
                           paddingVertical: 12,
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "space-between",
                         },
                       ]}
                     >
-                      <View style={styles.memberInfo}>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          flex: 1,
+                        }}
+                      >
                         {member.avatarUrl ? (
                           <Image
                             source={{ uri: member.avatarUrl }}
-                            style={styles.memberAvatar}
+                            style={{
+                              width: 50,
+                              height: 50,
+                              borderRadius: 25,
+                              marginRight: 12,
+                            }}
                           />
                         ) : (
-                          <View style={styles.memberAvatarPlaceholder}>
-                            <Text style={styles.memberInitials}>
+                          <View style={baseStyles.memberAvatarPlaceholder}>
+                            <Text style={baseStyles.memberInitials}>
                               {getInitials(member.displayName)}
                             </Text>
                           </View>
                         )}
-                        <Text style={styles.memberName}>
+                        <Text style={baseStyles.heading}>
                           {member.displayName}
                         </Text>
                       </View>
