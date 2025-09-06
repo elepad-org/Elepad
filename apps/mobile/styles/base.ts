@@ -4,7 +4,7 @@ import { FONT } from "./theme";
 // SISTEMA DE COLORES SIMPLIFICADO
 export const COLORS = {
   // Colores principales
-  primary: "#7fb3d3",
+  primary: "#5278CD",
   secondary: "#5278CD",
 
   // Fondos
@@ -17,6 +17,8 @@ export const COLORS = {
   textSecondary: "#64748b",
   textLight: "#666666",
   textPlaceholder: "#B2AFAE",
+
+  red: "#c82929a6",
 
   // Estados
   success: "green",
@@ -69,9 +71,6 @@ export const styles = StyleSheet.create({
     paddingTop: 12,
     justifyContent: "flex-start",
   },
-  footer: {
-    marginTop: 16,
-  },
   center: {
     flex: 1,
     justifyContent: "center",
@@ -90,9 +89,10 @@ export const styles = StyleSheet.create({
   // === BOTONES ===
   buttonPrimary: {
     marginTop: 20,
-    width: "100%",
-    borderRadius: 8,
+    width: "85%",
+    borderRadius: 20,
     backgroundColor: COLORS.secondary,
+    alignItems: "center",
   },
   buttonSecondary: {
     marginTop: 14,
@@ -123,6 +123,7 @@ export const styles = StyleSheet.create({
     marginTop: 16,
     backgroundColor: COLORS.white,
     borderRadius: 8,
+    borderColor: COLORS.white, // para evitar borde gris en Android no se la verdad todo un tema
   },
   inputOutline: {
     borderRadius: 8,
@@ -311,10 +312,9 @@ export const styles = StyleSheet.create({
 
   // === TARJETA DE MENÚ ===
   menuCard: {
-    marginHorizontal: 16,
     marginVertical: 8,
     backgroundColor: COLORS.white,
-    borderRadius: 12,
+    borderRadius: 20,
     elevation: 2,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },

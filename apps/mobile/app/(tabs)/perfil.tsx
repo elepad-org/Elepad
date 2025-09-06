@@ -87,20 +87,7 @@ export default function PerfilScreen() {
           </List.Section>
         </Card>
 
-        <View style={baseStyles.footer}>
-          <Button
-            mode="contained"
-            icon="pencil"
-            onPress={() => {
-              setFormName(displayName);
-              setEditOpen(true);
-            }}
-            contentStyle={baseStyles.buttonContent}
-            style={baseStyles.buttonPrimary}
-          >
-            Editar perfil
-          </Button>
-
+        <View style={baseStyles.container}>
           <Button
             mode="contained"
             icon="logout"
@@ -109,7 +96,7 @@ export default function PerfilScreen() {
               router.replace("/");
             }}
             contentStyle={baseStyles.buttonContent}
-            style={[baseStyles.buttonPrimary, { backgroundColor: "#fca5a5" }]}
+            style={[baseStyles.buttonPrimary, { backgroundColor: COLORS.red }]}
           >
             Cerrar sesión
           </Button>
