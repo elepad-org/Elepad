@@ -1,17 +1,33 @@
 import { Tabs } from "expo-router";
 import { Icon } from "react-native-paper";
+import { COLORS } from "../../styles/base";
 
 export default function TabLayout() {
   return (
-    <Tabs screenOptions={{ headerShown: false }}>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: "#ef4444", // Rojo para texto activo
+        tabBarInactiveTintColor: "#6b7280", // Gris para texto inactivo
+        tabBarStyle: {
+          backgroundColor: "#ffffff", // Fondo blanco de la barra
+          borderTopColor: "#ef4444", // Borde superior rojo
+          borderTopWidth: 2, // Grosor del borde
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: "600",
+        },
+      }}
+    >
       <Tabs.Screen
         name="home"
         options={{
           title: "Home",
-          tabBarIcon: ({ focused, color, size }) => (
+          tabBarIcon: ({ focused, size }) => (
             <Icon
               source={focused ? "home" : "home-outline"}
-              color={color}
+              color={COLORS.primary}
               size={size}
             />
           ),
@@ -21,10 +37,10 @@ export default function TabLayout() {
         name="explore"
         options={{
           title: "Explore",
-          tabBarIcon: ({ focused, color, size }) => (
+          tabBarIcon: ({ focused, size }) => (
             <Icon
               source={focused ? "compass" : "compass-outline"}
-              color={color}
+              color={COLORS.primary}
               size={size}
             />
           ),
@@ -34,10 +50,10 @@ export default function TabLayout() {
         name="juegos"
         options={{
           title: "Juegos",
-          tabBarIcon: ({ focused, color, size }) => (
+          tabBarIcon: ({ focused, size }) => (
             <Icon
               source={focused ? "gamepad-variant" : "gamepad-variant-outline"}
-              color={color}
+              color={COLORS.primary}
               size={size}
             />
           ),
@@ -47,10 +63,10 @@ export default function TabLayout() {
         name="configuracion"
         options={{
           title: "Configuración",
-          tabBarIcon: ({ focused, color, size }) => (
+          tabBarIcon: ({ focused, size }) => (
             <Icon
               source={focused ? "cog" : "cog-outline"}
-              color={color}
+              color={COLORS.primary}
               size={size}
             />
           ),
