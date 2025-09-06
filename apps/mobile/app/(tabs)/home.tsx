@@ -1,33 +1,17 @@
 import React from "react";
-import {
-  Alert,
-  StyleSheet,
-  View,
-  SafeAreaView,
-  StatusBar,
-  ScrollView,
-} from "react-native";
-import { ActivityIndicator, Text, Button, Avatar } from "react-native-paper";
+import { StatusBar, ScrollView, Image, View } from "react-native";
+import { ActivityIndicator, Text, Avatar, Card } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
-import { useRouter } from "expo-router";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import ActivitiesList from "../../components/ActivitiesList";
-import CalendarView from "@/components/CalendarView";
-import { FONT } from "@/styles/theme";
-
-const colors = {
-  primary: "#7fb3d3",
-  white: "#f9f9f9ff",
-  background: "#F4F7FF",
-};
+import { SafeAreaView } from "react-native-safe-area-context";
+import elepadMantenimiento from "../../assets/images/elepad_mantenimiento.png";
+import { COLORS, styles as baseStyles } from "@/styles/base";
 
 export default function HomeScreen() {
-  const { userElepad, loading, signOut } = useAuth();
-  const router = useRouter();
+  const { userElepad, loading } = useAuth();
 
   if (loading) {
     return (
-      <View style={styles.center}>
+      <View style={baseStyles.center}>
         <ActivityIndicator />
       </View>
     );
@@ -36,110 +20,66 @@ export default function HomeScreen() {
   const displayName =
     (userElepad?.displayName as string) || userElepad?.email || "Usuario";
 
+  const getInitials = (name: string) =>
+    name
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((n) => n[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "U";
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
+    <SafeAreaView style={baseStyles.safeArea}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
       {/* --- Header --- */}
-      <View style={styles.header}>
-        <MaterialCommunityIcons name="menu" size={40} color={colors.white} />
-        <View>
+      <View style={baseStyles.headerPrimary}>
+        <View style={baseStyles.welcomeTextContainer}>
+          <Text style={baseStyles.welcomeGreeting}>¡Hola!</Text>
           <Text
             numberOfLines={1}
             ellipsizeMode="tail"
-            style={styles.headerTitle}
-            // TODO: If the name is too long it should be truncated, otherwise it will overflow the menu item and the avatar
+            style={baseStyles.headerTitle}
           >
-            Bienvenido {displayName}
+            {displayName}
           </Text>
         </View>
-        <Avatar.Image
-          size={50}
-          source={{ uri: "https://i.pravatar.cc/150?u=a042581f4e29030" }}
-        />
+        {userElepad?.avatarUrl ? (
+          <Avatar.Image size={50} source={{ uri: userElepad?.avatarUrl }} />
+        ) : (
+          <View style={baseStyles.memberAvatarPlaceholder}>
+            <Text style={baseStyles.memberInitials}>
+              {getInitials(displayName)}
+            </Text>
+          </View>
+        )}
       </View>
 
-      <ScrollView style={styles.contentContainer}>
-        <View>
-          <ActivitiesList />
-          <CalendarView />
+      <ScrollView style={baseStyles.contentWithCurves}>
+        <View style={baseStyles.developmentContainer}>
+          <Image
+            source={elepadMantenimiento}
+            style={baseStyles.maintenanceImage}
+            resizeMode="contain"
+          />
+          <Card style={baseStyles.developmentCard} mode="elevated">
+            <Card.Content>
+              <Text style={baseStyles.developmentTitle}>
+                🚧 Página en desarrollo
+              </Text>
+              <Text style={baseStyles.developmentText}>
+                ¡Hola! Esta página está en construcción. Próximamente verás
+                nuevas funcionalidades increíbles que harán tu experiencia aún
+                mejor.
+              </Text>
+              <Text style={baseStyles.developmentSubtext}>
+                Mantente atento a las actualizaciones 🎉
+              </Text>
+            </Card.Content>
+          </Card>
         </View>
       </ScrollView>
-      <Button
-        mode="contained"
-        style={styles.logout}
-        icon="logout"
-        onPress={async () => {
-          await signOut();
-          router.replace("/");
-          Alert.alert("Sesión cerrada", "Has cerrado sesión correctamente.");
-        }}
-      >
-        Cerrar sesión
-      </Button>
-      <View
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-around",
-          marginBottom: 20,
-        }}
-      >
-        <Button
-          mode="contained"
-          style={styles.logout}
-          icon="logout"
-          onPress={async () => {
-            router.navigate("/home2");
-          }}
-        >
-          Ir a Home 2
-        </Button>
-        <Button
-          mode="contained"
-          style={styles.logout}
-          icon="logout"
-          onPress={async () => {
-            router.navigate("/home3");
-          }}
-        >
-          Ir a Home 3
-        </Button>
-      </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.primary,
-  },
-  header: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 20,
-    paddingTop: "12%",
-    paddingBottom: "20%",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontFamily: FONT.bold,
-    color: colors.white,
-  },
-  contentContainer: {
-    flex: 1,
-    backgroundColor: colors.background,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    marginTop: -40,
-    paddingTop: 10,
-  },
-  listContainer: {
-    padding: 8,
-  },
-  logout: { marginTop: 32, alignSelf: "center", borderRadius: 8 },
-});

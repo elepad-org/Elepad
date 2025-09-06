@@ -1,24 +1,49 @@
-import React from "react";
-import { StyleSheet, View } from "react-native";
-import { Text } from "react-native-paper";
-import { FONT } from "@/styles/theme";
+import { StatusBar, ScrollView, Image, View } from "react-native";
+import { ActivityIndicator, Text, Card } from "react-native-paper";
+import { useAuth } from "@/hooks/useAuth";
+import { SafeAreaView } from "react-native-safe-area-context";
+import elepadMantenimiento from "../../assets/images/elepad_mantenimiento.png";
+import { COLORS, styles as baseStyles } from "@/styles/base";
 
 export default function ExploreScreen() {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return (
+      <View style={baseStyles.center}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <Text variant="titleLarge" style={styles.title}>
-        Explorar
-      </Text>
-      <Text style={styles.paragraph}>
-        Esta es una nueva app que está en construcción.
-      </Text>
-      <Text style={styles.paragraph}>Muy pronto verás más contenido aquí.</Text>
-    </View>
+    <SafeAreaView style={baseStyles.safeArea}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
+
+      <ScrollView style={baseStyles.contentWithCurves}>
+        <View style={baseStyles.developmentContainer}>
+          <Image
+            source={elepadMantenimiento}
+            style={baseStyles.maintenanceImage}
+            resizeMode="contain"
+          />
+          <Card style={baseStyles.developmentCard} mode="elevated">
+            <Card.Content>
+              <Text style={baseStyles.developmentTitle}>
+                🚧 Página en desarrollo
+              </Text>
+              <Text style={baseStyles.developmentText}>
+                ¡Hola! Esta página está en construcción. Próximamente verás
+                nuevas funcionalidades increíbles que harán tu experiencia aún
+                mejor.
+              </Text>
+              <Text style={baseStyles.developmentSubtext}>
+                Mantente atento a las actualizaciones 🎉
+              </Text>
+            </Card.Content>
+          </Card>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 24 },
-  title: { fontFamily: FONT.bold, textAlign: "center", marginBottom: 12 },
-  paragraph: { textAlign: "center", marginTop: 4 },
-});

@@ -3,15 +3,18 @@ import {
   AddUserWithCodeSchema,
   NewFamilyGroupSchema,
   UpdateFamilyGroupSchema,
+  TransferOwnershipSchema,
 } from "./schema";
 import { FamilyGroupService } from "./service";
 import { ApiException, openApiErrorResponse } from "@/utils/api-error";
+import { withAuth } from "@/middleware/auth";
 
 export const familyGroupApp = new OpenAPIHono();
 
 declare module "hono" {
   interface ContextVariableMap {
     familyGroupService: FamilyGroupService;
+    user: { id: string };
   }
 }
 
@@ -164,6 +167,9 @@ familyGroupApp.openapi(
   },
 );
 
+// Apply auth middleware to the remove user endpoint
+familyGroupApp.use("/familyGroup/:idGroup/member/:idUser", withAuth);
+
 familyGroupApp.openapi(
   {
     method: "delete",
@@ -182,16 +188,22 @@ familyGroupApp.openapi(
           "Member removed from group; ensures at least one group is maintained (new personal group created)",
       },
       400: openApiErrorResponse("Invalid request"),
+      401: openApiErrorResponse("Unauthorized"),
+      403: openApiErrorResponse(
+        "You can only remove yourself from the group or be removed by the group owner",
+      ),
       404: openApiErrorResponse("Group or User not found"),
       500: openApiErrorResponse("Internal Server Error"),
     },
   },
   async (c) => {
     const { idGroup, idUser } = c.req.valid("param");
+    const adminUser = c.var.user;
 
     const result = await c.var.familyGroupService.removeUserFromFamilyGroup(
       idGroup,
       idUser,
+      adminUser.id,
     );
 
     if (!result) {
@@ -247,5 +259,75 @@ familyGroupApp.openapi(
     );
 
     return c.json(updatedGroup, 200);
+  },
+);
+
+// Apply auth middleware to the transfer ownership endpoint
+familyGroupApp.use("/familyGroup/:idGroup/transfer-ownership", withAuth);
+
+// Endpoint para transferir ownership del grupo familiar
+familyGroupApp.openapi(
+  {
+    method: "put",
+    path: "/familyGroup/{idGroup}/transfer-ownership",
+    tags: ["familyGroups"],
+    operationId: "transferFamilyGroupOwnership",
+    request: {
+      params: z.object({ idGroup: z.uuid() }),
+      body: {
+        content: {
+          "application/json": {
+            schema: TransferOwnershipSchema,
+          },
+        },
+        required: true,
+      },
+    },
+    responses: {
+      200: {
+        description: "Ownership transferred successfully",
+        content: {
+          "application/json": {
+            schema: z.object({
+              group: z.object({
+                id: z.string().uuid(),
+                name: z.string(),
+                ownerUserId: z.string().uuid(),
+                createdAt: z.string(),
+              }),
+              previousOwner: z.object({
+                id: z.string().uuid(),
+              }),
+              newOwner: z.object({
+                id: z.string().uuid(),
+                displayName: z.string(),
+              }),
+            }),
+          },
+        },
+      },
+      400: openApiErrorResponse(
+        "Invalid request - same owner or new owner not a member",
+      ),
+      401: openApiErrorResponse("Unauthorized"),
+      403: openApiErrorResponse(
+        "Only the current group owner can transfer ownership",
+      ),
+      404: openApiErrorResponse("Group or new owner not found"),
+      500: openApiErrorResponse("Internal Server Error"),
+    },
+  },
+  async (c) => {
+    const { idGroup } = c.req.valid("param");
+    const { newOwnerId } = c.req.valid("json");
+    const currentUser = c.var.user;
+
+    const result = await c.var.familyGroupService.transferOwnership(
+      idGroup,
+      currentUser.id,
+      newOwnerId,
+    );
+
+    return c.json(result, 200);
   },
 );

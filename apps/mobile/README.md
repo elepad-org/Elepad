@@ -2,7 +2,66 @@
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
-## Get started
+## Sistema de Estilos Simplificado
+
+La app usa un **sistema de estilos minimalista** para mantener consistencia visual y reducir duplicación de código. El objetivo es tener **pocas opciones** para que el equipo tenga menos decisiones que tomar.
+
+### 🎨 Archivo Principal: `/styles/base.ts`
+
+Este archivo contiene **SOLO** los estilos esenciales:
+
+#### Colores (Solo los necesarios):
+
+- `COLORS.primary` - Color principal azul
+- `COLORS.secondary` - Botones principales
+- `COLORS.background` - Fondo general
+- `COLORS.loginBackground` - Fondo de login
+- `COLORS.white` - Blanco
+- `COLORS.text` - Texto principal
+- `COLORS.textSecondary` - Texto secundario
+- `COLORS.textLight` - Texto claro
+
+#### Estilos Base (Minimalistas):
+
+- **Layouts**: `safeArea`, `safeAreaLogin`, `container`, `center`
+- **Tarjetas**: `card`
+- **Botones**: `buttonPrimary`, `buttonSecondary`, `buttonGoogle`, `buttonContent`
+- **Inputs**: `input`, `inputOutline`
+- **Textos**: `heading`, `subheading`, `footerText`
+- **Logo**: `logoWrap`, `logo`, `brand`, `brandMedium`
+- **Headers**: `headerPrimary`, `welcomeGreeting`, `headerTitle`
+- **Desarrollo**: `developmentContainer`, `developmentCard`, `developmentTitle`
+
+### 🔧 Cómo usar en componentes:
+
+```typescript
+import { COLORS, styles } from "@/styles/base";
+
+export default function MiPantalla() {
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <Text style={styles.heading}>Mi Título</Text>
+        <Button style={styles.buttonPrimary}>Mi Botón</Button>
+      </View>
+    </SafeAreaView>
+  );
+}
+```
+
+### ✅ Beneficios:
+
+1. **Menos decisiones**: Solo hay 1-2 opciones para cada elemento
+2. **Consistencia garantizada**: Todos usan los mismos estilos
+3. **Código limpio**: No hay StyleSheet.create() en cada componente
+4. **Fácil mantenimiento**: Cambios centralizados
+5. **Visual idéntico**: Se mantiene la apariencia exacta
+
+### 🚫 Evita:
+
+- Crear estilos locales en componentes
+- Usar colores hardcodeados como "#7fb3d3"
+- Duplicar estilos entre pantallas## Get started
 
 1. Install dependencies
 

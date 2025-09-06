@@ -1,11 +1,5 @@
 import React, { useMemo, useState } from "react";
-import {
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  ScrollView,
-  View,
-} from "react-native";
+import { SafeAreaView, StatusBar, ScrollView, View } from "react-native";
 import {
   Button,
   Card,
@@ -19,17 +13,12 @@ import { patchUsersId } from "@elepad/api-client/src/gen/client";
 import { EditNameDialog, UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import ProfileHeader from "@/components/ProfileHeader";
 import { useRouter } from "expo-router";
-
-const colors = {
-  primary: "#7fb3d3",
-  white: "#f9f9f9ff",
-  background: "#F4F7FF",
-};
+import { COLORS, styles as baseStyles } from "@/styles/base";
 
 export default function PerfilScreen() {
   const router = useRouter();
 
-  const { userElepad, refreshUserElepad } = useAuth();
+  const { userElepad, refreshUserElepad, signOut } = useAuth();
   const displayName = userElepad?.displayName?.trim() || "Usuario";
   const email = userElepad?.email || "-";
   const avatarUrl = userElepad?.avatarUrl || "";
@@ -50,10 +39,10 @@ export default function PerfilScreen() {
   const initials = useMemo(() => getInitials(displayName), [displayName]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
+    <SafeAreaView style={baseStyles.safeArea}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView contentContainerStyle={baseStyles.contentContainer}>
         <ProfileHeader
           name={displayName}
           email={email}
@@ -61,7 +50,7 @@ export default function PerfilScreen() {
           onEditPhoto={() => setPhotoOpen(true)}
         />
 
-        <Card style={styles.menuCard} mode="elevated">
+        <Card style={baseStyles.menuCard}>
           <List.Section>
             <List.Item
               title="Editar perfil"
@@ -98,7 +87,7 @@ export default function PerfilScreen() {
           </List.Section>
         </Card>
 
-        <View style={styles.footer}>
+        <View style={baseStyles.footer}>
           <Button
             mode="contained"
             icon="pencil"
@@ -106,10 +95,23 @@ export default function PerfilScreen() {
               setFormName(displayName);
               setEditOpen(true);
             }}
-            contentStyle={styles.bottomButtonContent}
-            style={styles.bottomButton}
+            contentStyle={baseStyles.buttonContent}
+            style={baseStyles.buttonPrimary}
           >
             Editar perfil
+          </Button>
+
+          <Button
+            mode="contained"
+            icon="logout"
+            onPress={async () => {
+              await signOut();
+              router.replace("/");
+            }}
+            contentStyle={baseStyles.buttonContent}
+            style={[baseStyles.buttonPrimary, { backgroundColor: "#fca5a5" }]}
+          >
+            Cerrar sesión
           </Button>
         </View>
         <Portal>
@@ -163,7 +165,6 @@ export default function PerfilScreen() {
             visible={snackbarVisible}
             onDismiss={() => setSnackbarVisible(false)}
             duration={2200}
-            style={styles.successSnackbar}
           >
             ✓ Perfil actualizado
           </Snackbar>
@@ -172,70 +173,3 @@ export default function PerfilScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  container: {
-    flexGrow: 1,
-    padding: 16,
-    paddingTop: 12,
-    justifyContent: "flex-start",
-  },
-  profileHeader: {
-    alignItems: "center",
-    marginTop: 8,
-    marginBottom: 8,
-  },
-  avatarWrapper: {
-    position: "relative",
-    marginBottom: 12,
-  },
-  avatarBadge: {
-    position: "absolute",
-    right: -2,
-    bottom: -2,
-    borderWidth: 2,
-    borderColor: "#fff",
-  },
-  name: {
-    textAlign: "center",
-  },
-  subtitle: {
-    color: "#667085",
-    textAlign: "center",
-  },
-  menuCard: {
-    borderRadius: 16,
-    overflow: "hidden",
-    marginTop: 8,
-  },
-  footer: {
-    marginTop: 16,
-  },
-  bottomButton: {
-    borderRadius: 10,
-  },
-  bottomButtonContent: {
-    height: 48,
-  },
-  successSnackbar: {
-    backgroundColor: "green",
-  },
-  photoPreviewContainer: {
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  photoActionsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 8,
-    marginBottom: 8,
-  },
-  helperText: {
-    marginTop: 4,
-    color: "#6b7280",
-  },
-});
