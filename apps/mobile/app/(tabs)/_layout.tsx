@@ -7,12 +7,14 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#ef4444", // Rojo para texto activo
-        tabBarInactiveTintColor: "#6b7280", // Gris para texto inactivo
+        tabBarActiveTintColor: COLORS.textLight, // Rojo para texto activo
+        tabBarInactiveTintColor: COLORS.textLight, // Gris para texto inactivo
         tabBarStyle: {
-          backgroundColor: "#ffffff", // Fondo blanco de la barra
-          borderTopColor: "#ef4444", // Borde superior rojo
-          borderTopWidth: 2, // Grosor del borde
+          backgroundColor: COLORS.border,
+          borderTopWidth: 0, // Sin borde para que se vea uniforme
+          elevation: 0, // Sin sombra en Android
+          shadowOpacity: 0, // Sin sombra en iOS
+          paddingTop: 4, // Margen arriba para toda la barra
         },
         tabBarLabelStyle: {
           fontSize: 12,
@@ -27,7 +29,7 @@ export default function TabLayout() {
           tabBarIcon: ({ focused, size }) => (
             <Icon
               source={focused ? "home" : "home-outline"}
-              color={COLORS.primary}
+              color={COLORS.textLight}
               size={size}
             />
           ),
@@ -40,7 +42,7 @@ export default function TabLayout() {
           tabBarIcon: ({ focused, size }) => (
             <Icon
               source={focused ? "compass" : "compass-outline"}
-              color={COLORS.primary}
+              color={COLORS.textLight}
               size={size}
             />
           ),
@@ -53,7 +55,7 @@ export default function TabLayout() {
           tabBarIcon: ({ focused, size }) => (
             <Icon
               source={focused ? "gamepad-variant" : "gamepad-variant-outline"}
-              color={COLORS.primary}
+              color={COLORS.textLight}
               size={size}
             />
           ),
@@ -62,11 +64,11 @@ export default function TabLayout() {
       <Tabs.Screen
         name="configuracion"
         options={{
-          title: "Configuración",
+          title: "Config.",
           tabBarIcon: ({ focused, size }) => (
             <Icon
               source={focused ? "cog" : "cog-outline"}
-              color={COLORS.primary}
+              color={COLORS.textLight}
               size={size}
             />
           ),

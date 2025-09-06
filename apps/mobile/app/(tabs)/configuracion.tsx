@@ -153,7 +153,7 @@ export default function ConfiguracionScreen() {
             onDismiss={() => setSnackbarVisible(false)}
             duration={2200}
           >
-            ✓ Información actualizada
+            ✓ Información actualizada correctamente
           </Snackbar>
         </Portal>
       </ScrollView>

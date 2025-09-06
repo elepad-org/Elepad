@@ -8,8 +8,8 @@ export const COLORS = {
   secondary: "#5278CD",
 
   // Fondos
-  background: "#F8F9FA",
-  loginBackground: "#FFF9F1",
+  background: "#FFF4E3",
+  backgroundSecondary: "#F8F9FA",
   white: "#ffffff",
 
   // Textos
@@ -23,9 +23,9 @@ export const COLORS = {
   // Estados
   success: "green",
   error: "#d32f2f",
-
+  accent: "#f4efe9ff",
   // Bordes y líneas
-  border: "#E6E3E0",
+  border: "#dac8b676",
   separator: "#111",
 
   // Específicos
@@ -59,7 +59,7 @@ export const styles = StyleSheet.create({
   },
   safeAreaLogin: {
     flex: 1,
-    backgroundColor: COLORS.loginBackground,
+    backgroundColor: COLORS.background,
   },
   container: {
     flex: 1,
@@ -139,11 +139,10 @@ export const styles = StyleSheet.create({
   },
 
   subheading: {
-    fontSize: 13,
+    fontSize: 14,
     color: COLORS.textLight,
-    marginTop: 8,
+    marginTop: 6,
     textAlign: "center",
-    fontFamily: FONT.semiBold,
   },
   footerText: {
     marginTop: 18,
@@ -313,7 +312,7 @@ export const styles = StyleSheet.create({
   // === TARJETA DE MENÚ ===
   menuCard: {
     marginVertical: 8,
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.accent,
     borderRadius: 20,
     elevation: 2,
     shadowColor: "#000",

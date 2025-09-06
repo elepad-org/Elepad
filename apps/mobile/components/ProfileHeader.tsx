@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Avatar, IconButton, Text, useTheme } from "react-native-paper";
-import { COLORS } from "@/styles/base";
+import { COLORS, styles as baseStyles } from "@/styles/base";
 
 export type ProfileHeaderProps = {
   name: string;
@@ -51,11 +51,11 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           />
         ) : null}
       </View>
-      <Text variant="titleLarge" style={styles.name}>
+      <Text variant="titleLarge" style={baseStyles.heading}>
         {name}
       </Text>
       {!!email && (
-        <Text variant="bodyMedium" style={styles.subtitle}>
+        <Text variant="bodyMedium" style={baseStyles.subheading}>
           {email}
         </Text>
       )}
@@ -79,13 +79,6 @@ const styles = StyleSheet.create({
     bottom: -2,
     borderWidth: 2,
     borderColor: "#fff",
-  },
-  name: {
-    textAlign: "center",
-  },
-  subtitle: {
-    color: "#667085",
-    textAlign: "center",
   },
 });
 
