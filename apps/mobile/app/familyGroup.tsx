@@ -597,7 +597,7 @@ export default function FamilyGroup() {
 
             {/* Link para volver, sin botón */}
             <Text
-              onPress={() => router.push("/perfil")}
+              onPress={() => router.push("/(tabs)/configuracion")}
               style={{
                 color: COLORS.primary,
                 marginVertical: 16,

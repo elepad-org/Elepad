@@ -31,12 +31,25 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="perfil"
+        name="juegos"
         options={{
-          title: "Perfil",
+          title: "Juegos",
           tabBarIcon: ({ focused, color, size }) => (
             <Icon
-              source={focused ? "account" : "account-outline"}
+              source={focused ? "cog" : "cog-outline"}
+              color={color}
+              size={size}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="configuracion"
+        options={{
+          title: "Configuración",
+          tabBarIcon: ({ focused, color, size }) => (
+            <Icon
+              source={focused ? "cog" : "cog-outline"}
               color={color}
               size={size}
             />

@@ -15,7 +15,7 @@ import ProfileHeader from "@/components/ProfileHeader";
 import { useRouter } from "expo-router";
 import { COLORS, styles as baseStyles } from "@/styles/base";
 
-export default function PerfilScreen() {
+export default function ConfiguracionScreen() {
   const router = useRouter();
 
   const { userElepad, refreshUserElepad, signOut } = useAuth();
@@ -53,7 +53,7 @@ export default function PerfilScreen() {
         <Card style={baseStyles.menuCard}>
           <List.Section>
             <List.Item
-              title="Editar perfil"
+              title="Editar información"
               left={(props) => <List.Icon {...props} icon="account-edit" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
               onPress={() => {
@@ -153,7 +153,7 @@ export default function PerfilScreen() {
             onDismiss={() => setSnackbarVisible(false)}
             duration={2200}
           >
-            ✓ Perfil actualizado
+            ✓ Información actualizada
           </Snackbar>
         </Portal>
       </ScrollView>
