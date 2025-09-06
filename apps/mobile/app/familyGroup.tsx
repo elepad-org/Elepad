@@ -247,7 +247,7 @@ export default function FamilyGroup() {
         contentContainerStyle={baseStyles.contentContainer}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={baseStyles.footer}>
+        <View style={baseStyles.container}>
           {(() => {
             const groupInfo = selectGroupInfo();
             const groupName = groupInfo?.name;

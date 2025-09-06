@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Avatar, IconButton, Text, useTheme } from "react-native-paper";
+import { COLORS } from "@/styles/base";
 
 export type ProfileHeaderProps = {
   name: string;
@@ -42,10 +43,10 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
         {onEditPhoto ? (
           <IconButton
             icon="pencil"
-            size={16}
+            size={15}
             onPress={onEditPhoto}
             iconColor="#fff"
-            containerColor={theme.colors.primary}
+            containerColor={COLORS.primary}
             style={styles.avatarBadge}
           />
         ) : null}
