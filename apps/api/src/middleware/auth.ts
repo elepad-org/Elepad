@@ -13,7 +13,6 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
 
   // Discard the 'Bearer ' prefix
   const token = authHeader.split(" ")[1];
-
   const {
     data: { user },
     error,

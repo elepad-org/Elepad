@@ -39,3 +39,12 @@ export const AddUserWithCodeSchema = z
   .openapi("AddUserWithCode");
 
 export type AddUserWithCode = z.infer<typeof AddUserWithCodeSchema>;
+
+export const TransferOwnershipSchema = z
+  .object({
+    newOwnerId: z.uuid(),
+  })
+  .strict()
+  .openapi("TransferOwnership");
+
+export type TransferOwnership = z.infer<typeof TransferOwnershipSchema>;
