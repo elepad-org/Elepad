@@ -33,8 +33,6 @@ import { FONT } from "@/styles/theme";
 import { COLORS, commonStyles } from "@/styles/shared";
 import { Pressable } from "react-native";
 
-// Using shared COLORS from shared.ts
-
 export default function FamilyGroup() {
   const { userElepad, refreshUserElepad } = useAuth();
   const [invitationCode, setInvitationCode] =
@@ -84,6 +82,10 @@ export default function FamilyGroup() {
     );
   };
 
+  // Variable para determinar si el usuario actual es el owner del grupo
+  const groupInfo = selectGroupInfo();
+  const isOwnerOfGroup = groupInfo?.owner?.id === userElepad?.id;
+
   const getInitials = (name: string) =>
     (name || "")
       .split(/\s+/)
@@ -128,13 +130,11 @@ export default function FamilyGroup() {
 
       // Si el usuario se está saliendo del grupo, necesitamos refrescar su información
       if (isSelfRemoval) {
-        // Refrescar la información del usuario para obtener el nuevo groupId
         await refreshUserElepad();
         // Pequeña pausa para asegurar que el backend haya procesado todo
         await new Promise((resolve) => setTimeout(resolve, 500));
       }
 
-      // Refrescar la lista de miembros del grupo
       await membersQuery.refetch();
 
       const message = isSelfRemoval
@@ -198,7 +198,6 @@ export default function FamilyGroup() {
         data: { newOwnerId: selectedNewOwner.id },
       });
 
-      // Refrescar la lista de miembros para mostrar los nuevos datos
       await membersQuery.refetch();
 
       Alert.alert(
@@ -227,7 +226,6 @@ export default function FamilyGroup() {
 
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.footer}>
-          {/* Nombre del grupo (centrado y lindo) */}
           {(() => {
             const groupInfo = selectGroupInfo();
             const groupName = groupInfo?.name;
@@ -312,16 +310,11 @@ export default function FamilyGroup() {
               </View>
             );
           })()}
-          {/* Mostramos los miembros del grupo Familiar */}
           <View style={styles.membersSection}>
-            {/* Antes de los miembros debemos mostrar centrado y lindo el nombre del grupo */}
-
             <Text style={styles.membersTitle}>Miembros del grupo</Text>
             {(() => {
-              const groupInfo = selectGroupInfo();
               if (!groupInfo) return null;
               const o = groupInfo.owner;
-              const isCurrentUserOwner = o.id === userElepad?.id;
 
               return (
                 <View style={[styles.memberRow, { borderBottomWidth: 0 }]}>
@@ -346,7 +339,7 @@ export default function FamilyGroup() {
                     </View>
                   </View>
                   {/* Solo mostrar basurero si el owner actual está viendo a otro owner (caso edge) */}
-                  {isCurrentUserOwner && o.id !== userElepad?.id && (
+                  {isOwnerOfGroup && o.id !== userElepad?.id && (
                     <IconButton
                       icon="delete"
                       size={22}
@@ -364,17 +357,10 @@ export default function FamilyGroup() {
               <Text style={styles.membersError}>Error cargando miembros</Text>
             ) : (
               (() => {
-                const groupInfo = selectGroupInfo();
                 const membersArray = groupInfo?.members;
-                const isCurrentUserOwner =
-                  groupInfo?.owner?.id === userElepad?.id;
 
                 if (!membersArray || membersArray.length === 0) {
-                  return (
-                    <Text style={styles.noMembersText}>
-                      No hay miembros para mostrar
-                    </Text>
-                  );
+                  return null;
                 }
 
                 return membersArray.map((m) => (
@@ -395,8 +381,8 @@ export default function FamilyGroup() {
                       <Text style={styles.memberName}>{m.displayName}</Text>
                     </View>
 
-                    {/* Solo mostrar basurero si el usuario actual es owner */}
-                    {isCurrentUserOwner && (
+                    {/* Solo mostrar la opción de eliminar si el usuario actual es owner */}
+                    {isOwnerOfGroup && (
                       <IconButton
                         icon="delete"
                         size={22}
@@ -416,10 +402,7 @@ export default function FamilyGroup() {
             mode="outlined"
             icon="exit-to-app"
             onPress={() => {
-              const groupInfo = selectGroupInfo();
-              const isOwner = groupInfo?.owner?.id === userElepad?.id;
-
-              if (isOwner) {
+              if (isOwnerOfGroup) {
                 Alert.alert(
                   "No puedes salir del grupo",
                   "Como administrador del grupo, primero debes transferir la administración a otro miembro antes de poder salir.",
@@ -447,12 +430,10 @@ export default function FamilyGroup() {
 
           {/* Botón de transferir ownership (solo para el owner) */}
           {(() => {
-            const groupInfo = selectGroupInfo();
-            const isOwner = groupInfo?.owner?.id === userElepad?.id;
             const hasMembers =
               groupInfo?.members && groupInfo.members.length > 0;
 
-            if (!isOwner || !hasMembers) return null;
+            if (!isOwnerOfGroup || !hasMembers) return null;
 
             return (
               <Button
