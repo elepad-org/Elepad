@@ -20,7 +20,7 @@ import {
 } from "react-native-paper";
 import { Link } from "expo-router";
 import {
-  getFamilyGroupIdGroupInvite,
+  useGetFamilyGroupIdGroupInvite,
   getFamilyGroupIdGroupInviteResponse,
   useGetFamilyGroupIdGroupMembers,
   useRemoveUserFromFamilyGroup,
@@ -41,11 +41,17 @@ export default function FamilyGroup() {
   const groupId = userElepad?.groupId;
 
   const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarError, setSnackbarError] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
 
-  const [isUpdating, setIsUpdating] = useState(false);
   const patchFamilyGroup = usePatchFamilyGroupIdGroup(); // Este hook ya maneja la mutación
+
+  // Hook para crear código de invitación
+  const inviteQuery = useGetFamilyGroupIdGroupInvite(groupId ?? "", {
+    query: { enabled: false }, // No ejecutar automáticamente
+  });
 
   // Confirmación de eliminación
   const [confirmVisible, setConfirmVisible] = useState(false);
@@ -96,10 +102,25 @@ export default function FamilyGroup() {
       .toUpperCase();
 
   const createInvitationCode = async () => {
-    const link = await getFamilyGroupIdGroupInvite(groupId ?? "1");
-    console.log(link);
-    setInvitationCode(link);
-    setSnackbarVisible(true);
+    try {
+      const result = await inviteQuery.refetch();
+      if (result.data) {
+        setInvitationCode(result.data);
+        setSnackbarMessage(
+          `Enlace de invitación generado correctamente: http://elepad.com/invite/${result.data}`,
+        );
+        setSnackbarError(false);
+        setSnackbarVisible(true);
+      }
+    } catch (e: unknown) {
+      const msg =
+        e instanceof Error
+          ? e.message
+          : "Error al generar el enlace de invitación";
+      setSnackbarMessage(msg);
+      setSnackbarError(true);
+      setSnackbarVisible(true);
+    }
   };
 
   const openConfirm = (member: {
@@ -224,7 +245,10 @@ export default function FamilyGroup() {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.footer}>
           {(() => {
             const groupInfo = selectGroupInfo();
@@ -244,7 +268,7 @@ export default function FamilyGroup() {
                       <Button
                         mode="text"
                         onPress={() => setIsEditing(false)}
-                        disabled={isUpdating}
+                        disabled={patchFamilyGroup.isPending}
                       >
                         Cancelar
                       </Button>
@@ -257,12 +281,15 @@ export default function FamilyGroup() {
                             return;
                           }
                           try {
-                            setIsUpdating(true);
                             await patchFamilyGroup.mutateAsync({
                               idGroup: groupId,
                               data: { name: newGroupName },
                             });
                             setIsEditing(false);
+                            setSnackbarMessage(
+                              "Nombre del Grupo Familiar actualizado correctamente",
+                            );
+                            setSnackbarError(false);
                             setSnackbarVisible(true);
                             // Refrescar los datos manualmente
                             if (membersQuery.refetch) {
@@ -272,14 +299,16 @@ export default function FamilyGroup() {
                             const msg =
                               e instanceof Error
                                 ? e.message
-                                : "Error al actualizar";
-                            console.warn(msg);
-                          } finally {
-                            setIsUpdating(false);
+                                : "Error al actualizar el nombre del grupo";
+                            setSnackbarMessage(msg);
+                            setSnackbarError(true);
+                            setSnackbarVisible(true);
                           }
                         }}
-                        loading={isUpdating}
-                        disabled={!newGroupName.trim()}
+                        loading={patchFamilyGroup.isPending}
+                        disabled={
+                          !newGroupName.trim() || patchFamilyGroup.isPending
+                        }
                       >
                         Guardar
                       </Button>
@@ -457,6 +486,8 @@ export default function FamilyGroup() {
             }}
             contentStyle={styles.bottomButtonContent}
             style={styles.bottomButton}
+            loading={inviteQuery.isFetching}
+            disabled={inviteQuery.isFetching}
           >
             Crear enlace de invitación
           </Button>
@@ -483,9 +514,11 @@ export default function FamilyGroup() {
             visible={snackbarVisible}
             onDismiss={() => setSnackbarVisible(false)}
             duration={2200}
-            style={styles.successSnackbar}
+            style={[
+              snackbarError ? styles.errorSnackbar : styles.successSnackbar,
+            ]}
           >
-            {`Enlace de invitación generado correctamente: http://elepad.com/invite/${invitationCode} `}
+            {snackbarMessage}
           </Snackbar>
 
           <Dialog visible={confirmVisible} onDismiss={closeConfirm}>
@@ -680,5 +713,8 @@ const styles = StyleSheet.create({
     fontFamily: FONT.regular,
     fontSize: 12,
     color: COLORS.text.tertiary,
+  },
+  errorSnackbar: {
+    backgroundColor: "#d32f2f",
   },
 });
