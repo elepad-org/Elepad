@@ -158,8 +158,8 @@ export const styles = StyleSheet.create({
     marginTop: 115,
   },
   logo: {
-    width: 230,
-    height: 230,
+    width: 240,
+    height: 240,
   },
   brand: {
     marginTop: 20,
