@@ -50,7 +50,7 @@ export default function PerfilScreen() {
           onEditPhoto={() => setPhotoOpen(true)}
         />
 
-        <Card style={baseStyles.menuCard} mode="elevated">
+        <Card style={baseStyles.menuCard}>
           <List.Section>
             <List.Item
               title="Editar perfil"
@@ -95,8 +95,8 @@ export default function PerfilScreen() {
               setFormName(displayName);
               setEditOpen(true);
             }}
-            contentStyle={baseStyles.bottomButtonContent}
-            style={baseStyles.bottomButton}
+            contentStyle={baseStyles.buttonContent}
+            style={baseStyles.buttonPrimary}
           >
             Editar perfil
           </Button>
@@ -108,8 +108,8 @@ export default function PerfilScreen() {
               await signOut();
               router.replace("/");
             }}
-            contentStyle={baseStyles.bottomButtonContent}
-            style={[baseStyles.bottomButton, baseStyles.logoutButton]}
+            contentStyle={baseStyles.buttonContent}
+            style={[baseStyles.buttonPrimary, { backgroundColor: "#fca5a5" }]}
           >
             Cerrar sesión
           </Button>
@@ -165,7 +165,6 @@ export default function PerfilScreen() {
             visible={snackbarVisible}
             onDismiss={() => setSnackbarVisible(false)}
             duration={2200}
-            style={baseStyles.successSnackbar}
           >
             ✓ Perfil actualizado
           </Snackbar>
