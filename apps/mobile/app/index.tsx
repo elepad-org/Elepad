@@ -48,7 +48,7 @@ export default function IndexRedirect() {
                 style={baseStyles.logo}
                 resizeMode="contain"
               />
-              <Text style={baseStyles.brand}>Elepad</Text>
+              <Text style={baseStyles.brand}> Elepad </Text>
             </View>
             <View style={baseStyles.separatorWrap}>
               <View style={baseStyles.separator} />

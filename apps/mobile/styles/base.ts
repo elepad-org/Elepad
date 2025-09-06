@@ -130,11 +130,13 @@ export const styles = StyleSheet.create({
 
   // === TEXTOS ===
   heading: {
-    fontSize: 18,
+    fontSize: 20,
     marginTop: 6,
     fontFamily: FONT.semiBold,
     color: COLORS.text,
+    textAlign: "center",
   },
+
   subheading: {
     fontSize: 13,
     color: COLORS.textLight,

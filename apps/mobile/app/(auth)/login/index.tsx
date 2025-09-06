@@ -39,26 +39,4 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  logoContainer: {
-    width: 300,
-    height: 300,
-    marginHorizontal: "15%",
-    marginTop: 50,
-  },
-  title: { color: "white", textAlign: "center", fontFamily: FONT.bold },
-  registerRow: { flexDirection: "row", justifyContent: "center" },
-  buttonNew: { fontFamily: FONT.semiBold, textAlign: "center", lineHeight: 60 },
-  buttonAqui: {
-    fontFamily: FONT.bold,
-    textAlign: "center",
-    lineHeight: 60,
-    textDecorationLine: "underline",
-  },
-  inlineBack: {
-    marginTop: 22,
-    textAlign: "center",
-    fontFamily: FONT.regular,
-    fontSize: 14,
-    color: "#666",
-  },
 });

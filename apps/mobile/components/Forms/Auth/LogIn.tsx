@@ -7,6 +7,7 @@ import { Platform, Animated } from "react-native";
 import googleLogo from "@/assets/images/google.png";
 import { Link } from "expo-router";
 import { FONT } from "@/styles/theme";
+import { COLORS, styles as baseStyles } from "@/styles/base";
 
 export default function LogIn() {
   const [email, setEmail] = useState("");
@@ -47,7 +48,7 @@ export default function LogIn() {
   return (
     <Surface style={styles.surface} elevation={2}>
       <View style={styles.containerPadding}>
-        <Text style={styles.heading}>Iniciar Sesión</Text>
+        <Text style={baseStyles.heading}>Iniciar Sesión</Text>
         <Text style={styles.subheading}>Ingresa tu email y tu contraseña</Text>
 
         <TextInput
@@ -175,12 +176,6 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "transparent",
     alignItems: "center",
-  },
-  heading: {
-    fontSize: 22,
-    marginTop: 6,
-    fontFamily: FONT.semiBold,
-    textAlign: "center",
   },
   subheading: {
     fontSize: 13,
