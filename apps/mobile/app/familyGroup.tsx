@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  StyleSheet,
   SafeAreaView,
   StatusBar,
   ScrollView,
@@ -29,10 +28,8 @@ import {
 import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 import { useAuth } from "@/hooks/useAuth";
 import { FONT } from "@/styles/theme";
-import { COLORS, commonStyles } from "@/styles/shared";
+import { COLORS, styles as baseStyles } from "@/styles/base";
 import { Pressable } from "react-native";
-
-// Using shared COLORS from shared.ts
 
 export default function FamilyGroup() {
   const { userElepad } = useAuth();
@@ -137,27 +134,27 @@ export default function FamilyGroup() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={baseStyles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.footer}>
+      <ScrollView contentContainerStyle={baseStyles.contentContainer}>
+        <View style={baseStyles.footer}>
           {/* Nombre del grupo (centrado y lindo) */}
           {(() => {
             const groupInfo = selectGroupInfo();
             const groupName = groupInfo?.name;
             if (!groupName) return null;
             return (
-              <View style={styles.groupHeaderCard}>
+              <View style={baseStyles.groupHeaderCard}>
                 {isEditing ? (
-                  <View style={styles.editContainer}>
+                  <View style={baseStyles.editContainer}>
                     <TextInput
-                      style={styles.nameInput}
+                      style={baseStyles.nameInput}
                       value={newGroupName}
                       onChangeText={setNewGroupName}
                       autoFocus
                     />
-                    <View style={styles.editButtons}>
+                    <View style={baseStyles.editButtons}>
                       <Button
                         mode="text"
                         onPress={() => setIsEditing(false)}
@@ -208,18 +205,20 @@ export default function FamilyGroup() {
                       setNewGroupName(groupName || "");
                       setIsEditing(true);
                     }}
-                    style={styles.nameContainer}
+                    style={baseStyles.nameContainer}
                   >
-                    <Text style={styles.groupHeaderSubtitle}>
+                    <Text style={baseStyles.groupHeaderSubtitle}>
                       Grupo Familiar
                     </Text>
-                    <View style={styles.nameRowContainer}>
-                      <Text style={styles.groupHeaderTitle}>{groupName}</Text>
+                    <View style={baseStyles.nameRowContainer}>
+                      <Text style={baseStyles.groupHeaderTitle}>
+                        {groupName}
+                      </Text>
                       <IconButton
                         icon="pencil"
                         size={18}
                         iconColor="#64748b"
-                        style={styles.editIcon}
+                        style={baseStyles.editIcon}
                       />
                     </View>
                   </Pressable>
@@ -228,31 +227,31 @@ export default function FamilyGroup() {
             );
           })()}
           {/* Mostramos los miembros del grupo Familiar */}
-          <View style={styles.membersSection}>
+          <View style={baseStyles.membersSection}>
             {/* Antes de los miembros debemos mostrar centrado y lindo el nombre del grupo */}
 
-            <Text style={styles.membersTitle}>Miembros del grupo</Text>
+            <Text style={baseStyles.membersTitle}>Miembros del grupo</Text>
             {(() => {
               const groupInfo = selectGroupInfo();
               if (!groupInfo) return null;
               const o = groupInfo.owner;
               return (
-                <View style={[styles.memberRow, { borderBottomWidth: 0 }]}>
-                  <View style={styles.memberInfo}>
+                <View style={[baseStyles.memberRow, { borderBottomWidth: 0 }]}>
+                  <View style={baseStyles.memberInfo}>
                     {o.avatarUrl ? (
                       <Image
                         source={{ uri: o.avatarUrl }}
-                        style={styles.memberAvatar}
+                        style={baseStyles.memberAvatar}
                       />
                     ) : (
-                      <View style={styles.memberAvatarPlaceholder}>
-                        <Text style={styles.memberInitials}>
+                      <View style={baseStyles.memberAvatarPlaceholder}>
+                        <Text style={baseStyles.memberInitials}>
                           {getInitials(o.displayName)}
                         </Text>
                       </View>
                     )}
                     <View>
-                      <Text style={styles.memberName}>{o.displayName}</Text>
+                      <Text style={baseStyles.memberName}>{o.displayName}</Text>
                       <Text style={{ color: "#64748b", fontSize: 12 }}>
                         Owner
                       </Text>
@@ -269,9 +268,11 @@ export default function FamilyGroup() {
               );
             })()}
             {membersQuery.isLoading ? (
-              <ActivityIndicator style={styles.membersLoading} />
+              <ActivityIndicator style={baseStyles.membersLoading} />
             ) : membersQuery.error ? (
-              <Text style={styles.membersError}>Error cargando miembros</Text>
+              <Text style={baseStyles.membersError}>
+                Error cargando miembros
+              </Text>
             ) : (
               (() => {
                 const groupInfo = selectGroupInfo();
@@ -279,28 +280,28 @@ export default function FamilyGroup() {
 
                 if (!membersArray || membersArray.length === 0) {
                   return (
-                    <Text style={styles.noMembersText}>
+                    <Text style={baseStyles.noMembersText}>
                       No hay miembros para mostrar
                     </Text>
                   );
                 }
 
                 return membersArray.map((m) => (
-                  <View key={m.id} style={styles.memberRow}>
-                    <View style={styles.memberInfo}>
+                  <View key={m.id} style={baseStyles.memberRow}>
+                    <View style={baseStyles.memberInfo}>
                       {m.avatarUrl ? (
                         <Image
                           source={{ uri: m.avatarUrl }}
-                          style={styles.memberAvatar}
+                          style={baseStyles.memberAvatar}
                         />
                       ) : (
-                        <View style={styles.memberAvatarPlaceholder}>
-                          <Text style={styles.memberInitials}>
+                        <View style={baseStyles.memberAvatarPlaceholder}>
+                          <Text style={baseStyles.memberInitials}>
                             {getInitials(m.displayName)}
                           </Text>
                         </View>
                       )}
-                      <Text style={styles.memberName}>{m.displayName}</Text>
+                      <Text style={baseStyles.memberName}>{m.displayName}</Text>
                     </View>
 
                     <IconButton
@@ -322,17 +323,19 @@ export default function FamilyGroup() {
             onPress={() => {
               createInvitationCode();
             }}
-            contentStyle={styles.bottomButtonContent}
-            style={styles.bottomButton}
+            contentStyle={baseStyles.buttonContent}
+            style={baseStyles.buttonPrimary}
           >
             Crear enlace de invitación
           </Button>
 
           {invitationCode && (
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Código de invitación</Text>
-              <Text style={styles.cardContent}>{String(invitationCode)}</Text>
-              <Text style={styles.cardInfo}>
+            <View style={baseStyles.card}>
+              <Text style={baseStyles.cardTitle}>Código de invitación</Text>
+              <Text style={baseStyles.cardContent}>
+                {String(invitationCode)}
+              </Text>
+              <Text style={baseStyles.cardInfo}>
                 Expira 10 minutos luego de su creación.
               </Text>
             </View>
@@ -340,7 +343,7 @@ export default function FamilyGroup() {
           <Link
             href={{ pathname: "/perfil" }}
             accessibilityRole="button"
-            style={styles.inlineBack}
+            style={baseStyles.inlineBack}
           >
             Volver
           </Link>
@@ -350,7 +353,7 @@ export default function FamilyGroup() {
             visible={snackbarVisible}
             onDismiss={() => setSnackbarVisible(false)}
             duration={2200}
-            style={styles.successSnackbar}
+            style={baseStyles.successSnackbar}
           >
             {`Enlace de invitación generado correctamente: http://elepad.com/invite/${invitationCode} `}
           </Snackbar>
@@ -387,48 +390,3 @@ export default function FamilyGroup() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  // Using common styles from shared.ts
-  ...commonStyles,
-
-  // Styles specific to this component or overrides
-  safeArea: {
-    ...commonStyles.safeArea,
-    backgroundColor: COLORS.background,
-  },
-
-  membersLoading: {
-    marginVertical: 8,
-  },
-  membersError: {
-    color: "red",
-  },
-  noMembersText: {
-    color: COLORS.text.tertiary,
-  },
-
-  nameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-    width: "100%",
-  },
-
-  cardTitle: {
-    fontFamily: FONT.bold,
-    fontSize: 16,
-    marginBottom: 8,
-  },
-  cardContent: {
-    fontFamily: FONT.regular,
-    fontSize: 14,
-    color: "#333",
-  },
-  cardInfo: {
-    fontFamily: FONT.regular,
-    fontSize: 12,
-    color: COLORS.text.tertiary,
-  },
-});

@@ -63,6 +63,15 @@ export const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
   },
+  contentContainer: {
+    flexGrow: 1,
+    padding: 16,
+    paddingTop: 12,
+    justifyContent: "flex-start",
+  },
+  footer: {
+    marginTop: 16,
+  },
   center: {
     flex: 1,
     justifyContent: "center",
@@ -149,8 +158,8 @@ export const styles = StyleSheet.create({
     marginTop: 115,
   },
   logo: {
-    width: 185,
-    height: 185,
+    width: 230,
+    height: 230,
   },
   brand: {
     marginTop: 20,
@@ -303,5 +312,163 @@ export const styles = StyleSheet.create({
     fontFamily: FONT.medium,
     textAlign: "center",
     color: COLORS.primary,
+  },
+
+  // === FAMILY GROUP ESPECÍFICOS ===
+  membersSection: {
+    marginTop: 12,
+    marginBottom: 12,
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    padding: 12,
+    ...SHADOWS.light,
+  },
+  membersTitle: {
+    fontSize: 16,
+    fontFamily: FONT.bold,
+    paddingLeft: 10,
+    marginBottom: 10,
+    color: COLORS.text,
+  },
+  memberRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 8,
+    borderBottomWidth: 0,
+  },
+  memberInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+    marginRight: 8,
+  },
+  memberAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    marginRight: 12,
+  },
+  memberName: {
+    fontSize: 15,
+    color: COLORS.text,
+  },
+  groupHeaderCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 8,
+    ...SHADOWS.medium,
+  },
+  groupHeaderSubtitle: {
+    fontFamily: FONT.regular,
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    marginBottom: 4,
+    letterSpacing: 0.5,
+    textAlign: "center",
+  },
+  groupHeaderTitle: {
+    fontFamily: FONT.bold,
+    fontSize: 20,
+    color: COLORS.text,
+    textAlign: "center",
+    flex: 1,
+  },
+  nameContainer: {
+    alignItems: "center",
+    width: "100%",
+  },
+  nameRowContainer: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+    paddingHorizontal: 32,
+  },
+  editIcon: {
+    margin: 0,
+    padding: 0,
+    position: "absolute",
+    right: -7,
+    height: 36,
+    width: 36,
+  },
+  editContainer: {
+    width: "100%",
+  },
+  nameInput: {
+    backgroundColor: "#f8f9fa",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginBottom: 12,
+  },
+  editButtons: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 8,
+  },
+  inlineBack: {
+    textAlign: "center",
+    fontFamily: FONT.regular,
+    fontSize: 14,
+    paddingVertical: 22,
+    color: COLORS.textLight,
+  },
+  successSnackbar: {
+    backgroundColor: COLORS.success,
+  },
+  membersLoading: {
+    marginVertical: 16,
+  },
+  membersError: {
+    color: COLORS.error,
+    textAlign: "center",
+    marginVertical: 16,
+    fontFamily: FONT.regular,
+  },
+  noMembersText: {
+    textAlign: "center",
+    color: COLORS.textLight,
+    fontFamily: FONT.regular,
+    fontSize: 16,
+    marginVertical: 20,
+  },
+  cardTitle: {
+    fontFamily: FONT.bold,
+    fontSize: 18,
+    marginBottom: 12,
+    color: COLORS.text,
+  },
+  cardContent: {
+    fontSize: 24,
+    fontFamily: FONT.bold,
+    textAlign: "center",
+    color: COLORS.primary,
+    marginVertical: 12,
+  },
+  cardInfo: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    textAlign: "center",
+    marginTop: 8,
+    fontFamily: FONT.regular,
+  },
+  menuCard: {
+    margin: 16,
+    backgroundColor: COLORS.white,
+  },
+  bottomButtonContent: {
+    paddingVertical: 8,
+  },
+  bottomButton: {
+    marginHorizontal: 16,
+    marginVertical: 8,
+    borderRadius: 12,
+  },
+  logoutButton: {
+    marginTop: 12,
+    backgroundColor: "#fca5a5", // rojo claro
   },
 });

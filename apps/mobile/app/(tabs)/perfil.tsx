@@ -1,11 +1,5 @@
 import React, { useMemo, useState } from "react";
-import {
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  ScrollView,
-  View,
-} from "react-native";
+import { SafeAreaView, StatusBar, ScrollView, View } from "react-native";
 import {
   Button,
   Card,
@@ -19,7 +13,7 @@ import { patchUsersId } from "@elepad/api-client/src/gen/client";
 import { EditNameDialog, UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import ProfileHeader from "@/components/ProfileHeader";
 import { useRouter } from "expo-router";
-import { COLORS, commonStyles } from "@/styles/shared";
+import { COLORS, styles as baseStyles } from "@/styles/base";
 
 export default function PerfilScreen() {
   const router = useRouter();
@@ -45,10 +39,10 @@ export default function PerfilScreen() {
   const initials = useMemo(() => getInitials(displayName), [displayName]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={baseStyles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
 
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView contentContainerStyle={baseStyles.contentContainer}>
         <ProfileHeader
           name={displayName}
           email={email}
@@ -56,7 +50,7 @@ export default function PerfilScreen() {
           onEditPhoto={() => setPhotoOpen(true)}
         />
 
-        <Card style={styles.menuCard} mode="elevated">
+        <Card style={baseStyles.menuCard} mode="elevated">
           <List.Section>
             <List.Item
               title="Editar perfil"
@@ -93,7 +87,7 @@ export default function PerfilScreen() {
           </List.Section>
         </Card>
 
-        <View style={styles.footer}>
+        <View style={baseStyles.footer}>
           <Button
             mode="contained"
             icon="pencil"
@@ -101,8 +95,8 @@ export default function PerfilScreen() {
               setFormName(displayName);
               setEditOpen(true);
             }}
-            contentStyle={styles.bottomButtonContent}
-            style={styles.bottomButton}
+            contentStyle={baseStyles.bottomButtonContent}
+            style={baseStyles.bottomButton}
           >
             Editar perfil
           </Button>
@@ -114,8 +108,8 @@ export default function PerfilScreen() {
               await signOut();
               router.replace("/");
             }}
-            contentStyle={styles.bottomButtonContent}
-            style={[styles.bottomButton, styles.logoutButton]}
+            contentStyle={baseStyles.bottomButtonContent}
+            style={[baseStyles.bottomButton, baseStyles.logoutButton]}
           >
             Cerrar sesión
           </Button>
@@ -171,7 +165,7 @@ export default function PerfilScreen() {
             visible={snackbarVisible}
             onDismiss={() => setSnackbarVisible(false)}
             duration={2200}
-            style={styles.successSnackbar}
+            style={baseStyles.successSnackbar}
           >
             ✓ Perfil actualizado
           </Snackbar>
@@ -180,55 +174,3 @@ export default function PerfilScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  // Using common styles from shared.ts
-  ...commonStyles,
-
-  // Specific styles or overrides for this screen
-  safeArea: {
-    ...commonStyles.safeArea,
-  },
-
-  profileHeader: {
-    alignItems: "center",
-    marginTop: 8,
-    marginBottom: 8,
-  },
-  avatarWrapper: {
-    position: "relative",
-    marginBottom: 12,
-  },
-  avatarBadge: {
-    position: "absolute",
-    right: -2,
-    bottom: -2,
-    borderWidth: 2,
-    borderColor: COLORS.white,
-  },
-  name: {
-    textAlign: "center",
-  },
-  subtitle: {
-    color: "#667085",
-    textAlign: "center",
-  },
-  photoPreviewContainer: {
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  photoActionsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 8,
-    marginBottom: 8,
-  },
-  helperText: {
-    marginTop: 4,
-    color: "#6b7280",
-  },
-  logoutButton: {
-    marginTop: 12,
-    backgroundColor: "#fca5a5", // rojo claro
-  },
-});
