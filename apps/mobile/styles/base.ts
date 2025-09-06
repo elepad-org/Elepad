@@ -8,7 +8,7 @@ export const COLORS = {
   secondary: "#5278CD",
 
   // Fondos
-  background: "#FFF9F1",
+  background: "#F8F9FA",
   loginBackground: "#FFF9F1",
   white: "#ffffff",
 
@@ -255,17 +255,17 @@ export const styles = StyleSheet.create({
 
   // === AVATARES ===
   memberAvatarPlaceholder: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: COLORS.white,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COLORS.textSecondary,
     justifyContent: "center",
     alignItems: "center",
   },
   memberInitials: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: FONT.bold,
-    color: COLORS.primary,
+    color: COLORS.white,
   },
 
   // === DESARROLLO/MANTENIMIENTO ===
@@ -325,5 +325,149 @@ export const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
+  },
+
+  // === FAMILY GROUP ESPECÍFICOS ===
+  familyGroupCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 20,
+    ...SHADOWS.light,
+  },
+  familyGroupTitle: {
+    fontSize: 20,
+    fontFamily: FONT.bold,
+    color: COLORS.text,
+    flex: 1,
+    textAlign: "center",
+  },
+  familyGroupSubtitle: {
+    fontSize: 14,
+    fontFamily: FONT.medium,
+    color: COLORS.textSecondary,
+    textAlign: "center",
+    marginBottom: 12,
+  },
+  familyGroupHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  editButton: {
+    padding: 4,
+    marginLeft: 8,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontFamily: FONT.bold,
+    color: COLORS.text,
+    marginBottom: 16,
+  },
+  membersSectionContainer: {
+    marginTop: 24,
+  },
+  membersSectionHeader: {
+    marginBottom: 12,
+  },
+  groupNameEditContainer: {
+    alignItems: "center",
+    width: "100%",
+  },
+  groupNameDisplay: {
+    alignItems: "center",
+    width: "100%",
+    padding: 16,
+  },
+  editButtonsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 16,
+    width: "100%",
+    gap: 12,
+  },
+  membersContainer: {
+    marginHorizontal: 16,
+    marginTop: 8,
+  },
+  memberCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: COLORS.white,
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 8,
+    ...SHADOWS.light,
+  },
+  memberInfoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  memberDetails: {
+    marginLeft: 12,
+  },
+  memberNameText: {
+    fontSize: 16,
+    fontFamily: FONT.medium,
+    color: COLORS.text,
+    marginBottom: 2,
+  },
+  ownerBadge: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
+    fontFamily: FONT.regular,
+    marginTop: 2,
+  },
+  ownerBadgeText: {
+    color: COLORS.white,
+    fontSize: 12,
+    fontFamily: FONT.medium,
+  },
+  actionButtonsContainer: {
+    marginHorizontal: 16,
+    marginTop: 20,
+  },
+  actionButton: {
+    marginBottom: 12,
+    width: "100%",
+  },
+  inviteCodeCard: {
+    backgroundColor: COLORS.primary,
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 16,
+    alignItems: "center",
+    ...SHADOWS.medium,
+  },
+  inviteCodeTitle: {
+    fontSize: 16,
+    fontFamily: FONT.medium,
+    color: COLORS.white,
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  inviteCodeText: {
+    fontSize: 18,
+    fontFamily: FONT.bold,
+    color: COLORS.white,
+    textAlign: "center",
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  inviteCodeExpiry: {
+    fontSize: 12,
+    fontFamily: FONT.regular,
+    color: COLORS.white,
+    textAlign: "center",
+    opacity: 0.8,
+  },
+  backButtonContainer: {
+    alignItems: "center",
+    marginHorizontal: 16,
+    marginTop: 24,
+    marginBottom: 20,
   },
 });
