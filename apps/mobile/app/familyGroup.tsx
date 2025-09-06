@@ -36,7 +36,7 @@ import { Pressable } from "react-native";
 // Using shared COLORS from shared.ts
 
 export default function FamilyGroup() {
-  const { userElepad } = useAuth();
+  const { userElepad, refreshUserElepad } = useAuth();
   const [invitationCode, setInvitationCode] =
     useState<getFamilyGroupIdGroupInviteResponse>();
 
@@ -119,17 +119,31 @@ export default function FamilyGroup() {
         return;
       }
 
+      const isSelfRemoval = memberToRemove.id === userElepad?.id;
+
       await removeMember.mutateAsync({
         idGroup: groupId,
         idUser: memberToRemove.id,
       });
 
-      // Refrescar la lista de miembros
+      // Si el usuario se está saliendo del grupo, necesitamos refrescar su información
+      if (isSelfRemoval) {
+        // Refrescar la información del usuario para obtener el nuevo groupId
+        await refreshUserElepad();
+        // Pequeña pausa para asegurar que el backend haya procesado todo
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+
+      // Refrescar la lista de miembros del grupo
       await membersQuery.refetch();
 
+      const message = isSelfRemoval
+        ? "Has salido del grupo correctamente. Se ha creado un nuevo grupo familiar para ti."
+        : "El miembro fue eliminado correctamente.";
+
       Alert.alert(
-        "Miembro eliminado",
-        "El miembro fue eliminado correctamente.",
+        isSelfRemoval ? "Saliste del grupo" : "Miembro eliminado",
+        message,
       );
     } catch (e: unknown) {
       type MaybeApiError = {
@@ -307,6 +321,8 @@ export default function FamilyGroup() {
               const groupInfo = selectGroupInfo();
               if (!groupInfo) return null;
               const o = groupInfo.owner;
+              const isCurrentUserOwner = o.id === userElepad?.id;
+
               return (
                 <View style={[styles.memberRow, { borderBottomWidth: 0 }]}>
                   <View style={styles.memberInfo}>
@@ -329,13 +345,16 @@ export default function FamilyGroup() {
                       </Text>
                     </View>
                   </View>
-                  <IconButton
-                    icon="delete"
-                    size={22}
-                    iconColor="#d32f2f"
-                    onPress={() => openConfirm(o)}
-                    accessibilityLabel={`Eliminar a ${o.displayName}`}
-                  />
+                  {/* Solo mostrar basurero si el owner actual está viendo a otro owner (caso edge) */}
+                  {isCurrentUserOwner && o.id !== userElepad?.id && (
+                    <IconButton
+                      icon="delete"
+                      size={22}
+                      iconColor="#d32f2f"
+                      onPress={() => openConfirm(o)}
+                      accessibilityLabel={`Eliminar a ${o.displayName}`}
+                    />
+                  )}
                 </View>
               );
             })()}
@@ -347,6 +366,8 @@ export default function FamilyGroup() {
               (() => {
                 const groupInfo = selectGroupInfo();
                 const membersArray = groupInfo?.members;
+                const isCurrentUserOwner =
+                  groupInfo?.owner?.id === userElepad?.id;
 
                 if (!membersArray || membersArray.length === 0) {
                   return (
@@ -374,18 +395,55 @@ export default function FamilyGroup() {
                       <Text style={styles.memberName}>{m.displayName}</Text>
                     </View>
 
-                    <IconButton
-                      icon="delete"
-                      size={22}
-                      iconColor="#d32f2f"
-                      onPress={() => openConfirm(m)}
-                      accessibilityLabel={`Eliminar a ${m.displayName}`}
-                    />
+                    {/* Solo mostrar basurero si el usuario actual es owner */}
+                    {isCurrentUserOwner && (
+                      <IconButton
+                        icon="delete"
+                        size={22}
+                        iconColor="#d32f2f"
+                        onPress={() => openConfirm(m)}
+                        accessibilityLabel={`Eliminar a ${m.displayName}`}
+                      />
+                    )}
                   </View>
                 ));
               })()
             )}
           </View>
+
+          {/* Botón para salir del grupo familiar */}
+          <Button
+            mode="outlined"
+            icon="exit-to-app"
+            onPress={() => {
+              const groupInfo = selectGroupInfo();
+              const isOwner = groupInfo?.owner?.id === userElepad?.id;
+
+              if (isOwner) {
+                Alert.alert(
+                  "No puedes salir del grupo",
+                  "Como administrador del grupo, primero debes transferir la administración a otro miembro antes de poder salir.",
+                  [{ text: "Entendido", style: "default" }],
+                );
+                return;
+              }
+
+              // Si no es owner, proceder con la auto-eliminación
+              if (userElepad?.id) {
+                openConfirm({
+                  id: userElepad.id,
+                  displayName: userElepad.displayName,
+                  avatarUrl: userElepad.avatarUrl || null,
+                });
+              }
+            }}
+            contentStyle={styles.bottomButtonContent}
+            style={[styles.bottomButton, { marginBottom: 12 }]}
+            buttonColor="#fff"
+            textColor="#d32f2f"
+          >
+            Salir del grupo familiar
+          </Button>
 
           {/* Botón de transferir ownership (solo para el owner) */}
           {(() => {
@@ -450,14 +508,24 @@ export default function FamilyGroup() {
           </Snackbar>
 
           <Dialog visible={confirmVisible} onDismiss={closeConfirm}>
-            <Dialog.Title>Eliminar miembro</Dialog.Title>
+            <Dialog.Title>
+              {memberToRemove?.id === userElepad?.id
+                ? "Salir del grupo"
+                : "Eliminar miembro"}
+            </Dialog.Title>
             <Dialog.Content>
               <Text>
-                ¿Está seguro que desea eliminar a {""}
-                <Text style={{ fontWeight: "700" }}>
-                  {memberToRemove?.displayName}
-                </Text>{" "}
-                del grupo?
+                {memberToRemove?.id === userElepad?.id ? (
+                  <>¿Está seguro que desea salir del grupo familiar?</>
+                ) : (
+                  <>
+                    ¿Está seguro que desea eliminar a {""}
+                    <Text style={{ fontWeight: "700" }}>
+                      {memberToRemove?.displayName}
+                    </Text>{" "}
+                    del grupo?
+                  </>
+                )}
               </Text>
             </Dialog.Content>
             <Dialog.Actions style={{ justifyContent: "space-between" }}>
@@ -472,7 +540,7 @@ export default function FamilyGroup() {
                 }}
                 disabled={removeMember.isPending}
               >
-                SI
+                {memberToRemove?.id === userElepad?.id ? "SALIR" : "SI"}
               </Button>
             </Dialog.Actions>
           </Dialog>
