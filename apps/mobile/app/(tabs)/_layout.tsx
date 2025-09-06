@@ -36,7 +36,7 @@ export default function TabLayout() {
           title: "Juegos",
           tabBarIcon: ({ focused, color, size }) => (
             <Icon
-              source={focused ? "cog" : "cog-outline"}
+              source={focused ? "gamepad-variant" : "gamepad-variant-outline"}
               color={color}
               size={size}
             />
