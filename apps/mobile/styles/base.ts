@@ -23,9 +23,9 @@ export const COLORS = {
   // Estados
   success: "green",
   error: "#d32f2f",
-  accent: "#f4efe9ff",
+  accent: "#FFF9F1",
   // Bordes y líneas
-  border: "#dac8b676",
+  border: "#FFF9F1",
   separator: "#111",
 
   // Específicos
@@ -322,109 +322,28 @@ export const styles = StyleSheet.create({
   },
 
   // === FAMILY GROUP ESPECÍFICOS ===
-  familyGroupCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 10,
+  titleCard: {
+    backgroundColor: COLORS.accent,
+    borderRadius: 20,
     padding: 16,
+    width: "100%",
     marginBottom: 14,
     ...SHADOWS.light,
   },
-  familyGroupTitle: {
-    fontSize: 20,
-    fontFamily: FONT.bold,
-    color: COLORS.text,
-    flex: 1,
-    width: "85%",
-    textAlign: "center",
-  },
-  familyGroupSubtitle: {
-    fontSize: 14,
-    fontFamily: FONT.medium,
-    color: COLORS.textSecondary,
-    textAlign: "center",
-    marginBottom: 6,
-  },
-  familyGroupHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
-  },
-  editButton: {
-    padding: 2,
-    marginLeft: 8,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontFamily: FONT.bold,
-    color: COLORS.text,
-    marginBottom: 4,
-  },
-  membersSectionContainer: {
-    marginTop: 24,
-  },
-  membersSectionHeader: {
-    marginBottom: 12,
-  },
-  groupNameEditContainer: {
-    alignItems: "center",
-    width: "100%",
-  },
-  groupNameDisplay: {
-    alignItems: "center",
-    width: "100%",
-    padding: 16,
-  },
-  editButtonsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 16,
-    width: "100%",
-    gap: 12,
-  },
-  membersContainer: {
-    marginHorizontal: 16,
-    marginTop: 8,
-  },
-  memberCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: COLORS.white,
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 8,
-    ...SHADOWS.light,
-  },
+
   memberInfoRow: {
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
   },
-  memberDetails: {
-    marginLeft: 12,
-  },
-  memberNameText: {
+
+  paragraphText: {
     fontSize: 16,
     fontFamily: FONT.medium,
     color: COLORS.text,
     marginBottom: 2,
   },
-  ownerBadge: {
-    color: COLORS.textSecondary,
-    fontSize: 14,
-    fontFamily: FONT.regular,
-    marginTop: 2,
-  },
-  ownerBadgeText: {
-    color: COLORS.white,
-    fontSize: 12,
-    fontFamily: FONT.medium,
-  },
-  actionButtonsContainer: {
-    marginHorizontal: 16,
-    marginTop: 20,
-  },
+
   actionButton: {
     marginBottom: 12,
     width: "100%",

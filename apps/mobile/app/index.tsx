@@ -58,7 +58,7 @@ export default function IndexRedirect() {
                 <>
                   <Text style={baseStyles.heading}>¡Bienvenido!</Text>
                   <Text style={baseStyles.subheading}>
-                    Elige una opción para continuar
+                    Elija una opción para continuar
                   </Text>
 
                   <Button
@@ -75,8 +75,11 @@ export default function IndexRedirect() {
                     mode="contained"
                     onPress={() => router.push("/signup")}
                     contentStyle={baseStyles.buttonContent}
-                    style={baseStyles.buttonSecondary}
-                    labelStyle={{ color: "#333" }}
+                    style={[
+                      baseStyles.buttonPrimary,
+                      { backgroundColor: COLORS.white },
+                    ]}
+                    labelStyle={{ color: COLORS.text }}
                     accessibilityLabel="Ir a crear cuenta"
                   >
                     Crear Cuenta

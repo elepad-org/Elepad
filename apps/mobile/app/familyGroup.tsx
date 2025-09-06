@@ -28,7 +28,7 @@ import {
 } from "@elepad/api-client";
 import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 import { useAuth } from "@/hooks/useAuth";
-import { COLORS, styles as baseStyles } from "@/styles/base";
+import { COLORS, styles as baseStyles, styles } from "@/styles/base";
 import { Pressable } from "react-native";
 
 export default function FamilyGroup() {
@@ -256,9 +256,9 @@ export default function FamilyGroup() {
             return (
               <>
                 {isEditing ? (
-                  <View style={[baseStyles.familyGroupCard, baseStyles.center]}>
+                  <View style={[baseStyles.titleCard]}>
                     <TextInput
-                      style={[baseStyles.input, { marginTop: 8 }]}
+                      style={[baseStyles.input]}
                       value={newGroupName}
                       onChangeText={setNewGroupName}
                       autoFocus
@@ -313,6 +313,7 @@ export default function FamilyGroup() {
                           }
                         }}
                         loading={patchFamilyGroup.isPending}
+                        style={[baseStyles.buttonPrimary, { width: "48%" }]}
                         disabled={
                           !newGroupName.trim() || patchFamilyGroup.isPending
                         }
@@ -322,10 +323,8 @@ export default function FamilyGroup() {
                     </View>
                   </View>
                 ) : (
-                  <View style={[baseStyles.familyGroupCard]}>
-                    <Text style={baseStyles.familyGroupSubtitle}>
-                      Grupo Familiar
-                    </Text>
+                  <View style={[baseStyles.titleCard]}>
+                    <Text style={baseStyles.subheading}>Grupo Familiar</Text>
                     <View
                       style={{
                         position: "relative",
@@ -333,9 +332,7 @@ export default function FamilyGroup() {
                         alignItems: "center",
                       }}
                     >
-                      <Text style={[baseStyles.familyGroupTitle]}>
-                        {groupName}
-                      </Text>
+                      <Text style={[baseStyles.heading]}>{groupName}</Text>
                       <Pressable
                         onPress={() => {
                           setNewGroupName(groupName || "");
@@ -353,7 +350,7 @@ export default function FamilyGroup() {
                         <IconButton
                           icon="pencil"
                           size={18}
-                          iconColor={COLORS.primary}
+                          iconColor={COLORS.textLight}
                           style={{ margin: 0 }}
                         />
                       </Pressable>
@@ -364,9 +361,11 @@ export default function FamilyGroup() {
             );
           })()}
           {/* Mostramos los miembros del grupo Familiar */}
-          <View style={[baseStyles.familyGroupCard, { marginHorizontal: 0 }]}>
-            <Text style={[baseStyles.sectionTitle, { textAlign: "center" }]}>
-              Miembros del grupo
+          <View style={baseStyles.titleCard}>
+            <Text
+              style={[baseStyles.heading, { fontSize: 16, marginBottom: 8 }]}
+            >
+              Miembros
             </Text>
 
             {membersQuery.isLoading ? (
@@ -411,11 +410,18 @@ export default function FamilyGroup() {
                             </Text>
                           </View>
                         )}
-                        <View style={baseStyles.memberDetails}>
-                          <Text style={baseStyles.memberNameText}>
+                        <View style={{ marginLeft: 12 }}>
+                          <Text style={baseStyles.paragraphText}>
                             {o.displayName}
                           </Text>
-                          <Text style={baseStyles.ownerBadge}>Owner</Text>
+                          <Text
+                            style={[
+                              baseStyles.subheading,
+                              { textAlign: "left", marginTop: 0 },
+                            ]}
+                          >
+                            Owner
+                          </Text>
                         </View>
                       </View>
                       {/* Solo mostrar basurero si el owner actual está viendo a otro owner (caso edge) */}
@@ -426,7 +432,6 @@ export default function FamilyGroup() {
                           iconColor={COLORS.error}
                           onPress={() => openConfirm(o)}
                           accessibilityLabel={`Eliminar a ${o.displayName}`}
-                          style={{ margin: 0, marginRight: -8 }}
                         />
                       )}
                     </View>
@@ -442,23 +447,14 @@ export default function FamilyGroup() {
                   }
 
                   return membersArray.map((m) => (
-                    <View
-                      key={m.id}
-                      style={[
-                        baseStyles.memberInfoRow,
-                        {
-                          justifyContent: "space-between",
-                          paddingVertical: 8,
-                        },
-                      ]}
-                    >
+                    <View key={m.id} style={[baseStyles.memberInfoRow]}>
                       <View
                         style={{ flexDirection: "row", alignItems: "center" }}
                       >
                         {m.avatarUrl ? (
                           <Image
                             source={{ uri: m.avatarUrl }}
-                            style={{ width: 40, height: 40, borderRadius: 20 }}
+                            style={{ width: 75, height: 75, borderRadius: 20 }}
                           />
                         ) : (
                           <View style={baseStyles.memberAvatarPlaceholder}>
@@ -467,8 +463,8 @@ export default function FamilyGroup() {
                             </Text>
                           </View>
                         )}
-                        <View style={baseStyles.memberDetails}>
-                          <Text style={baseStyles.memberNameText}>
+                        <View style={{ marginLeft: 12 }}>
+                          <Text style={baseStyles.paragraphText}>
                             {m.displayName}
                           </Text>
                         </View>
@@ -493,47 +489,7 @@ export default function FamilyGroup() {
           </View>
 
           {/* Sección de botones de acción */}
-          <View
-            style={[
-              baseStyles.actionButtonsContainer,
-              { alignItems: "center" },
-            ]}
-          >
-            {/* Botón para salir del grupo familiar */}
-            <Button
-              mode="outlined"
-              icon="exit-to-app"
-              onPress={() => {
-                if (isOwnerOfGroup) {
-                  Alert.alert(
-                    "No puedes salir del grupo",
-                    "Como administrador del grupo, primero debes transferir la administración a otro miembro antes de poder salir.",
-                    [{ text: "Entendido", style: "default" }],
-                  );
-                  return;
-                }
-
-                // Si no es owner, proceder con la auto-eliminación
-                if (userElepad?.id) {
-                  openConfirm({
-                    id: userElepad.id,
-                    displayName: userElepad.displayName,
-                    avatarUrl: userElepad.avatarUrl || null,
-                  });
-                }
-              }}
-              contentStyle={baseStyles.buttonContent}
-              style={[
-                baseStyles.buttonSecondary,
-                baseStyles.actionButton,
-                { width: "80%" },
-              ]}
-              buttonColor="#fff"
-              textColor={COLORS.error}
-            >
-              Salir del grupo familiar
-            </Button>
-
+          <View style={[{ alignItems: "center", width: "100%" }]}>
             {/* Botón de transferir ownership (solo para el owner) */}
             {(() => {
               const hasMembers =
@@ -560,13 +516,7 @@ export default function FamilyGroup() {
                     openTransferDialog();
                   }}
                   contentStyle={baseStyles.buttonContent}
-                  style={[
-                    baseStyles.buttonPrimary,
-                    baseStyles.actionButton,
-                    { width: "80%" },
-                  ]}
-                  buttonColor={COLORS.primary}
-                  textColor={COLORS.white}
+                  style={[baseStyles.buttonPrimary]}
                 >
                   Transferir administración
                 </Button>
@@ -582,17 +532,41 @@ export default function FamilyGroup() {
               }}
               contentStyle={baseStyles.buttonContent}
               labelStyle={{ fontFamily: "Montserrat_500Medium" }}
-              style={[
-                baseStyles.buttonPrimary,
-                {
-                  width: "80%",
-                  marginBottom: 12,
-                },
-              ]}
+              style={[baseStyles.buttonPrimary]}
               loading={inviteQuery.isFetching}
               disabled={inviteQuery.isFetching}
             >
               Crear enlace de invitación
+            </Button>
+            <Button
+              mode="contained"
+              icon="exit-to-app"
+              onPress={() => {
+                if (isOwnerOfGroup) {
+                  Alert.alert(
+                    "No puedes salir del grupo",
+                    "Como administrador del grupo, primero debes transferir la administración a otro miembro antes de poder salir.",
+                    [{ text: "Entendido", style: "default" }],
+                  );
+                  return;
+                }
+
+                // Si no es owner, proceder con la auto-eliminación
+                if (userElepad?.id) {
+                  openConfirm({
+                    id: userElepad.id,
+                    displayName: userElepad.displayName,
+                    avatarUrl: userElepad.avatarUrl || null,
+                  });
+                }
+              }}
+              contentStyle={baseStyles.buttonContent}
+              style={[
+                baseStyles.buttonPrimary,
+                { backgroundColor: COLORS.red },
+              ]}
+            >
+              Salir del grupo familiar
             </Button>
 
             {/* Link para volver, sin botón */}
