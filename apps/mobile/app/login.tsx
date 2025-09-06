@@ -1,16 +1,9 @@
 import React, { useState, useRef } from "react";
-import {
-  StyleSheet,
-  View,
-  Image,
-  TouchableOpacity,
-  Animated,
-  Easing,
-} from "react-native";
+import { View, Image, TouchableOpacity, Animated, Easing } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, TextInput, Button } from "react-native-paper";
 import logoBlue from "@/assets/images/bbb.png";
-import { COLORS, commonStyles } from "@/styles/shared";
+import { COLORS, styles as baseStyles } from "@/styles/base";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -44,20 +37,27 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
-      <View style={styles.container}>
-        <View style={styles.logoWrap}>
-          <Image source={logoBlue} style={styles.logo} resizeMode="contain" />
-          <Text style={styles.brand}>ELEPAD</Text>
+    <SafeAreaView
+      style={baseStyles.safeAreaLogin}
+      edges={["top", "left", "right"]}
+    >
+      <View style={baseStyles.container}>
+        <View style={baseStyles.logoWrap}>
+          <Image
+            source={logoBlue}
+            style={baseStyles.logo}
+            resizeMode="contain"
+          />
+          <Text style={baseStyles.brand}>ELEPAD</Text>
         </View>
 
-        <View style={styles.separatorWrap}>
-          <View style={styles.separator} />
+        <View style={baseStyles.separatorWrap}>
+          <View style={baseStyles.separator} />
         </View>
 
-        <View style={styles.card}>
-          <Text style={styles.heading}>Create an account</Text>
-          <Text style={styles.subheading}>
+        <View style={baseStyles.card}>
+          <Text style={baseStyles.heading}>Create an account</Text>
+          <Text style={baseStyles.subheading}>
             Enter your email to sign up for this app
           </Text>
 
@@ -68,8 +68,8 @@ export default function LoginScreen() {
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
-            style={styles.input}
-            outlineStyle={styles.inputOutline}
+            style={baseStyles.input}
+            outlineStyle={baseStyles.inputOutline}
           />
 
           <Animated.View
@@ -81,32 +81,32 @@ export default function LoginScreen() {
             <Button
               mode="contained"
               onPress={handleContinue}
-              contentStyle={styles.continueContent}
-              style={styles.continueButton}
-              labelStyle={styles.continueLabel}
+              contentStyle={baseStyles.buttonContent}
+              style={baseStyles.buttonPrimary}
+              labelStyle={baseStyles.buttonContent}
             >
               Continue
             </Button>
           </Animated.View>
 
-          <View style={styles.orRow}>
-            <View style={styles.line} />
-            <Text style={styles.orText}>or</Text>
-            <View style={styles.line} />
+          <View style={baseStyles.orRow}>
+            <View style={baseStyles.orLine} />
+            <Text style={baseStyles.orText}>or</Text>
+            <View style={baseStyles.orLine} />
           </View>
 
           <TouchableOpacity
-            style={styles.googleButton}
+            style={baseStyles.buttonGoogle}
             onPress={handleGoogle}
             activeOpacity={0.8}
           >
-            <View style={styles.gIconWrap}>
-              <Text style={styles.gIcon}>G</Text>
+            <View style={baseStyles.googleIconWrap}>
+              <Text style={baseStyles.googleIcon}>G</Text>
             </View>
-            <Text style={styles.googleText}>Continue with Google</Text>
+            <Text style={baseStyles.googleText}>Continue with Google</Text>
           </TouchableOpacity>
 
-          <Text style={styles.footerText}>
+          <Text style={baseStyles.footerText}>
             Si tienes cuenta, haz click aqui
           </Text>
         </View>
@@ -114,21 +114,3 @@ export default function LoginScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  // Using common styles from shared.ts
-  ...commonStyles,
-
-  // Specific styles or overrides for this screen
-  safe: { flex: 1, backgroundColor: COLORS.loginBackground },
-  container: { flex: 1, alignItems: "center" },
-  card: {
-    ...commonStyles.loginCard,
-  },
-  continueButton: {
-    ...commonStyles.continueButton,
-  },
-  footerText: {
-    ...commonStyles.footerText,
-  },
-});

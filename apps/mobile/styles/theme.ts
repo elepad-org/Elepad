@@ -11,6 +11,7 @@ export const FONT = {
   bold: "Montserrat_700Bold",
   extraBold: "Montserrat_800ExtraBold",
   black: "Montserrat_900Black",
+  lobster: "Lobster_400Regular",
 } as const;
 
 export const lightTheme = {

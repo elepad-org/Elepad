@@ -2,70 +2,66 @@
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
-## Style System
+## Sistema de Estilos Simplificado
 
-The app uses a shared style system to maintain visual consistency and reduce code duplication across screens. The shared style system includes:
+La app usa un **sistema de estilos minimalista** para mantener consistencia visual y reducir duplicación de código. El objetivo es tener **pocas opciones** para que el equipo tenga menos decisiones que tomar.
 
-### 1. Theme Constants
+### 🎨 Archivo Principal: `/styles/base.ts`
 
-Located in `/styles/theme.ts`, this file contains:
+Este archivo contiene **SOLO** los estilos esenciales:
 
-- Font family definitions
-- Theme colors for light and dark modes
+#### Colores (Solo los necesarios):
 
-### 2. Shared Styles
+- `COLORS.primary` - Color principal azul
+- `COLORS.secondary` - Botones principales
+- `COLORS.background` - Fondo general
+- `COLORS.loginBackground` - Fondo de login
+- `COLORS.white` - Blanco
+- `COLORS.text` - Texto principal
+- `COLORS.textSecondary` - Texto secundario
+- `COLORS.textLight` - Texto claro
 
-Located in `/styles/shared.ts`, this file contains:
+#### Estilos Base (Minimalistas):
 
-- Common color definitions with semantic naming
-- Spacing constants for consistent layout
-- Border radius constants
-- Shadow utilities
-- Reusable style objects for common UI elements like:
-  - Layout containers (safeArea, container, footer)
-  - Cards and sections
-  - Buttons
-  - Text styles
-  - Form elements
-  - List items and member displays
+- **Layouts**: `safeArea`, `safeAreaLogin`, `container`, `center`
+- **Tarjetas**: `card`
+- **Botones**: `buttonPrimary`, `buttonSecondary`, `buttonGoogle`, `buttonContent`
+- **Inputs**: `input`, `inputOutline`
+- **Textos**: `heading`, `subheading`, `footerText`
+- **Logo**: `logoWrap`, `logo`, `brand`, `brandMedium`
+- **Headers**: `headerPrimary`, `welcomeGreeting`, `headerTitle`
+- **Desarrollo**: `developmentContainer`, `developmentCard`, `developmentTitle`
 
-### How to Use Shared Styles
+### 🔧 Cómo usar en componentes:
 
-1. Import the necessary styles in your component:
+```typescript
+import { COLORS, styles } from "@/styles/base";
 
-   ```typescript
-   import { COLORS, commonStyles } from "@/styles/shared";
-   import { FONT } from "@/styles/theme";
-   ```
+export default function MiPantalla() {
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <Text style={styles.heading}>Mi Título</Text>
+        <Button style={styles.buttonPrimary}>Mi Botón</Button>
+      </View>
+    </SafeAreaView>
+  );
+}
+```
 
-2. Use the shared styles in your component's StyleSheet:
+### ✅ Beneficios:
 
-   ```typescript
-   const styles = StyleSheet.create({
-     // Include all common styles
-     ...commonStyles,
+1. **Menos decisiones**: Solo hay 1-2 opciones para cada elemento
+2. **Consistencia garantizada**: Todos usan los mismos estilos
+3. **Código limpio**: No hay StyleSheet.create() en cada componente
+4. **Fácil mantenimiento**: Cambios centralizados
+5. **Visual idéntico**: Se mantiene la apariencia exacta
 
-     // Override specific styles or add component-specific styles
-     container: {
-       ...commonStyles.container,
-       backgroundColor: COLORS.background,
-     },
+### 🚫 Evita:
 
-     // Add new styles specific to this component
-     myCustomStyle: {
-       // ...
-     },
-   });
-   ```
-
-3. When referencing colors, use the COLORS constant:
-   ```typescript
-   <View style={{ backgroundColor: COLORS.primary }} />
-   ```
-
-By using this shared style system, we maintain visual consistency across the app while reducing code duplication.
-
-## Get started
+- Crear estilos locales en componentes
+- Usar colores hardcodeados como "#7fb3d3"
+- Duplicar estilos entre pantallas## Get started
 
 1. Install dependencies
 
