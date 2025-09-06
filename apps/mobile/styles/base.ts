@@ -155,25 +155,18 @@ export const styles = StyleSheet.create({
   },
   logoWrapWithMargin: {
     alignItems: "center",
-    marginTop: 115,
+    marginTop: 70,
   },
   logo: {
-    width: 240,
-    height: 240,
+    width: 255,
+    height: 255,
   },
   brand: {
-    marginTop: 20,
-    fontSize: 44,
-    letterSpacing: 8,
+    marginTop: -15,
+    fontSize: 65,
     fontFamily: FONT.lobster,
     color: COLORS.text,
-  },
-  brandMedium: {
-    marginTop: 20,
-    fontSize: 44,
-    letterSpacing: 8,
-    fontFamily: FONT.medium,
-    color: COLORS.text,
+    paddingBottom: 8,
   },
 
   // === SEPARADORES ===
@@ -330,9 +323,9 @@ export const styles = StyleSheet.create({
   // === FAMILY GROUP ESPECÍFICOS ===
   familyGroupCard: {
     backgroundColor: COLORS.white,
-    borderRadius: 8,
+    borderRadius: 10,
     padding: 16,
-    marginBottom: 20,
+    marginBottom: 14,
     ...SHADOWS.light,
   },
   familyGroupTitle: {
@@ -340,6 +333,7 @@ export const styles = StyleSheet.create({
     fontFamily: FONT.bold,
     color: COLORS.text,
     flex: 1,
+    width: "85%",
     textAlign: "center",
   },
   familyGroupSubtitle: {
@@ -347,7 +341,7 @@ export const styles = StyleSheet.create({
     fontFamily: FONT.medium,
     color: COLORS.textSecondary,
     textAlign: "center",
-    marginBottom: 12,
+    marginBottom: 6,
   },
   familyGroupHeader: {
     flexDirection: "row",
@@ -356,14 +350,14 @@ export const styles = StyleSheet.create({
     width: "100%",
   },
   editButton: {
-    padding: 4,
+    padding: 2,
     marginLeft: 8,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: FONT.bold,
     color: COLORS.text,
-    marginBottom: 16,
+    marginBottom: 4,
   },
   membersSectionContainer: {
     marginTop: 24,

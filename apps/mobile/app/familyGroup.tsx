@@ -322,22 +322,33 @@ export default function FamilyGroup() {
                     </View>
                   </View>
                 ) : (
-                  <View style={baseStyles.familyGroupCard}>
+                  <View style={[baseStyles.familyGroupCard]}>
                     <Text style={baseStyles.familyGroupSubtitle}>
                       Grupo Familiar
                     </Text>
-                    <View style={baseStyles.familyGroupHeader}>
-                      <View style={{ flex: 1 }}>
-                        <Text style={baseStyles.familyGroupTitle}>
-                          {groupName}
-                        </Text>
-                      </View>
+                    <View
+                      style={{
+                        position: "relative",
+                        width: "100%",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Text style={[baseStyles.familyGroupTitle]}>
+                        {groupName}
+                      </Text>
                       <Pressable
                         onPress={() => {
                           setNewGroupName(groupName || "");
                           setIsEditing(true);
                         }}
-                        style={baseStyles.editButton}
+                        style={{
+                          position: "absolute",
+                          right: 0,
+                          top: 0,
+                          bottom: 0,
+                          justifyContent: "center",
+                          padding: 4,
+                        }}
                       >
                         <IconButton
                           icon="pencil"
@@ -353,49 +364,11 @@ export default function FamilyGroup() {
             );
           })()}
           {/* Mostramos los miembros del grupo Familiar */}
-          <View style={baseStyles.membersSectionContainer}>
-            <View style={baseStyles.membersSectionHeader}>
-              <Text style={baseStyles.sectionTitle}>Miembros del grupo</Text>
-            </View>
-            {(() => {
-              if (!groupInfo) return null;
-              const o = groupInfo.owner;
+          <View style={[baseStyles.familyGroupCard, { marginHorizontal: 0 }]}>
+            <Text style={[baseStyles.sectionTitle, { textAlign: "center" }]}>
+              Miembros del grupo
+            </Text>
 
-              return (
-                <View style={baseStyles.memberCard}>
-                  <View style={baseStyles.memberInfoRow}>
-                    {o.avatarUrl ? (
-                      <Image
-                        source={{ uri: o.avatarUrl }}
-                        style={{ width: 40, height: 40, borderRadius: 20 }}
-                      />
-                    ) : (
-                      <View style={baseStyles.memberAvatarPlaceholder}>
-                        <Text style={baseStyles.memberInitials}>
-                          {getInitials(o.displayName)}
-                        </Text>
-                      </View>
-                    )}
-                    <View style={baseStyles.memberDetails}>
-                      <Text style={baseStyles.memberNameText}>
-                        {o.displayName}
-                      </Text>
-                      <Text style={baseStyles.ownerBadge}>Owner</Text>
-                    </View>
-                  </View>
-                  {/* Solo mostrar basurero si el owner actual está viendo a otro owner (caso edge) */}
-                  {isOwnerOfGroup && o.id !== userElepad?.id && (
-                    <IconButton
-                      icon="delete"
-                      size={22}
-                      iconColor={COLORS.error}
-                      onPress={() => openConfirm(o)}
-                      accessibilityLabel={`Eliminar a ${o.displayName}`}
-                    />
-                  )}
-                </View>
-              );
-            })()}
             {membersQuery.isLoading ? (
               <ActivityIndicator
                 style={{ marginVertical: 20, alignSelf: "center" }}
@@ -410,53 +383,122 @@ export default function FamilyGroup() {
                 Error cargando miembros
               </Text>
             ) : (
-              (() => {
-                const membersArray = groupInfo?.members;
+              <View style={{ width: "100%" }}>
+                {/* Mostrar el owner */}
+                {(() => {
+                  if (!groupInfo) return null;
+                  const o = groupInfo.owner;
 
-                if (!membersArray || membersArray.length === 0) {
-                  return null;
-                }
-
-                return membersArray.map((m) => (
-                  <View key={m.id} style={baseStyles.memberCard}>
-                    <View style={baseStyles.memberInfoRow}>
-                      {m.avatarUrl ? (
-                        <Image
-                          source={{ uri: m.avatarUrl }}
-                          style={{ width: 40, height: 40, borderRadius: 20 }}
+                  return (
+                    <View
+                      style={[
+                        baseStyles.memberInfoRow,
+                        { justifyContent: "space-between", paddingVertical: 8 },
+                      ]}
+                    >
+                      <View
+                        style={{ flexDirection: "row", alignItems: "center" }}
+                      >
+                        {o.avatarUrl ? (
+                          <Image
+                            source={{ uri: o.avatarUrl }}
+                            style={{ width: 40, height: 40, borderRadius: 20 }}
+                          />
+                        ) : (
+                          <View style={baseStyles.memberAvatarPlaceholder}>
+                            <Text style={baseStyles.memberInitials}>
+                              {getInitials(o.displayName)}
+                            </Text>
+                          </View>
+                        )}
+                        <View style={baseStyles.memberDetails}>
+                          <Text style={baseStyles.memberNameText}>
+                            {o.displayName}
+                          </Text>
+                          <Text style={baseStyles.ownerBadge}>Owner</Text>
+                        </View>
+                      </View>
+                      {/* Solo mostrar basurero si el owner actual está viendo a otro owner (caso edge) */}
+                      {isOwnerOfGroup && o.id !== userElepad?.id && (
+                        <IconButton
+                          icon="delete"
+                          size={22}
+                          iconColor={COLORS.error}
+                          onPress={() => openConfirm(o)}
+                          accessibilityLabel={`Eliminar a ${o.displayName}`}
+                          style={{ margin: 0, marginRight: -8 }}
                         />
-                      ) : (
-                        <View style={baseStyles.memberAvatarPlaceholder}>
-                          <Text style={baseStyles.memberInitials}>
-                            {getInitials(m.displayName)}
+                      )}
+                    </View>
+                  );
+                })()}
+
+                {/* Mostrar los miembros */}
+                {(() => {
+                  const membersArray = groupInfo?.members;
+
+                  if (!membersArray || membersArray.length === 0) {
+                    return null;
+                  }
+
+                  return membersArray.map((m) => (
+                    <View
+                      key={m.id}
+                      style={[
+                        baseStyles.memberInfoRow,
+                        {
+                          justifyContent: "space-between",
+                          paddingVertical: 8,
+                        },
+                      ]}
+                    >
+                      <View
+                        style={{ flexDirection: "row", alignItems: "center" }}
+                      >
+                        {m.avatarUrl ? (
+                          <Image
+                            source={{ uri: m.avatarUrl }}
+                            style={{ width: 40, height: 40, borderRadius: 20 }}
+                          />
+                        ) : (
+                          <View style={baseStyles.memberAvatarPlaceholder}>
+                            <Text style={baseStyles.memberInitials}>
+                              {getInitials(m.displayName)}
+                            </Text>
+                          </View>
+                        )}
+                        <View style={baseStyles.memberDetails}>
+                          <Text style={baseStyles.memberNameText}>
+                            {m.displayName}
                           </Text>
                         </View>
-                      )}
-                      <View style={baseStyles.memberDetails}>
-                        <Text style={baseStyles.memberNameText}>
-                          {m.displayName}
-                        </Text>
                       </View>
-                    </View>
 
-                    {/* Solo mostrar la opción de eliminar si el usuario actual es owner */}
-                    {isOwnerOfGroup && (
-                      <IconButton
-                        icon="delete"
-                        size={22}
-                        iconColor={COLORS.error}
-                        onPress={() => openConfirm(m)}
-                        accessibilityLabel={`Eliminar a ${m.displayName}`}
-                      />
-                    )}
-                  </View>
-                ));
-              })()
+                      {/* Solo mostrar la opción de eliminar si el usuario actual es owner */}
+                      {isOwnerOfGroup && (
+                        <IconButton
+                          icon="delete"
+                          size={22}
+                          iconColor={COLORS.error}
+                          onPress={() => openConfirm(m)}
+                          accessibilityLabel={`Eliminar a ${m.displayName}`}
+                          style={{ margin: 0, marginRight: -8 }}
+                        />
+                      )}
+                    </View>
+                  ));
+                })()}
+              </View>
             )}
           </View>
 
           {/* Sección de botones de acción */}
-          <View style={baseStyles.actionButtonsContainer}>
+          <View
+            style={[
+              baseStyles.actionButtonsContainer,
+              { alignItems: "center" },
+            ]}
+          >
             {/* Botón para salir del grupo familiar */}
             <Button
               mode="outlined"
@@ -481,7 +523,11 @@ export default function FamilyGroup() {
                 }
               }}
               contentStyle={baseStyles.buttonContent}
-              style={[baseStyles.buttonSecondary, baseStyles.actionButton]}
+              style={[
+                baseStyles.buttonSecondary,
+                baseStyles.actionButton,
+                { width: "80%" },
+              ]}
               buttonColor="#fff"
               textColor={COLORS.error}
             >
@@ -514,7 +560,11 @@ export default function FamilyGroup() {
                     openTransferDialog();
                   }}
                   contentStyle={baseStyles.buttonContent}
-                  style={[baseStyles.buttonPrimary, baseStyles.actionButton]}
+                  style={[
+                    baseStyles.buttonPrimary,
+                    baseStyles.actionButton,
+                    { width: "80%" },
+                  ]}
                   buttonColor={COLORS.primary}
                   textColor={COLORS.white}
                 >
@@ -531,27 +581,33 @@ export default function FamilyGroup() {
                 createInvitationCode();
               }}
               contentStyle={baseStyles.buttonContent}
-              style={[baseStyles.buttonPrimary, baseStyles.actionButton]}
+              labelStyle={{ fontFamily: "Montserrat_500Medium" }}
+              style={[
+                baseStyles.buttonPrimary,
+                {
+                  width: "80%",
+                  marginBottom: 12,
+                },
+              ]}
               loading={inviteQuery.isFetching}
               disabled={inviteQuery.isFetching}
             >
               Crear enlace de invitación
             </Button>
 
-            {/* Botón para volver */}
-            <Button
-              mode="outlined"
-              icon="arrow-left"
-              onPress={() => {
-                router.push("/perfil");
+            {/* Link para volver, sin botón */}
+            <Text
+              onPress={() => router.push("/perfil")}
+              style={{
+                color: COLORS.primary,
+                marginVertical: 16,
+                fontSize: 16,
+                fontFamily: "system-font",
+                textAlign: "center",
               }}
-              contentStyle={baseStyles.buttonContent}
-              style={[baseStyles.buttonSecondary, baseStyles.actionButton]}
-              buttonColor="#fff"
-              textColor={COLORS.text}
             >
               Volver
-            </Button>
+            </Text>
           </View>
 
           {invitationCode && (
