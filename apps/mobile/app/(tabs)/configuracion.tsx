@@ -40,7 +40,7 @@ export default function ConfiguracionScreen() {
 
   return (
     <SafeAreaView style={baseStyles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
       <ScrollView contentContainerStyle={baseStyles.contentContainer}>
         <ProfileHeader

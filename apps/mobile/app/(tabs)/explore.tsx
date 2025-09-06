@@ -18,7 +18,7 @@ export default function ExploreScreen() {
 
   return (
     <SafeAreaView style={baseStyles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
       <ScrollView style={baseStyles.contentWithCurves}>
         <View style={baseStyles.developmentContainer}>

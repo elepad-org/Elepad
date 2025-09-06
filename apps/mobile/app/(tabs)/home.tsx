@@ -31,7 +31,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={baseStyles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
       {/* --- Header --- */}
       <View style={baseStyles.headerPrimary}>

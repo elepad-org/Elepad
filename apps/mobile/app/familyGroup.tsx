@@ -241,7 +241,7 @@ export default function FamilyGroup() {
 
   return (
     <SafeAreaView style={baseStyles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
       <ScrollView
         contentContainerStyle={baseStyles.contentContainer}
