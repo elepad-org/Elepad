@@ -1,21 +1,16 @@
 import { supabase } from "@/lib/supabase";
-import { View, StyleSheet, Alert, Image, TouchableOpacity } from "react-native";
-import { Text, TextInput, Button, Surface } from "react-native-paper";
+import { View, Alert, Image, TouchableOpacity } from "react-native";
+import { Text, TextInput, Button } from "react-native-paper";
 import { makeRedirectUri } from "expo-auth-session";
-import React, { useState, useRef } from "react";
-import { Platform, Animated } from "react-native";
+import React, { useState } from "react";
 import googleLogo from "@/assets/images/google.png";
 import { Link } from "expo-router";
-import { FONT } from "@/styles/theme";
 import { COLORS, styles as baseStyles } from "@/styles/base";
 
 export default function LogIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
-  // Animated value for button scale
-  const buttonScale = useRef(new Animated.Value(1)).current;
 
   const handleLogin = async () => {
     setLoading(true);
@@ -46,10 +41,31 @@ export default function LogIn() {
   };
 
   return (
-    <Surface style={styles.surface} elevation={2}>
-      <View style={styles.containerPadding}>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        paddingHorizontal: 16,
+      }}
+    >
+      <View
+        style={[
+          baseStyles.titleCard,
+          {
+            backgroundColor: COLORS.accent,
+            borderRadius: 20,
+            padding: 20,
+            width: "100%",
+            maxWidth: 400,
+            alignItems: "center",
+          },
+        ]}
+      >
         <Text style={baseStyles.heading}>Iniciar Sesión</Text>
-        <Text style={styles.subheading}>Ingresa tu email y tu contraseña</Text>
+        <Text style={[baseStyles.subheading, { marginTop: 8 }]}>
+          Ingresa tu email y tu contraseña
+        </Text>
 
         <TextInput
           mode="outlined"
@@ -59,8 +75,8 @@ export default function LogIn() {
           keyboardType="email-address"
           autoCapitalize="none"
           returnKeyType="next"
-          style={styles.input}
-          outlineStyle={styles.inputOutline}
+          style={baseStyles.input}
+          outlineStyle={baseStyles.inputOutline}
           disabled={loading}
           dense
         />
@@ -69,183 +85,60 @@ export default function LogIn() {
           placeholder="Contraseña"
           value={password}
           onChangeText={setPassword}
-          keyboardType="email-address"
+          secureTextEntry
           autoCapitalize="none"
-          returnKeyType="next"
-          style={styles.input}
-          outlineStyle={styles.inputOutline}
+          returnKeyType="done"
+          style={baseStyles.input}
+          outlineStyle={baseStyles.inputOutline}
           onSubmitEditing={handleLogin}
           disabled={loading}
           dense
         />
-        <Animated.View
-          style={{
-            transform: [{ scale: buttonScale }],
-            width: "100%",
-          }}
+
+        <Button
+          mode="contained"
+          contentStyle={baseStyles.buttonContent}
+          style={baseStyles.buttonPrimary}
+          onPress={handleLogin}
+          loading={loading}
+          disabled={loading}
         >
-          <Button
-            mode="contained"
-            contentStyle={styles.continueContent}
-            style={styles.continueButton}
-            labelStyle={styles.continueLabel}
-            onPress={handleLogin}
-            loading={loading}
-            disabled={loading}
-          >
-            Continuar
-          </Button>
-        </Animated.View>
-        <View style={styles.orRow}>
-          <View style={styles.line} />
-          <Text style={styles.orText}>o</Text>
-          <View style={styles.line} />
+          Continuar
+        </Button>
+
+        <View style={baseStyles.orRow}>
+          <View style={baseStyles.orLine} />
+          <Text style={baseStyles.orText}>o</Text>
+          <View style={baseStyles.orLine} />
         </View>
 
         <TouchableOpacity
-          style={styles.googleButton}
+          style={baseStyles.buttonGoogle}
           activeOpacity={0.85}
           onPress={handleGoogleLogin}
           disabled={loading}
         >
-          <View style={styles.gIconWrap}>
+          <View style={baseStyles.googleIconWrap}>
             <Image
               source={googleLogo}
-              style={styles.gIconImage}
+              style={{ width: 18, height: 18 }}
               resizeMode="contain"
             />
           </View>
-          <Text style={styles.googleText}>Continuar con Google</Text>
+          <Text style={baseStyles.googleText}>Continuar con Google</Text>
         </TouchableOpacity>
 
         <Link
           href={{ pathname: "/" }}
           accessibilityRole="button"
-          style={styles.inlineBack}
+          style={[
+            baseStyles.subheading,
+            { textAlign: "center", marginTop: 23 },
+          ]}
         >
-          Volver
+          <Text style={[baseStyles.subheading]}> Volver</Text>
         </Link>
       </View>
-    </Surface>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  surface: {
-    marginTop: 235,
-    marginHorizontal: 16,
-    borderRadius: 20,
-    backgroundColor: "#FFF9F1",
-  },
-  containerPadding: {
-    padding: 20,
-  },
-  title: {
-    marginBottom: 20,
-    fontFamily: FONT.semiBold,
-  },
-  button: {
-    marginTop: 12,
-    borderRadius: 12,
-  },
-  buttonContent: {
-    paddingVertical: 8,
-  },
-  backButton: {
-    marginTop: 8,
-  },
-  backLabel: {
-    fontSize: 16,
-    fontFamily: FONT.regular,
-  },
-  safe: { flex: 1, backgroundColor: "#FFF9F1" },
-  container: { flex: 1, alignItems: "center" },
-  logoWrap: { alignItems: "center" },
-  logo: { width: 185, height: 185 },
-  brand: {
-    marginTop: 20,
-    fontSize: 44,
-    letterSpacing: 8,
-    fontFamily: FONT.regular,
-  },
-  separatorWrap: { width: "100%", alignItems: "center", marginTop: 6 },
-  separator: { width: "60%", height: 1, backgroundColor: "#111", opacity: 0.9 },
-  card: {
-    width: "90%",
-    marginTop: 18,
-    padding: 20,
-    backgroundColor: "transparent",
-    alignItems: "center",
-  },
-  subheading: {
-    fontSize: 13,
-    color: "#666",
-    marginTop: 8,
-    textAlign: "center",
-    fontFamily: FONT.semiBold,
-  },
-  input: {
-    width: "100%",
-    marginTop: 16,
-    backgroundColor: "white",
-    borderRadius: 8,
-  },
-  inputOutline: { borderRadius: 8 },
-  continueButton: {
-    marginTop: 12,
-    width: "100%",
-    borderRadius: 8,
-    backgroundColor: "#5278CD",
-  },
-  continueContent: { height: 48 },
-  continueLabel: { fontSize: 16, fontFamily: FONT.semiBold },
-  orRow: {
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 12,
-  },
-  line: { flex: 1, height: 1, backgroundColor: "#E6E3E0" },
-  orText: { marginHorizontal: 12, color: "#999" },
-  googleButton: {
-    marginTop: 14,
-    marginBottom: 20,
-    width: "100%",
-    backgroundColor: "#FEFEFE",
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: Platform.OS === "ios" ? 0.08 : 0.15,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  gIconWrap: {
-    position: "absolute",
-    left: 16,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: "#FFFFFF",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  gIconImage: { width: 18, height: 18 },
-  googleText: { fontSize: 15, fontFamily: FONT.semiBold },
-  inlineBack: {
-    textAlign: "center",
-    fontFamily: FONT.regular,
-    fontSize: 14,
-    color: "#666",
-  },
-  footer: {
-    marginTop: 18,
-    color: "#B2AFAE",
-    fontSize: 13,
-    fontFamily: FONT.semiBold,
-  },
-});
