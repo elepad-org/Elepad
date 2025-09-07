@@ -25,7 +25,7 @@ export const COLORS = {
   error: "#d32f2f",
   accent: "#F5F1F0",
   // Bordes y líneas
-  border: "#8998AF",
+  border: "#b2bed2ff",
   separator: "#111",
 };
 

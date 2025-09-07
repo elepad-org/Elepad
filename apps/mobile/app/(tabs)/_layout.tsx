@@ -7,19 +7,24 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: COLORS.textLight, // Rojo para texto activo
-        tabBarInactiveTintColor: COLORS.textLight, // Gris para texto inactivo
+        tabBarActiveTintColor: COLORS.accent, // Color accent para texto activo
+        tabBarInactiveTintColor: COLORS.accent, // Color accent para texto inactivo
         tabBarStyle: {
           backgroundColor: COLORS.border,
           borderTopWidth: 0, // Sin borde para que se vea uniforme
           elevation: 0, // Sin sombra en Android
           shadowOpacity: 0, // Sin sombra en iOS
-          paddingTop: 4, // Margen arriba para toda la barra
+          paddingTop: 8, // Más margen arriba para centrar mejor
+          paddingBottom: 8, // Margen abajo para centrar
+          height: 78, // Altura fija para mejor control
+          justifyContent: "center", // Centrar contenido
+          alignItems: "center", // Centrar items
         },
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: "600",
         },
+        tabBarShowLabel: false, // Ocultar las etiquetas/palabras
       }}
     >
       <Tabs.Screen
@@ -29,8 +34,8 @@ export default function TabLayout() {
           tabBarIcon: ({ focused, size }) => (
             <Icon
               source={focused ? "home" : "home-outline"}
-              color={COLORS.textLight}
-              size={size}
+              color={COLORS.accent}
+              size={28}
             />
           ),
         }}
@@ -42,8 +47,8 @@ export default function TabLayout() {
           tabBarIcon: ({ focused, size }) => (
             <Icon
               source={focused ? "compass" : "compass-outline"}
-              color={COLORS.textLight}
-              size={size}
+              color={COLORS.accent}
+              size={28}
             />
           ),
         }}
@@ -55,8 +60,8 @@ export default function TabLayout() {
           tabBarIcon: ({ focused, size }) => (
             <Icon
               source={focused ? "gamepad-variant" : "gamepad-variant-outline"}
-              color={COLORS.textLight}
-              size={size}
+              color={COLORS.accent}
+              size={28}
             />
           ),
         }}
@@ -68,8 +73,8 @@ export default function TabLayout() {
           tabBarIcon: ({ focused, size }) => (
             <Icon
               source={focused ? "cog" : "cog-outline"}
-              color={COLORS.textLight}
-              size={size}
+              color={COLORS.accent}
+              size={28}
             />
           ),
         }}
