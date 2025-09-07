@@ -263,6 +263,8 @@ export default function FamilyGroup() {
                       <TextInput
                         style={[baseStyles.input]}
                         value={newGroupName}
+                        underlineColor="transparent"
+                        activeUnderlineColor={COLORS.primary}
                         onChangeText={setNewGroupName}
                         autoFocus
                       />
@@ -365,7 +367,7 @@ export default function FamilyGroup() {
             );
           })()}
           {/* Mostramos los miembros del grupo Familiar */}
-          <View style={baseStyles.titleCard}>
+          <View style={[baseStyles.titleCard, { marginBottom: 6 }]}>
             <Text
               style={[baseStyles.heading, { fontSize: 16, marginBottom: 8 }]}
             >
@@ -504,7 +506,7 @@ export default function FamilyGroup() {
                     style={{
                       width: "95%",
                       borderTopWidth: 0.5,
-                      borderTopColor: COLORS.red,
+                      borderTopColor: COLORS.textLight,
                     }}
                   />
 
@@ -676,7 +678,7 @@ export default function FamilyGroup() {
           </View>
 
           {/* Solo botón de salir del grupo */}
-          <View style={[{ alignItems: "center", width: "100%" }]}>
+          <View style={[{ alignItems: "center", width: "100%", marginTop: 0 }]}>
             <Button
               mode="contained"
               icon="exit-to-app"
@@ -711,13 +713,7 @@ export default function FamilyGroup() {
             {/* Link para volver, sin botón */}
             <Text
               onPress={() => router.push("/(tabs)/configuracion")}
-              style={{
-                color: COLORS.primary,
-                marginVertical: 16,
-                fontSize: 16,
-                fontFamily: "system-font",
-                textAlign: "center",
-              }}
+              style={[baseStyles.subheading, { marginTop: 23 }]}
             >
               Volver
             </Text>

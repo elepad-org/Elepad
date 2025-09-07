@@ -73,10 +73,11 @@ export default function ConfiguracionScreen() {
             {editExpanded && (
               <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
                 <TextInput
-                  label="Nombre"
                   value={formName}
                   onChangeText={setFormName}
                   style={baseStyles.input}
+                  underlineColor="transparent"
+                  activeUnderlineColor={COLORS.primary}
                   autoFocus
                 />
                 <View

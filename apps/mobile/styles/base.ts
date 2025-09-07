@@ -123,10 +123,19 @@ export const styles = StyleSheet.create({
     marginTop: 16,
     backgroundColor: COLORS.white,
     borderRadius: 8,
-    borderColor: COLORS.white, // para evitar borde gris en Android no se la verdad todo un tema
+    borderBottomWidth: 0,
+    borderBottomColor: "transparent",
+    borderColor: "transparent", // para evitar borde gris en Android
+    borderWidth: 0, // elimina todos los bordes por defecto
+    borderTopWidth: 0,
+    borderLeftWidth: 0,
+    borderRightWidth: 0,
+    outlineWidth: 0, // para web
   },
   inputOutline: {
-    borderRadius: 8,
+    borderRadius: 20,
+    borderColor: "transparent",
+    borderWidth: 0,
   },
 
   // === TEXTOS ===
@@ -344,10 +353,6 @@ export const styles = StyleSheet.create({
     marginBottom: 2,
   },
 
-  actionButton: {
-    marginBottom: 12,
-    width: "100%",
-  },
   inviteCodeCard: {
     backgroundColor: COLORS.primary,
     padding: 16,
@@ -377,11 +382,5 @@ export const styles = StyleSheet.create({
     color: COLORS.white,
     textAlign: "center",
     opacity: 0.8,
-  },
-  backButtonContainer: {
-    alignItems: "center",
-    marginHorizontal: 16,
-    marginTop: 24,
-    marginBottom: 20,
   },
 });
