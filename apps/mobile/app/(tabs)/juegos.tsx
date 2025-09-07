@@ -1,8 +1,9 @@
-import { StatusBar, ScrollView, View } from "react-native";
+import { StatusBar, ScrollView, View, Image } from "react-native";
 import { ActivityIndicator, Text } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, styles as baseStyles } from "@/styles/base";
+import eleCasino from "@/assets/images/ele-casino.jpeg";
 
 export default function JuegosScreen() {
   const { loading } = useAuth();
@@ -43,9 +44,24 @@ export default function JuegosScreen() {
               ¡Hola! Esta página está en construcción. Próximamente verás nuevas
               funcionalidades increíbles que harán tu experiencia aún mejor.
             </Text>
-            <Text style={[baseStyles.subheading, { textAlign: "center" }]}>
+            <Text
+              style={[
+                baseStyles.subheading,
+                { textAlign: "center", marginBottom: 16 },
+              ]}
+            >
               Mantente atento a las actualizaciones 🎉
             </Text>
+            <Image
+              source={eleCasino}
+              style={{
+                width: "100%",
+                height: 330,
+                borderRadius: 16,
+                marginTop: 8,
+              }}
+              resizeMode="cover"
+            />
           </View>
         </View>
       </ScrollView>

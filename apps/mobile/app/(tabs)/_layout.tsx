@@ -16,7 +16,7 @@ export default function TabLayout() {
           shadowOpacity: 0, // Sin sombra en iOS
           paddingTop: 8, // Más margen arriba para centrar mejor
           paddingBottom: 8, // Margen abajo para centrar
-          height: 78, // Altura fija para mejor control
+          height: 88, // Altura más grande para los textos
           justifyContent: "center", // Centrar contenido
           alignItems: "center", // Centrar items
         },
@@ -24,7 +24,7 @@ export default function TabLayout() {
           fontSize: 12,
           fontWeight: "600",
         },
-        tabBarShowLabel: false, // Ocultar las etiquetas/palabras
+        tabBarShowLabel: true, // Mostrar las etiquetas/palabras
       }}
     >
       <Tabs.Screen

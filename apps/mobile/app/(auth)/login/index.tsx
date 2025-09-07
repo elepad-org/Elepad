@@ -25,7 +25,7 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar style="light" translucent />
+      <StatusBar />
       <ImageBackground source={bh} resizeMode="cover" style={{ flex: 1 }}>
         <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
           <LogIn />
