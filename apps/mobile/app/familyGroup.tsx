@@ -255,76 +255,79 @@ export default function FamilyGroup() {
 
             return (
               <>
-                {isEditing ? (
-                  <View style={[baseStyles.titleCard]}>
-                    <TextInput
-                      style={[baseStyles.input]}
-                      value={newGroupName}
-                      onChangeText={setNewGroupName}
-                      autoFocus
-                    />
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        marginTop: 16,
-                        width: "100%",
-                        gap: 12,
-                      }}
-                    >
-                      <Button
-                        mode="text"
-                        onPress={() => setIsEditing(false)}
-                        disabled={patchFamilyGroup.isPending}
-                      >
-                        Cancelar
-                      </Button>
-                      <Button
-                        mode="contained"
-                        onPress={async () => {
-                          if (!newGroupName.trim() || !groupId) return;
-                          if (newGroupName === groupName) {
-                            setIsEditing(false);
-                            return;
-                          }
-                          try {
-                            await patchFamilyGroup.mutateAsync({
-                              idGroup: groupId,
-                              data: { name: newGroupName },
-                            });
-                            setIsEditing(false);
-                            setSnackbarMessage(
-                              "Nombre del Grupo Familiar actualizado correctamente",
-                            );
-                            setSnackbarError(false);
-                            setSnackbarVisible(true);
-                            // Refrescar los datos manualmente
-                            if (membersQuery.refetch) {
-                              await membersQuery.refetch();
-                            }
-                          } catch (e: unknown) {
-                            const msg =
-                              e instanceof Error
-                                ? e.message
-                                : "Error al actualizar el nombre del grupo";
-                            setSnackbarMessage(msg);
-                            setSnackbarError(true);
-                            setSnackbarVisible(true);
-                          }
+                <View style={[baseStyles.titleCard]}>
+                  <Text style={baseStyles.subheading}>Grupo Familiar</Text>
+                  {isEditing ? (
+                    <>
+                      <TextInput
+                        style={[baseStyles.input]}
+                        value={newGroupName}
+                        onChangeText={setNewGroupName}
+                        autoFocus
+                      />
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          width: "100%",
                         }}
-                        loading={patchFamilyGroup.isPending}
-                        style={[baseStyles.buttonPrimary, { width: "48%" }]}
-                        disabled={
-                          !newGroupName.trim() || patchFamilyGroup.isPending
-                        }
                       >
-                        Guardar
-                      </Button>
-                    </View>
-                  </View>
-                ) : (
-                  <View style={[baseStyles.titleCard]}>
-                    <Text style={baseStyles.subheading}>Grupo Familiar</Text>
+                        <Button
+                          mode="contained"
+                          onPress={() => setIsEditing(false)}
+                          disabled={patchFamilyGroup.isPending}
+                          style={[
+                            baseStyles.buttonPrimary,
+                            { width: "40%", backgroundColor: COLORS.white },
+                          ]}
+                          labelStyle={{ color: COLORS.text }}
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          mode="contained"
+                          onPress={async () => {
+                            if (!newGroupName.trim() || !groupId) return;
+                            if (newGroupName === groupName) {
+                              setIsEditing(false);
+                              return;
+                            }
+                            try {
+                              await patchFamilyGroup.mutateAsync({
+                                idGroup: groupId,
+                                data: { name: newGroupName },
+                              });
+                              setIsEditing(false);
+                              setSnackbarMessage(
+                                "Nombre del Grupo Familiar actualizado correctamente",
+                              );
+                              setSnackbarError(false);
+                              setSnackbarVisible(true);
+                              // Refrescar los datos manualmente
+                              if (membersQuery.refetch) {
+                                await membersQuery.refetch();
+                              }
+                            } catch (e: unknown) {
+                              const msg =
+                                e instanceof Error
+                                  ? e.message
+                                  : "Error al actualizar el nombre del grupo";
+                              setSnackbarMessage(msg);
+                              setSnackbarError(true);
+                              setSnackbarVisible(true);
+                            }
+                          }}
+                          loading={patchFamilyGroup.isPending}
+                          style={[baseStyles.buttonPrimary, { width: "40%" }]}
+                          disabled={
+                            !newGroupName.trim() || patchFamilyGroup.isPending
+                          }
+                        >
+                          Guardar
+                        </Button>
+                      </View>
+                    </>
+                  ) : (
                     <View
                       style={{
                         position: "relative",
@@ -355,8 +358,8 @@ export default function FamilyGroup() {
                         />
                       </Pressable>
                     </View>
-                  </View>
-                )}
+                  )}
+                </View>
               </>
             );
           })()}
@@ -428,7 +431,7 @@ export default function FamilyGroup() {
                       {isOwnerOfGroup && o.id !== userElepad?.id && (
                         <IconButton
                           icon="delete"
-                          size={22}
+                          size={20}
                           iconColor={COLORS.error}
                           onPress={() => openConfirm(o)}
                           accessibilityLabel={`Eliminar a ${o.displayName}`}

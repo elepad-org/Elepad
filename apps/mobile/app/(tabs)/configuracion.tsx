@@ -7,6 +7,7 @@ import {
   List,
   Portal,
   Snackbar,
+  TextInput,
 } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
@@ -24,6 +25,7 @@ export default function ConfiguracionScreen() {
   const avatarUrl = userElepad?.avatarUrl || "";
 
   const [editOpen, setEditOpen] = useState(false);
+  const [editExpanded, setEditExpanded] = useState(false);
   const [formName, setFormName] = useState(displayName);
   const [saving, setSaving] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
@@ -55,12 +57,88 @@ export default function ConfiguracionScreen() {
             <List.Item
               title="Editar información"
               left={(props) => <List.Icon {...props} icon="account-edit" />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              right={(props) => (
+                <List.Icon
+                  {...props}
+                  icon={editExpanded ? "chevron-down" : "chevron-right"}
+                />
+              )}
               onPress={() => {
                 setFormName(displayName);
-                setEditOpen(true);
+                setEditExpanded(!editExpanded);
               }}
             />
+
+            {/* Campo de texto desplegable */}
+            {editExpanded && (
+              <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
+                <TextInput
+                  label="Nombre"
+                  value={formName}
+                  onChangeText={setFormName}
+                  style={{ marginBottom: 12 }}
+                  theme={{ colors: { primary: COLORS.primary } }}
+                  autoFocus
+                />
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "flex-end",
+                    gap: 8,
+                  }}
+                >
+                  <Button
+                    mode="text"
+                    onPress={() => {
+                      setEditExpanded(false);
+                      setFormName(displayName);
+                    }}
+                    disabled={saving}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    mode="contained"
+                    onPress={async () => {
+                      const next = formName.trim();
+                      if (!next || !userElepad?.id) return;
+                      if (next === displayName) {
+                        setEditExpanded(false);
+                        return;
+                      }
+                      try {
+                        setSaving(true);
+                        await patchUsersId(userElepad.id, {
+                          displayName: next,
+                        });
+                        setEditExpanded(false);
+                        await refreshUserElepad?.();
+                        setSnackbarVisible(true);
+                      } catch (e: unknown) {
+                        const msg =
+                          e instanceof Error
+                            ? e.message
+                            : "Error al actualizar";
+                        console.warn(msg);
+                      } finally {
+                        setSaving(false);
+                      }
+                    }}
+                    loading={saving}
+                    disabled={
+                      saving ||
+                      !formName.trim() ||
+                      !userElepad?.id ||
+                      formName.trim() === displayName
+                    }
+                    buttonColor={COLORS.primary}
+                  >
+                    Guardar
+                  </Button>
+                </View>
+              </View>
+            )}
+
             <Divider />
             <List.Item
               title="Notificaciones"
@@ -102,39 +180,6 @@ export default function ConfiguracionScreen() {
           </Button>
         </View>
         <Portal>
-          <EditNameDialog
-            title="Editar nombre"
-            visible={editOpen}
-            name={formName}
-            saving={saving}
-            disabled={
-              saving ||
-              !formName.trim() ||
-              !userElepad?.id ||
-              formName.trim() === displayName
-            }
-            onChange={setFormName}
-            onCancel={() => setEditOpen(false)}
-            onSubmit={async () => {
-              const next = formName.trim();
-              if (!next || !userElepad?.id) return;
-              if (next === displayName) return;
-              try {
-                setSaving(true);
-                await patchUsersId(userElepad.id, { displayName: next });
-                setEditOpen(false);
-                await refreshUserElepad?.();
-                setSnackbarVisible(true);
-              } catch (e: unknown) {
-                const msg =
-                  e instanceof Error ? e.message : "Error al actualizar";
-                console.warn(msg);
-              } finally {
-                setSaving(false);
-              }
-            }}
-          />
-
           <UpdatePhotoDialog
             visible={photoOpen}
             userId={userElepad?.id || ""}
