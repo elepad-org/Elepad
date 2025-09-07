@@ -7,6 +7,7 @@ import {
   List,
   Portal,
   Snackbar,
+  TextInput,
 } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
@@ -15,7 +16,7 @@ import ProfileHeader from "@/components/ProfileHeader";
 import { useRouter } from "expo-router";
 import { COLORS, styles as baseStyles } from "@/styles/base";
 
-export default function PerfilScreen() {
+export default function ConfiguracionScreen() {
   const router = useRouter();
 
   const { userElepad, refreshUserElepad, signOut } = useAuth();
@@ -24,6 +25,7 @@ export default function PerfilScreen() {
   const avatarUrl = userElepad?.avatarUrl || "";
 
   const [editOpen, setEditOpen] = useState(false);
+  const [editExpanded, setEditExpanded] = useState(false);
   const [formName, setFormName] = useState(displayName);
   const [saving, setSaving] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
@@ -40,7 +42,7 @@ export default function PerfilScreen() {
 
   return (
     <SafeAreaView style={baseStyles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
       <ScrollView contentContainerStyle={baseStyles.contentContainer}>
         <ProfileHeader
@@ -55,12 +57,92 @@ export default function PerfilScreen() {
             <List.Item
               title="Editar perfil"
               left={(props) => <List.Icon {...props} icon="account-edit" />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              right={(props) => (
+                <List.Icon
+                  {...props}
+                  icon={editExpanded ? "chevron-down" : "chevron-right"}
+                />
+              )}
               onPress={() => {
                 setFormName(displayName);
-                setEditOpen(true);
+                setEditExpanded(!editExpanded);
               }}
             />
+
+            {/* Campo de texto desplegable */}
+            {editExpanded && (
+              <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
+                <TextInput
+                  value={formName}
+                  onChangeText={setFormName}
+                  style={baseStyles.input}
+                  underlineColor="transparent"
+                  activeUnderlineColor={COLORS.primary}
+                  autoFocus
+                />
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    width: "100%",
+                  }}
+                >
+                  <Button
+                    mode="text"
+                    onPress={() => {
+                      setEditExpanded(false);
+                      setFormName(displayName);
+                    }}
+                    disabled={saving}
+                    style={[
+                      baseStyles.buttonPrimary,
+                      { width: "40%", backgroundColor: COLORS.white },
+                    ]}
+                    labelStyle={{ color: COLORS.text }}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    mode="contained"
+                    onPress={async () => {
+                      const next = formName.trim();
+                      if (!next || !userElepad?.id) return;
+                      if (next === displayName) {
+                        setEditExpanded(false);
+                        return;
+                      }
+                      try {
+                        setSaving(true);
+                        await patchUsersId(userElepad.id, {
+                          displayName: next,
+                        });
+                        setEditExpanded(false);
+                        await refreshUserElepad?.();
+                        setSnackbarVisible(true);
+                      } catch (e: unknown) {
+                        const msg =
+                          e instanceof Error
+                            ? e.message
+                            : "Error al actualizar";
+                      } finally {
+                        setSaving(false);
+                      }
+                    }}
+                    loading={saving}
+                    disabled={
+                      saving ||
+                      !formName.trim() ||
+                      !userElepad?.id ||
+                      formName.trim() === displayName
+                    }
+                    style={[baseStyles.buttonPrimary, { width: "40%" }]}
+                  >
+                    Guardar
+                  </Button>
+                </View>
+              </View>
+            )}
+
             <Divider />
             <List.Item
               title="Notificaciones"
@@ -87,20 +169,7 @@ export default function PerfilScreen() {
           </List.Section>
         </Card>
 
-        <View style={baseStyles.footer}>
-          <Button
-            mode="contained"
-            icon="pencil"
-            onPress={() => {
-              setFormName(displayName);
-              setEditOpen(true);
-            }}
-            contentStyle={baseStyles.buttonContent}
-            style={baseStyles.buttonPrimary}
-          >
-            Editar perfil
-          </Button>
-
+        <View style={baseStyles.container}>
           <Button
             mode="contained"
             icon="logout"
@@ -109,45 +178,12 @@ export default function PerfilScreen() {
               router.replace("/");
             }}
             contentStyle={baseStyles.buttonContent}
-            style={[baseStyles.buttonPrimary, { backgroundColor: "#fca5a5" }]}
+            style={[baseStyles.buttonPrimary, { backgroundColor: COLORS.red }]}
           >
             Cerrar sesión
           </Button>
         </View>
         <Portal>
-          <EditNameDialog
-            title="Editar nombre"
-            visible={editOpen}
-            name={formName}
-            saving={saving}
-            disabled={
-              saving ||
-              !formName.trim() ||
-              !userElepad?.id ||
-              formName.trim() === displayName
-            }
-            onChange={setFormName}
-            onCancel={() => setEditOpen(false)}
-            onSubmit={async () => {
-              const next = formName.trim();
-              if (!next || !userElepad?.id) return;
-              if (next === displayName) return;
-              try {
-                setSaving(true);
-                await patchUsersId(userElepad.id, { displayName: next });
-                setEditOpen(false);
-                await refreshUserElepad?.();
-                setSnackbarVisible(true);
-              } catch (e: unknown) {
-                const msg =
-                  e instanceof Error ? e.message : "Error al actualizar";
-                console.warn(msg);
-              } finally {
-                setSaving(false);
-              }
-            }}
-          />
-
           <UpdatePhotoDialog
             visible={photoOpen}
             userId={userElepad?.id || ""}
@@ -166,7 +202,7 @@ export default function PerfilScreen() {
             onDismiss={() => setSnackbarVisible(false)}
             duration={2200}
           >
-            ✓ Perfil actualizado
+            ✓ Información actualizada correctamente
           </Snackbar>
         </Portal>
       </ScrollView>

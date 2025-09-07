@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, styles as baseStyles } from "@/styles/base";
 
-export default function ExploreScreen() {
+export default function JuegosScreen() {
   const { loading } = useAuth();
 
   if (loading) {
@@ -29,7 +29,7 @@ export default function ExploreScreen() {
             <Text
               style={[baseStyles.heading, { fontSize: 48, marginBottom: 16 }]}
             >
-              🚧
+              🎮
             </Text>
             <Text style={[baseStyles.heading, { marginBottom: 16 }]}>
               Página en desarrollo

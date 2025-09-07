@@ -4,13 +4,14 @@ import { FONT } from "./theme";
 // SISTEMA DE COLORES SIMPLIFICADO
 export const COLORS = {
   // Colores principales
-  primary: "#7fb3d3",
+  primary: "#8998AF",
   secondary: "#5278CD",
 
   // Fondos
-  background: "#F8F9FA",
-  loginBackground: "#FFF9F1",
+  background: "#F7F3F2",
+  backgroundSecondary: "#F8F9FA",
   white: "#ffffff",
+  success: "#5278CD",
 
   // Textos
   text: "#0f172a",
@@ -18,16 +19,14 @@ export const COLORS = {
   textLight: "#666666",
   textPlaceholder: "#B2AFAE",
 
+  red: "#c82929a6",
+
   // Estados
-  success: "green",
   error: "#d32f2f",
-
+  accent: "#F5F1F0",
   // Bordes y líneas
-  border: "#E6E3E0",
+  border: "#b2bed2ff",
   separator: "#111",
-
-  // Específicos
-  googleIcon: "#DB4437",
 };
 
 // SOMBRAS SIMPLIFICADAS
@@ -57,7 +56,7 @@ export const styles = StyleSheet.create({
   },
   safeAreaLogin: {
     flex: 1,
-    backgroundColor: COLORS.loginBackground,
+    backgroundColor: COLORS.background,
   },
   container: {
     flex: 1,
@@ -68,9 +67,6 @@ export const styles = StyleSheet.create({
     padding: 16,
     paddingTop: 12,
     justifyContent: "flex-start",
-  },
-  footer: {
-    marginTop: 16,
   },
   center: {
     flex: 1,
@@ -90,9 +86,10 @@ export const styles = StyleSheet.create({
   // === BOTONES ===
   buttonPrimary: {
     marginTop: 20,
-    width: "100%",
-    borderRadius: 8,
-    backgroundColor: COLORS.secondary,
+    width: "85%",
+    borderRadius: 20,
+    backgroundColor: COLORS.primary,
+    alignItems: "center",
   },
   buttonSecondary: {
     marginTop: 14,
@@ -123,9 +120,19 @@ export const styles = StyleSheet.create({
     marginTop: 16,
     backgroundColor: COLORS.white,
     borderRadius: 8,
+    borderBottomWidth: 0,
+    borderBottomColor: "transparent",
+    borderColor: "transparent", // para evitar borde gris en Android
+    borderWidth: 0, // elimina todos los bordes por defecto
+    borderTopWidth: 0,
+    borderLeftWidth: 0,
+    borderRightWidth: 0,
+    outlineWidth: 0, // para web
   },
   inputOutline: {
-    borderRadius: 8,
+    borderRadius: 20,
+    borderColor: "transparent",
+    borderWidth: 0,
   },
 
   // === TEXTOS ===
@@ -138,11 +145,10 @@ export const styles = StyleSheet.create({
   },
 
   subheading: {
-    fontSize: 13,
+    fontSize: 14,
     color: COLORS.textLight,
-    marginTop: 8,
+    marginTop: 6,
     textAlign: "center",
-    fontFamily: FONT.semiBold,
   },
   footerText: {
     marginTop: 18,
@@ -212,40 +218,12 @@ export const styles = StyleSheet.create({
     borderColor: COLORS.border,
   },
   googleIcon: {
-    color: COLORS.googleIcon,
     fontFamily: FONT.bold,
   },
   googleText: {
     fontSize: 15,
     color: "#333",
     fontFamily: FONT.semiBold,
-  },
-
-  // === HEADERS ===
-  headerPrimary: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 20,
-    paddingTop: "12%",
-    paddingBottom: "20%",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  welcomeTextContainer: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  welcomeGreeting: {
-    fontSize: 16,
-    fontFamily: FONT.regular,
-    color: COLORS.white,
-    opacity: 0.9,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontFamily: FONT.bold,
-    color: COLORS.white,
-    marginTop: 2,
   },
 
   // === AVATARES ===
@@ -263,173 +241,45 @@ export const styles = StyleSheet.create({
     color: COLORS.white,
   },
 
-  // === DESARROLLO/MANTENIMIENTO ===
-  contentWithCurves: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    marginTop: -40,
-    paddingTop: 10,
-  },
-  developmentContainer: {
-    padding: 20,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  maintenanceImage: {
-    width: 120,
-    height: 120,
-    marginBottom: 24,
-  },
-  developmentCard: {
-    width: "100%",
-    backgroundColor: COLORS.white,
-    elevation: 3,
-  },
-  developmentTitle: {
-    fontSize: 24,
-    fontFamily: FONT.bold,
-    textAlign: "center",
-    color: COLORS.primary,
-    marginBottom: 16,
-  },
-  developmentText: {
-    fontSize: 16,
-    fontFamily: FONT.regular,
-    textAlign: "center",
-    lineHeight: 24,
-    color: COLORS.textLight,
-    marginBottom: 12,
-  },
-  developmentSubtext: {
-    fontSize: 14,
-    fontFamily: FONT.medium,
-    textAlign: "center",
-    color: COLORS.primary,
-  },
-
   // === TARJETA DE MENÚ ===
   menuCard: {
-    marginHorizontal: 16,
     marginVertical: 8,
-    backgroundColor: COLORS.white,
-    borderRadius: 12,
-    elevation: 2,
+    backgroundColor: COLORS.accent,
+    borderRadius: 20,
+    elevation: 4,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
   },
 
   // === FAMILY GROUP ESPECÍFICOS ===
-  familyGroupCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 10,
+  titleCard: {
+    backgroundColor: COLORS.accent,
+    borderRadius: 20,
     padding: 16,
+    width: "100%",
     marginBottom: 14,
-    ...SHADOWS.light,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
   },
-  familyGroupTitle: {
-    fontSize: 20,
-    fontFamily: FONT.bold,
-    color: COLORS.text,
-    flex: 1,
-    width: "85%",
-    textAlign: "center",
-  },
-  familyGroupSubtitle: {
-    fontSize: 14,
-    fontFamily: FONT.medium,
-    color: COLORS.textSecondary,
-    textAlign: "center",
-    marginBottom: 6,
-  },
-  familyGroupHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: "100%",
-  },
-  editButton: {
-    padding: 2,
-    marginLeft: 8,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontFamily: FONT.bold,
-    color: COLORS.text,
-    marginBottom: 4,
-  },
-  membersSectionContainer: {
-    marginTop: 24,
-  },
-  membersSectionHeader: {
-    marginBottom: 12,
-  },
-  groupNameEditContainer: {
-    alignItems: "center",
-    width: "100%",
-  },
-  groupNameDisplay: {
-    alignItems: "center",
-    width: "100%",
-    padding: 16,
-  },
-  editButtonsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 16,
-    width: "100%",
-    gap: 12,
-  },
-  membersContainer: {
-    marginHorizontal: 16,
-    marginTop: 8,
-  },
-  memberCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: COLORS.white,
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 8,
-    ...SHADOWS.light,
-  },
+
   memberInfoRow: {
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
   },
-  memberDetails: {
-    marginLeft: 12,
-  },
-  memberNameText: {
+
+  paragraphText: {
     fontSize: 16,
     fontFamily: FONT.medium,
     color: COLORS.text,
     marginBottom: 2,
   },
-  ownerBadge: {
-    color: COLORS.textSecondary,
-    fontSize: 14,
-    fontFamily: FONT.regular,
-    marginTop: 2,
-  },
-  ownerBadgeText: {
-    color: COLORS.white,
-    fontSize: 12,
-    fontFamily: FONT.medium,
-  },
-  actionButtonsContainer: {
-    marginHorizontal: 16,
-    marginTop: 20,
-  },
-  actionButton: {
-    marginBottom: 12,
-    width: "100%",
-  },
+
   inviteCodeCard: {
     backgroundColor: COLORS.primary,
     padding: 16,
@@ -459,11 +309,5 @@ export const styles = StyleSheet.create({
     color: COLORS.white,
     textAlign: "center",
     opacity: 0.8,
-  },
-  backButtonContainer: {
-    alignItems: "center",
-    marginHorizontal: 16,
-    marginTop: 24,
-    marginBottom: 20,
   },
 });

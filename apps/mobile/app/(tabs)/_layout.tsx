@@ -1,18 +1,41 @@
 import { Tabs } from "expo-router";
 import { Icon } from "react-native-paper";
+import { COLORS } from "../../styles/base";
 
 export default function TabLayout() {
   return (
-    <Tabs screenOptions={{ headerShown: false }}>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: COLORS.accent, // Color accent para texto activo
+        tabBarInactiveTintColor: COLORS.accent, // Color accent para texto inactivo
+        tabBarStyle: {
+          backgroundColor: COLORS.border,
+          borderTopWidth: 0, // Sin borde para que se vea uniforme
+          elevation: 0, // Sin sombra en Android
+          shadowOpacity: 0, // Sin sombra en iOS
+          paddingTop: 8, // Más margen arriba para centrar mejor
+          paddingBottom: 8, // Margen abajo para centrar
+          height: 78, // Altura fija para mejor control
+          justifyContent: "center", // Centrar contenido
+          alignItems: "center", // Centrar items
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: "600",
+        },
+        tabBarShowLabel: false, // Ocultar las etiquetas/palabras
+      }}
+    >
       <Tabs.Screen
         name="home"
         options={{
           title: "Home",
-          tabBarIcon: ({ focused, color, size }) => (
+          tabBarIcon: ({ focused, size }) => (
             <Icon
               source={focused ? "home" : "home-outline"}
-              color={color}
-              size={size}
+              color={COLORS.accent}
+              size={28}
             />
           ),
         }}
@@ -21,24 +44,37 @@ export default function TabLayout() {
         name="explore"
         options={{
           title: "Explore",
-          tabBarIcon: ({ focused, color, size }) => (
+          tabBarIcon: ({ focused, size }) => (
             <Icon
               source={focused ? "compass" : "compass-outline"}
-              color={color}
-              size={size}
+              color={COLORS.accent}
+              size={28}
             />
           ),
         }}
       />
       <Tabs.Screen
-        name="perfil"
+        name="juegos"
         options={{
-          title: "Perfil",
-          tabBarIcon: ({ focused, color, size }) => (
+          title: "Juegos",
+          tabBarIcon: ({ focused, size }) => (
             <Icon
-              source={focused ? "account" : "account-outline"}
-              color={color}
-              size={size}
+              source={focused ? "gamepad-variant" : "gamepad-variant-outline"}
+              color={COLORS.accent}
+              size={28}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="configuracion"
+        options={{
+          title: "Config.",
+          tabBarIcon: ({ focused, size }) => (
+            <Icon
+              source={focused ? "cog" : "cog-outline"}
+              color={COLORS.accent}
+              size={28}
             />
           ),
         }}

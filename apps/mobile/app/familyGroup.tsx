@@ -28,7 +28,7 @@ import {
 } from "@elepad/api-client";
 import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 import { useAuth } from "@/hooks/useAuth";
-import { COLORS, styles as baseStyles } from "@/styles/base";
+import { COLORS, styles as baseStyles, styles } from "@/styles/base";
 import { Pressable } from "react-native";
 
 export default function FamilyGroup() {
@@ -43,6 +43,7 @@ export default function FamilyGroup() {
   const [snackbarError, setSnackbarError] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
+  const [advancedOptionsExpanded, setAdvancedOptionsExpanded] = useState(false);
 
   const patchFamilyGroup = usePatchFamilyGroupIdGroup(); // Este hook ya maneja la mutación
 
@@ -241,13 +242,13 @@ export default function FamilyGroup() {
 
   return (
     <SafeAreaView style={baseStyles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
       <ScrollView
         contentContainerStyle={baseStyles.contentContainer}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={baseStyles.footer}>
+        <View style={baseStyles.container}>
           {(() => {
             const groupInfo = selectGroupInfo();
             const groupName = groupInfo?.name;
@@ -255,77 +256,81 @@ export default function FamilyGroup() {
 
             return (
               <>
-                {isEditing ? (
-                  <View style={[baseStyles.familyGroupCard, baseStyles.center]}>
-                    <TextInput
-                      style={[baseStyles.input, { marginTop: 8 }]}
-                      value={newGroupName}
-                      onChangeText={setNewGroupName}
-                      autoFocus
-                    />
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        marginTop: 16,
-                        width: "100%",
-                        gap: 12,
-                      }}
-                    >
-                      <Button
-                        mode="text"
-                        onPress={() => setIsEditing(false)}
-                        disabled={patchFamilyGroup.isPending}
-                      >
-                        Cancelar
-                      </Button>
-                      <Button
-                        mode="contained"
-                        onPress={async () => {
-                          if (!newGroupName.trim() || !groupId) return;
-                          if (newGroupName === groupName) {
-                            setIsEditing(false);
-                            return;
-                          }
-                          try {
-                            await patchFamilyGroup.mutateAsync({
-                              idGroup: groupId,
-                              data: { name: newGroupName },
-                            });
-                            setIsEditing(false);
-                            setSnackbarMessage(
-                              "Nombre del Grupo Familiar actualizado correctamente",
-                            );
-                            setSnackbarError(false);
-                            setSnackbarVisible(true);
-                            // Refrescar los datos manualmente
-                            if (membersQuery.refetch) {
-                              await membersQuery.refetch();
-                            }
-                          } catch (e: unknown) {
-                            const msg =
-                              e instanceof Error
-                                ? e.message
-                                : "Error al actualizar el nombre del grupo";
-                            setSnackbarMessage(msg);
-                            setSnackbarError(true);
-                            setSnackbarVisible(true);
-                          }
+                <View style={[baseStyles.titleCard]}>
+                  <Text style={baseStyles.subheading}>Grupo Familiar</Text>
+                  {isEditing ? (
+                    <>
+                      <TextInput
+                        style={[baseStyles.input]}
+                        value={newGroupName}
+                        underlineColor="transparent"
+                        activeUnderlineColor={COLORS.primary}
+                        onChangeText={setNewGroupName}
+                        autoFocus
+                      />
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          width: "100%",
                         }}
-                        loading={patchFamilyGroup.isPending}
-                        disabled={
-                          !newGroupName.trim() || patchFamilyGroup.isPending
-                        }
                       >
-                        Guardar
-                      </Button>
-                    </View>
-                  </View>
-                ) : (
-                  <View style={[baseStyles.familyGroupCard]}>
-                    <Text style={baseStyles.familyGroupSubtitle}>
-                      Grupo Familiar
-                    </Text>
+                        <Button
+                          mode="contained"
+                          onPress={() => setIsEditing(false)}
+                          disabled={patchFamilyGroup.isPending}
+                          style={[
+                            baseStyles.buttonPrimary,
+                            { width: "40%", backgroundColor: COLORS.white },
+                          ]}
+                          labelStyle={{ color: COLORS.text }}
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          mode="contained"
+                          onPress={async () => {
+                            if (!newGroupName.trim() || !groupId) return;
+                            if (newGroupName === groupName) {
+                              setIsEditing(false);
+                              return;
+                            }
+                            try {
+                              await patchFamilyGroup.mutateAsync({
+                                idGroup: groupId,
+                                data: { name: newGroupName },
+                              });
+                              setIsEditing(false);
+                              setSnackbarMessage(
+                                "Nombre del Grupo Familiar actualizado correctamente",
+                              );
+                              setSnackbarError(false);
+                              setSnackbarVisible(true);
+                              // Refrescar los datos manualmente
+                              if (membersQuery.refetch) {
+                                await membersQuery.refetch();
+                              }
+                            } catch (e: unknown) {
+                              const msg =
+                                e instanceof Error
+                                  ? e.message
+                                  : "Error al actualizar el nombre del grupo";
+                              setSnackbarMessage(msg);
+                              setSnackbarError(true);
+                              setSnackbarVisible(true);
+                            }
+                          }}
+                          loading={patchFamilyGroup.isPending}
+                          style={[baseStyles.buttonPrimary, { width: "40%" }]}
+                          disabled={
+                            !newGroupName.trim() || patchFamilyGroup.isPending
+                          }
+                        >
+                          Guardar
+                        </Button>
+                      </View>
+                    </>
+                  ) : (
                     <View
                       style={{
                         position: "relative",
@@ -333,9 +338,7 @@ export default function FamilyGroup() {
                         alignItems: "center",
                       }}
                     >
-                      <Text style={[baseStyles.familyGroupTitle]}>
-                        {groupName}
-                      </Text>
+                      <Text style={[baseStyles.heading]}>{groupName}</Text>
                       <Pressable
                         onPress={() => {
                           setNewGroupName(groupName || "");
@@ -353,20 +356,22 @@ export default function FamilyGroup() {
                         <IconButton
                           icon="pencil"
                           size={18}
-                          iconColor={COLORS.primary}
+                          iconColor={COLORS.textLight}
                           style={{ margin: 0 }}
                         />
                       </Pressable>
                     </View>
-                  </View>
-                )}
+                  )}
+                </View>
               </>
             );
           })()}
           {/* Mostramos los miembros del grupo Familiar */}
-          <View style={[baseStyles.familyGroupCard, { marginHorizontal: 0 }]}>
-            <Text style={[baseStyles.sectionTitle, { textAlign: "center" }]}>
-              Miembros del grupo
+          <View style={[baseStyles.titleCard, { marginBottom: 6 }]}>
+            <Text
+              style={[baseStyles.heading, { fontSize: 16, marginBottom: 8 }]}
+            >
+              Miembros
             </Text>
 
             {membersQuery.isLoading ? (
@@ -402,7 +407,7 @@ export default function FamilyGroup() {
                         {o.avatarUrl ? (
                           <Image
                             source={{ uri: o.avatarUrl }}
-                            style={{ width: 40, height: 40, borderRadius: 20 }}
+                            style={{ width: 47, height: 47, borderRadius: 40 }}
                           />
                         ) : (
                           <View style={baseStyles.memberAvatarPlaceholder}>
@@ -411,22 +416,28 @@ export default function FamilyGroup() {
                             </Text>
                           </View>
                         )}
-                        <View style={baseStyles.memberDetails}>
-                          <Text style={baseStyles.memberNameText}>
+                        <View style={{ marginLeft: 12 }}>
+                          <Text style={baseStyles.paragraphText}>
                             {o.displayName}
                           </Text>
-                          <Text style={baseStyles.ownerBadge}>Owner</Text>
+                          <Text
+                            style={[
+                              baseStyles.subheading,
+                              { textAlign: "left", marginTop: 0 },
+                            ]}
+                          >
+                            Owner
+                          </Text>
                         </View>
                       </View>
                       {/* Solo mostrar basurero si el owner actual está viendo a otro owner (caso edge) */}
                       {isOwnerOfGroup && o.id !== userElepad?.id && (
                         <IconButton
                           icon="delete"
-                          size={22}
+                          size={20}
                           iconColor={COLORS.error}
                           onPress={() => openConfirm(o)}
                           accessibilityLabel={`Eliminar a ${o.displayName}`}
-                          style={{ margin: 0, marginRight: -8 }}
                         />
                       )}
                     </View>
@@ -446,10 +457,7 @@ export default function FamilyGroup() {
                       key={m.id}
                       style={[
                         baseStyles.memberInfoRow,
-                        {
-                          justifyContent: "space-between",
-                          paddingVertical: 8,
-                        },
+                        { justifyContent: "space-between", paddingVertical: 2 },
                       ]}
                     >
                       <View
@@ -458,7 +466,7 @@ export default function FamilyGroup() {
                         {m.avatarUrl ? (
                           <Image
                             source={{ uri: m.avatarUrl }}
-                            style={{ width: 40, height: 40, borderRadius: 20 }}
+                            style={{ width: 47, height: 47, borderRadius: 40 }}
                           />
                         ) : (
                           <View style={baseStyles.memberAvatarPlaceholder}>
@@ -467,8 +475,8 @@ export default function FamilyGroup() {
                             </Text>
                           </View>
                         )}
-                        <View style={baseStyles.memberDetails}>
-                          <Text style={baseStyles.memberNameText}>
+                        <View style={{ marginLeft: 12 }}>
+                          <Text style={baseStyles.paragraphText}>
                             {m.displayName}
                           </Text>
                         </View>
@@ -482,26 +490,197 @@ export default function FamilyGroup() {
                           iconColor={COLORS.error}
                           onPress={() => openConfirm(m)}
                           accessibilityLabel={`Eliminar a ${m.displayName}`}
-                          style={{ margin: 0, marginRight: -8 }}
+                          style={{ alignSelf: "center" }}
                         />
                       )}
                     </View>
                   ));
                 })()}
+
+                {/* Opciones avanzadas */}
+                <View
+                  style={{ width: "100%", marginTop: 16, alignItems: "center" }}
+                >
+                  {/* Línea divisoria centrada */}
+                  <View
+                    style={{
+                      width: "95%",
+                      borderTopWidth: 0.5,
+                      borderTopColor: COLORS.textLight,
+                    }}
+                  />
+
+                  {/* Contenedor de opciones avanzadas */}
+                  <View style={{ width: "100%" }}>
+                    <Pressable
+                      onPress={() =>
+                        setAdvancedOptionsExpanded(!advancedOptionsExpanded)
+                      }
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        paddingTop: 10,
+                      }}
+                    >
+                      <Text
+                        style={[
+                          baseStyles.subheading,
+                          {
+                            color: COLORS.textLight,
+                            fontSize: 14,
+                            textAlign: "left",
+                            marginLeft: 10,
+                            marginTop: 0,
+                          },
+                        ]}
+                      >
+                        Opciones avanzadas
+                      </Text>
+                      <IconButton
+                        icon={
+                          advancedOptionsExpanded
+                            ? "chevron-down"
+                            : "chevron-right"
+                        }
+                        size={20}
+                        iconColor={COLORS.textLight}
+                        style={{ margin: 0 }}
+                      />
+                    </Pressable>
+
+                    {/* Contenido expandible */}
+                    {advancedOptionsExpanded && (
+                      <View style={{ paddingTop: 0 }}>
+                        {/* Opción de crear enlace de invitación */}
+                        <Pressable
+                          onPress={createInvitationCode}
+                          disabled={inviteQuery.isFetching}
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            paddingVertical: 10,
+                            paddingHorizontal: 8,
+                            backgroundColor: inviteQuery.isFetching
+                              ? COLORS.backgroundSecondary
+                              : "transparent",
+                            borderRadius: 8,
+                          }}
+                        >
+                          <IconButton
+                            icon="account-multiple-plus"
+                            size={20}
+                            iconColor={COLORS.primary}
+                            style={{ margin: 0, marginRight: 8 }}
+                          />
+                          <View style={{ flex: 1 }}>
+                            <Text
+                              style={[
+                                baseStyles.paragraphText,
+                                { color: COLORS.text },
+                              ]}
+                            >
+                              Crear enlace de invitación
+                            </Text>
+                            <Text
+                              style={[
+                                baseStyles.subheading,
+                                {
+                                  fontSize: 12,
+                                  textAlign: "left",
+                                  marginTop: 2,
+                                  color: COLORS.textLight,
+                                },
+                              ]}
+                            >
+                              Invita nuevos miembros al grupo
+                            </Text>
+                          </View>
+                          {inviteQuery.isFetching && (
+                            <ActivityIndicator
+                              size="small"
+                              color={COLORS.primary}
+                            />
+                          )}
+                        </Pressable>
+
+                        {/* Opción de transferir administración (solo para owner con miembros) */}
+                        {(() => {
+                          const hasMembers =
+                            groupInfo?.members && groupInfo.members.length > 0;
+                          if (!isOwnerOfGroup || !hasMembers) return null;
+
+                          return (
+                            <Pressable
+                              onPress={() => {
+                                const groupInfo = selectGroupInfo();
+                                const membersArray = groupInfo?.members;
+
+                                if (
+                                  !membersArray ||
+                                  membersArray.length === 0
+                                ) {
+                                  Alert.alert(
+                                    "Sin miembros",
+                                    "No hay otros miembros en el grupo para transferir la administración.",
+                                  );
+                                  return;
+                                }
+
+                                openTransferDialog();
+                              }}
+                              style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                paddingVertical: 8,
+                                paddingHorizontal: 8,
+                                borderRadius: 8,
+                              }}
+                            >
+                              <IconButton
+                                icon="account-switch"
+                                size={20}
+                                iconColor={COLORS.primary}
+                                style={{ margin: 0, marginRight: 8 }}
+                              />
+                              <View style={{ flex: 1 }}>
+                                <Text
+                                  style={[
+                                    baseStyles.paragraphText,
+                                    { color: COLORS.text },
+                                  ]}
+                                >
+                                  Transferir administración
+                                </Text>
+                                <Text
+                                  style={[
+                                    baseStyles.subheading,
+                                    {
+                                      fontSize: 12,
+                                      textAlign: "left",
+                                      marginTop: 2,
+                                      color: COLORS.textLight,
+                                    },
+                                  ]}
+                                >
+                                  Cambiar el administrador del grupo
+                                </Text>
+                              </View>
+                            </Pressable>
+                          );
+                        })()}
+                      </View>
+                    )}
+                  </View>
+                </View>
               </View>
             )}
           </View>
 
-          {/* Sección de botones de acción */}
-          <View
-            style={[
-              baseStyles.actionButtonsContainer,
-              { alignItems: "center" },
-            ]}
-          >
-            {/* Botón para salir del grupo familiar */}
+          {/* Solo botón de salir del grupo */}
+          <View style={[{ alignItems: "center", width: "100%", marginTop: 0 }]}>
             <Button
-              mode="outlined"
+              mode="contained"
               icon="exit-to-app"
               onPress={() => {
                 if (isOwnerOfGroup) {
@@ -524,87 +703,17 @@ export default function FamilyGroup() {
               }}
               contentStyle={baseStyles.buttonContent}
               style={[
-                baseStyles.buttonSecondary,
-                baseStyles.actionButton,
-                { width: "80%" },
+                baseStyles.buttonPrimary,
+                { backgroundColor: COLORS.red },
               ]}
-              buttonColor="#fff"
-              textColor={COLORS.error}
             >
               Salir del grupo familiar
             </Button>
 
-            {/* Botón de transferir ownership (solo para el owner) */}
-            {(() => {
-              const hasMembers =
-                groupInfo?.members && groupInfo.members.length > 0;
-
-              if (!isOwnerOfGroup || !hasMembers) return null;
-
-              return (
-                <Button
-                  mode="outlined"
-                  icon="account-switch"
-                  onPress={() => {
-                    const groupInfo = selectGroupInfo();
-                    const membersArray = groupInfo?.members;
-
-                    if (!membersArray || membersArray.length === 0) {
-                      Alert.alert(
-                        "Sin miembros",
-                        "No hay otros miembros en el grupo para transferir la administración.",
-                      );
-                      return;
-                    }
-
-                    openTransferDialog();
-                  }}
-                  contentStyle={baseStyles.buttonContent}
-                  style={[
-                    baseStyles.buttonPrimary,
-                    baseStyles.actionButton,
-                    { width: "80%" },
-                  ]}
-                  buttonColor={COLORS.primary}
-                  textColor={COLORS.white}
-                >
-                  Transferir administración
-                </Button>
-              );
-            })()}
-
-            {/* Botón para crear enlace de invitación */}
-            <Button
-              mode="contained"
-              icon="account-multiple-plus"
-              onPress={() => {
-                createInvitationCode();
-              }}
-              contentStyle={baseStyles.buttonContent}
-              labelStyle={{ fontFamily: "Montserrat_500Medium" }}
-              style={[
-                baseStyles.buttonPrimary,
-                {
-                  width: "80%",
-                  marginBottom: 12,
-                },
-              ]}
-              loading={inviteQuery.isFetching}
-              disabled={inviteQuery.isFetching}
-            >
-              Crear enlace de invitación
-            </Button>
-
             {/* Link para volver, sin botón */}
             <Text
-              onPress={() => router.push("/perfil")}
-              style={{
-                color: COLORS.primary,
-                marginVertical: 16,
-                fontSize: 16,
-                fontFamily: "system-font",
-                textAlign: "center",
-              }}
+              onPress={() => router.push("/(tabs)/configuracion")}
+              style={[baseStyles.subheading, { marginTop: 23 }]}
             >
               Volver
             </Text>
@@ -637,20 +746,34 @@ export default function FamilyGroup() {
             {snackbarMessage}
           </Snackbar>
 
-          <Dialog visible={confirmVisible} onDismiss={closeConfirm}>
+          <Dialog
+            visible={confirmVisible}
+            onDismiss={closeConfirm}
+            style={{
+              alignSelf: "center",
+              width: "90%",
+              backgroundColor: COLORS.background,
+            }}
+          >
             <Dialog.Title>
-              {memberToRemove?.id === userElepad?.id
-                ? "Salir del grupo"
-                : "Eliminar miembro"}
+              <Text
+                style={[baseStyles.heading, { fontSize: 18, paddingTop: 15 }]}
+              >
+                {memberToRemove?.id === userElepad?.id
+                  ? "Salir del grupo"
+                  : "Eliminar miembro"}
+              </Text>
             </Dialog.Title>
             <Dialog.Content>
-              <Text>
+              <Text style={[baseStyles.subheading]}>
                 {memberToRemove?.id === userElepad?.id ? (
                   <>¿Está seguro que desea salir del grupo familiar?</>
                 ) : (
                   <>
                     ¿Está seguro que desea eliminar a {""}
-                    <Text style={{ fontWeight: "700" }}>
+                    <Text
+                      style={[baseStyles.paragraphText, { fontWeight: "700" }]}
+                    >
                       {memberToRemove?.displayName}
                     </Text>{" "}
                     del grupo?
@@ -658,19 +781,45 @@ export default function FamilyGroup() {
                 )}
               </Text>
             </Dialog.Content>
-            <Dialog.Actions style={{ justifyContent: "space-between" }}>
-              <Button onPress={closeConfirm}>NO</Button>
+            <Dialog.Actions
+              style={{
+                justifyContent: "space-between",
+                paddingHorizontal: 16,
+                paddingBottom: 16,
+              }}
+            >
               <Button
-                onPress={confirmRemove}
-                textColor="#ffffff"
                 mode="contained"
-                style={{
-                  backgroundColor: "#d32f2f",
-                  opacity: removeMember.isPending ? 0.7 : 1,
+                onPress={closeConfirm}
+                style={[
+                  baseStyles.buttonPrimary,
+                  { width: "40%", marginTop: 0, backgroundColor: COLORS.white },
+                ]}
+                labelStyle={{ color: COLORS.text }}
+                contentStyle={baseStyles.buttonContent}
+              >
+                No
+              </Button>
+              <Button
+                mode="contained"
+                onPress={confirmRemove}
+                style={[
+                  baseStyles.buttonPrimary,
+                  {
+                    width: "40%",
+                    backgroundColor: COLORS.red,
+                    marginTop: 0,
+                    opacity: removeMember.isPending ? 0.7 : 1,
+                  },
+                ]}
+                labelStyle={{
+                  color: COLORS.white,
+                  fontFamily: "Montserrat_500Medium",
                 }}
+                contentStyle={baseStyles.buttonContent}
                 disabled={removeMember.isPending}
               >
-                {memberToRemove?.id === userElepad?.id ? "SALIR" : "SI"}
+                {memberToRemove?.id === userElepad?.id ? "Salir" : "Si"}
               </Button>
             </Dialog.Actions>
           </Dialog>
@@ -679,13 +828,24 @@ export default function FamilyGroup() {
           <Dialog
             visible={transferDialogVisible}
             onDismiss={closeTransferDialog}
+            style={{
+              alignSelf: "center",
+              width: "90%",
+              backgroundColor: COLORS.background,
+            }}
           >
-            <Dialog.Title>Transferir administración</Dialog.Title>
+            <Dialog.Title>
+              <Text
+                style={[baseStyles.heading, { fontSize: 18, paddingTop: 15 }]}
+              >
+                Transferir administración
+              </Text>
+            </Dialog.Title>
             <Dialog.Content>
-              <Text style={{ marginBottom: 16 }}>
+              <Text style={[baseStyles.subheading]}>
                 Selecciona el miembro que será el nuevo administrador del grupo:
               </Text>
-              <ScrollView style={{ maxHeight: 300 }}>
+              <ScrollView style={{ maxHeight: 300, marginTop: 16 }}>
                 {(() => {
                   const groupInfo = selectGroupInfo();
                   const membersArray = groupInfo?.members;
@@ -710,12 +870,11 @@ export default function FamilyGroup() {
                       style={[
                         baseStyles.card,
                         {
-                          borderBottomWidth: 1,
-                          borderBottomColor: COLORS.border,
                           paddingVertical: 12,
                           flexDirection: "row",
                           alignItems: "center",
                           justifyContent: "space-between",
+                          marginTop: 0,
                         },
                       ]}
                     >
@@ -743,7 +902,7 @@ export default function FamilyGroup() {
                             </Text>
                           </View>
                         )}
-                        <Text style={baseStyles.heading}>
+                        <Text style={[baseStyles.paragraphText]}>
                           {member.displayName}
                         </Text>
                       </View>
@@ -752,8 +911,25 @@ export default function FamilyGroup() {
                 })()}
               </ScrollView>
             </Dialog.Content>
-            <Dialog.Actions>
-              <Button onPress={closeTransferDialog}>Cancelar</Button>
+            <Dialog.Actions
+              style={{
+                justifyContent: "center",
+                paddingHorizontal: 16,
+                paddingBottom: 16,
+              }}
+            >
+              <Button
+                mode="contained"
+                onPress={closeTransferDialog}
+                style={[
+                  baseStyles.buttonPrimary,
+                  { marginTop: 0, backgroundColor: COLORS.white },
+                ]}
+                labelStyle={{ color: COLORS.text }}
+                contentStyle={baseStyles.buttonContent}
+              >
+                Cancelar
+              </Button>
             </Dialog.Actions>
           </Dialog>
 
@@ -761,38 +937,78 @@ export default function FamilyGroup() {
           <Dialog
             visible={confirmTransferVisible}
             onDismiss={closeConfirmTransfer}
+            style={{
+              alignSelf: "center",
+              width: "90%",
+              backgroundColor: COLORS.background,
+            }}
           >
-            <Dialog.Title>Confirmar transferencia</Dialog.Title>
+            <Dialog.Title>
+              <Text
+                style={[baseStyles.heading, { fontSize: 18, paddingTop: 15 }]}
+              >
+                Confirmar transferencia
+              </Text>
+            </Dialog.Title>
             <Dialog.Content>
-              <Text>
+              <Text style={[baseStyles.subheading]}>
                 ¿Está seguro que desea transferir la administración del grupo a{" "}
-                <Text style={{ fontWeight: "700" }}>
+                <Text style={[baseStyles.paragraphText, { fontWeight: "700" }]}>
                   {selectedNewOwner?.displayName}
                 </Text>
                 ?
               </Text>
               <Text
-                style={{
-                  marginTop: 12,
-                  fontStyle: "italic",
-                  color: "#d32f2f",
-                  fontSize: 14,
-                }}
+                style={[
+                  baseStyles.subheading,
+                  {
+                    marginTop: 12,
+                    fontStyle: "italic",
+                    color: COLORS.red,
+                    fontSize: 14,
+                  },
+                ]}
               >
                 ⚠️ Una vez realizada la transferencia, usted dejará de ser el
                 administrador y no podrá deshacer esta operación.
               </Text>
             </Dialog.Content>
-            <Dialog.Actions style={{ justifyContent: "space-between" }}>
-              <Button onPress={closeConfirmTransfer}>Cancelar</Button>
+            <Dialog.Actions
+              style={{
+                justifyContent: "space-between",
+                paddingHorizontal: 16,
+                paddingBottom: 16,
+              }}
+            >
               <Button
-                onPress={confirmTransferOwnership}
-                textColor="#ffffff"
                 mode="contained"
-                style={{
-                  backgroundColor: "#d32f2f",
-                  opacity: transferOwnership.isPending ? 0.7 : 1,
+                onPress={closeConfirmTransfer}
+                style={[
+                  baseStyles.buttonPrimary,
+                  { width: "40%", marginTop: 0, backgroundColor: COLORS.white },
+                ]}
+                labelStyle={{ color: COLORS.text }}
+                contentStyle={baseStyles.buttonContent}
+              >
+                Cancelar
+              </Button>
+              <Button
+                mode="contained"
+                onPress={confirmTransferOwnership}
+                style={[
+                  baseStyles.buttonPrimary,
+                  {
+                    width: "40%",
+                    backgroundColor: COLORS.red,
+                    marginTop: 0,
+                    opacity: transferOwnership.isPending ? 0.7 : 1,
+                  },
+                ]}
+                labelStyle={{
+                  color: COLORS.white,
+                  fontFamily: "Montserrat_500Medium",
                 }}
+                contentStyle={baseStyles.buttonContent}
                 disabled={transferOwnership.isPending}
                 loading={transferOwnership.isPending}
               >

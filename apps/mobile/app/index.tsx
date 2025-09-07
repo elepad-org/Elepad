@@ -4,7 +4,8 @@ import React, { useRef } from "react";
 import { Animated, View, Image } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { Button, Text, ActivityIndicator } from "react-native-paper";
-import logoBlue from "@/assets/images/lombriz.png";
+import logoBlue from "@/assets/images/ele-gray.png";
+import logoGray from "@/assets/images/ele-gray.png";
 import { useState } from "react";
 import { COLORS, styles as baseStyles } from "@/styles/base";
 
@@ -44,7 +45,7 @@ export default function IndexRedirect() {
               ]}
             >
               <Image
-                source={logoBlue}
+                source={logoGray}
                 style={baseStyles.logo}
                 resizeMode="contain"
               />
@@ -58,7 +59,7 @@ export default function IndexRedirect() {
                 <>
                   <Text style={baseStyles.heading}>¡Bienvenido!</Text>
                   <Text style={baseStyles.subheading}>
-                    Elige una opción para continuar
+                    Elija una opción para continuar
                   </Text>
 
                   <Button
@@ -75,8 +76,11 @@ export default function IndexRedirect() {
                     mode="contained"
                     onPress={() => router.push("/signup")}
                     contentStyle={baseStyles.buttonContent}
-                    style={baseStyles.buttonSecondary}
-                    labelStyle={{ color: "#333" }}
+                    style={[
+                      baseStyles.buttonPrimary,
+                      { backgroundColor: COLORS.white },
+                    ]}
+                    labelStyle={{ color: COLORS.text }}
                     accessibilityLabel="Ir a crear cuenta"
                   >
                     Crear Cuenta
