@@ -31,7 +31,7 @@ export default function TabLayout() {
         name="home"
         options={{
           title: "Home",
-          tabBarIcon: ({ focused, size }) => (
+          tabBarIcon: ({ focused }) => (
             <Icon
               source={focused ? "home" : "home-outline"}
               color={COLORS.accent}
@@ -44,7 +44,7 @@ export default function TabLayout() {
         name="explore"
         options={{
           title: "Explore",
-          tabBarIcon: ({ focused, size }) => (
+          tabBarIcon: ({ focused }) => (
             <Icon
               source={focused ? "compass" : "compass-outline"}
               color={COLORS.accent}
@@ -57,7 +57,7 @@ export default function TabLayout() {
         name="juegos"
         options={{
           title: "Juegos",
-          tabBarIcon: ({ focused, size }) => (
+          tabBarIcon: ({ focused }) => (
             <Icon
               source={focused ? "gamepad-variant" : "gamepad-variant-outline"}
               color={COLORS.accent}
@@ -70,7 +70,7 @@ export default function TabLayout() {
         name="configuracion"
         options={{
           title: "Config.",
-          tabBarIcon: ({ focused, size }) => (
+          tabBarIcon: ({ focused }) => (
             <Icon
               source={focused ? "cog" : "cog-outline"}
               color={COLORS.accent}

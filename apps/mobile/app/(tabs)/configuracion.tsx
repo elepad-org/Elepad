@@ -11,7 +11,7 @@ import {
 } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
-import { EditNameDialog, UpdatePhotoDialog } from "@/components/PerfilDialogs";
+import { UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import ProfileHeader from "@/components/ProfileHeader";
 import { useRouter } from "expo-router";
 import { COLORS, styles as baseStyles } from "@/styles/base";
@@ -24,7 +24,6 @@ export default function ConfiguracionScreen() {
   const email = userElepad?.email || "-";
   const avatarUrl = userElepad?.avatarUrl || "";
 
-  const [editOpen, setEditOpen] = useState(false);
   const [editExpanded, setEditExpanded] = useState(false);
   const [formName, setFormName] = useState(displayName);
   const [saving, setSaving] = useState(false);
@@ -124,6 +123,7 @@ export default function ConfiguracionScreen() {
                           e instanceof Error
                             ? e.message
                             : "Error al actualizar";
+                        alert(msg);
                       } finally {
                         setSaving(false);
                       }

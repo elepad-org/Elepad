@@ -28,7 +28,7 @@ import {
 } from "@elepad/api-client";
 import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 import { useAuth } from "@/hooks/useAuth";
-import { COLORS, styles as baseStyles, styles } from "@/styles/base";
+import { COLORS, styles as baseStyles } from "@/styles/base";
 import { Pressable } from "react-native";
 
 export default function FamilyGroup() {
@@ -398,7 +398,11 @@ export default function FamilyGroup() {
                     <View
                       style={[
                         baseStyles.memberInfoRow,
-                        { justifyContent: "space-between", paddingVertical: 8 },
+                        {
+                          justifyContent: "space-between",
+                          paddingTop: 4,
+                          paddingBottom: 4,
+                        },
                       ]}
                     >
                       <View
@@ -457,7 +461,11 @@ export default function FamilyGroup() {
                       key={m.id}
                       style={[
                         baseStyles.memberInfoRow,
-                        { justifyContent: "space-between", paddingVertical: 2 },
+                        {
+                          justifyContent: "space-between",
+                          paddingTop: 4,
+                          paddingBottom: 4,
+                        },
                       ]}
                     >
                       <View

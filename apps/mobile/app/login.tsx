@@ -3,7 +3,7 @@ import { View, Image, TouchableOpacity, Animated, Easing } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, TextInput, Button } from "react-native-paper";
 import logoBlue from "@/assets/images/bbb.png";
-import { COLORS, styles as baseStyles } from "@/styles/base";
+import { styles as baseStyles } from "@/styles/base";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");

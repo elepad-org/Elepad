@@ -228,9 +228,9 @@ export const styles = StyleSheet.create({
 
   // === AVATARES ===
   memberAvatarPlaceholder: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 47,
+    height: 47,
+    borderRadius: 40,
     backgroundColor: COLORS.textSecondary,
     justifyContent: "center",
     alignItems: "center",

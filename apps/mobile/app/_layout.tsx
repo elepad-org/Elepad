@@ -11,10 +11,7 @@ import "react-native-reanimated";
 import { useColorScheme } from "react-native";
 import { useEffect } from "react";
 import { configureApiClient } from "@elepad/api-client/src/runtime";
-import {
-  Provider as PaperProvider,
-  adaptNavigationTheme,
-} from "react-native-paper";
+import { Provider as PaperProvider } from "react-native-paper";
 import { lightTheme, darkTheme } from "@/styles/theme";
 import { supabase } from "@/lib/supabase";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -52,16 +49,8 @@ export default function RootLayout() {
     getToken: () => AUTH_TOKEN,
   });
 
-  const { LightTheme: AdaptedNavLight, DarkTheme: AdaptedNavDark } =
-    adaptNavigationTheme({
-      reactNavigationLight: NavLight,
-      reactNavigationDark: NavDark,
-      materialLight: lightTheme,
-      materialDark: darkTheme,
-    });
-
   const paperTheme = colorScheme === "dark" ? darkTheme : lightTheme;
-  const navTheme = colorScheme === "dark" ? AdaptedNavDark : AdaptedNavLight;
+  const navTheme = colorScheme === "dark" ? NavDark : NavLight;
 
   return (
     <SafeAreaProvider>

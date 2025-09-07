@@ -4,7 +4,6 @@ import React, { useRef } from "react";
 import { Animated, View, Image } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { Button, Text, ActivityIndicator } from "react-native-paper";
-import logoBlue from "@/assets/images/ele-gray.png";
 import logoGray from "@/assets/images/ele-gray.png";
 import { useState } from "react";
 import { COLORS, styles as baseStyles } from "@/styles/base";
