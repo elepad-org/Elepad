@@ -4,11 +4,11 @@ import { FONT } from "./theme";
 // SISTEMA DE COLORES SIMPLIFICADO
 export const COLORS = {
   // Colores principales
-  primary: "#5278CD",
+  primary: "#8998AF",
   secondary: "#5278CD",
 
   // Fondos
-  background: "#FFF4E3",
+  background: "#F7F3F2",
   backgroundSecondary: "#F8F9FA",
   white: "#ffffff",
   success: "#5278CD",
@@ -23,13 +23,10 @@ export const COLORS = {
 
   // Estados
   error: "#d32f2f",
-  accent: "#FFF9F1",
+  accent: "#F5F1F0",
   // Bordes y líneas
-  border: "#FFF9F1",
+  border: "#8998AF",
   separator: "#111",
-
-  // Específicos
-  googleIcon: "#DB4437",
 };
 
 // SOMBRAS SIMPLIFICADAS
@@ -221,7 +218,6 @@ export const styles = StyleSheet.create({
     borderColor: COLORS.border,
   },
   googleIcon: {
-    color: COLORS.googleIcon,
     fontFamily: FONT.bold,
   },
   googleText: {
@@ -250,11 +246,11 @@ export const styles = StyleSheet.create({
     marginVertical: 8,
     backgroundColor: COLORS.accent,
     borderRadius: 20,
-    elevation: 2,
+    elevation: 4,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
   },
 
   // === FAMILY GROUP ESPECÍFICOS ===
@@ -264,7 +260,11 @@ export const styles = StyleSheet.create({
     padding: 16,
     width: "100%",
     marginBottom: 14,
-    ...SHADOWS.light,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
   },
 
   memberInfoRow: {
