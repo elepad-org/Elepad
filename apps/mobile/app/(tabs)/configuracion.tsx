@@ -55,7 +55,7 @@ export default function ConfiguracionScreen() {
         <Card style={baseStyles.menuCard}>
           <List.Section>
             <List.Item
-              title="Editar información"
+              title="Editar perfil"
               left={(props) => <List.Icon {...props} icon="account-edit" />}
               right={(props) => (
                 <List.Icon
@@ -76,15 +76,14 @@ export default function ConfiguracionScreen() {
                   label="Nombre"
                   value={formName}
                   onChangeText={setFormName}
-                  style={{ marginBottom: 12 }}
-                  theme={{ colors: { primary: COLORS.primary } }}
+                  style={baseStyles.input}
                   autoFocus
                 />
                 <View
                   style={{
                     flexDirection: "row",
-                    justifyContent: "flex-end",
-                    gap: 8,
+                    justifyContent: "space-between",
+                    width: "100%",
                   }}
                 >
                   <Button
@@ -94,6 +93,11 @@ export default function ConfiguracionScreen() {
                       setFormName(displayName);
                     }}
                     disabled={saving}
+                    style={[
+                      baseStyles.buttonPrimary,
+                      { width: "40%", backgroundColor: COLORS.white },
+                    ]}
+                    labelStyle={{ color: COLORS.text }}
                   >
                     Cancelar
                   </Button>
@@ -131,7 +135,7 @@ export default function ConfiguracionScreen() {
                       !userElepad?.id ||
                       formName.trim() === displayName
                     }
-                    buttonColor={COLORS.primary}
+                    style={[baseStyles.buttonPrimary, { width: "40%" }]}
                   >
                     Guardar
                   </Button>
