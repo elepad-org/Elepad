@@ -230,33 +230,6 @@ export const styles = StyleSheet.create({
     fontFamily: FONT.semiBold,
   },
 
-  // === HEADERS ===
-  headerPrimary: {
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 20,
-    paddingTop: "12%",
-    paddingBottom: "20%",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  welcomeTextContainer: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  welcomeGreeting: {
-    fontSize: 16,
-    fontFamily: FONT.regular,
-    color: COLORS.white,
-    opacity: 0.9,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontFamily: FONT.bold,
-    color: COLORS.white,
-    marginTop: 2,
-  },
-
   // === AVATARES ===
   memberAvatarPlaceholder: {
     width: 40,
@@ -270,52 +243,6 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: FONT.bold,
     color: COLORS.white,
-  },
-
-  // === DESARROLLO/MANTENIMIENTO ===
-  contentWithCurves: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    marginTop: -40,
-    paddingTop: 10,
-  },
-  developmentContainer: {
-    padding: 20,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  maintenanceImage: {
-    width: 120,
-    height: 120,
-    marginBottom: 24,
-  },
-  developmentCard: {
-    width: "100%",
-    backgroundColor: COLORS.white,
-    elevation: 3,
-  },
-  developmentTitle: {
-    fontSize: 24,
-    fontFamily: FONT.bold,
-    textAlign: "center",
-    color: COLORS.primary,
-    marginBottom: 16,
-  },
-  developmentText: {
-    fontSize: 16,
-    fontFamily: FONT.regular,
-    textAlign: "center",
-    lineHeight: 24,
-    color: COLORS.textLight,
-    marginBottom: 12,
-  },
-  developmentSubtext: {
-    fontSize: 14,
-    fontFamily: FONT.medium,
-    textAlign: "center",
-    color: COLORS.primary,
   },
 
   // === TARJETA DE MENÚ ===
