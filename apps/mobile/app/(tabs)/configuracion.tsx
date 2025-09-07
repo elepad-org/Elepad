@@ -123,7 +123,6 @@ export default function ConfiguracionScreen() {
                           e instanceof Error
                             ? e.message
                             : "Error al actualizar";
-                        console.warn(msg);
                       } finally {
                         setSaving(false);
                       }

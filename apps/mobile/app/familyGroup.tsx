@@ -43,6 +43,7 @@ export default function FamilyGroup() {
   const [snackbarError, setSnackbarError] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
+  const [advancedOptionsExpanded, setAdvancedOptionsExpanded] = useState(false);
 
   const patchFamilyGroup = usePatchFamilyGroupIdGroup(); // Este hook ya maneja la mutación
 
@@ -404,7 +405,7 @@ export default function FamilyGroup() {
                         {o.avatarUrl ? (
                           <Image
                             source={{ uri: o.avatarUrl }}
-                            style={{ width: 40, height: 40, borderRadius: 20 }}
+                            style={{ width: 47, height: 47, borderRadius: 40 }}
                           />
                         ) : (
                           <View style={baseStyles.memberAvatarPlaceholder}>
@@ -450,14 +451,20 @@ export default function FamilyGroup() {
                   }
 
                   return membersArray.map((m) => (
-                    <View key={m.id} style={[baseStyles.memberInfoRow]}>
+                    <View
+                      key={m.id}
+                      style={[
+                        baseStyles.memberInfoRow,
+                        { justifyContent: "space-between", paddingVertical: 2 },
+                      ]}
+                    >
                       <View
                         style={{ flexDirection: "row", alignItems: "center" }}
                       >
                         {m.avatarUrl ? (
                           <Image
                             source={{ uri: m.avatarUrl }}
-                            style={{ width: 75, height: 75, borderRadius: 20 }}
+                            style={{ width: 47, height: 47, borderRadius: 40 }}
                           />
                         ) : (
                           <View style={baseStyles.memberAvatarPlaceholder}>
@@ -481,66 +488,195 @@ export default function FamilyGroup() {
                           iconColor={COLORS.error}
                           onPress={() => openConfirm(m)}
                           accessibilityLabel={`Eliminar a ${m.displayName}`}
-                          style={{ margin: 0, marginRight: -8 }}
+                          style={{ alignSelf: "center" }}
                         />
                       )}
                     </View>
                   ));
                 })()}
+
+                {/* Opciones avanzadas */}
+                <View
+                  style={{ width: "100%", marginTop: 16, alignItems: "center" }}
+                >
+                  {/* Línea divisoria centrada */}
+                  <View
+                    style={{
+                      width: "95%",
+                      borderTopWidth: 0.5,
+                      borderTopColor: COLORS.red,
+                    }}
+                  />
+
+                  {/* Contenedor de opciones avanzadas */}
+                  <View style={{ width: "100%" }}>
+                    <Pressable
+                      onPress={() =>
+                        setAdvancedOptionsExpanded(!advancedOptionsExpanded)
+                      }
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        paddingTop: 10,
+                      }}
+                    >
+                      <Text
+                        style={[
+                          baseStyles.subheading,
+                          {
+                            color: COLORS.textLight,
+                            fontSize: 14,
+                            textAlign: "left",
+                            marginLeft: 10,
+                            marginTop: 0,
+                          },
+                        ]}
+                      >
+                        Opciones avanzadas
+                      </Text>
+                      <IconButton
+                        icon={
+                          advancedOptionsExpanded
+                            ? "chevron-down"
+                            : "chevron-right"
+                        }
+                        size={20}
+                        iconColor={COLORS.textLight}
+                        style={{ margin: 0 }}
+                      />
+                    </Pressable>
+
+                    {/* Contenido expandible */}
+                    {advancedOptionsExpanded && (
+                      <View style={{ paddingTop: 0 }}>
+                        {/* Opción de crear enlace de invitación */}
+                        <Pressable
+                          onPress={createInvitationCode}
+                          disabled={inviteQuery.isFetching}
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            paddingVertical: 10,
+                            paddingHorizontal: 8,
+                            backgroundColor: inviteQuery.isFetching
+                              ? COLORS.backgroundSecondary
+                              : "transparent",
+                            borderRadius: 8,
+                          }}
+                        >
+                          <IconButton
+                            icon="account-multiple-plus"
+                            size={20}
+                            iconColor={COLORS.primary}
+                            style={{ margin: 0, marginRight: 8 }}
+                          />
+                          <View style={{ flex: 1 }}>
+                            <Text
+                              style={[
+                                baseStyles.paragraphText,
+                                { color: COLORS.text },
+                              ]}
+                            >
+                              Crear enlace de invitación
+                            </Text>
+                            <Text
+                              style={[
+                                baseStyles.subheading,
+                                {
+                                  fontSize: 12,
+                                  textAlign: "left",
+                                  marginTop: 2,
+                                  color: COLORS.textLight,
+                                },
+                              ]}
+                            >
+                              Invita nuevos miembros al grupo
+                            </Text>
+                          </View>
+                          {inviteQuery.isFetching && (
+                            <ActivityIndicator
+                              size="small"
+                              color={COLORS.primary}
+                            />
+                          )}
+                        </Pressable>
+
+                        {/* Opción de transferir administración (solo para owner con miembros) */}
+                        {(() => {
+                          const hasMembers =
+                            groupInfo?.members && groupInfo.members.length > 0;
+                          if (!isOwnerOfGroup || !hasMembers) return null;
+
+                          return (
+                            <Pressable
+                              onPress={() => {
+                                const groupInfo = selectGroupInfo();
+                                const membersArray = groupInfo?.members;
+
+                                if (
+                                  !membersArray ||
+                                  membersArray.length === 0
+                                ) {
+                                  Alert.alert(
+                                    "Sin miembros",
+                                    "No hay otros miembros en el grupo para transferir la administración.",
+                                  );
+                                  return;
+                                }
+
+                                openTransferDialog();
+                              }}
+                              style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                paddingVertical: 8,
+                                paddingHorizontal: 8,
+                                borderRadius: 8,
+                              }}
+                            >
+                              <IconButton
+                                icon="account-switch"
+                                size={20}
+                                iconColor={COLORS.primary}
+                                style={{ margin: 0, marginRight: 8 }}
+                              />
+                              <View style={{ flex: 1 }}>
+                                <Text
+                                  style={[
+                                    baseStyles.paragraphText,
+                                    { color: COLORS.text },
+                                  ]}
+                                >
+                                  Transferir administración
+                                </Text>
+                                <Text
+                                  style={[
+                                    baseStyles.subheading,
+                                    {
+                                      fontSize: 12,
+                                      textAlign: "left",
+                                      marginTop: 2,
+                                      color: COLORS.textLight,
+                                    },
+                                  ]}
+                                >
+                                  Cambiar el administrador del grupo
+                                </Text>
+                              </View>
+                            </Pressable>
+                          );
+                        })()}
+                      </View>
+                    )}
+                  </View>
+                </View>
               </View>
             )}
           </View>
 
-          {/* Sección de botones de acción */}
+          {/* Solo botón de salir del grupo */}
           <View style={[{ alignItems: "center", width: "100%" }]}>
-            {/* Botón de transferir ownership (solo para el owner) */}
-            {(() => {
-              const hasMembers =
-                groupInfo?.members && groupInfo.members.length > 0;
-
-              if (!isOwnerOfGroup || !hasMembers) return null;
-
-              return (
-                <Button
-                  mode="outlined"
-                  icon="account-switch"
-                  onPress={() => {
-                    const groupInfo = selectGroupInfo();
-                    const membersArray = groupInfo?.members;
-
-                    if (!membersArray || membersArray.length === 0) {
-                      Alert.alert(
-                        "Sin miembros",
-                        "No hay otros miembros en el grupo para transferir la administración.",
-                      );
-                      return;
-                    }
-
-                    openTransferDialog();
-                  }}
-                  contentStyle={baseStyles.buttonContent}
-                  style={[baseStyles.buttonPrimary]}
-                >
-                  Transferir administración
-                </Button>
-              );
-            })()}
-
-            {/* Botón para crear enlace de invitación */}
-            <Button
-              mode="contained"
-              icon="account-multiple-plus"
-              onPress={() => {
-                createInvitationCode();
-              }}
-              contentStyle={baseStyles.buttonContent}
-              labelStyle={{ fontFamily: "Montserrat_500Medium" }}
-              style={[baseStyles.buttonPrimary]}
-              loading={inviteQuery.isFetching}
-              disabled={inviteQuery.isFetching}
-            >
-              Crear enlace de invitación
-            </Button>
             <Button
               mode="contained"
               icon="exit-to-app"
