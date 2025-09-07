@@ -11,6 +11,7 @@ export const COLORS = {
   background: "#FFF4E3",
   backgroundSecondary: "#F8F9FA",
   white: "#ffffff",
+  success: "#5278CD",
 
   // Textos
   text: "#0f172a",
@@ -21,7 +22,6 @@ export const COLORS = {
   red: "#c82929a6",
 
   // Estados
-  success: "green",
   error: "#d32f2f",
   accent: "#FFF9F1",
   // Bordes y líneas
@@ -91,7 +91,7 @@ export const styles = StyleSheet.create({
     marginTop: 20,
     width: "85%",
     borderRadius: 20,
-    backgroundColor: COLORS.secondary,
+    backgroundColor: COLORS.primary,
     alignItems: "center",
   },
   buttonSecondary: {

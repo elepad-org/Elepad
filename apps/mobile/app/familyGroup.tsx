@@ -746,20 +746,34 @@ export default function FamilyGroup() {
             {snackbarMessage}
           </Snackbar>
 
-          <Dialog visible={confirmVisible} onDismiss={closeConfirm}>
+          <Dialog
+            visible={confirmVisible}
+            onDismiss={closeConfirm}
+            style={{
+              alignSelf: "center",
+              width: "90%",
+              backgroundColor: COLORS.background,
+            }}
+          >
             <Dialog.Title>
-              {memberToRemove?.id === userElepad?.id
-                ? "Salir del grupo"
-                : "Eliminar miembro"}
+              <Text
+                style={[baseStyles.heading, { fontSize: 18, paddingTop: 15 }]}
+              >
+                {memberToRemove?.id === userElepad?.id
+                  ? "Salir del grupo"
+                  : "Eliminar miembro"}
+              </Text>
             </Dialog.Title>
             <Dialog.Content>
-              <Text>
+              <Text style={[baseStyles.subheading]}>
                 {memberToRemove?.id === userElepad?.id ? (
                   <>¿Está seguro que desea salir del grupo familiar?</>
                 ) : (
                   <>
                     ¿Está seguro que desea eliminar a {""}
-                    <Text style={{ fontWeight: "700" }}>
+                    <Text
+                      style={[baseStyles.paragraphText, { fontWeight: "700" }]}
+                    >
                       {memberToRemove?.displayName}
                     </Text>{" "}
                     del grupo?
@@ -767,19 +781,45 @@ export default function FamilyGroup() {
                 )}
               </Text>
             </Dialog.Content>
-            <Dialog.Actions style={{ justifyContent: "space-between" }}>
-              <Button onPress={closeConfirm}>NO</Button>
+            <Dialog.Actions
+              style={{
+                justifyContent: "space-between",
+                paddingHorizontal: 16,
+                paddingBottom: 16,
+              }}
+            >
               <Button
-                onPress={confirmRemove}
-                textColor="#ffffff"
                 mode="contained"
-                style={{
-                  backgroundColor: "#d32f2f",
-                  opacity: removeMember.isPending ? 0.7 : 1,
+                onPress={closeConfirm}
+                style={[
+                  baseStyles.buttonPrimary,
+                  { width: "40%", marginTop: 0, backgroundColor: COLORS.white },
+                ]}
+                labelStyle={{ color: COLORS.text }}
+                contentStyle={baseStyles.buttonContent}
+              >
+                No
+              </Button>
+              <Button
+                mode="contained"
+                onPress={confirmRemove}
+                style={[
+                  baseStyles.buttonPrimary,
+                  {
+                    width: "40%",
+                    backgroundColor: COLORS.red,
+                    marginTop: 0,
+                    opacity: removeMember.isPending ? 0.7 : 1,
+                  },
+                ]}
+                labelStyle={{
+                  color: COLORS.white,
+                  fontFamily: "Montserrat_500Medium",
                 }}
+                contentStyle={baseStyles.buttonContent}
                 disabled={removeMember.isPending}
               >
-                {memberToRemove?.id === userElepad?.id ? "SALIR" : "SI"}
+                {memberToRemove?.id === userElepad?.id ? "Salir" : "Si"}
               </Button>
             </Dialog.Actions>
           </Dialog>
@@ -788,13 +828,24 @@ export default function FamilyGroup() {
           <Dialog
             visible={transferDialogVisible}
             onDismiss={closeTransferDialog}
+            style={{
+              alignSelf: "center",
+              width: "90%",
+              backgroundColor: COLORS.background,
+            }}
           >
-            <Dialog.Title>Transferir administración</Dialog.Title>
+            <Dialog.Title>
+              <Text
+                style={[baseStyles.heading, { fontSize: 18, paddingTop: 15 }]}
+              >
+                Transferir administración
+              </Text>
+            </Dialog.Title>
             <Dialog.Content>
-              <Text style={{ marginBottom: 16 }}>
+              <Text style={[baseStyles.subheading]}>
                 Selecciona el miembro que será el nuevo administrador del grupo:
               </Text>
-              <ScrollView style={{ maxHeight: 300 }}>
+              <ScrollView style={{ maxHeight: 300, marginTop: 16 }}>
                 {(() => {
                   const groupInfo = selectGroupInfo();
                   const membersArray = groupInfo?.members;
@@ -819,12 +870,11 @@ export default function FamilyGroup() {
                       style={[
                         baseStyles.card,
                         {
-                          borderBottomWidth: 1,
-                          borderBottomColor: COLORS.border,
                           paddingVertical: 12,
                           flexDirection: "row",
                           alignItems: "center",
                           justifyContent: "space-between",
+                          marginTop: 0,
                         },
                       ]}
                     >
@@ -852,7 +902,7 @@ export default function FamilyGroup() {
                             </Text>
                           </View>
                         )}
-                        <Text style={baseStyles.heading}>
+                        <Text style={[baseStyles.paragraphText]}>
                           {member.displayName}
                         </Text>
                       </View>
@@ -861,8 +911,25 @@ export default function FamilyGroup() {
                 })()}
               </ScrollView>
             </Dialog.Content>
-            <Dialog.Actions>
-              <Button onPress={closeTransferDialog}>Cancelar</Button>
+            <Dialog.Actions
+              style={{
+                justifyContent: "center",
+                paddingHorizontal: 16,
+                paddingBottom: 16,
+              }}
+            >
+              <Button
+                mode="contained"
+                onPress={closeTransferDialog}
+                style={[
+                  baseStyles.buttonPrimary,
+                  { marginTop: 0, backgroundColor: COLORS.white },
+                ]}
+                labelStyle={{ color: COLORS.text }}
+                contentStyle={baseStyles.buttonContent}
+              >
+                Cancelar
+              </Button>
             </Dialog.Actions>
           </Dialog>
 
@@ -870,38 +937,78 @@ export default function FamilyGroup() {
           <Dialog
             visible={confirmTransferVisible}
             onDismiss={closeConfirmTransfer}
+            style={{
+              alignSelf: "center",
+              width: "90%",
+              backgroundColor: COLORS.background,
+            }}
           >
-            <Dialog.Title>Confirmar transferencia</Dialog.Title>
+            <Dialog.Title>
+              <Text
+                style={[baseStyles.heading, { fontSize: 18, paddingTop: 15 }]}
+              >
+                Confirmar transferencia
+              </Text>
+            </Dialog.Title>
             <Dialog.Content>
-              <Text>
+              <Text style={[baseStyles.subheading]}>
                 ¿Está seguro que desea transferir la administración del grupo a{" "}
-                <Text style={{ fontWeight: "700" }}>
+                <Text style={[baseStyles.paragraphText, { fontWeight: "700" }]}>
                   {selectedNewOwner?.displayName}
                 </Text>
                 ?
               </Text>
               <Text
-                style={{
-                  marginTop: 12,
-                  fontStyle: "italic",
-                  color: "#d32f2f",
-                  fontSize: 14,
-                }}
+                style={[
+                  baseStyles.subheading,
+                  {
+                    marginTop: 12,
+                    fontStyle: "italic",
+                    color: COLORS.red,
+                    fontSize: 14,
+                  },
+                ]}
               >
                 ⚠️ Una vez realizada la transferencia, usted dejará de ser el
                 administrador y no podrá deshacer esta operación.
               </Text>
             </Dialog.Content>
-            <Dialog.Actions style={{ justifyContent: "space-between" }}>
-              <Button onPress={closeConfirmTransfer}>Cancelar</Button>
+            <Dialog.Actions
+              style={{
+                justifyContent: "space-between",
+                paddingHorizontal: 16,
+                paddingBottom: 16,
+              }}
+            >
               <Button
-                onPress={confirmTransferOwnership}
-                textColor="#ffffff"
                 mode="contained"
-                style={{
-                  backgroundColor: "#d32f2f",
-                  opacity: transferOwnership.isPending ? 0.7 : 1,
+                onPress={closeConfirmTransfer}
+                style={[
+                  baseStyles.buttonPrimary,
+                  { width: "40%", marginTop: 0, backgroundColor: COLORS.white },
+                ]}
+                labelStyle={{ color: COLORS.text }}
+                contentStyle={baseStyles.buttonContent}
+              >
+                Cancelar
+              </Button>
+              <Button
+                mode="contained"
+                onPress={confirmTransferOwnership}
+                style={[
+                  baseStyles.buttonPrimary,
+                  {
+                    width: "40%",
+                    backgroundColor: COLORS.red,
+                    marginTop: 0,
+                    opacity: transferOwnership.isPending ? 0.7 : 1,
+                  },
+                ]}
+                labelStyle={{
+                  color: COLORS.white,
+                  fontFamily: "Montserrat_500Medium",
                 }}
+                contentStyle={baseStyles.buttonContent}
                 disabled={transferOwnership.isPending}
                 loading={transferOwnership.isPending}
               >
