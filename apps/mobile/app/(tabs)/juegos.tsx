@@ -1,13 +1,11 @@
-import React from "react";
-import { StatusBar, ScrollView, Image, View } from "react-native";
-import { ActivityIndicator, Text, Avatar, Card } from "react-native-paper";
+import { StatusBar, ScrollView, View } from "react-native";
+import { ActivityIndicator, Text } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
-import elepadMantenimiento from "../../assets/images/elepad_mantenimiento.png";
 import { COLORS, styles as baseStyles } from "@/styles/base";
 
-export default function HomeScreen() {
-  const { userElepad, loading } = useAuth();
+export default function JuegosScreen() {
+  const { loading } = useAuth();
 
   if (loading) {
     return (
@@ -17,24 +15,40 @@ export default function HomeScreen() {
     );
   }
 
-  const displayName =
-    (userElepad?.displayName as string) || userElepad?.email || "Usuario";
-
-  const getInitials = (name: string) =>
-    name
-      .split(/\s+/)
-      .filter(Boolean)
-      .map((n) => n[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase() || "U";
-
   return (
     <SafeAreaView style={baseStyles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
-      <Text style={baseStyles.developmentText}>
-        Esta sección está en desarrollo. ¡Pronto habrá juegos disponibles!
-      </Text>
+
+      <ScrollView
+        contentContainerStyle={baseStyles.contentContainer}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={baseStyles.container}>
+          {/* Contenido principal */}
+          <View style={[baseStyles.titleCard, { alignItems: "center" }]}>
+            <Text
+              style={[baseStyles.heading, { fontSize: 48, marginBottom: 16 }]}
+            >
+              🎮
+            </Text>
+            <Text style={[baseStyles.heading, { marginBottom: 16 }]}>
+              Página en desarrollo
+            </Text>
+            <Text
+              style={[
+                baseStyles.paragraphText,
+                { textAlign: "center", marginBottom: 12 },
+              ]}
+            >
+              ¡Hola! Esta página está en construcción. Próximamente verás nuevas
+              funcionalidades increíbles que harán tu experiencia aún mejor.
+            </Text>
+            <Text style={[baseStyles.subheading, { textAlign: "center" }]}>
+              Mantente atento a las actualizaciones 🎉
+            </Text>
+          </View>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
