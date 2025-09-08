@@ -2,7 +2,7 @@ import { supabase } from "@/lib/supabase";
 import { View, Alert, Image, TouchableOpacity } from "react-native";
 import { Text, TextInput, Button } from "react-native-paper";
 import { makeRedirectUri } from "expo-auth-session";
-import React, { useState } from "react";
+import { useState } from "react";
 import googleLogo from "@/assets/images/google.png";
 import { Link } from "expo-router";
 import { COLORS, styles as baseStyles } from "@/styles/base";
@@ -69,7 +69,7 @@ export default function LogIn() {
 
         <TextInput
           mode="outlined"
-          placeholder="Email"
+          placeholder="Correo"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
