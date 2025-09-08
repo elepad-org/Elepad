@@ -1,7 +1,20 @@
 import { StyleSheet, Platform } from "react-native";
-import { FONT } from "./theme";
 
-// SISTEMA DE COLORES SIMPLIFICADO
+/** The exact names of available font families. */
+export const FONT = {
+  thin: "Montserrat_100Thin",
+  extraLight: "Montserrat_200ExtraLight",
+  light: "Montserrat_300Light",
+  regular: "Montserrat_400Regular",
+  medium: "Montserrat_500Medium",
+  semiBold: "Montserrat_600SemiBold",
+  bold: "Montserrat_700Bold",
+  extraBold: "Montserrat_800ExtraBold",
+  black: "Montserrat_900Black",
+  lobster: "Lobster_400Regular",
+} as const;
+
+/** Centralized color palette for the app. */
 export const COLORS = {
   // Colores principales
   primary: "#8998AF",
@@ -27,9 +40,9 @@ export const COLORS = {
   // Bordes y líneas
   border: "#b2bed2ff",
   separator: "#111",
-};
+} as const;
 
-// SOMBRAS SIMPLIFICADAS
+/** Simple shadows. */
 export const SHADOWS = {
   light: {
     shadowColor: "#000",
@@ -45,11 +58,11 @@ export const SHADOWS = {
     shadowRadius: 6,
     elevation: 2,
   },
-};
+} as const;
 
-// ESTILOS BASE MINIMALISTAS - SOLO LO ESENCIAL
+// Estilos base minimalistas - solo lo esencial
 export const styles = StyleSheet.create({
-  // === LAYOUTS BÁSICOS ===
+  // Layouts básicos
   safeArea: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -74,7 +87,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  // === TARJETAS ===
+  // Tarjetas
   card: {
     width: "90%",
     marginTop: 18,
@@ -83,7 +96,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  // === BOTONES ===
+  // Botones
   buttonPrimary: {
     marginTop: 20,
     width: "85%",
@@ -114,7 +127,7 @@ export const styles = StyleSheet.create({
     ...SHADOWS.medium,
   },
 
-  // === INPUTS ===
+  // Inputs
   input: {
     width: "100%",
     marginTop: 16,
@@ -135,7 +148,7 @@ export const styles = StyleSheet.create({
     borderWidth: 0,
   },
 
-  // === TEXTOS ===
+  // Textos
   heading: {
     fontSize: 20,
     marginTop: 6,
@@ -157,7 +170,7 @@ export const styles = StyleSheet.create({
     fontFamily: FONT.semiBold,
   },
 
-  // === LOGO ===
+  // Logo
   logoWrap: {
     alignItems: "center",
   },
@@ -177,7 +190,7 @@ export const styles = StyleSheet.create({
     paddingBottom: 8,
   },
 
-  // === SEPARADORES ===
+  // Separadores
   separatorWrap: {
     width: "100%",
     alignItems: "center",
@@ -205,7 +218,7 @@ export const styles = StyleSheet.create({
     color: "#999",
   },
 
-  // === GOOGLE BUTTON ===
+  // Google Button
   googleIconWrap: {
     width: 28,
     height: 28,
@@ -226,7 +239,7 @@ export const styles = StyleSheet.create({
     fontFamily: FONT.semiBold,
   },
 
-  // === AVATARES ===
+  // Avatares
   memberAvatarPlaceholder: {
     width: 47,
     height: 47,
@@ -241,7 +254,7 @@ export const styles = StyleSheet.create({
     color: COLORS.white,
   },
 
-  // === TARJETA DE MENÚ ===
+  // Tarjeta de menú
   menuCard: {
     marginVertical: 8,
     backgroundColor: COLORS.accent,
@@ -253,7 +266,7 @@ export const styles = StyleSheet.create({
     shadowRadius: 4,
   },
 
-  // === FAMILY GROUP ESPECÍFICOS ===
+  // Family Group específicos
   titleCard: {
     backgroundColor: COLORS.accent,
     borderRadius: 20,

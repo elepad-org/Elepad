@@ -6,7 +6,7 @@ import { Animated, ImageBackground, StyleSheet, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator } from "react-native-paper";
 import bh from "@/assets/images/bh5.png";
-import { FONT } from "@/styles/theme";
+import { FONT } from "@/styles/base";
 
 export default function SignupScreen() {
   const { session, loading } = useAuth();

@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { Alert, Platform, View } from "react-native";
-import { Avatar, Button, Dialog, Text, TextInput } from "react-native-paper";
+import {
+  Avatar,
+  Button,
+  Dialog,
+  Text,
+  TextInput,
+  useTheme,
+} from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import { patchUsersIdAvatar } from "@elepad/api-client";
 import { uriToBlob } from "@/lib/uriToBlob";
@@ -26,9 +33,17 @@ export function EditNameDialog({
   onCancel,
   onSubmit,
 }: EditNameDialogProps) {
+  const theme = useTheme();
+
   return (
-    <Dialog visible={visible} onDismiss={onCancel}>
-      <Dialog.Title>{title}</Dialog.Title>
+    <Dialog
+      visible={visible}
+      onDismiss={onCancel}
+      style={{ backgroundColor: theme.colors.surface }}
+    >
+      <Dialog.Title style={{ color: theme.colors.onSurface }}>
+        {title}
+      </Dialog.Title>
       <Dialog.Content>
         <TextInput
           label="Nombre"
@@ -37,15 +52,25 @@ export function EditNameDialog({
           onChangeText={onChange}
           left={<TextInput.Icon icon="account" />}
           autoFocus
+          theme={{
+            colors: {
+              primary: theme.colors.primary,
+              outline: theme.colors.outline,
+            },
+          }}
         />
       </Dialog.Content>
       <Dialog.Actions>
-        <Button onPress={onCancel}>Cancelar</Button>
+        <Button onPress={onCancel} textColor={theme.colors.onSurface}>
+          Cancelar
+        </Button>
         <Button
           mode="contained"
           loading={!!saving}
           disabled={!!disabled}
           onPress={onSubmit}
+          buttonColor={theme.colors.primary}
+          textColor={theme.colors.onPrimary}
         >
           Guardar
         </Button>
@@ -74,6 +99,7 @@ export function UpdatePhotoDialog({
   onReopen,
   onSuccess,
 }: UpdatePhotoDialogProps) {
+  const theme = useTheme();
   const [selectedPhoto, setSelectedPhoto] = useState<null | {
     uri: string;
     name: string;
@@ -121,8 +147,14 @@ export function UpdatePhotoDialog({
   };
 
   return (
-    <Dialog visible={visible} onDismiss={onClose}>
-      <Dialog.Title>Actualizar foto de perfil</Dialog.Title>
+    <Dialog
+      visible={visible}
+      onDismiss={onClose}
+      style={{ backgroundColor: theme.colors.surface }}
+    >
+      <Dialog.Title style={{ color: theme.colors.onSurface }}>
+        Actualizar foto de perfil
+      </Dialog.Title>
       <Dialog.Content>
         <View style={{ alignItems: "center", marginBottom: 16 }}>
           {selectedPhoto ? (
@@ -130,7 +162,15 @@ export function UpdatePhotoDialog({
           ) : currentAvatarUrl ? (
             <Avatar.Image size={96} source={{ uri: currentAvatarUrl }} />
           ) : (
-            <Avatar.Text size={96} label={initials} />
+            <Avatar.Text
+              size={96}
+              label={initials}
+              style={{ backgroundColor: theme.colors.primary }}
+              labelStyle={{
+                color: theme.colors.onPrimary,
+                fontFamily: theme.fonts.titleMedium.fontFamily,
+              }}
+            />
           )}
         </View>
         <View
@@ -141,12 +181,20 @@ export function UpdatePhotoDialog({
             marginBottom: 8,
           }}
         >
-          <Button mode="outlined" icon="image" onPress={openGallery}>
+          <Button
+            mode="outlined"
+            icon="image"
+            onPress={openGallery}
+            textColor={theme.colors.primary}
+            style={{ borderColor: theme.colors.outline }}
+          >
             Galería
           </Button>
           <Button
             mode="outlined"
             icon="camera"
+            textColor={theme.colors.primary}
+            style={{ borderColor: theme.colors.outline }}
             onPress={async () => {
               const wasOpen = visible;
               if (wasOpen) onClose();
@@ -179,7 +227,7 @@ export function UpdatePhotoDialog({
             Cámara
           </Button>
         </View>
-        <Text style={{ marginTop: 4, color: "#6b7280" }}>
+        <Text style={{ marginTop: 4, color: theme.colors.onSurfaceVariant }}>
           Selecciona una imagen desde tu dispositivo. Aún no se guardará nada
           hasta confirmar.
         </Text>
@@ -197,6 +245,8 @@ export function UpdatePhotoDialog({
           mode="contained"
           loading={saving}
           disabled={!selectedPhoto || !userId || saving}
+          buttonColor={theme.colors.primary}
+          textColor={theme.colors.onPrimary}
           onPress={async () => {
             if (!selectedPhoto || !userId) return;
             try {

@@ -1,12 +1,13 @@
 import { supabase } from "@/lib/supabase";
-import { FONT } from "@/styles/theme";
+import { FONT } from "@/styles/base";
 import { postFamilyGroupCreate, postFamilyGroupLink } from "@elepad/api-client";
 import { Link } from "expo-router";
 import { useRef, useState } from "react";
 import { View, StyleSheet, Animated } from "react-native";
-import { Surface, TextInput, Button, Text } from "react-native-paper";
+import { Surface, TextInput, Button, Text, useTheme } from "react-native-paper";
 
 export default function NewAccount() {
+  const theme = useTheme();
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
@@ -52,13 +53,27 @@ export default function NewAccount() {
   const buttonScale = useRef(new Animated.Value(1)).current;
 
   return (
-    <Surface style={styles.surface} elevation={2}>
+    <Surface
+      style={[styles.surface, { backgroundColor: theme.colors.surfaceVariant }]}
+      elevation={2}
+    >
       <View style={styles.containerPadding}>
-        <Text style={styles.heading}>Crear Cuenta</Text>
-        <Text style={styles.subheading}>Ingrese sus datos personales </Text>
+        <Text
+          variant="headlineSmall"
+          style={[styles.heading, { color: theme.colors.onSurface }]}
+        >
+          Crear Cuenta
+        </Text>
+        <Text
+          variant="bodyMedium"
+          style={[styles.subheading, { color: theme.colors.onSurfaceVariant }]}
+        >
+          Ingrese sus datos personales
+        </Text>
 
         <TextInput
           mode="outlined"
+          label="Nombre de usuario"
           placeholder="Nombre de usuario"
           value={displayName}
           onChangeText={setDisplayName}
@@ -69,9 +84,16 @@ export default function NewAccount() {
           outlineStyle={styles.inputOutline}
           disabled={loading}
           dense
+          theme={{
+            colors: {
+              primary: theme.colors.primary,
+              outline: theme.colors.outline,
+            },
+          }}
         />
         <TextInput
           mode="outlined"
+          label="Correo"
           placeholder="Correo "
           value={email}
           onChangeText={setEmail}
@@ -82,9 +104,16 @@ export default function NewAccount() {
           outlineStyle={styles.inputOutline}
           disabled={loading}
           dense
+          theme={{
+            colors: {
+              primary: theme.colors.primary,
+              outline: theme.colors.outline,
+            },
+          }}
         />
         <TextInput
           mode="outlined"
+          label="Código del grupo familiar"
           placeholder="Código del grupo familiar"
           value={familyCode}
           onChangeText={setFamilyCode}
@@ -95,9 +124,16 @@ export default function NewAccount() {
           outlineStyle={styles.inputOutline}
           disabled={loading}
           dense
+          theme={{
+            colors: {
+              primary: theme.colors.primary,
+              outline: theme.colors.outline,
+            },
+          }}
         />
         <TextInput
           mode="outlined"
+          label="Contraseña"
           placeholder="Contraseña"
           value={password}
           onChangeText={setPassword}
@@ -109,6 +145,12 @@ export default function NewAccount() {
           onSubmitEditing={handleSignUp}
           disabled={loading}
           dense
+          theme={{
+            colors: {
+              primary: theme.colors.primary,
+              outline: theme.colors.outline,
+            },
+          }}
         />
         <Animated.View
           style={{
@@ -124,20 +166,26 @@ export default function NewAccount() {
             onPress={handleSignUp}
             loading={loading}
             disabled={loading}
+            buttonColor={theme.colors.primary}
+            textColor={theme.colors.onPrimary}
           >
             Continuar
           </Button>
         </Animated.View>
         <View style={styles.orRow}>
           <View style={styles.line} />
-          <Text style={styles.orText}>o</Text>
+          <Text
+            style={[styles.orText, { color: theme.colors.onSurfaceVariant }]}
+          >
+            o
+          </Text>
           <View style={styles.line} />
         </View>
 
         <Link
           href={{ pathname: "/" }}
           accessibilityRole="button"
-          style={styles.inlineBack}
+          style={[styles.inlineBack, { color: theme.colors.onSurfaceVariant }]}
         >
           Volver
         </Link>
