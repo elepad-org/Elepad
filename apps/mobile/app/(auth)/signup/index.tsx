@@ -5,8 +5,8 @@ import { useRef } from "react";
 import { Animated, ImageBackground, StyleSheet, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator } from "react-native-paper";
-import bh from "@/assets/images/bh5.png";
-import { FONT } from "@/styles/theme";
+import bh from "@/assets/images/bh7.jpeg";
+import { FONT } from "@/styles/base";
 
 export default function SignupScreen() {
   const { session, loading } = useAuth();
@@ -27,7 +27,15 @@ export default function SignupScreen() {
   return (
     <View style={styles.container}>
       <StatusBar style="light" translucent />
-      <ImageBackground source={bh} resizeMode="cover" style={{ flex: 1 }}>
+      <ImageBackground
+        source={bh}
+        resizeMode="cover"
+        style={{
+          flex: 1,
+          width: "100%",
+          height: "100%",
+        }}
+      >
         <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
           <NewAccount />
         </Animated.View>
@@ -37,7 +45,11 @@ export default function SignupScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   logoContainer: {
     width: 300,

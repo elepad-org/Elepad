@@ -1,8 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
-import { Card, List, Text } from "react-native-paper";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { FONT } from "@/styles/theme";
+import { Card, List, Text, IconButton } from "react-native-paper";
+import { FONT } from "@/styles/base";
 
 type EventItem = {
   id: string;
@@ -49,7 +48,7 @@ function getMonthMatrix(year: number, monthIndex: number) {
 
 const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
 
-const CalendarView: React.FC = () => {
+export default function CalendarView() {
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth()); // 0..11
@@ -137,13 +136,21 @@ const CalendarView: React.FC = () => {
     <View style={styles.container}>
       <Text style={styles.heading}>Calendario</Text>
       <View style={styles.header}>
-        <TouchableOpacity onPress={handlePrev} style={styles.navBtn}>
-          <MaterialCommunityIcons name="chevron-left" size={28} color="#444" />
-        </TouchableOpacity>
+        <IconButton
+          icon="chevron-left"
+          size={28}
+          iconColor="#444"
+          onPress={handlePrev}
+          style={styles.navBtn}
+        />
         <Text style={styles.monthLabel}>{monthLabel}</Text>
-        <TouchableOpacity onPress={handleNext} style={styles.navBtn}>
-          <MaterialCommunityIcons name="chevron-right" size={28} color="#444" />
-        </TouchableOpacity>
+        <IconButton
+          icon="chevron-right"
+          size={28}
+          iconColor="#444"
+          onPress={handleNext}
+          style={styles.navBtn}
+        />
       </View>
 
       <View style={styles.weekDays}>
@@ -209,7 +216,7 @@ const CalendarView: React.FC = () => {
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -291,5 +298,3 @@ const styles = StyleSheet.create({
   },
   eventTimeText: { fontFamily: FONT.bold, color: "#333" },
 });
-
-export default CalendarView;

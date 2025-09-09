@@ -1,6 +1,6 @@
 import { View, StyleSheet } from "react-native";
 import { Card, Text, List, Chip } from "react-native-paper";
-import { FONT } from "@/styles/theme";
+import { FONT } from "@/styles/base";
 
 type Activity = {
   id: string;
@@ -15,7 +15,7 @@ const mockActivities: Activity[] = [
   { id: "3", title: "Alimentación", time: "13:00", status: "Pendiente" },
 ];
 
-const ActivitiesList = () => {
+export default function ActivitiesList() {
   const renderItem = ({ item }: { item: Activity }) => {
     /* const cardStyle = [
       styles.card,
@@ -84,7 +84,7 @@ const ActivitiesList = () => {
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -102,5 +102,3 @@ const styles = StyleSheet.create({
   },
   chip: { alignSelf: "flex-start" },
 });
-
-export default ActivitiesList;

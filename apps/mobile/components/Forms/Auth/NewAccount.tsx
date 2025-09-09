@@ -1,10 +1,10 @@
 import { supabase } from "@/lib/supabase";
-import { FONT } from "@/styles/theme";
 import { postFamilyGroupCreate, postFamilyGroupLink } from "@elepad/api-client";
 import { Link } from "expo-router";
-import { useRef, useState } from "react";
-import { View, StyleSheet, Animated } from "react-native";
-import { Surface, TextInput, Button, Text } from "react-native-paper";
+import { useState } from "react";
+import { View, Alert } from "react-native";
+import { TextInput, Button, Text } from "react-native-paper";
+import { COLORS, STYLES } from "@/styles/base";
 
 export default function NewAccount() {
   const [email, setEmail] = useState("");
@@ -21,10 +21,12 @@ export default function NewAccount() {
       options: { data: { displayName } },
     });
     if (error) {
-      console.log(error);
+      Alert.alert(error.message);
+      setLoading(false);
+      return;
     }
     if (!data.session) {
-      console.log("No se pudo crear un grupo familiar");
+      Alert.alert("No se pudo crear un grupo familiar");
       setLoading(false);
       return;
     }
@@ -35,7 +37,7 @@ export default function NewAccount() {
       });
       // TODO: The workflow when this fails needs to be defined!!
       if (!res) {
-        console.log("No se pudo crear un grupo familiar");
+        Alert.alert("No se pudo crear un grupo familiar");
       }
     } else {
       const res = await postFamilyGroupLink({
@@ -43,56 +45,73 @@ export default function NewAccount() {
         userId: data.session.user.id,
       });
       if (!res) {
-        console.log("No se pudo vincular al grupo familiar");
+        Alert.alert("No se pudo vincular al grupo familiar");
       }
     }
     setLoading(false);
   };
 
-  const buttonScale = useRef(new Animated.Value(1)).current;
-
   return (
-    <Surface style={styles.surface} elevation={2}>
-      <View style={styles.containerPadding}>
-        <Text style={styles.heading}>Crear Cuenta</Text>
-        <Text style={styles.subheading}>Ingrese sus datos personales </Text>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        paddingHorizontal: 16,
+      }}
+    >
+      <View
+        style={[
+          STYLES.titleCard,
+          {
+            backgroundColor: COLORS.accent,
+            borderRadius: 20,
+            padding: 20,
+            width: "100%",
+            maxWidth: 400,
+            alignItems: "center",
+          },
+        ]}
+      >
+        <Text style={STYLES.heading}>Crear Cuenta</Text>
+        <Text style={[STYLES.subheading, { marginTop: 8 }]}>
+          Ingrese sus datos personales
+        </Text>
 
         <TextInput
           mode="outlined"
           placeholder="Nombre de usuario"
           value={displayName}
           onChangeText={setDisplayName}
-          keyboardType="email-address"
           autoCapitalize="none"
           returnKeyType="next"
-          style={styles.input}
-          outlineStyle={styles.inputOutline}
+          style={STYLES.input}
+          outlineStyle={STYLES.inputOutline}
           disabled={loading}
           dense
         />
         <TextInput
           mode="outlined"
-          placeholder="Correo "
+          placeholder="Correo"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
           returnKeyType="next"
-          style={styles.input}
-          outlineStyle={styles.inputOutline}
+          style={STYLES.input}
+          outlineStyle={STYLES.inputOutline}
           disabled={loading}
           dense
         />
         <TextInput
           mode="outlined"
-          placeholder="Código del grupo familiar"
+          placeholder="Código familiar (opcional)"
           value={familyCode}
           onChangeText={setFamilyCode}
-          keyboardType="email-address"
           autoCapitalize="characters"
           returnKeyType="next"
-          style={styles.input}
-          outlineStyle={styles.inputOutline}
+          style={STYLES.input}
+          outlineStyle={STYLES.inputOutline}
           disabled={loading}
           dense
         />
@@ -101,140 +120,41 @@ export default function NewAccount() {
           placeholder="Contraseña"
           value={password}
           onChangeText={setPassword}
-          keyboardType="email-address"
+          secureTextEntry
           autoCapitalize="none"
-          returnKeyType="next"
-          style={styles.input}
-          outlineStyle={styles.inputOutline}
+          returnKeyType="done"
+          style={STYLES.input}
+          outlineStyle={STYLES.inputOutline}
           onSubmitEditing={handleSignUp}
           disabled={loading}
           dense
         />
-        <Animated.View
-          style={{
-            transform: [{ scale: buttonScale }],
-            width: "100%",
-          }}
+
+        <Button
+          mode="contained"
+          contentStyle={STYLES.buttonContent}
+          style={STYLES.buttonPrimary}
+          onPress={handleSignUp}
+          loading={loading}
+          disabled={loading}
         >
-          <Button
-            mode="contained"
-            contentStyle={styles.continueContent}
-            style={styles.continueButton}
-            labelStyle={styles.continueLabel}
-            onPress={handleSignUp}
-            loading={loading}
-            disabled={loading}
-          >
-            Continuar
-          </Button>
-        </Animated.View>
-        <View style={styles.orRow}>
-          <View style={styles.line} />
-          <Text style={styles.orText}>o</Text>
-          <View style={styles.line} />
+          Continuar
+        </Button>
+
+        <View style={STYLES.orRow}>
+          <View style={STYLES.orLine} />
+          <Text style={STYLES.orText}>o</Text>
+          <View style={STYLES.orLine} />
         </View>
 
         <Link
           href={{ pathname: "/" }}
           accessibilityRole="button"
-          style={styles.inlineBack}
+          style={[STYLES.subheading, { textAlign: "center", marginTop: 23 }]}
         >
-          Volver
+          <Text style={[STYLES.subheading]}> Volver</Text>
         </Link>
       </View>
-    </Surface>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  surface: {
-    marginTop: 235,
-    marginHorizontal: 16,
-    borderRadius: 20,
-    backgroundColor: "#FFF9F1",
-  },
-  containerPadding: {
-    padding: 20,
-  },
-  title: {
-    marginBottom: 20,
-    fontFamily: FONT.semiBold,
-  },
-  button: {
-    marginTop: 12,
-    borderRadius: 12,
-  },
-  buttonContent: {
-    paddingVertical: 8,
-  },
-  backButton: {
-    marginTop: 8,
-  },
-  backLabel: {
-    fontSize: 16,
-    fontFamily: FONT.semiBold,
-  },
-  safe: { flex: 1, backgroundColor: "#FFF9F1" },
-  container: { flex: 1, alignItems: "center" },
-  logoWrap: { alignItems: "center" },
-  logo: { width: 185, height: 185 },
-  brand: {
-    marginTop: 20,
-    fontSize: 44,
-    letterSpacing: 8,
-    fontFamily: FONT.regular,
-  },
-  separatorWrap: { width: "100%", alignItems: "center", marginTop: 6 },
-  separator: { width: "60%", height: 1, backgroundColor: "#111", opacity: 0.9 },
-  card: {
-    width: "90%",
-    marginTop: 18,
-    padding: 20,
-    backgroundColor: "transparent",
-    alignItems: "center",
-  },
-  heading: {
-    fontSize: 22,
-    marginTop: 6,
-    fontFamily: FONT.semiBold,
-    textAlign: "center",
-  },
-  subheading: {
-    fontSize: 13,
-    color: "#666",
-    marginTop: 8,
-    textAlign: "center",
-    fontFamily: FONT.semiBold,
-  },
-  input: {
-    width: "100%",
-    marginTop: 16,
-    backgroundColor: "white",
-    borderRadius: 8,
-  },
-  inputOutline: { borderRadius: 8 },
-  continueButton: {
-    marginTop: 12,
-    marginBottom: 4,
-    width: "100%",
-    borderRadius: 8,
-    backgroundColor: "#5278CD",
-  },
-  continueContent: { height: 48 },
-  continueLabel: { fontSize: 16, fontFamily: FONT.semiBold },
-  orRow: {
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 12,
-    marginBottom: 14,
-  },
-  line: { flex: 1, height: 1, backgroundColor: "#E6E3E0" },
-  orText: { marginHorizontal: 12, color: "#999" },
-  inlineBack: {
-    textAlign: "center",
-    fontFamily: FONT.regular,
-    fontSize: 14,
-    color: "#666",
-  },
-});

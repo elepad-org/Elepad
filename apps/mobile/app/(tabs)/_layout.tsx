@@ -1,84 +1,103 @@
-import { Tabs } from "expo-router";
-import { Icon } from "react-native-paper";
-import { COLORS } from "../../styles/base";
+import { useState } from "react";
+import { View } from "react-native";
+import { BottomNavigation, useTheme } from "react-native-paper";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import HomeScreen from "./home";
+import ExploreScreen from "./explore";
+import JuegosScreen from "./juegos";
+import ConfiguracionScreen from "./configuracion";
+import { COLORS } from "@/styles/base";
 
 export default function TabLayout() {
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
+  const [index, setIndex] = useState(0);
+
+  const [routes] = useState([
+    {
+      key: "home",
+      title: "Inicio",
+      focusedIcon: "home",
+      unfocusedIcon: "home-outline",
+    },
+    {
+      key: "explore",
+      title: "Explorar",
+      focusedIcon: "compass",
+      unfocusedIcon: "compass-outline",
+    },
+    {
+      key: "juegos",
+      title: "Juegos",
+      focusedIcon: "puzzle",
+      unfocusedIcon: "puzzle-outline",
+    },
+    {
+      key: "configuracion",
+      title: "Config.",
+      focusedIcon: "cog",
+      unfocusedIcon: "cog-outline",
+    },
+  ]);
+
+  const renderScene = BottomNavigation.SceneMap({
+    home: HomeScreen,
+    explore: ExploreScreen,
+    juegos: JuegosScreen,
+    configuracion: ConfiguracionScreen,
+  });
+
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: COLORS.accent, // Color accent para texto activo
-        tabBarInactiveTintColor: COLORS.accent, // Color accent para texto inactivo
-        tabBarStyle: {
-          backgroundColor: COLORS.border,
-          borderTopWidth: 0, // Sin borde para que se vea uniforme
-          elevation: 0, // Sin sombra en Android
-          shadowOpacity: 0, // Sin sombra en iOS
-          paddingTop: 8, // Más margen arriba para centrar mejor
-          paddingBottom: 8, // Margen abajo para centrar
-          height: 88, // Altura más grande para los textos
-          justifyContent: "center", // Centrar contenido
-          alignItems: "center", // Centrar items
-        },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: "600",
-        },
-        tabBarShowLabel: true, // Mostrar las etiquetas/palabras
-      }}
-    >
-      <Tabs.Screen
-        name="home"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ focused }) => (
-            <Icon
-              source={focused ? "home" : "home-outline"}
-              color={COLORS.accent}
-              size={28}
-            />
-          ),
+    <View style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>
+        {renderScene({
+          route: routes[index],
+          jumpTo: (key: string) => {
+            const routeIndex = routes.findIndex((route) => route.key === key);
+            if (routeIndex !== -1) {
+              setIndex(routeIndex);
+            }
+          },
+        })}
+      </View>
+      <View
+        style={{
+          position: "absolute",
+          bottom: insets.bottom + 10,
+          left: 16,
+          right: 16,
+          borderRadius: 30,
+          overflow: "hidden",
+          elevation: 12,
+          shadowColor: "#000",
+          shadowOpacity: 0.2,
+          shadowRadius: 8,
         }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: "Explore",
-          tabBarIcon: ({ focused }) => (
-            <Icon
-              source={focused ? "compass" : "compass-outline"}
-              color={COLORS.accent}
-              size={28}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="juegos"
-        options={{
-          title: "Juegos",
-          tabBarIcon: ({ focused }) => (
-            <Icon
-              source={focused ? "gamepad-variant" : "gamepad-variant-outline"}
-              color={COLORS.accent}
-              size={28}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="configuracion"
-        options={{
-          title: "Config.",
-          tabBarIcon: ({ focused }) => (
-            <Icon
-              source={focused ? "cog" : "cog-outline"}
-              color={COLORS.accent}
-              size={28}
-            />
-          ),
-        }}
-      />
-    </Tabs>
+      >
+        <BottomNavigation.Bar
+          navigationState={{ index, routes }}
+          onTabPress={({ route }) => {
+            const routeIndex = routes.findIndex((r) => r.key === route.key);
+            if (routeIndex !== -1) {
+              setIndex(routeIndex);
+            }
+          }}
+          activeColor={theme.colors.onSurface}
+          inactiveColor={theme.colors.onSurface}
+          activeIndicatorStyle={{
+            backgroundColor: COLORS.primary,
+          }}
+          style={{
+            backgroundColor: COLORS.border,
+            borderTopWidth: 0,
+            elevation: 0,
+          }}
+          labeled={true}
+          labelMaxFontSizeMultiplier={1.4}
+          theme={theme}
+          safeAreaInsets={{ bottom: 0 }}
+        />
+      </View>
+    </View>
   );
 }

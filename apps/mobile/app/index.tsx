@@ -1,25 +1,20 @@
 import { useAuth } from "@/hooks/useAuth";
 import { Redirect, useRouter } from "expo-router";
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { Animated, View, Image } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Text, ActivityIndicator } from "react-native-paper";
-import logoGray from "@/assets/images/ele-gray.png";
-import { useState } from "react";
-import { COLORS, styles as baseStyles } from "@/styles/base";
+import heroImage from "@/assets/images/ele-gray.png";
+import { COLORS, STYLES } from "@/styles/base";
 
 export default function IndexRedirect() {
   const { session, loading } = useAuth();
   const router = useRouter();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [view, getView] = useState<"buttons" | "login" | "newaccount">(
-    "buttons",
-  );
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
   if (loading) {
     return (
-      <View style={baseStyles.center}>
+      <View style={STYLES.center}>
         <ActivityIndicator />
       </View>
     );
@@ -30,66 +25,42 @@ export default function IndexRedirect() {
   }
 
   return (
-    <>
-      <SafeAreaProvider>
-        <SafeAreaView
-          style={baseStyles.safeAreaLogin}
-          edges={["top", "left", "right"]}
-        >
-          <View style={baseStyles.container}>
-            <View
-              style={[
-                baseStyles.logoWrapWithMargin,
-                view !== "buttons" && { marginTop: 10 }, // sube el logo cuando hay formulario
-              ]}
-            >
-              <Image
-                source={logoGray}
-                style={baseStyles.logo}
-                resizeMode="contain"
-              />
-              <Text style={baseStyles.brand}> Elepad </Text>
-            </View>
-            <View style={baseStyles.separatorWrap}>
-              <View style={baseStyles.separator} />
-            </View>
-            <Animated.View style={[baseStyles.card, { opacity: fadeAnim }]}>
-              {view === "buttons" && (
-                <>
-                  <Text style={baseStyles.heading}>¡Bienvenido!</Text>
-                  <Text style={baseStyles.subheading}>
-                    Elija una opción para continuar
-                  </Text>
+    <SafeAreaView style={STYLES.safeAreaLogin}>
+      <View style={STYLES.container}>
+        <View style={STYLES.logoWrapWithMargin}>
+          <Image source={heroImage} style={STYLES.logo} resizeMode="contain" />
+          <Text style={STYLES.brand}> Elepad </Text>
+        </View>
+        <View style={STYLES.separatorWrap}>
+          <View style={STYLES.separator} />
+        </View>
+        <Animated.View style={[STYLES.card, { opacity: fadeAnim }]}>
+          <Text style={STYLES.heading}>¡Bienvenido!</Text>
+          <Text style={STYLES.subheading}>Elija una opción para continuar</Text>
 
-                  <Button
-                    mode="contained"
-                    onPress={() => router.push("/login")}
-                    contentStyle={baseStyles.buttonContent}
-                    style={baseStyles.buttonPrimary}
-                    accessibilityLabel="Ir a iniciar sesión"
-                  >
-                    Iniciar Sesión
-                  </Button>
+          <Button
+            mode="contained"
+            onPress={() => router.push("/login")}
+            contentStyle={STYLES.buttonContent}
+            style={STYLES.buttonPrimary}
+            accessibilityLabel="Ir a iniciar sesión"
+          >
+            Iniciar Sesión
+          </Button>
 
-                  <Button
-                    mode="contained"
-                    onPress={() => router.push("/signup")}
-                    contentStyle={baseStyles.buttonContent}
-                    style={[
-                      baseStyles.buttonPrimary,
-                      { backgroundColor: COLORS.white },
-                    ]}
-                    labelStyle={{ color: COLORS.text }}
-                    accessibilityLabel="Ir a crear cuenta"
-                  >
-                    Crear Cuenta
-                  </Button>
-                </>
-              )}
-            </Animated.View>
-          </View>
-        </SafeAreaView>
-      </SafeAreaProvider>
-    </>
+          <Button
+            mode="contained"
+            onPress={() => router.push("/signup")}
+            onLongPress={() => router.push("/signup")}
+            contentStyle={STYLES.buttonContent}
+            style={[STYLES.buttonPrimary, { backgroundColor: COLORS.white }]}
+            labelStyle={{ color: COLORS.text }}
+            accessibilityLabel="Ir a crear cuenta"
+          >
+            Crear Cuenta
+          </Button>
+        </Animated.View>
+      </View>
+    </SafeAreaView>
   );
 }

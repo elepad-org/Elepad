@@ -1,12 +1,14 @@
 import { Link, Stack } from "expo-router";
 import { StyleSheet } from "react-native";
 import { Surface, Text, Button, useTheme } from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { STYLES } from "@/styles/base";
 
 export default function NotFoundScreen() {
   const theme = useTheme();
 
   return (
-    <>
+    <SafeAreaView style={STYLES.safeArea}>
       <Stack.Screen options={{ title: "Oops!" }} />
       <Surface
         style={[styles.container, { backgroundColor: theme.colors.background }]}
@@ -23,7 +25,7 @@ export default function NotFoundScreen() {
           </Button>
         </Link>
       </Surface>
-    </>
+    </SafeAreaView>
   );
 }
 

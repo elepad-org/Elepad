@@ -2,10 +2,10 @@ import { supabase } from "@/lib/supabase";
 import { View, Alert, Image, TouchableOpacity } from "react-native";
 import { Text, TextInput, Button } from "react-native-paper";
 import { makeRedirectUri } from "expo-auth-session";
-import React, { useState } from "react";
+import { useState } from "react";
 import googleLogo from "@/assets/images/google.png";
 import { Link } from "expo-router";
-import { COLORS, styles as baseStyles } from "@/styles/base";
+import { COLORS, STYLES } from "@/styles/base";
 
 export default function LogIn() {
   const [email, setEmail] = useState("");
@@ -51,7 +51,7 @@ export default function LogIn() {
     >
       <View
         style={[
-          baseStyles.titleCard,
+          STYLES.titleCard,
           {
             backgroundColor: COLORS.accent,
             borderRadius: 20,
@@ -62,21 +62,21 @@ export default function LogIn() {
           },
         ]}
       >
-        <Text style={baseStyles.heading}>Iniciar Sesión</Text>
-        <Text style={[baseStyles.subheading, { marginTop: 8 }]}>
+        <Text style={STYLES.heading}>Iniciar Sesión</Text>
+        <Text style={[STYLES.subheading, { marginTop: 8 }]}>
           Ingresa tu email y tu contraseña
         </Text>
 
         <TextInput
           mode="outlined"
-          placeholder="Email"
+          placeholder="Correo"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
           returnKeyType="next"
-          style={baseStyles.input}
-          outlineStyle={baseStyles.inputOutline}
+          style={STYLES.input}
+          outlineStyle={STYLES.inputOutline}
           disabled={loading}
           dense
         />
@@ -88,8 +88,8 @@ export default function LogIn() {
           secureTextEntry
           autoCapitalize="none"
           returnKeyType="done"
-          style={baseStyles.input}
-          outlineStyle={baseStyles.inputOutline}
+          style={STYLES.input}
+          outlineStyle={STYLES.inputOutline}
           onSubmitEditing={handleLogin}
           disabled={loading}
           dense
@@ -97,8 +97,8 @@ export default function LogIn() {
 
         <Button
           mode="contained"
-          contentStyle={baseStyles.buttonContent}
-          style={baseStyles.buttonPrimary}
+          contentStyle={STYLES.buttonContent}
+          style={STYLES.buttonPrimary}
           onPress={handleLogin}
           loading={loading}
           disabled={loading}
@@ -106,37 +106,34 @@ export default function LogIn() {
           Continuar
         </Button>
 
-        <View style={baseStyles.orRow}>
-          <View style={baseStyles.orLine} />
-          <Text style={baseStyles.orText}>o</Text>
-          <View style={baseStyles.orLine} />
+        <View style={STYLES.orRow}>
+          <View style={STYLES.orLine} />
+          <Text style={STYLES.orText}>o</Text>
+          <View style={STYLES.orLine} />
         </View>
 
         <TouchableOpacity
-          style={baseStyles.buttonGoogle}
+          style={STYLES.buttonGoogle}
           activeOpacity={0.85}
           onPress={handleGoogleLogin}
           disabled={loading}
         >
-          <View style={baseStyles.googleIconWrap}>
+          <View style={STYLES.googleIconWrap}>
             <Image
               source={googleLogo}
               style={{ width: 18, height: 18 }}
               resizeMode="contain"
             />
           </View>
-          <Text style={baseStyles.googleText}>Continuar con Google</Text>
+          <Text style={STYLES.googleText}>Continuar con Google</Text>
         </TouchableOpacity>
 
         <Link
           href={{ pathname: "/" }}
           accessibilityRole="button"
-          style={[
-            baseStyles.subheading,
-            { textAlign: "center", marginTop: 23 },
-          ]}
+          style={[STYLES.subheading, { textAlign: "center", marginTop: 23 }]}
         >
-          <Text style={[baseStyles.subheading]}> Volver</Text>
+          <Text style={[STYLES.subheading]}> Volver</Text>
         </Link>
       </View>
     </View>

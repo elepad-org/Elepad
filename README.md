@@ -8,7 +8,7 @@
   <img src="packages/assets/ele-excited.png" alt="Ele, el elefante de Elepad" width="200" />
 </p>
 
-Elepad es una aplicación móvil diseñada para que los adultos mayores se mantengan conectados con sus familias, compartiendo actividades, recuerdos y desafíos cognitivos en una plataforma intuitiva.
+Elepad es una aplicación móvil diseñada para que los adultos mayores se mantengan conectados con sus familias, compartiendo actividades, recuerdos y juegos cognitivos en una plataforma intuitiva.
 
 1. 📱 Descargá Elepad desde la Play Store.
 2. 👨‍👩‍👧‍👦 Creá un grupo familiar.

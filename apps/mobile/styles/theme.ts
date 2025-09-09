@@ -1,27 +1,29 @@
 import { MD3LightTheme } from "react-native-paper";
+import { COLORS, FONT } from "./base";
 
-/** The exact names of available font families. */
-export const FONT = {
-  thin: "Montserrat_100Thin",
-  extraLight: "Montserrat_200ExtraLight",
-  light: "Montserrat_300Light",
-  regular: "Montserrat_400Regular",
-  medium: "Montserrat_500Medium",
-  semiBold: "Montserrat_600SemiBold",
-  bold: "Montserrat_700Bold",
-  extraBold: "Montserrat_800ExtraBold",
-  black: "Montserrat_900Black",
-  lobster: "Lobster_400Regular",
-} as const;
-
+// Apply COLORS to the React Native Paper theme
 export const lightTheme = {
   ...MD3LightTheme,
   colors: {
     ...MD3LightTheme.colors,
-    primary: "#0a7ea4",
-    background: "#fff",
-    text: "#11181C",
-    surface: "#fff",
+    primary: COLORS.primary,
+    secondary: COLORS.secondary,
+    background: COLORS.background,
+    surface: COLORS.white,
+    surfaceVariant: COLORS.backgroundSecondary,
+    onSurface: COLORS.text,
+    onSurfaceVariant: COLORS.textSecondary,
+    onPrimary: COLORS.white,
+    onSecondary: COLORS.white,
+    error: COLORS.error,
+    onError: COLORS.white,
+    outline: COLORS.border,
+    outlineVariant: COLORS.separator,
+    // Custom mappings for Elepad
+    text: COLORS.text,
+    accent: COLORS.accent,
+    success: COLORS.success,
+    placeholder: COLORS.textPlaceholder,
   },
   fonts: {
     ...MD3LightTheme.fonts,
