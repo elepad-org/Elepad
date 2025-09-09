@@ -27,7 +27,15 @@ export default function SignupScreen() {
   return (
     <View style={styles.container}>
       <StatusBar style="light" translucent />
-      <ImageBackground source={bh} resizeMode="cover" style={{ flex: 1 }}>
+      <ImageBackground
+        source={bh}
+        resizeMode="cover"
+        style={{
+          flex: 1,
+          width: "100%",
+          height: "100%",
+        }}
+      >
         <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
           <NewAccount />
         </Animated.View>
@@ -37,7 +45,11 @@ export default function SignupScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   logoContainer: {
     width: 300,
