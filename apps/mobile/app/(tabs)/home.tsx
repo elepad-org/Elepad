@@ -1,18 +1,17 @@
-import React from "react";
 import { StatusBar, ScrollView, View } from "react-native";
 import { ActivityIndicator, Text, Avatar, Card } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { COLORS, styles as baseStyles } from "@/styles/base";
+import { COLORS, STYLES } from "@/styles/base";
 
 export default function HomeScreen() {
   const { userElepad, loading } = useAuth();
 
   if (loading) {
     return (
-      <View style={baseStyles.center}>
+      <SafeAreaView style={STYLES.center}>
         <ActivityIndicator />
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -29,16 +28,16 @@ export default function HomeScreen() {
       .toUpperCase() || "U";
 
   return (
-    <SafeAreaView style={baseStyles.safeArea}>
+    <SafeAreaView style={STYLES.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
       <ScrollView
-        contentContainerStyle={baseStyles.contentContainer}
+        contentContainerStyle={STYLES.contentContainer}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={baseStyles.container}>
+        <View style={STYLES.container}>
           {/* Header con saludo */}
-          <Card style={[baseStyles.titleCard, { marginBottom: 24 }]}>
+          <Card style={[STYLES.titleCard, { marginBottom: 24 }]}>
             <Card.Content>
               <View
                 style={{
@@ -49,13 +48,13 @@ export default function HomeScreen() {
                 }}
               >
                 <View style={{ flex: 1 }}>
-                  <Text style={[baseStyles.subheading, { marginBottom: 4 }]}>
+                  <Text style={[STYLES.subheading, { marginBottom: 4 }]}>
                     ¡Hola!
                   </Text>
                   <Text
                     numberOfLines={1}
                     ellipsizeMode="tail"
-                    style={baseStyles.heading}
+                    style={STYLES.heading}
                   >
                     {displayName}
                   </Text>
@@ -69,8 +68,8 @@ export default function HomeScreen() {
                   <Avatar.Text
                     size={50}
                     label={getInitials(displayName)}
-                    style={baseStyles.memberAvatarPlaceholder}
-                    labelStyle={baseStyles.memberInitials}
+                    style={STYLES.memberAvatarPlaceholder}
+                    labelStyle={STYLES.memberInitials}
                   />
                 )}
               </View>
@@ -78,19 +77,19 @@ export default function HomeScreen() {
           </Card>
 
           {/* Contenido principal */}
-          <Card style={[baseStyles.titleCard, { alignItems: "center" }]}>
+          <Card style={[STYLES.titleCard, { alignItems: "center" }]}>
             <Card.Content>
               <Text
-                style={[baseStyles.heading, { fontSize: 48, marginBottom: 16 }]}
+                style={[STYLES.heading, { fontSize: 48, marginBottom: 16 }]}
               >
                 🚧
               </Text>
-              <Text style={[baseStyles.heading, { marginBottom: 16 }]}>
+              <Text style={[STYLES.heading, { marginBottom: 16 }]}>
                 Página en desarrollo
               </Text>
               <Text
                 style={[
-                  baseStyles.paragraphText,
+                  STYLES.paragraphText,
                   { textAlign: "center", marginBottom: 12 },
                 ]}
               >
@@ -98,7 +97,7 @@ export default function HomeScreen() {
                 nuevas funcionalidades increíbles que harán tu experiencia aún
                 mejor.
               </Text>
-              <Text style={[baseStyles.subheading, { textAlign: "center" }]}>
+              <Text style={[STYLES.subheading, { textAlign: "center" }]}>
                 Mantente atento a las actualizaciones 🎉
               </Text>
             </Card.Content>

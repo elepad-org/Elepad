@@ -4,7 +4,7 @@ import { Link } from "expo-router";
 import { useState } from "react";
 import { View, Alert } from "react-native";
 import { TextInput, Button, Text } from "react-native-paper";
-import { COLORS, styles as baseStyles } from "@/styles/base";
+import { COLORS, STYLES } from "@/styles/base";
 
 export default function NewAccount() {
   const [email, setEmail] = useState("");
@@ -62,7 +62,7 @@ export default function NewAccount() {
     >
       <View
         style={[
-          baseStyles.titleCard,
+          STYLES.titleCard,
           {
             backgroundColor: COLORS.accent,
             borderRadius: 20,
@@ -73,8 +73,8 @@ export default function NewAccount() {
           },
         ]}
       >
-        <Text style={baseStyles.heading}>Crear Cuenta</Text>
-        <Text style={[baseStyles.subheading, { marginTop: 8 }]}>
+        <Text style={STYLES.heading}>Crear Cuenta</Text>
+        <Text style={[STYLES.subheading, { marginTop: 8 }]}>
           Ingrese sus datos personales
         </Text>
 
@@ -85,8 +85,8 @@ export default function NewAccount() {
           onChangeText={setDisplayName}
           autoCapitalize="none"
           returnKeyType="next"
-          style={baseStyles.input}
-          outlineStyle={baseStyles.inputOutline}
+          style={STYLES.input}
+          outlineStyle={STYLES.inputOutline}
           disabled={loading}
           dense
         />
@@ -98,8 +98,8 @@ export default function NewAccount() {
           keyboardType="email-address"
           autoCapitalize="none"
           returnKeyType="next"
-          style={baseStyles.input}
-          outlineStyle={baseStyles.inputOutline}
+          style={STYLES.input}
+          outlineStyle={STYLES.inputOutline}
           disabled={loading}
           dense
         />
@@ -110,8 +110,8 @@ export default function NewAccount() {
           onChangeText={setFamilyCode}
           autoCapitalize="characters"
           returnKeyType="next"
-          style={baseStyles.input}
-          outlineStyle={baseStyles.inputOutline}
+          style={STYLES.input}
+          outlineStyle={STYLES.inputOutline}
           disabled={loading}
           dense
         />
@@ -123,8 +123,8 @@ export default function NewAccount() {
           secureTextEntry
           autoCapitalize="none"
           returnKeyType="done"
-          style={baseStyles.input}
-          outlineStyle={baseStyles.inputOutline}
+          style={STYLES.input}
+          outlineStyle={STYLES.inputOutline}
           onSubmitEditing={handleSignUp}
           disabled={loading}
           dense
@@ -132,8 +132,8 @@ export default function NewAccount() {
 
         <Button
           mode="contained"
-          contentStyle={baseStyles.buttonContent}
-          style={baseStyles.buttonPrimary}
+          contentStyle={STYLES.buttonContent}
+          style={STYLES.buttonPrimary}
           onPress={handleSignUp}
           loading={loading}
           disabled={loading}
@@ -141,21 +141,18 @@ export default function NewAccount() {
           Continuar
         </Button>
 
-        <View style={baseStyles.orRow}>
-          <View style={baseStyles.orLine} />
-          <Text style={baseStyles.orText}>o</Text>
-          <View style={baseStyles.orLine} />
+        <View style={STYLES.orRow}>
+          <View style={STYLES.orLine} />
+          <Text style={STYLES.orText}>o</Text>
+          <View style={STYLES.orLine} />
         </View>
 
         <Link
           href={{ pathname: "/" }}
           accessibilityRole="button"
-          style={[
-            baseStyles.subheading,
-            { textAlign: "center", marginTop: 23 },
-          ]}
+          style={[STYLES.subheading, { textAlign: "center", marginTop: 23 }]}
         >
-          <Text style={[baseStyles.subheading]}> Volver</Text>
+          <Text style={[STYLES.subheading]}> Volver</Text>
         </Link>
       </View>
     </View>

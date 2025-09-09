@@ -5,7 +5,7 @@ import { Animated, View, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Text, ActivityIndicator } from "react-native-paper";
 import heroImage from "@/assets/images/ele-gray.png";
-import { COLORS, styles as baseStyles } from "@/styles/base";
+import { COLORS, STYLES } from "@/styles/base";
 
 export default function IndexRedirect() {
   const { session, loading } = useAuth();
@@ -14,7 +14,7 @@ export default function IndexRedirect() {
 
   if (loading) {
     return (
-      <View style={baseStyles.center}>
+      <View style={STYLES.center}>
         <ActivityIndicator />
       </View>
     );
@@ -25,33 +25,24 @@ export default function IndexRedirect() {
   }
 
   return (
-    <SafeAreaView
-      style={baseStyles.safeAreaLogin}
-      edges={["top", "left", "right"]}
-    >
-      <View style={baseStyles.container}>
-        <View style={baseStyles.logoWrapWithMargin}>
-          <Image
-            source={heroImage}
-            style={baseStyles.logo}
-            resizeMode="contain"
-          />
-          <Text style={baseStyles.brand}> Elepad </Text>
+    <SafeAreaView style={STYLES.safeAreaLogin} edges={["top", "left", "right"]}>
+      <View style={STYLES.container}>
+        <View style={STYLES.logoWrapWithMargin}>
+          <Image source={heroImage} style={STYLES.logo} resizeMode="contain" />
+          <Text style={STYLES.brand}> Elepad </Text>
         </View>
-        <View style={baseStyles.separatorWrap}>
-          <View style={baseStyles.separator} />
+        <View style={STYLES.separatorWrap}>
+          <View style={STYLES.separator} />
         </View>
-        <Animated.View style={[baseStyles.card, { opacity: fadeAnim }]}>
-          <Text style={baseStyles.heading}>¡Bienvenido!</Text>
-          <Text style={baseStyles.subheading}>
-            Elija una opción para continuar
-          </Text>
+        <Animated.View style={[STYLES.card, { opacity: fadeAnim }]}>
+          <Text style={STYLES.heading}>¡Bienvenido!</Text>
+          <Text style={STYLES.subheading}>Elija una opción para continuar</Text>
 
           <Button
             mode="contained"
             onPress={() => router.push("/login")}
-            contentStyle={baseStyles.buttonContent}
-            style={baseStyles.buttonPrimary}
+            contentStyle={STYLES.buttonContent}
+            style={STYLES.buttonPrimary}
             accessibilityLabel="Ir a iniciar sesión"
           >
             Iniciar Sesión
@@ -61,11 +52,8 @@ export default function IndexRedirect() {
             mode="contained"
             onPress={() => router.push("/signup")}
             onLongPress={() => router.push("/signup")}
-            contentStyle={baseStyles.buttonContent}
-            style={[
-              baseStyles.buttonPrimary,
-              { backgroundColor: COLORS.white },
-            ]}
+            contentStyle={STYLES.buttonContent}
+            style={[STYLES.buttonPrimary, { backgroundColor: COLORS.white }]}
             labelStyle={{ color: COLORS.text }}
             accessibilityLabel="Ir a crear cuenta"
           >

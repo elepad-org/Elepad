@@ -61,7 +61,7 @@ export const SHADOWS = {
 } as const;
 
 // Estilos base minimalistas - solo lo esencial
-export const styles = StyleSheet.create({
+export const STYLES = StyleSheet.create({
   // Layouts básicos
   safeArea: {
     flex: 1,
@@ -323,4 +323,4 @@ export const styles = StyleSheet.create({
     textAlign: "center",
     opacity: 0.8,
   },
-});
+} as const);

@@ -14,7 +14,7 @@ import { patchUsersId } from "@elepad/api-client/src/gen/client";
 import { UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import ProfileHeader from "@/components/ProfileHeader";
 import { useRouter } from "expo-router";
-import { COLORS, styles as baseStyles } from "@/styles/base";
+import { COLORS, STYLES } from "@/styles/base";
 
 export default function ConfiguracionScreen() {
   const router = useRouter();
@@ -40,10 +40,10 @@ export default function ConfiguracionScreen() {
   const initials = useMemo(() => getInitials(displayName), [displayName]);
 
   return (
-    <SafeAreaView style={baseStyles.safeArea}>
+    <SafeAreaView style={STYLES.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
-      <ScrollView contentContainerStyle={baseStyles.contentContainer}>
+      <ScrollView contentContainerStyle={STYLES.contentContainer}>
         <ProfileHeader
           name={displayName}
           email={email}
@@ -51,7 +51,7 @@ export default function ConfiguracionScreen() {
           onEditPhoto={() => setPhotoOpen(true)}
         />
 
-        <Card style={baseStyles.menuCard}>
+        <Card style={STYLES.menuCard}>
           <List.Section>
             <List.Item
               title="Editar nombre"
@@ -74,7 +74,7 @@ export default function ConfiguracionScreen() {
                 <TextInput
                   value={formName}
                   onChangeText={setFormName}
-                  style={baseStyles.input}
+                  style={STYLES.input}
                   underlineColor="transparent"
                   activeUnderlineColor={COLORS.primary}
                   autoFocus
@@ -94,7 +94,7 @@ export default function ConfiguracionScreen() {
                     }}
                     disabled={saving}
                     style={[
-                      baseStyles.buttonPrimary,
+                      STYLES.buttonPrimary,
                       { width: "40%", backgroundColor: COLORS.white },
                     ]}
                     labelStyle={{ color: COLORS.text }}
@@ -130,7 +130,7 @@ export default function ConfiguracionScreen() {
                     }}
                     loading={saving}
                     disabled={saving}
-                    style={[baseStyles.buttonPrimary, { width: "40%" }]}
+                    style={[STYLES.buttonPrimary, { width: "40%" }]}
                   >
                     Guardar
                   </Button>
@@ -150,7 +150,7 @@ export default function ConfiguracionScreen() {
           </List.Section>
         </Card>
 
-        <View style={baseStyles.container}>
+        <View style={STYLES.container}>
           <Button
             mode="contained"
             icon="logout"
@@ -158,8 +158,8 @@ export default function ConfiguracionScreen() {
               await signOut();
               router.replace("/");
             }}
-            contentStyle={baseStyles.buttonContent}
-            style={[baseStyles.buttonPrimary, { backgroundColor: COLORS.red }]}
+            contentStyle={STYLES.buttonContent}
+            style={[STYLES.buttonPrimary, { backgroundColor: COLORS.red }]}
           >
             Cerrar sesión
           </Button>

@@ -1,30 +1,36 @@
 import { Tabs } from "expo-router";
-import { Icon } from "react-native-paper";
+import { Icon, useTheme } from "react-native-paper";
 import { COLORS } from "../../styles/base";
 
 export default function TabLayout() {
+  const theme = useTheme();
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: COLORS.accent, // Color accent para texto activo
-        tabBarInactiveTintColor: COLORS.accent, // Color accent para texto inactivo
+        tabBarActiveTintColor: theme.colors.primary, // Use theme primary color
+        tabBarInactiveTintColor: theme.colors.onSurfaceVariant, // Use theme secondary text
         tabBarStyle: {
-          backgroundColor: COLORS.border,
-          borderTopWidth: 0, // Sin borde para que se vea uniforme
-          elevation: 0, // Sin sombra en Android
-          shadowOpacity: 0, // Sin sombra en iOS
-          paddingTop: 8, // Más margen arriba para centrar mejor
-          paddingBottom: 8, // Margen abajo para centrar
-          height: 88, // Altura más grande para los textos
-          justifyContent: "center", // Centrar contenido
-          alignItems: "center", // Centrar items
+          backgroundColor: theme.colors.surface, // Use theme surface color
+          borderTopWidth: 1,
+          borderTopColor: theme.colors.outline, // Subtle border
+          elevation: 8, // Add elevation for depth
+          shadowOpacity: 0.1, // Subtle shadow
+          shadowOffset: { width: 0, height: -2 },
+          shadowRadius: 8,
+          paddingTop: 8,
+          paddingBottom: 8,
+          height: 88,
+          justifyContent: "center",
+          alignItems: "center",
         },
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: "600",
+          fontFamily: theme.fonts.labelMedium.fontFamily,
         },
-        tabBarShowLabel: true, // Mostrar las etiquetas/palabras
+        tabBarShowLabel: true,
       }}
     >
       <Tabs.Screen
@@ -34,7 +40,7 @@ export default function TabLayout() {
           tabBarIcon: ({ focused }) => (
             <Icon
               source={focused ? "home" : "home-outline"}
-              color={COLORS.accent}
+              color={COLORS.primary}
               size={28}
             />
           ),
@@ -47,7 +53,7 @@ export default function TabLayout() {
           tabBarIcon: ({ focused }) => (
             <Icon
               source={focused ? "compass" : "compass-outline"}
-              color={COLORS.accent}
+              color={COLORS.primary}
               size={28}
             />
           ),
@@ -60,7 +66,7 @@ export default function TabLayout() {
           tabBarIcon: ({ focused }) => (
             <Icon
               source={focused ? "puzzle" : "puzzle-outline"}
-              color={COLORS.accent}
+              color={COLORS.primary}
               size={28}
             />
           ),
@@ -73,7 +79,7 @@ export default function TabLayout() {
           tabBarIcon: ({ focused }) => (
             <Icon
               source={focused ? "cog" : "cog-outline"}
-              color={COLORS.accent}
+              color={COLORS.primary}
               size={28}
             />
           ),

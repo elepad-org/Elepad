@@ -29,7 +29,7 @@ import {
 } from "@elepad/api-client";
 import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 import { useAuth } from "@/hooks/useAuth";
-import { COLORS, styles as baseStyles } from "@/styles/base";
+import { COLORS, STYLES } from "@/styles/base";
 import { Pressable } from "react-native";
 
 export default function FamilyGroup() {
@@ -242,14 +242,14 @@ export default function FamilyGroup() {
   };
 
   return (
-    <SafeAreaView style={baseStyles.safeArea}>
+    <SafeAreaView style={STYLES.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
       <ScrollView
-        contentContainerStyle={baseStyles.contentContainer}
+        contentContainerStyle={STYLES.contentContainer}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={baseStyles.container}>
+        <View style={STYLES.container}>
           {(() => {
             const groupInfo = selectGroupInfo();
             const groupName = groupInfo?.name;
@@ -257,13 +257,13 @@ export default function FamilyGroup() {
 
             return (
               <>
-                <Card style={[baseStyles.titleCard]}>
+                <Card style={[STYLES.titleCard]}>
                   <Card.Content>
-                    <Text style={baseStyles.subheading}>Grupo Familiar</Text>
+                    <Text style={STYLES.subheading}>Grupo Familiar</Text>
                     {isEditing ? (
                       <>
                         <TextInput
-                          style={[baseStyles.input]}
+                          style={[STYLES.input]}
                           value={newGroupName}
                           underlineColor="transparent"
                           activeUnderlineColor={COLORS.primary}
@@ -282,7 +282,7 @@ export default function FamilyGroup() {
                             onPress={() => setIsEditing(false)}
                             disabled={patchFamilyGroup.isPending}
                             style={[
-                              baseStyles.buttonPrimary,
+                              STYLES.buttonPrimary,
                               { width: "40%", backgroundColor: COLORS.white },
                             ]}
                             labelStyle={{ color: COLORS.text }}
@@ -323,7 +323,7 @@ export default function FamilyGroup() {
                               }
                             }}
                             loading={patchFamilyGroup.isPending}
-                            style={[baseStyles.buttonPrimary, { width: "40%" }]}
+                            style={[STYLES.buttonPrimary, { width: "40%" }]}
                             disabled={
                               !newGroupName.trim() || patchFamilyGroup.isPending
                             }
@@ -340,7 +340,7 @@ export default function FamilyGroup() {
                           alignItems: "center",
                         }}
                       >
-                        <Text style={[baseStyles.heading]}>{groupName}</Text>
+                        <Text style={[STYLES.heading]}>{groupName}</Text>
                         <Pressable
                           onPress={() => {
                             setNewGroupName(groupName || "");
@@ -361,11 +361,9 @@ export default function FamilyGroup() {
             );
           })()}
           {/* Mostramos los miembros del grupo Familiar */}
-          <Card style={[baseStyles.titleCard, { marginBottom: 6 }]}>
+          <Card style={[STYLES.titleCard, { marginBottom: 6 }]}>
             <Card.Content>
-              <Text
-                style={[baseStyles.heading, { fontSize: 16, marginBottom: 8 }]}
-              >
+              <Text style={[STYLES.heading, { fontSize: 16, marginBottom: 8 }]}>
                 Miembros
               </Text>
 
@@ -376,7 +374,7 @@ export default function FamilyGroup() {
               ) : membersQuery.error ? (
                 <Text
                   style={[
-                    baseStyles.subheading,
+                    STYLES.subheading,
                     { color: COLORS.error, textAlign: "center" },
                   ]}
                 >
@@ -392,7 +390,7 @@ export default function FamilyGroup() {
                     return (
                       <View
                         style={[
-                          baseStyles.memberInfoRow,
+                          STYLES.memberInfoRow,
                           {
                             justifyContent: "space-between",
                             paddingTop: 4,
@@ -413,19 +411,19 @@ export default function FamilyGroup() {
                               }}
                             />
                           ) : (
-                            <View style={baseStyles.memberAvatarPlaceholder}>
-                              <Text style={baseStyles.memberInitials}>
+                            <View style={STYLES.memberAvatarPlaceholder}>
+                              <Text style={STYLES.memberInitials}>
                                 {getInitials(o.displayName)}
                               </Text>
                             </View>
                           )}
                           <View style={{ marginLeft: 12 }}>
-                            <Text style={baseStyles.paragraphText}>
+                            <Text style={STYLES.paragraphText}>
                               {o.displayName}
                             </Text>
                             <Text
                               style={[
-                                baseStyles.subheading,
+                                STYLES.subheading,
                                 { textAlign: "left", marginTop: 0 },
                               ]}
                             >
@@ -459,7 +457,7 @@ export default function FamilyGroup() {
                       <View
                         key={m.id}
                         style={[
-                          baseStyles.memberInfoRow,
+                          STYLES.memberInfoRow,
                           {
                             justifyContent: "space-between",
                             paddingTop: 4,
@@ -480,14 +478,14 @@ export default function FamilyGroup() {
                               }}
                             />
                           ) : (
-                            <View style={baseStyles.memberAvatarPlaceholder}>
-                              <Text style={baseStyles.memberInitials}>
+                            <View style={STYLES.memberAvatarPlaceholder}>
+                              <Text style={STYLES.memberInitials}>
                                 {getInitials(m.displayName)}
                               </Text>
                             </View>
                           )}
                           <View style={{ marginLeft: 12 }}>
-                            <Text style={baseStyles.paragraphText}>
+                            <Text style={STYLES.paragraphText}>
                               {m.displayName}
                             </Text>
                           </View>
@@ -540,7 +538,7 @@ export default function FamilyGroup() {
                       >
                         <Text
                           style={[
-                            baseStyles.subheading,
+                            STYLES.subheading,
                             {
                               color: COLORS.textLight,
                               fontSize: 14,
@@ -591,7 +589,7 @@ export default function FamilyGroup() {
                             <View style={{ flex: 1 }}>
                               <Text
                                 style={[
-                                  baseStyles.paragraphText,
+                                  STYLES.paragraphText,
                                   { color: COLORS.text },
                                 ]}
                               >
@@ -599,7 +597,7 @@ export default function FamilyGroup() {
                               </Text>
                               <Text
                                 style={[
-                                  baseStyles.subheading,
+                                  STYLES.subheading,
                                   {
                                     fontSize: 12,
                                     textAlign: "left",
@@ -662,7 +660,7 @@ export default function FamilyGroup() {
                                 <View style={{ flex: 1 }}>
                                   <Text
                                     style={[
-                                      baseStyles.paragraphText,
+                                      STYLES.paragraphText,
                                       { color: COLORS.text },
                                     ]}
                                   >
@@ -670,7 +668,7 @@ export default function FamilyGroup() {
                                   </Text>
                                   <Text
                                     style={[
-                                      baseStyles.subheading,
+                                      STYLES.subheading,
                                       {
                                         fontSize: 12,
                                         textAlign: "left",
@@ -718,11 +716,8 @@ export default function FamilyGroup() {
                   });
                 }
               }}
-              contentStyle={baseStyles.buttonContent}
-              style={[
-                baseStyles.buttonPrimary,
-                { backgroundColor: COLORS.red },
-              ]}
+              contentStyle={STYLES.buttonContent}
+              style={[STYLES.buttonPrimary, { backgroundColor: COLORS.red }]}
             >
               Salir del grupo familiar
             </Button>
@@ -730,21 +725,19 @@ export default function FamilyGroup() {
             {/* Link para volver, sin botón */}
             <Text
               onPress={() => router.push("/(tabs)/configuracion")}
-              style={[baseStyles.subheading, { marginTop: 23 }]}
+              style={[STYLES.subheading, { marginTop: 23 }]}
             >
               Volver
             </Text>
           </View>
 
           {invitationCode && (
-            <View style={baseStyles.inviteCodeCard}>
-              <Text style={baseStyles.inviteCodeTitle}>
-                Código de invitación
-              </Text>
-              <Text style={baseStyles.inviteCodeText}>
+            <View style={STYLES.inviteCodeCard}>
+              <Text style={STYLES.inviteCodeTitle}>Código de invitación</Text>
+              <Text style={STYLES.inviteCodeText}>
                 {String(invitationCode)}
               </Text>
-              <Text style={baseStyles.inviteCodeExpiry}>
+              <Text style={STYLES.inviteCodeExpiry}>
                 Expira 10 minutos luego de su creación.
               </Text>
             </View>
@@ -773,24 +766,20 @@ export default function FamilyGroup() {
             }}
           >
             <Dialog.Title>
-              <Text
-                style={[baseStyles.heading, { fontSize: 18, paddingTop: 15 }]}
-              >
+              <Text style={[STYLES.heading, { fontSize: 18, paddingTop: 15 }]}>
                 {memberToRemove?.id === userElepad?.id
                   ? "Salir del grupo"
                   : "Eliminar miembro"}
               </Text>
             </Dialog.Title>
             <Dialog.Content>
-              <Text style={[baseStyles.subheading]}>
+              <Text style={[STYLES.subheading]}>
                 {memberToRemove?.id === userElepad?.id ? (
                   <>¿Está seguro que desea salir del grupo familiar?</>
                 ) : (
                   <>
                     ¿Está seguro que desea eliminar a {""}
-                    <Text
-                      style={[baseStyles.paragraphText, { fontWeight: "700" }]}
-                    >
+                    <Text style={[STYLES.paragraphText, { fontWeight: "700" }]}>
                       {memberToRemove?.displayName}
                     </Text>{" "}
                     del grupo?
@@ -809,11 +798,11 @@ export default function FamilyGroup() {
                 mode="contained"
                 onPress={closeConfirm}
                 style={[
-                  baseStyles.buttonPrimary,
+                  STYLES.buttonPrimary,
                   { width: "40%", marginTop: 0, backgroundColor: COLORS.white },
                 ]}
                 labelStyle={{ color: COLORS.text }}
-                contentStyle={baseStyles.buttonContent}
+                contentStyle={STYLES.buttonContent}
               >
                 No
               </Button>
@@ -821,7 +810,7 @@ export default function FamilyGroup() {
                 mode="contained"
                 onPress={confirmRemove}
                 style={[
-                  baseStyles.buttonPrimary,
+                  STYLES.buttonPrimary,
                   {
                     width: "40%",
                     backgroundColor: COLORS.red,
@@ -833,7 +822,7 @@ export default function FamilyGroup() {
                   color: COLORS.white,
                   fontFamily: "Montserrat_500Medium",
                 }}
-                contentStyle={baseStyles.buttonContent}
+                contentStyle={STYLES.buttonContent}
                 disabled={removeMember.isPending}
               >
                 {memberToRemove?.id === userElepad?.id ? "Salir" : "Si"}
@@ -852,14 +841,12 @@ export default function FamilyGroup() {
             }}
           >
             <Dialog.Title>
-              <Text
-                style={[baseStyles.heading, { fontSize: 18, paddingTop: 15 }]}
-              >
+              <Text style={[STYLES.heading, { fontSize: 18, paddingTop: 15 }]}>
                 Transferir administración
               </Text>
             </Dialog.Title>
             <Dialog.Content>
-              <Text style={[baseStyles.subheading]}>
+              <Text style={[STYLES.subheading]}>
                 Selecciona el miembro que será el nuevo administrador del grupo:
               </Text>
               <ScrollView style={{ maxHeight: 300, marginTop: 16 }}>
@@ -871,7 +858,7 @@ export default function FamilyGroup() {
                     return (
                       <Text
                         style={[
-                          baseStyles.subheading,
+                          STYLES.subheading,
                           { color: COLORS.textSecondary, fontStyle: "italic" },
                         ]}
                       >
@@ -885,7 +872,7 @@ export default function FamilyGroup() {
                       key={member.id}
                       onPress={() => selectNewOwner(member)}
                       style={[
-                        baseStyles.card,
+                        STYLES.card,
                         {
                           paddingVertical: 12,
                           flexDirection: "row",
@@ -913,13 +900,13 @@ export default function FamilyGroup() {
                             }}
                           />
                         ) : (
-                          <View style={baseStyles.memberAvatarPlaceholder}>
-                            <Text style={baseStyles.memberInitials}>
+                          <View style={STYLES.memberAvatarPlaceholder}>
+                            <Text style={STYLES.memberInitials}>
                               {getInitials(member.displayName)}
                             </Text>
                           </View>
                         )}
-                        <Text style={[baseStyles.paragraphText]}>
+                        <Text style={[STYLES.paragraphText]}>
                           {member.displayName}
                         </Text>
                       </View>
@@ -939,11 +926,11 @@ export default function FamilyGroup() {
                 mode="contained"
                 onPress={closeTransferDialog}
                 style={[
-                  baseStyles.buttonPrimary,
+                  STYLES.buttonPrimary,
                   { marginTop: 0, backgroundColor: COLORS.white },
                 ]}
                 labelStyle={{ color: COLORS.text }}
-                contentStyle={baseStyles.buttonContent}
+                contentStyle={STYLES.buttonContent}
               >
                 Cancelar
               </Button>
@@ -961,23 +948,21 @@ export default function FamilyGroup() {
             }}
           >
             <Dialog.Title>
-              <Text
-                style={[baseStyles.heading, { fontSize: 18, paddingTop: 15 }]}
-              >
+              <Text style={[STYLES.heading, { fontSize: 18, paddingTop: 15 }]}>
                 Confirmar transferencia
               </Text>
             </Dialog.Title>
             <Dialog.Content>
-              <Text style={[baseStyles.subheading]}>
+              <Text style={[STYLES.subheading]}>
                 ¿Está seguro que desea transferir la administración del grupo a{" "}
-                <Text style={[baseStyles.paragraphText, { fontWeight: "700" }]}>
+                <Text style={[STYLES.paragraphText, { fontWeight: "700" }]}>
                   {selectedNewOwner?.displayName}
                 </Text>
                 ?
               </Text>
               <Text
                 style={[
-                  baseStyles.subheading,
+                  STYLES.subheading,
                   {
                     marginTop: 12,
                     fontStyle: "italic",
@@ -1001,11 +986,11 @@ export default function FamilyGroup() {
                 mode="contained"
                 onPress={closeConfirmTransfer}
                 style={[
-                  baseStyles.buttonPrimary,
+                  STYLES.buttonPrimary,
                   { width: "40%", marginTop: 0, backgroundColor: COLORS.white },
                 ]}
                 labelStyle={{ color: COLORS.text }}
-                contentStyle={baseStyles.buttonContent}
+                contentStyle={STYLES.buttonContent}
               >
                 Cancelar
               </Button>
@@ -1013,7 +998,7 @@ export default function FamilyGroup() {
                 mode="contained"
                 onPress={confirmTransferOwnership}
                 style={[
-                  baseStyles.buttonPrimary,
+                  STYLES.buttonPrimary,
                   {
                     width: "40%",
                     backgroundColor: COLORS.red,
@@ -1025,7 +1010,7 @@ export default function FamilyGroup() {
                   color: COLORS.white,
                   fontFamily: "Montserrat_500Medium",
                 }}
-                contentStyle={baseStyles.buttonContent}
+                contentStyle={STYLES.buttonContent}
                 disabled={transferOwnership.isPending}
                 loading={transferOwnership.isPending}
               >
