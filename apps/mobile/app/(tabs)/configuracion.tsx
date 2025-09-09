@@ -54,7 +54,7 @@ export default function ConfiguracionScreen() {
         <Card style={baseStyles.menuCard}>
           <List.Section>
             <List.Item
-              title="Editar perfil"
+              title="Editar nombre"
               left={(props) => <List.Icon {...props} icon="account-edit" />}
               right={(props) => (
                 <List.Icon
@@ -129,12 +129,7 @@ export default function ConfiguracionScreen() {
                       }
                     }}
                     loading={saving}
-                    disabled={
-                      saving ||
-                      !formName.trim() ||
-                      !userElepad?.id ||
-                      formName.trim() === displayName
-                    }
+                    disabled={saving}
                     style={[baseStyles.buttonPrimary, { width: "40%" }]}
                   >
                     Guardar
@@ -145,26 +140,12 @@ export default function ConfiguracionScreen() {
 
             <Divider />
             <List.Item
-              title="Notificaciones"
-              left={(props) => <List.Icon {...props} icon="bell-outline" />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
-              onPress={() => {}}
-            />
-            <Divider />
-            <List.Item
               title="Grupo familiar"
               left={(props) => <List.Icon {...props} icon="account-group" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
               onPress={() => {
                 router.navigate("/familyGroup");
               }}
-            />
-            <Divider />
-            <List.Item
-              title="Cambiar contraseña"
-              left={(props) => <List.Icon {...props} icon="lock-outline" />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
-              onPress={() => {}}
             />
           </List.Section>
         </Card>

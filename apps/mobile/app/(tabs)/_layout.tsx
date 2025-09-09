@@ -30,7 +30,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: "Home",
+          title: "Inicio",
           tabBarIcon: ({ focused }) => (
             <Icon
               source={focused ? "home" : "home-outline"}
@@ -43,7 +43,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="explore"
         options={{
-          title: "Explore",
+          title: "Explorar",
           tabBarIcon: ({ focused }) => (
             <Icon
               source={focused ? "compass" : "compass-outline"}
@@ -59,7 +59,7 @@ export default function TabLayout() {
           title: "Juegos",
           tabBarIcon: ({ focused }) => (
             <Icon
-              source={focused ? "gamepad-variant" : "gamepad-variant-outline"}
+              source={focused ? "puzzle" : "puzzle-outline"}
               color={COLORS.accent}
               size={28}
             />
