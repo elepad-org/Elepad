@@ -25,7 +25,7 @@ export default function IndexRedirect() {
   }
 
   return (
-    <SafeAreaView style={STYLES.safeAreaLogin} edges={["top", "left", "right"]}>
+    <SafeAreaView style={STYLES.safeAreaLogin}>
       <View style={STYLES.container}>
         <View style={STYLES.logoWrapWithMargin}>
           <Image source={heroImage} style={STYLES.logo} resizeMode="contain" />

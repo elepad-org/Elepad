@@ -2,12 +2,11 @@ import NewAccount from "@/components/Forms/Auth/NewAccount";
 import { useAuth } from "@/hooks/useAuth";
 import { Redirect } from "expo-router";
 import { useRef } from "react";
-import { Animated, ImageBackground, StyleSheet } from "react-native";
+import { Animated, ImageBackground, StyleSheet, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator } from "react-native-paper";
 import bh from "@/assets/images/bh7.jpeg";
 import { FONT } from "@/styles/base";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignupScreen() {
   const { session, loading } = useAuth();
@@ -15,9 +14,9 @@ export default function SignupScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.center}>
+      <View style={styles.center}>
         <ActivityIndicator />
-      </SafeAreaView>
+      </View>
     );
   }
 
@@ -26,14 +25,14 @@ export default function SignupScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <StatusBar style="light" translucent />
       <ImageBackground source={bh} resizeMode="cover" style={{ flex: 1 }}>
         <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
           <NewAccount />
         </Animated.View>
       </ImageBackground>
-    </SafeAreaView>
+    </View>
   );
 }
 
