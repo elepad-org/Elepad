@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Platform } from "react-native";
 import { Modal, TextInput, Button, Text, Checkbox } from "react-native-paper";
-import DatePicker from "react-native-date-picker";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { STYLES as baseStyles } from "@/styles/base";
 import type { Activity } from "@elepad/api-client";
 
@@ -106,9 +106,8 @@ export default function ActivityForm({
       </View>
 
       {/* DatePicker para fecha de inicio */}
-      <DatePicker
-        modal
-        open={showStartPicker}
+      <DateTimePickerModal
+        isVisible={showStartPicker}
         date={startsAtDate}
         mode="datetime"
         onConfirm={(date) => {
@@ -117,14 +116,11 @@ export default function ActivityForm({
         }}
         onCancel={() => setShowStartPicker(false)}
         title="Selecciona la fecha de inicio"
-        confirmText="Confirmar"
-        cancelText="Cancelar"
       />
 
       {/* DatePicker para fecha de fin */}
-      <DatePicker
-        modal
-        open={showEndPicker}
+      <DateTimePickerModal
+        isVisible={showEndPicker}
         date={endsAtDate ?? new Date()}
         mode="datetime"
         onConfirm={(date) => {
@@ -133,8 +129,6 @@ export default function ActivityForm({
         }}
         onCancel={() => setShowEndPicker(false)}
         title="Selecciona la fecha de fin"
-        confirmText="Confirmar"
-        cancelText="Cancelar"
       />
 
       <View style={styles.row}>
