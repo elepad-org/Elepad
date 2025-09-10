@@ -6,7 +6,6 @@ import HomeScreen from "./home";
 import ExploreScreen from "./explore";
 import JuegosScreen from "./juegos";
 import ConfiguracionScreen from "./configuracion";
-import { COLORS } from "@/styles/base";
 
 export default function TabLayout() {
   const theme = useTheme();
@@ -82,13 +81,7 @@ export default function TabLayout() {
               setIndex(routeIndex);
             }
           }}
-          activeColor={theme.colors.onSurface}
-          inactiveColor={theme.colors.onSurface}
-          activeIndicatorStyle={{
-            backgroundColor: COLORS.primary,
-          }}
           style={{
-            backgroundColor: COLORS.border,
             borderTopWidth: 0,
             elevation: 0,
           }}

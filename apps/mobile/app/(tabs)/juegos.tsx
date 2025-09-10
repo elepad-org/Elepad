@@ -1,4 +1,5 @@
-import { ScrollView, View, Image } from "react-native";
+import { ScrollView, View } from "react-native";
+import { Image } from "expo-image";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator, Text, Card } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
@@ -63,7 +64,7 @@ export default function JuegosScreen() {
                   borderRadius: 16,
                   marginTop: 8,
                 }}
-                resizeMode="cover"
+                contentFit="cover"
               />
             </Card.Content>
           </Card>

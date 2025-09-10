@@ -2,7 +2,8 @@ import NewAccount from "@/components/Forms/Auth/NewAccount";
 import { useAuth } from "@/hooks/useAuth";
 import { Redirect } from "expo-router";
 import { useRef } from "react";
-import { Animated, ImageBackground, StyleSheet, View } from "react-native";
+import { Animated, StyleSheet, View } from "react-native";
+import { Image } from "expo-image";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator } from "react-native-paper";
 import bh from "@/assets/images/bh7.jpeg";
@@ -27,19 +28,12 @@ export default function SignupScreen() {
   return (
     <View style={styles.container}>
       <StatusBar style="light" translucent />
-      <ImageBackground
-        source={bh}
-        resizeMode="cover"
-        style={{
-          flex: 1,
-          width: "100%",
-          height: "100%",
-        }}
-      >
-        <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
+      <View style={styles.imageContainer}>
+        <Image source={bh} contentFit="cover" style={styles.backgroundImage} />
+        <Animated.View style={[styles.contentOverlay, { opacity: fadeAnim }]}>
           <NewAccount />
         </Animated.View>
-      </ImageBackground>
+      </View>
     </View>
   );
 }
@@ -49,6 +43,24 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     height: "100%",
+  },
+  imageContainer: {
+    flex: 1,
+    position: "relative",
+  },
+  backgroundImage: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: "100%",
+    height: "100%",
+  },
+  contentOverlay: {
+    flex: 1,
+    position: "relative",
+    zIndex: 1,
   },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   logoContainer: {
