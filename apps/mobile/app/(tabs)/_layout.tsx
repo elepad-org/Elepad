@@ -7,6 +7,7 @@ import ExploreScreen from "./explore";
 import JuegosScreen from "./juegos";
 import ConfiguracionScreen from "./configuracion";
 import { COLORS } from "@/styles/base";
+import CalendarScreen from "./calendar";
 
 export default function TabLayout() {
   const theme = useTheme();
@@ -21,10 +22,10 @@ export default function TabLayout() {
       unfocusedIcon: "home-outline",
     },
     {
-      key: "explore",
-      title: "Explorar",
-      focusedIcon: "compass",
-      unfocusedIcon: "compass-outline",
+      key: "calendar",
+      title: "Calendario",
+      focusedIcon: "calendar-month",
+      unfocusedIcon: "calendar-month-outline",
     },
     {
       key: "juegos",
@@ -42,7 +43,7 @@ export default function TabLayout() {
 
   const renderScene = BottomNavigation.SceneMap({
     home: HomeScreen,
-    explore: ExploreScreen,
+    calendar: CalendarScreen,
     juegos: JuegosScreen,
     configuracion: ConfiguracionScreen,
   });
