@@ -1,8 +1,9 @@
-import { StatusBar, ScrollView, View } from "react-native";
+import { ScrollView, View } from "react-native";
+import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator, Text, Card } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { COLORS, STYLES } from "@/styles/base";
+import { STYLES } from "@/styles/base";
 
 export default function ExploreScreen() {
   const { loading } = useAuth();
@@ -17,7 +18,7 @@ export default function ExploreScreen() {
 
   return (
     <SafeAreaView style={STYLES.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+      <StatusBar />
 
       <ScrollView
         contentContainerStyle={STYLES.contentContainer}

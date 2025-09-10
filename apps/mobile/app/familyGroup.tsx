@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   SafeAreaView,
-  StatusBar,
   ScrollView,
   View,
   Image,
@@ -19,6 +18,7 @@ import {
   Card,
 } from "react-native-paper";
 import { router } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import {
   useGetFamilyGroupIdGroupInvite,
   getFamilyGroupIdGroupInviteResponse,
@@ -243,7 +243,7 @@ export default function FamilyGroup() {
 
   return (
     <SafeAreaView style={STYLES.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+      <StatusBar />
 
       <ScrollView
         contentContainerStyle={STYLES.contentContainer}

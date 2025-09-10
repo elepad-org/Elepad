@@ -1,8 +1,9 @@
-import { StatusBar, ScrollView, View, Image } from "react-native";
+import { ScrollView, View, Image } from "react-native";
+import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator, Text, Card } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { COLORS, STYLES } from "@/styles/base";
+import { STYLES } from "@/styles/base";
 import eleCasino from "@/assets/images/ele-casino.jpeg";
 
 export default function JuegosScreen() {
@@ -18,7 +19,7 @@ export default function JuegosScreen() {
 
   return (
     <SafeAreaView style={STYLES.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+      <StatusBar />
 
       <ScrollView
         contentContainerStyle={STYLES.contentContainer}

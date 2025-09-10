@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { SafeAreaView, StatusBar, ScrollView, View } from "react-native";
+import { SafeAreaView, ScrollView, View } from "react-native";
 import {
   Button,
   Card,
@@ -9,6 +9,7 @@ import {
   Snackbar,
   TextInput,
 } from "react-native-paper";
+import { StatusBar } from "expo-status-bar";
 import { useAuth } from "@/hooks/useAuth";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
 import { UpdatePhotoDialog } from "@/components/PerfilDialogs";
@@ -41,7 +42,7 @@ export default function ConfiguracionScreen() {
 
   return (
     <SafeAreaView style={STYLES.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+      <StatusBar />
 
       <ScrollView contentContainerStyle={STYLES.contentContainer}>
         <ProfileHeader
