@@ -26,17 +26,18 @@ export default function TextNoteComponent({
       style={{
         backgroundColor: COLORS.background,
         padding: 20,
+        borderRadius: 20,
       }}
     >
       <Text style={STYLES.heading}>Nueva nota</Text>
       <Text style={{ ...STYLES.subheading, marginBottom: 16 }}>
-        Escribe tu nota o recordatorio:
+        Escribe tu nota o recordatorio
       </Text>
 
       <TextInput
         value={content}
         onChangeText={setContent}
-        style={{ marginBottom: 20, height: 120 }}
+        style={{ marginBottom: 20, height: 120, borderRadius: 20 }}
         multiline={true}
         numberOfLines={6}
         mode="outlined"
@@ -45,16 +46,20 @@ export default function TextNoteComponent({
         placeholder="Escribe aquí tu nota..."
       />
 
-      <Button
-        mode="contained"
-        onPress={handleSubmit}
-        style={{ ...STYLES.buttonPrimary, marginBottom: 12 }}
-        disabled={!content.trim()}
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
       >
-        Guardar nota
-      </Button>
-
-      <CancelButton onPress={onCancel} />
+        <CancelButton onPress={onCancel} />
+        <CancelButton
+          onPress={handleSubmit}
+          text="Aceptar"
+          disabled={!content.trim()}
+        />
+      </View>
     </View>
   );
 }

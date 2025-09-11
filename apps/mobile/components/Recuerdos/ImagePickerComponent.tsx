@@ -84,11 +84,12 @@ export default function ImagePickerComponent({
       style={{
         backgroundColor: COLORS.background,
         padding: 20,
+        borderRadius: 20,
       }}
     >
       <Text style={STYLES.heading}>Agregar foto o video</Text>
       <Text style={{ ...STYLES.subheading, marginBottom: 16 }}>
-        Selecciona una imagen o video de tu galería o toma una nueva foto:
+        Selecciona una imagen o video de tu galería o toma una nueva foto
       </Text>
 
       {uploading ? (
@@ -98,7 +99,7 @@ export default function ImagePickerComponent({
           style={{ marginVertical: 20 }}
         />
       ) : (
-        <>
+        <View style={{ alignItems: "center" }}>
           <Button
             mode="contained"
             onPress={pickImage}
@@ -116,7 +117,7 @@ export default function ImagePickerComponent({
             Tomar foto
           </Button>
           <CancelButton onPress={onCancel} />
-        </>
+        </View>
       )}
     </View>
   );
