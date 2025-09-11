@@ -3,6 +3,7 @@ import { View, TouchableOpacity, Alert } from "react-native";
 import { Button, Text, IconButton } from "react-native-paper";
 import { Audio } from "expo-av";
 import { STYLES, COLORS } from "@/styles/base";
+import CancelButton from "../shared/CancelButton";
 
 interface AudioRecorderProps {
   onAudioRecorded: (uri: string) => void;
@@ -110,15 +111,20 @@ export default function AudioRecorderComponent({
   };
 
   return (
-    <View style={STYLES.contentContainer}>
+    <View
+      style={{
+        backgroundColor: COLORS.background,
+        padding: 20,
+      }}
+    >
       <Text style={STYLES.heading}>Grabar audio</Text>
 
-      <Text style={STYLES.subheading}>
+      <Text style={{ ...STYLES.subheading, marginBottom: 16 }}>
         {isRecording
           ? `Grabando... ${formatTime(recordingDuration)}`
           : audioUri
-            ? "Audio grabado"
-            : "Presiona el botón para comenzar a grabar"}
+            ? "Audio grabado - Presiona reproducir para escuchar:"
+            : "Presiona el botón para comenzar a grabar:"}
       </Text>
 
       <View style={{ alignItems: "center", marginVertical: 20 }}>
@@ -160,15 +166,13 @@ export default function AudioRecorderComponent({
         <Button
           mode="contained"
           onPress={() => audioUri && onAudioRecorded(audioUri)}
-          style={STYLES.buttonPrimary}
+          style={{ ...STYLES.buttonPrimary, marginBottom: 20 }}
         >
           Guardar grabación
         </Button>
       )}
 
-      <Button mode="outlined" onPress={onCancel} style={STYLES.buttonSecondary}>
-        Cancelar
-      </Button>
+      <CancelButton onPress={onCancel} />
     </View>
   );
 }

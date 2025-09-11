@@ -25,7 +25,7 @@ import { COLORS, STYLES, SHADOWS } from "@/styles/base";
 
 import RecuerdoItemComponent from "@/components/Recuerdos/RecuerdoItemComponent";
 import NuevoRecuerdoDialogComponent from "@/components/Recuerdos/NuevoRecuerdoDialogComponent";
-import eleEmpthy from "@/assets/images/elepad_mantenimiento.png";
+import eleEmpthy from "@/assets/images/ele-idea.jpeg";
 
 const screenWidth = Dimensions.get("window").width;
 const numColumns = 2;
@@ -158,11 +158,11 @@ export default function RecuerdosScreen() {
         >
           <Image
             source={eleEmpthy}
-            style={{ width: 180, height: 180, marginBottom: 10 }}
+            style={{ width: 220, height: 220, marginBottom: 10 }}
           />
           <Text style={STYLES.heading}>No hay recuerdos aún</Text>
           <Text style={STYLES.subheading}>
-            Añade un recuedro recuerdo con + Agregar.
+            Añade un recuerdo recuerdo con + Agregar.
           </Text>
         </View>
       ) : (

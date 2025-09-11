@@ -3,6 +3,7 @@ import { View, Alert } from "react-native";
 import { Button, Text, ActivityIndicator } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import { STYLES, COLORS } from "@/styles/base";
+import CancelButton from "../shared/CancelButton";
 
 interface ImagePickerProps {
   onImageSelected: (uri: string) => void;
@@ -79,20 +80,29 @@ export default function ImagePickerComponent({
   };
 
   return (
-    <View style={STYLES.contentContainer}>
+    <View
+      style={{
+        backgroundColor: COLORS.background,
+        padding: 20,
+      }}
+    >
       <Text style={STYLES.heading}>Agregar foto o video</Text>
-      <Text style={STYLES.subheading}>
-        Selecciona una imagen o video de tu galería o toma una nueva foto
+      <Text style={{ ...STYLES.subheading, marginBottom: 16 }}>
+        Selecciona una imagen o video de tu galería o toma una nueva foto:
       </Text>
 
       {uploading ? (
-        <ActivityIndicator size="large" color={COLORS.primary} />
+        <ActivityIndicator
+          size="large"
+          color={COLORS.primary}
+          style={{ marginVertical: 20 }}
+        />
       ) : (
         <>
           <Button
             mode="contained"
             onPress={pickImage}
-            style={STYLES.buttonPrimary}
+            style={{ ...STYLES.buttonPrimary, marginBottom: 12 }}
             icon="image"
           >
             Seleccionar de galería
@@ -100,18 +110,12 @@ export default function ImagePickerComponent({
           <Button
             mode="contained"
             onPress={takePhoto}
-            style={STYLES.buttonPrimary}
+            style={{ ...STYLES.buttonPrimary, marginBottom: 20 }}
             icon="camera"
           >
             Tomar foto
           </Button>
-          <Button
-            mode="outlined"
-            onPress={onCancel}
-            style={STYLES.buttonSecondary}
-          >
-            Cancelar
-          </Button>
+          <CancelButton onPress={onCancel} />
         </>
       )}
     </View>
