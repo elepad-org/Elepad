@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { SafeAreaView, StatusBar, ScrollView, View } from "react-native";
+import { StatusBar, ScrollView, View } from "react-native";
 import {
   Button,
   Card,
@@ -9,6 +9,7 @@ import {
   Snackbar,
   TextInput,
 } from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/hooks/useAuth";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
 import { UpdatePhotoDialog } from "@/components/PerfilDialogs";
@@ -40,10 +41,16 @@ export default function ConfiguracionScreen() {
   const initials = useMemo(() => getInitials(displayName), [displayName]);
 
   return (
-    <SafeAreaView style={STYLES.safeArea}>
+    <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
-      <ScrollView contentContainerStyle={STYLES.contentContainer}>
+      <ScrollView
+        contentContainerStyle={[
+          STYLES.contentContainer,
+          { paddingBottom: 120 }, // Espacio para la barra flotante
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
         <ProfileHeader
           name={displayName}
           email={email}
@@ -138,7 +145,7 @@ export default function ConfiguracionScreen() {
               </View>
             )}
 
-            <Divider />
+            <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
             <List.Item
               title="Grupo familiar"
               left={(props) => <List.Icon {...props} icon="account-group" />}
