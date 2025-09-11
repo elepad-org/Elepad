@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Platform } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { Modal, TextInput, Button, Text, Checkbox } from "react-native-paper";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { STYLES as baseStyles } from "@/styles/base";
 import type { Activity } from "@elepad/api-client";
 
 type Props = {
@@ -66,26 +65,37 @@ export default function ActivityForm({
     }
   };
 
+  const formatDateTime = (d?: Date) => {
+    if (!d) return "No definido";
+    return `${d.toLocaleDateString()} ${d.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    })}`;
+  };
+
   return (
     <Modal
       visible={visible}
       onDismiss={onClose}
-      contentContainerStyle={[styles.modal, baseStyles.card]}
+      contentContainerStyle={styles.modal}
+      theme={{ colors: { backdrop: "rgba(255, 255, 255, 0.82)" } }}
     >
-      <Text variant="titleMedium" style={styles.heading}>
-        Evento
+      <Text variant="titleLarge" style={styles.heading}>
+        {initial ? "Editar evento" : "Nuevo evento"}
       </Text>
+
       <TextInput
         label="Título"
         value={title}
         onChangeText={setTitle}
-        style={[styles.input, baseStyles.input]}
+        style={styles.input}
       />
       <TextInput
         label="Descripción"
         value={description}
         onChangeText={setDescription}
-        style={[styles.input, baseStyles.input]}
+        multiline
+        style={styles.input}
       />
 
       <View style={styles.pickerRow}>
@@ -94,18 +104,21 @@ export default function ActivityForm({
           onPress={() => setShowStartPicker(true)}
           style={styles.pickerButton}
         >
-          Inicio: {startsAtDate ? startsAtDate.toLocaleString() : "No definido"}
+          Inicio: {formatDateTime(startsAtDate)}
         </Button>
+      </View>
+
+      <View style={styles.pickerRow}>
         <Button
           mode="outlined"
           onPress={() => setShowEndPicker(true)}
           style={styles.pickerButton}
         >
-          Fin: {endsAtDate ? endsAtDate.toLocaleString() : "No definido"}
+          Fin: {formatDateTime(endsAtDate)}
         </Button>
       </View>
 
-      {/* DatePicker para fecha de inicio */}
+      {/* Pickers */}
       <DateTimePickerModal
         isVisible={showStartPicker}
         date={startsAtDate}
@@ -115,10 +128,7 @@ export default function ActivityForm({
           setStartsAtDate(date);
         }}
         onCancel={() => setShowStartPicker(false)}
-        title="Selecciona la fecha de inicio"
       />
-
-      {/* DatePicker para fecha de fin */}
       <DateTimePickerModal
         isVisible={showEndPicker}
         date={endsAtDate ?? new Date()}
@@ -128,7 +138,6 @@ export default function ActivityForm({
           setEndsAtDate(date);
         }}
         onCancel={() => setShowEndPicker(false)}
-        title="Selecciona la fecha de fin"
       />
 
       <View style={styles.row}>
@@ -136,17 +145,23 @@ export default function ActivityForm({
           status={completed ? "checked" : "unchecked"}
           onPress={() => setCompleted(!completed)}
         />
-        <Text style={{ marginTop: 8 }}>Completado</Text>
+        <Text
+          onPress={() => setCompleted(!completed)}
+          style={styles.checkboxLabel}
+        >
+          Completado
+        </Text>
       </View>
 
-      {error && (
-        <Text style={{ color: "red", marginTop: 8, marginBottom: 4 }}>
-          {error}
-        </Text>
-      )}
+      {error && <Text style={styles.error}>{error}</Text>}
 
-      <View style={[styles.actions, { justifyContent: "space-between" }]}>
-        <Button onPress={onClose} disabled={saving}>
+      <View style={styles.actions}>
+        <Button
+          mode="outlined"
+          onPress={onClose}
+          disabled={saving}
+          style={styles.actionBtn}
+        >
           Cancelar
         </Button>
         <Button
@@ -154,6 +169,7 @@ export default function ActivityForm({
           onPress={handleSave}
           loading={saving}
           disabled={saving || !startsAtDate}
+          style={styles.actionBtn}
         >
           Guardar
         </Button>
@@ -165,13 +181,40 @@ export default function ActivityForm({
 const styles = StyleSheet.create({
   modal: {
     margin: 20,
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 16,
+    padding: 20,
+    backgroundColor: "#fff",
+    elevation: 1,
   },
-  heading: { marginBottom: 12 },
-  input: { marginBottom: 8 },
-  actions: { flexDirection: "row", marginTop: 8 },
-  row: { flexDirection: "row", alignItems: "center", marginTop: 8 },
-  pickerRow: { flexDirection: "row", justifyContent: "space-between", gap: 8 },
-  pickerButton: { flex: 1, marginRight: 8 },
+  heading: {
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  input: {
+    marginBottom: 16,
+    backgroundColor: "#fafafa",
+  },
+  pickerRow: {
+    marginBottom: 12,
+  },
+  pickerButton: {
+    borderRadius: 8,
+    paddingVertical: 6,
+  },
+  row: { flexDirection: "row", alignItems: "center", marginTop: 12 },
+  checkboxLabel: {
+    fontSize: 16,
+    marginLeft: 4,
+  },
+  error: { color: "red", marginTop: 8, marginBottom: 4 },
+  actions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20,
+  },
+  actionBtn: {
+    flex: 1,
+    marginHorizontal: 4,
+    borderRadius: 8,
+  },
 });

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
 import { Text, Card, List, Button } from "react-native-paper";
-import { Calendar, DateData } from "react-native-calendars";
+import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import ActivityForm from "./ActivityForm";
 import {
   useGetActivitiesUserIdCreator,
@@ -12,6 +12,51 @@ import {
   NewActivity,
   UpdateActivity,
 } from "@elepad/api-client";
+import { COLORS } from "@/styles/base";
+
+LocaleConfig.locales["es"] = {
+  monthNames: [
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
+  ],
+  monthNamesShort: [
+    "Ene.",
+    "Feb.",
+    "Mar.",
+    "Abr.",
+    "May.",
+    "Jun.",
+    "Jul.",
+    "Ago.",
+    "Sept.",
+    "Oct.",
+    "Nov.",
+    "Dic.",
+  ],
+  dayNames: [
+    "Domingo",
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+  ],
+  dayNamesShort: ["Dom", "Lun", "Mar", "Mir", "Jue", "Vie", "Sab"],
+  today: "Hoy",
+};
+
+LocaleConfig.defaultLocale = "es";
 
 export default function CalendarCard({ userId }: { userId: string }) {
   const [selectedDay, setSelectedDay] = useState<string>(() => {
@@ -100,6 +145,21 @@ export default function CalendarCard({ userId }: { userId: string }) {
         onDayPress={(d: DateData) => setSelectedDay(d.dateString)}
         markedDates={marked}
         enableSwipeMonths
+        style={styles.calendar}
+        theme={{
+          backgroundColor: "#ffffff",
+          calendarBackground: "#ffffff",
+          textSectionTitleColor: "#555",
+          selectedDayBackgroundColor: "#82bcfeff",
+          selectedDayTextColor: "#fff",
+          todayTextColor: "#ff2020ff",
+          dayTextColor: "#333",
+          textDisabledColor: "#ccc",
+          monthTextColor: "#4A4A4A",
+          textMonthFontSize: 20,
+          textDayFontSize: 18,
+          textDayHeaderFontSize: 14,
+        }}
       />
 
       <View style={styles.headerRow}>
@@ -163,14 +223,35 @@ export default function CalendarCard({ userId }: { userId: string }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 12 },
+  container: {
+    flex: 1,
+    margin: 5,
+    backgroundColor: COLORS.background,
+  },
+  calendar: {
+    borderRadius: 16,
+    elevation: 3,
+    marginVertical: 20,
+    padding: 8,
+  },
   headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 8,
-    marginBottom: 8,
+    marginBottom: 12,
+    marginTop: 16,
   },
-  card: { marginBottom: 8 },
-  cardEmpty: { marginTop: 8, padding: 12 },
+  card: {
+    marginBottom: 12,
+    borderRadius: 12,
+    elevation: 1,
+    backgroundColor: "#fff",
+  },
+  cardEmpty: {
+    marginTop: 20,
+    padding: 10,
+    borderRadius: 12,
+    backgroundColor: "#f9f9f9",
+    elevation: 1,
+  },
 });

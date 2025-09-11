@@ -3,16 +3,19 @@ import { useAuth } from "@/hooks/useAuth";
 import CalendarCard from "@/components/Calendar/CalendarCard";
 import { COLORS, STYLES as baseStyles } from "@/styles/base";
 import { Text } from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CalendarScreen() {
   const { userElepad } = useAuth();
-  const userId = userElepad?.id ?? "user-1";
+  const userId = userElepad?.id ?? "";
 
   return (
-    <View style={baseStyles.container}>
+    <SafeAreaView style={baseStyles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
-      <Text style={[baseStyles.heading, { marginBottom: 16 }]}>Calendario</Text>
-      <CalendarCard userId={userId} />
-    </View>
+      <View style={[baseStyles.container]}>
+        <Text style={[baseStyles.heading]}>Calendario</Text>
+        <CalendarCard userId={userId} />
+      </View>
+    </SafeAreaView>
   );
 }
