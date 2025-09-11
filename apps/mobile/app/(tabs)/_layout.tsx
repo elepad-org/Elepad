@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import HomeScreen from "./home";
 import ExploreScreen from "./explore";
 import JuegosScreen from "./juegos";
+import RecuerdosScreen from "./recuerdos";
 import ConfiguracionScreen from "./configuracion";
 import { COLORS } from "@/styles/base";
 
@@ -33,6 +34,12 @@ export default function TabLayout() {
       unfocusedIcon: "puzzle-outline",
     },
     {
+      key: "recuerdos",
+      title: "Recuerdos",
+      focusedIcon: "image-multiple",
+      unfocusedIcon: "image-multiple-outline",
+    },
+    {
       key: "configuracion",
       title: "Config.",
       focusedIcon: "cog",
@@ -44,6 +51,7 @@ export default function TabLayout() {
     home: HomeScreen,
     explore: ExploreScreen,
     juegos: JuegosScreen,
+    recuerdos: RecuerdosScreen,
     configuracion: ConfiguracionScreen,
   });
 
