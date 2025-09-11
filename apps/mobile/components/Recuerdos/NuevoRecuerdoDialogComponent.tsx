@@ -5,6 +5,7 @@ import { STYLES, COLORS } from "@/styles/base";
 import ImagePickerComponent from "./ImagePickerComponent";
 import TextNoteComponent from "./TextNoteComponent";
 import AudioRecorderComponent from "./AudioRecorderComponent";
+import CancelButton from "../shared/CancelButton";
 
 type RecuerdoTipo = "imagen" | "texto" | "audio";
 
@@ -53,41 +54,50 @@ export default function NuevoRecuerdoDialogComponent({
   }
 
   return (
-    <Dialog visible={visible} onDismiss={hideDialog}>
+    <Dialog
+      visible={visible}
+      onDismiss={hideDialog}
+      style={{
+        backgroundColor: COLORS.background,
+        width: "90%",
+        alignSelf: "center",
+        paddingVertical: 14,
+      }}
+    >
       <Dialog.Title style={STYLES.heading}>Nuevo recuerdo</Dialog.Title>
-      <Dialog.Content>
-        <Text style={STYLES.subheading}>
+      <Dialog.Content style={{ paddingBottom: 8 }}>
+        <Text style={{ ...STYLES.subheading, marginBottom: 14 }}>
           Selecciona el tipo de recuerdo que quieres subir:
         </Text>
         <TouchableOpacity
           style={{
             flexDirection: "row",
             alignItems: "center",
-            paddingVertical: 12,
+            paddingVertical: 6,
           }}
           onPress={() => onSelectTipo("imagen")}
         >
           <IconButton icon="image" size={24} iconColor={COLORS.primary} />
           <Text style={STYLES.paragraphText}>Imagen o Video</Text>
         </TouchableOpacity>
-        <Divider />
+        <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
         <TouchableOpacity
           style={{
             flexDirection: "row",
             alignItems: "center",
-            paddingVertical: 12,
+            paddingVertical: 6,
           }}
           onPress={() => onSelectTipo("texto")}
         >
           <IconButton icon="text" size={24} iconColor={COLORS.primary} />
-          <Text style={STYLES.paragraphText}>Texto</Text>
+          <Text style={STYLES.paragraphText}>Nota</Text>
         </TouchableOpacity>
-        <Divider />
+        <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
         <TouchableOpacity
           style={{
             flexDirection: "row",
             alignItems: "center",
-            paddingVertical: 12,
+            paddingVertical: 6,
           }}
           onPress={() => onSelectTipo("audio")}
         >
@@ -95,8 +105,8 @@ export default function NuevoRecuerdoDialogComponent({
           <Text style={STYLES.paragraphText}>Audio</Text>
         </TouchableOpacity>
       </Dialog.Content>
-      <Dialog.Actions>
-        <Button onPress={hideDialog}>Cancelar</Button>
+      <Dialog.Actions style={{ paddingBottom: 12 }}>
+        <CancelButton onPress={hideDialog} />
       </Dialog.Actions>
     </Dialog>
   );

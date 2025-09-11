@@ -22,7 +22,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, STYLES, SHADOWS } from "@/styles/base";
-import EmptyStateComponent from "@/components/Recuerdos/EmptyStateComponent";
+
 import RecuerdoItemComponent from "@/components/Recuerdos/RecuerdoItemComponent";
 import NuevoRecuerdoDialogComponent from "@/components/Recuerdos/NuevoRecuerdoDialogComponent";
 import eleEmpthy from "@/assets/images/elepad_mantenimiento.png";
@@ -128,35 +128,41 @@ export default function RecuerdosScreen() {
 
       <View
         style={{
-          padding: 16,
+          paddingHorizontal: 24,
+          paddingVertical: 20,
           borderBottomColor: COLORS.border,
-          borderBottomWidth: 1,
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
         }}
       >
-        <Text style={STYLES.heading}>Mis Recuerdos</Text>
+        <Text style={STYLES.superHeading}>Mis Recuerdos</Text>
         <Button
           mode="contained"
           onPress={() => setDialogVisible(true)}
-          style={{ ...STYLES.buttonPrimary, width: "35%" }}
+          style={{ ...STYLES.miniButton }}
           icon="plus"
-          compact
         >
           Agregar
         </Button>
       </View>
 
       {recuerdos.length === 0 ? (
-        <View style={STYLES.center}>
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "flex-start",
+            paddingTop: "35%",
+          }}
+        >
           <Image
             source={eleEmpthy}
-            style={{ width: 180, height: 180, marginBottom: 24 }}
+            style={{ width: 180, height: 180, marginBottom: 10 }}
           />
           <Text style={STYLES.heading}>No hay recuerdos aún</Text>
           <Text style={STYLES.subheading}>
-            Subí tu primer recuerdo tocando el botón Agregar
+            Añade un recuedro recuerdo con + Agregar.
           </Text>
         </View>
       ) : (
