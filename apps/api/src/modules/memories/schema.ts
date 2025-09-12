@@ -55,9 +55,9 @@ export const NewMemorySchema = z
     bookId: z.string().uuid(),
     groupId: z.string().uuid(),
     createdBy: z.string().uuid(),
-    title: z.string().min(1).optional(),
+    title: z.string().optional(),
     caption: z.string().optional(),
-    mediaUrl: z.string().url().optional(),
+    mediaUrl: z.string().optional(),
     mimeType: z.string().optional(),
   })
   .openapi("NewMemory");
@@ -89,3 +89,16 @@ export const MemoryFiltersSchema = z
   .openapi("MemoryFilters");
 
 export type MemoryFilters = z.infer<typeof MemoryFiltersSchema>;
+
+// Schema para crear memory con imagen (multipart/form-data)
+export const CreateMemoryWithImageSchema = z
+  .object({
+    bookId: z.string().uuid(),
+    groupId: z.string().uuid(),
+    title: z.string().min(1).optional(),
+    caption: z.string().optional(),
+    // La imagen se manejará como File en el handler
+  })
+  .openapi("CreateMemoryWithImage");
+
+export type CreateMemoryWithImage = z.infer<typeof CreateMemoryWithImageSchema>;
