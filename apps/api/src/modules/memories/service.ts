@@ -1,7 +1,14 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { ApiException } from "@/utils/api-error";
-import { NewMemory, NewMemoriesBook, MemoryFilters, Memory } from "./schema";
+import {
+  NewMemory,
+  NewMemoriesBook,
+  MemoryFilters,
+  Memory,
+  CreateMemoryWithImage,
+} from "./schema";
 import { Database } from "@/supabase-types";
+import { uploadMemoryImage } from "@/services/storage";
 
 export class MemoriesService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -83,6 +90,58 @@ export class MemoriesService {
     }
 
     return data;
+  }
+
+  /**
+   * Create a new memory with image upload to Supabase Storage
+   */
+  async createMemoryWithImage(
+    memoryData: CreateMemoryWithImage,
+    imageFile: File,
+    userId: string,
+  ): Promise<Memory> {
+    try {
+      // 1. Subir imagen al storage usando el servicio centralizado
+      const mediaUrl = await uploadMemoryImage(
+        this.supabase,
+        memoryData.groupId,
+        imageFile,
+      );
+
+      // 2. Crear el registro en la tabla memories
+      const newMemory: NewMemory = {
+        bookId: memoryData.bookId,
+        groupId: memoryData.groupId,
+        createdBy: userId,
+        title: memoryData.title,
+        caption: memoryData.caption,
+        mediaUrl,
+        mimeType: imageFile.type,
+      };
+
+      const { data, error } = await this.supabase
+        .from("memories")
+        .insert(newMemory)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error creating memory in database:", error);
+        throw new ApiException(500, "Error creating memory");
+      }
+
+      if (!data) {
+        throw new ApiException(500, "Failed to create memory");
+      }
+
+      return data;
+    } catch (error) {
+      if (error instanceof ApiException) {
+        throw error;
+      }
+      console.error("Unexpected error in createMemoryWithImage:", error);
+      throw new ApiException(500, "Internal server error");
+    }
   }
 
   /**
