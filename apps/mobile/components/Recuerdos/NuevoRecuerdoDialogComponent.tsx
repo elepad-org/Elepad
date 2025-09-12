@@ -30,7 +30,16 @@ export default function NuevoRecuerdoDialogComponent({
 }: NuevoRecuerdoDialogProps) {
   if (step === "create" && selectedTipo) {
     return (
-      <Dialog visible={visible} onDismiss={hideDialog}>
+      <Dialog
+        visible={visible}
+        onDismiss={hideDialog}
+        style={{
+          backgroundColor: COLORS.background,
+          width: "90%",
+          alignSelf: "center",
+          borderRadius: 16,
+        }}
+      >
         {selectedTipo === "imagen" && (
           <ImagePickerComponent
             onImageSelected={(uri: string) => onSave(uri)}
@@ -62,12 +71,13 @@ export default function NuevoRecuerdoDialogComponent({
         width: "90%",
         alignSelf: "center",
         paddingVertical: 14,
+        borderRadius: 16,
       }}
     >
       <Dialog.Title style={STYLES.heading}>Nuevo recuerdo</Dialog.Title>
       <Dialog.Content style={{ paddingBottom: 8 }}>
         <Text style={{ ...STYLES.subheading, marginBottom: 14 }}>
-          Selecciona el tipo de recuerdo que quieres subir:
+          Selecciona el tipo de recuerdo que quieres subir
         </Text>
         <TouchableOpacity
           style={{

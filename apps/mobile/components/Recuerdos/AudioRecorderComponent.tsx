@@ -115,6 +115,7 @@ export default function AudioRecorderComponent({
       style={{
         backgroundColor: COLORS.background,
         padding: 20,
+        borderRadius: 20,
       }}
     >
       <Text style={STYLES.heading}>Grabar audio</Text>
@@ -123,8 +124,8 @@ export default function AudioRecorderComponent({
         {isRecording
           ? `Grabando... ${formatTime(recordingDuration)}`
           : audioUri
-            ? "Audio grabado - Presiona reproducir para escuchar:"
-            : "Presiona el botón para comenzar a grabar:"}
+            ? "Audio grabado - Presiona reproducir para escuchar"
+            : "Presiona el botón para comenzar a grabar"}
       </Text>
 
       <View style={{ alignItems: "center", marginVertical: 20 }}>
@@ -163,16 +164,22 @@ export default function AudioRecorderComponent({
       </View>
 
       {audioUri && !isRecording && (
-        <Button
-          mode="contained"
-          onPress={() => audioUri && onAudioRecorded(audioUri)}
-          style={{ ...STYLES.buttonPrimary, marginBottom: 20 }}
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
         >
-          Guardar grabación
-        </Button>
+          <CancelButton onPress={onCancel} />
+          <CancelButton
+            onPress={() => audioUri && onAudioRecorded(audioUri)}
+            text="Guardar"
+          />
+        </View>
       )}
 
-      <CancelButton onPress={onCancel} />
+      {!audioUri && <CancelButton onPress={onCancel} />}
     </View>
   );
 }
