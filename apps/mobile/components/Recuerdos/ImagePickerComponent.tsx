@@ -35,7 +35,7 @@ export default function ImagePickerComponent({
     try {
       setUploading(true);
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        mediaTypes: ["images", "videos"],
         allowsEditing: true,
         quality: 0.8,
         allowsMultipleSelection: false,
@@ -43,6 +43,7 @@ export default function ImagePickerComponent({
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         onImageSelected(result.assets[0].uri);
+        console.log(result.assets[0].uri);
       }
     } catch (error) {
       Alert.alert("Error", "No se pudo seleccionar la imagen");
@@ -64,7 +65,7 @@ export default function ImagePickerComponent({
     try {
       setUploading(true);
       const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        mediaTypes: ["images", "videos"],
         allowsEditing: true,
         quality: 0.8,
       });
