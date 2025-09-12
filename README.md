@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="packages/assets/ele-excited.png" alt="Ele, el elefante de Elepad" width="200" />
+  <img src="apps/mobile/assets/images/ele-gray.png" alt="Ele, el elefante de Elepad" width="200" />
 </p>
 
 Elepad es una aplicación móvil diseñada para que los adultos mayores se mantengan conectados con sus familias, compartiendo actividades, recuerdos y juegos cognitivos en una plataforma intuitiva.
