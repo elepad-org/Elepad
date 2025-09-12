@@ -7,7 +7,6 @@ import {
   FlatList,
   TouchableOpacity,
   RefreshControl,
-  ActivityIndicator,
   Dimensions,
 } from "react-native";
 import {
@@ -18,8 +17,11 @@ import {
   Button,
   IconButton,
   Divider,
+  Snackbar,
+  ActivityIndicator,
 } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
+import { useGetMemories, Memory } from "@elepad/api-client";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, STYLES, SHADOWS } from "@/styles/base";
 
@@ -34,6 +36,31 @@ const itemSize = (screenWidth - 48) / numColumns;
 // Tipos de recuerdos
 type RecuerdoTipo = "imagen" | "texto" | "audio";
 
+// Función auxiliar para convertir Memory a Recuerdo para compatibilidad con componentes existentes
+const memoryToRecuerdo = (memory: Memory): Recuerdo => {
+  let tipo: RecuerdoTipo = "texto";
+
+  if (memory.mimeType) {
+    if (memory.mimeType.startsWith("image/")) {
+      tipo = "imagen";
+    } else if (memory.mimeType.startsWith("audio/")) {
+      tipo = "audio";
+    }
+  }
+
+  return {
+    id: memory.id,
+    tipo,
+    contenido: memory.mediaUrl || memory.caption || "",
+    miniatura:
+      memory.mimeType?.startsWith("image/") && memory.mediaUrl
+        ? memory.mediaUrl
+        : undefined,
+    titulo: memory.title || undefined,
+    fecha: new Date(memory.createdAt),
+  };
+};
+
 interface Recuerdo {
   id: string;
   tipo: RecuerdoTipo;
@@ -44,38 +71,72 @@ interface Recuerdo {
 }
 
 export default function RecuerdosScreen() {
-  const { loading } = useAuth();
+  const { loading: authLoading, userElepad } = useAuth();
+
+  // Estados locales
   const [refreshing, setRefreshing] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [recuerdos, setRecuerdos] = useState<Recuerdo[]>([]);
   const [dialogVisible, setDialogVisible] = useState(false);
   const [currentStep, setCurrentStep] = useState<"select" | "create">("select");
   const [selectedTipo, setSelectedTipo] = useState<RecuerdoTipo | null>(null);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarError, setSnackbarError] = useState(false);
 
-  // Función para simular la carga de recuerdos (en producción, aquí se conectaría con el backend)
+  // Hook del API client
+  const {
+    data: memoriesResponse,
+    isLoading: memoriesLoading,
+    error,
+    refetch: refetchMemories,
+  } = useGetMemories(
+    {
+      groupId: userElepad?.groupId || undefined,
+      limit: 20,
+    },
+    {
+      query: {
+        enabled: !!userElepad?.groupId, // Solo ejecutar cuando tengamos groupId
+      },
+    },
+  );
+
+  // Función para cargar recuerdos (mantiene el patrón original)
   const cargarRecuerdos = useCallback(async () => {
-    // En producción, aquí se cargarían los recuerdos desde el backend
-    // Por ahora, simularemos que no hay recuerdos
-    setRecuerdos([]);
-    return [];
-  }, []);
+    try {
+      await refetchMemories();
+    } catch (err) {
+      setSnackbarMessage("Error al cargar los recuerdos");
+      setSnackbarError(true);
+      setSnackbarVisible(true);
+    }
+  }, [refetchMemories]);
 
-  // Función para cargar más recuerdos al hacer scroll
-  const cargarMasRecuerdos = useCallback(async () => {
-    if (loadingMore) return;
-    setLoadingMore(true);
+  // Extraer los datos de la respuesta
+  const memoriesData =
+    memoriesResponse && "data" in memoriesResponse ? memoriesResponse.data : [];
+  const memories = Array.isArray(memoriesData) ? memoriesData : [];
+  const hasGroupId = !!userElepad?.groupId;
 
-    // Simular carga de más recuerdos (en producción, se implementaría la paginación)
-    setTimeout(() => {
-      setLoadingMore(false);
-    }, 1000);
-  }, [loadingMore]);
+  // Convertir memories a recuerdos para compatibilidad con componentes existentes
+  const recuerdos = memories.map(memoryToRecuerdo);
 
-  // Función para refrescar la galería
+  // Estados de carga y error (patrón original restaurado)
+  const isLoading = authLoading || memoriesLoading;
+  const hasError = !!error;
+  const isEmpty = !isLoading && !hasError && recuerdos.length === 0;
+
+  // Función para refrescar la galería (patrón original)
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await cargarRecuerdos();
-    setRefreshing(false);
+    try {
+      await cargarRecuerdos();
+    } catch (err) {
+      setSnackbarMessage("Error al refrescar los recuerdos");
+      setSnackbarError(true);
+      setSnackbarVisible(true);
+    } finally {
+      setRefreshing(false);
+    }
   }, [cargarRecuerdos]);
 
   // Manejador para crear un nuevo recuerdo
@@ -85,17 +146,11 @@ export default function RecuerdosScreen() {
   };
 
   const handleGuardarRecuerdo = (contenido: string, titulo?: string) => {
-    // Crear nuevo recuerdo
-    const nuevoRecuerdo: Recuerdo = {
-      id: Date.now().toString(),
-      tipo: selectedTipo!,
-      contenido,
-      titulo,
-      fecha: new Date(),
-    };
-
-    // Agregar al estado local (en producción se enviaría al backend)
-    setRecuerdos((prev) => [nuevoRecuerdo, ...prev]);
+    // TODO: Implementar la subida real de recuerdos usando uploadMemory del hook
+    // Por ahora, solo mostrar un mensaje
+    setSnackbarMessage("Funcionalidad de subida en desarrollo");
+    setSnackbarError(false);
+    setSnackbarVisible(true);
 
     // Resetear estado
     setDialogVisible(false);
@@ -109,16 +164,63 @@ export default function RecuerdosScreen() {
     setSelectedTipo(null);
   };
 
-  // Efecto para cargar los recuerdos inicialmente
-  React.useEffect(() => {
-    cargarRecuerdos();
-  }, [cargarRecuerdos]);
-
-  if (loading) {
+  if (isLoading && recuerdos.length === 0) {
     return (
-      <View style={STYLES.center}>
-        <ActivityIndicator color={COLORS.primary} />
-      </View>
+      <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor={COLORS.background}
+        />
+
+        <View
+          style={{
+            paddingHorizontal: 24,
+            paddingVertical: 20,
+            borderBottomColor: COLORS.border,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Text style={STYLES.superHeading}>Mis Recuerdos</Text>
+          <Button
+            mode="contained"
+            onPress={() => setDialogVisible(true)}
+            style={{ ...STYLES.miniButton }}
+            icon="plus"
+          >
+            Agregar
+          </Button>
+        </View>
+
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <ActivityIndicator />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Si el usuario no tiene groupId, mostrar mensaje
+  if (!hasGroupId) {
+    return (
+      <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor={COLORS.background}
+        />
+        <View style={STYLES.center}>
+          <Text style={STYLES.heading}>Sin grupo familiar</Text>
+          <Text style={STYLES.subheading}>
+            Necesitas estar en un grupo familiar para ver recuerdos.
+          </Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
@@ -172,15 +274,13 @@ export default function RecuerdosScreen() {
           keyExtractor={(item) => item.id}
           numColumns={numColumns}
           contentContainerStyle={{ padding: 16 }}
-          onEndReached={cargarMasRecuerdos}
-          onEndReachedThreshold={0.5}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
           ListFooterComponent={
-            loadingMore ? (
+            memoriesLoading && recuerdos.length > 0 ? (
               <View style={{ padding: 16, alignItems: "center" }}>
-                <ActivityIndicator color={COLORS.primary} />
+                <ActivityIndicator />
               </View>
             ) : null
           }
@@ -199,6 +299,20 @@ export default function RecuerdosScreen() {
           onCancel={handleCancelar}
         />
       </Portal>
+
+      {/* Snackbar para mostrar mensajes */}
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={2200}
+        style={{
+          backgroundColor: snackbarError ? COLORS.error : COLORS.success,
+          borderRadius: 8,
+          marginBottom: 80, // Agregar margen para que no se superponga con la tab bar
+        }}
+      >
+        {snackbarMessage}
+      </Snackbar>
     </SafeAreaView>
   );
 }
