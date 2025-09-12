@@ -10,6 +10,21 @@ function urlify(name: string) {
 }
 
 /**
+ * Determines the media type folder based on file MIME type
+ */
+function getMediaTypeFolder(mimeType: string): string {
+  if (mimeType.startsWith("image/")) {
+    return "imagenes";
+  } else if (mimeType.startsWith("video/")) {
+    return "videos";
+  } else if (mimeType.startsWith("audio/")) {
+    return "audios";
+  } else {
+    return "otros"; // Para otros tipos de archivos
+  }
+}
+
+/**
  * Uploads a profile avatar to Supabase Storage and returns the public URL.
  */
 export async function uploadUserAvatarImage(
@@ -35,7 +50,9 @@ export async function uploadUserAvatarImage(
 }
 
 /**
- * Uploads a memory image to Supabase Storage and returns the public URL.
+ * Uploads a memory media file to Supabase Storage organized by media type and returns the public URL.
+ * Files are organized as: {groupId}/{mediaType}/{fileName}
+ * Where mediaType can be: imagenes, videos, audios, otros
  */
 export async function uploadMemoryImage(
   supabase: SupabaseClient<Database>,
@@ -43,9 +60,14 @@ export async function uploadMemoryImage(
   file: File,
 ): Promise<string> {
   const originalName = file.name || `memory-${Date.now()}`;
-  const fileExtension = originalName.split(".").pop() || "jpg";
+  const fileExtension = originalName.split(".").pop() || "bin";
   const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExtension}`;
-  const path = `memories/${groupId}/${fileName}`;
+
+  // Determinar el tipo de media y crear el path organizado
+  const mediaTypeFolder = getMediaTypeFolder(
+    file.type || "application/octet-stream",
+  );
+  const path = `${groupId}/${mediaTypeFolder}/${fileName}`;
 
   const { error } = await supabase.storage
     .from(MEMORIES_BUCKET)
@@ -56,7 +78,7 @@ export async function uploadMemoryImage(
     });
 
   if (error) {
-    throw new Error(`Memory image upload failed: ${error.message}`);
+    throw new Error(`Memory media upload failed: ${error.message}`);
   }
 
   const { data } = supabase.storage.from(MEMORIES_BUCKET).getPublicUrl(path);
