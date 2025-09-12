@@ -10,6 +10,7 @@ import { cors } from "hono/cors";
 import { swaggerUI } from "@hono/swagger-ui";
 import { familyGroupApp } from "./modules/familyGroups/handler.js";
 import { Database } from "./supabase-types.js";
+import { memoriesApp } from "./modules/memories/handler.js";
 
 const app = new OpenAPIHono();
 
@@ -62,6 +63,7 @@ app.use("*", async (c, next) => {
 app.route("/", healthApp);
 app.route("/", usersApp);
 app.route("/", familyGroupApp);
+app.route("/", memoriesApp);
 
 // OpenAPI spec.
 app.doc("/openapi.json", {
