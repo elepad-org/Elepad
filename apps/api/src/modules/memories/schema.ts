@@ -1,0 +1,91 @@
+import { z } from "@hono/zod-openapi";
+
+// Schema para MemoriesBooks
+export const MemoriesBookSchema = z
+  .object({
+    id: z.string().uuid(),
+    groupId: z.string().uuid(),
+    title: z.string().nullable(),
+    createdAt: z.string().datetime(), // timestamp with time zone como string ISO
+  })
+  .openapi("MemoriesBook");
+
+export type MemoriesBook = z.infer<typeof MemoriesBookSchema>;
+
+// Schema para crear un nuevo MemoriesBook
+export const NewMemoriesBookSchema = z
+  .object({
+    groupId: z.string().uuid(),
+    title: z.string().min(1).optional(),
+  })
+  .openapi("NewMemoriesBook");
+
+export type NewMemoriesBook = z.infer<typeof NewMemoriesBookSchema>;
+
+// Schema para actualizar un MemoriesBook
+export const UpdateMemoriesBookSchema = z
+  .object({
+    title: z.string().min(1).optional(),
+  })
+  .strict()
+  .openapi("UpdateMemoriesBook");
+
+export type UpdateMemoriesBook = z.infer<typeof UpdateMemoriesBookSchema>;
+
+// Schema para Memories
+export const MemorySchema = z
+  .object({
+    id: z.string().uuid(),
+    bookId: z.string().uuid(),
+    groupId: z.string().uuid(),
+    createdBy: z.string().uuid(),
+    title: z.string().nullable(),
+    caption: z.string().nullable(),
+    mediaUrl: z.string().nullable(),
+    mimeType: z.string().nullable(),
+    createdAt: z.string().datetime(), // timestamp with time zone como string ISO
+  })
+  .openapi("Memory");
+
+export type Memory = z.infer<typeof MemorySchema>;
+
+// Schema para crear una nueva Memory
+export const NewMemorySchema = z
+  .object({
+    bookId: z.string().uuid(),
+    groupId: z.string().uuid(),
+    createdBy: z.string().uuid(),
+    title: z.string().min(1).optional(),
+    caption: z.string().optional(),
+    mediaUrl: z.string().url().optional(),
+    mimeType: z.string().optional(),
+  })
+  .openapi("NewMemory");
+
+export type NewMemory = z.infer<typeof NewMemorySchema>;
+
+// Schema para actualizar una Memory
+export const UpdateMemorySchema = z
+  .object({
+    title: z.string().min(1).optional(),
+    caption: z.string().optional(),
+    mediaUrl: z.string().url().optional(),
+    mimeType: z.string().optional(),
+  })
+  .strict()
+  .openapi("UpdateMemory");
+
+export type UpdateMemory = z.infer<typeof UpdateMemorySchema>;
+
+// Schema para filtros/consultas
+export const MemoryFiltersSchema = z
+  .object({
+    bookId: z.string().uuid().optional(),
+    groupId: z.string().uuid().optional(),
+    createdBy: z.string().uuid().optional(),
+    limit: z.coerce.number().int().positive().max(100).default(20),
+    offset: z.coerce.number().int().nonnegative().default(0),
+  })
+  .openapi("MemoryFilters");
+
+export type MemoryFilters = z.infer<typeof MemoryFiltersSchema>;
