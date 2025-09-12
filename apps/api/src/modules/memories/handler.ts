@@ -1,5 +1,10 @@
 import { OpenAPIHono, z } from "@hono/zod-openapi";
-import { MemorySchema, MemoryFiltersSchema, NewMemorySchema } from "./schema";
+import {
+  MemorySchema,
+  MemoryFiltersSchema,
+  NewMemorySchema,
+  CreateMemoryWithImageSchema,
+} from "./schema";
 import { MemoriesService } from "./service";
 import { ApiException, openApiErrorResponse } from "@/utils/api-error";
 import { withAuth } from "@/middleware/auth";
@@ -138,6 +143,101 @@ memoriesApp.openapi(
     const body = c.req.valid("json");
 
     const createdMemory = await c.var.memoriesService.createMemory(body);
+
+    return c.json(createdMemory, 201);
+  },
+);
+
+// Aplicar middleware de autenticación para el endpoint de upload de imagen
+memoriesApp.use("/memories/upload", withAuth);
+
+// POST /memories/upload - Crear una nueva memory con imagen (requiere autenticación)
+memoriesApp.openapi(
+  {
+    method: "post",
+    path: "/memories/upload",
+    tags: ["memories"],
+    operationId: "createMemoryWithImage",
+    request: {
+      body: {
+        content: {
+          "multipart/form-data": {
+            schema: z.object({
+              bookId: z.string().uuid(),
+              groupId: z.string().uuid(),
+              title: z.string().optional(),
+              caption: z.string().optional(),
+              image: z.instanceof(File).openapi({
+                type: "string",
+                format: "binary",
+                description: "Image file to upload",
+              }),
+            }),
+          },
+        },
+        required: true,
+      },
+    },
+    responses: {
+      201: {
+        description: "Memory with image created successfully",
+        content: {
+          "application/json": {
+            schema: MemorySchema,
+          },
+        },
+      },
+      400: openApiErrorResponse("Invalid request or invalid image file"),
+      401: openApiErrorResponse("Unauthorized"),
+      413: openApiErrorResponse("File too large"),
+      415: openApiErrorResponse("Unsupported media type"),
+      500: openApiErrorResponse("Internal Server Error"),
+    },
+  },
+  async (c) => {
+    const body = await c.req.parseBody();
+    const user = c.var.user;
+
+    // Validar que se envió una imagen
+    const imageFile = body.image as File;
+    if (!imageFile || !(imageFile instanceof File)) {
+      throw new ApiException(400, "Image file is required");
+    }
+
+    // Validar tipo de archivo (solo imágenes)
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!allowedTypes.includes(imageFile.type)) {
+      throw new ApiException(
+        415,
+        "Only image files are allowed (JPEG, PNG, GIF, WebP)",
+      );
+    }
+
+    // Validar tamaño del archivo (máximo 50MB)
+    const maxSize = 50 * 1024 * 1024; // 50MB
+    if (imageFile.size > maxSize) {
+      throw new ApiException(413, "File size too large. Maximum size is 50MB");
+    }
+
+    // Preparar datos para crear la memory
+    const memoryData = {
+      bookId: body.bookId as string,
+      groupId: body.groupId as string,
+      title: body.title as string | undefined,
+      caption: body.caption as string | undefined,
+    };
+
+    // Validar que los campos requeridos están presentes
+    if (!memoryData.bookId || !memoryData.groupId) {
+      throw new ApiException(400, "bookId and groupId are required");
+    }
+
+    // Crear la memory con imagen
+    const createdMemory = await c.var.memoriesService.createMemoryWithImage(
+      memoryData,
+      imageFile,
+      user.id,
+    );
 
     return c.json(createdMemory, 201);
   },
