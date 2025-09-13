@@ -11,6 +11,7 @@ import { swaggerUI } from "@hono/swagger-ui";
 import { familyGroupApp } from "./modules/familyGroups/handler.js";
 import { activitiesApp } from "./modules/activities/handler.js";
 import { Database } from "./supabase-types.js";
+import { memoriesApp } from "./modules/memories/handler.js";
 
 const app = new OpenAPIHono();
 
@@ -64,12 +65,13 @@ app.route("/", healthApp);
 app.route("/", usersApp);
 app.route("/", familyGroupApp);
 app.route("/", activitiesApp);
+app.route("/", memoriesApp);
 
 // OpenAPI spec.
 app.doc("/openapi.json", {
   openapi: "3.1.0",
   info: { title: "Elepad API", version: "1.0.0" },
-  tags: [{ name: "users" }],
+  tags: [{ name: "users" }, { name: "memories" }, { name: "familyGroups" }],
 });
 
 // Serve OpenAPI documentation with SwaggerUI.

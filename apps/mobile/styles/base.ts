@@ -19,6 +19,7 @@ export const COLORS = {
   // Colores principales
   primary: "#8998AF",
   secondary: "#5278CD",
+  border: "#b2bed2ff",
 
   // Fondos
   background: "#F7F3F2",
@@ -38,7 +39,7 @@ export const COLORS = {
   error: "#d32f2f",
   accent: "#F5F1F0",
   // Bordes y líneas
-  border: "#b2bed2ff",
+
   separator: "#111",
 } as const;
 
@@ -96,6 +97,13 @@ export const STYLES = StyleSheet.create({
     alignItems: "center",
   },
 
+  miniButton: {
+    width: "35%",
+    borderRadius: 20,
+    backgroundColor: COLORS.primary,
+    alignItems: "center",
+  },
+
   // Botones
   buttonPrimary: {
     marginTop: 20,
@@ -149,6 +157,13 @@ export const STYLES = StyleSheet.create({
   },
 
   // Textos
+  superHeading: {
+    fontSize: 25,
+    fontFamily: FONT.semiBold,
+    color: COLORS.text,
+    textAlign: "center",
+  },
+
   heading: {
     fontSize: 20,
     marginTop: 6,

@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import HomeScreen from "./home";
 import ExploreScreen from "./explore";
 import JuegosScreen from "./juegos";
+import RecuerdosScreen from "./recuerdos";
 import ConfiguracionScreen from "./configuracion";
 import { COLORS } from "@/styles/base";
 import CalendarScreen from "./calendar";
@@ -34,6 +35,12 @@ export default function TabLayout() {
       unfocusedIcon: "puzzle-outline",
     },
     {
+      key: "recuerdos",
+      title: "Recuerdos",
+      focusedIcon: "image-multiple",
+      unfocusedIcon: "image-multiple-outline",
+    },
+    {
       key: "configuracion",
       title: "Config.",
       focusedIcon: "cog",
@@ -45,12 +52,23 @@ export default function TabLayout() {
     home: HomeScreen,
     calendar: CalendarScreen,
     juegos: JuegosScreen,
+    recuerdos: RecuerdosScreen,
     configuracion: ConfiguracionScreen,
   });
 
   return (
     <View style={{ flex: 1 }}>
-      <View style={{ flex: 1 }}>
+      {/* Contenido que ocupa toda la pantalla */}
+      <View
+        style={{
+          flex: 1,
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+        }}
+      >
         {renderScene({
           route: routes[index],
           jumpTo: (key: string) => {
@@ -61,18 +79,21 @@ export default function TabLayout() {
           },
         })}
       </View>
+
+      {/* Barra de navegación flotante */}
       <View
         style={{
           position: "absolute",
-          bottom: insets.bottom + 10,
+          bottom: 25,
           left: 16,
           right: 16,
-          borderRadius: 30,
+          borderRadius: 28,
           overflow: "hidden",
           elevation: 12,
           shadowColor: "#000",
           shadowOpacity: 0.2,
           shadowRadius: 8,
+          zIndex: 1000, // Asegurar que esté por encima del contenido
         }}
       >
         <BottomNavigation.Bar
@@ -92,6 +113,9 @@ export default function TabLayout() {
             backgroundColor: COLORS.border,
             borderTopWidth: 0,
             elevation: 0,
+            height: 77,
+            justifyContent: "center",
+            alignItems: "center",
           }}
           labeled={true}
           labelMaxFontSizeMultiplier={1.4}

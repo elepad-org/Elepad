@@ -17,7 +17,7 @@ export default function JuegosScreen() {
   }
 
   return (
-    <SafeAreaView style={STYLES.safeArea}>
+    <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
       <ScrollView
