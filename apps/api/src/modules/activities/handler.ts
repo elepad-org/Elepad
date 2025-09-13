@@ -103,7 +103,7 @@ activitiesApp.openapi(
     path: "/activities/{id}",
     tags: ["activities"],
     request: {
-      params: z.object({ id: z.string().uuid() }),
+      params: z.object({ id: z.uuid() }),
       body: {
         content: {
           "application/json": {
@@ -136,7 +136,7 @@ activitiesApp.openapi(
     method: "delete",
     path: "/activities/{id}",
     tags: ["activities"],
-    request: { params: z.object({ id: z.string().uuid() }) },
+    request: { params: z.object({ id: z.uuid() }) },
     responses: {
       204: {
         description: "Actividad eliminada",
