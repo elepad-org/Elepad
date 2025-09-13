@@ -38,7 +38,7 @@ activitiesApp.openapi(
   },
   async (c) => {
     const { id } = c.req.valid("param");
-    const event = await c.var.activityService.getById(id);
+    const event = await c.var.activityService.getActivityById(id);
     return c.json(event, 200);
   },
 );
@@ -46,9 +46,9 @@ activitiesApp.openapi(
 activitiesApp.openapi(
   {
     method: "get",
-    path: "/activities/user/{idCreator}",
+    path: "/activities/familyCode/{idFamilyGroup}",
     tags: ["activities"],
-    request: { params: z.object({ idCreator: z.uuid() }) },
+    request: { params: z.object({ idFamilyGroup: z.uuid() }) },
     responses: {
       200: {
         description: "Actividad",
@@ -59,8 +59,9 @@ activitiesApp.openapi(
     },
   },
   async (c) => {
-    const { idCreator } = c.req.valid("param");
-    const event = await c.var.activityService.getByUserId(idCreator);
+    const { idFamilyGroup } = c.req.valid("param");
+    const event =
+      await c.var.activityService.getActivitiesWithFamilyCode(idFamilyGroup);
     return c.json(event, 200);
   },
 );

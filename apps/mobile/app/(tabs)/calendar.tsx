@@ -7,14 +7,19 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CalendarScreen() {
   const { userElepad } = useAuth();
-  const userId = userElepad?.id ?? "";
+  const familyCode = userElepad?.groupId ?? "";
+
+  // TODO: Add error screen if not User
 
   return (
     <SafeAreaView style={baseStyles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
       <View style={[baseStyles.container]}>
         <Text style={[baseStyles.heading]}>Calendario</Text>
-        <CalendarCard userId={userId} />
+        <CalendarCard
+          idFamilyGroup={familyCode}
+          idUser={userElepad?.id ?? ""}
+        />
       </View>
     </SafeAreaView>
   );

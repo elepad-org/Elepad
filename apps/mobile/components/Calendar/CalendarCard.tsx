@@ -1,19 +1,20 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
-import { Text, Card, List, Button } from "react-native-paper";
+import { Text, Card, List, Button, SegmentedButtons } from "react-native-paper";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import ActivityForm from "./ActivityForm";
 import {
-  useGetActivitiesUserIdCreator,
   usePostActivities,
   usePatchActivitiesId,
   useDeleteActivitiesId,
   Activity,
   NewActivity,
   UpdateActivity,
+  useGetActivitiesFamilyCodeIdFamilyGroup,
 } from "@elepad/api-client";
 import { COLORS } from "@/styles/base";
 
+// Configuración de calendario en español
 LocaleConfig.locales["es"] = {
   monthNames: [
     "Enero",
@@ -55,28 +56,33 @@ LocaleConfig.locales["es"] = {
   dayNamesShort: ["Dom", "Lun", "Mar", "Mir", "Jue", "Vie", "Sab"],
   today: "Hoy",
 };
-
 LocaleConfig.defaultLocale = "es";
 
-export default function CalendarCard({ userId }: { userId: string }) {
+export default function CalendarCard({
+  idFamilyGroup,
+  idUser,
+}: {
+  idFamilyGroup: string;
+  idUser: string;
+}) {
   const [selectedDay, setSelectedDay] = useState<string>(() => {
     const d = new Date();
     return d.toISOString().slice(0, 10);
   });
   const [formVisible, setFormVisible] = useState(false);
   const [editing, setEditing] = useState<Activity | null>(null);
+  const [filter, setFilter] = useState<"all" | "mine">("all");
 
   // API hooks
-  const activitiesQuery = useGetActivitiesUserIdCreator(userId);
+  const activitiesQuery =
+    useGetActivitiesFamilyCodeIdFamilyGroup(idFamilyGroup);
   const postActivity = usePostActivities();
   const patchActivity = usePatchActivitiesId();
   const deleteActivity = useDeleteActivitiesId();
 
   const events: Activity[] = useMemo(() => {
     if (!activitiesQuery.data) return [];
-    // El endpoint devuelve { data, status }, y data es Activity
     if (Array.isArray(activitiesQuery.data)) {
-      // Defensive, pero normalmente será un solo objeto
       return activitiesQuery.data as Activity[];
     }
     if ((activitiesQuery.data as any).data) {
@@ -106,9 +112,16 @@ export default function CalendarCard({ userId }: { userId: string }) {
     return obj;
   }, [eventsByDate, selectedDay]);
 
-  const dayEvents = eventsByDate[selectedDay] ?? [];
+  // Filtro de actividades solo del usuario
+  const dayEvents = useMemo(() => {
+    const eventsToday = eventsByDate[selectedDay] ?? [];
+    if (filter === "mine") {
+      return eventsToday.filter((ev) => ev.createdBy === idUser);
+    }
+    return eventsToday;
+  }, [eventsByDate, selectedDay, filter, idUser]);
 
-  // Modularizar lógica de guardado
+  // Guardar actividad
   const handleSave = async (payload: Partial<Activity>) => {
     if (editing) {
       await patchActivity.mutateAsync({
@@ -119,7 +132,7 @@ export default function CalendarCard({ userId }: { userId: string }) {
       await postActivity.mutateAsync({
         data: {
           ...payload,
-          createdBy: userId,
+          createdBy: idUser,
           startsAt: payload.startsAt!,
         } as NewActivity,
       });
@@ -174,6 +187,17 @@ export default function CalendarCard({ userId }: { userId: string }) {
         </Button>
       </View>
 
+      {/* Filtro de actividades */}
+      <SegmentedButtons
+        value={filter}
+        onValueChange={setFilter}
+        buttons={[
+          { value: "all", label: "Todos" },
+          { value: "mine", label: "Mis eventos" },
+        ]}
+        style={{ marginBottom: 10 }}
+      />
+
       {activitiesQuery.isLoading && <Text>Cargando...</Text>}
       {activitiesQuery.error && (
         <Text style={{ color: "red" }}>{String(activitiesQuery.error)}</Text>
@@ -181,7 +205,7 @@ export default function CalendarCard({ userId }: { userId: string }) {
       {dayEvents.length === 0 ? (
         <Card style={styles.cardEmpty}>
           <Card.Content>
-            <Text>No tienes eventos programados este día aún.</Text>
+            <Text>No hay eventos para este día.</Text>
           </Card.Content>
         </Card>
       ) : (
@@ -193,16 +217,20 @@ export default function CalendarCard({ userId }: { userId: string }) {
               <List.Item
                 title={item.title}
                 description={`${item.startsAt.slice(11, 16)} - ${item.endsAt ? item.endsAt.slice(11, 16) : ""}`}
-                right={() => (
-                  <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <Button compact onPress={() => handleEdit(item)}>
-                      Editar evento
-                    </Button>
-                    <Button compact onPress={() => handleDelete(item.id)}>
-                      Borrar evento
-                    </Button>
-                  </View>
-                )}
+                right={() =>
+                  item.createdBy === idUser ? (
+                    <View
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    >
+                      <Button compact onPress={() => handleEdit(item)}>
+                        Editar
+                      </Button>
+                      <Button compact onPress={() => handleDelete(item.id)}>
+                        Borrar
+                      </Button>
+                    </View>
+                  ) : null
+                }
               />
             </Card>
           )}

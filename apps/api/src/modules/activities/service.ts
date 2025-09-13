@@ -6,7 +6,7 @@ import type { NewActivity, UpdateActivity } from "./schema";
 export class ActivityService {
   constructor(private supabase: SupabaseClient<Database>) {}
 
-  async getById(id: string) {
+  async getActivityById(id: string) {
     const { data, error } = await this.supabase
       .from("activities")
       .select("*")
@@ -22,18 +22,53 @@ export class ActivityService {
   }
 
   // TODO: Check if the user id exist
-  async getByUserId(idCreator: string) {
-    const { data, error } = await this.supabase
+  async getActivitiesWithFamilyCode(idFamilyGroup: string) {
+    // Obtener los IDs de los usuarios del grupo familiar
+    const { data: usersIds, error: usersError } = await this.supabase
+      .from("users")
+      .select("id")
+      .eq("groupId", idFamilyGroup);
+
+    if (usersError) {
+      throw new ApiException(
+        500,
+        "Error al obtener los IDs de los usuarios",
+        usersError,
+      );
+    }
+
+    if (!usersIds || usersIds.length === 0) {
+      throw new ApiException(
+        404,
+        "No se encontraron usuarios en este grupo familiar",
+      );
+    }
+
+    // Pasar ids del obj a un array
+    const userIdsArray = usersIds.map((u) => u.id);
+
+    // Obtener todas las actividades
+    const { data: activities, error: activitiesError } = await this.supabase
       .from("activities")
       .select("*")
-      .eq("createdBy", idCreator);
-    if (error) {
-      throw new ApiException(500, "Error al obtener la actividad", error);
+      .in("createdBy", userIdsArray);
+
+    if (activitiesError) {
+      throw new ApiException(
+        500,
+        "Error al obtener las actividades",
+        activitiesError,
+      );
     }
-    if (!data) {
-      throw new ApiException(404, "Actividad no encontrada");
+
+    if (!activities || activities.length === 0) {
+      throw new ApiException(
+        404,
+        "No se encontraron actividades para este grupo familiar",
+      );
     }
-    return data;
+
+    return activities;
   }
 
   async create(payload: NewActivity) {
