@@ -5,18 +5,29 @@ import { STYLES, COLORS } from "@/styles/base";
 import ImagePickerComponent from "./ImagePickerComponent";
 import TextNoteComponent from "./TextNoteComponent";
 import AudioRecorderComponent from "./AudioRecorderComponent";
+import MetadataInputComponent from "./MetadataInputComponent";
 import CancelButton from "../shared/CancelButton";
 
 type RecuerdoTipo = "imagen" | "texto" | "audio";
+
+interface RecuerdoData {
+  contenido: string; // URI del archivo o texto
+  titulo?: string;
+  caption?: string;
+  mimeType?: string;
+}
 
 interface NuevoRecuerdoDialogProps {
   visible: boolean;
   hideDialog: () => void;
   onSelectTipo: (tipo: RecuerdoTipo) => void;
-  step: "select" | "create";
+  step: "select" | "create" | "metadata";
   selectedTipo: RecuerdoTipo | null;
-  onSave: (contenido: string, titulo?: string) => void;
+  onSave: (data: RecuerdoData) => void;
   onCancel: () => void;
+  isUploading?: boolean;
+  selectedFileUri?: string;
+  onFileSelected?: (uri: string, mimeType?: string) => void;
 }
 
 export default function NuevoRecuerdoDialogComponent({
@@ -27,7 +38,46 @@ export default function NuevoRecuerdoDialogComponent({
   selectedTipo,
   onSave,
   onCancel,
+  isUploading = false,
+  selectedFileUri,
+  onFileSelected,
 }: NuevoRecuerdoDialogProps) {
+  // Paso de metadata para imágenes y audio
+  if (
+    step === "metadata" &&
+    selectedTipo &&
+    selectedFileUri &&
+    onFileSelected
+  ) {
+    return (
+      <Dialog
+        visible={visible}
+        onDismiss={hideDialog}
+        style={{
+          backgroundColor: COLORS.background,
+          width: "90%",
+          alignSelf: "center",
+          borderRadius: 16,
+        }}
+      >
+        <MetadataInputComponent
+          onSave={(title, caption) => {
+            const mimeType =
+              selectedTipo === "imagen" ? "image/jpeg" : "audio/m4a";
+            onSave({
+              contenido: selectedFileUri,
+              titulo: title,
+              caption: caption,
+              mimeType: mimeType,
+            });
+          }}
+          onCancel={onCancel}
+          isUploading={isUploading}
+        />
+      </Dialog>
+    );
+  }
+
   if (step === "create" && selectedTipo) {
     return (
       <Dialog
@@ -42,20 +92,35 @@ export default function NuevoRecuerdoDialogComponent({
       >
         {selectedTipo === "imagen" && (
           <ImagePickerComponent
-            onImageSelected={(uri: string) => onSave(uri)}
+            onImageSelected={(uri: string, mimeType?: string) => {
+              if (onFileSelected) {
+                onFileSelected(uri, mimeType);
+              } else {
+                onSave({ contenido: uri, mimeType });
+              }
+            }}
             onCancel={onCancel}
+            isUploading={isUploading}
           />
         )}
         {selectedTipo === "texto" && (
           <TextNoteComponent
-            onSaveText={(titulo, contenido) => onSave(contenido, titulo)}
+            onSaveText={(titulo, contenido) => onSave({ contenido, titulo })}
             onCancel={onCancel}
+            isUploading={isUploading}
           />
         )}
         {selectedTipo === "audio" && (
           <AudioRecorderComponent
-            onAudioRecorded={(uri: string) => onSave(uri)}
+            onAudioRecorded={(uri: string) => {
+              if (onFileSelected) {
+                onFileSelected(uri, "audio/m4a");
+              } else {
+                onSave({ contenido: uri, mimeType: "audio/m4a" });
+              }
+            }}
             onCancel={onCancel}
+            isUploading={isUploading}
           />
         )}
       </Dialog>
