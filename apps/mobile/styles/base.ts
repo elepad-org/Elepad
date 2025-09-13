@@ -97,6 +97,13 @@ export const STYLES = StyleSheet.create({
     alignItems: "center",
   },
 
+  miniButton: {
+    width: "35%",
+    borderRadius: 20,
+    backgroundColor: COLORS.primary,
+    alignItems: "center",
+  },
+
   // Botones
   buttonPrimary: {
     marginTop: 20,
@@ -150,6 +157,13 @@ export const STYLES = StyleSheet.create({
   },
 
   // Textos
+  superHeading: {
+    fontSize: 25,
+    fontFamily: FONT.semiBold,
+    color: COLORS.text,
+    textAlign: "center",
+  },
+
   heading: {
     fontSize: 20,
     marginTop: 6,
