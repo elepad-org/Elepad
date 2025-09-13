@@ -8,11 +8,13 @@ import CancelButton from "../shared/CancelButton";
 interface AudioRecorderProps {
   onAudioRecorded: (uri: string) => void;
   onCancel: () => void;
+  isUploading?: boolean;
 }
 
 export default function AudioRecorderComponent({
   onAudioRecorded,
   onCancel,
+  isUploading = false,
 }: AudioRecorderProps) {
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [isRecording, setIsRecording] = useState(false);
@@ -171,15 +173,16 @@ export default function AudioRecorderComponent({
             alignItems: "center",
           }}
         >
-          <CancelButton onPress={onCancel} />
+          <CancelButton onPress={onCancel} disabled={isUploading} />
           <CancelButton
             onPress={() => audioUri && onAudioRecorded(audioUri)}
-            text="Guardar"
+            text={isUploading ? "Subiendo..." : "Guardar"}
+            disabled={isUploading}
           />
         </View>
       )}
 
-      {!audioUri && <CancelButton onPress={onCancel} />}
+      {!audioUri && <CancelButton onPress={onCancel} disabled={isUploading} />}
     </View>
   );
 }
