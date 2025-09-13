@@ -6,13 +6,15 @@ import { STYLES, COLORS } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
 
 interface ImagePickerProps {
-  onImageSelected: (uri: string) => void;
+  onImageSelected: (uri: string, mimeType?: string) => void;
   onCancel: () => void;
+  isUploading?: boolean;
 }
 
 export default function ImagePickerComponent({
   onImageSelected,
   onCancel,
+  isUploading = false,
 }: ImagePickerProps) {
   const [uploading, setUploading] = useState(false);
 
@@ -42,8 +44,8 @@ export default function ImagePickerComponent({
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        onImageSelected(result.assets[0].uri);
-        console.log(result.assets[0].uri);
+        const asset = result.assets[0];
+        onImageSelected(asset.uri, asset.mimeType);
       }
     } catch (error) {
       Alert.alert("Error", "No se pudo seleccionar la imagen");
@@ -71,7 +73,8 @@ export default function ImagePickerComponent({
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        onImageSelected(result.assets[0].uri);
+        const asset = result.assets[0];
+        onImageSelected(asset.uri, asset.mimeType);
       }
     } catch (error) {
       Alert.alert("Error", "No se pudo tomar la foto");
@@ -93,12 +96,17 @@ export default function ImagePickerComponent({
         Selecciona una imagen o video de tu galería o toma una nueva foto
       </Text>
 
-      {uploading ? (
-        <ActivityIndicator
-          size="large"
-          color={COLORS.primary}
-          style={{ marginVertical: 20 }}
-        />
+      {uploading || isUploading ? (
+        <View style={{ alignItems: "center", marginVertical: 20 }}>
+          <ActivityIndicator
+            size="large"
+            color={COLORS.primary}
+            style={{ marginBottom: 16 }}
+          />
+          <Text style={STYLES.subheading}>
+            {uploading ? "Seleccionando archivo..." : "Subiendo recuerdo..."}
+          </Text>
+        </View>
       ) : (
         <View style={{ alignItems: "center" }}>
           <Button
@@ -106,6 +114,7 @@ export default function ImagePickerComponent({
             onPress={pickImage}
             style={{ ...STYLES.buttonPrimary, marginBottom: 12 }}
             icon="image"
+            disabled={isUploading}
           >
             Seleccionar de galería
           </Button>
@@ -114,10 +123,11 @@ export default function ImagePickerComponent({
             onPress={takePhoto}
             style={{ ...STYLES.buttonPrimary, marginBottom: 20 }}
             icon="camera"
+            disabled={isUploading}
           >
             Tomar foto
           </Button>
-          <CancelButton onPress={onCancel} />
+          <CancelButton onPress={onCancel} disabled={isUploading} />
         </View>
       )}
     </View>
