@@ -18,8 +18,7 @@
     "prepare": "husky && turbo run prepare"
   },
   "devDependencies": {
-    "@types/react": "19.0.10",
-    "@types/react-native": "0.72.8",
+    "@types/react": "~19.1.10",
     "@typescript-eslint/eslint-plugin": "^8.39.1",
     "@typescript-eslint/parser": "^8.39.1",
     "eslint": "^9.25.0",
@@ -36,5 +35,10 @@
   "packageManager": "npm@11.5.2",
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "expo": "^54.0.6",
+    "react": "19.1.0",
+    "react-native": "0.81.4"
   }
 }
