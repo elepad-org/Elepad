@@ -21,9 +21,16 @@ import {
   ActivityIndicator,
 } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
-import { useGetMemories, Memory } from "@elepad/api-client";
+import {
+  useGetMemories,
+  createMemoryWithMedia,
+  Memory,
+} from "@elepad/api-client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, STYLES, SHADOWS } from "@/styles/base";
+import { Platform } from "react-native";
+import { uriToBlob } from "@/lib/uriToBlob";
 
 import RecuerdoItemComponent from "@/components/Recuerdos/RecuerdoItemComponent";
 import NuevoRecuerdoDialogComponent from "@/components/Recuerdos/NuevoRecuerdoDialogComponent";
@@ -35,6 +42,13 @@ const itemSize = (screenWidth - 48) / numColumns;
 
 // Tipos de recuerdos
 type RecuerdoTipo = "imagen" | "texto" | "audio";
+
+interface RecuerdoData {
+  contenido: string; // URI del archivo o texto
+  titulo?: string;
+  caption?: string;
+  mimeType?: string;
+}
 
 // Función auxiliar para convertir Memory a Recuerdo para compatibilidad con componentes existentes
 const memoryToRecuerdo = (memory: Memory): Recuerdo => {
@@ -72,12 +86,17 @@ interface Recuerdo {
 
 export default function RecuerdosScreen() {
   const { loading: authLoading, userElepad } = useAuth();
+  const queryClient = useQueryClient();
 
   // Estados locales
   const [refreshing, setRefreshing] = useState(false);
   const [dialogVisible, setDialogVisible] = useState(false);
-  const [currentStep, setCurrentStep] = useState<"select" | "create">("select");
+  const [currentStep, setCurrentStep] = useState<
+    "select" | "create" | "metadata"
+  >("select");
   const [selectedTipo, setSelectedTipo] = useState<RecuerdoTipo | null>(null);
+  const [selectedFileUri, setSelectedFileUri] = useState<string | null>(null);
+  const [selectedMimeType, setSelectedMimeType] = useState<string | null>(null);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarError, setSnackbarError] = useState(false);
@@ -88,17 +107,66 @@ export default function RecuerdosScreen() {
     isLoading: memoriesLoading,
     error,
     refetch: refetchMemories,
-  } = useGetMemories(
-    {
-      groupId: userElepad?.groupId || undefined,
-      limit: 20,
+  } = useGetMemories({
+    groupId: userElepad?.groupId || "",
+    limit: 20,
+  });
+
+  // Hook de mutación para subir archivos
+  const uploadMemoryMutation = useMutation({
+    mutationFn: async (data: any) => {
+      console.log("=== CLIENT: Starting upload mutation ===");
+      console.log("CLIENT: Upload data:", {
+        ...data,
+        image:
+          data.image instanceof Blob
+            ? "Blob"
+            : typeof data.image === "object"
+              ? "File object"
+              : typeof data.image,
+      });
+      try {
+        const result = await createMemoryWithMedia(data);
+        console.log("CLIENT: Upload successful:", result);
+        return result;
+      } catch (error) {
+        console.error("CLIENT: Upload mutation failed:", error);
+        // Log more details about the error
+        if (error && typeof error === "object") {
+          console.error("CLIENT: Error details:", {
+            message: (error as any).message,
+            status: (error as any).status,
+            statusText: (error as any).statusText,
+            body: (error as any).body,
+          });
+        }
+        throw error;
+      }
     },
-    {
-      query: {
-        enabled: !!userElepad?.groupId, // Solo ejecutar cuando tengamos groupId
-      },
+    onSuccess: (data) => {
+      console.log("Upload mutation onSuccess:", data);
+      // Refrescar la lista de memorias
+      refetchMemories();
+      setSnackbarMessage("Recuerdo agregado exitosamente");
+      setSnackbarError(false);
+      setSnackbarVisible(true);
+
+      // Resetear estado del diálogo
+      setDialogVisible(false);
+      setCurrentStep("select");
+      setSelectedTipo(null);
+      setSelectedFileUri(null);
+      setSelectedMimeType(null);
     },
-  );
+    onError: (error) => {
+      console.error("Upload mutation onError:", error);
+      setSnackbarMessage(
+        `Error al subir el recuerdo: ${error instanceof Error ? error.message : "Error desconocido"}`,
+      );
+      setSnackbarError(true);
+      setSnackbarVisible(true);
+    },
+  });
 
   // Función para cargar recuerdos (mantiene el patrón original)
   const cargarRecuerdos = useCallback(async () => {
@@ -115,13 +183,13 @@ export default function RecuerdosScreen() {
   const memoriesData =
     memoriesResponse && "data" in memoriesResponse ? memoriesResponse.data : [];
   const memories = Array.isArray(memoriesData) ? memoriesData : [];
-  const hasGroupId = !!userElepad?.groupId;
 
   // Convertir memories a recuerdos para compatibilidad con componentes existentes
   const recuerdos = memories.map(memoryToRecuerdo);
 
   // Estados de carga y error (patrón original restaurado)
-  const isLoading = authLoading || memoriesLoading;
+  const isLoading =
+    authLoading || memoriesLoading || uploadMemoryMutation.isPending;
   const hasError = !!error;
   const isEmpty = !isLoading && !hasError && recuerdos.length === 0;
 
@@ -145,23 +213,69 @@ export default function RecuerdosScreen() {
     setCurrentStep("create");
   };
 
-  const handleGuardarRecuerdo = (contenido: string, titulo?: string) => {
-    // TODO: Implementar la subida real de recuerdos usando uploadMemory del hook
-    // Por ahora, solo mostrar un mensaje
-    setSnackbarMessage("Funcionalidad de subida en desarrollo");
-    setSnackbarError(false);
-    setSnackbarVisible(true);
+  // Manejador para cuando se selecciona un archivo (imagen o audio)
+  const handleFileSelected = (uri: string, mimeType?: string) => {
+    setSelectedFileUri(uri);
+    setSelectedMimeType(mimeType || null);
+    setCurrentStep("metadata");
+  };
 
-    // Resetear estado
-    setDialogVisible(false);
-    setCurrentStep("select");
-    setSelectedTipo(null);
+  // Función para crear un nuevo recuerdo con multimedia
+  const handleGuardarRecuerdo = async (data: RecuerdoData) => {
+    try {
+      let fileData: any;
+
+      if (selectedTipo === "texto") {
+        // Para texto, crear un blob con el contenido
+        fileData = new Blob([data.contenido], { type: "text/plain" });
+      } else {
+        // Para archivos multimedia - mismo patrón que el avatar
+        const fileName =
+          selectedTipo === "imagen" ? "memory.jpg" : "memory.m4a";
+        const mimeType =
+          data.mimeType ||
+          (selectedTipo === "imagen" ? "image/jpeg" : "audio/mp4");
+
+        if (Platform.OS === "web") {
+          // Para web, convertir URI a blob
+          fileData = await uriToBlob(data.contenido);
+        } else {
+          // Para React Native, usar objeto con propiedades de Blob (igual que avatar)
+          fileData = {
+            uri: data.contenido,
+            name: fileName,
+            type: mimeType,
+          } as unknown as Blob;
+        }
+      }
+
+      // Usar bookId por defecto para el grupo
+      const defaultBookId = "070ac9a2-832f-4c05-bfa5-cec689a4181c";
+
+      const uploadData = {
+        bookId: defaultBookId,
+        groupId: userElepad!.groupId,
+        title: data.titulo,
+        caption: data.caption,
+        image: fileData,
+      };
+
+      await uploadMemoryMutation.mutateAsync(uploadData);
+    } catch (error) {
+      setSnackbarMessage(
+        `Error al preparar el archivo: ${error instanceof Error ? error.message : "Error desconocido"}`,
+      );
+      setSnackbarError(true);
+      setSnackbarVisible(true);
+    }
   };
 
   const handleCancelar = () => {
     setDialogVisible(false);
     setCurrentStep("select");
     setSelectedTipo(null);
+    setSelectedFileUri(null);
+    setSelectedMimeType(null);
   };
 
   if (isLoading && recuerdos.length === 0) {
@@ -201,24 +315,6 @@ export default function RecuerdosScreen() {
           }}
         >
           <ActivityIndicator />
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  // Si el usuario no tiene groupId, mostrar mensaje
-  if (!hasGroupId) {
-    return (
-      <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
-        <StatusBar
-          barStyle="dark-content"
-          backgroundColor={COLORS.background}
-        />
-        <View style={STYLES.center}>
-          <Text style={STYLES.heading}>Sin grupo familiar</Text>
-          <Text style={STYLES.subheading}>
-            Necesitas estar en un grupo familiar para ver recuerdos.
-          </Text>
         </View>
       </SafeAreaView>
     );
@@ -297,6 +393,13 @@ export default function RecuerdosScreen() {
           selectedTipo={selectedTipo}
           onSave={handleGuardarRecuerdo}
           onCancel={handleCancelar}
+          isUploading={uploadMemoryMutation.isPending}
+          selectedFileUri={selectedFileUri || undefined}
+          onFileSelected={
+            selectedTipo === "imagen" || selectedTipo === "audio"
+              ? handleFileSelected
+              : undefined
+          }
         />
       </Portal>
 
