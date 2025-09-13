@@ -30,7 +30,9 @@ export default function RecuerdoItemComponent({ item }: RecuerdoItemProps) {
       {item.tipo === "imagen" && (
         <View style={[STYLES.center, { backgroundColor: COLORS.accent }]}>
           <IconButton icon="image" size={32} iconColor={COLORS.primary} />
-          <Text style={STYLES.footerText}>Imagen</Text>
+          <Text numberOfLines={2} style={STYLES.footerText}>
+            {item.titulo || "Imagen"}
+          </Text>
         </View>
       )}
       {item.tipo === "texto" && (
