@@ -18,6 +18,9 @@ declare module "hono" {
   }
 }
 
+// Middleware de autenticación para todas las rutas de memories
+memoriesApp.use("*", withAuth);
+
 // Middleware para inyectar el MemoriesService en cada request
 memoriesApp.use("*", async (c, next) => {
   const memoriesService = new MemoriesService(c.var.supabase);
@@ -186,12 +189,16 @@ memoriesApp.openapi(
       "audio/aac",
       "audio/flac",
       "audio/webm",
+      "audio/m4a", // Formato M4A usado por iOS/React Native
+      "audio/x-m4a", // Variante de M4A
+      "audio/3gp", // Formato 3GP para Android
+      "audio/amr", // AMR usado en algunos dispositivos Android
     ];
+
     if (!allowedTypes.includes(mediaFile.type)) {
-      console.log(`File type not allowed: ${mediaFile.type}`);
       throw new ApiException(
         415,
-        "Only image, video, and audio files are allowed",
+        `File type not allowed: ${mediaFile.type}. Allowed types: ${allowedTypes.join(", ")}`,
       );
     }
 
