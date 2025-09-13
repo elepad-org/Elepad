@@ -7,11 +7,13 @@ import CancelButton from "../shared/CancelButton";
 interface TextNoteProps {
   onSaveText: (title: string, content: string) => void;
   onCancel: () => void;
+  isUploading?: boolean;
 }
 
 export default function TextNoteComponent({
   onSaveText,
   onCancel,
+  isUploading = false,
 }: TextNoteProps) {
   const [content, setContent] = useState("");
 
@@ -53,11 +55,11 @@ export default function TextNoteComponent({
           alignItems: "center",
         }}
       >
-        <CancelButton onPress={onCancel} />
+        <CancelButton onPress={onCancel} disabled={isUploading} />
         <CancelButton
           onPress={handleSubmit}
-          text="Aceptar"
-          disabled={!content.trim()}
+          text={isUploading ? "Subiendo..." : "Aceptar"}
+          disabled={!content.trim() || isUploading}
         />
       </View>
     </View>
