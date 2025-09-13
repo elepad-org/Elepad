@@ -46,6 +46,10 @@ export default function ActivityForm({
 
   const handleSave = async () => {
     setError(null);
+    if (!title.trim()) {
+      setError("El título es obligatorio.");
+      return;
+    }
     if (!startsAtDate) {
       setError("La fecha de inicio es obligatoria.");
       return;

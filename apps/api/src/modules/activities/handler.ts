@@ -82,7 +82,7 @@ activitiesApp.openapi(
     },
     responses: {
       201: {
-        description: "Actividad creado",
+        description: "Actividad creada",
         content: { "application/json": { schema: ActivitySchema } },
       },
       400: openApiErrorResponse("Datos inválidos"),
@@ -114,11 +114,11 @@ activitiesApp.openapi(
     },
     responses: {
       200: {
-        description: "Actividad actualizado",
+        description: "Actividad actualizada",
         content: { "application/json": { schema: ActivitySchema } },
       },
       400: openApiErrorResponse("Datos inválidos"),
-      404: openApiErrorResponse("Actividad no encontrado"),
+      404: openApiErrorResponse("Actividad no encontrada"),
       500: openApiErrorResponse("Error interno del servidor"),
     },
   },
@@ -137,9 +137,8 @@ activitiesApp.openapi(
     tags: ["activities"],
     request: { params: z.object({ id: z.string().uuid() }) },
     responses: {
-      200: {
-        description: "Actividad eliminado",
-        content: { "application/json": { schema: ActivitySchema } },
+      204: {
+        description: "Actividad eliminada",
       },
       404: openApiErrorResponse("Actividad no encontrado"),
       500: openApiErrorResponse("Error interno del servidor"),

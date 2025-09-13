@@ -65,18 +65,13 @@ export class ActivityService {
   }
 
   async remove(id: string) {
-    const { data, error } = await this.supabase
+    const { error } = await this.supabase
       .from("activities")
       .delete()
-      .eq("id", id)
-      .select("*")
-      .maybeSingle();
+      .eq("id", id);
     if (error) {
       throw new ApiException(500, "Error al eliminar la actividad", error);
     }
-    if (!data) {
-      throw new ApiException(404, "Actividad no encontrada");
-    }
-    return data;
+    return true;
   }
 }
