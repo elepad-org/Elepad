@@ -122,7 +122,6 @@ export default function ActivityForm({
         </Button>
       </View>
 
-      {/* Pickers */}
       <DateTimePickerModal
         isVisible={showStartPicker}
         date={startsAtDate}
@@ -185,6 +184,7 @@ export default function ActivityForm({
 const styles = StyleSheet.create({
   modal: {
     margin: 20,
+    marginTop: "-40%",
     borderRadius: 16,
     padding: 20,
     backgroundColor: "#fff",
