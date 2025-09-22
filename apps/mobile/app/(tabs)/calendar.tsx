@@ -1,5 +1,5 @@
-import React from "react";
-import { View, StyleSheet, StatusBar } from "react-native";
+import { useState } from "react";
+import { View, StatusBar } from "react-native";
 import { useAuth } from "@/hooks/useAuth";
 import CalendarCard from "@/components/Calendar/CalendarCard";
 import ActivityForm from "@/components/Calendar/ActivityForm";
@@ -20,15 +20,15 @@ export default function CalendarScreen() {
   const familyCode = userElepad?.groupId ?? "";
   const idUser = userElepad?.id ?? "";
 
-  const [formVisible, setFormVisible] = React.useState(false);
-  const [editing, setEditing] = React.useState<Activity | null>(null);
+  const [formVisible, setFormVisible] = useState(false);
+  const [editing, setEditing] = useState<Activity | null>(null);
   const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(familyCode);
   const postActivity = usePostActivities();
   const patchActivity = usePatchActivitiesId();
   const deleteActivity = useDeleteActivitiesId();
 
-  const [deleteModalVisible, setDeleteModalVisible] = React.useState(false);
-  const [eventToDelete, setEventToDelete] = React.useState<string | null>(null);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState<string | null>(null);
 
   const handleSave = async (payload: Partial<Activity>) => {
     if (editing) {
@@ -80,7 +80,7 @@ export default function CalendarScreen() {
           justifyContent: "flex-start",
         }}
       >
-        <Text style={baseStyles.superHeading}>Mis Recuerdos</Text>
+        <Text style={baseStyles.superHeading}>Calendario Grupal</Text>
         <CalendarCard
           idFamilyGroup={familyCode}
           idUser={idUser}
