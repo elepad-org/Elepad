@@ -1,26 +1,135 @@
+import React from "react";
 import { View, StyleSheet, StatusBar } from "react-native";
 import { useAuth } from "@/hooks/useAuth";
 import CalendarCard from "@/components/Calendar/CalendarCard";
+import ActivityForm from "@/components/Calendar/ActivityForm";
+import {
+  usePostActivities,
+  usePatchActivitiesId,
+  useDeleteActivitiesId,
+  Activity,
+  NewActivity,
+  UpdateActivity,
+  useGetActivitiesFamilyCodeIdFamilyGroup,
+} from "@elepad/api-client";
 import { COLORS, STYLES as baseStyles } from "@/styles/base";
-import { Text } from "react-native-paper";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Text, Modal, Button } from "react-native-paper";
 
 export default function CalendarScreen() {
   const { userElepad } = useAuth();
   const familyCode = userElepad?.groupId ?? "";
+  const idUser = userElepad?.id ?? "";
 
-  // TODO: Add error screen if not User
+  const [formVisible, setFormVisible] = React.useState(false);
+  const [editing, setEditing] = React.useState<Activity | null>(null);
+  const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(familyCode);
+  const postActivity = usePostActivities();
+  const patchActivity = usePatchActivitiesId();
+  const deleteActivity = useDeleteActivitiesId();
+
+  const [deleteModalVisible, setDeleteModalVisible] = React.useState(false);
+  const [eventToDelete, setEventToDelete] = React.useState<string | null>(null);
+
+  const handleSave = async (payload: Partial<Activity>) => {
+    if (editing) {
+      await patchActivity.mutateAsync({
+        id: editing.id,
+        data: payload as UpdateActivity,
+      });
+    } else {
+      await postActivity.mutateAsync({
+        data: {
+          ...payload,
+          createdBy: idUser,
+          startsAt: payload.startsAt!,
+        } as NewActivity,
+      });
+    }
+    setFormVisible(false);
+    setEditing(null);
+    await activitiesQuery.refetch();
+  };
+
+  const handleEdit = (ev: Activity) => {
+    setEditing(ev);
+    setFormVisible(true);
+  };
+
+  const handleConfirmDelete = (id: string) => {
+    setEventToDelete(id);
+    setDeleteModalVisible(true);
+  };
+
+  const handleDelete = async () => {
+    if (eventToDelete) {
+      await deleteActivity.mutateAsync({ id: eventToDelete });
+      await activitiesQuery.refetch();
+    }
+    setDeleteModalVisible(false);
+    setEventToDelete(null);
+  };
 
   return (
-    <SafeAreaView style={baseStyles.safeArea}>
+    <View style={baseStyles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
-      <View style={[baseStyles.container]}>
-        <Text style={[baseStyles.heading]}>Calendario</Text>
+      <View
+        style={{
+          flex: 1,
+          padding: 16,
+          paddingTop: "15%",
+          justifyContent: "flex-start",
+        }}
+      >
+        <Text style={baseStyles.superHeading}>Mis Recuerdos</Text>
         <CalendarCard
           idFamilyGroup={familyCode}
-          idUser={userElepad?.id ?? ""}
+          idUser={idUser}
+          activitiesQuery={activitiesQuery}
+          onEdit={handleEdit}
+          onDelete={handleConfirmDelete}
+          setFormVisible={setFormVisible}
         />
+        <ActivityForm
+          visible={formVisible}
+          onClose={() => {
+            setFormVisible(false);
+            setEditing(null);
+          }}
+          onSave={handleSave}
+          initial={editing ?? null}
+        />
+
+        <Modal
+          visible={deleteModalVisible}
+          onDismiss={() => setDeleteModalVisible(false)}
+          contentContainerStyle={{
+            backgroundColor: "#fff",
+            padding: 24,
+            margin: 32,
+            borderRadius: 16,
+          }}
+        >
+          <Text style={{ fontSize: 18, marginBottom: 16 }}>
+            ¿Seguro que quieres eliminar este evento?
+          </Text>
+          <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
+            <Button
+              onPress={() => setDeleteModalVisible(false)}
+              style={{ marginRight: 8 }}
+              mode="outlined"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onPress={handleDelete}
+              mode="contained"
+              buttonColor="#ff2020"
+            >
+              Eliminar
+            </Button>
+          </View>
+        </Modal>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }

@@ -2,16 +2,16 @@ import React, { useEffect, useMemo, useState } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
 import { Text, Card, List, Button, SegmentedButtons } from "react-native-paper";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
-import ActivityForm from "./ActivityForm";
-import {
-  usePostActivities,
-  usePatchActivitiesId,
-  useDeleteActivitiesId,
-  Activity,
-  NewActivity,
-  UpdateActivity,
-  useGetActivitiesFamilyCodeIdFamilyGroup,
-} from "@elepad/api-client";
+
+interface CalendarCardProps {
+  idFamilyGroup: string;
+  idUser: string;
+  activitiesQuery: any;
+  onEdit: (ev: Activity) => void;
+  onDelete: (id: string) => void;
+  setFormVisible: (v: boolean) => void;
+}
+import { Activity } from "@elepad/api-client";
 import { COLORS } from "@/styles/base";
 
 // Configuración de calendario en español
@@ -58,27 +58,18 @@ LocaleConfig.locales["es"] = {
 };
 LocaleConfig.defaultLocale = "es";
 
-export default function CalendarCard({
-  idFamilyGroup,
-  idUser,
-}: {
-  idFamilyGroup: string;
-  idUser: string;
-}) {
-  const [selectedDay, setSelectedDay] = useState<string>(() => {
-    const d = new Date();
-    return d.toISOString().slice(0, 10);
-  });
-  const [formVisible, setFormVisible] = useState(false);
-  const [editing, setEditing] = useState<Activity | null>(null);
+export default function CalendarCard(props: CalendarCardProps) {
+  const {
+    idFamilyGroup,
+    idUser,
+    activitiesQuery,
+    onEdit,
+    onDelete,
+    setFormVisible,
+  } = props;
+  const today = new Date().toISOString().slice(0, 10);
+  const [selectedDay, setSelectedDay] = useState<string>(today);
   const [filter, setFilter] = useState<"all" | "mine">("all");
-
-  // API hooks
-  const activitiesQuery =
-    useGetActivitiesFamilyCodeIdFamilyGroup(idFamilyGroup);
-  const postActivity = usePostActivities();
-  const patchActivity = usePatchActivitiesId();
-  const deleteActivity = useDeleteActivitiesId();
 
   const events: Activity[] = useMemo(() => {
     if (!activitiesQuery.data) return [];
@@ -112,7 +103,7 @@ export default function CalendarCard({
     return obj;
   }, [eventsByDate, selectedDay]);
 
-  // Filtro de actividades solo del usuario
+  // Only user's activities only
   const dayEvents = useMemo(() => {
     const eventsToday = eventsByDate[selectedDay] ?? [];
     if (filter === "mine") {
@@ -120,37 +111,6 @@ export default function CalendarCard({
     }
     return eventsToday;
   }, [eventsByDate, selectedDay, filter, idUser]);
-
-  // Guardar actividad
-  const handleSave = async (payload: Partial<Activity>) => {
-    if (editing) {
-      await patchActivity.mutateAsync({
-        id: editing.id,
-        data: payload as UpdateActivity,
-      });
-    } else {
-      await postActivity.mutateAsync({
-        data: {
-          ...payload,
-          createdBy: idUser,
-          startsAt: payload.startsAt!,
-        } as NewActivity,
-      });
-    }
-    setFormVisible(false);
-    setEditing(null);
-    await activitiesQuery.refetch();
-  };
-
-  const handleEdit = (ev: Activity) => {
-    setEditing(ev);
-    setFormVisible(true);
-  };
-
-  const handleDelete = async (id: string) => {
-    await deleteActivity.mutateAsync({ id });
-    await activitiesQuery.refetch();
-  };
 
   return (
     <View style={styles.container}>
@@ -179,7 +139,13 @@ export default function CalendarCard({
         <Text variant="titleMedium">Eventos — {selectedDay}</Text>
         <Button
           onPress={() => {
-            setEditing(null);
+            setSelectedDay(today);
+          }}
+        >
+          Hoy
+        </Button>
+        <Button
+          onPress={() => {
             setFormVisible(true);
           }}
         >
@@ -187,7 +153,6 @@ export default function CalendarCard({
         </Button>
       </View>
 
-      {/* Filtro de actividades */}
       <SegmentedButtons
         value={filter}
         onValueChange={setFilter}
@@ -213,19 +178,29 @@ export default function CalendarCard({
           data={dayEvents.sort((a, b) => a.startsAt.localeCompare(b.startsAt))}
           keyExtractor={(i) => i.id}
           renderItem={({ item }) => (
-            <Card style={styles.card}>
+            <Card
+              style={[
+                styles.card,
+                item.completed && { backgroundColor: "#d4edda" },
+              ]}
+            >
               <List.Item
+                titleStyle={
+                  item.completed && { textDecorationLine: "line-through" }
+                }
                 title={item.title}
-                description={`${item.startsAt.slice(11, 16)} - ${item.endsAt ? item.endsAt.slice(11, 16) : ""}`}
+                description={`${item.startsAt.slice(11, 16)} - ${
+                  item.endsAt ? item.endsAt.slice(11, 16) : ""
+                }`}
                 right={() =>
                   item.createdBy === idUser ? (
                     <View
                       style={{ flexDirection: "row", alignItems: "center" }}
                     >
-                      <Button compact onPress={() => handleEdit(item)}>
+                      <Button compact onPress={() => onEdit(item)}>
                         Editar
                       </Button>
-                      <Button compact onPress={() => handleDelete(item.id)}>
+                      <Button compact onPress={() => onDelete(item.id)}>
                         Borrar
                       </Button>
                     </View>
@@ -236,16 +211,6 @@ export default function CalendarCard({
           )}
         />
       )}
-
-      <ActivityForm
-        visible={formVisible}
-        onClose={() => {
-          setFormVisible(false);
-          setEditing(null);
-        }}
-        onSave={handleSave}
-        initial={editing ?? null}
-      />
     </View>
   );
 }
