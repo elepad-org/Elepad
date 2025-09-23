@@ -13,12 +13,18 @@ import {
   useGetActivitiesFamilyCodeIdFamilyGroup,
 } from "@elepad/api-client";
 import { COLORS, STYLES as baseStyles } from "@/styles/base";
-import { Text, Modal, Button } from "react-native-paper";
+import { Text, Modal, Button, Portal, Dialog } from "react-native-paper";
 
 export default function CalendarScreen() {
   const { userElepad } = useAuth();
   const familyCode = userElepad?.groupId ?? "";
   const idUser = userElepad?.id ?? "";
+
+  const [visible, setVisible] = useState(true);
+
+  const showDialog = () => setVisible(true);
+
+  const hideDialog = () => setVisible(false);
 
   const [formVisible, setFormVisible] = useState(false);
   const [editing, setEditing] = useState<Activity | null>(null);
@@ -67,6 +73,7 @@ export default function CalendarScreen() {
     }
     setDeleteModalVisible(false);
     setEventToDelete(null);
+    showDialog();
   };
 
   return (
@@ -89,6 +96,36 @@ export default function CalendarScreen() {
           onDelete={handleConfirmDelete}
           setFormVisible={setFormVisible}
         />
+        <View>
+          <Portal>
+            <Dialog
+              visible={visible}
+              onDismiss={hideDialog}
+              style={{
+                backgroundColor: "#fff",
+                //padding: 24,
+                marginTop: "-10%",
+                borderRadius: 16,
+              }}
+            >
+              <Dialog.Title>Evento eliminado</Dialog.Title>
+              <Dialog.Content>
+                <Text variant="bodyLarge">
+                  El evento se eliminó correctamente
+                </Text>
+              </Dialog.Content>
+              <Dialog.Actions>
+                <Button
+                  onPress={hideDialog}
+                  mode="contained"
+                  buttonColor={COLORS.secondary}
+                >
+                  Aceptar
+                </Button>
+              </Dialog.Actions>
+            </Dialog>
+          </Portal>
+        </View>
         <ActivityForm
           visible={formVisible}
           onClose={() => {
