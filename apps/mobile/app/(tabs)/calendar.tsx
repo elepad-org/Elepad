@@ -104,7 +104,7 @@ export default function CalendarScreen() {
               style={{
                 backgroundColor: "#fff",
                 //padding: 24,
-                marginTop: "-10%",
+                marginTop: "-15%",
                 borderRadius: 16,
               }}
             >
@@ -119,6 +119,8 @@ export default function CalendarScreen() {
                   onPress={hideDialog}
                   mode="contained"
                   buttonColor={COLORS.secondary}
+                  textColor="#ffffffff"
+                  style={{ borderRadius: 10 }}
                 >
                   Aceptar
                 </Button>
