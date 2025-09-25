@@ -1,6 +1,13 @@
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
-import { Text, Card, List, Button, SegmentedButtons } from "react-native-paper";
+import {
+  Text,
+  Card,
+  List,
+  Button,
+  SegmentedButtons,
+  IconButton,
+} from "react-native-paper";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 
 interface CalendarCardProps {
@@ -9,6 +16,7 @@ interface CalendarCardProps {
   activitiesQuery: any;
   onEdit: (ev: Activity) => void;
   onDelete: (id: string) => void;
+  onToggleComplete: (ev: Activity) => void;
   setFormVisible: (v: boolean) => void;
 }
 import { Activity } from "@elepad/api-client";
@@ -65,6 +73,7 @@ export default function CalendarCard(props: CalendarCardProps) {
     activitiesQuery,
     onEdit,
     onDelete,
+    onToggleComplete,
     setFormVisible,
   } = props;
   const today = new Date().toISOString().slice(0, 10);
@@ -195,6 +204,14 @@ export default function CalendarCard(props: CalendarCardProps) {
                 description={`${item.startsAt.slice(11, 16)} - ${
                   item.endsAt ? item.endsAt.slice(11, 16) : ""
                 }`}
+                left={() => (
+                  <IconButton
+                    icon="check"
+                    iconColor={item.completed ? "#28a745" : "#6c757d"}
+                    size={20}
+                    onPress={() => onToggleComplete(item)}
+                  />
+                )}
                 right={() =>
                   item.createdBy === idUser ? (
                     <View
