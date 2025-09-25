@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { View, StatusBar } from "react-native";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import CalendarCard from "@/components/Calendar/CalendarCard";
 import ActivityForm from "@/components/Calendar/ActivityForm";
@@ -19,18 +20,24 @@ export default function CalendarScreen() {
   const { userElepad } = useAuth();
   const familyCode = userElepad?.groupId ?? "";
   const idUser = userElepad?.id ?? "";
+  const queryClient = useQueryClient();
 
-  const [visible, setVisible] = useState(true);
+  const [successDialogVisible, setSuccessDialogVisible] = useState(false);
 
-  const showDialog = () => setVisible(true);
+  const showSuccessDialog = () => setSuccessDialogVisible(true);
 
-  const hideDialog = () => setVisible(false);
+  const hideSuccessDialog = () => setSuccessDialogVisible(false);
 
   const [formVisible, setFormVisible] = useState(false);
   const [editing, setEditing] = useState<Activity | null>(null);
   const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(familyCode);
   const postActivity = usePostActivities();
-  const patchActivity = usePatchActivitiesId();
+  const patchActivity = usePatchActivitiesId({
+    mutation: {
+      retry: 2, // Solo 2 reintentos
+      retryDelay: 1000, // 1 segundo entre reintentos
+    },
+  });
   const deleteActivity = useDeleteActivitiesId();
 
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -73,7 +80,50 @@ export default function CalendarScreen() {
     }
     setDeleteModalVisible(false);
     setEventToDelete(null);
-    showDialog();
+    showSuccessDialog();
+  };
+
+  const handleToggleComplete = async (activity: Activity) => {
+    // Actualización optimista: actualizamos inmediatamente el cache
+    const queryKey = activitiesQuery.queryKey;
+
+    // Guardamos el estado anterior para rollback
+    await queryClient.cancelQueries({ queryKey });
+    const previousActivities = queryClient.getQueryData(queryKey);
+
+    // Actualizamos optimísticamente el cache
+    queryClient.setQueryData(queryKey, (old: any) => {
+      if (Array.isArray(old)) {
+        return old.map((act: Activity) =>
+          act.id === activity.id ? { ...act, completed: !act.completed } : act,
+        );
+      }
+      return old;
+    });
+
+    try {
+      // Enviamos la petición al backend con timeout
+      const timeoutPromise = new Promise(
+        (_, reject) => setTimeout(() => reject(new Error("Timeout")), 4000), // 4 segundos timeout
+      );
+
+      await Promise.race([
+        patchActivity.mutateAsync({
+          id: activity.id,
+          data: {
+            title: activity.title,
+            startsAt: activity.startsAt,
+            endsAt: activity.endsAt,
+            completed: !activity.completed,
+          } as UpdateActivity,
+        }),
+        timeoutPromise,
+      ]);
+    } catch (error) {
+      // Si hay error, revertimos el cambio optimista
+      console.error("Error al actualizar actividad:", error);
+      queryClient.setQueryData(queryKey, previousActivities);
+    }
   };
 
   return (
@@ -94,13 +144,14 @@ export default function CalendarScreen() {
           activitiesQuery={activitiesQuery}
           onEdit={handleEdit}
           onDelete={handleConfirmDelete}
+          onToggleComplete={handleToggleComplete}
           setFormVisible={setFormVisible}
         />
         <View>
           <Portal>
             <Dialog
-              visible={visible}
-              onDismiss={hideDialog}
+              visible={successDialogVisible}
+              onDismiss={hideSuccessDialog}
               style={{
                 backgroundColor: "#fff",
                 //padding: 24,
@@ -116,7 +167,7 @@ export default function CalendarScreen() {
               </Dialog.Content>
               <Dialog.Actions>
                 <Button
-                  onPress={hideDialog}
+                  onPress={hideSuccessDialog}
                   mode="contained"
                   buttonColor={COLORS.secondary}
                   textColor="#ffffffff"
