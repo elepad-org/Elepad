@@ -14,7 +14,8 @@ import {
   useGetActivitiesFamilyCodeIdFamilyGroup,
 } from "@elepad/api-client";
 import { COLORS, STYLES as baseStyles } from "@/styles/base";
-import { Text, Modal, Button, Portal, Dialog } from "react-native-paper";
+import { Text, Modal, Button } from "react-native-paper";
+import AppDialog from "@/components/AppDialog";
 
 export default function CalendarScreen() {
   const { userElepad } = useAuth();
@@ -22,11 +23,14 @@ export default function CalendarScreen() {
   const idUser = userElepad?.id ?? "";
   const queryClient = useQueryClient();
 
-  const [successDialogVisible, setSuccessDialogVisible] = useState(false);
+  const [dialogVisible, setDialogVisible] = useState(false);
 
-  const showSuccessDialog = () => setSuccessDialogVisible(true);
+  const showDialog = () => setDialogVisible(true);
 
-  const hideSuccessDialog = () => setSuccessDialogVisible(false);
+  const hideDialog = () => setDialogVisible(false);
+
+  const [dialogTitle, setDialogTitle] = useState("");
+  const [dialogMessage, setDialogMessage] = useState("");
 
   const [formVisible, setFormVisible] = useState(false);
   const [editing, setEditing] = useState<Activity | null>(null);
@@ -45,21 +49,42 @@ export default function CalendarScreen() {
 
   const handleSave = async (payload: Partial<Activity>) => {
     if (editing) {
-      await patchActivity.mutateAsync({
+      const { status } = await patchActivity.mutateAsync({
         id: editing.id,
         data: payload as UpdateActivity,
       });
+      if (status !== 200) {
+        setDialogTitle("Algo salió mal.");
+        setDialogMessage(
+          "El estado de la actividad no se pudo actualizar. Por favor, inténtalo de nuevo.",
+        );
+      } else {
+        setDialogTitle("Listo");
+        setDialogMessage(
+          "El estado de la actividad se actualizó correctamente.",
+        );
+      }
     } else {
-      await postActivity.mutateAsync({
+      const { status } = await postActivity.mutateAsync({
         data: {
           ...payload,
           createdBy: idUser,
           startsAt: payload.startsAt!,
         } as NewActivity,
       });
+      if (status !== 201) {
+        setDialogTitle("Algo salió mal.");
+        setDialogMessage(
+          "No pudimos crear la actividad. Por favor, inténtalo de nuevo.",
+        );
+      } else {
+        setDialogTitle("Listo");
+        setDialogMessage("La actividad se creó correctamente.");
+      }
     }
     setFormVisible(false);
     setEditing(null);
+    showDialog();
     await activitiesQuery.refetch();
   };
 
@@ -78,9 +103,11 @@ export default function CalendarScreen() {
       await deleteActivity.mutateAsync({ id: eventToDelete });
       await activitiesQuery.refetch();
     }
+    setDialogTitle("Actividad eliminada");
+    setDialogMessage("La actividad se eliminó correctamente.");
     setDeleteModalVisible(false);
     setEventToDelete(null);
-    showSuccessDialog();
+    showDialog();
   };
 
   const handleToggleComplete = async (activity: Activity) => {
@@ -123,6 +150,11 @@ export default function CalendarScreen() {
       // Si hay error, revertimos el cambio optimista
       console.error("Error al actualizar actividad:", error);
       queryClient.setQueryData(queryKey, previousActivities);
+      setDialogTitle("Error");
+      setDialogMessage(
+        "No se pudo actualizar el estado de la actividad. Por favor, inténtalo de nuevo.",
+      );
+      showDialog();
     }
   };
 
@@ -147,38 +179,12 @@ export default function CalendarScreen() {
           onToggleComplete={handleToggleComplete}
           setFormVisible={setFormVisible}
         />
-        <View>
-          <Portal>
-            <Dialog
-              visible={successDialogVisible}
-              onDismiss={hideSuccessDialog}
-              style={{
-                backgroundColor: "#fff",
-                //padding: 24,
-                marginTop: "-15%",
-                borderRadius: 16,
-              }}
-            >
-              <Dialog.Title>Evento eliminado</Dialog.Title>
-              <Dialog.Content>
-                <Text variant="bodyLarge">
-                  El evento se eliminó correctamente
-                </Text>
-              </Dialog.Content>
-              <Dialog.Actions>
-                <Button
-                  onPress={hideSuccessDialog}
-                  mode="contained"
-                  buttonColor={COLORS.secondary}
-                  textColor="#ffffffff"
-                  style={{ borderRadius: 10 }}
-                >
-                  Aceptar
-                </Button>
-              </Dialog.Actions>
-            </Dialog>
-          </Portal>
-        </View>
+        <AppDialog
+          visible={dialogVisible}
+          onClose={hideDialog}
+          title={dialogTitle}
+          message={dialogMessage}
+        />
         <ActivityForm
           visible={formVisible}
           onClose={() => {
