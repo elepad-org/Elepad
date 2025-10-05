@@ -1,4 +1,4 @@
-import { View, StyleSheet, StatusBar } from "react-native";
+import { View, StatusBar } from "react-native";
 import { useAuth } from "@/hooks/useAuth";
 import CalendarCard from "@/components/Calendar/CalendarCard";
 import { COLORS, STYLES as baseStyles } from "@/styles/base";

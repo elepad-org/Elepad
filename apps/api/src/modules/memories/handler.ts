@@ -1,10 +1,5 @@
 import { OpenAPIHono, z } from "@hono/zod-openapi";
-import {
-  MemorySchema,
-  MemoryFiltersSchema,
-  NewMemorySchema,
-  CreateMemoryWithImageSchema,
-} from "./schema";
+import { MemorySchema, MemoryFiltersSchema } from "./schema";
 import { MemoriesService } from "./service";
 import { ApiException, openApiErrorResponse } from "@/utils/api-error";
 import { withAuth } from "@/middleware/auth";

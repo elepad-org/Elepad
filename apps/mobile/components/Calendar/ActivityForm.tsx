@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { Modal, TextInput, Button, Text, Checkbox } from "react-native-paper";
 import DateTimePickerModal from "react-native-modal-datetime-picker";

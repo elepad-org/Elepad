@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
 import { Text, Card, List, Button, SegmentedButtons } from "react-native-paper";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
@@ -85,8 +85,8 @@ export default function CalendarCard({
     if (Array.isArray(activitiesQuery.data)) {
       return activitiesQuery.data as Activity[];
     }
-    if ((activitiesQuery.data as any).data) {
-      return [(activitiesQuery.data as any).data];
+    if ((activitiesQuery.data as unknown as { data?: Activity }).data) {
+      return [(activitiesQuery.data as unknown as { data: Activity }).data];
     }
     return [];
   }, [activitiesQuery.data]);
@@ -102,7 +102,10 @@ export default function CalendarCard({
   }, [events]);
 
   const marked = useMemo(() => {
-    const obj: Record<string, any> = {};
+    const obj: Record<
+      string,
+      { marked?: boolean; dotColor?: string; selected?: boolean }
+    > = {};
     for (const d of Object.keys(eventsByDate)) {
       obj[d] = { marked: true, dotColor: "#FF8C00" };
     }

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { View, TouchableOpacity, Alert } from "react-native";
-import { Button, Text, IconButton } from "react-native-paper";
+import { Text, IconButton } from "react-native-paper";
 import { Audio } from "expo-av";
 import { STYLES, COLORS } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
@@ -51,8 +51,8 @@ export default function AudioRecorderComponent({
         playsInSilentModeIOS: true,
       });
       return true;
-    } catch (error) {
-      console.error("Error al solicitar permisos:", error);
+    } catch {
+      console.error("Error al solicitar permisos");
       return false;
     }
   };
@@ -68,7 +68,7 @@ export default function AudioRecorderComponent({
       );
       setRecording(recording);
       setIsRecording(true);
-    } catch (error) {
+    } catch {
       Alert.alert("Error", "No se pudo iniciar la grabación");
     }
   };
@@ -81,8 +81,8 @@ export default function AudioRecorderComponent({
       setRecording(null);
       setIsRecording(false);
       if (uri) setAudioUri(uri);
-    } catch (error) {
-      console.error("Error al detener grabación:", error);
+    } catch {
+      console.error("Error al detener grabación");
     }
   };
 
@@ -96,13 +96,19 @@ export default function AudioRecorderComponent({
       setSound(newSound);
       setIsPlaying(true);
       await newSound.playAsync();
-      newSound.setOnPlaybackStatusUpdate((status: any) => {
-        if (status.isLoaded && !status.isPlaying && status.didJustFinish) {
-          setIsPlaying(false);
-        }
-      });
-    } catch (error) {
-      console.error("Error al reproducir audio:", error);
+      newSound.setOnPlaybackStatusUpdate(
+        (status: {
+          isLoaded?: boolean;
+          isPlaying?: boolean;
+          didJustFinish?: boolean;
+        }) => {
+          if (status.isLoaded && !status.isPlaying && status.didJustFinish) {
+            setIsPlaying(false);
+          }
+        },
+      );
+    } catch {
+      console.error("Error al reproducir audio");
     }
   };
 

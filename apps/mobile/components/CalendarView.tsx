@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { Card, List, Text, IconButton } from "react-native-paper";
 import { FONT } from "@/styles/base";

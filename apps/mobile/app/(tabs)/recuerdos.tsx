@@ -1,22 +1,9 @@
-import React, { useState, useCallback } from "react";
-import {
-  StatusBar,
-  ScrollView,
-  View,
-  Image,
-  FlatList,
-  TouchableOpacity,
-  RefreshControl,
-  Dimensions,
-} from "react-native";
+import { useState, useCallback } from "react";
+import { StatusBar, View, Image, FlatList, RefreshControl } from "react-native";
 import {
   Text,
-  Card,
   Portal,
-  Dialog,
   Button,
-  IconButton,
-  Divider,
   Snackbar,
   ActivityIndicator,
 } from "react-native-paper";
@@ -26,9 +13,9 @@ import {
   createMemoryWithMedia,
   Memory,
 } from "@elepad/api-client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { COLORS, STYLES, SHADOWS } from "@/styles/base";
+import { COLORS, STYLES } from "@/styles/base";
 import { Platform } from "react-native";
 import { uriToBlob } from "@/lib/uriToBlob";
 
@@ -36,9 +23,7 @@ import RecuerdoItemComponent from "@/components/Recuerdos/RecuerdoItemComponent"
 import NuevoRecuerdoDialogComponent from "@/components/Recuerdos/NuevoRecuerdoDialogComponent";
 import eleEmpthy from "@/assets/images/ele-idea.jpeg";
 
-const screenWidth = Dimensions.get("window").width;
 const numColumns = 2;
-const itemSize = (screenWidth - 48) / numColumns;
 
 // Tipos de recuerdos
 type RecuerdoTipo = "imagen" | "texto" | "audio";
@@ -86,7 +71,6 @@ interface Recuerdo {
 
 export default function RecuerdosScreen() {
   const { loading: authLoading, userElepad } = useAuth();
-  const queryClient = useQueryClient();
 
   // Estados locales
   const [refreshing, setRefreshing] = useState(false);
@@ -96,7 +80,7 @@ export default function RecuerdosScreen() {
   >("select");
   const [selectedTipo, setSelectedTipo] = useState<RecuerdoTipo | null>(null);
   const [selectedFileUri, setSelectedFileUri] = useState<string | null>(null);
-  const [selectedMimeType, setSelectedMimeType] = useState<string | null>(null);
+  const [, setSelectedMimeType] = useState<string | null>(null);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarError, setSnackbarError] = useState(false);
@@ -105,7 +89,6 @@ export default function RecuerdosScreen() {
   const {
     data: memoriesResponse,
     isLoading: memoriesLoading,
-    error,
     refetch: refetchMemories,
   } = useGetMemories({
     groupId: userElepad?.groupId || "",
@@ -114,7 +97,13 @@ export default function RecuerdosScreen() {
 
   // Hook de mutación para subir archivos
   const uploadMemoryMutation = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: {
+      bookId: string;
+      groupId: string;
+      title?: string;
+      caption?: string;
+      image: Blob;
+    }) => {
       console.log("=== CLIENT: Starting upload mutation ===");
       console.log("CLIENT: Upload data:", {
         ...data,
@@ -134,10 +123,10 @@ export default function RecuerdosScreen() {
         // Log more details about the error
         if (error && typeof error === "object") {
           console.error("CLIENT: Error details:", {
-            message: (error as any).message,
-            status: (error as any).status,
-            statusText: (error as any).statusText,
-            body: (error as any).body,
+            message: (error as Error).message,
+            status: (error as { status?: number }).status,
+            statusText: (error as { statusText?: string }).statusText,
+            body: (error as { body?: unknown }).body,
           });
         }
         throw error;
@@ -172,7 +161,7 @@ export default function RecuerdosScreen() {
   const cargarRecuerdos = useCallback(async () => {
     try {
       await refetchMemories();
-    } catch (err) {
+    } catch {
       setSnackbarMessage("Error al cargar los recuerdos");
       setSnackbarError(true);
       setSnackbarVisible(true);
@@ -190,15 +179,13 @@ export default function RecuerdosScreen() {
   // Estados de carga y error (patrón original restaurado)
   const isLoading =
     authLoading || memoriesLoading || uploadMemoryMutation.isPending;
-  const hasError = !!error;
-  const isEmpty = !isLoading && !hasError && recuerdos.length === 0;
 
   // Función para refrescar la galería (patrón original)
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
       await cargarRecuerdos();
-    } catch (err) {
+    } catch {
       setSnackbarMessage("Error al refrescar los recuerdos");
       setSnackbarError(true);
       setSnackbarVisible(true);
@@ -223,7 +210,7 @@ export default function RecuerdosScreen() {
   // Función para crear un nuevo recuerdo con multimedia
   const handleGuardarRecuerdo = async (data: RecuerdoData) => {
     try {
-      let fileData: any;
+      let fileData: Blob;
 
       if (selectedTipo === "texto") {
         // Para texto, crear un blob con el contenido
@@ -254,7 +241,7 @@ export default function RecuerdosScreen() {
 
       const uploadData = {
         bookId: defaultBookId,
-        groupId: userElepad!.groupId,
+        groupId: userElepad!.groupId!,
         title: data.titulo,
         caption: data.caption,
         image: fileData,

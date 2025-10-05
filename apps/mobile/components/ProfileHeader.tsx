@@ -1,4 +1,3 @@
-import React from "react";
 import { StyleSheet, View } from "react-native";
 import { Avatar, IconButton, Text } from "react-native-paper";
 import { COLORS, STYLES } from "@/styles/base";
@@ -23,13 +22,13 @@ function getInitials(name: string) {
   );
 }
 
-export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
+export const ProfileHeader = ({
   name,
   email,
   avatarUrl,
   size = 112,
   onEditPhoto,
-}) => {
+}: ProfileHeaderProps) => {
   return (
     <View style={styles.profileHeader}>
       <View style={styles.avatarWrapper}>
