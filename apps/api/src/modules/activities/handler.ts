@@ -15,7 +15,7 @@ declare module "hono" {
   }
 }
 
-activitiesApp.use("*", async (c, next) => {
+activitiesApp.use("/activities/*", async (c, next) => {
   const activityService = new ActivityService(c.var.supabase);
   c.set("activityService", activityService);
   await next();
