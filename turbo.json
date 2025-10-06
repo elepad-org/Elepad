@@ -34,7 +34,8 @@
     },
     "gen:types": {},
     "prepare": {
-      "dependsOn": ["^prepare"]
+      "dependsOn": ["^prepare"],
+      "cache": false
     }
   }
 }

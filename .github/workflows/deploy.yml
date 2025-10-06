@@ -1,8 +1,6 @@
 name: Deploy Mobile and API
 
 on:
-  push:
-    branches: [prod]
   workflow_dispatch:
 
 jobs:

@@ -9,36 +9,29 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [20]
 
     steps:
       - name: 📂 Checkout repository
         uses: actions/checkout@v4
 
-      - name: 🔧 Setup Node.js ${{ matrix.node-version }}
+      - name: 🔧 Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 22
           cache: "npm"
 
-      - name: ♻️ Cache node_modules and npm
+      - name: ♻️ Restore node_modules
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.npm
-            ~/.cache
-            node_modules
-          key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-${{ matrix.node-version }}
+          path: node_modules
+          key: node-modules-${{ hashFiles('**/package-lock.json') }}
 
       - name: 🏗️ Install dependencies
         run: npm ci
 
       - name: 🧹 Lint (with ESLint and TS)
         run: npm run lint
+        if: success() || failure()
 
       - name: 📦 Build
         run: npm run build
