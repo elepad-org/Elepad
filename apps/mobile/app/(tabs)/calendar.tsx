@@ -12,6 +12,7 @@ import {
   NewActivity,
   UpdateActivity,
   useGetActivitiesFamilyCodeIdFamilyGroup,
+  getActivitiesFamilyCodeIdFamilyGroupResponse,
 } from "@elepad/api-client";
 import { COLORS, STYLES as baseStyles } from "@/styles/base";
 import { Text, Modal, Button } from "react-native-paper";
@@ -35,57 +36,117 @@ export default function CalendarScreen() {
   const [formVisible, setFormVisible] = useState(false);
   const [editing, setEditing] = useState<Activity | null>(null);
   const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(familyCode);
-  const postActivity = usePostActivities();
-  const patchActivity = usePatchActivitiesId({
+
+  const postActivity = usePostActivities({
     mutation: {
-      retry: 2, // Solo 2 reintentos
-      retryDelay: 1000, // 1 segundo entre reintentos
+      onSuccess: async () => {
+        setDialogTitle("Listo");
+        setDialogMessage("La actividad se creó correctamente.");
+        setFormVisible(false);
+        setEditing(null);
+        showDialog();
+        await activitiesQuery.refetch();
+      },
+      onError: (error) => {
+        console.error("Error al crear actividad:", error);
+        setDialogTitle("Algo salió mal.");
+        setDialogMessage(
+          "No pudimos crear la actividad. Por favor, inténtalo de nuevo.",
+        );
+        showDialog();
+      },
     },
   });
-  const deleteActivity = useDeleteActivitiesId();
+
+  const patchActivity = usePatchActivitiesId({
+    mutation: {
+      retry: 2,
+      retryDelay: 1000,
+      onSuccess: async () => {
+        setDialogTitle("Listo");
+        setDialogMessage(
+          "El estado de la actividad se actualizó correctamente.",
+        );
+        setFormVisible(false);
+        setEditing(null);
+        showDialog();
+        await activitiesQuery.refetch();
+      },
+      onError: (error) => {
+        console.error("Error al actualizar actividad:", error);
+        setDialogTitle("Algo salió mal.");
+        setDialogMessage(
+          "El estado de la actividad no se pudo actualizar. Por favor, inténtalo de nuevo.",
+        );
+        showDialog();
+      },
+    },
+  });
+
+  const deleteActivity = useDeleteActivitiesId({
+    mutation: {
+      onSuccess: async () => {
+        setDialogTitle("Actividad eliminada");
+        setDialogMessage("La actividad se eliminó correctamente.");
+        showDialog();
+        await activitiesQuery.refetch();
+      },
+      onError: (error) => {
+        console.error("Error al eliminar actividad:", error);
+        setDialogTitle("Error");
+        setDialogMessage(
+          "No se pudo eliminar la actividad. Por favor, inténtalo de nuevo.",
+        );
+        showDialog();
+      },
+    },
+  });
+
+  // Mutación separada para toggle con actualización optimista
+  const toggleActivity = usePatchActivitiesId({
+    mutation: {
+      retry: 1, // Solo 1 reintento
+      retryDelay: 500, // 500ms entre reintentos
+      onSuccess: () => {
+        // No hacemos refetch aquí para mantener la UI instantánea
+        // El servidor ya confirmó el cambio
+      },
+      onError: (error) => {
+        console.error("Error al actualizar actividad:", error);
+        // El rollback se maneja en handleToggleComplete
+        setDialogTitle("Error");
+        setDialogMessage(
+          "No se pudo actualizar el estado de la actividad. Por favor, inténtalo de nuevo.",
+        );
+        showDialog();
+      },
+    },
+  });
 
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<string | null>(null);
 
   const handleSave = async (payload: Partial<Activity>) => {
-    if (editing) {
-      const { status } = await patchActivity.mutateAsync({
-        id: editing.id,
-        data: payload as UpdateActivity,
-      });
-      if (status !== 200) {
-        setDialogTitle("Algo salió mal.");
-        setDialogMessage(
-          "El estado de la actividad no se pudo actualizar. Por favor, inténtalo de nuevo.",
-        );
+    try {
+      if (editing) {
+        await patchActivity.mutateAsync({
+          id: editing.id,
+          data: payload as UpdateActivity,
+        });
       } else {
-        setDialogTitle("Listo");
-        setDialogMessage(
-          "El estado de la actividad se actualizó correctamente.",
-        );
+        await postActivity.mutateAsync({
+          data: {
+            ...payload,
+            createdBy: idUser,
+            startsAt: payload.startsAt!,
+          } as NewActivity,
+        });
       }
-    } else {
-      const { status } = await postActivity.mutateAsync({
-        data: {
-          ...payload,
-          createdBy: idUser,
-          startsAt: payload.startsAt!,
-        } as NewActivity,
-      });
-      if (status !== 201) {
-        setDialogTitle("Algo salió mal.");
-        setDialogMessage(
-          "No pudimos crear la actividad. Por favor, inténtalo de nuevo.",
-        );
-      } else {
-        setDialogTitle("Listo");
-        setDialogMessage("La actividad se creó correctamente.");
-      }
+      // Los callbacks onSuccess de las mutaciones ya manejan el cierre del form y el diálogo
+    } catch (error) {
+      // Los callbacks onError de las mutaciones ya manejan el diálogo de error
+      console.error("Error en handleSave:", error);
     }
-    setFormVisible(false);
-    setEditing(null);
-    showDialog();
-    await activitiesQuery.refetch();
   };
 
   const handleEdit = (ev: Activity) => {
@@ -111,50 +172,86 @@ export default function CalendarScreen() {
   };
 
   const handleToggleComplete = async (activity: Activity) => {
-    // Actualización optimista: actualizamos inmediatamente el cache
-    const queryKey = activitiesQuery.queryKey;
+    // Construimos la queryKey directamente
+    const queryKey = [`/activities/familyCode/${familyCode}`];
 
-    // Guardamos el estado anterior para rollback
+    // Cancelamos cualquier refetch en progreso
     await queryClient.cancelQueries({ queryKey });
-    const previousActivities = queryClient.getQueryData(queryKey);
 
-    // Actualizamos optimísticamente el cache
-    queryClient.setQueryData(queryKey, (old: any) => {
-      if (Array.isArray(old)) {
-        return old.map((act: Activity) =>
-          act.id === activity.id ? { ...act, completed: !act.completed } : act,
-        );
-      }
-      return old;
-    });
+    // Guardamos el estado previo por si necesitamos revertir
+    const previousData =
+      queryClient.getQueryData<getActivitiesFamilyCodeIdFamilyGroupResponse>(
+        queryKey,
+      );
 
+    // Actualizamos optimísticamente el cache de forma SÍNCRONA
+    queryClient.setQueryData<getActivitiesFamilyCodeIdFamilyGroupResponse>(
+      queryKey,
+      (old) => {
+        if (!old) return old;
+
+        // Caso 1: Los datos son un array plano (formato simplificado de React Query)
+        if (Array.isArray(old)) {
+          return old.map((act: Activity) =>
+            act.id === activity.id
+              ? { ...act, completed: !act.completed }
+              : act,
+          ) as unknown as getActivitiesFamilyCodeIdFamilyGroupResponse;
+        }
+
+        // Caso 2: Los datos tienen la estructura completa { data, status, headers }
+        if ("data" in old && Array.isArray(old.data)) {
+          return {
+            ...old,
+            data: old.data.map((act: Activity) =>
+              act.id === activity.id
+                ? { ...act, completed: !act.completed }
+                : act,
+            ),
+          } as getActivitiesFamilyCodeIdFamilyGroupResponse;
+        }
+
+        return old;
+      },
+    );
+
+    // Ejecutamos la mutación en background con timeout
     try {
-      // Enviamos la petición al backend con timeout
-      const timeoutPromise = new Promise(
-        (_, reject) => setTimeout(() => reject(new Error("Timeout")), 4000), // 4 segundos timeout
+      const updateData: UpdateActivity = {
+        startsAt: activity.startsAt,
+        completed: !activity.completed,
+      };
+
+      // Solo incluir campos opcionales si tienen valor
+      if (activity.title) {
+        updateData.title = activity.title;
+      }
+      if (activity.endsAt !== null && activity.endsAt !== undefined) {
+        updateData.endsAt = activity.endsAt;
+      }
+      if (activity.description !== null && activity.description !== undefined) {
+        updateData.description = activity.description;
+      }
+
+      // Timeout de 3 segundos para la petición
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Timeout")), 3000),
       );
 
       await Promise.race([
-        patchActivity.mutateAsync({
+        toggleActivity.mutateAsync({
           id: activity.id,
-          data: {
-            title: activity.title,
-            startsAt: activity.startsAt,
-            endsAt: activity.endsAt,
-            completed: !activity.completed,
-          } as UpdateActivity,
+          data: updateData,
         }),
         timeoutPromise,
       ]);
+
+      // No hacemos invalidateQueries para evitar el refetch y mantener la UI instantánea
+      // El cache ya está actualizado optimísticamente
     } catch (error) {
-      // Si hay error, revertimos el cambio optimista
+      // En caso de error, revertimos al estado anterior
+      queryClient.setQueryData(queryKey, previousData);
       console.error("Error al actualizar actividad:", error);
-      queryClient.setQueryData(queryKey, previousActivities);
-      setDialogTitle("Error");
-      setDialogMessage(
-        "No se pudo actualizar el estado de la actividad. Por favor, inténtalo de nuevo.",
-      );
-      showDialog();
     }
   };
 
