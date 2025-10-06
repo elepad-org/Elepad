@@ -74,7 +74,6 @@ LocaleConfig.defaultLocale = "es";
 
 export default function CalendarCard(props: CalendarCardProps) {
   const {
-    idFamilyGroup,
     idUser,
     activitiesQuery,
     onEdit,
@@ -219,9 +218,50 @@ export default function CalendarCard(props: CalendarCardProps) {
                   item.completed && { textDecorationLine: "line-through" }
                 }
                 title={item.title}
-                description={`${item.startsAt.slice(11, 16)} - ${
-                  item.endsAt ? item.endsAt.slice(11, 16) : ""
-                }`}
+                description={(() => {
+                  const startDateObj = new Date(item.startsAt);
+                  const endDateObj = item.endsAt ? new Date(item.endsAt) : null;
+
+                  // Comparar fechas en hora local
+                  const startDateLocal =
+                    startDateObj.toLocaleDateString("en-CA"); // formato YYYY-MM-DD
+                  const endDateLocal = endDateObj?.toLocaleDateString("en-CA");
+                  const actualToday = new Date().toLocaleDateString("en-CA");
+
+                  const isActuallyToday = startDateLocal === actualToday;
+
+                  const startTime = startDateObj.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+
+                  // Si la actividad no es de hoy (fecha actual), mostrar fecha completa de inicio
+                  const startDisplay = isActuallyToday
+                    ? startTime
+                    : `${startDateObj.toLocaleDateString([], {
+                        day: "numeric",
+                        month: "short",
+                      })} ${startTime}`;
+
+                  if (!endDateObj) return startDisplay;
+
+                  const endTime = endDateObj.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+
+                  if (startDateLocal === endDateLocal) {
+                    // Mismo día local - solo mostrar hora de fin
+                    return `${startDisplay} - ${endTime}`;
+                  } else {
+                    // Diferente día - mostrar fecha completa de fin
+                    const endDateFormatted = endDateObj.toLocaleDateString([], {
+                      day: "numeric",
+                      month: "short",
+                    });
+                    return `${startDisplay} - ${endDateFormatted} ${endTime}`;
+                  }
+                })()}
                 left={() => (
                   <IconButton
                     icon="check"
