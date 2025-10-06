@@ -39,6 +39,8 @@ export default function CalendarScreen() {
 
   const postActivity = usePostActivities({
     mutation: {
+      retry: 2, // Reintentar 2 veces antes de fallar
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000), // Exponential backoff: 1s, 2s
       onSuccess: async () => {
         setDialogTitle("Listo");
         setDialogMessage("La actividad se creó correctamente.");
@@ -49,19 +51,16 @@ export default function CalendarScreen() {
       },
       onError: (error) => {
         console.error("Error al crear actividad:", error);
-        setDialogTitle("Algo salió mal.");
-        setDialogMessage(
-          "No pudimos crear la actividad. Por favor, inténtalo de nuevo.",
-        );
-        showDialog();
+        // NO cerramos el formulario para que el usuario no pierda los datos
+        // El error se maneja dentro del formulario
       },
     },
   });
 
   const patchActivity = usePatchActivitiesId({
     mutation: {
-      retry: 2,
-      retryDelay: 1000,
+      retry: 2, // Reintentar 2 veces antes de fallar
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000), // Exponential backoff: 1s, 2s
       onSuccess: async () => {
         setDialogTitle("Listo");
         setDialogMessage(
@@ -74,11 +73,8 @@ export default function CalendarScreen() {
       },
       onError: (error) => {
         console.error("Error al actualizar actividad:", error);
-        setDialogTitle("Algo salió mal.");
-        setDialogMessage(
-          "El estado de la actividad no se pudo actualizar. Por favor, inténtalo de nuevo.",
-        );
-        showDialog();
+        // NO cerramos el formulario para que el usuario no pierda los datos
+        // El error se maneja dentro del formulario
       },
     },
   });
@@ -127,26 +123,22 @@ export default function CalendarScreen() {
   const [eventToDelete, setEventToDelete] = useState<string | null>(null);
 
   const handleSave = async (payload: Partial<Activity>) => {
-    try {
-      if (editing) {
-        await patchActivity.mutateAsync({
-          id: editing.id,
-          data: payload as UpdateActivity,
-        });
-      } else {
-        await postActivity.mutateAsync({
-          data: {
-            ...payload,
-            createdBy: idUser,
-            startsAt: payload.startsAt!,
-          } as NewActivity,
-        });
-      }
-      // Los callbacks onSuccess de las mutaciones ya manejan el cierre del form y el diálogo
-    } catch (error) {
-      // Los callbacks onError de las mutaciones ya manejan el diálogo de error
-      console.error("Error en handleSave:", error);
+    // No usamos try-catch aquí, dejamos que el error se propague al formulario
+    if (editing) {
+      await patchActivity.mutateAsync({
+        id: editing.id,
+        data: payload as UpdateActivity,
+      });
+    } else {
+      await postActivity.mutateAsync({
+        data: {
+          ...payload,
+          createdBy: idUser,
+          startsAt: payload.startsAt!,
+        } as NewActivity,
+      });
     }
+    // Los callbacks onSuccess de las mutaciones ya manejan el cierre del form y el diálogo
   };
 
   const handleEdit = (ev: Activity) => {
