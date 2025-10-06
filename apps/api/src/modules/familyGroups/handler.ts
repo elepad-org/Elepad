@@ -18,7 +18,7 @@ declare module "hono" {
   }
 }
 
-familyGroupApp.use("*", async (c, next) => {
+familyGroupApp.use("/familyGroup/*", async (c, next) => {
   const familyGroupService = new FamilyGroupService(c.var.supabase);
   c.set("familyGroupService", familyGroupService);
   await next();

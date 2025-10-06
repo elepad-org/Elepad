@@ -1,17 +1,14 @@
-import React from "react";
 import { Button } from "react-native-paper";
-import { STYLES, COLORS } from "@/styles/base";
+import { STYLES } from "@/styles/base";
 
-interface CancelButtonProps {
-  onPress: () => void;
-  text?: string;
-  disabled?: boolean;
-}
-
-const CancelButton: React.FC<CancelButtonProps> = ({
+const CancelButton = ({
   onPress,
   text = "Cancelar",
   disabled = false,
+}: {
+  onPress: () => void;
+  text?: string;
+  disabled?: boolean;
 }) => {
   return (
     <Button

@@ -11,8 +11,8 @@ declare module "hono" {
   }
 }
 
-// Add a UserService instance to each request context
-usersApp.use("*", async (c, next) => {
+// Add a UserService instance to each request context.
+usersApp.use("/users/*", async (c, next) => {
   const userService = new UserService(c.var.supabase);
   c.set("userService", userService);
   await next();

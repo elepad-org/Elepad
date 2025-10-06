@@ -1,4 +1,3 @@
-import React from "react";
 import { TouchableOpacity, View, Dimensions } from "react-native";
 import { Text, IconButton } from "react-native-paper";
 import { STYLES, COLORS } from "@/styles/base";

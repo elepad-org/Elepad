@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { View } from "react-native";
 import { BottomNavigation, useTheme } from "react-native-paper";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import HomeScreen from "./home";
-import ExploreScreen from "./explore";
 import JuegosScreen from "./juegos";
 import RecuerdosScreen from "./recuerdos";
 import ConfiguracionScreen from "./configuracion";
@@ -12,7 +10,6 @@ import CalendarScreen from "./calendar";
 
 export default function TabLayout() {
   const theme = useTheme();
-  const insets = useSafeAreaInsets();
   const [index, setIndex] = useState(0);
 
   const [routes] = useState([

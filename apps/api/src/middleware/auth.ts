@@ -2,8 +2,8 @@ import type { MiddlewareHandler } from "hono";
 
 /**
  * This middleware checks for a valid Bearer token in the Authorization header.
- * If the token is validated by Supabase, it attaches the user information to the context.
- * If not, it responds with a 401 Unauthorized status.
+ * If Supabase validates the token, the user information is attached to the context (in the `user` variable).
+ * If not, a 401 Unauthorized status is returned.
  */
 export const withAuth: MiddlewareHandler = async (c, next) => {
   const authHeader = c.req.header("Authorization");
@@ -11,7 +11,7 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
     return c.json({ error: "Unauthorized" }, 401);
   }
 
-  // Discard the 'Bearer ' prefix
+  // Discard the 'Bearer ' prefix.
   const token = authHeader.split(" ")[1];
   const {
     data: { user },

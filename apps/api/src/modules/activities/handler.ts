@@ -5,7 +5,7 @@ import {
   NewActivitySchema,
   UpdateActivitySchema,
 } from "./schema";
-import { ApiException, openApiErrorResponse } from "@/utils/api-error";
+import { openApiErrorResponse } from "@/utils/api-error";
 
 export const activitiesApp = new OpenAPIHono();
 
@@ -15,7 +15,7 @@ declare module "hono" {
   }
 }
 
-activitiesApp.use("*", async (c, next) => {
+activitiesApp.use("/activities/*", async (c, next) => {
   const activityService = new ActivityService(c.var.supabase);
   c.set("activityService", activityService);
   await next();

@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { View } from "react-native";
-import { TextInput, Button, Text } from "react-native-paper";
+import { TextInput, Text } from "react-native-paper";
 import { STYLES, COLORS } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
 
@@ -8,18 +8,12 @@ interface MetadataInputProps {
   onSave: (title?: string, caption?: string) => void;
   onCancel: () => void;
   isUploading?: boolean;
-  showPreview?: boolean;
-  previewUri?: string;
-  previewType?: "image" | "audio";
 }
 
 export default function MetadataInputComponent({
   onSave,
   onCancel,
   isUploading = false,
-  showPreview = false,
-  previewUri,
-  previewType,
 }: MetadataInputProps) {
   const [title, setTitle] = useState("");
   const [caption, setCaption] = useState("");
