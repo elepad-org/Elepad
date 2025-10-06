@@ -56,14 +56,38 @@ export default function ActivityForm({
     }
     setSaving(true);
     try {
-      await onSave({
-        title,
-        description,
-        startsAt: startsAtDate.toISOString(),
-        endsAt: endsAtDate ? endsAtDate.toISOString() : undefined,
-        completed,
-      });
+      // Timeout de 10 segundos para la petición
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error("Timeout: La petición tardó demasiado")),
+          10000,
+        ),
+      );
+
+      await Promise.race([
+        onSave({
+          title,
+          description,
+          startsAt: startsAtDate.toISOString(),
+          endsAt: endsAtDate ? endsAtDate.toISOString() : undefined,
+          completed,
+        }),
+        timeoutPromise,
+      ]);
+
+      // Solo cerramos si fue exitoso (onSave no lanzó error)
       onClose();
+    } catch (error) {
+      // Capturamos el error y lo mostramos en el formulario
+      // NO cerramos el modal para que el usuario no pierda los datos
+      console.error("Error al guardar:", error);
+
+      const errorMessage =
+        error instanceof Error && error.message.includes("Timeout")
+          ? "La petición está tardando mucho. Por favor, verifica tu conexión e inténtalo de nuevo."
+          : "No se pudo guardar la actividad. Por favor, verifica tu conexión e inténtalo de nuevo.";
+
+      setError(errorMessage);
     } finally {
       setSaving(false);
     }
@@ -159,12 +183,7 @@ export default function ActivityForm({
       {error && <Text style={styles.error}>{error}</Text>}
 
       <View style={styles.actions}>
-        <Button
-          mode="outlined"
-          onPress={onClose}
-          disabled={saving}
-          style={styles.actionBtn}
-        >
+        <Button mode="outlined" onPress={onClose} style={styles.actionBtn}>
           Cancelar
         </Button>
         <Button

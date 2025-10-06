@@ -167,6 +167,7 @@ export default function CalendarCard(props: CalendarCardProps) {
           onPress={() => {
             setFormVisible(true);
           }}
+          icon="plus"
         >
           Nuevo
         </Button>
