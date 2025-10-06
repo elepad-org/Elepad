@@ -9,18 +9,24 @@ import {
   IconButton,
 } from "react-native-paper";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
+import { Activity } from "@elepad/api-client";
+import { COLORS } from "@/styles/base";
+import type { getActivitiesFamilyCodeIdFamilyGroupResponse } from "@elepad/api-client";
 
 interface CalendarCardProps {
   idFamilyGroup: string;
   idUser: string;
-  activitiesQuery: any;
+  activitiesQuery: {
+    data?: getActivitiesFamilyCodeIdFamilyGroupResponse;
+    isLoading: boolean;
+    error: unknown;
+    refetch: () => Promise<unknown>;
+  };
   onEdit: (ev: Activity) => void;
   onDelete: (id: string) => void;
   onToggleComplete: (ev: Activity) => void;
   setFormVisible: (v: boolean) => void;
 }
-import { Activity } from "@elepad/api-client";
-import { COLORS } from "@/styles/base";
 
 // Configuración de calendario en español
 LocaleConfig.locales["es"] = {
@@ -82,12 +88,20 @@ export default function CalendarCard(props: CalendarCardProps) {
 
   const events: Activity[] = useMemo(() => {
     if (!activitiesQuery.data) return [];
+
+    // El tipo de respuesta es { data: Activity[], status: number, headers: Headers }
+    if (
+      "data" in activitiesQuery.data &&
+      Array.isArray(activitiesQuery.data.data)
+    ) {
+      return activitiesQuery.data.data;
+    }
+
+    // Fallback por si acaso
     if (Array.isArray(activitiesQuery.data)) {
       return activitiesQuery.data as Activity[];
     }
-    if ((activitiesQuery.data as any).data) {
-      return [(activitiesQuery.data as any).data];
-    }
+
     return [];
   }, [activitiesQuery.data]);
 
@@ -102,7 +116,10 @@ export default function CalendarCard(props: CalendarCardProps) {
   }, [events]);
 
   const marked = useMemo(() => {
-    const obj: Record<string, any> = {};
+    const obj: Record<
+      string,
+      { marked?: boolean; dotColor?: string; selected?: boolean }
+    > = {};
     for (const d of Object.keys(eventsByDate)) {
       obj[d] = { marked: true, dotColor: "#FF8C00" };
     }
@@ -173,8 +190,12 @@ export default function CalendarCard(props: CalendarCardProps) {
       />
 
       {activitiesQuery.isLoading && <Text>Cargando...</Text>}
-      {activitiesQuery.error && (
-        <Text style={{ color: "red" }}>{String(activitiesQuery.error)}</Text>
+      {!!activitiesQuery.error && (
+        <Text style={{ color: "red" }}>
+          {activitiesQuery.error instanceof Error
+            ? activitiesQuery.error.message
+            : String(activitiesQuery.error)}
+        </Text>
       )}
       {dayEvents.length === 0 ? (
         <Card style={styles.cardEmpty}>
