@@ -1,17 +1,11 @@
 import React, { useMemo, useState } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
-import {
-  Text,
-  Card,
-  List,
-  Button,
-  SegmentedButtons,
-  IconButton,
-} from "react-native-paper";
+import { Text, Card, Button, SegmentedButtons } from "react-native-paper";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import { Activity } from "@elepad/api-client";
 import { COLORS } from "@/styles/base";
 import type { getActivitiesFamilyCodeIdFamilyGroupResponse } from "@elepad/api-client";
+import ActivityItem from "./ActivityItem";
 
 interface CalendarCardProps {
   idFamilyGroup: string;
@@ -207,85 +201,13 @@ export default function CalendarCard(props: CalendarCardProps) {
           data={dayEvents.sort((a, b) => a.startsAt.localeCompare(b.startsAt))}
           keyExtractor={(i) => i.id}
           renderItem={({ item }) => (
-            <Card
-              style={[
-                styles.card,
-                item.completed && { backgroundColor: "#d4edda" },
-              ]}
-            >
-              <List.Item
-                titleStyle={
-                  item.completed && { textDecorationLine: "line-through" }
-                }
-                title={item.title}
-                description={(() => {
-                  const startDateObj = new Date(item.startsAt);
-                  const endDateObj = item.endsAt ? new Date(item.endsAt) : null;
-
-                  // Comparar fechas en hora local
-                  const startDateLocal =
-                    startDateObj.toLocaleDateString("en-CA"); // formato YYYY-MM-DD
-                  const endDateLocal = endDateObj?.toLocaleDateString("en-CA");
-                  const actualToday = new Date().toLocaleDateString("en-CA");
-
-                  const isActuallyToday = startDateLocal === actualToday;
-
-                  const startTime = startDateObj.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  });
-
-                  // Si la actividad no es de hoy (fecha actual), mostrar fecha completa de inicio
-                  const startDisplay = isActuallyToday
-                    ? startTime
-                    : `${startDateObj.toLocaleDateString([], {
-                        day: "numeric",
-                        month: "short",
-                      })} ${startTime}`;
-
-                  if (!endDateObj) return startDisplay;
-
-                  const endTime = endDateObj.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  });
-
-                  if (startDateLocal === endDateLocal) {
-                    // Mismo día local - solo mostrar hora de fin
-                    return `${startDisplay} - ${endTime}`;
-                  } else {
-                    // Diferente día - mostrar fecha completa de fin
-                    const endDateFormatted = endDateObj.toLocaleDateString([], {
-                      day: "numeric",
-                      month: "short",
-                    });
-                    return `${startDisplay} - ${endDateFormatted} ${endTime}`;
-                  }
-                })()}
-                left={() => (
-                  <IconButton
-                    icon="check"
-                    iconColor={item.completed ? "#28a745" : "#6c757d"}
-                    size={20}
-                    onPress={() => onToggleComplete(item)}
-                  />
-                )}
-                right={() =>
-                  item.createdBy === idUser ? (
-                    <View
-                      style={{ flexDirection: "row", alignItems: "center" }}
-                    >
-                      <Button compact onPress={() => onEdit(item)}>
-                        Editar
-                      </Button>
-                      <Button compact onPress={() => onDelete(item.id)}>
-                        Borrar
-                      </Button>
-                    </View>
-                  ) : null
-                }
-              />
-            </Card>
+            <ActivityItem
+              item={item}
+              idUser={idUser}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onToggleComplete={onToggleComplete}
+            />
           )}
         />
       )}
@@ -311,12 +233,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 12,
     marginTop: 16,
-  },
-  card: {
-    marginBottom: 12,
-    borderRadius: 12,
-    elevation: 1,
-    backgroundColor: "#fff",
   },
   cardEmpty: {
     marginTop: 20,
