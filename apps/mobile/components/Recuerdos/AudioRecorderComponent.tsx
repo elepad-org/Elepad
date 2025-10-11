@@ -1,7 +1,14 @@
 import { useState, useEffect } from "react";
 import { View, TouchableOpacity, Alert } from "react-native";
 import { Text, IconButton } from "react-native-paper";
-import { Audio } from "expo-av";
+import {
+  useAudioRecorder,
+  useAudioPlayer,
+  useAudioRecorderState,
+  RecordingPresets,
+  requestRecordingPermissionsAsync,
+  setAudioModeAsync,
+} from "expo-audio";
 import { STYLES, COLORS } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
 
@@ -16,29 +23,31 @@ export default function AudioRecorderComponent({
   onCancel,
   isUploading = false,
 }: AudioRecorderProps) {
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordingDuration, setRecordingDuration] = useState(0);
   const [audioUri, setAudioUri] = useState<string | null>(null);
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const player = useAudioPlayer(audioUri);
+  const recorderState = useAudioRecorderState(recorder);
+
+  // Watch for recording completion and set audioUri
   useEffect(() => {
-    let interval: number | null = null;
-    if (isRecording) {
-      interval = window.setInterval(() => {
-        setRecordingDuration((prev) => prev + 1);
-      }, 1000);
+    if (recorderState.url && !audioUri) {
+      setAudioUri(recorderState.url);
     }
-    return () => {
-      if (interval) clearInterval(interval);
-      if (sound) sound.unloadAsync();
-    };
-  }, [isRecording, sound]);
+  }, [recorderState.url, audioUri]);
+
+  // Watch for audio playback completion
+  useEffect(() => {
+    if (player && !player.playing && isPlaying) {
+      // Audio has stopped playing, reset the playing state
+      setIsPlaying(false);
+    }
+  }, [player?.playing, isPlaying]);
 
   const requestPermissions = async () => {
     try {
-      const { status } = await Audio.requestPermissionsAsync();
+      const { status } = await requestRecordingPermissionsAsync();
       if (status !== "granted") {
         Alert.alert(
           "Permisos insuficientes",
@@ -46,9 +55,9 @@ export default function AudioRecorderComponent({
         );
         return false;
       }
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
+      await setAudioModeAsync({
+        allowsRecording: true,
+        playsInSilentMode: true,
       });
       return true;
     } catch {
@@ -62,53 +71,34 @@ export default function AudioRecorderComponent({
     if (!hasPermission) return;
 
     try {
-      setRecordingDuration(0);
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY,
-      );
-      setRecording(recording);
-      setIsRecording(true);
-    } catch {
+      await recorder.prepareToRecordAsync();
+      recorder.record();
+    } catch (error) {
+      console.error("Error al iniciar grabación:", error);
       Alert.alert("Error", "No se pudo iniciar la grabación");
     }
   };
 
   const stopRecording = async () => {
-    if (!recording) return;
     try {
-      await recording.stopAndUnloadAsync();
-      const uri = recording.getURI();
-      setRecording(null);
-      setIsRecording(false);
-      if (uri) setAudioUri(uri);
-    } catch {
-      console.error("Error al detener grabación");
+      await recorder.stop();
+    } catch (error) {
+      console.error("Error al detener grabación:", error);
     }
   };
 
-  const playSound = async () => {
-    if (!audioUri) return;
+  const playSound = () => {
+    if (!audioUri || !player) return;
     try {
-      if (sound) await sound.unloadAsync();
-      const { sound: newSound } = await Audio.Sound.createAsync({
-        uri: audioUri,
-      });
-      setSound(newSound);
-      setIsPlaying(true);
-      await newSound.playAsync();
-      newSound.setOnPlaybackStatusUpdate(
-        (status: {
-          isLoaded?: boolean;
-          isPlaying?: boolean;
-          didJustFinish?: boolean;
-        }) => {
-          if (status.isLoaded && !status.isPlaying && status.didJustFinish) {
-            setIsPlaying(false);
-          }
-        },
-      );
-    } catch {
-      console.error("Error al reproducir audio");
+      if (isPlaying) {
+        player.pause();
+        setIsPlaying(false);
+      } else {
+        player.play();
+        setIsPlaying(true);
+      }
+    } catch (error) {
+      console.error("Error al reproducir audio:", error);
     }
   };
 
@@ -129,20 +119,20 @@ export default function AudioRecorderComponent({
       <Text style={STYLES.heading}>Grabar audio</Text>
 
       <Text style={{ ...STYLES.subheading, marginBottom: 16 }}>
-        {isRecording
-          ? `Grabando... ${formatTime(recordingDuration)}`
+        {recorderState.isRecording
+          ? `Grabando... ${formatTime(Math.floor(recorderState.durationMillis / 1000))}`
           : audioUri
             ? "Audio grabado - Presiona reproducir para escuchar"
             : "Presiona el botón para comenzar a grabar"}
       </Text>
 
       <View style={{ alignItems: "center", marginVertical: 20 }}>
-        {audioUri && !isRecording ? (
+        {audioUri && !recorderState.isRecording ? (
           <IconButton
             icon={isPlaying ? "pause" : "play"}
             size={50}
             iconColor={COLORS.primary}
-            onPress={isPlaying ? () => sound?.pauseAsync() : playSound}
+            onPress={playSound}
             style={{ backgroundColor: COLORS.accent }}
           />
         ) : (
@@ -155,23 +145,27 @@ export default function AudioRecorderComponent({
               justifyContent: "center",
               alignItems: "center",
               borderWidth: 2,
-              borderColor: isRecording ? COLORS.error : COLORS.primary,
+              borderColor: recorderState.isRecording
+                ? COLORS.error
+                : COLORS.primary,
             }}
-            onPress={isRecording ? stopRecording : startRecording}
+            onPress={recorderState.isRecording ? stopRecording : startRecording}
           >
             <View
               style={{
-                width: isRecording ? 30 : 50,
-                height: isRecording ? 30 : 50,
-                borderRadius: isRecording ? 5 : 25,
-                backgroundColor: isRecording ? COLORS.error : COLORS.primary,
+                width: recorderState.isRecording ? 30 : 50,
+                height: recorderState.isRecording ? 30 : 50,
+                borderRadius: recorderState.isRecording ? 5 : 25,
+                backgroundColor: recorderState.isRecording
+                  ? COLORS.error
+                  : COLORS.primary,
               }}
             />
           </TouchableOpacity>
         )}
       </View>
 
-      {audioUri && !isRecording && (
+      {audioUri && !recorderState.isRecording && (
         <View
           style={{
             flexDirection: "row",

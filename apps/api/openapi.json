@@ -16,7 +16,10 @@
             "type": "string"
           }
         },
-        "required": ["ok", "timestamp"]
+        "required": [
+          "ok",
+          "timestamp"
+        ]
       },
       "User": {
         "type": "object",
@@ -44,7 +47,13 @@
             "format": "uuid"
           }
         },
-        "required": ["id", "email", "displayName", "avatarUrl", "groupId"]
+        "required": [
+          "id",
+          "email",
+          "displayName",
+          "avatarUrl",
+          "groupId"
+        ]
       },
       "Error": {
         "type": "object",
@@ -59,10 +68,14 @@
                 "nullable": true
               }
             },
-            "required": ["message"]
+            "required": [
+              "message"
+            ]
           }
         },
-        "required": ["error"]
+        "required": [
+          "error"
+        ]
       },
       "UpdateUser": {
         "type": "object",
@@ -89,7 +102,10 @@
             "format": "uuid"
           }
         },
-        "required": ["name", "ownerUserId"]
+        "required": [
+          "name",
+          "ownerUserId"
+        ]
       },
       "AddUserWithCode": {
         "type": "object",
@@ -103,7 +119,10 @@
             "minLength": 1
           }
         },
-        "required": ["userId", "invitationCode"]
+        "required": [
+          "userId",
+          "invitationCode"
+        ]
       },
       "UpdateFamilyGroup": {
         "type": "object",
@@ -113,7 +132,9 @@
             "minLength": 1
           }
         },
-        "required": ["name"],
+        "required": [
+          "name"
+        ],
         "additionalProperties": false
       },
       "TransferOwnership": {
@@ -124,7 +145,9 @@
             "format": "uuid"
           }
         },
-        "required": ["newOwnerId"],
+        "required": [
+          "newOwnerId"
+        ],
         "additionalProperties": false
       },
       "Activity": {
@@ -207,7 +230,11 @@
             "format": "uuid"
           }
         },
-        "required": ["title", "startsAt", "createdBy"]
+        "required": [
+          "title",
+          "startsAt",
+          "createdBy"
+        ]
       },
       "UpdateActivity": {
         "type": "object",
@@ -229,7 +256,9 @@
             "type": "boolean"
           }
         },
-        "required": ["startsAt"],
+        "required": [
+          "startsAt"
+        ],
         "additionalProperties": false
       },
       "Memory": {
@@ -290,7 +319,9 @@
   "paths": {
     "/health": {
       "get": {
-        "tags": ["health"],
+        "tags": [
+          "health"
+        ],
         "responses": {
           "200": {
             "description": "Health check",
@@ -307,7 +338,9 @@
     },
     "/users/{id}": {
       "get": {
-        "tags": ["users"],
+        "tags": [
+          "users"
+        ],
         "parameters": [
           {
             "schema": {
@@ -336,7 +369,9 @@
         }
       },
       "patch": {
-        "tags": ["users"],
+        "tags": [
+          "users"
+        ],
         "parameters": [
           {
             "schema": {
@@ -404,7 +439,9 @@
     },
     "/users/{id}/avatar": {
       "patch": {
-        "tags": ["users"],
+        "tags": [
+          "users"
+        ],
         "parameters": [
           {
             "schema": {
@@ -478,7 +515,9 @@
     },
     "/familyGroup/create": {
       "post": {
-        "tags": ["familyGroups"],
+        "tags": [
+          "familyGroups"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -518,7 +557,9 @@
     },
     "/familyGroup/link": {
       "post": {
-        "tags": ["familyGroups"],
+        "tags": [
+          "familyGroups"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -568,7 +609,9 @@
     },
     "/familyGroup/{idGroup}/invite": {
       "get": {
-        "tags": ["familyGroups"],
+        "tags": [
+          "familyGroups"
+        ],
         "parameters": [
           {
             "schema": {
@@ -619,7 +662,9 @@
     },
     "/familyGroup/{idGroup}/members": {
       "get": {
-        "tags": ["familyGroups"],
+        "tags": [
+          "familyGroups"
+        ],
         "parameters": [
           {
             "schema": {
@@ -657,7 +702,11 @@
                           "nullable": true
                         }
                       },
-                      "required": ["id", "displayName", "avatarUrl"]
+                      "required": [
+                        "id",
+                        "displayName",
+                        "avatarUrl"
+                      ]
                     },
                     "members": {
                       "type": "array",
@@ -676,11 +725,19 @@
                             "nullable": true
                           }
                         },
-                        "required": ["id", "displayName", "avatarUrl"]
+                        "required": [
+                          "id",
+                          "displayName",
+                          "avatarUrl"
+                        ]
                       }
                     }
                   },
-                  "required": ["name", "owner", "members"]
+                  "required": [
+                    "name",
+                    "owner",
+                    "members"
+                  ]
                 }
               }
             }
@@ -720,7 +777,9 @@
     },
     "/familyGroup/{idGroup}/member/{idUser}": {
       "delete": {
-        "tags": ["familyGroups"],
+        "tags": [
+          "familyGroups"
+        ],
         "operationId": "removeUserFromFamilyGroup",
         "parameters": [
           {
@@ -801,7 +860,9 @@
     },
     "/familyGroup/{idGroup}": {
       "patch": {
-        "tags": ["familyGroups"],
+        "tags": [
+          "familyGroups"
+        ],
         "parameters": [
           {
             "schema": {
@@ -843,7 +904,11 @@
                       "format": "uuid"
                     }
                   },
-                  "required": ["id", "name", "ownerUserId"]
+                  "required": [
+                    "id",
+                    "name",
+                    "ownerUserId"
+                  ]
                 }
               }
             }
@@ -883,7 +948,9 @@
     },
     "/familyGroup/{idGroup}/transfer-ownership": {
       "put": {
-        "tags": ["familyGroups"],
+        "tags": [
+          "familyGroups"
+        ],
         "operationId": "transferFamilyGroupOwnership",
         "parameters": [
           {
@@ -932,7 +999,12 @@
                           "type": "string"
                         }
                       },
-                      "required": ["id", "name", "ownerUserId", "createdAt"]
+                      "required": [
+                        "id",
+                        "name",
+                        "ownerUserId",
+                        "createdAt"
+                      ]
                     },
                     "previousOwner": {
                       "type": "object",
@@ -942,7 +1014,9 @@
                           "format": "uuid"
                         }
                       },
-                      "required": ["id"]
+                      "required": [
+                        "id"
+                      ]
                     },
                     "newOwner": {
                       "type": "object",
@@ -955,10 +1029,17 @@
                           "type": "string"
                         }
                       },
-                      "required": ["id", "displayName"]
+                      "required": [
+                        "id",
+                        "displayName"
+                      ]
                     }
                   },
-                  "required": ["group", "previousOwner", "newOwner"]
+                  "required": [
+                    "group",
+                    "previousOwner",
+                    "newOwner"
+                  ]
                 }
               }
             }
@@ -1018,7 +1099,9 @@
     },
     "/activities/{id}": {
       "get": {
-        "tags": ["activities"],
+        "tags": [
+          "activities"
+        ],
         "parameters": [
           {
             "schema": {
@@ -1064,7 +1147,9 @@
         }
       },
       "patch": {
-        "tags": ["activities"],
+        "tags": [
+          "activities"
+        ],
         "parameters": [
           {
             "schema": {
@@ -1130,7 +1215,9 @@
         }
       },
       "delete": {
-        "tags": ["activities"],
+        "tags": [
+          "activities"
+        ],
         "parameters": [
           {
             "schema": {
@@ -1171,7 +1258,9 @@
     },
     "/activities/familyCode/{idFamilyGroup}": {
       "get": {
-        "tags": ["activities"],
+        "tags": [
+          "activities"
+        ],
         "parameters": [
           {
             "schema": {
@@ -1222,7 +1311,9 @@
     },
     "/activities": {
       "post": {
-        "tags": ["activities"],
+        "tags": [
+          "activities"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1269,7 +1360,9 @@
     },
     "/memories": {
       "get": {
-        "tags": ["memories"],
+        "tags": [
+          "memories"
+        ],
         "parameters": [
           {
             "schema": {
@@ -1346,7 +1439,12 @@
                       "type": "number"
                     }
                   },
-                  "required": ["data", "total", "limit", "offset"]
+                  "required": [
+                    "data",
+                    "total",
+                    "limit",
+                    "offset"
+                  ]
                 }
               }
             }
@@ -1376,7 +1474,9 @@
     },
     "/memories/{id}": {
       "get": {
-        "tags": ["memories"],
+        "tags": [
+          "memories"
+        ],
         "parameters": [
           {
             "schema": {
@@ -1432,7 +1532,9 @@
         }
       },
       "delete": {
-        "tags": ["memories"],
+        "tags": [
+          "memories"
+        ],
         "operationId": "deleteMemory",
         "parameters": [
           {
@@ -1504,7 +1606,9 @@
     },
     "/memories/upload": {
       "post": {
-        "tags": ["memories"],
+        "tags": [
+          "memories"
+        ],
         "operationId": "createMemoryWithMedia",
         "requestBody": {
           "required": true,
@@ -1533,7 +1637,11 @@
                     "description": "Media file to upload (image, video, or audio)"
                   }
                 },
-                "required": ["bookId", "groupId", "image"]
+                "required": [
+                  "bookId",
+                  "groupId",
+                  "image"
+                ]
               }
             }
           }
