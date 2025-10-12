@@ -7,6 +7,8 @@ import { COLORS } from "@/styles/base";
 import type { getActivitiesFamilyCodeIdFamilyGroupResponse } from "@elepad/api-client";
 import ActivityItem from "./ActivityItem";
 
+import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
+
 interface CalendarCardProps {
   idFamilyGroup: string;
   idUser: string;
@@ -19,7 +21,8 @@ interface CalendarCardProps {
   onEdit: (ev: Activity) => void;
   onDelete: (id: string) => void;
   onToggleComplete: (ev: Activity) => void;
-  setFormVisible: (v: boolean) => void;
+  isOwnerOfGroup: boolean;
+  groupInfo?: GetFamilyGroupIdGroupMembers200;
 }
 
 // Configuración de calendario en español
@@ -73,7 +76,8 @@ export default function CalendarCard(props: CalendarCardProps) {
     onEdit,
     onDelete,
     onToggleComplete,
-    setFormVisible,
+    isOwnerOfGroup,
+    groupInfo,
   } = props;
   const today = new Date().toISOString().slice(0, 10);
   const [selectedDay, setSelectedDay] = useState<string>(today);
@@ -133,43 +137,36 @@ export default function CalendarCard(props: CalendarCardProps) {
 
   return (
     <View style={styles.container}>
-      <Calendar
-        onDayPress={(d: DateData) => setSelectedDay(d.dateString)}
-        markedDates={marked}
-        enableSwipeMonths
-        style={styles.calendar}
-        theme={{
-          backgroundColor: "#ffffff",
-          calendarBackground: "#ffffff",
-          textSectionTitleColor: "#555",
-          selectedDayBackgroundColor: "#82bcfeff",
-          selectedDayTextColor: "#fff",
-          todayTextColor: "#ff2020ff",
-          dayTextColor: "#333",
-          textDisabledColor: "#ccc",
-          monthTextColor: "#4A4A4A",
-          textMonthFontSize: 20,
-          textDayFontSize: 18,
-          textDayHeaderFontSize: 14,
-        }}
-      />
-
-      <View style={styles.headerRow}>
-        <Text variant="titleMedium">Eventos — {selectedDay}</Text>
+      <View style={styles.calendarWrapper}>
+        <Calendar
+          onDayPress={(d: DateData) => setSelectedDay(d.dateString)}
+          markedDates={marked}
+          enableSwipeMonths
+          style={styles.calendar}
+          theme={{
+            backgroundColor: "#ffffff",
+            calendarBackground: "#ffffff",
+            textSectionTitleColor: "#555",
+            selectedDayBackgroundColor: "#82bcfeff",
+            selectedDayTextColor: "#fff",
+            todayTextColor: "#ff2020ff",
+            dayTextColor: "#333",
+            textDisabledColor: "#ccc",
+            monthTextColor: "#4A4A4A",
+            textMonthFontSize: 20,
+            textDayFontSize: 18,
+            textDayHeaderFontSize: 14,
+          }}
+        />
         <Button
+          mode="outlined"
           onPress={() => {
             setSelectedDay(today);
           }}
+          style={styles.todayButton}
+          compact
         >
           Hoy
-        </Button>
-        <Button
-          onPress={() => {
-            setFormVisible(true);
-          }}
-          icon="plus"
-        >
-          Nuevo
         </Button>
       </View>
 
@@ -180,7 +177,7 @@ export default function CalendarCard(props: CalendarCardProps) {
           { value: "all", label: "Todos" },
           { value: "mine", label: "Mis eventos" },
         ]}
-        style={{ marginBottom: 10 }}
+        style={styles.segmentedButtons}
       />
 
       {activitiesQuery.isLoading && <Text>Cargando...</Text>}
@@ -208,6 +205,8 @@ export default function CalendarCard(props: CalendarCardProps) {
               onEdit={onEdit}
               onDelete={onDelete}
               onToggleComplete={onToggleComplete}
+              isOwnerOfGroup={isOwnerOfGroup}
+              groupInfo={groupInfo}
             />
           )}
         />
@@ -219,21 +218,28 @@ export default function CalendarCard(props: CalendarCardProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    margin: 5,
+    paddingHorizontal: 16,
     backgroundColor: COLORS.background,
+  },
+  calendarWrapper: {
+    position: "relative",
+    marginTop: 16,
+    marginBottom: 16,
   },
   calendar: {
     borderRadius: 16,
-    elevation: 3,
-    marginVertical: 20,
+    elevation: 2,
     padding: 8,
   },
-  headerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-    marginTop: 16,
+  todayButton: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    minWidth: 60,
+    borderRadius: 8,
+  },
+  segmentedButtons: {
+    marginBottom: 16,
   },
   cardEmpty: {
     marginTop: 20,
