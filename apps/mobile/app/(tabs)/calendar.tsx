@@ -13,10 +13,13 @@ import {
   UpdateActivity,
   useGetActivitiesFamilyCodeIdFamilyGroup,
   getActivitiesFamilyCodeIdFamilyGroupResponse,
+  useGetFamilyGroupIdGroupMembers,
+  GetFamilyGroupIdGroupMembers200,
 } from "@elepad/api-client";
 import { COLORS, STYLES as baseStyles } from "@/styles/base";
 import { Text, Modal, Button } from "react-native-paper";
 import AppDialog from "@/components/AppDialog";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CalendarScreen() {
   const { userElepad } = useAuth();
@@ -36,6 +39,23 @@ export default function CalendarScreen() {
   const [formVisible, setFormVisible] = useState(false);
   const [editing, setEditing] = useState<Activity | null>(null);
   const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(familyCode);
+  const membersQuery = useGetFamilyGroupIdGroupMembers(familyCode);
+
+  // Normaliza la respuesta del hook (envuelta en {data} o directa)
+  const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
+    const resp = membersQuery.data as
+      | { data?: GetFamilyGroupIdGroupMembers200 }
+      | GetFamilyGroupIdGroupMembers200
+      | undefined;
+    if (!resp) return undefined;
+    return (
+      (resp as { data?: GetFamilyGroupIdGroupMembers200 }).data ??
+      (resp as GetFamilyGroupIdGroupMembers200)
+    );
+  };
+
+  const groupInfo = selectGroupInfo();
+  const isOwnerOfGroup = groupInfo?.owner?.id === userElepad?.id;
 
   const postActivity = usePostActivities({
     mutation: {
@@ -248,17 +268,31 @@ export default function CalendarScreen() {
   };
 
   return (
-    <View style={baseStyles.safeArea}>
+    <SafeAreaView style={baseStyles.safeArea} edges={["top", "left", "right"]}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+
       <View
         style={{
-          flex: 1,
-          padding: 16,
-          paddingTop: "15%",
-          justifyContent: "flex-start",
+          paddingHorizontal: 24,
+          paddingVertical: 20,
+          borderBottomColor: COLORS.border,
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
         }}
       >
-        <Text style={baseStyles.superHeading}>Calendario Grupal</Text>
+        <Text style={baseStyles.superHeading}>Calendario</Text>
+        <Button
+          mode="contained"
+          onPress={() => setFormVisible(true)}
+          style={{ ...baseStyles.miniButton }}
+          icon="plus"
+        >
+          Agregar
+        </Button>
+      </View>
+
+      <View style={{ flex: 1 }}>
         <CalendarCard
           idFamilyGroup={familyCode}
           idUser={idUser}
@@ -266,55 +300,53 @@ export default function CalendarScreen() {
           onEdit={handleEdit}
           onDelete={handleConfirmDelete}
           onToggleComplete={handleToggleComplete}
-          setFormVisible={setFormVisible}
+          isOwnerOfGroup={isOwnerOfGroup}
+          groupInfo={groupInfo}
         />
-        <AppDialog
-          visible={dialogVisible}
-          onClose={hideDialog}
-          title={dialogTitle}
-          message={dialogMessage}
-        />
-        <ActivityForm
-          visible={formVisible}
-          onClose={() => {
-            setFormVisible(false);
-            setEditing(null);
-          }}
-          onSave={handleSave}
-          initial={editing ?? null}
-        />
-
-        <Modal
-          visible={deleteModalVisible}
-          onDismiss={() => setDeleteModalVisible(false)}
-          contentContainerStyle={{
-            backgroundColor: "#fff",
-            padding: 24,
-            margin: 32,
-            borderRadius: 16,
-          }}
-        >
-          <Text style={{ fontSize: 18, marginBottom: 16 }}>
-            ¿Seguro que quieres eliminar este evento?
-          </Text>
-          <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
-            <Button
-              onPress={() => setDeleteModalVisible(false)}
-              style={{ marginRight: 8 }}
-              mode="outlined"
-            >
-              Cancelar
-            </Button>
-            <Button
-              onPress={handleDelete}
-              mode="contained"
-              buttonColor="#ff2020"
-            >
-              Eliminar
-            </Button>
-          </View>
-        </Modal>
       </View>
-    </View>
+
+      <AppDialog
+        visible={dialogVisible}
+        onClose={hideDialog}
+        title={dialogTitle}
+        message={dialogMessage}
+      />
+      <ActivityForm
+        visible={formVisible}
+        onClose={() => {
+          setFormVisible(false);
+          setEditing(null);
+        }}
+        onSave={handleSave}
+        initial={editing ?? null}
+      />
+
+      <Modal
+        visible={deleteModalVisible}
+        onDismiss={() => setDeleteModalVisible(false)}
+        contentContainerStyle={{
+          backgroundColor: "#fff",
+          padding: 24,
+          margin: 32,
+          borderRadius: 16,
+        }}
+      >
+        <Text style={{ fontSize: 18, marginBottom: 16 }}>
+          ¿Seguro que quieres eliminar este evento?
+        </Text>
+        <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
+          <Button
+            onPress={() => setDeleteModalVisible(false)}
+            style={{ marginRight: 8 }}
+            mode="outlined"
+          >
+            Cancelar
+          </Button>
+          <Button onPress={handleDelete} mode="contained" buttonColor="#ff2020">
+            Eliminar
+          </Button>
+        </View>
+      </Modal>
+    </SafeAreaView>
   );
 }
