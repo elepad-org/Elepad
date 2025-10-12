@@ -1,8 +1,16 @@
-import { useEffect, useState } from "react";
-import { View, StyleSheet } from "react-native";
-import { Modal, TextInput, Button, Text, Checkbox } from "react-native-paper";
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet, ScrollView } from "react-native";
+import {
+  Modal,
+  TextInput,
+  Button,
+  Text,
+  Checkbox,
+  Menu,
+} from "react-native-paper";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import type { Activity } from "@elepad/api-client";
+import { useGetFrequencies } from "@elepad/api-client";
 
 type Props = {
   visible: boolean;
@@ -26,10 +34,29 @@ export default function ActivityForm({
     initial?.endsAt ? new Date(initial.endsAt) : undefined,
   );
   const [completed, setCompleted] = useState(initial?.completed ?? false);
+  const [frequencyId, setFrequencyId] = useState<string | undefined>(
+    initial?.frequencyId || undefined,
+  );
   const [saving, setSaving] = useState(false);
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
+  const [showFrequencyMenu, setShowFrequencyMenu] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Fetch available frequencies
+  const frequenciesQuery = useGetFrequencies();
+
+  // Extract frequencies from response
+  const frequencies = (() => {
+    if (!frequenciesQuery.data) return [];
+    const data = frequenciesQuery.data as any;
+    if (Array.isArray(data)) return data;
+    if (data.data && Array.isArray(data.data)) return data.data;
+    return [];
+  })();
+
+  const selectedFrequency = frequencies.find((f: any) => f.id === frequencyId);
+  const frequencyLabel = selectedFrequency?.label || "Una vez";
 
   useEffect(() => {
     if (visible) {
@@ -40,6 +67,7 @@ export default function ActivityForm({
       );
       setEndsAtDate(initial?.endsAt ? new Date(initial.endsAt) : undefined);
       setCompleted(initial?.completed ?? false);
+      setFrequencyId(initial?.frequencyId || undefined);
       setError(null);
     }
   }, [visible, initial]);
@@ -71,6 +99,7 @@ export default function ActivityForm({
           startsAt: startsAtDate.toISOString(),
           endsAt: endsAtDate ? endsAtDate.toISOString() : undefined,
           completed,
+          frequencyId: frequencyId || null,
         }),
         timeoutPromise,
       ]);
@@ -108,94 +137,123 @@ export default function ActivityForm({
       contentContainerStyle={styles.modal}
       theme={{ colors: { backdrop: "rgba(255, 255, 255, 0.82)" } }}
     >
-      <Text variant="titleLarge" style={styles.heading}>
-        {initial ? "Editar evento" : "Nuevo evento"}
-      </Text>
-
-      <TextInput
-        label="Título"
-        value={title}
-        onChangeText={setTitle}
-        style={styles.input}
-      />
-      <TextInput
-        label="Descripción"
-        value={description}
-        onChangeText={setDescription}
-        multiline
-        style={styles.input}
-      />
-
-      <View style={styles.pickerRow}>
-        <Button
-          mode="outlined"
-          onPress={() => setShowStartPicker(true)}
-          style={styles.pickerButton}
-        >
-          Inicio: {formatDateTime(startsAtDate)}
-        </Button>
-      </View>
-
-      <View style={styles.pickerRow}>
-        <Button
-          mode="outlined"
-          onPress={() => setShowEndPicker(true)}
-          style={styles.pickerButton}
-        >
-          Fin: {formatDateTime(endsAtDate)}
-        </Button>
-      </View>
-
-      <DateTimePickerModal
-        isVisible={showStartPicker}
-        date={startsAtDate}
-        mode="datetime"
-        onConfirm={(date) => {
-          setShowStartPicker(false);
-          setStartsAtDate(date);
-        }}
-        onCancel={() => setShowStartPicker(false)}
-      />
-      <DateTimePickerModal
-        isVisible={showEndPicker}
-        date={endsAtDate ?? new Date()}
-        mode="datetime"
-        onConfirm={(date) => {
-          setShowEndPicker(false);
-          setEndsAtDate(date);
-        }}
-        onCancel={() => setShowEndPicker(false)}
-      />
-
-      <View style={styles.row}>
-        <Checkbox
-          status={completed ? "checked" : "unchecked"}
-          onPress={() => setCompleted(!completed)}
-        />
-        <Text
-          onPress={() => setCompleted(!completed)}
-          style={styles.checkboxLabel}
-        >
-          Completado
+      <ScrollView>
+        <Text variant="titleLarge" style={styles.heading}>
+          {initial ? "Editar evento" : "Nuevo evento"}
         </Text>
-      </View>
 
-      {error && <Text style={styles.error}>{error}</Text>}
+        <TextInput
+          label="Título"
+          value={title}
+          onChangeText={setTitle}
+          style={styles.input}
+        />
+        <TextInput
+          label="Descripción"
+          value={description}
+          onChangeText={setDescription}
+          multiline
+          style={styles.input}
+        />
 
-      <View style={styles.actions}>
-        <Button mode="outlined" onPress={onClose} style={styles.actionBtn}>
-          Cancelar
-        </Button>
-        <Button
-          mode="contained"
-          onPress={handleSave}
-          loading={saving}
-          disabled={saving || !startsAtDate}
-          style={styles.actionBtn}
-        >
-          Guardar
-        </Button>
-      </View>
+        <View style={styles.pickerRow}>
+          <Button
+            mode="outlined"
+            onPress={() => setShowStartPicker(true)}
+            style={styles.pickerButton}
+          >
+            Inicio: {formatDateTime(startsAtDate)}
+          </Button>
+        </View>
+
+        <View style={styles.pickerRow}>
+          <Button
+            mode="outlined"
+            onPress={() => setShowEndPicker(true)}
+            style={styles.pickerButton}
+          >
+            Fin: {formatDateTime(endsAtDate)}
+          </Button>
+        </View>
+
+        <View style={styles.pickerRow}>
+          <Menu
+            visible={showFrequencyMenu}
+            onDismiss={() => setShowFrequencyMenu(false)}
+            anchor={
+              <Button
+                mode="outlined"
+                onPress={() => setShowFrequencyMenu(true)}
+                style={styles.pickerButton}
+              >
+                Frecuencia: {frequencyLabel}
+              </Button>
+            }
+          >
+            {frequencies.map((freq: any) => (
+              <Menu.Item
+                key={freq.id}
+                onPress={() => {
+                  setFrequencyId(freq.id);
+                  setShowFrequencyMenu(false);
+                }}
+                title={freq.label}
+              />
+            ))}
+          </Menu>
+        </View>
+
+        <DateTimePickerModal
+          isVisible={showStartPicker}
+          date={startsAtDate}
+          mode="datetime"
+          onConfirm={(date) => {
+            setShowStartPicker(false);
+            setStartsAtDate(date);
+          }}
+          onCancel={() => setShowStartPicker(false)}
+        />
+        <DateTimePickerModal
+          isVisible={showEndPicker}
+          date={endsAtDate ?? new Date()}
+          mode="datetime"
+          onConfirm={(date) => {
+            setShowEndPicker(false);
+            setEndsAtDate(date);
+          }}
+          onCancel={() => setShowEndPicker(false)}
+        />
+
+        <View style={styles.row}>
+          <Checkbox
+            status={completed ? "checked" : "unchecked"}
+            onPress={() => setCompleted(!completed)}
+          />
+          <Text
+            onPress={() => setCompleted(!completed)}
+            style={styles.checkboxLabel}
+          >
+            Completado
+          </Text>
+        </View>
+
+        {error && <Text style={styles.error}>{error}</Text>}
+
+        <View style={styles.actions}>
+          <Button mode="outlined" onPress={onClose} style={styles.actionBtn}>
+            Cancelar
+          </Button>
+          <Button
+            mode="contained"
+            onPress={handleSave}
+            loading={saving}
+            disabled={saving || !startsAtDate}
+            style={styles.actionBtn}
+          >
+            Guardar
+          </Button>
+        </View>
+      </ScrollView>
     </Modal>
   );
 }

@@ -12,6 +12,7 @@ import { familyGroupApp } from "./modules/familyGroups/handler.js";
 import { activitiesApp } from "./modules/activities/handler.js";
 import { Database } from "./supabase-types.js";
 import { memoriesApp } from "./modules/memories/handler.js";
+import { frequenciesApp } from "./modules/frequencies/handler.js";
 
 const app = new OpenAPIHono();
 
@@ -66,12 +67,18 @@ app.route("/", usersApp);
 app.route("/", familyGroupApp);
 app.route("/", activitiesApp);
 app.route("/", memoriesApp);
+app.route("/", frequenciesApp);
 
 // OpenAPI spec.
 app.doc("/openapi.json", {
   openapi: "3.1.0",
   info: { title: "Elepad API", version: "1.0.0" },
-  tags: [{ name: "users" }, { name: "memories" }, { name: "familyGroups" }],
+  tags: [
+    { name: "users" },
+    { name: "memories" },
+    { name: "familyGroups" },
+    { name: "frequencies" },
+  ],
 });
 
 // Serve OpenAPI documentation with SwaggerUI.
