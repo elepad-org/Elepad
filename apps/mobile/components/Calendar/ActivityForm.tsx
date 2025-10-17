@@ -162,7 +162,7 @@ export default function ActivityForm({
             label="Título"
             value={title}
             onChangeText={setTitle}
-            style={styles.input}
+            style={styles.inputFirst}
             mode="outlined"
           />
           <TextInput
@@ -273,6 +273,10 @@ export default function ActivityForm({
 }
 
 const styles = StyleSheet.create({
+  inputFirst: {
+    marginBottom: 14,
+    backgroundColor: "transparent",
+  },
   input: {
     marginBottom: 14,
     backgroundColor: "transparent",
