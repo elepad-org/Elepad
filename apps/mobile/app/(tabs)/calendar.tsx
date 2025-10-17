@@ -17,9 +17,10 @@ import {
   GetFamilyGroupIdGroupMembers200,
 } from "@elepad/api-client";
 import { COLORS, STYLES as baseStyles } from "@/styles/base";
-import { Text, Modal, Button } from "react-native-paper";
+import { Text, Dialog, Button } from "react-native-paper";
 import AppDialog from "@/components/AppDialog";
 import { SafeAreaView } from "react-native-safe-area-context";
+import CancelButton from "@/components/shared/CancelButton";
 
 export default function CalendarScreen() {
   const { userElepad } = useAuth();
@@ -319,32 +320,43 @@ export default function CalendarScreen() {
         initial={editing ?? null}
       />
 
-      <Modal
+      <Dialog
         visible={deleteModalVisible}
         onDismiss={() => setDeleteModalVisible(false)}
-        contentContainerStyle={{
-          backgroundColor: "#fff",
-          padding: 24,
-          margin: 32,
+        style={{
+          backgroundColor: COLORS.background,
+          width: "90%",
+          alignSelf: "center",
           borderRadius: 16,
+          paddingVertical: 14,
         }}
       >
-        <Text style={{ fontSize: 18, marginBottom: 16 }}>
-          ¿Seguro que quieres eliminar este evento?
-        </Text>
-        <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
+        <Dialog.Title style={{ ...baseStyles.heading, paddingTop: 8 }}>
+          Eliminar evento
+        </Dialog.Title>
+        <Dialog.Content style={{ paddingBottom: 8 }}>
+          <Text style={{ ...baseStyles.subheading, marginTop: 0 }}>
+            ¿Estás seguro que quieres eliminar este evento?
+          </Text>
+        </Dialog.Content>
+        <Dialog.Actions
+          style={{
+            paddingBottom: 12,
+            paddingHorizontal: 20,
+            justifyContent: "space-between",
+          }}
+        >
+          <CancelButton onPress={() => setDeleteModalVisible(false)} />
           <Button
-            onPress={() => setDeleteModalVisible(false)}
-            style={{ marginRight: 8 }}
-            mode="outlined"
+            onPress={handleDelete}
+            mode="contained"
+            buttonColor={COLORS.red}
+            style={{ borderRadius: 20, paddingHorizontal: 24 }}
           >
-            Cancelar
-          </Button>
-          <Button onPress={handleDelete} mode="contained" buttonColor="#ff2020">
             Eliminar
           </Button>
-        </View>
-      </Modal>
+        </Dialog.Actions>
+      </Dialog>
     </SafeAreaView>
   );
 }
