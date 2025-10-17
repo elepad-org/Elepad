@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, StyleSheet } from "react-native";
-import { Text, Card, List, Button, IconButton } from "react-native-paper";
+import { Text, Card, List, IconButton } from "react-native-paper";
 import { Activity, GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 
 interface ActivityItemProps {
@@ -102,12 +102,16 @@ export default function ActivityItem({
         }
         onPress={hasDescription ? () => setExpanded(!expanded) : undefined}
         left={() => (
-          <IconButton
-            icon="check"
-            iconColor={item.completed ? "#28a745" : "#6c757d"}
-            size={20}
-            onPress={() => onToggleComplete(item)}
-          />
+          <View style={styles.checkboxContainer}>
+            <IconButton
+              icon={
+                item.completed ? "checkbox-marked" : "checkbox-blank-outline"
+              }
+              iconColor={item.completed ? "#28a745" : "#6c757d"}
+              size={24}
+              onPress={() => onToggleComplete(item)}
+            />
+          </View>
         )}
         right={() => (
           <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -120,24 +124,24 @@ export default function ActivityItem({
             )}
             {canEdit && (
               <>
-                <Button
-                  compact
+                <IconButton
+                  icon="pencil"
+                  iconColor="#007bff"
+                  size={20}
                   onPress={(e) => {
                     e.stopPropagation();
                     onEdit(item);
                   }}
-                >
-                  Editar
-                </Button>
-                <Button
-                  compact
+                />
+                <IconButton
+                  icon="delete"
+                  iconColor="#dc3545"
+                  size={20}
                   onPress={(e) => {
                     e.stopPropagation();
                     onDelete(item.id);
                   }}
-                >
-                  Borrar
-                </Button>
+                />
               </>
             )}
           </View>
@@ -159,14 +163,23 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderRadius: 12,
     elevation: 2,
-    backgroundColor: "#fff",
+    backgroundColor: "#eaf5ffff",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
+    borderLeftWidth: 4,
+    borderLeftColor: "#007bff", // o "#FF8C00"
   },
   completedCard: {
-    backgroundColor: "#d4edda",
+    backgroundColor: "#f6fcf8ff",
+    borderLeftWidth: 4,
+    borderLeftColor: "#dee2e6",
+    opacity: 0.7,
+  },
+  checkboxContainer: {
+    justifyContent: "center",
+    alignItems: "center",
   },
   timeText: {
     color: "#495057",
