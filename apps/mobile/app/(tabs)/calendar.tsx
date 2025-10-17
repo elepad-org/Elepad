@@ -83,9 +83,7 @@ export default function CalendarScreen() {
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000), // Exponential backoff: 1s, 2s
       onSuccess: async () => {
         setDialogTitle("Listo");
-        setDialogMessage(
-          "El estado de la actividad se actualizó correctamente.",
-        );
+        setDialogMessage("La actividad se actualizó correctamente.");
         setFormVisible(false);
         setEditing(null);
         showDialog();

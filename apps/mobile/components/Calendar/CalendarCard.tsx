@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
-import { Text, Card, Button, SegmentedButtons } from "react-native-paper";
+import { Text, Card, SegmentedButtons, IconButton } from "react-native-paper";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import { Activity } from "@elepad/api-client";
 import { COLORS } from "@/styles/base";
@@ -158,27 +158,30 @@ export default function CalendarCard(props: CalendarCardProps) {
             textDayHeaderFontSize: 14,
           }}
         />
-        <Button
-          mode="outlined"
+      </View>
+
+      <View style={styles.controlsRow}>
+        <SegmentedButtons
+          value={filter}
+          onValueChange={setFilter}
+          buttons={[
+            { value: "all", label: "Todos" },
+            { value: "mine", label: "Mis eventos" },
+          ]}
+          style={styles.segmentedButtons}
+        />
+        <IconButton
+          icon="calendar-today"
+          size={24}
+          mode="contained"
           onPress={() => {
             setSelectedDay(today);
           }}
-          style={styles.todayButton}
-          compact
-        >
-          Hoy
-        </Button>
+          style={styles.todayIconButton}
+          containerColor="#82bcfeff"
+          iconColor="#fff"
+        />
       </View>
-
-      <SegmentedButtons
-        value={filter}
-        onValueChange={setFilter}
-        buttons={[
-          { value: "all", label: "Todos" },
-          { value: "mine", label: "Mis eventos" },
-        ]}
-        style={styles.segmentedButtons}
-      />
 
       {activitiesQuery.isLoading && <Text>Cargando...</Text>}
       {!!activitiesQuery.error && (
@@ -231,15 +234,17 @@ const styles = StyleSheet.create({
     elevation: 2,
     padding: 8,
   },
-  todayButton: {
-    position: "absolute",
-    top: 8,
-    right: 8,
-    minWidth: 60,
-    borderRadius: 8,
+  controlsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 16,
   },
   segmentedButtons: {
-    marginBottom: 16,
+    flex: 1,
+  },
+  todayIconButton: {
+    margin: 0,
   },
   cardEmpty: {
     marginTop: 20,
