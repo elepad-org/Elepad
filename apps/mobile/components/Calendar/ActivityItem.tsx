@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { Text, Card, List, Button, IconButton } from "react-native-paper";
-import { Activity } from "@elepad/api-client";
+import { Activity, GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 
 interface ActivityItemProps {
   item: Activity;
@@ -9,6 +9,8 @@ interface ActivityItemProps {
   onEdit: (ev: Activity) => void;
   onDelete: (id: string) => void;
   onToggleComplete: (ev: Activity) => void;
+  isOwnerOfGroup: boolean;
+  groupInfo?: GetFamilyGroupIdGroupMembers200;
 }
 
 export default function ActivityItem({
@@ -17,8 +19,23 @@ export default function ActivityItem({
   onEdit,
   onDelete,
   onToggleComplete,
+  isOwnerOfGroup,
+  groupInfo,
 }: ActivityItemProps) {
   const [expanded, setExpanded] = useState(false);
+
+  // Find the owner of this activity
+  const activityOwner = (() => {
+    if (!groupInfo) return null;
+    if (groupInfo.owner.id === item.createdBy) {
+      return groupInfo.owner.displayName;
+    }
+    const member = groupInfo.members.find((m) => m.id === item.createdBy);
+    return member?.displayName || "Usuario desconocido";
+  })();
+
+  // Check if current user can edit this activity
+  const canEdit = item.createdBy === idUser || isOwnerOfGroup;
 
   const timeDescription = (() => {
     const startDateObj = new Date(item.startsAt);
@@ -67,13 +84,22 @@ export default function ActivityItem({
   const hasDescription = item.description && item.description.trim().length > 0;
 
   return (
-    <Card
-      style={[styles.card, item.completed && { backgroundColor: "#d4edda" }]}
-    >
+    <Card style={[styles.card, item.completed && styles.completedCard]}>
       <List.Item
         titleStyle={item.completed && { textDecorationLine: "line-through" }}
         title={item.title}
-        description={timeDescription}
+        description={
+          <View>
+            <Text variant="bodySmall" style={styles.timeText}>
+              {timeDescription}
+            </Text>
+            {activityOwner && (
+              <Text variant="bodySmall" style={styles.ownerText}>
+                Por: {activityOwner}
+              </Text>
+            )}
+          </View>
+        }
         onPress={hasDescription ? () => setExpanded(!expanded) : undefined}
         left={() => (
           <IconButton
@@ -92,7 +118,7 @@ export default function ActivityItem({
                 onPress={() => setExpanded(!expanded)}
               />
             )}
-            {item.createdBy === idUser && (
+            {canEdit && (
               <>
                 <Button
                   compact
@@ -132,8 +158,23 @@ const styles = StyleSheet.create({
   card: {
     marginBottom: 12,
     borderRadius: 12,
-    elevation: 1,
+    elevation: 2,
     backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  completedCard: {
+    backgroundColor: "#d4edda",
+  },
+  timeText: {
+    color: "#495057",
+    marginBottom: 2,
+  },
+  ownerText: {
+    color: "#6c757d",
+    fontStyle: "italic",
   },
   descriptionContent: {
     paddingTop: 8,
