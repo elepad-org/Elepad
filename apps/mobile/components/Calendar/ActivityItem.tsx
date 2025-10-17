@@ -11,6 +11,7 @@ interface ActivityItemProps {
   onToggleComplete: (ev: Activity) => void;
   isOwnerOfGroup: boolean;
   groupInfo?: GetFamilyGroupIdGroupMembers200;
+  completed?: boolean; // Nueva prop para completado por día
 }
 
 export default function ActivityItem({
@@ -21,8 +22,12 @@ export default function ActivityItem({
   onToggleComplete,
   isOwnerOfGroup,
   groupInfo,
+  completed, // Usar esta prop en lugar de item.completed
 }: ActivityItemProps) {
   const [expanded, setExpanded] = useState(false);
+
+  // Usar completed de la prop si está disponible, sino usar item.completed
+  const isCompleted = completed !== undefined ? completed : item.completed;
 
   // Find the owner of this activity
   const activityOwner = (() => {
@@ -84,9 +89,9 @@ export default function ActivityItem({
   const hasDescription = item.description && item.description.trim().length > 0;
 
   return (
-    <Card style={[styles.card, item.completed && styles.completedCard]}>
+    <Card style={[styles.card, isCompleted && styles.completedCard]}>
       <List.Item
-        titleStyle={item.completed && { textDecorationLine: "line-through" }}
+        titleStyle={isCompleted && { textDecorationLine: "line-through" }}
         title={item.title}
         description={
           <View>
@@ -104,10 +109,8 @@ export default function ActivityItem({
         left={() => (
           <View style={styles.checkboxContainer}>
             <IconButton
-              icon={
-                item.completed ? "checkbox-marked" : "checkbox-blank-outline"
-              }
-              iconColor={item.completed ? "#8998AF" : "#6c757d"}
+              icon={isCompleted ? "checkbox-marked" : "checkbox-blank-outline"}
+              iconColor={isCompleted ? "#8998AF" : "#6c757d"}
               size={24}
               onPress={() => onToggleComplete(item)}
             />
