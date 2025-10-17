@@ -126,7 +126,7 @@ export default function ActivityItem({
               <>
                 <IconButton
                   icon="pencil"
-                  iconColor="#007bff"
+                  iconColor="#8998AF"
                   size={20}
                   onPress={(e) => {
                     e.stopPropagation();
@@ -160,21 +160,22 @@ export default function ActivityItem({
 
 const styles = StyleSheet.create({
   card: {
-    marginBottom: 12,
-    borderRadius: 12,
-    elevation: 2,
-    backgroundColor: "#eaf5ffff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    borderLeftWidth: 4,
-    borderLeftColor: "#007bff", // o "#FF8C00"
+    marginBottom: 14,
+    borderRadius: 24,
+    elevation: 0,
+    backgroundColor: "rgba(255, 255, 255, 0.65)",
+    shadowColor: "transparent",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    borderWidth: 1,
+    borderColor: "rgba(137, 152, 175, 0.2)",
+    overflow: "hidden",
   },
   completedCard: {
-    backgroundColor: "#f6fcf8ff",
-    borderLeftWidth: 4,
-    borderLeftColor: "#dee2e6",
+    backgroundColor: "rgba(248, 249, 250, 0.5)",
+    borderWidth: 1,
+    borderColor: "rgba(137, 152, 175, 0.15)",
     opacity: 0.7,
   },
   checkboxContainer: {
@@ -193,9 +194,9 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 12,
     paddingHorizontal: 16,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "transparent",
     borderTopWidth: 1,
-    borderTopColor: "#e9ecef",
+    borderTopColor: "#f0f0f0",
   },
   descriptionText: {
     color: "#495057",

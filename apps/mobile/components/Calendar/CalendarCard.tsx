@@ -147,9 +147,9 @@ export default function CalendarCard(props: CalendarCardProps) {
             backgroundColor: "#ffffff",
             calendarBackground: "#ffffff",
             textSectionTitleColor: "#555",
-            selectedDayBackgroundColor: "#82bcfeff",
+            selectedDayBackgroundColor: "#8998AF",
             selectedDayTextColor: "#fff",
-            todayTextColor: "#ff2020ff",
+            todayTextColor: "#8998AF",
             dayTextColor: "#333",
             textDisabledColor: "#ccc",
             monthTextColor: "#4A4A4A",
@@ -165,8 +165,30 @@ export default function CalendarCard(props: CalendarCardProps) {
           value={filter}
           onValueChange={setFilter}
           buttons={[
-            { value: "all", label: "Todos" },
-            { value: "mine", label: "Mis eventos" },
+            {
+              value: "all",
+              label: "Todos",
+              style:
+                filter === "all"
+                  ? styles.segmentedButtonActive
+                  : styles.segmentedButtonInactive,
+              labelStyle:
+                filter === "all"
+                  ? styles.segmentedLabelActive
+                  : styles.segmentedLabelInactive,
+            },
+            {
+              value: "mine",
+              label: "Mis eventos",
+              style:
+                filter === "mine"
+                  ? styles.segmentedButtonActive
+                  : styles.segmentedButtonInactive,
+              labelStyle:
+                filter === "mine"
+                  ? styles.segmentedLabelActive
+                  : styles.segmentedLabelInactive,
+            },
           ]}
           style={styles.segmentedButtons}
         />
@@ -178,7 +200,7 @@ export default function CalendarCard(props: CalendarCardProps) {
             setSelectedDay(today);
           }}
           style={styles.todayIconButton}
-          containerColor="#82bcfeff"
+          containerColor="#8998AF"
           iconColor="#fff"
         />
       </View>
@@ -242,6 +264,25 @@ const styles = StyleSheet.create({
   },
   segmentedButtons: {
     flex: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    borderRadius: 24,
+    borderWidth: 0,
+  },
+  segmentedButtonActive: {
+    backgroundColor: "rgba(137, 152, 175, 0.75)",
+    borderRadius: 20,
+    borderWidth: 0,
+  },
+  segmentedButtonInactive: {
+    backgroundColor: "rgba(255, 255, 255, 0.25)",
+    borderRadius: 20,
+    borderWidth: 0,
+  },
+  segmentedLabelActive: {
+    color: "#ffffff",
+  },
+  segmentedLabelInactive: {
+    color: "rgba(137, 152, 175, 0.8)",
   },
   todayIconButton: {
     margin: 0,
