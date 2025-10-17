@@ -126,13 +126,24 @@ export default function CalendarCard(props: CalendarCardProps) {
     return obj;
   }, [eventsByDate, selectedDay]);
 
-  // Only user's activities only
+  // Only user's activities only, ordenados: primero incompletos, luego completados
   const dayEvents = useMemo(() => {
     const eventsToday = eventsByDate[selectedDay] ?? [];
-    if (filter === "mine") {
-      return eventsToday.filter((ev) => ev.createdBy === idUser);
-    }
-    return eventsToday;
+    const filtered =
+      filter === "mine"
+        ? eventsToday.filter((ev) => ev.createdBy === idUser)
+        : eventsToday;
+
+    // Separar completados de no completados
+    const incomplete = filtered.filter((ev) => !ev.completed);
+    const complete = filtered.filter((ev) => ev.completed);
+
+    // Ordenar cada grupo por hora de inicio
+    incomplete.sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+    complete.sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+
+    // Retornar incompletos primero, luego completados
+    return [...incomplete, ...complete];
   }, [eventsByDate, selectedDay, filter, idUser]);
 
   return (
@@ -221,7 +232,7 @@ export default function CalendarCard(props: CalendarCardProps) {
         </Card>
       ) : (
         <FlatList
-          data={dayEvents.sort((a, b) => a.startsAt.localeCompare(b.startsAt))}
+          data={dayEvents}
           keyExtractor={(i) => i.id}
           renderItem={({ item }) => (
             <ActivityItem
@@ -234,6 +245,8 @@ export default function CalendarCard(props: CalendarCardProps) {
               groupInfo={groupInfo}
             />
           )}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
         />
       )}
     </View>
@@ -267,6 +280,11 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.4)",
     borderRadius: 24,
     borderWidth: 0,
+    shadowColor: "#8998AF",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 5,
   },
   segmentedButtonActive: {
     backgroundColor: "rgba(137, 152, 175, 0.75)",
@@ -293,5 +311,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: "#f9f9f9",
     elevation: 1,
+  },
+  listContent: {
+    paddingBottom: 100,
   },
 });
