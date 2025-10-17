@@ -17,7 +17,7 @@ import {
   GetFamilyGroupIdGroupMembers200,
 } from "@elepad/api-client";
 import { COLORS, STYLES as baseStyles } from "@/styles/base";
-import { Text, Dialog, Button } from "react-native-paper";
+import { Text, Dialog, Button, Snackbar } from "react-native-paper";
 import AppDialog from "@/components/AppDialog";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CancelButton from "@/components/shared/CancelButton";
@@ -28,14 +28,8 @@ export default function CalendarScreen() {
   const idUser = userElepad?.id ?? "";
   const queryClient = useQueryClient();
 
-  const [dialogVisible, setDialogVisible] = useState(false);
-
-  const showDialog = () => setDialogVisible(true);
-
-  const hideDialog = () => setDialogVisible(false);
-
-  const [dialogTitle, setDialogTitle] = useState("");
-  const [dialogMessage, setDialogMessage] = useState("");
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const [formVisible, setFormVisible] = useState(false);
   const [editing, setEditing] = useState<Activity | null>(null);
@@ -63,11 +57,10 @@ export default function CalendarScreen() {
       retry: 2, // Reintentar 2 veces antes de fallar
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000), // Exponential backoff: 1s, 2s
       onSuccess: async () => {
-        setDialogTitle("Listo");
-        setDialogMessage("La actividad se creó correctamente.");
+        setSnackbarMessage("Actividad creada correctamente");
         setFormVisible(false);
         setEditing(null);
-        showDialog();
+        setSnackbarVisible(true);
         await activitiesQuery.refetch();
       },
       onError: (error) => {
@@ -83,11 +76,10 @@ export default function CalendarScreen() {
       retry: 2, // Reintentar 2 veces antes de fallar
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000), // Exponential backoff: 1s, 2s
       onSuccess: async () => {
-        setDialogTitle("Listo");
-        setDialogMessage("La actividad se actualizó correctamente.");
+        setSnackbarMessage("Actividad actualizada correctamente");
         setFormVisible(false);
         setEditing(null);
-        showDialog();
+        setSnackbarVisible(true);
         await activitiesQuery.refetch();
       },
       onError: (error) => {
@@ -101,18 +93,14 @@ export default function CalendarScreen() {
   const deleteActivity = useDeleteActivitiesId({
     mutation: {
       onSuccess: async () => {
-        setDialogTitle("Actividad eliminada");
-        setDialogMessage("La actividad se eliminó correctamente.");
-        showDialog();
+        setSnackbarMessage("Actividad eliminada correctamente");
+        setSnackbarVisible(true);
         await activitiesQuery.refetch();
       },
       onError: (error) => {
         console.error("Error al eliminar actividad:", error);
-        setDialogTitle("Error");
-        setDialogMessage(
-          "No se pudo eliminar la actividad. Por favor, inténtalo de nuevo.",
-        );
-        showDialog();
+        setSnackbarMessage("No se pudo eliminar la actividad");
+        setSnackbarVisible(true);
       },
     },
   });
@@ -129,11 +117,8 @@ export default function CalendarScreen() {
       onError: (error) => {
         console.error("Error al actualizar actividad:", error);
         // El rollback se maneja en handleToggleComplete
-        setDialogTitle("Error");
-        setDialogMessage(
-          "No se pudo actualizar el estado de la actividad. Por favor, inténtalo de nuevo.",
-        );
-        showDialog();
+        setSnackbarMessage("No se pudo actualizar el estado de la actividad");
+        setSnackbarVisible(true);
       },
     },
   });
@@ -175,11 +160,8 @@ export default function CalendarScreen() {
       await deleteActivity.mutateAsync({ id: eventToDelete });
       await activitiesQuery.refetch();
     }
-    setDialogTitle("Actividad eliminada");
-    setDialogMessage("La actividad se eliminó correctamente.");
     setDeleteModalVisible(false);
     setEventToDelete(null);
-    showDialog();
   };
 
   const handleToggleComplete = async (activity: Activity) => {
@@ -304,12 +286,6 @@ export default function CalendarScreen() {
         />
       </View>
 
-      <AppDialog
-        visible={dialogVisible}
-        onClose={hideDialog}
-        title={dialogTitle}
-        message={dialogMessage}
-      />
       <ActivityForm
         visible={formVisible}
         onClose={() => {
@@ -357,6 +333,19 @@ export default function CalendarScreen() {
           </Button>
         </Dialog.Actions>
       </Dialog>
+
+      <Snackbar
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
+        duration={2200}
+        style={{
+          backgroundColor: "#4CAF50",
+          borderRadius: 12,
+          marginBottom: 80,
+        }}
+      >
+        {snackbarMessage}
+      </Snackbar>
     </SafeAreaView>
   );
 }
