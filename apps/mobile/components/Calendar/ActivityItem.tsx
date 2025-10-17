@@ -107,7 +107,7 @@ export default function ActivityItem({
               icon={
                 item.completed ? "checkbox-marked" : "checkbox-blank-outline"
               }
-              iconColor={item.completed ? "#28a745" : "#6c757d"}
+              iconColor={item.completed ? "#8998AF" : "#6c757d"}
               size={24}
               onPress={() => onToggleComplete(item)}
             />

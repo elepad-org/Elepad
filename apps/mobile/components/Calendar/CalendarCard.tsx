@@ -167,6 +167,7 @@ export default function CalendarCard(props: CalendarCardProps) {
             textMonthFontSize: 20,
             textDayFontSize: 18,
             textDayHeaderFontSize: 14,
+            arrowColor: "#8998AF",
           }}
         />
       </View>
