@@ -6,6 +6,10 @@ import { Activity, useGetFrequencies } from "@elepad/api-client";
 import { COLORS } from "@/styles/base";
 import type { getActivitiesFamilyCodeIdFamilyGroupResponse } from "@elepad/api-client";
 import ActivityItem from "./ActivityItem";
+import {
+  useGetActivityCompletions,
+  usePostActivityCompletionsToggle,
+} from "@elepad/api-client/src/gen/client";
 
 import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 
@@ -184,6 +188,28 @@ export default function CalendarCard(props: CalendarCardProps) {
   const [selectedDay, setSelectedDay] = useState<string>(today);
   const [filter, setFilter] = useState<"all" | "mine">("all");
 
+  // Calcular rango de fechas para cargar completaciones (3 meses antes y después)
+  const dateRange = useMemo(() => {
+    const now = new Date();
+    const start = new Date(now);
+    start.setMonth(now.getMonth() - 3);
+    const end = new Date(now);
+    end.setMonth(now.getMonth() + 3);
+    return {
+      startDate: start.toISOString().slice(0, 10),
+      endDate: end.toISOString().slice(0, 10),
+    };
+  }, []);
+
+  // Cargar completaciones para el rango de fechas
+  const completionsQuery = useGetActivityCompletions({
+    startDate: dateRange.startDate,
+    endDate: dateRange.endDate,
+  });
+
+  // Mutation para toggle de completaciones
+  const toggleCompletionMutation = usePostActivityCompletionsToggle();
+
   // Cargar frecuencias para expandir actividades recurrentes
   const frequenciesQuery = useGetFrequencies();
 
@@ -254,6 +280,25 @@ export default function CalendarCard(props: CalendarCardProps) {
     return map;
   }, [events, frequenciesMap]);
 
+  // Crear mapa de completaciones por activityId + fecha
+  const completionsByDateMap = useMemo(() => {
+    const map: Record<string, boolean> = {};
+    const completionsData = completionsQuery.data;
+
+    // Verificar que sea la respuesta exitosa con data
+    if (
+      completionsData &&
+      "data" in completionsData &&
+      Array.isArray(completionsData.data)
+    ) {
+      for (const completion of completionsData.data) {
+        const key = `${completion.activityId}_${completion.completedDate}`;
+        map[key] = true;
+      }
+    }
+    return map;
+  }, [completionsQuery.data]);
+
   const marked = useMemo(() => {
     const obj: Record<
       string,
@@ -276,9 +321,15 @@ export default function CalendarCard(props: CalendarCardProps) {
         ? eventsToday.filter((ev) => ev.createdBy === idUser)
         : eventsToday;
 
-    // Separar completados de no completados
-    const incomplete = filtered.filter((ev) => !ev.completed);
-    const complete = filtered.filter((ev) => ev.completed);
+    // Separar completados de no completados usando completionsByDateMap
+    const incomplete = filtered.filter((ev) => {
+      const key = `${ev.id}_${selectedDay}`;
+      return !completionsByDateMap[key];
+    });
+    const complete = filtered.filter((ev) => {
+      const key = `${ev.id}_${selectedDay}`;
+      return completionsByDateMap[key];
+    });
 
     // Ordenar cada grupo por hora de inicio
     incomplete.sort((a, b) => a.startsAt.localeCompare(b.startsAt));
@@ -286,7 +337,7 @@ export default function CalendarCard(props: CalendarCardProps) {
 
     // Retornar incompletos primero, luego completados
     return [...incomplete, ...complete];
-  }, [eventsByDate, selectedDay, filter, idUser]);
+  }, [eventsByDate, selectedDay, filter, idUser, completionsByDateMap]);
 
   return (
     <View style={styles.container}>
@@ -383,9 +434,24 @@ export default function CalendarCard(props: CalendarCardProps) {
               idUser={idUser}
               onEdit={onEdit}
               onDelete={onDelete}
-              onToggleComplete={onToggleComplete}
+              onToggleComplete={async (activity) => {
+                // Toggle con API
+                await toggleCompletionMutation.mutateAsync({
+                  data: {
+                    activityId: activity.id,
+                    completedDate: selectedDay,
+                  },
+                });
+
+                // Invalidar query para recargar completaciones
+                completionsQuery.refetch();
+              }}
               isOwnerOfGroup={isOwnerOfGroup}
               groupInfo={groupInfo}
+              completed={(() => {
+                const key = `${item.id}_${selectedDay}`;
+                return completionsByDateMap[key] || false;
+              })()}
             />
           )}
           contentContainerStyle={styles.listContent}
