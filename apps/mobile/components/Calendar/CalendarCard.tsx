@@ -1,6 +1,12 @@
 import React, { useMemo, useState } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
-import { Text, Card, SegmentedButtons, IconButton } from "react-native-paper";
+import {
+  Text,
+  Card,
+  SegmentedButtons,
+  IconButton,
+  Snackbar,
+} from "react-native-paper";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import { Activity, useGetFrequencies } from "@elepad/api-client";
 import { COLORS } from "@/styles/base";
@@ -188,7 +194,16 @@ export default function CalendarCard(props: CalendarCardProps) {
   const [selectedDay, setSelectedDay] = useState<string>(today);
   const [filter, setFilter] = useState<"all" | "mine">("all");
 
-  // Calcular rango de fechas para cargar completaciones (3 meses antes y después)
+  // Estado optimista local para las completaciones
+  const [optimisticCompletions, setOptimisticCompletions] = useState<
+    Record<string, boolean>
+  >({});
+
+  // Estado para mostrar errores
+  const [errorSnackbar, setErrorSnackbar] = useState<{
+    visible: boolean;
+    message: string;
+  }>({ visible: false, message: "" }); // Calcular rango de fechas para cargar completaciones (3 meses antes y después)
   const dateRange = useMemo(() => {
     const now = new Date();
     const start = new Date(now);
@@ -280,7 +295,7 @@ export default function CalendarCard(props: CalendarCardProps) {
     return map;
   }, [events, frequenciesMap]);
 
-  // Crear mapa de completaciones por activityId + fecha
+  // Crear mapa de completaciones por activityId + fecha (combina servidor + optimista)
   const completionsByDateMap = useMemo(() => {
     const map: Record<string, boolean> = {};
     const completionsData = completionsQuery.data;
@@ -296,8 +311,14 @@ export default function CalendarCard(props: CalendarCardProps) {
         map[key] = true;
       }
     }
+
+    // Sobrescribir con cambios optimistas
+    for (const key in optimisticCompletions) {
+      map[key] = optimisticCompletions[key];
+    }
+
     return map;
-  }, [completionsQuery.data]);
+  }, [completionsQuery.data, optimisticCompletions]);
 
   const marked = useMemo(() => {
     const obj: Record<
@@ -339,6 +360,68 @@ export default function CalendarCard(props: CalendarCardProps) {
     return [...incomplete, ...complete];
   }, [eventsByDate, selectedDay, filter, idUser, completionsByDateMap]);
 
+  // Función para toggle optimista con reintentos
+  const handleToggleCompletion = async (activity: Activity) => {
+    const key = `${activity.id}_${selectedDay}`;
+    const currentState = completionsByDateMap[key] || false;
+    const newState = !currentState;
+
+    // 1. Actualización optimista instantánea
+    setOptimisticCompletions((prev) => ({
+      ...prev,
+      [key]: newState,
+    }));
+
+    // 2. Función de reintento con backoff
+    const attemptToggle = async (attemptNumber: number): Promise<boolean> => {
+      try {
+        await toggleCompletionMutation.mutateAsync({
+          data: {
+            activityId: activity.id,
+            completedDate: selectedDay,
+          },
+        });
+        return true;
+      } catch (error) {
+        console.error(`Intento ${attemptNumber} fallido:`, error);
+
+        if (attemptNumber < 2) {
+          // Esperar 3 segundos antes del siguiente intento
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          return attemptToggle(attemptNumber + 1);
+        }
+
+        return false;
+      }
+    };
+
+    // 3. Ejecutar con reintentos (máximo 2 intentos)
+    const success = await attemptToggle(1);
+
+    if (success) {
+      // 4. Éxito: refrescar datos del servidor y limpiar estado optimista
+      await completionsQuery.refetch();
+      setOptimisticCompletions((prev) => {
+        const updated = { ...prev };
+        delete updated[key];
+        return updated;
+      });
+    } else {
+      // 5. Fallo después de 2 intentos: revertir al estado original
+      console.warn("Toggle falló después de 2 intentos, revirtiendo...");
+      setOptimisticCompletions((prev) => {
+        const updated = { ...prev };
+        delete updated[key];
+        return updated;
+      });
+
+      // Mostrar mensaje de error al usuario
+      setErrorSnackbar({
+        visible: true,
+        message: "No se pudo actualizar. Intenta nuevamente.",
+      });
+    }
+  };
   return (
     <View style={styles.container}>
       <View style={styles.calendarWrapper}>
@@ -434,18 +517,7 @@ export default function CalendarCard(props: CalendarCardProps) {
               idUser={idUser}
               onEdit={onEdit}
               onDelete={onDelete}
-              onToggleComplete={async (activity) => {
-                // Toggle con API
-                await toggleCompletionMutation.mutateAsync({
-                  data: {
-                    activityId: activity.id,
-                    completedDate: selectedDay,
-                  },
-                });
-
-                // Invalidar query para recargar completaciones
-                completionsQuery.refetch();
-              }}
+              onToggleComplete={() => handleToggleCompletion(item)}
               isOwnerOfGroup={isOwnerOfGroup}
               groupInfo={groupInfo}
               completed={(() => {
@@ -458,6 +530,24 @@ export default function CalendarCard(props: CalendarCardProps) {
           showsVerticalScrollIndicator={false}
         />
       )}
+
+      <Snackbar
+        visible={errorSnackbar.visible}
+        onDismiss={() => setErrorSnackbar({ visible: false, message: "" })}
+        duration={4000}
+        style={{
+          backgroundColor: "#dc3545",
+          borderRadius: 12,
+          marginBottom: 80,
+        }}
+        action={{
+          label: "OK",
+          onPress: () => setErrorSnackbar({ visible: false, message: "" }),
+          textColor: "#fff",
+        }}
+      >
+        <Text style={{ color: "#fff" }}>{errorSnackbar.message}</Text>
+      </Snackbar>
     </View>
   );
 }
