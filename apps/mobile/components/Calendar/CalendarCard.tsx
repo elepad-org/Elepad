@@ -2,12 +2,113 @@ import React, { useMemo, useState } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
 import { Text, Card, SegmentedButtons, IconButton } from "react-native-paper";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
-import { Activity } from "@elepad/api-client";
+import { Activity, useGetFrequencies } from "@elepad/api-client";
 import { COLORS } from "@/styles/base";
 import type { getActivitiesFamilyCodeIdFamilyGroupResponse } from "@elepad/api-client";
 import ActivityItem from "./ActivityItem";
 
 import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
+
+// Función para expandir actividades recurrentes según frequencyId y RRULE
+function expandRecurringActivity(
+  activity: Activity,
+  startDate: Date,
+  endDate: Date,
+  frequencies: Record<string, { label: string; rrule: string | null }>,
+): string[] {
+  // Si no tiene frecuencia, solo retorna el día de inicio
+  if (!activity.frequencyId || !frequencies[activity.frequencyId]) {
+    return [activity.startsAt.slice(0, 10)];
+  }
+
+  const frequency = frequencies[activity.frequencyId];
+  const rrule = frequency.rrule;
+
+  // Si no hay RRULE (Una vez), solo el día de inicio
+  if (!rrule) {
+    return [activity.startsAt.slice(0, 10)];
+  }
+
+  const dates: string[] = [];
+  const activityStart = new Date(activity.startsAt);
+  const activityEnd = activity.endsAt ? new Date(activity.endsAt) : endDate;
+
+  // Parsear el RRULE
+  let freq: string | null = null;
+  let interval = 1;
+  let byDay: string[] = [];
+
+  // Extraer FREQ
+  const freqMatch = rrule.match(/FREQ=(\w+)/);
+  if (freqMatch) freq = freqMatch[1];
+
+  // Extraer INTERVAL
+  const intervalMatch = rrule.match(/INTERVAL=(\d+)/);
+  if (intervalMatch) interval = parseInt(intervalMatch[1]);
+
+  // Extraer BYDAY
+  const byDayMatch = rrule.match(/BYDAY=([A-Z,]+)/);
+  if (byDayMatch) byDay = byDayMatch[1].split(",");
+
+  // Generar fechas según la frecuencia
+  let currentDate = new Date(activityStart);
+
+  // Limitar a 365 días para evitar loops infinitos
+  const maxIterations = 365;
+  let iterations = 0;
+
+  while (
+    currentDate <= activityEnd &&
+    currentDate <= endDate &&
+    iterations < maxIterations
+  ) {
+    iterations++;
+
+    // Verificar si la fecha actual cumple con las condiciones
+    let shouldInclude = true;
+
+    // Si tiene BYDAY, verificar que el día de la semana coincida
+    if (byDay.length > 0) {
+      const dayOfWeek = currentDate.getDay();
+      const dayMap: Record<number, string> = {
+        0: "SU",
+        1: "MO",
+        2: "TU",
+        3: "WE",
+        4: "TH",
+        5: "FR",
+        6: "SA",
+      };
+      shouldInclude = byDay.includes(dayMap[dayOfWeek]);
+    }
+
+    if (shouldInclude && currentDate >= activityStart) {
+      const dateStr = currentDate.toISOString().slice(0, 10);
+      dates.push(dateStr);
+    }
+
+    // Avanzar según la frecuencia
+    switch (freq) {
+      case "DAILY":
+        currentDate.setDate(currentDate.getDate() + interval);
+        break;
+      case "WEEKLY":
+        currentDate.setDate(currentDate.getDate() + 7 * interval);
+        break;
+      case "MONTHLY":
+        currentDate.setMonth(currentDate.getMonth() + interval);
+        break;
+      case "YEARLY":
+        currentDate.setFullYear(currentDate.getFullYear() + interval);
+        break;
+      default:
+        // Si no hay frecuencia válida, solo agregar el primer día
+        return [activity.startsAt.slice(0, 10)];
+    }
+  }
+
+  return dates.length > 0 ? dates : [activity.startsAt.slice(0, 10)];
+}
 
 interface CalendarCardProps {
   idFamilyGroup: string;
@@ -83,6 +184,9 @@ export default function CalendarCard(props: CalendarCardProps) {
   const [selectedDay, setSelectedDay] = useState<string>(today);
   const [filter, setFilter] = useState<"all" | "mine">("all");
 
+  // Cargar frecuencias para expandir actividades recurrentes
+  const frequenciesQuery = useGetFrequencies();
+
   const events: Activity[] = useMemo(() => {
     if (!activitiesQuery.data) return [];
 
@@ -102,15 +206,53 @@ export default function CalendarCard(props: CalendarCardProps) {
     return [];
   }, [activitiesQuery.data]);
 
+  // Crear mapa de frecuencias para acceso rápido
+  const frequenciesMap = useMemo(() => {
+    const map: Record<string, { label: string; rrule: string | null }> = {};
+
+    if (!frequenciesQuery.data) return map;
+
+    const frequencies = (() => {
+      const data = frequenciesQuery.data as any;
+      if (Array.isArray(data)) return data;
+      if (data.data && Array.isArray(data.data)) return data.data;
+      return [];
+    })();
+
+    for (const freq of frequencies) {
+      map[freq.id] = { label: freq.label, rrule: freq.rrule };
+    }
+
+    return map;
+  }, [frequenciesQuery.data]);
+
   const eventsByDate = useMemo(() => {
     const map: Record<string, Activity[]> = {};
+
+    // Calcular rango de fechas para expandir (3 meses antes y 3 meses después)
+    const now = new Date();
+    const startRange = new Date(now);
+    startRange.setMonth(now.getMonth() - 3);
+    const endRange = new Date(now);
+    endRange.setMonth(now.getMonth() + 3);
+
     for (const ev of events) {
-      const day = ev.startsAt.slice(0, 10);
-      if (!map[day]) map[day] = [];
-      map[day].push(ev);
+      // Expandir la actividad según su frecuencia
+      const dates = expandRecurringActivity(
+        ev,
+        startRange,
+        endRange,
+        frequenciesMap,
+      );
+
+      // Agregar la actividad a cada fecha expandida
+      for (const date of dates) {
+        if (!map[date]) map[date] = [];
+        map[date].push(ev);
+      }
     }
     return map;
-  }, [events]);
+  }, [events, frequenciesMap]);
 
   const marked = useMemo(() => {
     const obj: Record<
