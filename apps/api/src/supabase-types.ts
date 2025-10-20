@@ -68,6 +68,48 @@ export type Database = {
           },
         ];
       };
+      activity_completions: {
+        Row: {
+          activityId: string;
+          completedDate: string;
+          createdAt: string;
+          id: string;
+          updatedAt: string;
+          userId: string;
+        };
+        Insert: {
+          activityId: string;
+          completedDate: string;
+          createdAt?: string;
+          id?: string;
+          updatedAt?: string;
+          userId: string;
+        };
+        Update: {
+          activityId?: string;
+          completedDate?: string;
+          createdAt?: string;
+          id?: string;
+          updatedAt?: string;
+          userId?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "activity_completions_activityid_fkey";
+            columns: ["activityId"];
+            isOneToOne: false;
+            referencedRelation: "activities";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "activity_completions_userid_fkey";
+            columns: ["userId"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       attempts: {
         Row: {
           durationMs: number | null;
