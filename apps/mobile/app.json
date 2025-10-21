@@ -5,12 +5,13 @@
     "version": "1.0.0",
     "scheme": "elepad",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/ele-gray.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "jsEngine": "hermes",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.elepadorg.elepad"
     },
     "android": {
       "adaptiveIcon": {

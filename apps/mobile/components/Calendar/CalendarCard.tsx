@@ -186,7 +186,6 @@ export default function CalendarCard(props: CalendarCardProps) {
     activitiesQuery,
     onEdit,
     onDelete,
-    onToggleComplete,
     isOwnerOfGroup,
     groupInfo,
   } = props;
@@ -254,7 +253,7 @@ export default function CalendarCard(props: CalendarCardProps) {
     if (!frequenciesQuery.data) return map;
 
     const frequencies = (() => {
-      const data = frequenciesQuery.data as any;
+      const data = frequenciesQuery.data;
       if (Array.isArray(data)) return data;
       if (data.data && Array.isArray(data.data)) return data.data;
       return [];

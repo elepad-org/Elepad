@@ -18,7 +18,6 @@ import {
 } from "@elepad/api-client";
 import { COLORS, STYLES as baseStyles } from "@/styles/base";
 import { Text, Dialog, Button, Snackbar } from "react-native-paper";
-import AppDialog from "@/components/AppDialog";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CancelButton from "@/components/shared/CancelButton";
 

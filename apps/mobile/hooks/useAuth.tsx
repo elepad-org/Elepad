@@ -43,6 +43,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       setUserElepad(u);
     } catch (err) {
       console.warn("loadElepadUserById error", err);
+      // TODO: add error handling in the UI
       setUserElepad(null);
     }
   }

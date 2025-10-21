@@ -1,4 +1,3 @@
-import { AuthProvider } from "@/hooks/useAuth";
 import {
   DarkTheme as NavDark,
   DefaultTheme as NavLight,
@@ -15,39 +14,43 @@ import { Provider as PaperProvider } from "react-native-paper";
 import { lightTheme, darkTheme } from "@/styles/theme";
 import { supabase } from "@/lib/supabase";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { AuthProvider } from "@/hooks/useAuth";
 
 const queryClient = new QueryClient();
 
-// Caché en memoria del token para cumplir con la firma síncrona de getToken, solutions by el amigo
+// Caché en memoria del token para cumplir con la firma síncrona de getToken.
 let AUTH_TOKEN: string | undefined;
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useAppFonts();
+configureApiClient({
+  baseUrl: process.env.EXPO_PUBLIC_API_URL,
+});
 
-  // Mantener el token actualizado en AUTH_TOKEN de forma reactiva
+export default function RootLayout() {
+  const [fontsLoaded] = useAppFonts();
+  const colorScheme = useColorScheme();
+
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      AUTH_TOKEN = data.session?.access_token ?? undefined;
-    });
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        AUTH_TOKEN = session?.access_token ?? undefined;
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        AUTH_TOKEN = session?.access_token;
+        const apiUrl =
+          process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:8787";
+
+        configureApiClient({
+          baseUrl: apiUrl,
+          getToken: () => AUTH_TOKEN,
+        });
       },
     );
-    return () => listener?.subscription?.unsubscribe?.();
+
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
   }, []);
 
-  if (!loaded) {
-    // Async font loading only occurs in development.
+  if (!fontsLoaded) {
     return null;
   }
-
-  configureApiClient({
-    // TODO: read from a config.ts file, and make that file read from env
-    baseUrl: process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:8787",
-    getToken: () => AUTH_TOKEN,
-  });
 
   const paperTheme = colorScheme === "dark" ? darkTheme : lightTheme;
   const navTheme = colorScheme === "dark" ? NavDark : NavLight;

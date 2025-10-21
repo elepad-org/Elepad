@@ -2,15 +2,70 @@ import { supabase } from "@/lib/supabase";
 import { View, Alert, Image, TouchableOpacity } from "react-native";
 import { Text, TextInput, Button } from "react-native-paper";
 import { makeRedirectUri } from "expo-auth-session";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import googleLogo from "@/assets/images/google.png";
 import { Link } from "expo-router";
 import { COLORS, STYLES } from "@/styles/base";
+import * as Linking from "expo-linking";
 
 export default function LogIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const handleDeepLink = (event: { url: string }) => {
+      const url = event.url;
+      console.log("Received deep link:", url);
+      if (url.includes("access_token=")) {
+        const hash = url.split("#")[1];
+        const params = new URLSearchParams(hash);
+        const access_token = params.get("access_token");
+        const refresh_token = params.get("refresh_token");
+        if (access_token && refresh_token) {
+          supabase.auth
+            .setSession({ access_token, refresh_token })
+            .then(({ error }) => {
+              if (error) {
+                Alert.alert("Error setting session", error.message);
+              } else {
+                Alert.alert("Success", "Logged in!");
+              }
+            });
+        }
+      }
+    };
+
+    const subscription = Linking.addEventListener("url", handleDeepLink);
+
+    // Handle initial URL
+    Linking.getInitialURL().then((url) => {
+      if (url) {
+        console.log("Initial URL:", url);
+        if (url.includes("access_token=")) {
+          const hash = url.split("#")[1];
+          const params = new URLSearchParams(hash);
+          const access_token = params.get("access_token");
+          const refresh_token = params.get("refresh_token");
+          if (access_token && refresh_token) {
+            supabase.auth
+              .setSession({ access_token, refresh_token })
+              .then(({ error }) => {
+                if (error) {
+                  Alert.alert("Error setting session", error.message);
+                } else {
+                  Alert.alert("Success", "Logged in!");
+                }
+              });
+          }
+        }
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
 
   const handleLogin = async () => {
     setLoading(true);
@@ -21,21 +76,25 @@ export default function LogIn() {
     if (error) {
       Alert.alert(error.message);
     } else {
-      console.log("Inicio de sesión:", email);
+      Alert.alert(
+        "Google Sign-In not available in dev client. Use web or full build.",
+      );
     }
     setLoading(false);
   };
 
   const handleGoogleLogin = async () => {
     setLoading(true);
-    const redirectTo = makeRedirectUri({ scheme: "elepad", path: "/login" });
+    const redirectTo = makeRedirectUri({ scheme: "elepad", path: "login" });
     console.log(redirectTo);
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo },
     });
     if (error) {
       Alert.alert(error.message);
+    } else if (data?.url) {
+      Linking.openURL(data.url);
     }
     setLoading(false);
   };

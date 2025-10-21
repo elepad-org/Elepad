@@ -9,6 +9,9 @@
     "build": "orval",
     "dev": "orval --watch"
   },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.2.0"
+  },
   "peerDependencies": {
     "@tanstack/react-query": "^5.85.3",
     "react": "^19.0.0",
@@ -17,7 +20,7 @@
   "devDependencies": {
     "@elepad/api": "*",
     "cross-env": "^10.0.0",
-    "orval": "^7.11.2"
+    "orval": "^7.13.2"
   },
   "packageManager": "npm@11.5.2"
 }
