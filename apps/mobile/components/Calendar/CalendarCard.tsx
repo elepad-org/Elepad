@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
 import {
   Text,
@@ -22,7 +22,6 @@ import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 // Función para expandir actividades recurrentes según frequencyId y RRULE
 function expandRecurringActivity(
   activity: Activity,
-  startDate: Date,
   endDate: Date,
   frequencies: Record<string, { label: string; rrule: string | null }>,
 ): string[] {
@@ -131,7 +130,6 @@ interface CalendarCardProps {
   };
   onEdit: (ev: Activity) => void;
   onDelete: (id: string) => void;
-  onToggleComplete: (ev: Activity) => void;
   isOwnerOfGroup: boolean;
   groupInfo?: GetFamilyGroupIdGroupMembers200;
 }
@@ -186,7 +184,6 @@ export default function CalendarCard(props: CalendarCardProps) {
     activitiesQuery,
     onEdit,
     onDelete,
-    onToggleComplete,
     isOwnerOfGroup,
     groupInfo,
   } = props;
@@ -254,7 +251,7 @@ export default function CalendarCard(props: CalendarCardProps) {
     if (!frequenciesQuery.data) return map;
 
     const frequencies = (() => {
-      const data = frequenciesQuery.data as any;
+      const data = frequenciesQuery.data;
       if (Array.isArray(data)) return data;
       if (data.data && Array.isArray(data.data)) return data.data;
       return [];
@@ -272,19 +269,12 @@ export default function CalendarCard(props: CalendarCardProps) {
 
     // Calcular rango de fechas para expandir (3 meses antes y 3 meses después)
     const now = new Date();
-    const startRange = new Date(now);
-    startRange.setMonth(now.getMonth() - 3);
     const endRange = new Date(now);
     endRange.setMonth(now.getMonth() + 3);
 
     for (const ev of events) {
       // Expandir la actividad según su frecuencia
-      const dates = expandRecurringActivity(
-        ev,
-        startRange,
-        endRange,
-        frequenciesMap,
-      );
+      const dates = expandRecurringActivity(ev, endRange, frequenciesMap);
 
       // Agregar la actividad a cada fecha expandida
       for (const date of dates) {

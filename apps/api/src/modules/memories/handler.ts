@@ -1,10 +1,5 @@
 import { OpenAPIHono, z } from "@hono/zod-openapi";
-import {
-  MemorySchema,
-  MemoryFiltersSchema,
-  NewMemorySchema,
-  CreateMemoryWithImageSchema,
-} from "./schema";
+import { MemorySchema, MemoryFiltersSchema } from "./schema";
 import { MemoriesService } from "./service";
 import { ApiException, openApiErrorResponse } from "@/utils/api-error";
 import { withAuth } from "@/middleware/auth";
@@ -19,7 +14,7 @@ declare module "hono" {
 }
 
 // Middleware de autenticación para todas las rutas de memories
-memoriesApp.use("*", withAuth);
+memoriesApp.use("/memories*", withAuth);
 
 // Middleware para inyectar el MemoriesService en cada request
 memoriesApp.use("*", async (c, next) => {

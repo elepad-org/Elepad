@@ -47,7 +47,7 @@ export default function ImagePickerComponent({
         const asset = result.assets[0];
         onImageSelected(asset.uri, asset.mimeType);
       }
-    } catch (error) {
+    } catch {
       Alert.alert("Error", "No se pudo seleccionar la imagen");
     } finally {
       setUploading(false);
@@ -76,7 +76,7 @@ export default function ImagePickerComponent({
         const asset = result.assets[0];
         onImageSelected(asset.uri, asset.mimeType);
       }
-    } catch (error) {
+    } catch {
       Alert.alert("Error", "No se pudo tomar la foto");
     } finally {
       setUploading(false);

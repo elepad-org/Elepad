@@ -1,6 +1,6 @@
 import React from "react";
 import { TouchableOpacity } from "react-native";
-import { Dialog, Text, IconButton, Divider, Button } from "react-native-paper";
+import { Dialog, Text, IconButton, Divider } from "react-native-paper";
 import { STYLES, COLORS } from "@/styles/base";
 import ImagePickerComponent from "./ImagePickerComponent";
 import TextNoteComponent from "./TextNoteComponent";

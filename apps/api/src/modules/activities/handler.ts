@@ -5,7 +5,7 @@ import {
   NewActivitySchema,
   UpdateActivitySchema,
 } from "./schema";
-import { ApiException, openApiErrorResponse } from "@/utils/api-error";
+import { openApiErrorResponse } from "@/utils/api-error";
 
 export const activitiesApp = new OpenAPIHono();
 
