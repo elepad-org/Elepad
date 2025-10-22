@@ -16,9 +16,11 @@ import {
   GetFamilyGroupIdGroupMembers200,
 } from "@elepad/api-client";
 import { COLORS, STYLES as baseStyles } from "@/styles/base";
-import { Text, Dialog, Button, Snackbar } from "react-native-paper";
+import { Text, Dialog, Button } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CancelButton from "@/components/shared/CancelButton";
+import SuccessSnackbar from "@/components/shared/SuccessSnackbar";
+import ErrorSnackbar from "@/components/shared/ErrorSnackbar";
 
 export default function CalendarScreen() {
   const { userElepad } = useAuth();
@@ -27,6 +29,9 @@ export default function CalendarScreen() {
 
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarType, setSnackbarType] = useState<"success" | "error">(
+    "success",
+  );
 
   const [formVisible, setFormVisible] = useState(false);
   const [editing, setEditing] = useState<Activity | null>(null);
@@ -55,6 +60,7 @@ export default function CalendarScreen() {
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000), // Exponential backoff: 1s, 2s
       onSuccess: async () => {
         setSnackbarMessage("Actividad creada correctamente");
+        setSnackbarType("success");
         setFormVisible(false);
         setEditing(null);
         setSnackbarVisible(true);
@@ -75,6 +81,7 @@ export default function CalendarScreen() {
         Math.min(1000 * 2 ** attemptIndex, 3000), // Exponential backoff: 1s, 2s
       onSuccess: async () => {
         setSnackbarMessage("Actividad actualizada correctamente");
+        setSnackbarType("success");
         setFormVisible(false);
         setEditing(null);
         setSnackbarVisible(true);
@@ -92,12 +99,14 @@ export default function CalendarScreen() {
     mutation: {
       onSuccess: async () => {
         setSnackbarMessage("Actividad eliminada correctamente");
+        setSnackbarType("success");
         setSnackbarVisible(true);
         await activitiesQuery.refetch();
       },
       onError: (error) => {
         console.error("Error al eliminar actividad:", error);
         setSnackbarMessage("No se pudo eliminar la actividad");
+        setSnackbarType("error");
         setSnackbarVisible(true);
       },
     },
@@ -229,18 +238,19 @@ export default function CalendarScreen() {
         </Dialog.Actions>
       </Dialog>
 
-      <Snackbar
-        visible={snackbarVisible}
-        onDismiss={() => setSnackbarVisible(false)}
-        duration={2200}
-        style={{
-          backgroundColor: "#4CAF50",
-          borderRadius: 12,
-          marginBottom: 80,
-        }}
-      >
-        {snackbarMessage}
-      </Snackbar>
+      {snackbarType === "success" ? (
+        <SuccessSnackbar
+          visible={snackbarVisible}
+          onDismiss={() => setSnackbarVisible(false)}
+          message={snackbarMessage}
+        />
+      ) : (
+        <ErrorSnackbar
+          visible={snackbarVisible}
+          onDismiss={() => setSnackbarVisible(false)}
+          message={snackbarMessage}
+        />
+      )}
     </SafeAreaView>
   );
 }

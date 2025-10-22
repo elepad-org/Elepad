@@ -91,6 +91,7 @@ export default function ActivityItem({
   return (
     <Card style={[styles.card, isCompleted && styles.completedCard]}>
       <List.Item
+        style={styles.listItem}
         titleStyle={isCompleted && { textDecorationLine: "line-through" }}
         title={item.title}
         description={
@@ -163,12 +164,13 @@ export default function ActivityItem({
 
 const styles = StyleSheet.create({
   card: {
-    marginBottom: 14,
-    borderRadius: 28,
+    marginBottom: 8,
+    borderRadius: 34,
     backgroundColor: "rgba(255, 255, 255, 0.7)",
-    borderWidth: 1,
+    borderWidth: 0,
     borderColor: "rgba(137, 152, 175, 0.18)",
     overflow: "hidden",
+
     shadowColor: "#8998AF",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.08,
@@ -181,6 +183,10 @@ const styles = StyleSheet.create({
     borderColor: "rgba(137, 152, 175, 0.12)",
     opacity: 0.7,
     shadowOpacity: 0.04,
+  },
+  listItem: {
+    paddingVertical: 2,
+    paddingHorizontal: 4,
   },
   checkboxContainer: {
     justifyContent: "center",
@@ -195,10 +201,11 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
   },
   descriptionContent: {
-    paddingTop: 8,
-    paddingBottom: 12,
-    paddingHorizontal: 16,
+    paddingTop: 4,
+    paddingBottom: 8,
+    paddingHorizontal: 12,
     backgroundColor: "transparent",
+    paddingLeft: 27,
     borderTopWidth: 1,
     borderTopColor: "#f0f0f0",
   },
