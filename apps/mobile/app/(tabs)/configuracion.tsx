@@ -6,7 +6,6 @@ import {
   Divider,
   List,
   Portal,
-  Snackbar,
   TextInput,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -14,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
 import { UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import ProfileHeader from "@/components/ProfileHeader";
+import SuccessSnackbar from "@/components/shared/SuccessSnackbar";
 import { useRouter } from "expo-router";
 import { COLORS, STYLES } from "@/styles/base";
 
@@ -185,13 +185,11 @@ export default function ConfiguracionScreen() {
               setSnackbarVisible(true);
             }}
           />
-          <Snackbar
+          <SuccessSnackbar
             visible={snackbarVisible}
             onDismiss={() => setSnackbarVisible(false)}
-            duration={2200}
-          >
-            ✓ Información actualizada correctamente
-          </Snackbar>
+            message="✓ Información actualizada correctamente"
+          />
         </Portal>
       </ScrollView>
     </SafeAreaView>

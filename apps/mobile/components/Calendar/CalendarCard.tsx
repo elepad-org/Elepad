@@ -1,12 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
-import {
-  Text,
-  Card,
-  SegmentedButtons,
-  IconButton,
-  Snackbar,
-} from "react-native-paper";
+import { Text, Card, SegmentedButtons, IconButton } from "react-native-paper";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import { Activity, useGetFrequencies } from "@elepad/api-client";
 import { COLORS } from "@/styles/base";
@@ -16,6 +10,7 @@ import {
   useGetActivityCompletions,
   usePostActivityCompletionsToggle,
 } from "@elepad/api-client/src/gen/client";
+import ErrorSnackbar from "@/components/shared/ErrorSnackbar";
 
 import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 
@@ -508,11 +503,9 @@ export default function CalendarCard(props: CalendarCardProps) {
         </Text>
       )}
       {dayEvents.length === 0 ? (
-        <Card style={styles.cardEmpty}>
-          <Card.Content>
-            <Text>No hay eventos para este día.</Text>
-          </Card.Content>
-        </Card>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>No hay eventos para este día.</Text>
+        </View>
       ) : (
         <FlatList
           data={dayEvents}
@@ -537,23 +530,11 @@ export default function CalendarCard(props: CalendarCardProps) {
         />
       )}
 
-      <Snackbar
+      <ErrorSnackbar
         visible={errorSnackbar.visible}
         onDismiss={() => setErrorSnackbar({ visible: false, message: "" })}
-        duration={4000}
-        style={{
-          backgroundColor: "#dc3545",
-          borderRadius: 12,
-          marginBottom: 80,
-        }}
-        action={{
-          label: "OK",
-          onPress: () => setErrorSnackbar({ visible: false, message: "" }),
-          textColor: "#fff",
-        }}
-      >
-        <Text style={{ color: "#fff" }}>{errorSnackbar.message}</Text>
-      </Snackbar>
+        message={errorSnackbar.message}
+      />
     </View>
   );
 }
@@ -610,12 +591,15 @@ const styles = StyleSheet.create({
   todayIconButton: {
     margin: 0,
   },
-  cardEmpty: {
+  emptyContainer: {
     marginTop: 20,
-    padding: 10,
-    borderRadius: 12,
-    backgroundColor: "#f9f9f9",
-    elevation: 1,
+    paddingHorizontal: 10,
+    alignItems: "center",
+  },
+  emptyText: {
+    color: "#6c757d",
+    fontSize: 15,
+    textAlign: "center",
   },
   listContent: {
     paddingBottom: 100,
