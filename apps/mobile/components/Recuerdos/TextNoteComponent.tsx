@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { View } from "react-native";
 import { TextInput, Text } from "react-native-paper";
 import { STYLES, COLORS } from "@/styles/base";

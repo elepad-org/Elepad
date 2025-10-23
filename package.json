@@ -3,8 +3,8 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "packages/*",
+    "apps/*"
   ],
   "scripts": {
     "start": "turbo run start",
@@ -15,7 +15,7 @@
     "format": "prettier --write . --list-different",
     "fix:mobile": "turbo run fix:mobile",
     "gen:types": "turbo run gen:types",
-    "prepare": "husky && turbo run prepare"
+    "prepare": "husky"
   },
   "devDependencies": {
     "@types/react": "~19.1.10",

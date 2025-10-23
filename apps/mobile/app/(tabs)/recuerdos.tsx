@@ -80,6 +80,7 @@ export default function RecuerdosScreen() {
   >("select");
   const [selectedTipo, setSelectedTipo] = useState<RecuerdoTipo | null>(null);
   const [selectedFileUri, setSelectedFileUri] = useState<string | null>(null);
+  const [, setSelectedMimeType] = useState<string | null>(null);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarError, setSnackbarError] = useState(false);
@@ -122,20 +123,10 @@ export default function RecuerdosScreen() {
         // Log more details about the error
         if (error && typeof error === "object") {
           console.error("CLIENT: Error details:", {
-            message:
-              "message" in error
-                ? (error as { message: string }).message
-                : "Unknown",
-            status:
-              "status" in error
-                ? (error as { status: number }).status
-                : undefined,
-            statusText:
-              "statusText" in error
-                ? (error as { statusText: string }).statusText
-                : undefined,
-            body:
-              "body" in error ? (error as { body: unknown }).body : undefined,
+            message: (error as Error).message,
+            status: (error as { status?: number }).status,
+            statusText: (error as { statusText?: string }).statusText,
+            body: (error as { body?: unknown }).body,
           });
         }
         throw error;
@@ -217,7 +208,7 @@ export default function RecuerdosScreen() {
   // Función para crear un nuevo recuerdo con multimedia
   const handleGuardarRecuerdo = async (data: RecuerdoData) => {
     try {
-      let fileData: Blob | { uri: string; name: string; type: string };
+      let fileData: Blob;
 
       if (selectedTipo === "texto") {
         // Para texto, crear un blob con el contenido

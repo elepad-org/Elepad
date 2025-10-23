@@ -1,6 +1,12 @@
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
-import { Text, Card, SegmentedButtons, IconButton } from "react-native-paper";
+import {
+  Text,
+  Card,
+  SegmentedButtons,
+  IconButton,
+  Snackbar,
+} from "react-native-paper";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import { Activity, useGetFrequencies } from "@elepad/api-client";
 import { COLORS } from "@/styles/base";
@@ -10,13 +16,13 @@ import {
   useGetActivityCompletions,
   usePostActivityCompletionsToggle,
 } from "@elepad/api-client/src/gen/client";
-import ErrorSnackbar from "@/components/shared/ErrorSnackbar";
 
 import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 
 // Función para expandir actividades recurrentes según frequencyId y RRULE
 function expandRecurringActivity(
   activity: Activity,
+  startDate: Date,
   endDate: Date,
   frequencies: Record<string, { label: string; rrule: string | null }>,
 ): string[] {
@@ -125,6 +131,7 @@ interface CalendarCardProps {
   };
   onEdit: (ev: Activity) => void;
   onDelete: (id: string) => void;
+  onToggleComplete: (ev: Activity) => void;
   isOwnerOfGroup: boolean;
   groupInfo?: GetFamilyGroupIdGroupMembers200;
 }
@@ -179,6 +186,7 @@ export default function CalendarCard(props: CalendarCardProps) {
     activitiesQuery,
     onEdit,
     onDelete,
+    onToggleComplete,
     isOwnerOfGroup,
     groupInfo,
   } = props;
@@ -246,7 +254,7 @@ export default function CalendarCard(props: CalendarCardProps) {
     if (!frequenciesQuery.data) return map;
 
     const frequencies = (() => {
-      const data = frequenciesQuery.data;
+      const data = frequenciesQuery.data as any;
       if (Array.isArray(data)) return data;
       if (data.data && Array.isArray(data.data)) return data.data;
       return [];
@@ -264,12 +272,19 @@ export default function CalendarCard(props: CalendarCardProps) {
 
     // Calcular rango de fechas para expandir (3 meses antes y 3 meses después)
     const now = new Date();
+    const startRange = new Date(now);
+    startRange.setMonth(now.getMonth() - 3);
     const endRange = new Date(now);
     endRange.setMonth(now.getMonth() + 3);
 
     for (const ev of events) {
       // Expandir la actividad según su frecuencia
-      const dates = expandRecurringActivity(ev, endRange, frequenciesMap);
+      const dates = expandRecurringActivity(
+        ev,
+        startRange,
+        endRange,
+        frequenciesMap,
+      );
 
       // Agregar la actividad a cada fecha expandida
       for (const date of dates) {
@@ -514,11 +529,23 @@ export default function CalendarCard(props: CalendarCardProps) {
         />
       )}
 
-      <ErrorSnackbar
+      <Snackbar
         visible={errorSnackbar.visible}
         onDismiss={() => setErrorSnackbar({ visible: false, message: "" })}
-        message={errorSnackbar.message}
-      />
+        duration={4000}
+        style={{
+          backgroundColor: "#dc3545",
+          borderRadius: 12,
+          marginBottom: 80,
+        }}
+        action={{
+          label: "OK",
+          onPress: () => setErrorSnackbar({ visible: false, message: "" }),
+          textColor: "#fff",
+        }}
+      >
+        <Text style={{ color: "#fff" }}>{errorSnackbar.message}</Text>
+      </Snackbar>
     </View>
   );
 }
@@ -575,6 +602,25 @@ const styles = StyleSheet.create({
   todayIconButton: {
     margin: 0,
   },
+  segmentedButtonActive: {
+    backgroundColor: "rgba(137, 152, 175, 0.75)",
+    borderRadius: 20,
+    borderWidth: 0,
+  },
+  segmentedButtonInactive: {
+    backgroundColor: "rgba(255, 255, 255, 0.25)",
+    borderRadius: 20,
+    borderWidth: 0,
+  },
+  segmentedLabelActive: {
+    color: "#ffffff",
+  },
+  segmentedLabelInactive: {
+    color: "rgba(137, 152, 175, 0.8)",
+  },
+  todayIconButton: {
+    margin: 0,
+  },
   emptyContainer: {
     marginTop: 20,
     paddingHorizontal: 10,
@@ -584,6 +630,9 @@ const styles = StyleSheet.create({
     color: "#6c757d",
     fontSize: 15,
     textAlign: "center",
+  },
+  listContent: {
+    paddingBottom: 100,
   },
   listContent: {
     paddingBottom: 100,

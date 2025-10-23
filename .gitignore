@@ -1,9 +1,7 @@
 # dependencies and build outputs
 **/node_modules/
 **/dist/
-apps/api/openapi.json
 apps/api/cloudflare-worker.js
-gen/
 
 # local configs and caches
 .vscode/

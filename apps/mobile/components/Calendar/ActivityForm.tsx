@@ -1,6 +1,16 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
-import { TextInput, Button, Text, Menu, Dialog } from "react-native-paper";
+import {
+  Modal,
+  TextInput,
+  Button,
+  Text,
+  Checkbox,
+  Menu,
+  Dialog,
+  IconButton,
+  Divider,
+} from "react-native-paper";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import type { Activity } from "@elepad/api-client";
 import { useGetFrequencies } from "@elepad/api-client";
@@ -28,7 +38,7 @@ export default function ActivityForm({
   const [endsAtDate, setEndsAtDate] = useState<Date | undefined>(
     initial?.endsAt ? new Date(initial.endsAt) : undefined,
   );
-
+  const [completed, setCompleted] = useState(initial?.completed ?? false);
   const [frequencyId, setFrequencyId] = useState<string | undefined>(
     initial?.frequencyId || undefined,
   );
@@ -44,20 +54,13 @@ export default function ActivityForm({
   // Extract frequencies from response
   const frequencies = (() => {
     if (!frequenciesQuery.data) return [];
-    const data = frequenciesQuery.data as unknown;
-    if (Array.isArray(data)) return data as { id: string; label: string }[];
-    if (
-      data &&
-      typeof data === "object" &&
-      "data" in data &&
-      Array.isArray((data as { data: unknown }).data)
-    ) {
-      return (data as { data: { id: string; label: string }[] }).data;
-    }
+    const data = frequenciesQuery.data as any;
+    if (Array.isArray(data)) return data;
+    if (data.data && Array.isArray(data.data)) return data.data;
     return [];
   })();
 
-  const selectedFrequency = frequencies.find((f) => f.id === frequencyId);
+  const selectedFrequency = frequencies.find((f: any) => f.id === frequencyId);
   const frequencyLabel = selectedFrequency?.label || "Una vez";
 
   useEffect(() => {
@@ -209,7 +212,7 @@ export default function ActivityForm({
                 </Button>
               }
             >
-              {frequencies.map((freq) => (
+              {frequencies.map((freq: any) => (
                 <Menu.Item
                   key={freq.id}
                   onPress={() => {

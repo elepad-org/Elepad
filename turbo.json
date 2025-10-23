@@ -32,9 +32,6 @@
     "clean": {
       "cache": false
     },
-    "gen:types": {},
-    "prepare": {
-      "dependsOn": ["^prepare"]
-    }
+    "gen:types": {}
   }
 }

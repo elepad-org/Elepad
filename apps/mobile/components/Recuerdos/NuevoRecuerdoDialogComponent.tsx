@@ -1,4 +1,3 @@
-import React from "react";
 import { TouchableOpacity } from "react-native";
 import { Dialog, Text, IconButton, Divider } from "react-native-paper";
 import { STYLES, COLORS } from "@/styles/base";

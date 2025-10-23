@@ -47,13 +47,13 @@ Se aplicarán **técnicas ágiles** y **prácticas DevOps** para trabajar de man
 ### 📂 Estructura del Repositorio
 
 ```yaml
-├── apps            # Aplicaciones
-│   ├── api           # Servidor back end con Hono y OpenAPI
-│   └── mobile        # App móvil con React Native y Expo
-├── packages        # Paquetes comunes a las aplicaciones
-│   ├── api-client    # Hooks de Tanstack Query generados con orval
-│   └── assets        # Imágenes de la marca Elepad
-└── supabase        # Para gestionar Supabase en entorno local
+├── apps/            # Aplicaciones
+│   ├── api/           # Servidor back end con Hono y OpenAPI
+│   └── mobile/        # App móvil con React Native y Expo
+├── packages/        # Paquetes comunes a las aplicaciones
+│   ├── api-client/    # Hooks de Tanstack Query generados con orval
+│   └── assets/        # Imágenes de la marca Elepad
+└── supabase/        # Para gestionar Supabase en entorno local
 ```
 
 Utilizamos una estructura de monorepo con [Turborepo](https://turborepo.com/docs) como sistema de build. Esto permite ejecutar procesos en varias subcarpetas a la vez. Con un solo comando `turbo run dev` se levanta el servidor back end y la app mobile.
@@ -92,6 +92,11 @@ Si en el código hay deuda técnica o cambios pendientes, se lo debe señalar co
 - **Lenguajes, frameworks y librerías**: Node.js, JavaScript, TypeScript, Hono, React Native, React Native Paper, Expo.
 - **Dev tools**: npm, Turborepo, eslint, Prettier, OpenAPI, husky.
 - **Servicios**: [Supabase](https://supabase.com/dashboard/project/sdnmoweppzszpxyggdyg) (Database, Storage, Auth), [Google Cloud](https://console.cloud.google.com/auth/clients?project=elepad-mobile) (OAuth), [Expo EAS](https://expo.dev/accounts/elepad-org/projects/elepad), [Cloudflare Workers](https://dash.cloudflare.com/6eee324495e2fe7945478ecec8158c8e/workers-and-pages).
+
+Se utiliza Husky para configurar hooks de Git:
+
+- Formatear el código con Prettier antes de un `git commit`.
+- Instalar dependencias después de un `git pull`.
 
 ## 🚀 Despliegue
 

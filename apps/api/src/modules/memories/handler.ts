@@ -13,11 +13,11 @@ declare module "hono" {
   }
 }
 
-// Middleware de autenticación para todas las rutas de memories
-memoriesApp.use("/memories*", withAuth);
+// Middleware de autenticación para todas las rutas de memories.
+memoriesApp.use("/memories/*", withAuth);
 
-// Middleware para inyectar el MemoriesService en cada request
-memoriesApp.use("*", async (c, next) => {
+// Middleware para inyectar el MemoriesService en cada request.
+memoriesApp.use("/memories/*", async (c, next) => {
   const memoriesService = new MemoriesService(c.var.supabase);
   c.set("memoriesService", memoriesService);
   await next();
