@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-# See: https://gist.github.com/sindresorhus/7996717
-
-# Get all changed files after running `git pull`
-changed_files="$(git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD)"
-# Install dependencies if any package.json changed
-echo "$changed_files" | grep --quiet package.json && npm install

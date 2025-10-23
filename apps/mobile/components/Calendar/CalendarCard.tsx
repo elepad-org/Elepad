@@ -19,6 +19,12 @@ import {
 
 import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 
+type Frequency = {
+  id: string;
+  label: string;
+  rrule: string | null;
+};
+
 // Función para expandir actividades recurrentes según frequencyId y RRULE
 function expandRecurringActivity(
   activity: Activity,
@@ -131,7 +137,6 @@ interface CalendarCardProps {
   };
   onEdit: (ev: Activity) => void;
   onDelete: (id: string) => void;
-  onToggleComplete: (ev: Activity) => void;
   isOwnerOfGroup: boolean;
   groupInfo?: GetFamilyGroupIdGroupMembers200;
 }
@@ -186,7 +191,6 @@ export default function CalendarCard(props: CalendarCardProps) {
     activitiesQuery,
     onEdit,
     onDelete,
-    onToggleComplete,
     isOwnerOfGroup,
     groupInfo,
   } = props;
@@ -253,8 +257,10 @@ export default function CalendarCard(props: CalendarCardProps) {
 
     if (!frequenciesQuery.data) return map;
 
-    const frequencies = (() => {
-      const data = frequenciesQuery.data as any;
+    const frequencies: Frequency[] = (() => {
+      const data = frequenciesQuery.data as
+        | { data?: Frequency[] }
+        | Frequency[];
       if (Array.isArray(data)) return data;
       if (data.data && Array.isArray(data.data)) return data.data;
       return [];

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { View, StatusBar } from "react-native";
-import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import CalendarCard from "@/components/Calendar/CalendarCard";
 import ActivityForm from "@/components/Calendar/ActivityForm";
@@ -12,13 +11,11 @@ import {
   NewActivity,
   UpdateActivity,
   useGetActivitiesFamilyCodeIdFamilyGroup,
-  getActivitiesFamilyCodeIdFamilyGroupResponse,
   useGetFamilyGroupIdGroupMembers,
   GetFamilyGroupIdGroupMembers200,
 } from "@elepad/api-client";
 import { COLORS, STYLES as baseStyles } from "@/styles/base";
 import { Text, Dialog, Button, Snackbar } from "react-native-paper";
-import AppDialog from "@/components/AppDialog";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CancelButton from "@/components/shared/CancelButton";
 
@@ -26,7 +23,6 @@ export default function CalendarScreen() {
   const { userElepad } = useAuth();
   const familyCode = userElepad?.groupId ?? "";
   const idUser = userElepad?.id ?? "";
-  const queryClient = useQueryClient();
 
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -105,24 +101,6 @@ export default function CalendarScreen() {
     },
   });
 
-  // Mutación separada para toggle con actualización optimista
-  const toggleActivity = usePatchActivitiesId({
-    mutation: {
-      retry: 1, // Solo 1 reintento
-      retryDelay: 500, // 500ms entre reintentos
-      onSuccess: () => {
-        // No hacemos refetch aquí para mantener la UI instantánea
-        // El servidor ya confirmó el cambio
-      },
-      onError: (error) => {
-        console.error("Error al actualizar actividad:", error);
-        // El rollback se maneja en handleToggleComplete
-        setSnackbarMessage("No se pudo actualizar el estado de la actividad");
-        setSnackbarVisible(true);
-      },
-    },
-  });
-
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<string | null>(null);
 
@@ -164,90 +142,6 @@ export default function CalendarScreen() {
     setEventToDelete(null);
   };
 
-  const handleToggleComplete = async (activity: Activity) => {
-    // Construimos la queryKey directamente
-    const queryKey = [`/activities/familyCode/${familyCode}`];
-
-    // Cancelamos cualquier refetch en progreso
-    await queryClient.cancelQueries({ queryKey });
-
-    // Guardamos el estado previo por si necesitamos revertir
-    const previousData =
-      queryClient.getQueryData<getActivitiesFamilyCodeIdFamilyGroupResponse>(
-        queryKey,
-      );
-
-    // Actualizamos optimísticamente el cache de forma SÍNCRONA
-    queryClient.setQueryData<getActivitiesFamilyCodeIdFamilyGroupResponse>(
-      queryKey,
-      (old) => {
-        if (!old) return old;
-
-        // Caso 1: Los datos son un array plano (formato simplificado de React Query)
-        if (Array.isArray(old)) {
-          return old.map((act: Activity) =>
-            act.id === activity.id
-              ? { ...act, completed: !act.completed }
-              : act,
-          ) as unknown as getActivitiesFamilyCodeIdFamilyGroupResponse;
-        }
-
-        // Caso 2: Los datos tienen la estructura completa { data, status, headers }
-        if ("data" in old && Array.isArray(old.data)) {
-          return {
-            ...old,
-            data: old.data.map((act: Activity) =>
-              act.id === activity.id
-                ? { ...act, completed: !act.completed }
-                : act,
-            ),
-          } as getActivitiesFamilyCodeIdFamilyGroupResponse;
-        }
-
-        return old;
-      },
-    );
-
-    // Ejecutamos la mutación en background con timeout
-    try {
-      const updateData: UpdateActivity = {
-        startsAt: activity.startsAt,
-        completed: !activity.completed,
-      };
-
-      // Solo incluir campos opcionales si tienen valor
-      if (activity.title) {
-        updateData.title = activity.title;
-      }
-      if (activity.endsAt !== null && activity.endsAt !== undefined) {
-        updateData.endsAt = activity.endsAt;
-      }
-      if (activity.description !== null && activity.description !== undefined) {
-        updateData.description = activity.description;
-      }
-
-      // Timeout de 3 segundos para la petición
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Timeout")), 3000),
-      );
-
-      await Promise.race([
-        toggleActivity.mutateAsync({
-          id: activity.id,
-          data: updateData,
-        }),
-        timeoutPromise,
-      ]);
-
-      // No hacemos invalidateQueries para evitar el refetch y mantener la UI instantánea
-      // El cache ya está actualizado optimísticamente
-    } catch (error) {
-      // En caso de error, revertimos al estado anterior
-      queryClient.setQueryData(queryKey, previousData);
-      console.error("Error al actualizar actividad:", error);
-    }
-  };
-
   return (
     <SafeAreaView style={baseStyles.safeArea} edges={["top", "left", "right"]}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
@@ -280,7 +174,6 @@ export default function CalendarScreen() {
           activitiesQuery={activitiesQuery}
           onEdit={handleEdit}
           onDelete={handleConfirmDelete}
-          onToggleComplete={handleToggleComplete}
           isOwnerOfGroup={isOwnerOfGroup}
           groupInfo={groupInfo}
         />
