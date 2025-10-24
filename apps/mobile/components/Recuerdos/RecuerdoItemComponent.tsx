@@ -18,11 +18,13 @@ interface Recuerdo {
 interface RecuerdoItemProps {
   item: Recuerdo;
   numColumns: number;
+  onPress: (item: Recuerdo) => void;
 }
 
 export default function RecuerdoItemComponent({
   item,
   numColumns,
+  onPress,
 }: RecuerdoItemProps) {
   const spacing = 16; // Espacio total horizontal
   const gap = 4; // Espacio entre items
@@ -31,6 +33,7 @@ export default function RecuerdoItemComponent({
 
   return (
     <TouchableOpacity
+      onPress={() => onPress(item)}
       style={{
         width: itemSize,
         height: itemSize,

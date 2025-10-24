@@ -23,6 +23,7 @@ import { uriToBlob } from "@/lib/uriToBlob";
 
 import RecuerdoItemComponent from "@/components/Recuerdos/RecuerdoItemComponent";
 import NuevoRecuerdoDialogComponent from "@/components/Recuerdos/NuevoRecuerdoDialogComponent";
+import RecuerdoDetailDialog from "@/components/Recuerdos/RecuerdoDetailDialog";
 import eleEmpthy from "@/assets/images/ele-idea.jpeg";
 
 // Tipos de recuerdos
@@ -77,6 +78,10 @@ export default function RecuerdosScreen() {
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const [numColumns, setNumColumns] = useState(2);
   const [dialogVisible, setDialogVisible] = useState(false);
+  const [detailDialogVisible, setDetailDialogVisible] = useState(false);
+  const [selectedRecuerdo, setSelectedRecuerdo] = useState<Recuerdo | null>(
+    null,
+  );
   const [currentStep, setCurrentStep] = useState<
     "select" | "create" | "metadata"
   >("select");
@@ -273,6 +278,16 @@ export default function RecuerdosScreen() {
     setSelectedMimeType(null);
   };
 
+  const handleRecuerdoPress = (recuerdo: Recuerdo) => {
+    setSelectedRecuerdo(recuerdo);
+    setDetailDialogVisible(true);
+  };
+
+  const handleCloseDetail = () => {
+    setDetailDialogVisible(false);
+    setSelectedRecuerdo(null);
+  };
+
   if (isLoading && recuerdos.length === 0) {
     return (
       <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
@@ -337,16 +352,20 @@ export default function RecuerdosScreen() {
             buttons={[
               {
                 value: "2",
-                label: "2",
-                icon: "view-grid",
+                icon: "view-module",
               },
               {
                 value: "3",
-                label: "3",
-                icon: "view-grid",
+                icon: "view-comfy",
               },
             ]}
             style={{ width: 140 }}
+            theme={{
+              colors: {
+                secondaryContainer: COLORS.primary,
+                onSecondaryContainer: COLORS.white,
+              },
+            }}
           />
         </View>
 
@@ -421,16 +440,21 @@ export default function RecuerdosScreen() {
           buttons={[
             {
               value: "2",
-              label: "2",
+
               icon: "view-grid",
             },
             {
               value: "3",
-              label: "3",
-              icon: "view-grid",
+              icon: "view-comfy",
             },
           ]}
           style={{ width: 140 }}
+          theme={{
+            colors: {
+              secondaryContainer: COLORS.primary,
+              onSecondaryContainer: COLORS.white,
+            },
+          }}
         />
       </View>
 
@@ -457,7 +481,11 @@ export default function RecuerdosScreen() {
           key={`grid-${numColumns}`}
           data={recuerdos}
           renderItem={({ item }) => (
-            <RecuerdoItemComponent item={item} numColumns={numColumns} />
+            <RecuerdoItemComponent
+              item={item}
+              numColumns={numColumns}
+              onPress={handleRecuerdoPress}
+            />
           )}
           keyExtractor={(item) => item.id}
           numColumns={numColumns}
@@ -497,6 +525,13 @@ export default function RecuerdosScreen() {
           }
         />
       </Portal>
+
+      {/* Diálogo de detalle del recuerdo */}
+      <RecuerdoDetailDialog
+        visible={detailDialogVisible}
+        recuerdo={selectedRecuerdo}
+        onDismiss={handleCloseDetail}
+      />
 
       {/* Snackbar para mostrar mensajes */}
       <Snackbar
