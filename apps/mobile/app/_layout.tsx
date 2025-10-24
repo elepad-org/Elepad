@@ -7,7 +7,6 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAppFonts } from "@/hooks/useAppFonts";
 import { Stack } from "expo-router";
-import "react-native-reanimated";
 import { useColorScheme } from "react-native";
 import { useEffect } from "react";
 import { configureApiClient } from "@elepad/api-client/src/runtime";
