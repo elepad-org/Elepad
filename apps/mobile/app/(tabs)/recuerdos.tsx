@@ -6,6 +6,8 @@ import {
   Button,
   Snackbar,
   ActivityIndicator,
+  IconButton,
+  SegmentedButtons,
 } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -22,8 +24,6 @@ import { uriToBlob } from "@/lib/uriToBlob";
 import RecuerdoItemComponent from "@/components/Recuerdos/RecuerdoItemComponent";
 import NuevoRecuerdoDialogComponent from "@/components/Recuerdos/NuevoRecuerdoDialogComponent";
 import eleEmpthy from "@/assets/images/ele-idea.jpeg";
-
-const numColumns = 2;
 
 // Tipos de recuerdos
 type RecuerdoTipo = "imagen" | "texto" | "audio";
@@ -74,6 +74,8 @@ export default function RecuerdosScreen() {
 
   // Estados locales
   const [refreshing, setRefreshing] = useState(false);
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+  const [numColumns, setNumColumns] = useState(2);
   const [dialogVisible, setDialogVisible] = useState(false);
   const [currentStep, setCurrentStep] = useState<
     "select" | "create" | "metadata"
@@ -174,7 +176,13 @@ export default function RecuerdosScreen() {
   const memories = Array.isArray(memoriesData) ? memoriesData : [];
 
   // Convertir memories a recuerdos para compatibilidad con componentes existentes
-  const recuerdos = memories.map(memoryToRecuerdo);
+  const recuerdos = memories.map(memoryToRecuerdo).sort((a, b) => {
+    if (sortOrder === "desc") {
+      return b.fecha.getTime() - a.fecha.getTime();
+    } else {
+      return a.fecha.getTime() - b.fecha.getTime();
+    }
+  });
 
   // Estados de carga y error (patrón original restaurado)
   const isLoading =
@@ -294,6 +302,54 @@ export default function RecuerdosScreen() {
           </Button>
         </View>
 
+        {/* Controles de ordenamiento y vista */}
+        <View
+          style={{
+            paddingHorizontal: 24,
+            paddingVertical: 12,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Text
+              style={{
+                fontSize: 14,
+                color: COLORS.textSecondary,
+                marginRight: 8,
+              }}
+            >
+              Ordenar:
+            </Text>
+            <IconButton
+              icon={sortOrder === "desc" ? "arrow-down" : "arrow-up"}
+              size={20}
+              onPress={() =>
+                setSortOrder(sortOrder === "desc" ? "asc" : "desc")
+              }
+              mode="contained-tonal"
+            />
+          </View>
+          <SegmentedButtons
+            value={numColumns.toString()}
+            onValueChange={(value) => setNumColumns(parseInt(value))}
+            buttons={[
+              {
+                value: "2",
+                label: "2",
+                icon: "view-grid",
+              },
+              {
+                value: "3",
+                label: "3",
+                icon: "view-grid",
+              },
+            ]}
+            style={{ width: 140 }}
+          />
+        </View>
+
         <View
           style={{
             flex: 1,
@@ -332,6 +388,52 @@ export default function RecuerdosScreen() {
         </Button>
       </View>
 
+      {/* Controles de ordenamiento y vista */}
+      <View
+        style={{
+          paddingHorizontal: 24,
+          paddingVertical: 12,
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Text
+            style={{
+              fontSize: 14,
+              color: COLORS.textSecondary,
+              marginRight: 8,
+            }}
+          >
+            Ordenar:
+          </Text>
+          <IconButton
+            icon={sortOrder === "desc" ? "arrow-down" : "arrow-up"}
+            size={20}
+            onPress={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
+            mode="contained-tonal"
+          />
+        </View>
+        <SegmentedButtons
+          value={numColumns.toString()}
+          onValueChange={(value) => setNumColumns(parseInt(value))}
+          buttons={[
+            {
+              value: "2",
+              label: "2",
+              icon: "view-grid",
+            },
+            {
+              value: "3",
+              label: "3",
+              icon: "view-grid",
+            },
+          ]}
+          style={{ width: 140 }}
+        />
+      </View>
+
       {recuerdos.length === 0 ? (
         <View
           style={{
@@ -352,11 +454,17 @@ export default function RecuerdosScreen() {
         </View>
       ) : (
         <FlatList
+          key={`grid-${numColumns}`}
           data={recuerdos}
-          renderItem={({ item }) => <RecuerdoItemComponent item={item} />}
+          renderItem={({ item }) => (
+            <RecuerdoItemComponent item={item} numColumns={numColumns} />
+          )}
           keyExtractor={(item) => item.id}
           numColumns={numColumns}
-          contentContainerStyle={{ padding: 16 }}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8 }}
+          columnWrapperStyle={{
+            justifyContent: "flex-start",
+          }}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
