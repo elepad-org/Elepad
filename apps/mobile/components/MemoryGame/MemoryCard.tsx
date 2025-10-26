@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
   },
   cardMatched: {
-    backgroundColor: COLORS.success + "20",
+    backgroundColor: "#E8F5E9", // Verde muy claro sólido en lugar de transparente
     borderColor: COLORS.success,
   },
   cardBackText: {
