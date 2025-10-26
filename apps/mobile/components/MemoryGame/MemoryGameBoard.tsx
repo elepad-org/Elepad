@@ -132,11 +132,12 @@ const styles = StyleSheet.create({
   board: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "space-evenly",
+    alignItems: "flex-start",
     backgroundColor: COLORS.backgroundSecondary,
     borderRadius: 12,
-    padding: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 4,
     marginBottom: 16,
   },
   controls: {

@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from "react";
 import { View, StyleSheet, StatusBar } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text, Portal, Dialog, Button } from "react-native-paper";
-import { router } from "expo-router";
+import { Text, Portal, Dialog, Button, IconButton } from "react-native-paper";
+import { router, Stack } from "expo-router";
 import { MemoryGameBoard } from "@/components/MemoryGame/MemoryGameBoard";
 import { COLORS } from "@/styles/base";
 
@@ -49,112 +49,127 @@ export default function MemoryGameScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor={COLORS.background}
+        />
 
-      <View style={styles.container}>
-        {/* Título */}
-        <View style={styles.header}>
-          <Text variant="headlineMedium" style={styles.title}>
-            🧠 Juego de Memoria
-          </Text>
-          <Text variant="bodyMedium" style={styles.subtitle}>
-            Encuentra todas las parejas
-          </Text>
-        </View>
+        <View style={styles.container}>
+          {/* Título con botón de retroceso flotante */}
+          <View style={styles.header}>
+            <IconButton
+              icon="arrow-left"
+              size={24}
+              onPress={() => router.back()}
+              style={styles.backButton}
+              iconColor={COLORS.primary}
+            />
+            <Text variant="headlineMedium" style={styles.title}>
+              🧠 Juego de Memoria
+            </Text>
+            <Text variant="bodyMedium" style={styles.subtitle}>
+              Encuentra todas las parejas
+            </Text>
+          </View>
 
-        {/* Tablero de juego */}
-        <MemoryGameBoard onQuit={handleQuit} onComplete={handleComplete} />
+          {/* Tablero de juego */}
+          <MemoryGameBoard onQuit={handleQuit} onComplete={handleComplete} />
 
-        {/* Diálogo de confirmación para salir */}
-        <Portal>
-          <Dialog
-            visible={showQuitDialog}
-            onDismiss={() => setShowQuitDialog(false)}
-          >
-            <Dialog.Icon icon="alert-circle" />
-            <Dialog.Title style={styles.dialogTitle}>
-              ¿Salir de la partida?
-            </Dialog.Title>
-            <Dialog.Content>
-              <Text variant="bodyMedium">
-                Si abandonas ahora, perderás tu progreso actual. ¿Estás seguro
-                de que quieres salir?
-              </Text>
-            </Dialog.Content>
-            <Dialog.Actions>
-              <Button onPress={() => setShowQuitDialog(false)}>Cancelar</Button>
-              <Button onPress={confirmQuit} textColor={COLORS.error}>
-                Salir
-              </Button>
-            </Dialog.Actions>
-          </Dialog>
-        </Portal>
-
-        {/* Diálogo de resultados */}
-        <Portal>
-          <Dialog
-            visible={showResultsDialog}
-            onDismiss={() => setShowResultsDialog(false)}
-          >
-            <Dialog.Icon icon="trophy" />
-            <Dialog.Title style={styles.dialogTitle}>
-              ¡Felicitaciones! 🎉
-            </Dialog.Title>
-            <Dialog.Content>
-              <View style={styles.resultsContainer}>
-                <Text variant="bodyLarge" style={styles.resultsText}>
-                  ¡Has completado el juego!
+          {/* Diálogo de confirmación para salir */}
+          <Portal>
+            <Dialog
+              visible={showQuitDialog}
+              onDismiss={() => setShowQuitDialog(false)}
+            >
+              <Dialog.Icon icon="alert-circle" />
+              <Dialog.Title style={styles.dialogTitle}>
+                ¿Salir de la partida?
+              </Dialog.Title>
+              <Dialog.Content>
+                <Text variant="bodyMedium">
+                  Si abandonas ahora, perderás tu progreso actual. ¿Estás seguro
+                  de que quieres salir?
                 </Text>
-                <View style={styles.resultStats}>
-                  <View style={styles.resultStat}>
-                    <Text variant="titleLarge" style={styles.resultIcon}>
-                      ⏱️
-                    </Text>
-                    <Text variant="bodyMedium" style={styles.resultLabel}>
-                      Tiempo
-                    </Text>
-                    <Text variant="headlineSmall" style={styles.resultValue}>
-                      {gameResults
-                        ? formatTime(gameResults.timeElapsed)
-                        : "--:--"}
-                    </Text>
-                  </View>
-                  <View style={styles.resultStat}>
-                    <Text variant="titleLarge" style={styles.resultIcon}>
-                      🎯
-                    </Text>
-                    <Text variant="bodyMedium" style={styles.resultLabel}>
-                      Movimientos
-                    </Text>
-                    <Text variant="headlineSmall" style={styles.resultValue}>
-                      {gameResults?.moves || 0}
-                    </Text>
+              </Dialog.Content>
+              <Dialog.Actions>
+                <Button onPress={() => setShowQuitDialog(false)}>
+                  Cancelar
+                </Button>
+                <Button onPress={confirmQuit} textColor={COLORS.error}>
+                  Salir
+                </Button>
+              </Dialog.Actions>
+            </Dialog>
+          </Portal>
+
+          {/* Diálogo de resultados */}
+          <Portal>
+            <Dialog
+              visible={showResultsDialog}
+              onDismiss={() => setShowResultsDialog(false)}
+            >
+              <Dialog.Icon icon="trophy" />
+              <Dialog.Title style={styles.dialogTitle}>
+                ¡Felicitaciones! 🎉
+              </Dialog.Title>
+              <Dialog.Content>
+                <View style={styles.resultsContainer}>
+                  <Text variant="bodyLarge" style={styles.resultsText}>
+                    ¡Has completado el juego!
+                  </Text>
+                  <View style={styles.resultStats}>
+                    <View style={styles.resultStat}>
+                      <Text variant="titleLarge" style={styles.resultIcon}>
+                        ⏱️
+                      </Text>
+                      <Text variant="bodyMedium" style={styles.resultLabel}>
+                        Tiempo
+                      </Text>
+                      <Text variant="headlineSmall" style={styles.resultValue}>
+                        {gameResults
+                          ? formatTime(gameResults.timeElapsed)
+                          : "--:--"}
+                      </Text>
+                    </View>
+                    <View style={styles.resultStat}>
+                      <Text variant="titleLarge" style={styles.resultIcon}>
+                        🎯
+                      </Text>
+                      <Text variant="bodyMedium" style={styles.resultLabel}>
+                        Movimientos
+                      </Text>
+                      <Text variant="headlineSmall" style={styles.resultValue}>
+                        {gameResults?.moves || 0}
+                      </Text>
+                    </View>
                   </View>
                 </View>
-              </View>
-            </Dialog.Content>
-            <Dialog.Actions style={styles.dialogActions}>
-              <Button
-                mode="outlined"
-                onPress={handleBackToGames}
-                style={styles.dialogButton}
-              >
-                Volver a Juegos
-              </Button>
-              <Button
-                mode="contained"
-                onPress={handlePlayAgain}
-                style={styles.dialogButton}
-                buttonColor={COLORS.primary}
-              >
-                Jugar de Nuevo
-              </Button>
-            </Dialog.Actions>
-          </Dialog>
-        </Portal>
-      </View>
-    </SafeAreaView>
+              </Dialog.Content>
+              <Dialog.Actions style={styles.dialogActions}>
+                <Button
+                  mode="outlined"
+                  onPress={handleBackToGames}
+                  style={styles.dialogButton}
+                >
+                  Volver a Juegos
+                </Button>
+                <Button
+                  mode="contained"
+                  onPress={handlePlayAgain}
+                  style={styles.dialogButton}
+                  buttonColor={COLORS.primary}
+                >
+                  Jugar de Nuevo
+                </Button>
+              </Dialog.Actions>
+            </Dialog>
+          </Portal>
+        </View>
+      </SafeAreaView>
+    </>
   );
 }
 
@@ -170,6 +185,13 @@ const styles = StyleSheet.create({
   header: {
     alignItems: "center",
     marginBottom: 16,
+    position: "relative",
+  },
+  backButton: {
+    position: "absolute",
+    left: -8,
+    top: 0,
+    zIndex: 1,
   },
   title: {
     fontWeight: "bold",

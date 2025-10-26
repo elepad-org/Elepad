@@ -1,4 +1,4 @@
-import { StatusBar, ScrollView, View, Image, StyleSheet } from "react-native";
+import { StatusBar, ScrollView, View, Image } from "react-native";
 import { ActivityIndicator, Text, Card, Button } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -36,31 +36,47 @@ export default function JuegosScreen() {
           </Text>
 
           {/* Juego de Memoria */}
-          <Card style={[STYLES.card, { marginBottom: 16 }]}>
-            <Card.Content>
-              <View style={styles.gameHeader}>
-                <Text style={styles.gameIcon}>🧠</Text>
-                <View style={styles.gameInfo}>
-                  <Text variant="titleLarge" style={styles.gameTitle}>
-                    Juego de Memoria
-                  </Text>
-                  <Text variant="bodyMedium" style={styles.gameDescription}>
-                    Encuentra todas las parejas de cartas iguales
-                  </Text>
-                </View>
-              </View>
-            </Card.Content>
-            <Card.Actions>
+          <Card
+            style={[
+              STYLES.titleCard,
+              { alignItems: "center", marginBottom: 16 },
+            ]}
+          >
+            <Card.Content style={{ alignItems: "center" }}>
+              <Text style={{ fontSize: 64, marginBottom: 12 }}>🧠</Text>
+              <Text
+                variant="headlineSmall"
+                style={{
+                  fontWeight: "bold",
+                  color: COLORS.primary,
+                  marginBottom: 8,
+                  textAlign: "center",
+                }}
+              >
+                Juego de Memoria
+              </Text>
+              <Text
+                variant="bodyMedium"
+                style={{
+                  color: COLORS.textSecondary,
+                  textAlign: "center",
+                  marginBottom: 20,
+                }}
+              >
+                Encuentra todas las parejas de cartas iguales y entrena tu
+                mente. ¡Desafía tu memoria!
+              </Text>
               <Button
                 mode="contained"
                 onPress={() => router.push("/memory-game")}
                 icon="play"
                 buttonColor={COLORS.primary}
-                style={styles.playButton}
+                style={{ width: "100%" }}
+                contentStyle={{ paddingVertical: 4 }}
               >
                 Jugar Ahora
               </Button>
-            </Card.Actions>
+            </Card.Content>
           </Card>
 
           {/* Próximamente */}
@@ -108,28 +124,3 @@ export default function JuegosScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  gameHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-  },
-  gameIcon: {
-    fontSize: 48,
-  },
-  gameInfo: {
-    flex: 1,
-  },
-  gameTitle: {
-    fontWeight: "bold",
-    color: COLORS.primary,
-    marginBottom: 4,
-  },
-  gameDescription: {
-    color: COLORS.textSecondary,
-  },
-  playButton: {
-    flex: 1,
-  },
-});

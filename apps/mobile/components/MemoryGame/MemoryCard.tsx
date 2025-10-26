@@ -86,9 +86,13 @@ export const MemoryCard: React.FC<MemoryCardProps> = ({
 
 const styles = StyleSheet.create({
   cardContainer: {
-    width: "15%",
+    // Para 6 columnas: 100% / 6 = 16.666%
+    // Restamos un pequeño margen para el gap
+    width: "15.5%",
     aspectRatio: 0.7,
-    margin: 4,
+    // Usamos marginBottom para separación vertical y marginHorizontal mínimo
+    marginBottom: 6,
+    marginHorizontal: 1,
   },
   card: {
     position: "absolute",
