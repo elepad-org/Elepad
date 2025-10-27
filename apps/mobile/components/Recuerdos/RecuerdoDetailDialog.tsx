@@ -3,10 +3,11 @@ import { View, Image, Dimensions, StyleSheet } from "react-native";
 import { Dialog, Portal, Text, IconButton, Button } from "react-native-paper";
 import { COLORS, STYLES, FONT } from "@/styles/base";
 import { useAudioPlayer } from "expo-audio";
+import { Video, ResizeMode } from "expo-av";
 import Slider from "@react-native-community/slider";
 import CancelButton from "@/components/shared/CancelButton";
 
-type RecuerdoTipo = "imagen" | "texto" | "audio";
+type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
 
 interface Recuerdo {
   id: string;
@@ -36,6 +37,8 @@ export default function RecuerdoDetailDialog({
   const [duration, setDuration] = useState(0);
   const audioUrl = recuerdo?.tipo === "audio" ? recuerdo.contenido : "";
   const player = useAudioPlayer(audioUrl);
+  const videoRef = useRef<Video>(null);
+  const [videoStatus, setVideoStatus] = useState<any>({});
 
   // Resetear el player cuando se abre el modal
   useEffect(() => {
@@ -45,6 +48,12 @@ export default function RecuerdoDetailDialog({
       player.seekTo(0);
       setIsPlaying(false);
       setCurrentTime(0);
+    }
+
+    // Resetear video si existe
+    if (visible && recuerdo?.tipo === "video" && videoRef.current) {
+      videoRef.current.setPositionAsync(0);
+      videoRef.current.pauseAsync();
     }
   }, [visible, recuerdo, player]);
 
@@ -132,6 +141,9 @@ export default function RecuerdoDetailDialog({
     if (recuerdo.tipo === "audio") {
       stopAudio();
     }
+    if (recuerdo.tipo === "video" && videoRef.current) {
+      videoRef.current.pauseAsync();
+    }
     onDismiss();
   };
 
@@ -149,7 +161,7 @@ export default function RecuerdoDetailDialog({
         <View
           style={{
             backgroundColor: COLORS.white,
-            borderRadius: 0,
+            borderRadius: 10,
             overflow: "hidden",
             width: screenWidth * 0.92,
           }}
@@ -170,6 +182,69 @@ export default function RecuerdoDetailDialog({
               </View>
 
               {/* Información debajo de la imagen */}
+              <View style={{ padding: 20, paddingTop: 16 }}>
+                {recuerdo.titulo && (
+                  <Text style={{ ...STYLES.heading, textAlign: "left" }}>
+                    {recuerdo.titulo}
+                  </Text>
+                )}
+
+                {recuerdo.descripcion && (
+                  <Text
+                    style={{
+                      ...STYLES.subheading,
+                      marginTop: 8,
+                      textAlign: "left",
+                    }}
+                  >
+                    {recuerdo.descripcion}
+                  </Text>
+                )}
+
+                <Text
+                  style={{
+                    fontSize: 13,
+                    color: COLORS.textSecondary,
+                    marginTop: 8,
+                    fontFamily: FONT.regular,
+                  }}
+                >
+                  {recuerdo.fecha.toLocaleDateString("es-ES", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                  {" · "}
+                  {recuerdo.fecha.toLocaleTimeString("es-ES", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+              </View>
+            </View>
+          )}
+
+          {recuerdo.tipo === "video" && recuerdo.contenido && (
+            <View>
+              <View style={{ padding: 14, paddingBottom: 0 }}>
+                <Video
+                  ref={videoRef}
+                  source={{ uri: recuerdo.contenido }}
+                  style={{
+                    width: "100%",
+                    height: screenWidth * 0.84,
+                    borderRadius: 0,
+                  }}
+                  useNativeControls
+                  resizeMode={ResizeMode.CONTAIN}
+                  isLooping={false}
+                  onPlaybackStatusUpdate={(status) =>
+                    setVideoStatus(() => status)
+                  }
+                />
+              </View>
+
+              {/* Información debajo del video */}
               <View style={{ padding: 20, paddingTop: 16 }}>
                 {recuerdo.titulo && (
                   <Text style={{ ...STYLES.heading, textAlign: "left" }}>
@@ -275,15 +350,16 @@ export default function RecuerdoDetailDialog({
               <View
                 style={{
                   backgroundColor: COLORS.accent,
-                  paddingVertical: 30,
+                  paddingTop: 50,
+                  paddingBottom: 10,
                   paddingHorizontal: 20,
                   borderTopLeftRadius: 16,
                   borderTopRightRadius: 16,
-                  minHeight: 200,
+                  minHeight: 220,
                 }}
               >
                 {/* Botón de play/pause centrado */}
-                <View style={{ alignItems: "center", marginBottom: 20 }}>
+                <View style={{ alignItems: "center", marginBottom: 15 }}>
                   <IconButton
                     icon={isPlaying ? "pause-circle" : "play-circle"}
                     size={70}

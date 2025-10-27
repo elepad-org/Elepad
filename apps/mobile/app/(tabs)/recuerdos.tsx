@@ -27,7 +27,7 @@ import RecuerdoDetailDialog from "@/components/Recuerdos/RecuerdoDetailDialog";
 import eleEmpthy from "@/assets/images/ele-idea.jpeg";
 
 // Tipos de recuerdos
-type RecuerdoTipo = "imagen" | "texto" | "audio";
+type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
 
 interface RecuerdoData {
   contenido: string; // URI del archivo o texto
@@ -45,6 +45,8 @@ const memoryToRecuerdo = (memory: Memory): Recuerdo => {
       tipo = "imagen";
     } else if (memory.mimeType.startsWith("audio/")) {
       tipo = "audio";
+    } else if (memory.mimeType.startsWith("video/")) {
+      tipo = "video";
     }
   }
 
@@ -53,7 +55,9 @@ const memoryToRecuerdo = (memory: Memory): Recuerdo => {
     tipo,
     contenido: memory.mediaUrl || memory.caption || "",
     miniatura:
-      memory.mimeType?.startsWith("image/") && memory.mediaUrl
+      (memory.mimeType?.startsWith("image/") ||
+        memory.mimeType?.startsWith("video/")) &&
+      memory.mediaUrl
         ? memory.mediaUrl
         : undefined,
     titulo: memory.title || undefined,

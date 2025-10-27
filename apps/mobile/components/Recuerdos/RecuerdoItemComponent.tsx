@@ -4,7 +4,7 @@ import { STYLES, COLORS } from "@/styles/base";
 
 const screenWidth = Dimensions.get("window").width;
 
-type RecuerdoTipo = "imagen" | "texto" | "audio";
+type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
 
 interface Recuerdo {
   id: string;
@@ -76,6 +76,67 @@ export default function RecuerdoItemComponent({
             </View>
           )}
         </View>
+      ) : item.tipo === "video" && item.miniatura ? (
+        <View style={{ flex: 1, width: "100%", height: "100%" }}>
+          <Image
+            source={{ uri: item.miniatura }}
+            style={{
+              width: "100%",
+              height: "100%",
+              resizeMode: "cover",
+            }}
+          />
+          {/* Ícono de play para indicar que es un video */}
+          <View
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <View
+              style={{
+                backgroundColor: "rgba(0,0,0,0.5)",
+                borderRadius: 40,
+                width: 60,
+                height: 60,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <IconButton
+                icon="play"
+                size={30}
+                iconColor="#fff"
+                style={{ margin: 0 }}
+              />
+            </View>
+          </View>
+          {item.titulo && (
+            <View
+              style={{
+                position: "absolute",
+                top: 8,
+                left: 8,
+                right: 8,
+                backgroundColor: "rgba(0,0,0,0.6)",
+                padding: 6,
+                borderRadius: 4,
+              }}
+            >
+              <Text
+                numberOfLines={2}
+                style={{ color: "#fff", fontSize: 12, fontWeight: "500" }}
+              >
+                {item.titulo}
+              </Text>
+            </View>
+          )}
+        </View>
       ) : item.tipo === "texto" ? (
         <View
           style={[
@@ -95,15 +156,19 @@ export default function RecuerdoItemComponent({
         <View
           style={[
             STYLES.center,
-            { backgroundColor: "#F5F5F5", flex: 1, padding: 12 },
+            { backgroundColor: COLORS.accent, flex: 1, padding: 12 },
           ]}
         >
-          <IconButton icon="microphone" size={32} iconColor="#9E9E9E" />
+          <IconButton
+            icon="microphone"
+            size={32}
+            iconColor={COLORS.textSecondary}
+          />
           <Text
             numberOfLines={2}
             style={[
               STYLES.footerText,
-              { textAlign: "center", marginTop: 4, color: "#616161" },
+              { textAlign: "center", marginTop: 4, color: COLORS.textLight },
             ]}
           >
             {item.titulo || "Nota de voz"}
