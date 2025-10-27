@@ -41,7 +41,7 @@ export default function RecuerdoItemComponent({
         marginRight: gap,
         padding: 0,
         overflow: "hidden",
-        borderRadius: 8,
+        borderRadius: 4,
         backgroundColor: "#F5F5F5", // Fondo gris para todos
       }}
     >

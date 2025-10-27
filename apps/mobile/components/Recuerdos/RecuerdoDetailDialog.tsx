@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { View, Image, ScrollView, Dimensions } from "react-native";
+import { useState, useEffect, useRef } from "react";
+import { View, Image, Dimensions, StyleSheet } from "react-native";
 import { Dialog, Portal, Text, IconButton, Button } from "react-native-paper";
 import { COLORS, STYLES, FONT } from "@/styles/base";
 import { useAudioPlayer } from "expo-audio";
+import Slider from "@react-native-community/slider";
 import CancelButton from "@/components/shared/CancelButton";
 
 type RecuerdoTipo = "imagen" | "texto" | "audio";
@@ -30,27 +31,101 @@ export default function RecuerdoDetailDialog({
   recuerdo,
   onDismiss,
 }: RecuerdoDetailDialogProps) {
-  const player = useAudioPlayer(
-    recuerdo?.tipo === "audio" ? recuerdo.contenido : "",
-  );
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const audioUrl = recuerdo?.tipo === "audio" ? recuerdo.contenido : "";
+  const player = useAudioPlayer(audioUrl);
+
+  // Resetear el player cuando se abre el modal
+  useEffect(() => {
+    if (visible && recuerdo?.tipo === "audio") {
+      console.log("Modal opened, resetting player");
+      player.pause();
+      player.seekTo(0);
+      setIsPlaying(false);
+      setCurrentTime(0);
+    }
+  }, [visible, recuerdo, player]);
+
+  useEffect(() => {
+    // Sincronizar estado con el player
+    const checkStatus = () => {
+      setIsPlaying(player.playing);
+      setCurrentTime(player.currentTime);
+      setDuration(player.duration);
+    };
+
+    const interval = setInterval(checkStatus, 100);
+    return () => clearInterval(interval);
+  }, [player]);
+
+  // Limpiar el player cuando se cierra el modal
+  useEffect(() => {
+    return () => {
+      if (recuerdo?.tipo === "audio" && player) {
+        try {
+          console.log("Cleaning up player");
+          if (player.playing) {
+            player.pause();
+          }
+          player.seekTo(0);
+        } catch (error) {
+          console.log("Player already cleaned up");
+        }
+      }
+    };
+  }, [player, recuerdo]);
 
   if (!recuerdo) return null;
 
   const playAudio = () => {
-    if (isPlaying) {
-      player.pause();
-      setIsPlaying(false);
-    } else {
-      player.play();
-      setIsPlaying(true);
+    console.log("Play audio clicked, URL:", recuerdo.contenido);
+    console.log("Player state:", player.playing);
+
+    try {
+      if (player.playing) {
+        console.log("Pausing...");
+        player.pause();
+      } else {
+        console.log("Playing from position:", player.currentTime);
+        // Si el audio terminó, volver al inicio
+        if (player.currentTime >= player.duration - 0.1) {
+          console.log("Audio finished, seeking to start");
+          player.seekTo(0);
+        }
+        player.play();
+      }
+    } catch (error) {
+      console.error("Error toggling audio:", error);
     }
   };
 
   const stopAudio = () => {
-    player.pause();
-    player.seekTo(0);
-    setIsPlaying(false);
+    try {
+      player.pause();
+      player.seekTo(0);
+      setIsPlaying(false);
+      setCurrentTime(0);
+    } catch (error) {
+      console.error("Error stopping audio:", error);
+    }
+  };
+
+  const handleSliderChange = (value: number) => {
+    try {
+      player.seekTo(value);
+      setCurrentTime(value);
+    } catch (error) {
+      console.error("Error seeking:", error);
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    if (!seconds || isNaN(seconds)) return "0:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
   const handleDismiss = () => {
@@ -74,138 +149,141 @@ export default function RecuerdoDetailDialog({
         <View
           style={{
             backgroundColor: COLORS.white,
-            borderRadius: 20,
+            borderRadius: 0,
             overflow: "hidden",
-            maxHeight: screenWidth * 1.2,
             width: screenWidth * 0.92,
           }}
         >
-          <ScrollView showsVerticalScrollIndicator={false}>
-            {/* Contenido principal según el tipo */}
-            {recuerdo.tipo === "imagen" && recuerdo.miniatura && (
-              <View>
-                <View style={{ padding: 10, paddingBottom: 0 }}>
-                  <Image
-                    source={{ uri: recuerdo.miniatura }}
-                    style={{
-                      width: "100%",
-                      height: screenWidth * 0.84,
-                      borderRadius: 12,
-                    }}
-                    resizeMode="cover"
-                  />
-                </View>
+          {/* Contenido principal según el tipo */}
+          {recuerdo.tipo === "imagen" && recuerdo.miniatura && (
+            <View>
+              <View style={{ padding: 14, paddingBottom: 0 }}>
+                <Image
+                  source={{ uri: recuerdo.miniatura }}
+                  style={{
+                    width: "100%",
+                    height: screenWidth * 0.84,
+                    borderRadius: 0,
+                  }}
+                  resizeMode="cover"
+                />
+              </View>
 
-                {/* Información debajo de la imagen */}
-                <View style={{ padding: 20, paddingTop: 16 }}>
-                  {recuerdo.titulo && (
-                    <Text style={STYLES.heading}>{recuerdo.titulo}</Text>
-                  )}
+              {/* Información debajo de la imagen */}
+              <View style={{ padding: 20, paddingTop: 16 }}>
+                {recuerdo.titulo && (
+                  <Text style={{ ...STYLES.heading, textAlign: "left" }}>
+                    {recuerdo.titulo}
+                  </Text>
+                )}
 
-                  {recuerdo.descripcion && (
-                    <Text
-                      style={{
-                        ...STYLES.subheading,
-                        marginTop: 8,
-                        textAlign: "left",
-                      }}
-                    >
-                      {recuerdo.descripcion}
-                    </Text>
-                  )}
-
+                {recuerdo.descripcion && (
                   <Text
                     style={{
-                      fontSize: 13,
-                      color: COLORS.textSecondary,
+                      ...STYLES.subheading,
                       marginTop: 8,
-                      fontFamily: FONT.regular,
+                      textAlign: "left",
                     }}
                   >
-                    {recuerdo.fecha.toLocaleDateString("es-ES", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                    {" · "}
-                    {recuerdo.fecha.toLocaleTimeString("es-ES", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {recuerdo.descripcion}
                   </Text>
-                </View>
-              </View>
-            )}
+                )}
 
-            {recuerdo.tipo === "texto" && (
-              <View>
-                <View
+                <Text
                   style={{
-                    backgroundColor: COLORS.accent,
-                    padding: 20,
-                    paddingTop: 30,
-                    borderTopLeftRadius: 16,
-                    borderTopRightRadius: 16,
-                    minHeight: 180,
+                    fontSize: 13,
+                    color: COLORS.textSecondary,
+                    marginTop: 8,
+                    fontFamily: FONT.regular,
                   }}
                 >
-                  <Text style={STYLES.paragraphText}>{recuerdo.contenido}</Text>
-                </View>
+                  {recuerdo.fecha.toLocaleDateString("es-ES", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                  {" · "}
+                  {recuerdo.fecha.toLocaleTimeString("es-ES", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+              </View>
+            </View>
+          )}
 
-                {/* Información debajo del texto */}
-                <View style={{ padding: 20, paddingTop: 16 }}>
-                  {recuerdo.titulo && (
-                    <Text style={STYLES.heading}>{recuerdo.titulo}</Text>
-                  )}
+          {recuerdo.tipo === "texto" && (
+            <View>
+              <View
+                style={{
+                  backgroundColor: COLORS.accent,
+                  padding: 20,
+                  paddingTop: 30,
+                  borderTopLeftRadius: 16,
+                  borderTopRightRadius: 16,
+                  minHeight: 180,
+                }}
+              >
+                <Text style={STYLES.paragraphText}>{recuerdo.contenido}</Text>
+              </View>
 
-                  {recuerdo.descripcion && (
-                    <Text
-                      style={{
-                        ...STYLES.subheading,
-                        marginTop: 8,
-                        textAlign: "left",
-                      }}
-                    >
-                      {recuerdo.descripcion}
-                    </Text>
-                  )}
+              {/* Información debajo del texto */}
+              <View style={{ padding: 20, paddingTop: 16 }}>
+                {recuerdo.titulo && (
+                  <Text style={{ ...STYLES.heading, textAlign: "left" }}>
+                    {recuerdo.titulo}
+                  </Text>
+                )}
 
+                {recuerdo.descripcion && (
                   <Text
                     style={{
-                      fontSize: 13,
-                      color: COLORS.textSecondary,
+                      ...STYLES.subheading,
                       marginTop: 8,
-                      fontFamily: FONT.regular,
+                      textAlign: "left",
                     }}
                   >
-                    {recuerdo.fecha.toLocaleDateString("es-ES", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                    {" · "}
-                    {recuerdo.fecha.toLocaleTimeString("es-ES", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {recuerdo.descripcion}
                   </Text>
-                </View>
-              </View>
-            )}
+                )}
 
-            {recuerdo.tipo === "audio" && (
-              <View>
-                <View
+                <Text
                   style={{
-                    backgroundColor: COLORS.accent,
-                    paddingVertical: 40,
-                    borderTopLeftRadius: 16,
-                    borderTopRightRadius: 16,
-                    alignItems: "center",
-                    minHeight: 200,
-                    justifyContent: "center",
+                    fontSize: 13,
+                    color: COLORS.textSecondary,
+                    marginTop: 8,
+                    fontFamily: FONT.regular,
                   }}
                 >
+                  {recuerdo.fecha.toLocaleDateString("es-ES", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                  {" · "}
+                  {recuerdo.fecha.toLocaleTimeString("es-ES", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+              </View>
+            </View>
+          )}
+
+          {recuerdo.tipo === "audio" && (
+            <View>
+              <View
+                style={{
+                  backgroundColor: COLORS.accent,
+                  paddingVertical: 30,
+                  paddingHorizontal: 20,
+                  borderTopLeftRadius: 16,
+                  borderTopRightRadius: 16,
+                  minHeight: 200,
+                }}
+              >
+                {/* Botón de play/pause centrado */}
+                <View style={{ alignItems: "center", marginBottom: 20 }}>
                   <IconButton
                     icon={isPlaying ? "pause-circle" : "play-circle"}
                     size={70}
@@ -213,73 +291,94 @@ export default function RecuerdoDetailDialog({
                     onPress={playAudio}
                     style={{ margin: 0 }}
                   />
-                  <Text
-                    style={{
-                      color: COLORS.textSecondary,
-                      fontSize: 14,
-                      marginTop: 8,
-                    }}
-                  >
-                    {isPlaying ? "Reproduciendo..." : "Toca para reproducir"}
-                  </Text>
-                  {isPlaying && (
-                    <Button
-                      mode="text"
-                      onPress={stopAudio}
-                      textColor={COLORS.primary}
-                      compact
-                    >
-                      Detener
-                    </Button>
-                  )}
                 </View>
 
-                {/* Información debajo del audio */}
-                <View style={{ padding: 20, paddingTop: 16 }}>
-                  {recuerdo.titulo && (
-                    <Text style={STYLES.heading}>{recuerdo.titulo}</Text>
-                  )}
+                {/* Barra de progreso */}
+                <View style={{ paddingHorizontal: 10 }}>
+                  <Slider
+                    style={{ width: "100%", height: 40 }}
+                    minimumValue={0}
+                    maximumValue={duration || 1}
+                    value={currentTime}
+                    onSlidingComplete={handleSliderChange}
+                    minimumTrackTintColor={COLORS.primary}
+                    maximumTrackTintColor={COLORS.textSecondary + "40"}
+                    thumbTintColor={COLORS.primary}
+                  />
+                </View>
 
-                  {recuerdo.descripcion && (
-                    <Text
-                      style={{
-                        ...STYLES.subheading,
-                        marginTop: 8,
-                        textAlign: "left",
-                      }}
-                    >
-                      {recuerdo.descripcion}
-                    </Text>
-                  )}
-
+                {/* Tiempos: actual y duración */}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    paddingHorizontal: 20,
+                    marginTop: -10,
+                  }}
+                >
                   <Text
                     style={{
-                      fontSize: 13,
                       color: COLORS.textSecondary,
-                      marginTop: 8,
+                      fontSize: 12,
                       fontFamily: FONT.regular,
                     }}
                   >
-                    {recuerdo.fecha.toLocaleDateString("es-ES", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                    {" · "}
-                    {recuerdo.fecha.toLocaleTimeString("es-ES", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {formatTime(currentTime)}
+                  </Text>
+                  <Text
+                    style={{
+                      color: COLORS.textSecondary,
+                      fontSize: 12,
+                      fontFamily: FONT.regular,
+                    }}
+                  >
+                    {formatTime(duration)}
                   </Text>
                 </View>
               </View>
-            )}
 
-            {/* Botón de cerrar */}
-            <View style={{ paddingBottom: 12, alignItems: "center" }}>
-              <CancelButton onPress={handleDismiss} text="Cerrar" />
+              {/* Información debajo del audio */}
+              <View style={{ padding: 20, paddingTop: 16 }}>
+                {recuerdo.titulo && (
+                  <Text style={{ ...STYLES.heading, textAlign: "left" }}>
+                    {recuerdo.titulo}
+                  </Text>
+                )}
+
+                {recuerdo.descripcion && (
+                  <Text
+                    style={{
+                      ...STYLES.subheading,
+                      marginTop: 8,
+                      textAlign: "left",
+                    }}
+                  >
+                    {recuerdo.descripcion}
+                  </Text>
+                )}
+
+                <Text
+                  style={{
+                    fontSize: 13,
+                    color: COLORS.textSecondary,
+                    marginTop: 8,
+                    fontFamily: FONT.regular,
+                  }}
+                >
+                  {recuerdo.fecha.toLocaleDateString("es-ES", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                  {" · "}
+                  {recuerdo.fecha.toLocaleTimeString("es-ES", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+              </View>
             </View>
-          </ScrollView>
+          )}
         </View>
       </Dialog>
     </Portal>
