@@ -2,12 +2,15 @@ import { supabase } from "@/lib/supabase";
 import { View, Alert, Image, TouchableOpacity } from "react-native";
 import { Text, TextInput, Button } from "react-native-paper";
 import { makeRedirectUri } from "expo-auth-session";
+import * as WebBrowser from "expo-web-browser";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import googleLogo from "@/assets/images/google.png";
 import { Link } from "expo-router";
 import { COLORS, STYLES } from "@/styles/base";
 
 export default function LogIn() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,17 +30,110 @@ export default function LogIn() {
   };
 
   const handleGoogleLogin = async () => {
-    setLoading(true);
-    const redirectTo = makeRedirectUri({ scheme: "elepad", path: "/login" });
-    console.log(redirectTo);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo },
-    });
-    if (error) {
-      Alert.alert(error.message);
+    try {
+      setLoading(true);
+      // NO usar useProxy. Crear un redirect con tu scheme (deep link).
+      const redirectTo = makeRedirectUri({
+        scheme: "elepad",
+        path: "(tabs)/home",
+      });
+      console.log("Redirect URI (native):", redirectTo);
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo },
+      });
+
+      if (error) {
+        Alert.alert(error.message);
+        return;
+      }
+
+      console.log(data);
+
+      const authUrl = (data as any)?.url;
+      console.log(authUrl);
+      if (authUrl) {
+        // Abre el navegador para el flujo OAuth; cuando Google redirija a `redirectTo`
+        // el WebBrowser retornará con result.type === 'success' y result.url.
+        const result = await WebBrowser.openAuthSessionAsync(
+          authUrl,
+          redirectTo,
+        );
+        console.log(result);
+        if (result.type === "success" && result.url) {
+          // Algunas implementaciones de Supabase ofrecen helpers, pero aquí
+          // parseamos manualmente los tokens que vienen en la URL (fragment o query)
+          const parseParams = (u: string) => {
+            try {
+              const params: Record<string, string> = {};
+              // Intenta usar la parte después de '#' primero (hash fragment)
+              const hashIndex = u.indexOf("#");
+              const queryIndex = u.indexOf("?");
+              const raw =
+                hashIndex !== -1
+                  ? u.substring(hashIndex + 1)
+                  : queryIndex !== -1
+                    ? u.substring(queryIndex + 1)
+                    : "";
+              raw.split("&").forEach((pair) => {
+                const [k, v] = pair.split("=");
+                if (k && v)
+                  params[decodeURIComponent(k)] = decodeURIComponent(v);
+              });
+              return params;
+            } catch (e) {
+              return {} as Record<string, string>;
+            }
+          };
+
+          const params = parseParams(result.url);
+          const access_token =
+            params["access_token"] || params["access-token"] || undefined;
+          const refresh_token =
+            params["refresh_token"] || params["refresh-token"] || undefined;
+          //const provider_token = params['provider_token'] || undefined;
+
+          try {
+            // Si tenemos un access_token, intentamos establecer la sesión localmente.
+            if (access_token) {
+              // supabase-js v2 expone setSession
+              if (typeof (supabase.auth as any).setSession === "function") {
+                await (supabase.auth as any).setSession({
+                  access_token,
+                  refresh_token,
+                });
+              } else if (typeof (supabase.auth as any).setAuth === "function") {
+                // Fallback: algunas versiones exponen setAuth
+                await (supabase.auth as any).setAuth(access_token);
+              }
+            }
+          } catch (e) {
+            console.warn("No se pudo establecer la sesión desde tokens:", e);
+          }
+
+          // Confirma usuario y redirige a la pantalla principal
+          try {
+            const userRes: any = await supabase.auth.getUser();
+            const user = userRes?.data?.user;
+            if (user) {
+              router.replace("/(tabs)/home");
+              return;
+            }
+            // Si no hay user, navegamos al home igualmente y la app deberá sincronizar
+            router.replace("/(tabs)/home");
+          } catch (e) {
+            console.warn(
+              "No se pudo verificar el usuario después de OAuth:",
+              e,
+            );
+            router.replace("/(tabs)/home");
+          }
+        }
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
