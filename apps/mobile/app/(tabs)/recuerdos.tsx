@@ -57,6 +57,7 @@ const memoryToRecuerdo = (memory: Memory): Recuerdo => {
         ? memory.mediaUrl
         : undefined,
     titulo: memory.title || undefined,
+    descripcion: memory.caption || undefined,
     fecha: new Date(memory.createdAt),
   };
 };
@@ -67,6 +68,7 @@ interface Recuerdo {
   contenido: string;
   miniatura?: string;
   titulo?: string;
+  descripcion?: string;
   fecha: Date;
 }
 
