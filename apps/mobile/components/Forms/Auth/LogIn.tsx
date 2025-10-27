@@ -32,7 +32,6 @@ export default function LogIn() {
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
-      // NO usar useProxy. Crear un redirect con tu scheme (deep link).
       const redirectTo = makeRedirectUri({
         scheme: "elepad",
         path: "(tabs)/home",
@@ -54,20 +53,17 @@ export default function LogIn() {
       const authUrl = (data as any)?.url;
       console.log(authUrl);
       if (authUrl) {
-        // Abre el navegador para el flujo OAuth; cuando Google redirija a `redirectTo`
-        // el WebBrowser retornará con result.type === 'success' y result.url.
+        // Abre el browser del telefono
         const result = await WebBrowser.openAuthSessionAsync(
           authUrl,
           redirectTo,
         );
         console.log(result);
         if (result.type === "success" && result.url) {
-          // Algunas implementaciones de Supabase ofrecen helpers, pero aquí
-          // parseamos manualmente los tokens que vienen en la URL (fragment o query)
+          //Se parsea la URL que devuelve, ya que tiene los tokens de sesion
           const parseParams = (u: string) => {
             try {
               const params: Record<string, string> = {};
-              // Intenta usar la parte después de '#' primero (hash fragment)
               const hashIndex = u.indexOf("#");
               const queryIndex = u.indexOf("?");
               const raw =
@@ -88,46 +84,31 @@ export default function LogIn() {
           };
 
           const params = parseParams(result.url);
-          const access_token =
-            params["access_token"] || params["access-token"] || undefined;
-          const refresh_token =
-            params["refresh_token"] || params["refresh-token"] || undefined;
-          //const provider_token = params['provider_token'] || undefined;
+          const access_token = params["access_token"];
+          const refresh_token = params["refresh_token"];
 
           try {
-            // Si tenemos un access_token, intentamos establecer la sesión localmente.
-            if (access_token) {
-              // supabase-js v2 expone setSession
-              if (typeof (supabase.auth as any).setSession === "function") {
-                await (supabase.auth as any).setSession({
-                  access_token,
-                  refresh_token,
-                });
-              } else if (typeof (supabase.auth as any).setAuth === "function") {
-                // Fallback: algunas versiones exponen setAuth
-                await (supabase.auth as any).setAuth(access_token);
-              }
-            }
+            await supabase.auth.setSession({
+              access_token,
+              refresh_token,
+            });
           } catch (e) {
-            console.warn("No se pudo establecer la sesión desde tokens:", e);
+            console.warn("No se pudo establecer la sesión con los tokens:", e);
           }
 
-          // Confirma usuario y redirige a la pantalla principal
+          // Confirma usuario y redirige al inicio
           try {
-            const userRes: any = await supabase.auth.getUser();
+            const userRes = await supabase.auth.getUser();
             const user = userRes?.data?.user;
             if (user) {
               router.replace("/(tabs)/home");
               return;
+            } else {
+              router.replace("/login");
             }
-            // Si no hay user, navegamos al home igualmente y la app deberá sincronizar
-            router.replace("/(tabs)/home");
-          } catch (e) {
-            console.warn(
-              "No se pudo verificar el usuario después de OAuth:",
-              e,
-            );
-            router.replace("/(tabs)/home");
+          } catch (error) {
+            console.warn("No se pudo verificar el usuario de OAuth:", error);
+            router.replace("/login");
           }
         }
       }
