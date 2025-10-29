@@ -50,7 +50,7 @@ export default function LogIn() {
 
       console.log(data);
 
-      const authUrl = (data as any)?.url;
+      const authUrl = data?.url;
       console.log(authUrl);
       if (authUrl) {
         // Abre el browser del telefono
@@ -79,6 +79,7 @@ export default function LogIn() {
               });
               return params;
             } catch (e) {
+              console.log(e);
               return {} as Record<string, string>;
             }
           };
