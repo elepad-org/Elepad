@@ -1,8 +1,9 @@
 import { StatusBar, ScrollView, View, Image } from "react-native";
-import { ActivityIndicator, Text, Card } from "react-native-paper";
+import { ActivityIndicator, Text, Card, Button } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, STYLES } from "@/styles/base";
+import { router } from "expo-router";
 import eleCasino from "@/assets/images/ele-casino.jpeg";
 
 export default function JuegosScreen() {
@@ -25,16 +26,69 @@ export default function JuegosScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={STYLES.container}>
-          {/* Contenido principal */}
+          {/* Título de la sección */}
+          <Text style={[STYLES.heading, { marginBottom: 16 }]}>
+            🧩 Juegos Mentales
+          </Text>
+          <Text style={[STYLES.paragraphText, { marginBottom: 24 }]}>
+            Entrena tu mente con nuestros juegos diseñados para estimular la
+            memoria y las habilidades cognitivas.
+          </Text>
+
+          {/* Juego de Memoria */}
+          <Card
+            style={[
+              STYLES.titleCard,
+              { alignItems: "center", marginBottom: 16 },
+            ]}
+          >
+            <Card.Content style={{ alignItems: "center" }}>
+              <Text style={{ fontSize: 64, marginBottom: 12 }}>🧠</Text>
+              <Text
+                variant="headlineSmall"
+                style={{
+                  fontWeight: "bold",
+                  color: COLORS.primary,
+                  marginBottom: 8,
+                  textAlign: "center",
+                }}
+              >
+                Juego de Memoria
+              </Text>
+              <Text
+                variant="bodyMedium"
+                style={{
+                  color: COLORS.textSecondary,
+                  textAlign: "center",
+                  marginBottom: 20,
+                }}
+              >
+                Encuentra todas las parejas de cartas iguales y entrena tu
+                mente. ¡Desafía tu memoria!
+              </Text>
+              <Button
+                mode="contained"
+                onPress={() => router.push("/memory-game")}
+                icon="play"
+                buttonColor={COLORS.primary}
+                style={{ width: "100%" }}
+                contentStyle={{ paddingVertical: 4 }}
+              >
+                Jugar Ahora
+              </Button>
+            </Card.Content>
+          </Card>
+
+          {/* Próximamente */}
           <Card style={[STYLES.titleCard, { alignItems: "center" }]}>
             <Card.Content>
               <Text
                 style={[STYLES.heading, { fontSize: 48, marginBottom: 16 }]}
               >
-                🧩
+                🎮
               </Text>
               <Text style={[STYLES.heading, { marginBottom: 16 }]}>
-                Página en desarrollo
+                Más juegos próximamente
               </Text>
               <Text
                 style={[
@@ -42,9 +96,8 @@ export default function JuegosScreen() {
                   { textAlign: "center", marginBottom: 12 },
                 ]}
               >
-                ¡Hola! Esta página está en construcción. Próximamente verás
-                nuevas funcionalidades increíbles que harán tu experiencia aún
-                mejor.
+                Estamos trabajando en nuevos juegos emocionantes para ti. Pronto
+                tendrás sudoku, rompecabezas y mucho más.
               </Text>
               <Text
                 style={[

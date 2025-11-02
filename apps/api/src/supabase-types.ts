@@ -14,6 +14,42 @@ export type Database = {
   };
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          code: string;
+          condition: Json;
+          createdAt: string;
+          description: string;
+          gameType: Database["public"]["Enums"]["game_type"];
+          icon: string | null;
+          id: string;
+          points: number;
+          title: string;
+        };
+        Insert: {
+          code: string;
+          condition: Json;
+          createdAt?: string;
+          description: string;
+          gameType: Database["public"]["Enums"]["game_type"];
+          icon?: string | null;
+          id?: string;
+          points?: number;
+          title: string;
+        };
+        Update: {
+          code?: string;
+          condition?: Json;
+          createdAt?: string;
+          description?: string;
+          gameType?: Database["public"]["Enums"]["game_type"];
+          icon?: string | null;
+          id?: string;
+          points?: number;
+          title?: string;
+        };
+        Relationships: [];
+      };
       activities: {
         Row: {
           completed: boolean;
@@ -389,6 +425,7 @@ export type Database = {
         Row: {
           createdAt: string;
           difficulty: number | null;
+          gameName: string | null;
           gameType: Database["public"]["Enums"]["game_type"];
           id: string;
           title: string | null;
@@ -396,13 +433,15 @@ export type Database = {
         Insert: {
           createdAt?: string;
           difficulty?: number | null;
-          gameType: Database["public"]["Enums"]["game_type"];
+          gameName?: string | null;
+          gameType?: Database["public"]["Enums"]["game_type"];
           id?: string;
           title?: string | null;
         };
         Update: {
           createdAt?: string;
           difficulty?: number | null;
+          gameName?: string | null;
           gameType?: Database["public"]["Enums"]["game_type"];
           id?: string;
           title?: string | null;
@@ -437,6 +476,42 @@ export type Database = {
             columns: ["puzzleId"];
             isOneToOne: true;
             referencedRelation: "puzzles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      user_achievements: {
+        Row: {
+          achievementId: string;
+          id: string;
+          unlockedAt: string;
+          userId: string;
+        };
+        Insert: {
+          achievementId: string;
+          id?: string;
+          unlockedAt?: string;
+          userId: string;
+        };
+        Update: {
+          achievementId?: string;
+          id?: string;
+          unlockedAt?: string;
+          userId?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievementid_fkey";
+            columns: ["achievementId"];
+            isOneToOne: false;
+            referencedRelation: "achievements";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "user_achievements_userid_fkey";
+            columns: ["userId"];
+            isOneToOne: false;
+            referencedRelation: "users";
             referencedColumns: ["id"];
           },
         ];
@@ -487,7 +562,7 @@ export type Database = {
       [_ in never]: never;
     };
     Enums: {
-      game_type: "sudoku" | "memory" | "lightsout";
+      game_type: "memory" | "logic" | "calculation" | "attention";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -618,7 +693,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      game_type: ["sudoku", "memory", "lightsout"],
+      game_type: ["memory", "logic", "calculation", "attention"],
     },
   },
 } as const;
