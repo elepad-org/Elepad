@@ -14,6 +14,10 @@ import { Database } from "./supabase-types.js";
 import { memoriesApp } from "./modules/memories/handler.js";
 import { frequenciesApp } from "./modules/frequencies/handler.js";
 import { activityCompletionsHandler } from "./modules/activityCompletions/handler.js";
+import { puzzlesApp } from "./modules/puzzles/handler.js";
+import { attemptsApp } from "./modules/attempts/handler.js";
+import { achievementsApp } from "./modules/achievements/handler.js";
+import { withAuth } from "./middleware/auth.js";
 
 const app = new OpenAPIHono();
 
@@ -43,6 +47,8 @@ declare module "hono" {
   interface ContextVariableMap {
     /** A supabase client will be available in the context of every request. */
     supabase: SupabaseClient<Database>;
+    /** The authenticated user from Supabase Auth (available after withAuth middleware). */
+    user: { id: string };
   }
 }
 
@@ -71,6 +77,16 @@ app.route("/", memoriesApp);
 app.route("/", frequenciesApp);
 app.route("/activity-completions", activityCompletionsHandler);
 
+// Mount games/puzzles routes (public)
+app.route("/", puzzlesApp);
+
+// Mount attempts and achievements routes (require auth)
+app.use("/attempts/*", withAuth);
+app.route("/", attemptsApp);
+
+app.use("/achievements/*", withAuth);
+app.route("/", achievementsApp);
+
 // OpenAPI spec.
 app.doc("/openapi.json", {
   openapi: "3.1.0",
@@ -81,6 +97,10 @@ app.doc("/openapi.json", {
     { name: "familyGroups" },
     { name: "frequencies" },
     { name: "ActivityCompletions" },
+    { name: "games" },
+    { name: "puzzles" },
+    { name: "attempts" },
+    { name: "achievements" },
   ],
 });
 

@@ -7,15 +7,41 @@ import { COLORS } from "@/styles/base";
 
 interface MemoryGameBoardProps {
   onQuit: () => void;
-  onComplete: (stats: { moves: number; timeElapsed: number }) => void;
+  onComplete: (stats: {
+    moves: number;
+    timeElapsed: number;
+    achievements: Array<{
+      id: string;
+      title: string;
+      icon?: string;
+      description?: string;
+    }>;
+  }) => void;
+  onAchievementUnlocked?: (achievement: {
+    id: string;
+    title: string;
+    icon?: string;
+    description?: string;
+  }) => void;
 }
 
 export const MemoryGameBoard: React.FC<MemoryGameBoardProps> = ({
   onQuit,
   onComplete,
+  onAchievementUnlocked,
 }) => {
-  const { cards, flipCard, resetGame, stats, isProcessing } = useMemoryGame();
+  const {
+    cards,
+    flipCard,
+    resetGame,
+    stats,
+    isProcessing,
+    unlockedAchievements,
+  } = useMemoryGame({
+    onAchievementUnlocked,
+  });
   const hasCalledOnComplete = React.useRef(false);
+  const isCheckingAchievements = React.useRef(false);
 
   // Formatear el tiempo
   const formatTime = (seconds: number) => {
@@ -24,21 +50,51 @@ export const MemoryGameBoard: React.FC<MemoryGameBoardProps> = ({
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Cuando se completa el juego, notificar al padre (solo una vez)
+  // Cuando el juego se completa, marcar que estamos verificando logros
   React.useEffect(() => {
     if (stats.isComplete && !hasCalledOnComplete.current) {
-      hasCalledOnComplete.current = true;
-      onComplete({
-        moves: stats.moves,
-        timeElapsed: stats.timeElapsed,
-      });
+      isCheckingAchievements.current = true;
+      console.log("🎮 Juego completado, esperando verificación de logros...");
     }
-  }, [stats.isComplete, stats.moves, stats.timeElapsed, onComplete]);
+  }, [stats.isComplete]);
+
+  // Cuando se completa el juego Y se han verificado los logros, notificar al padre (solo una vez)
+  React.useEffect(() => {
+    if (
+      stats.isComplete &&
+      isCheckingAchievements.current &&
+      !hasCalledOnComplete.current
+    ) {
+      // Esperar un poco para dar tiempo a que los logros se procesen
+      const timer = setTimeout(() => {
+        hasCalledOnComplete.current = true;
+        isCheckingAchievements.current = false;
+        console.log(
+          "🎊 Notificando juego completado con logros:",
+          unlockedAchievements,
+        );
+        onComplete({
+          moves: stats.moves,
+          timeElapsed: stats.timeElapsed,
+          achievements: unlockedAchievements,
+        });
+      }, 100); // Pequeño delay para asegurar que los logros se hayan actualizado
+
+      return () => clearTimeout(timer);
+    }
+  }, [
+    stats.isComplete,
+    stats.moves,
+    stats.timeElapsed,
+    unlockedAchievements,
+    onComplete,
+  ]);
 
   // Resetear el flag cuando se reinicia el juego
   React.useEffect(() => {
     if (!stats.isComplete) {
       hasCalledOnComplete.current = false;
+      isCheckingAchievements.current = false;
     }
   }, [stats.isComplete]);
 

@@ -358,6 +358,346 @@
         "required": [
           "label"
         ]
+      },
+      "GameType": {
+        "type": "string",
+        "enum": [
+          "memory",
+          "logic",
+          "calculation",
+          "attention"
+        ]
+      },
+      "GameListItem": {
+        "type": "object",
+        "properties": {
+          "gameType": {
+            "$ref": "#/components/schemas/GameType"
+          },
+          "gameName": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          },
+          "isAvailable": {
+            "type": "boolean"
+          },
+          "comingSoon": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "gameType",
+          "gameName",
+          "displayName",
+          "description",
+          "icon",
+          "isAvailable"
+        ]
+      },
+      "Puzzle": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "gameType": {
+            "$ref": "#/components/schemas/GameType"
+          },
+          "gameName": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "difficulty": {
+            "type": "integer",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "gameType",
+          "gameName",
+          "title",
+          "difficulty",
+          "createdAt"
+        ]
+      },
+      "MemoryGame": {
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "puzzleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rows": {
+            "type": "integer"
+          },
+          "cols": {
+            "type": "integer"
+          },
+          "symbols": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "layout": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        "required": [
+          "puzzleId",
+          "rows",
+          "cols",
+          "symbols",
+          "layout"
+        ]
+      },
+      "LogicGame": {
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "puzzleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rows": {
+            "type": "integer"
+          },
+          "cols": {
+            "type": "integer"
+          },
+          "startState": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "puzzleId",
+          "rows",
+          "cols",
+          "startState"
+        ]
+      },
+      "SudokuGame": {
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "puzzleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rows": {
+            "type": "integer"
+          },
+          "cols": {
+            "type": "integer"
+          },
+          "given": {
+            "type": "string"
+          },
+          "solution": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "puzzleId",
+          "rows",
+          "cols",
+          "given",
+          "solution"
+        ]
+      },
+      "PuzzleWithDetails": {
+        "type": "object",
+        "properties": {
+          "puzzle": {
+            "$ref": "#/components/schemas/Puzzle"
+          },
+          "memoryGame": {
+            "$ref": "#/components/schemas/MemoryGame"
+          },
+          "logicGame": {
+            "$ref": "#/components/schemas/LogicGame"
+          },
+          "sudokuGame": {
+            "$ref": "#/components/schemas/SudokuGame"
+          }
+        },
+        "required": [
+          "puzzle",
+          "memoryGame",
+          "logicGame",
+          "sudokuGame"
+        ]
+      },
+      "NewMemoryPuzzle": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "difficulty": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "rows": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 6,
+            "default": 4
+          },
+          "cols": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 6,
+            "default": 6
+          }
+        }
+      },
+      "StartAttempt": {
+        "type": "object",
+        "properties": {
+          "puzzleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "gameType": {
+            "$ref": "#/components/schemas/GameType"
+          }
+        },
+        "required": [
+          "puzzleId",
+          "gameType"
+        ]
+      },
+      "FinishAttempt": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "moves": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "durationMs": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "score": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "meta": {
+            "type": "object",
+            "additionalProperties": {
+              "nullable": true
+            }
+          }
+        },
+        "required": [
+          "success",
+          "moves",
+          "durationMs"
+        ]
+      },
+      "AttemptStats": {
+        "type": "object",
+        "properties": {
+          "totalAttempts": {
+            "type": "integer"
+          },
+          "successfulAttempts": {
+            "type": "integer"
+          },
+          "failedAttempts": {
+            "type": "integer"
+          },
+          "averageDurationMs": {
+            "type": "number",
+            "nullable": true
+          },
+          "averageMoves": {
+            "type": "number",
+            "nullable": true
+          },
+          "bestScore": {
+            "type": "integer",
+            "nullable": true
+          },
+          "bestTime": {
+            "type": "integer",
+            "nullable": true
+          },
+          "bestMoves": {
+            "type": "integer",
+            "nullable": true
+          }
+        },
+        "required": [
+          "totalAttempts",
+          "successfulAttempts",
+          "failedAttempts",
+          "averageDurationMs",
+          "averageMoves",
+          "bestScore",
+          "bestTime",
+          "bestMoves"
+        ]
+      },
+      "AchievementProgress": {
+        "type": "object",
+        "properties": {
+          "totalAchievements": {
+            "type": "integer"
+          },
+          "unlockedAchievements": {
+            "type": "integer"
+          },
+          "totalPoints": {
+            "type": "integer"
+          },
+          "earnedPoints": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "totalAchievements",
+          "unlockedAchievements",
+          "totalPoints",
+          "earnedPoints"
+        ]
       }
     },
     "parameters": {}
@@ -2104,6 +2444,813 @@
                   "required": [
                     "error"
                   ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/games": {
+      "get": {
+        "tags": [
+          "games"
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de juegos disponibles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GameListItem"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/games/{gameName}": {
+      "get": {
+        "tags": [
+          "games"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "name": "gameName",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalles del juego",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameListItem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Juego no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/puzzles/{puzzleId}": {
+      "get": {
+        "tags": [
+          "puzzles"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "puzzleId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalles del puzzle",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PuzzleWithDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Puzzle no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/puzzles/memory": {
+      "post": {
+        "tags": [
+          "puzzles"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewMemoryPuzzle"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Puzzle de memoria creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PuzzleWithDetails"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/puzzles/recent/{gameType}": {
+      "get": {
+        "tags": [
+          "puzzles"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/GameType"
+            },
+            "required": true,
+            "name": "gameType",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de puzzles recientes",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Puzzle"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attempts/start": {
+      "post": {
+        "tags": [
+          "attempts"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartAttempt"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Intento iniciado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Puzzle no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attempts/{attemptId}/finish": {
+      "post": {
+        "tags": [
+          "attempts"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "attemptId",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinishAttempt"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Intento finalizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "score": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "score"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Intento ya finalizado o datos inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No autorizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Intento no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attempts/{attemptId}": {
+      "get": {
+        "tags": [
+          "attempts"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "attemptId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalles del intento",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Intento no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attempts": {
+      "get": {
+        "tags": [
+          "attempts"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de intentos del usuario",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attempts/stats/{gameType}": {
+      "get": {
+        "tags": [
+          "attempts"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/GameType"
+            },
+            "required": true,
+            "name": "gameType",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estadísticas del usuario para el tipo de juego",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttemptStats"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attempts/leaderboard/{gameType}": {
+      "get": {
+        "tags": [
+          "attempts"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/GameType"
+            },
+            "required": true,
+            "name": "gameType",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Leaderboard global del tipo de juego",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "score": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "score"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/achievements/{gameType}": {
+      "get": {
+        "tags": [
+          "achievements"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/GameType"
+            },
+            "required": true,
+            "name": "gameType",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de logros del tipo de juego",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "title"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/achievements/user/{gameType}": {
+      "get": {
+        "tags": [
+          "achievements"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/GameType"
+            },
+            "required": false,
+            "name": "gameType",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de logros con información de si el usuario los desbloqueó",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "unlocked": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "unlocked"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/achievements/progress/{gameType}": {
+      "get": {
+        "tags": [
+          "achievements"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/GameType"
+            },
+            "required": false,
+            "name": "gameType",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Progreso de logros del usuario",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AchievementProgress"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/achievements/check/{attemptId}": {
+      "post": {
+        "tags": [
+          "achievements"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "attemptId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logros desbloqueados (si hay alguno)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "title"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Intento no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
