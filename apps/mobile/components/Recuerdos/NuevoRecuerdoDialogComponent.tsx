@@ -7,7 +7,7 @@ import AudioRecorderComponent from "./AudioRecorderComponent";
 import MetadataInputComponent from "./MetadataInputComponent";
 import CancelButton from "../shared/CancelButton";
 
-type RecuerdoTipo = "imagen" | "texto" | "audio";
+type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
 
 interface RecuerdoData {
   contenido: string; // URI del archivo o texto

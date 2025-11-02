@@ -27,7 +27,10 @@ export async function rnFetch<T>(
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  const res = await fetch(`${getApiBaseUrl()}${url}`, {
+  const fullUrl = `${getApiBaseUrl()}${url}`;
+  console.log(`🌐 ${init.method || "GET"} ${fullUrl}`);
+
+  const res = await fetch(fullUrl, {
     ...init,
     headers,
   });
@@ -35,8 +38,11 @@ export async function rnFetch<T>(
   if (!res.ok) {
     try {
       const errorBody = await res.json();
+      console.error(`❌ API Error ${res.status}:`, errorBody);
       throw new ApiError(res.status, res.statusText, errorBody);
-    } catch {
+    } catch (e) {
+      if (e instanceof ApiError) throw e;
+      console.error(`❌ API Error ${res.status}: Failed to parse response`);
       throw new ApiError(res.status, res.statusText);
     }
   }
@@ -45,6 +51,7 @@ export async function rnFetch<T>(
     const data = await res.json();
     return data as T;
   } catch {
+    console.warn(`⚠️ Empty or invalid JSON response from ${url}`);
     return undefined as T;
   }
 }

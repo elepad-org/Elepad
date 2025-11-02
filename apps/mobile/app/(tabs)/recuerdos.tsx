@@ -6,6 +6,8 @@ import {
   Button,
   Snackbar,
   ActivityIndicator,
+  IconButton,
+  SegmentedButtons,
 } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -21,12 +23,11 @@ import { uriToBlob } from "@/lib/uriToBlob";
 
 import RecuerdoItemComponent from "@/components/Recuerdos/RecuerdoItemComponent";
 import NuevoRecuerdoDialogComponent from "@/components/Recuerdos/NuevoRecuerdoDialogComponent";
+import RecuerdoDetailDialog from "@/components/Recuerdos/RecuerdoDetailDialog";
 import eleEmpthy from "@/assets/images/ele-idea.jpeg";
 
-const numColumns = 2;
-
 // Tipos de recuerdos
-type RecuerdoTipo = "imagen" | "texto" | "audio";
+type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
 
 interface RecuerdoData {
   contenido: string; // URI del archivo o texto
@@ -44,6 +45,8 @@ const memoryToRecuerdo = (memory: Memory): Recuerdo => {
       tipo = "imagen";
     } else if (memory.mimeType.startsWith("audio/")) {
       tipo = "audio";
+    } else if (memory.mimeType.startsWith("video/")) {
+      tipo = "video";
     }
   }
 
@@ -52,10 +55,13 @@ const memoryToRecuerdo = (memory: Memory): Recuerdo => {
     tipo,
     contenido: memory.mediaUrl || memory.caption || "",
     miniatura:
-      memory.mimeType?.startsWith("image/") && memory.mediaUrl
+      (memory.mimeType?.startsWith("image/") ||
+        memory.mimeType?.startsWith("video/")) &&
+      memory.mediaUrl
         ? memory.mediaUrl
         : undefined,
     titulo: memory.title || undefined,
+    descripcion: memory.caption || undefined,
     fecha: new Date(memory.createdAt),
   };
 };
@@ -66,6 +72,7 @@ interface Recuerdo {
   contenido: string;
   miniatura?: string;
   titulo?: string;
+  descripcion?: string;
   fecha: Date;
 }
 
@@ -74,7 +81,13 @@ export default function RecuerdosScreen() {
 
   // Estados locales
   const [refreshing, setRefreshing] = useState(false);
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+  const [numColumns, setNumColumns] = useState(2);
   const [dialogVisible, setDialogVisible] = useState(false);
+  const [detailDialogVisible, setDetailDialogVisible] = useState(false);
+  const [selectedRecuerdo, setSelectedRecuerdo] = useState<Recuerdo | null>(
+    null,
+  );
   const [currentStep, setCurrentStep] = useState<
     "select" | "create" | "metadata"
   >("select");
@@ -174,7 +187,13 @@ export default function RecuerdosScreen() {
   const memories = Array.isArray(memoriesData) ? memoriesData : [];
 
   // Convertir memories a recuerdos para compatibilidad con componentes existentes
-  const recuerdos = memories.map(memoryToRecuerdo);
+  const recuerdos = memories.map(memoryToRecuerdo).sort((a, b) => {
+    if (sortOrder === "desc") {
+      return b.fecha.getTime() - a.fecha.getTime();
+    } else {
+      return a.fecha.getTime() - b.fecha.getTime();
+    }
+  });
 
   // Estados de carga y error (patrón original restaurado)
   const isLoading =
@@ -265,6 +284,16 @@ export default function RecuerdosScreen() {
     setSelectedMimeType(null);
   };
 
+  const handleRecuerdoPress = (recuerdo: Recuerdo) => {
+    setSelectedRecuerdo(recuerdo);
+    setDetailDialogVisible(true);
+  };
+
+  const handleCloseDetail = () => {
+    setDetailDialogVisible(false);
+    setSelectedRecuerdo(null);
+  };
+
   if (isLoading && recuerdos.length === 0) {
     return (
       <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
@@ -292,6 +321,58 @@ export default function RecuerdosScreen() {
           >
             Agregar
           </Button>
+        </View>
+
+        {/* Controles de ordenamiento y vista */}
+        <View
+          style={{
+            paddingHorizontal: 24,
+            paddingVertical: 12,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Text
+              style={{
+                fontSize: 14,
+                color: COLORS.textSecondary,
+                marginRight: 8,
+              }}
+            >
+              Ordenar:
+            </Text>
+            <IconButton
+              icon={sortOrder === "desc" ? "arrow-down" : "arrow-up"}
+              size={20}
+              onPress={() =>
+                setSortOrder(sortOrder === "desc" ? "asc" : "desc")
+              }
+              mode="contained-tonal"
+            />
+          </View>
+          <SegmentedButtons
+            value={numColumns.toString()}
+            onValueChange={(value) => setNumColumns(parseInt(value))}
+            buttons={[
+              {
+                value: "2",
+                icon: "view-module",
+              },
+              {
+                value: "3",
+                icon: "view-comfy",
+              },
+            ]}
+            style={{ width: 140 }}
+            theme={{
+              colors: {
+                secondaryContainer: COLORS.primary,
+                onSecondaryContainer: COLORS.white,
+              },
+            }}
+          />
         </View>
 
         <View
@@ -332,6 +413,57 @@ export default function RecuerdosScreen() {
         </Button>
       </View>
 
+      {/* Controles de ordenamiento y vista */}
+      <View
+        style={{
+          paddingHorizontal: 24,
+          paddingVertical: 12,
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Text
+            style={{
+              fontSize: 14,
+              color: COLORS.textSecondary,
+              marginRight: 8,
+            }}
+          >
+            Ordenar:
+          </Text>
+          <IconButton
+            icon={sortOrder === "desc" ? "arrow-down" : "arrow-up"}
+            size={20}
+            onPress={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
+            mode="contained-tonal"
+          />
+        </View>
+        <SegmentedButtons
+          value={numColumns.toString()}
+          onValueChange={(value) => setNumColumns(parseInt(value))}
+          buttons={[
+            {
+              value: "2",
+
+              icon: "view-grid",
+            },
+            {
+              value: "3",
+              icon: "view-comfy",
+            },
+          ]}
+          style={{ width: 140 }}
+          theme={{
+            colors: {
+              secondaryContainer: COLORS.primary,
+              onSecondaryContainer: COLORS.white,
+            },
+          }}
+        />
+      </View>
+
       {recuerdos.length === 0 ? (
         <View
           style={{
@@ -352,11 +484,21 @@ export default function RecuerdosScreen() {
         </View>
       ) : (
         <FlatList
+          key={`grid-${numColumns}`}
           data={recuerdos}
-          renderItem={({ item }) => <RecuerdoItemComponent item={item} />}
+          renderItem={({ item }) => (
+            <RecuerdoItemComponent
+              item={item}
+              numColumns={numColumns}
+              onPress={handleRecuerdoPress}
+            />
+          )}
           keyExtractor={(item) => item.id}
           numColumns={numColumns}
-          contentContainerStyle={{ padding: 16 }}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8 }}
+          columnWrapperStyle={{
+            justifyContent: "flex-start",
+          }}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
@@ -389,6 +531,13 @@ export default function RecuerdosScreen() {
           }
         />
       </Portal>
+
+      {/* Diálogo de detalle del recuerdo */}
+      <RecuerdoDetailDialog
+        visible={detailDialogVisible}
+        recuerdo={selectedRecuerdo}
+        onDismiss={handleCloseDetail}
+      />
 
       {/* Snackbar para mostrar mensajes */}
       <Snackbar
