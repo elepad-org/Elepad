@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   useGetMemories,
   createMemoryWithMedia,
+  createNote,
   Memory,
 } from "@elepad/api-client";
 import { useMutation } from "@tanstack/react-query";
@@ -47,6 +48,8 @@ const memoryToRecuerdo = (memory: Memory): Recuerdo => {
       tipo = "audio";
     } else if (memory.mimeType.startsWith("video/")) {
       tipo = "video";
+    } else if (memory.mimeType === "text/note") {
+      tipo = "texto";
     }
   }
 
@@ -170,6 +173,58 @@ export default function RecuerdosScreen() {
     },
   });
 
+  // Hook de mutación para crear notas (solo texto)
+  const createNoteMutation = useMutation({
+    mutationFn: async (data: {
+      bookId: string;
+      groupId: string;
+      title: string;
+      caption?: string;
+    }) => {
+      console.log("=== CLIENT: Starting create note mutation ===");
+      console.log("CLIENT: Note data:", data);
+      try {
+        const result = await createNote(data);
+        console.log("CLIENT: Note created successfully:", result);
+        return result;
+      } catch (error) {
+        console.error("CLIENT: Create note mutation failed:", error);
+        if (error && typeof error === "object") {
+          console.error("CLIENT: Error details:", {
+            message: (error as Error).message,
+            status: (error as { status?: number }).status,
+            statusText: (error as { statusText?: string }).statusText,
+            body: (error as { body?: unknown }).body,
+          });
+        }
+        throw error;
+      }
+    },
+    onSuccess: (data) => {
+      console.log("Create note mutation onSuccess:", data);
+      // Refrescar la lista de memorias
+      refetchMemories();
+      setSnackbarMessage("Nota agregada exitosamente");
+      setSnackbarError(false);
+      setSnackbarVisible(true);
+
+      // Resetear estado del diálogo
+      setDialogVisible(false);
+      setCurrentStep("select");
+      setSelectedTipo(null);
+      setSelectedFileUri(null);
+      setSelectedMimeType(null);
+    },
+    onError: (error) => {
+      console.error("Create note mutation onError:", error);
+      setSnackbarMessage(
+        `Error al crear la nota: ${error instanceof Error ? error.message : "Error desconocido"}`,
+      );
+      setSnackbarError(true);
+      setSnackbarVisible(true);
+    },
+  });
+
   // Función para cargar recuerdos (mantiene el patrón original)
   const cargarRecuerdos = useCallback(async () => {
     try {
@@ -197,7 +252,10 @@ export default function RecuerdosScreen() {
 
   // Estados de carga y error (patrón original restaurado)
   const isLoading =
-    authLoading || memoriesLoading || uploadMemoryMutation.isPending;
+    authLoading ||
+    memoriesLoading ||
+    uploadMemoryMutation.isPending ||
+    createNoteMutation.isPending;
 
   // Función para refrescar la galería (patrón original)
   const onRefresh = useCallback(async () => {
@@ -229,18 +287,36 @@ export default function RecuerdosScreen() {
   // Función para crear un nuevo recuerdo con multimedia
   const handleGuardarRecuerdo = async (data: RecuerdoData) => {
     try {
-      let fileData: Blob;
+      // Usar bookId por defecto para el grupo
+      const defaultBookId = "070ac9a2-832f-4c05-bfa5-cec689a4181c";
 
       if (selectedTipo === "texto") {
-        // Para texto, crear un blob con el contenido
-        fileData = new Blob([data.contenido], { type: "text/plain" });
+        // Para notas, usar el endpoint de createNote
+        const noteData = {
+          bookId: defaultBookId,
+          groupId: userElepad!.groupId!,
+          title: data.titulo || "Sin título",
+          caption: data.caption || data.contenido,
+        };
+
+        await createNoteMutation.mutateAsync(noteData);
       } else {
-        // Para archivos multimedia - mismo patrón que el avatar
+        // Para archivos multimedia, usar el endpoint de createMemoryWithMedia
+        let fileData: Blob;
+
         const fileName =
-          selectedTipo === "imagen" ? "memory.jpg" : "memory.m4a";
+          selectedTipo === "imagen"
+            ? "memory.jpg"
+            : selectedTipo === "video"
+              ? "memory.mp4"
+              : "memory.m4a";
         const mimeType =
           data.mimeType ||
-          (selectedTipo === "imagen" ? "image/jpeg" : "audio/mp4");
+          (selectedTipo === "imagen"
+            ? "image/jpeg"
+            : selectedTipo === "video"
+              ? "video/mp4"
+              : "audio/mp4");
 
         if (Platform.OS === "web") {
           // Para web, convertir URI a blob
@@ -253,20 +329,17 @@ export default function RecuerdosScreen() {
             type: mimeType,
           } as unknown as Blob;
         }
+
+        const uploadData = {
+          bookId: defaultBookId,
+          groupId: userElepad!.groupId!,
+          title: data.titulo,
+          caption: data.caption,
+          image: fileData,
+        };
+
+        await uploadMemoryMutation.mutateAsync(uploadData);
       }
-
-      // Usar bookId por defecto para el grupo
-      const defaultBookId = "070ac9a2-832f-4c05-bfa5-cec689a4181c";
-
-      const uploadData = {
-        bookId: defaultBookId,
-        groupId: userElepad!.groupId!,
-        title: data.titulo,
-        caption: data.caption,
-        image: fileData,
-      };
-
-      await uploadMemoryMutation.mutateAsync(uploadData);
     } catch (error) {
       setSnackbarMessage(
         `Error al preparar el archivo: ${error instanceof Error ? error.message : "Error desconocido"}`,
@@ -522,7 +595,9 @@ export default function RecuerdosScreen() {
           selectedTipo={selectedTipo}
           onSave={handleGuardarRecuerdo}
           onCancel={handleCancelar}
-          isUploading={uploadMemoryMutation.isPending}
+          isUploading={
+            uploadMemoryMutation.isPending || createNoteMutation.isPending
+          }
           selectedFileUri={selectedFileUri || undefined}
           onFileSelected={
             selectedTipo === "imagen" || selectedTipo === "audio"

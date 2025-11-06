@@ -15,11 +15,12 @@ export default function TextNoteComponent({
   onCancel,
   isUploading = false,
 }: TextNoteProps) {
+  const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
   const handleSubmit = () => {
-    if (content.trim()) {
-      onSaveText("Nueva nota", content);
+    if (title.trim() && content.trim()) {
+      onSaveText(title, content);
     }
   };
 
@@ -37,6 +38,18 @@ export default function TextNoteComponent({
       </Text>
 
       <TextInput
+        label="Título"
+        value={title}
+        onChangeText={setTitle}
+        style={{ marginBottom: 12 }}
+        mode="outlined"
+        outlineColor={COLORS.border}
+        activeOutlineColor={COLORS.primary}
+        placeholder="Título de la nota..."
+      />
+
+      <TextInput
+        label="Contenido"
         value={content}
         onChangeText={setContent}
         style={{ marginBottom: 20, height: 120, borderRadius: 20 }}
@@ -58,8 +71,8 @@ export default function TextNoteComponent({
         <CancelButton onPress={onCancel} disabled={isUploading} />
         <CancelButton
           onPress={handleSubmit}
-          text={isUploading ? "Subiendo..." : "Aceptar"}
-          disabled={!content.trim() || isUploading}
+          text={isUploading ? "Guardando..." : "Aceptar"}
+          disabled={!title.trim() || !content.trim() || isUploading}
         />
       </View>
     </View>
