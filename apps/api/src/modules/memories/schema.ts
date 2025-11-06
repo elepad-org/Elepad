@@ -102,3 +102,15 @@ export const CreateMemoryWithImageSchema = z
   .openapi("CreateMemoryWithImage");
 
 export type CreateMemoryWithImage = z.infer<typeof CreateMemoryWithImageSchema>;
+
+// Schema para crear una nota (memory sin archivo multimedia)
+export const CreateNoteSchema = z
+  .object({
+    bookId: z.string().uuid(),
+    groupId: z.string().uuid(),
+    title: z.string().min(1),
+    caption: z.string().optional(),
+  })
+  .openapi("CreateNote");
+
+export type CreateNote = z.infer<typeof CreateNoteSchema>;

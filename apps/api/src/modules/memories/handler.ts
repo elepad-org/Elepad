@@ -1,5 +1,5 @@
 import { OpenAPIHono, z } from "@hono/zod-openapi";
-import { MemorySchema, MemoryFiltersSchema } from "./schema";
+import { MemorySchema, MemoryFiltersSchema, CreateNoteSchema } from "./schema";
 import { MemoriesService } from "./service";
 import { ApiException, openApiErrorResponse } from "@/utils/api-error";
 import { withAuth } from "@/middleware/auth";
@@ -229,6 +229,50 @@ memoriesApp.openapi(
     );
 
     return c.json(createdMemory, 201);
+  },
+);
+
+// POST /memories/note - Crear una nota (memory sin archivo multimedia)
+memoriesApp.openapi(
+  {
+    method: "post",
+    path: "/memories/note",
+    tags: ["memories"],
+    operationId: "createNote",
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: CreateNoteSchema,
+          },
+        },
+        required: true,
+      },
+    },
+    responses: {
+      201: {
+        description: "Note created successfully",
+        content: {
+          "application/json": {
+            schema: MemorySchema,
+          },
+        },
+      },
+      400: openApiErrorResponse("Invalid request"),
+      401: openApiErrorResponse("Unauthorized"),
+      500: openApiErrorResponse("Internal Server Error"),
+    },
+  },
+  async (c) => {
+    const noteData = c.req.valid("json");
+    const user = c.var.user;
+
+    const createdNote = await c.var.memoriesService.createNote(
+      noteData,
+      user.id,
+    );
+
+    return c.json(createdNote, 201);
   },
 );
 

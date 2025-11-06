@@ -6,6 +6,7 @@ import {
   MemoryFilters,
   Memory,
   CreateMemoryWithImage,
+  CreateNote,
 } from "./schema";
 import { Database } from "@/supabase-types";
 import { uploadMemoryImage } from "@/services/storage";
@@ -179,6 +180,38 @@ export class MemoriesService {
 
     if (!data) {
       throw new ApiException(500, "Failed to create memories book");
+    }
+
+    return data;
+  }
+
+  /**
+   * Create a note (memory without multimedia file)
+   */
+  async createNote(noteData: CreateNote, userId: string): Promise<Memory> {
+    const newMemory: NewMemory = {
+      bookId: noteData.bookId,
+      groupId: noteData.groupId,
+      createdBy: userId,
+      title: noteData.title,
+      caption: noteData.caption,
+      mediaUrl: undefined, // No media URL for notes
+      mimeType: "text/note", // Special mime type to identify notes
+    };
+
+    const { data, error } = await this.supabase
+      .from("memories")
+      .insert(newMemory)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error creating note:", error);
+      throw new ApiException(500, "Error creating note");
+    }
+
+    if (!data) {
+      throw new ApiException(500, "Failed to create note");
     }
 
     return data;
