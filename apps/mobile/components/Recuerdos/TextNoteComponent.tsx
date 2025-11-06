@@ -32,9 +32,9 @@ export default function TextNoteComponent({
         borderRadius: 20,
       }}
     >
-      <Text style={STYLES.heading}>Nueva nota</Text>
+      <Text style={STYLES.heading}>Detalles del recuerdo</Text>
       <Text style={{ ...STYLES.subheading, marginBottom: 16 }}>
-        Escribe tu nota o recordatorio
+        Agrega un título y descripción
       </Text>
 
       <TextInput
@@ -45,20 +45,22 @@ export default function TextNoteComponent({
         mode="outlined"
         outlineColor={COLORS.border}
         activeOutlineColor={COLORS.primary}
-        placeholder="Título de la nota..."
+        placeholder="Ej: Recordatorio importante"
+        disabled={isUploading}
       />
 
       <TextInput
-        label="Contenido"
+        label="Descripción"
         value={content}
         onChangeText={setContent}
-        style={{ marginBottom: 20, height: 120, borderRadius: 20 }}
-        multiline={true}
-        numberOfLines={6}
+        style={{ marginBottom: 20 }}
         mode="outlined"
         outlineColor={COLORS.border}
         activeOutlineColor={COLORS.primary}
-        placeholder="Escribe aquí tu nota..."
+        placeholder="Describe tu recuerdo..."
+        multiline={true}
+        numberOfLines={3}
+        disabled={isUploading}
       />
 
       <View
@@ -71,7 +73,7 @@ export default function TextNoteComponent({
         <CancelButton onPress={onCancel} disabled={isUploading} />
         <CancelButton
           onPress={handleSubmit}
-          text={isUploading ? "Guardando..." : "Aceptar"}
+          text={isUploading ? "Guardando..." : "Guardar"}
           disabled={!title.trim() || !content.trim() || isUploading}
         />
       </View>
