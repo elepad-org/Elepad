@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { Text, Button, Card } from "react-native-paper";
+import { Text, Button, Card, ActivityIndicator } from "react-native-paper";
 import { MemoryCard } from "./MemoryCard";
 import { useMemoryGame } from "@/hooks/useMemoryGame";
 import { COLORS } from "@/styles/base";
@@ -37,6 +37,7 @@ export const MemoryGameBoard: React.FC<MemoryGameBoardProps> = ({
     stats,
     isProcessing,
     unlockedAchievements,
+    isLoading,
   } = useMemoryGame({
     onAchievementUnlocked,
   });
@@ -124,16 +125,25 @@ export const MemoryGameBoard: React.FC<MemoryGameBoardProps> = ({
 
       {/* Tablero de juego */}
       <View style={styles.board}>
-        {cards.map((card) => (
-          <MemoryCard
-            key={card.id}
-            id={card.id}
-            symbol={card.symbol}
-            state={card.state}
-            onPress={() => flipCard(card.id)}
-            disabled={isProcessing}
-          />
-        ))}
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={COLORS.primary} />
+            <Text variant="bodyLarge" style={styles.loadingText}>
+              Preparando el juego...
+            </Text>
+          </View>
+        ) : (
+          cards.map((card) => (
+            <MemoryCard
+              key={card.id}
+              id={card.id}
+              symbol={card.symbol}
+              state={card.state}
+              onPress={() => flipCard(card.id)}
+              disabled={isProcessing}
+            />
+          ))
+        )}
       </View>
 
       {/* Controles */}
@@ -195,6 +205,18 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 4,
     marginBottom: 16,
+    minHeight: 400,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+    paddingVertical: 80,
+  },
+  loadingText: {
+    marginTop: 16,
+    color: COLORS.textSecondary,
   },
   controls: {
     flexDirection: "row",

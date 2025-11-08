@@ -58,9 +58,11 @@ export const useMemoryGame = (props?: UseMemoryGameProps) => {
   const [unlockedAchievements, setUnlockedAchievements] = useState<
     UnlockedAchievement[]
   >([]);
+  const [isLoading, setIsLoading] = useState(true);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<number | null>(null);
   const hasFinishedAttempt = useRef(false);
+  const isStartingAttempt = useRef(false);
 
   // API Hooks
   const createPuzzle = usePostPuzzlesMemory();
@@ -80,6 +82,8 @@ export const useMemoryGame = (props?: UseMemoryGameProps) => {
     setPuzzleId(null);
     setUnlockedAchievements([]);
     hasFinishedAttempt.current = false;
+    isStartingAttempt.current = false;
+    setIsLoading(true);
 
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -88,7 +92,7 @@ export const useMemoryGame = (props?: UseMemoryGameProps) => {
     startTimeRef.current = null;
 
     try {
-      // Crear puzzle en el backend
+      // Crear puzzle en el backend - ESPERAMOS la respuesta
       console.log("🎮 Llamando a POST /puzzles/memory...");
       const puzzleData = await createPuzzle.mutateAsync({
         data: {
@@ -143,6 +147,7 @@ export const useMemoryGame = (props?: UseMemoryGameProps) => {
       );
 
       setCards(gameCards);
+      setIsLoading(false);
       console.log("🎴 Cartas generadas desde API:", gameCards.length);
     } catch (error) {
       console.error(
@@ -173,6 +178,7 @@ export const useMemoryGame = (props?: UseMemoryGameProps) => {
 
       const shuffled = gameCards.sort(() => Math.random() - 0.5);
       setCards(shuffled);
+      setIsLoading(false);
     }
   }, [createPuzzle]);
 
@@ -207,46 +213,51 @@ export const useMemoryGame = (props?: UseMemoryGameProps) => {
 
   // Voltear una carta
   const flipCard = useCallback(
-    async (cardId: number) => {
-      // Iniciar el juego en el primer movimiento
-      if (!isGameStarted) {
-        setIsGameStarted(true);
-        startTimeRef.current = Date.now();
-
-        // Iniciar el intento en el backend
-        if (puzzleId && !attemptId) {
-          try {
-            const attemptData = await startAttempt.mutateAsync({
-              data: {
-                puzzleId,
-                gameType: "memory",
-              },
-            });
-
-            if (attemptData) {
-              const responseData =
-                "data" in attemptData ? attemptData.data : attemptData;
-              const attemptId = (responseData as { id: string }).id;
-              setAttemptId(attemptId);
-              console.log("✅ Intento iniciado:", attemptId);
-            }
-          } catch (error) {
-            console.error("❌ Error starting attempt:", error);
-            // Continuar el juego aunque falle el intento
-          }
-        }
-      }
-
+    (cardId: number) => {
       // No permitir voltear más de 2 cartas
       if (flippedCards.length >= 2) return;
 
       // No permitir voltear la misma carta dos veces
       if (flippedCards.includes(cardId)) return;
 
+      // Iniciar el juego en el primer movimiento (OPTIMISTA - no bloquea)
+      if (!isGameStarted) {
+        setIsGameStarted(true);
+        startTimeRef.current = Date.now();
+
+        // Iniciar el intento en el backend de forma NO BLOQUEANTE
+        if (puzzleId && !attemptId && !isStartingAttempt.current) {
+          isStartingAttempt.current = true;
+
+          // Ejecutar en background sin await
+          startAttempt
+            .mutateAsync({
+              data: {
+                puzzleId,
+                gameType: "memory",
+              },
+            })
+            .then((attemptData) => {
+              if (attemptData) {
+                const responseData =
+                  "data" in attemptData ? attemptData.data : attemptData;
+                const newAttemptId = (responseData as { id: string }).id;
+                setAttemptId(newAttemptId);
+                console.log("✅ Intento iniciado:", newAttemptId);
+              }
+            })
+            .catch((error) => {
+              console.error("❌ Error starting attempt:", error);
+              // TODO: Mostrar snackbar de error si es necesario
+              // Por ahora solo logueamos, el juego continúa
+            });
+        }
+      }
+
       const newFlippedCards = [...flippedCards, cardId];
       setFlippedCards(newFlippedCards);
 
-      // Actualizar el estado de la carta
+      // Actualizar el estado de la carta INMEDIATAMENTE
       setCards((prevCards) =>
         prevCards.map((card) =>
           card.id === cardId
@@ -399,5 +410,6 @@ export const useMemoryGame = (props?: UseMemoryGameProps) => {
     stats,
     isProcessing: flippedCards.length >= 2,
     unlockedAchievements,
+    isLoading,
   };
 };
