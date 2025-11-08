@@ -1,0 +1,208 @@
+import React from "react";
+import { View, StyleSheet, ScrollView } from "react-native";
+import { Text, Button, Card } from "react-native-paper";
+import { NetTile } from "./NetTile";
+import { useNetGame } from "@/hooks/useNetGame";
+import { COLORS } from "@/styles/base";
+
+interface NetGameBoardProps {
+  gridSize: number;
+  onQuit: () => void;
+  onComplete: (stats: { moves: number; timeElapsed: number }) => void;
+}
+
+export const NetGameBoard: React.FC<NetGameBoardProps> = ({
+  gridSize,
+  onQuit,
+  onComplete,
+}) => {
+  const { tiles, rotateTile, toggleLock, resetGame, stats } = useNetGame({
+    gridSize,
+  });
+
+  const hasCalledOnComplete = React.useRef(false);
+
+  // Formatear el tiempo
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  // Cuando el juego se completa, notificar al padre (solo una vez)
+  React.useEffect(() => {
+    if (stats.isComplete && !hasCalledOnComplete.current) {
+      hasCalledOnComplete.current = true;
+      console.log("🎊 Juego NET completado");
+      onComplete({
+        moves: stats.moves,
+        timeElapsed: stats.timeElapsed,
+      });
+    }
+  }, [stats.isComplete, stats.moves, stats.timeElapsed, onComplete]);
+
+  // Resetear el flag cuando se reinicia el juego
+  React.useEffect(() => {
+    if (!stats.isComplete) {
+      hasCalledOnComplete.current = false;
+    }
+  }, [stats.isComplete]);
+
+  return (
+    <View style={styles.container}>
+      {/* Estadísticas */}
+      <Card style={styles.statsCard}>
+        <Card.Content style={styles.statsContent}>
+          <View style={styles.stat}>
+            <Text variant="titleMedium" style={styles.statLabel}>
+              ⏱️ Tiempo
+            </Text>
+            <Text variant="headlineSmall" style={styles.statValue}>
+              {formatTime(stats.timeElapsed)}
+            </Text>
+          </View>
+          <View style={styles.stat}>
+            <Text variant="titleMedium" style={styles.statLabel}>
+              🎯 Movimientos
+            </Text>
+            <Text variant="headlineSmall" style={styles.statValue}>
+              {stats.moves}
+            </Text>
+          </View>
+          <View style={styles.stat}>
+            <Text variant="titleMedium" style={styles.statLabel}>
+              🔗 Conectadas
+            </Text>
+            <Text variant="headlineSmall" style={styles.statValue}>
+              {stats.connectedTiles}/{stats.totalTiles}
+            </Text>
+          </View>
+        </Card.Content>
+      </Card>
+
+      {/* Tablero de juego */}
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.boardContainer}>
+          <View style={styles.board}>
+            {tiles.map((tile) => (
+              <NetTile
+                key={tile.id}
+                id={tile.id}
+                type={tile.type}
+                rotation={tile.rotation}
+                isLocked={tile.isLocked}
+                isConnected={tile.isConnected}
+                onRotate={(direction) => rotateTile(tile.id, direction)}
+                onToggleLock={() => toggleLock(tile.id)}
+                disabled={stats.isComplete}
+              />
+            ))}
+          </View>
+
+          {/* Instrucciones */}
+          <Card style={styles.instructionsCard}>
+            <Card.Content>
+              <Text variant="bodySmall" style={styles.instructionsText}>
+                🎯 Toca para rotar • Mantén presionado para bloquear
+              </Text>
+              <Text variant="bodySmall" style={styles.instructionsText}>
+                💡 Conecta todos los tiles (verdes) desde el centro
+              </Text>
+              <Text variant="bodySmall" style={styles.instructionsText}>
+                ⚠️ Evita crear circuitos cerrados (loops)
+              </Text>
+            </Card.Content>
+          </Card>
+        </View>
+      </ScrollView>
+
+      {/* Controles */}
+      <View style={styles.controls}>
+        <Button
+          mode="contained"
+          onPress={resetGame}
+          icon="refresh"
+          style={styles.button}
+          buttonColor={COLORS.primary}
+        >
+          Reiniciar
+        </Button>
+        <Button
+          mode="outlined"
+          onPress={onQuit}
+          icon="exit-to-app"
+          style={styles.button}
+          textColor={COLORS.error}
+        >
+          Abandonar
+        </Button>
+      </View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  statsCard: {
+    marginBottom: 12,
+    elevation: 2,
+  },
+  statsContent: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+  },
+  stat: {
+    alignItems: "center",
+  },
+  statLabel: {
+    color: COLORS.textSecondary,
+    marginBottom: 4,
+    fontSize: 13,
+  },
+  statValue: {
+    color: COLORS.primary,
+    fontWeight: "bold",
+    fontSize: 18,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  boardContainer: {
+    alignItems: "center",
+    paddingBottom: 16,
+  },
+  board: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 12,
+    padding: 8,
+    width: "100%",
+    maxWidth: 400,
+  },
+  instructionsCard: {
+    marginTop: 12,
+    backgroundColor: COLORS.accent,
+    elevation: 1,
+  },
+  instructionsText: {
+    color: COLORS.textSecondary,
+    textAlign: "center",
+    marginVertical: 2,
+  },
+  controls: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    gap: 12,
+    paddingVertical: 12,
+  },
+  button: {
+    flex: 1,
+  },
+});

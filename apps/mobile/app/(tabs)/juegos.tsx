@@ -79,6 +79,50 @@ export default function JuegosScreen() {
             </Card.Content>
           </Card>
 
+          {/* Juego NET */}
+          <Card
+            style={[
+              STYLES.titleCard,
+              { alignItems: "center", marginBottom: 16 },
+            ]}
+          >
+            <Card.Content style={{ alignItems: "center" }}>
+              <Text style={{ fontSize: 64, marginBottom: 12 }}>🔌</Text>
+              <Text
+                variant="headlineSmall"
+                style={{
+                  fontWeight: "bold",
+                  color: COLORS.primary,
+                  marginBottom: 8,
+                  textAlign: "center",
+                }}
+              >
+                NET
+              </Text>
+              <Text
+                variant="bodyMedium"
+                style={{
+                  color: COLORS.textSecondary,
+                  textAlign: "center",
+                  marginBottom: 20,
+                }}
+              >
+                Conecta toda la red girando los tiles. Rota las piezas hasta
+                formar una red completamente conectada.
+              </Text>
+              <Button
+                mode="contained"
+                onPress={() => router.push("/net-game")}
+                icon="play"
+                buttonColor={COLORS.primary}
+                style={{ width: "100%" }}
+                contentStyle={{ paddingVertical: 4 }}
+              >
+                Jugar Ahora
+              </Button>
+            </Card.Content>
+          </Card>
+
           {/* Próximamente */}
           <Card style={[STYLES.titleCard, { alignItems: "center" }]}>
             <Card.Content>

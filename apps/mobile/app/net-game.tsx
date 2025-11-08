@@ -1,32 +1,19 @@
 import React, { useState, useCallback } from "react";
 import { View, StyleSheet, StatusBar } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text, Portal, Dialog, Button, Snackbar } from "react-native-paper";
+import { Text, Portal, Dialog, Button } from "react-native-paper";
 import { router, Stack } from "expo-router";
-import { MemoryGameBoard } from "@/components/MemoryGame/MemoryGameBoard";
+import { NetGameBoard } from "@/components/NetGame/NetGameBoard";
 import { GameHeader } from "@/components/shared/GameHeader";
 import { COLORS } from "@/styles/base";
 
-type GameMode = "4x4" | "4x6";
-
-export default function MemoryGameScreen() {
+export default function NetGameScreen() {
   const [showQuitDialog, setShowQuitDialog] = useState(false);
   const [showResultsDialog, setShowResultsDialog] = useState(false);
-  const [showAchievementsDialog, setShowAchievementsDialog] = useState(false);
-  const [showModeSelectionDialog, setShowModeSelectionDialog] = useState(true);
-  const [selectedMode, setSelectedMode] = useState<GameMode | null>(null);
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
   const [gameResults, setGameResults] = useState<{
     moves: number;
     timeElapsed: number;
     score?: number;
-    achievements?: Array<{
-      id: string;
-      title: string;
-      icon?: string;
-      description?: string;
-    }>;
   } | null>(null);
 
   const handleQuit = useCallback(() => {
@@ -56,43 +43,15 @@ export default function MemoryGameScreen() {
     [],
   );
 
-  const handleAchievementUnlocked = useCallback(
-    (achievement: {
-      id: string;
-      title: string;
-      icon?: string;
-      description?: string;
-    }) => {
-      const icon = achievement.icon || "🏆";
-      const message = `${icon} ¡Logro desbloqueado! ${achievement.title}`;
-      console.log("🎉 Mostrando toast de logro:", message);
-      setSnackbarMessage(message);
-      setSnackbarVisible(true);
-    },
-    [],
-  );
-
   const handleComplete = useCallback(
-    (stats: {
-      moves: number;
-      timeElapsed: number;
-      achievements: Array<{
-        id: string;
-        title: string;
-        icon?: string;
-        description?: string;
-      }>;
-    }) => {
+    (stats: { moves: number; timeElapsed: number }) => {
       const score = calculateScore(stats.timeElapsed, stats.moves);
       setGameResults({ ...stats, score });
 
-      // Mostrar el diálogo de resultados después de un pequeño delay
-      // (para dar tiempo a ver el toast si hay logros)
-      const delay =
-        stats.achievements && stats.achievements.length > 0 ? 3000 : 0;
+      // Mostrar el diálogo de resultados
       setTimeout(() => {
         setShowResultsDialog(true);
-      }, delay);
+      }, 500);
     },
     [calculateScore],
   );
@@ -100,24 +59,12 @@ export default function MemoryGameScreen() {
   const handlePlayAgain = useCallback(() => {
     setShowResultsDialog(false);
     setGameResults(null);
-    setShowModeSelectionDialog(true);
-    setSelectedMode(null);
-    // El juego se reiniciará automáticamente
+    // El juego se reiniciará automáticamente al cambiar el key
   }, []);
 
   const handleBackToGames = useCallback(() => {
     setShowResultsDialog(false);
     router.back();
-  }, []);
-
-  const handleAchievementsDialogClose = useCallback(() => {
-    setShowAchievementsDialog(false);
-    setShowResultsDialog(true);
-  }, []);
-
-  const handleModeSelection = useCallback((mode: GameMode) => {
-    setSelectedMode(mode);
-    setShowModeSelectionDialog(false);
   }, []);
 
   const formatTime = (seconds: number) => {
@@ -136,40 +83,19 @@ export default function MemoryGameScreen() {
         />
 
         <View style={styles.container}>
-          {/* Título con botón de retroceso flotante */}
+          {/* Título con botón de retroceso */}
           <GameHeader
-            icon="🧠"
-            title="Juego de Memoria"
-            subtitle="Encuentra todas las parejas"
+            icon="🔌"
+            title="NET"
+            subtitle="Conecta toda la red girando los tiles"
           />
 
           {/* Tablero de juego */}
-          {selectedMode && (
-            <MemoryGameBoard
-              mode={selectedMode}
-              onQuit={handleQuit}
-              onComplete={handleComplete}
-              onAchievementUnlocked={handleAchievementUnlocked}
-            />
-          )}
-
-          {/* Toast de logro desbloqueado */}
-          <Snackbar
-            visible={snackbarVisible}
-            onDismiss={() => setSnackbarVisible(false)}
-            duration={3000}
-            style={styles.achievementSnackbar}
-            action={{
-              label: "Ver",
-              onPress: () => {
-                setSnackbarVisible(false);
-                setShowResultsDialog(true);
-              },
-              labelStyle: { color: "#FFF" },
-            }}
-          >
-            <Text style={styles.snackbarText}>{snackbarMessage}</Text>
-          </Snackbar>
+          <NetGameBoard
+            gridSize={5}
+            onQuit={handleQuit}
+            onComplete={handleComplete}
+          />
 
           {/* Diálogo de confirmación para salir */}
           <Portal>
@@ -198,80 +124,6 @@ export default function MemoryGameScreen() {
             </Dialog>
           </Portal>
 
-          {/* Diálogo de logros desbloqueados */}
-          <Portal>
-            <Dialog
-              visible={showAchievementsDialog}
-              onDismiss={handleAchievementsDialogClose}
-            >
-              <Dialog.Icon icon="trophy-award" />
-              <Dialog.Title style={styles.dialogTitle}>
-                ¡Logros Desbloqueados! 🎉
-              </Dialog.Title>
-              <Dialog.Content>
-                <View style={styles.achievementsContainer}>
-                  {gameResults?.achievements?.map((achievement) => (
-                    <View key={achievement.id} style={styles.achievementItem}>
-                      <Text
-                        variant="titleMedium"
-                        style={styles.achievementIcon}
-                      >
-                        🏅
-                      </Text>
-                      <Text variant="bodyLarge" style={styles.achievementTitle}>
-                        {achievement.title}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              </Dialog.Content>
-              <Dialog.Actions>
-                <Button
-                  mode="contained"
-                  onPress={handleAchievementsDialogClose}
-                  buttonColor={COLORS.primary}
-                >
-                  Continuar
-                </Button>
-              </Dialog.Actions>
-            </Dialog>
-          </Portal>
-
-          {/* Diálogo de selección de modo */}
-          <Portal>
-            <Dialog visible={showModeSelectionDialog} dismissable={false}>
-              <Dialog.Icon icon="cards" />
-              <Dialog.Title style={styles.dialogTitle}>
-                Elige el modo de juego
-              </Dialog.Title>
-              <Dialog.Content>
-                <Text variant="bodyMedium" style={styles.modeDescription}>
-                  Selecciona la dificultad del juego
-                </Text>
-              </Dialog.Content>
-              <Dialog.Actions style={styles.modeActions}>
-                <Button
-                  mode="contained"
-                  onPress={() => handleModeSelection("4x4")}
-                  style={styles.modeButton}
-                  buttonColor={COLORS.success}
-                  icon="grid"
-                >
-                  4x4 (Fácil)
-                </Button>
-                <Button
-                  mode="contained"
-                  onPress={() => handleModeSelection("4x6")}
-                  style={styles.modeButton}
-                  buttonColor={COLORS.primary}
-                  icon="grid"
-                >
-                  4x6 (Difícil)
-                </Button>
-              </Dialog.Actions>
-            </Dialog>
-          </Portal>
-
           {/* Diálogo de resultados */}
           <Portal>
             <Dialog
@@ -285,7 +137,7 @@ export default function MemoryGameScreen() {
               <Dialog.Content>
                 <View style={styles.resultsContainer}>
                   <Text variant="bodyLarge" style={styles.resultsText}>
-                    ¡Has completado el juego!
+                    ¡Has completado la red!
                   </Text>
 
                   {/* Puntaje destacado */}
@@ -368,19 +220,6 @@ const styles = StyleSheet.create({
   dialogTitle: {
     textAlign: "center",
   },
-  modeDescription: {
-    textAlign: "center",
-    marginBottom: 8,
-    color: COLORS.textSecondary,
-  },
-  modeActions: {
-    flexDirection: "column",
-    gap: 12,
-    padding: 16,
-  },
-  modeButton: {
-    width: "100%",
-  },
   resultsContainer: {
     alignItems: "center",
   },
@@ -441,35 +280,5 @@ const styles = StyleSheet.create({
   },
   dialogButton: {
     width: "100%",
-  },
-  achievementsContainer: {
-    gap: 16,
-  },
-  achievementItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: COLORS.primary + "10",
-    padding: 16,
-    borderRadius: 12,
-    gap: 12,
-  },
-  achievementIcon: {
-    fontSize: 32,
-  },
-  achievementTitle: {
-    flex: 1,
-    color: COLORS.text,
-    fontWeight: "600",
-  },
-  achievementSnackbar: {
-    backgroundColor: "#7C3AED", // Violeta hermoso
-    marginBottom: 16,
-    borderRadius: 12,
-    elevation: 8,
-  },
-  snackbarText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
   },
 });
