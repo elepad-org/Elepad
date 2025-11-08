@@ -13,10 +13,14 @@ import { router, Stack } from "expo-router";
 import { MemoryGameBoard } from "@/components/MemoryGame/MemoryGameBoard";
 import { COLORS } from "@/styles/base";
 
+type GameMode = "4x4" | "4x6";
+
 export default function MemoryGameScreen() {
   const [showQuitDialog, setShowQuitDialog] = useState(false);
   const [showResultsDialog, setShowResultsDialog] = useState(false);
   const [showAchievementsDialog, setShowAchievementsDialog] = useState(false);
+  const [showModeSelectionDialog, setShowModeSelectionDialog] = useState(true);
+  const [selectedMode, setSelectedMode] = useState<GameMode | null>(null);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [gameResults, setGameResults] = useState<{
@@ -102,6 +106,8 @@ export default function MemoryGameScreen() {
   const handlePlayAgain = useCallback(() => {
     setShowResultsDialog(false);
     setGameResults(null);
+    setShowModeSelectionDialog(true);
+    setSelectedMode(null);
     // El juego se reiniciará automáticamente
   }, []);
 
@@ -113,6 +119,11 @@ export default function MemoryGameScreen() {
   const handleAchievementsDialogClose = useCallback(() => {
     setShowAchievementsDialog(false);
     setShowResultsDialog(true);
+  }, []);
+
+  const handleModeSelection = useCallback((mode: GameMode) => {
+    setSelectedMode(mode);
+    setShowModeSelectionDialog(false);
   }, []);
 
   const formatTime = (seconds: number) => {
@@ -149,11 +160,14 @@ export default function MemoryGameScreen() {
           </View>
 
           {/* Tablero de juego */}
-          <MemoryGameBoard
-            onQuit={handleQuit}
-            onComplete={handleComplete}
-            onAchievementUnlocked={handleAchievementUnlocked}
-          />
+          {selectedMode && (
+            <MemoryGameBoard
+              mode={selectedMode}
+              onQuit={handleQuit}
+              onComplete={handleComplete}
+              onAchievementUnlocked={handleAchievementUnlocked}
+            />
+          )}
 
           {/* Toast de logro desbloqueado */}
           <Snackbar
@@ -234,6 +248,41 @@ export default function MemoryGameScreen() {
                   buttonColor={COLORS.primary}
                 >
                   Continuar
+                </Button>
+              </Dialog.Actions>
+            </Dialog>
+          </Portal>
+
+          {/* Diálogo de selección de modo */}
+          <Portal>
+            <Dialog visible={showModeSelectionDialog} dismissable={false}>
+              <Dialog.Icon icon="cards" />
+              <Dialog.Title style={styles.dialogTitle}>
+                Elige el modo de juego
+              </Dialog.Title>
+              <Dialog.Content>
+                <Text variant="bodyMedium" style={styles.modeDescription}>
+                  Selecciona la dificultad del juego
+                </Text>
+              </Dialog.Content>
+              <Dialog.Actions style={styles.modeActions}>
+                <Button
+                  mode="contained"
+                  onPress={() => handleModeSelection("4x4")}
+                  style={styles.modeButton}
+                  buttonColor={COLORS.success}
+                  icon="grid"
+                >
+                  4x4 (Fácil)
+                </Button>
+                <Button
+                  mode="contained"
+                  onPress={() => handleModeSelection("4x6")}
+                  style={styles.modeButton}
+                  buttonColor={COLORS.primary}
+                  icon="grid"
+                >
+                  4x6 (Difícil)
                 </Button>
               </Dialog.Actions>
             </Dialog>
@@ -353,6 +402,19 @@ const styles = StyleSheet.create({
   },
   dialogTitle: {
     textAlign: "center",
+  },
+  modeDescription: {
+    textAlign: "center",
+    marginBottom: 8,
+    color: COLORS.textSecondary,
+  },
+  modeActions: {
+    flexDirection: "column",
+    gap: 12,
+    padding: 16,
+  },
+  modeButton: {
+    width: "100%",
   },
   resultsContainer: {
     alignItems: "center",

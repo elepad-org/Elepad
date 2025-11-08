@@ -6,6 +6,7 @@ import { useMemoryGame } from "@/hooks/useMemoryGame";
 import { COLORS } from "@/styles/base";
 
 interface MemoryGameBoardProps {
+  mode: "4x4" | "4x6";
   onQuit: () => void;
   onComplete: (stats: {
     moves: number;
@@ -26,6 +27,7 @@ interface MemoryGameBoardProps {
 }
 
 export const MemoryGameBoard: React.FC<MemoryGameBoardProps> = ({
+  mode,
   onQuit,
   onComplete,
   onAchievementUnlocked,
@@ -40,6 +42,7 @@ export const MemoryGameBoard: React.FC<MemoryGameBoardProps> = ({
     isLoading,
     gameId,
   } = useMemoryGame({
+    mode,
     onAchievementUnlocked,
   });
   const hasCalledOnComplete = React.useRef(false);
@@ -185,6 +188,7 @@ export const MemoryGameBoard: React.FC<MemoryGameBoardProps> = ({
               state={card.state}
               onPress={() => flipCard(card.id)}
               disabled={isProcessing}
+              mode={mode}
             />
           ))
         )}

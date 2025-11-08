@@ -43,10 +43,12 @@ const SYMBOLS = [
 ];
 
 interface UseMemoryGameProps {
+  mode: "4x4" | "4x6";
   onAchievementUnlocked?: (achievement: UnlockedAchievement) => void;
 }
 
-export const useMemoryGame = (props?: UseMemoryGameProps) => {
+export const useMemoryGame = (props: UseMemoryGameProps) => {
+  const { mode, onAchievementUnlocked } = props;
   const [cards, setCards] = useState<Card[]>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
@@ -99,12 +101,16 @@ export const useMemoryGame = (props?: UseMemoryGameProps) => {
 
     try {
       // Crear puzzle en el backend - ESPERAMOS la respuesta
-      console.log("🎮 Llamando a POST /puzzles/memory...");
+      console.log("🎮 Llamando a POST /puzzles/memory con modo:", mode);
+
+      const [rows, cols] = mode === "4x4" ? [4, 4] : [4, 6];
+      const difficulty = mode === "4x4" ? 1 : 2;
+
       const puzzleData = await createPuzzle.mutateAsync({
         data: {
-          rows: 4,
-          cols: 6,
-          difficulty: 2,
+          rows,
+          cols,
+          difficulty,
         },
       });
 
@@ -164,7 +170,8 @@ export const useMemoryGame = (props?: UseMemoryGameProps) => {
         console.error("Error details:", error.message, error.stack);
       }
       // Fallback a generación local
-      const pairs = SYMBOLS.slice(0, 12);
+      const pairCount = mode === "4x4" ? 8 : 12;
+      const pairs = SYMBOLS.slice(0, pairCount);
       const gameCards: Card[] = [];
 
       pairs.forEach((symbol, index) => {
@@ -388,7 +395,7 @@ export const useMemoryGame = (props?: UseMemoryGameProps) => {
 
                   // Notificar cada logro desbloqueado
                   achievements.forEach((achievement) => {
-                    props?.onAchievementUnlocked?.(achievement);
+                    onAchievementUnlocked?.(achievement);
                   });
                 } else {
                   console.log("ℹ️ No se desbloquearon logros nuevos");

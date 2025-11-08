@@ -11,6 +11,7 @@ interface MemoryCardProps {
   state: CardState;
   onPress: () => void;
   disabled: boolean;
+  mode: "4x4" | "4x6";
 }
 
 export const MemoryCard: React.FC<MemoryCardProps> = ({
@@ -18,8 +19,12 @@ export const MemoryCard: React.FC<MemoryCardProps> = ({
   state,
   onPress,
   disabled,
+  mode,
 }) => {
   const flipAnimation = useRef(new Animated.Value(0)).current;
+
+  // Calcular dimensiones según el modo
+  const cardStyles = getCardStyles(mode);
 
   useEffect(() => {
     Animated.timing(flipAnimation, {
@@ -53,7 +58,7 @@ export const MemoryCard: React.FC<MemoryCardProps> = ({
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled || state !== "hidden"}
-      style={styles.cardContainer}
+      style={[styles.cardContainer, cardStyles.container]}
       activeOpacity={0.7}
     >
       {/* Cara trasera (oculta) */}
@@ -65,7 +70,7 @@ export const MemoryCard: React.FC<MemoryCardProps> = ({
           isFlipped && styles.hidden,
         ]}
       >
-        <Text style={styles.cardBackText}>?</Text>
+        <Text style={[styles.cardBackText, cardStyles.text]}>?</Text>
       </Animated.View>
 
       {/* Cara delantera (símbolo) */}
@@ -78,21 +83,46 @@ export const MemoryCard: React.FC<MemoryCardProps> = ({
           !isFlipped && styles.hidden,
         ]}
       >
-        <Text style={styles.symbol}>{symbol}</Text>
+        <Text style={[styles.symbol, cardStyles.text]}>{symbol}</Text>
       </Animated.View>
     </TouchableOpacity>
   );
 };
 
+// Función para calcular estilos dinámicos según el modo
+const getCardStyles = (mode: "4x4" | "4x6") => {
+  if (mode === "4x4") {
+    // Para 4x4: cartas más grandes
+    return {
+      container: {
+        width: "23%" as const,
+        aspectRatio: 0.85,
+        marginBottom: 8,
+        marginHorizontal: 2,
+      },
+      text: {
+        fontSize: 40,
+      },
+    };
+  } else {
+    // Para 4x6: cartas más pequeñas (originales)
+    return {
+      container: {
+        width: "15.5%" as const,
+        aspectRatio: 0.7,
+        marginBottom: 6,
+        marginHorizontal: 1,
+      },
+      text: {
+        fontSize: 32,
+      },
+    };
+  }
+};
+
 const styles = StyleSheet.create({
   cardContainer: {
-    // Para 6 columnas: 100% / 6 = 16.666%
-    // Restamos un pequeño margen para el gap
-    width: "15.5%",
-    aspectRatio: 0.7,
-    // Usamos marginBottom para separación vertical y marginHorizontal mínimo
-    marginBottom: 6,
-    marginHorizontal: 1,
+    // Estilos base - se sobrescriben con estilos dinámicos
   },
   card: {
     position: "absolute",
@@ -121,12 +151,11 @@ const styles = StyleSheet.create({
     borderColor: COLORS.success,
   },
   cardBackText: {
-    fontSize: 32,
     fontWeight: "bold",
     color: COLORS.white,
   },
   symbol: {
-    fontSize: 32,
+    // fontSize se define dinámicamente
   },
   hidden: {
     opacity: 0,
