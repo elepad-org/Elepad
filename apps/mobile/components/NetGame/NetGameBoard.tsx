@@ -8,7 +8,10 @@ import { COLORS } from "@/styles/base";
 interface NetGameBoardProps {
   gridSize: number;
   onQuit: () => void;
-  onComplete: (stats: { moves: number; timeElapsed: number }) => void;
+  onComplete: (
+    stats: { moves: number; timeElapsed: number },
+    isSolvedAutomatically: boolean,
+  ) => void;
 }
 
 export const NetGameBoard: React.FC<NetGameBoardProps> = ({
@@ -16,7 +19,16 @@ export const NetGameBoard: React.FC<NetGameBoardProps> = ({
   onQuit,
   onComplete,
 }) => {
-  const { tiles, rotateTile, toggleLock, resetGame, stats } = useNetGame({
+  const {
+    tiles,
+    rotateTile,
+    toggleLock,
+    resetGame,
+    solveGame,
+    stats,
+    centerTile,
+    isSolvedAutomatically,
+  } = useNetGame({
     gridSize,
   });
 
@@ -34,12 +46,21 @@ export const NetGameBoard: React.FC<NetGameBoardProps> = ({
     if (stats.isComplete && !hasCalledOnComplete.current) {
       hasCalledOnComplete.current = true;
       console.log("🎊 Juego NET completado");
-      onComplete({
-        moves: stats.moves,
-        timeElapsed: stats.timeElapsed,
-      });
+      onComplete(
+        {
+          moves: stats.moves,
+          timeElapsed: stats.timeElapsed,
+        },
+        isSolvedAutomatically,
+      );
     }
-  }, [stats.isComplete, stats.moves, stats.timeElapsed, onComplete]);
+  }, [
+    stats.isComplete,
+    stats.moves,
+    stats.timeElapsed,
+    onComplete,
+    isSolvedAutomatically,
+  ]);
 
   // Resetear el flag cuando se reinicia el juego
   React.useEffect(() => {
@@ -98,6 +119,7 @@ export const NetGameBoard: React.FC<NetGameBoardProps> = ({
                 onRotate={(direction) => rotateTile(tile.id, direction)}
                 onToggleLock={() => toggleLock(tile.id)}
                 disabled={stats.isComplete}
+                isCenter={tile.id === centerTile}
               />
             ))}
           </View>
@@ -114,6 +136,15 @@ export const NetGameBoard: React.FC<NetGameBoardProps> = ({
           buttonColor={COLORS.primary}
         >
           Reiniciar
+        </Button>
+        <Button
+          mode="contained-tonal"
+          onPress={solveGame}
+          icon="auto-fix"
+          style={styles.button}
+          disabled={stats.isComplete}
+        >
+          Resolver juego
         </Button>
         <Button
           mode="outlined"
@@ -175,13 +206,12 @@ const styles = StyleSheet.create({
     aspectRatio: 1, // Mantiene el tablero cuadrado
   },
   controls: {
-    flexDirection: "row",
-    justifyContent: "space-around",
+    flexDirection: "column",
     gap: 12,
     paddingVertical: 12,
     paddingHorizontal: 16,
   },
   button: {
-    flex: 1,
+    width: "100%",
   },
 });

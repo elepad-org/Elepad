@@ -46,6 +46,8 @@ const TILE_CONNECTIONS: Record<TileType, Direction[]> = {
 
 export const useNetGame = ({ gridSize }: UseNetGameProps) => {
   const [tiles, setTiles] = useState<Tile[]>([]);
+  const [solution, setSolution] = useState<Rotation[]>([]); // Guardar la solución
+  const [isSolvedAutomatically, setIsSolvedAutomatically] = useState(false); // Bandera para saber si se resolvió automáticamente
   const [moves, setMoves] = useState(0);
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
@@ -57,132 +59,204 @@ export const useNetGame = ({ gridSize }: UseNetGameProps) => {
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Generar un tablero aleatorio conectado
-  const generateConnectedBoard = useCallback((): Tile[] => {
+  // Generar un tablero aleatorio conectado (algoritmo de Simon Tatham simplificado)
+  const generateConnectedBoard = useCallback((): {
+    tiles: Tile[];
+    solution: Rotation[];
+  } => {
     const size = gridSize;
     const totalTiles = size * size;
-    const newTiles: Tile[] = [];
 
-    // 1. Generar un árbol de expansión usando DFS para garantizar conectividad
-    const visited = new Set<number>();
-    const stack: number[] = [];
+    // Representación de direcciones como bits (igual que en el código original)
+    // R=1 (derecha), U=2 (arriba), L=4 (izquierda), D=8 (abajo)
+    const R = 0x01,
+      U = 0x02,
+      L = 0x04,
+      D = 0x08;
 
-    // Empezar desde el centro
-    const center = Math.floor(totalTiles / 2);
-    stack.push(center);
-    visited.add(center);
+    // Tiles: cada casilla tiene un número que representa sus conexiones en bits
+    const tiles = new Array(totalTiles).fill(0);
 
-    const getNeighbors = (index: number): number[] => {
-      const row = Math.floor(index / size);
-      const col = index % size;
-      const neighbors: number[] = [];
+    // Posibilidades: lista de {x, y, direction} que representan extensiones posibles
+    interface Possibility {
+      x: number;
+      y: number;
+      direction: number;
+    }
+    const possibilities: Possibility[] = [];
 
-      // Arriba, Derecha, Abajo, Izquierda
-      const dirs = [
-        [-1, 0],
-        [0, 1],
-        [1, 0],
-        [0, -1],
-      ];
-
-      dirs.forEach(([dr, dc]) => {
-        const newRow = row + dr;
-        const newCol = col + dc;
-        if (newRow >= 0 && newRow < size && newCol >= 0 && newCol < size) {
-          neighbors.push(newRow * size + newCol);
-        }
-      });
-
-      return neighbors;
+    const getOpposite = (dir: number): number => {
+      // Dirección opuesta: R<->L, U<->D
+      if (dir === R) return L;
+      if (dir === L) return R;
+      if (dir === U) return D;
+      if (dir === D) return U;
+      return 0;
     };
 
-    // Construir árbol de expansión
-    const edges: Array<[number, number]> = [];
+    const getNeighborCoords = (
+      x: number,
+      y: number,
+      dir: number,
+    ): { x: number; y: number } | null => {
+      let nx = x,
+        ny = y;
+      if (dir === R) nx++;
+      else if (dir === L) nx--;
+      else if (dir === U) ny--;
+      else if (dir === D) ny++;
 
-    while (stack.length > 0) {
-      const current = stack.pop()!;
-      const neighbors = getNeighbors(current).filter((n) => !visited.has(n));
+      // Verificar límites (sin wrapping)
+      if (nx < 0 || nx >= size || ny < 0 || ny >= size) return null;
+      return { x: nx, y: ny };
+    };
 
-      if (neighbors.length > 0) {
-        // Elegir un vecino aleatorio
-        const next = neighbors[Math.floor(Math.random() * neighbors.length)];
-        edges.push([current, next]);
-        visited.add(next);
-        stack.push(current); // Volver a poner current para explorar otros vecinos
-        stack.push(next);
+    const countConnections = (tile: number): number => {
+      let count = 0;
+      if (tile & R) count++;
+      if (tile & U) count++;
+      if (tile & L) count++;
+      if (tile & D) count++;
+      return count;
+    };
+
+    const cx = Math.floor(size / 2);
+    const cy = Math.floor(size / 2);
+
+    // IMPORTANTE: El centro SIEMPRE debe ser endpoint (fuente única)
+    // Elegir UNA dirección aleatoria desde el centro
+    const centerDirections = [];
+    if (cx + 1 < size) centerDirections.push(R);
+    if (cy - 1 >= 0) centerDirections.push(U);
+    if (cx - 1 >= 0) centerDirections.push(L);
+    if (cy + 1 < size) centerDirections.push(D);
+
+    // Elegir solo UNA dirección para que el centro sea endpoint
+    const centerDir =
+      centerDirections[Math.floor(Math.random() * centerDirections.length)];
+    possibilities.push({ x: cx, y: cy, direction: centerDir });
+
+    // Algoritmo principal
+    while (possibilities.length > 0) {
+      // Elegir una posibilidad al azar
+      const i = Math.floor(Math.random() * possibilities.length);
+      const { x: x1, y: y1, direction: d1 } = possibilities[i];
+      possibilities.splice(i, 1);
+
+      // Calcular el tile vecino
+      const neighbor = getNeighborCoords(x1, y1, d1);
+      if (!neighbor) continue;
+
+      const { x: x2, y: y2 } = neighbor;
+      const d2 = getOpposite(d1);
+
+      // Conectar ambos tiles
+      tiles[y1 * size + x1] |= d1;
+
+      // Solo conectar si el vecino está vacío
+      if (tiles[y2 * size + x2] !== 0) continue;
+
+      tiles[y2 * size + x2] |= d2;
+
+      // Si acabamos de crear un T-piece (3 conexiones), eliminar la 4ta posibilidad
+      if (countConnections(tiles[y1 * size + x1]) === 3) {
+        const missingDir = (R | U | L | D) ^ tiles[y1 * size + x1];
+        const idx = possibilities.findIndex(
+          (p) => p.x === x1 && p.y === y1 && p.direction === missingDir,
+        );
+        if (idx >= 0) possibilities.splice(idx, 1);
+      }
+
+      // Eliminar posibilidades que apuntan al tile que acabamos de llenar
+      for (let dir of [R, U, L, D]) {
+        const n = getNeighborCoords(x2, y2, dir);
+        if (!n) continue;
+
+        const oppDir = getOpposite(dir);
+        const idx = possibilities.findIndex(
+          (p) => p.x === n.x && p.y === n.y && p.direction === oppDir,
+        );
+        if (idx >= 0) possibilities.splice(idx, 1);
+      }
+
+      // Agregar nuevas posibilidades desde el tile nuevo
+      for (let dir of [R, U, L, D]) {
+        if (dir === d2) continue; // Ya tenemos esta conexión
+
+        const n = getNeighborCoords(x2, y2, dir);
+        if (!n) continue;
+
+        // No agregar si crearía un loop
+        if (tiles[n.y * size + n.x] !== 0) continue;
+
+        possibilities.push({ x: x2, y: y2, direction: dir });
       }
     }
 
-    // 3. Crear tiles basados en las conexiones
-    const connections: Map<number, Set<Direction>> = new Map();
+    // Convertir de representación de bits a nuestros Tile objects
+    const finalTiles: Tile[] = [];
+    const solutionRotations: Rotation[] = [];
 
-    // Inicializar conexiones vacías
-    for (let i = 0; i < totalTiles; i++) {
-      connections.set(i, new Set());
-    }
-
-    // Agregar conexiones del árbol de expansión
-    edges.forEach(([from, to]) => {
-      const fromRow = Math.floor(from / size);
-      const fromCol = from % size;
-      const toRow = Math.floor(to / size);
-      const toCol = to % size;
-
-      // Determinar dirección
-      if (toRow < fromRow) {
-        connections.get(from)!.add(0); // arriba
-        connections.get(to)!.add(2); // abajo
-      } else if (toRow > fromRow) {
-        connections.get(from)!.add(2); // abajo
-        connections.get(to)!.add(0); // arriba
-      } else if (toCol > fromCol) {
-        connections.get(from)!.add(1); // derecha
-        connections.get(to)!.add(3); // izquierda
-      } else {
-        connections.get(from)!.add(3); // izquierda
-        connections.get(to)!.add(1); // derecha
-      }
-    });
-
-    // 4. Convertir conexiones a tipos de tiles
     for (let i = 0; i < totalTiles; i++) {
       const row = Math.floor(i / size);
       const col = i % size;
-      const conns = connections.get(i)!;
-      const connCount = conns.size;
+      const tileBits = tiles[i];
+      const connCount = countConnections(tileBits);
 
       let type: TileType;
+      let correctRotation: Rotation = 0;
 
+      // Determinar tipo y rotación correcta
       if (connCount === 0) {
-        type = "empty";
+        type = "endpoint";
+        correctRotation = 0;
       } else if (connCount === 1) {
         type = "endpoint";
+        // Calcular rotación: endpoint base apunta arriba (U=2)
+        if (tileBits & R) correctRotation = 90;
+        else if (tileBits & D) correctRotation = 180;
+        else if (tileBits & L) correctRotation = 270;
+        else correctRotation = 0; // U
       } else if (connCount === 2) {
-        const dirs = Array.from(conns).sort((a, b) => a - b);
-        // Verificar si es recto o esquina
+        // Determinar si es straight o corner
         if (
-          (dirs[0] === 0 && dirs[1] === 2) ||
-          (dirs[0] === 1 && dirs[1] === 3)
+          (tileBits & (U | D)) === (U | D) ||
+          (tileBits & (R | L)) === (R | L)
         ) {
           type = "straight";
+          correctRotation = (tileBits & (R | L)) === (R | L) ? 90 : 0;
         } else {
           type = "corner";
+          // Corner base es U|R
+          if ((tileBits & (U | R)) === (U | R)) correctRotation = 0;
+          else if ((tileBits & (R | D)) === (R | D)) correctRotation = 90;
+          else if ((tileBits & (D | L)) === (D | L)) correctRotation = 180;
+          else correctRotation = 270; // U|L
         }
       } else if (connCount === 3) {
         type = "t-junction";
+        // T-junction base es U|R|D (sin L)
+        if (!(tileBits & L)) correctRotation = 0;
+        else if (!(tileBits & U)) correctRotation = 90;
+        else if (!(tileBits & R)) correctRotation = 180;
+        else correctRotation = 270; // sin D
       } else {
-        type = "cross";
+        // No debería haber 4 conexiones
+        type = "t-junction";
+        correctRotation = 0;
       }
 
-      // Rotación inicial aleatoria
+      solutionRotations.push(correctRotation);
+
+      // Rotar aleatoriamente para el puzzle
       const randomRotations: Rotation[] = [0, 90, 180, 270];
-      const rotation =
+      const randomRotation =
         randomRotations[Math.floor(Math.random() * randomRotations.length)];
 
-      newTiles.push({
+      finalTiles.push({
         id: i,
         type,
-        rotation,
+        rotation: randomRotation,
         isLocked: false,
         isConnected: false,
         row,
@@ -190,7 +264,12 @@ export const useNetGame = ({ gridSize }: UseNetGameProps) => {
       });
     }
 
-    return newTiles;
+    const endpointCount = finalTiles.filter(
+      (t) => t.type === "endpoint",
+    ).length;
+    console.log(`✓ Tablero generado con ${endpointCount} endpoints`);
+
+    return { tiles: finalTiles, solution: solutionRotations };
   }, [gridSize]);
 
   // Inicializar juego
@@ -203,14 +282,16 @@ export const useNetGame = ({ gridSize }: UseNetGameProps) => {
     setTimeElapsed(0);
     setIsComplete(false);
     setIsGameStarted(false);
+    setIsSolvedAutomatically(false);
 
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
 
-    const newTiles = generateConnectedBoard();
+    const { tiles: newTiles, solution: newSolution } = generateConnectedBoard();
     setTiles(newTiles);
+    setSolution(newSolution);
     setCenterTile(Math.floor((gridSize * gridSize) / 2));
   }, [gridSize, generateConnectedBoard]);
 
@@ -499,6 +580,55 @@ export const useNetGame = ({ gridSize }: UseNetGameProps) => {
     initializeGame();
   }, [initializeGame]);
 
+  // Resolver juego automáticamente
+  const solveGame = useCallback(() => {
+    if (solution.length === 0) {
+      console.warn("No hay solución disponible");
+      return;
+    }
+
+    console.log("🤖 Resolviendo juego automáticamente...");
+    console.log("Solución guardada:", solution);
+
+    setTiles((prevTiles) => {
+      const solvedTiles = prevTiles.map((tile) => {
+        // Usar tile.id como índice para obtener la rotación correcta
+        const correctRotation = solution[tile.id];
+        console.log(
+          `Tile ${tile.id}: ${tile.rotation}° -> ${correctRotation}°`,
+        );
+
+        return {
+          ...tile,
+          rotation: correctRotation,
+          isLocked: false,
+        };
+      });
+
+      // Recalcular tiles conectados
+      const connected = calculateConnectedTiles(solvedTiles, centerTile);
+      const finalTiles = solvedTiles.map((tile) => ({
+        ...tile,
+        isConnected: connected.has(tile.id),
+      }));
+
+      console.log(
+        "Tiles resueltos:",
+        finalTiles.map((t) => `${t.id}:${t.rotation}°`).join(", "),
+      );
+      return finalTiles;
+    });
+
+    setIsSolvedAutomatically(true);
+    setIsComplete(true);
+    setIsGameStarted(true);
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }, [solution, calculateConnectedTiles, centerTile]);
+
   // Contar tiles conectados
   const connectedTiles = tiles.filter(
     (tile) => tile.type !== "empty" && tile.isConnected,
@@ -518,8 +648,10 @@ export const useNetGame = ({ gridSize }: UseNetGameProps) => {
     rotateTile,
     toggleLock,
     resetGame,
+    solveGame,
     stats,
     gameId,
     centerTile,
+    isSolvedAutomatically,
   };
 };

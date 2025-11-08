@@ -12,6 +12,7 @@ export default function NetGameScreen() {
   const [showQuitDialog, setShowQuitDialog] = useState(false);
   const [showResultsDialog, setShowResultsDialog] = useState(false);
   const [showHelpDialog, setShowHelpDialog] = useState(false);
+  const [wasSolvedAutomatically, setWasSolvedAutomatically] = useState(false);
   const [gameResults, setGameResults] = useState<{
     moves: number;
     timeElapsed: number;
@@ -46,7 +47,12 @@ export default function NetGameScreen() {
   );
 
   const handleComplete = useCallback(
-    (stats: { moves: number; timeElapsed: number }) => {
+    (
+      stats: { moves: number; timeElapsed: number },
+      isSolvedAutomatically: boolean,
+    ) => {
+      setWasSolvedAutomatically(isSolvedAutomatically);
+
       const score = calculateScore(stats.timeElapsed, stats.moves);
       setGameResults({ ...stats, score });
 
@@ -61,6 +67,7 @@ export default function NetGameScreen() {
   const handlePlayAgain = useCallback(() => {
     setShowResultsDialog(false);
     setGameResults(null);
+    setWasSolvedAutomatically(false);
     // El juego se reiniciará automáticamente al cambiar el key
   }, []);
 
@@ -270,30 +277,35 @@ export default function NetGameScreen() {
               visible={showResultsDialog}
               onDismiss={() => setShowResultsDialog(false)}
             >
-              <Dialog.Icon icon="trophy" />
+              <Dialog.Icon icon={wasSolvedAutomatically ? "robot" : "trophy"} />
               <Dialog.Title style={styles.dialogTitle}>
-                ¡Felicitaciones! 🎉
+                {wasSolvedAutomatically
+                  ? "Juego Terminado"
+                  : "¡Felicitaciones! 🎉"}
               </Dialog.Title>
               <Dialog.Content>
                 <View style={styles.resultsContainer}>
                   <Text variant="bodyLarge" style={styles.resultsText}>
-                    ¡Has completado la red!
+                    {wasSolvedAutomatically
+                      ? "El juego se resolvió automáticamente. ¡Mejor suerte para la próxima!"
+                      : "¡Has completado la red!"}
                   </Text>
 
-                  {/* Puntaje destacado */}
-                  {gameResults?.score !== undefined && (
-                    <View style={styles.scoreHighlight}>
-                      <Text variant="titleLarge" style={styles.scoreIcon}>
-                        🏆
-                      </Text>
-                      <Text variant="displaySmall" style={styles.scoreValue}>
-                        {gameResults.score}
-                      </Text>
-                      <Text variant="bodyMedium" style={styles.scoreLabel}>
-                        puntos
-                      </Text>
-                    </View>
-                  )}
+                  {/* Puntaje destacado - solo mostrar si NO fue resuelto automáticamente */}
+                  {!wasSolvedAutomatically &&
+                    gameResults?.score !== undefined && (
+                      <View style={styles.scoreHighlight}>
+                        <Text variant="titleLarge" style={styles.scoreIcon}>
+                          🏆
+                        </Text>
+                        <Text variant="displaySmall" style={styles.scoreValue}>
+                          {gameResults.score}
+                        </Text>
+                        <Text variant="bodyMedium" style={styles.scoreLabel}>
+                          puntos
+                        </Text>
+                      </View>
+                    )}
 
                   <View style={styles.resultStats}>
                     <View style={styles.resultStat}>

@@ -3,7 +3,7 @@ import { TouchableOpacity, StyleSheet, View } from "react-native";
 import { Text } from "react-native-paper";
 import { COLORS } from "@/styles/base";
 import { TileType, Rotation } from "@/hooks/useNetGame";
-import Svg, { Path, Circle } from "react-native-svg";
+import Svg, { Path, Circle, Rect } from "react-native-svg";
 
 interface NetTileProps {
   id: number;
@@ -14,6 +14,7 @@ interface NetTileProps {
   onRotate: (direction: "clockwise" | "counterclockwise") => void;
   onToggleLock: () => void;
   disabled: boolean;
+  isCenter?: boolean; // Nueva prop para identificar la casilla central
 }
 
 export const NetTile: React.FC<NetTileProps> = ({
@@ -24,6 +25,7 @@ export const NetTile: React.FC<NetTileProps> = ({
   onRotate,
   onToggleLock,
   disabled,
+  isCenter = false,
 }) => {
   // Renderizar las conexiones del tile usando SVG
   const renderConnections = () => {
@@ -32,7 +34,22 @@ export const NetTile: React.FC<NetTileProps> = ({
     const size = 60;
     const center = size / 2;
     const lineWidth = 6;
-    const connectionColor = isConnected ? COLORS.success : COLORS.textSecondary;
+
+    // Color de las líneas/conexiones (siempre verde o gris según conexión)
+    const lineColor = isConnected ? COLORS.success : COLORS.textSecondary;
+
+    // Color del cuadrado central de los endpoints
+    let endpointSquareColor: string;
+    if (isCenter) {
+      // Endpoint del centro: azul fuerte
+      endpointSquareColor = "#1565C0";
+    } else if (isConnected) {
+      // Endpoints conectados: celeste como el icono
+      endpointSquareColor = "#2196F3";
+    } else {
+      // Endpoints sin conectar: negro
+      endpointSquareColor = "#424242";
+    }
 
     return (
       <Svg
@@ -41,24 +58,36 @@ export const NetTile: React.FC<NetTileProps> = ({
         viewBox={`0 0 ${size} ${size}`}
         style={{ transform: [{ rotate: `${rotation}deg` }] }}
       >
-        {/* Centro del tile (siempre presente excepto en empty) */}
-        <Circle cx={center} cy={center} r={lineWidth} fill={connectionColor} />
-
-        {/* Endpoint: una línea */}
+        {/* Endpoint: una línea desde el cuadrado central */}
         {type === "endpoint" && (
-          <Path
-            d={`M ${center} ${center} L ${center} 0`}
-            stroke={connectionColor}
-            strokeWidth={lineWidth}
-            strokeLinecap="round"
-          />
+          <>
+            {/* Línea que sale del cuadrado (dibujada primero, queda debajo) */}
+            <Path
+              d={`M ${center} ${center - lineWidth * 1.5} L ${center} 0`}
+              stroke={lineColor}
+              strokeWidth={lineWidth}
+              strokeLinecap="round"
+            />
+            {/* Cuadrado vacío en el centro (dibujado después, queda encima) */}
+            <Rect
+              x={center - lineWidth * 1.5}
+              y={center - lineWidth * 1.5}
+              width={lineWidth * 3}
+              height={lineWidth * 3}
+              rx={4}
+              ry={4}
+              fill="none"
+              stroke={endpointSquareColor}
+              strokeWidth={lineWidth}
+            />
+          </>
         )}
 
-        {/* Straight: línea vertical */}
+        {/* Straight: línea vertical (SIN círculo en el centro) */}
         {type === "straight" && (
           <Path
             d={`M ${center} 0 L ${center} ${size}`}
-            stroke={connectionColor}
+            stroke={lineColor}
             strokeWidth={lineWidth}
             strokeLinecap="round"
           />
@@ -67,15 +96,16 @@ export const NetTile: React.FC<NetTileProps> = ({
         {/* Corner: curva */}
         {type === "corner" && (
           <>
+            <Circle cx={center} cy={center} r={lineWidth} fill={lineColor} />
             <Path
               d={`M ${center} ${center} L ${center} 0`}
-              stroke={connectionColor}
+              stroke={lineColor}
               strokeWidth={lineWidth}
               strokeLinecap="round"
             />
             <Path
               d={`M ${center} ${center} L ${size} ${center}`}
-              stroke={connectionColor}
+              stroke={lineColor}
               strokeWidth={lineWidth}
               strokeLinecap="round"
             />
@@ -85,15 +115,16 @@ export const NetTile: React.FC<NetTileProps> = ({
         {/* T-junction: tres líneas */}
         {type === "t-junction" && (
           <>
+            <Circle cx={center} cy={center} r={lineWidth} fill={lineColor} />
             <Path
               d={`M ${center} 0 L ${center} ${size}`}
-              stroke={connectionColor}
+              stroke={lineColor}
               strokeWidth={lineWidth}
               strokeLinecap="round"
             />
             <Path
               d={`M ${center} ${center} L ${size} ${center}`}
-              stroke={connectionColor}
+              stroke={lineColor}
               strokeWidth={lineWidth}
               strokeLinecap="round"
             />
@@ -103,15 +134,16 @@ export const NetTile: React.FC<NetTileProps> = ({
         {/* Cross: cuatro líneas */}
         {type === "cross" && (
           <>
+            <Circle cx={center} cy={center} r={lineWidth} fill={lineColor} />
             <Path
               d={`M ${center} 0 L ${center} ${size}`}
-              stroke={connectionColor}
+              stroke={lineColor}
               strokeWidth={lineWidth}
               strokeLinecap="round"
             />
             <Path
               d={`M 0 ${center} L ${size} ${center}`}
-              stroke={connectionColor}
+              stroke={lineColor}
               strokeWidth={lineWidth}
               strokeLinecap="round"
             />
