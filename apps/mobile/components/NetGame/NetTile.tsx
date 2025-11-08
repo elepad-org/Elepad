@@ -156,13 +156,12 @@ export const NetTile: React.FC<NetTileProps> = ({
   return (
     <View style={styles.tileContainer}>
       <TouchableOpacity
-        onPress={() => onRotate("clockwise")}
+        onPress={() => !isLocked && onRotate("clockwise")}
         onLongPress={onToggleLock}
-        disabled={disabled || isLocked || type === "empty"}
+        disabled={disabled || type === "empty"}
         activeOpacity={0.7}
         style={[
           styles.tile,
-          isConnected && styles.tileConnected,
           isLocked && styles.tileLocked,
           type === "empty" && styles.tileEmpty,
         ]}
@@ -200,11 +199,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3,
-  },
-  tileConnected: {
-    backgroundColor: "#E8F5E9", // Verde muy claro
-    borderColor: COLORS.success,
-    borderWidth: 3,
   },
   tileLocked: {
     borderColor: "#FFA726", // Naranja/amarillo
