@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
 import { Text, Button, Card, ActivityIndicator } from "react-native-paper";
 import { MemoryCard } from "./MemoryCard";
 import { useMemoryGame } from "@/hooks/useMemoryGame";
@@ -171,28 +171,35 @@ export const MemoryGameBoard: React.FC<MemoryGameBoardProps> = ({
       </Card>
 
       {/* Tablero de juego */}
-      <View style={styles.board}>
-        {isLoading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={COLORS.primary} />
-            <Text variant="bodyLarge" style={styles.loadingText}>
-              Preparando el juego...
-            </Text>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.boardContainer}>
+          <View style={styles.board}>
+            {isLoading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+                <Text variant="bodyLarge" style={styles.loadingText}>
+                  Preparando el juego...
+                </Text>
+              </View>
+            ) : (
+              cards.map((card) => (
+                <MemoryCard
+                  key={card.id}
+                  id={card.id}
+                  symbol={card.symbol}
+                  state={card.state}
+                  onPress={() => flipCard(card.id)}
+                  disabled={isProcessing}
+                  mode={mode}
+                />
+              ))
+            )}
           </View>
-        ) : (
-          cards.map((card) => (
-            <MemoryCard
-              key={card.id}
-              id={card.id}
-              symbol={card.symbol}
-              state={card.state}
-              onPress={() => flipCard(card.id)}
-              disabled={isProcessing}
-              mode={mode}
-            />
-          ))
-        )}
-      </View>
+        </View>
+      </ScrollView>
 
       {/* Controles */}
       <View style={styles.controls}>
@@ -222,10 +229,10 @@ export const MemoryGameBoard: React.FC<MemoryGameBoardProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
   },
   statsCard: {
-    marginBottom: 16,
+    marginBottom: 12,
+    marginHorizontal: 16,
     elevation: 2,
   },
   statsContent: {
@@ -238,10 +245,20 @@ const styles = StyleSheet.create({
   statLabel: {
     color: COLORS.textSecondary,
     marginBottom: 4,
+    fontSize: 13,
   },
   statValue: {
     color: COLORS.primary,
     fontWeight: "bold",
+    fontSize: 18,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  boardContainer: {
+    alignItems: "center",
+    paddingBottom: 16,
+    paddingHorizontal: 16,
   },
   board: {
     flexDirection: "row",
@@ -252,8 +269,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 4,
-    marginBottom: 16,
     minHeight: 400,
+    width: "100%",
   },
   loadingContainer: {
     flex: 1,
@@ -270,6 +287,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
   },
   button: {
     flex: 1,

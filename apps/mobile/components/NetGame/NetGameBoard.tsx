@@ -109,7 +109,7 @@ export const NetGameBoard: React.FC<NetGameBoardProps> = ({
                 🎯 Toca para rotar • Mantén presionado para bloquear
               </Text>
               <Text variant="bodySmall" style={styles.instructionsText}>
-                💡 Conecta todos los tiles (verdes) desde el centro
+                💡 Conecta todas las casillas (verdes) desde el centro
               </Text>
               <Text variant="bodySmall" style={styles.instructionsText}>
                 ⚠️ Evita crear circuitos cerrados (loops)
@@ -150,6 +150,7 @@ const styles = StyleSheet.create({
   },
   statsCard: {
     marginBottom: 12,
+    marginHorizontal: 16,
     elevation: 2,
   },
   statsContent: {
@@ -175,6 +176,8 @@ const styles = StyleSheet.create({
   boardContainer: {
     alignItems: "center",
     paddingBottom: 16,
+    width: "100%",
+    paddingHorizontal: 16,
   },
   board: {
     flexDirection: "row",
@@ -184,10 +187,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 8,
     width: "100%",
-    maxWidth: 400,
+    aspectRatio: 1, // Mantiene el tablero cuadrado
   },
   instructionsCard: {
     marginTop: 12,
+    marginHorizontal: 16,
     backgroundColor: COLORS.accent,
     elevation: 1,
   },
@@ -201,6 +205,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     gap: 12,
     paddingVertical: 12,
+    paddingHorizontal: 16,
   },
   button: {
     flex: 1,

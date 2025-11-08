@@ -8,12 +8,14 @@ interface GameHeaderProps {
   icon: string;
   title: string;
   subtitle: string;
+  onHelpPress?: () => void;
 }
 
 export const GameHeader: React.FC<GameHeaderProps> = ({
   icon,
   title,
   subtitle,
+  onHelpPress,
 }) => {
   return (
     <View style={styles.header}>
@@ -30,6 +32,15 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
       <Text variant="bodyMedium" style={styles.subtitle}>
         {subtitle}
       </Text>
+      {onHelpPress && (
+        <IconButton
+          icon="help-circle-outline"
+          size={24}
+          onPress={onHelpPress}
+          style={styles.helpButton}
+          iconColor={COLORS.textSecondary}
+        />
+      )}
     </View>
   );
 };
@@ -39,10 +50,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
     position: "relative",
+    paddingHorizontal: 16,
   },
   backButton: {
     position: "absolute",
     left: -8,
+    top: 0,
+    zIndex: 1,
+  },
+  helpButton: {
+    position: "absolute",
+    right: -8,
     top: 0,
     zIndex: 1,
   },

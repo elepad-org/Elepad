@@ -107,7 +107,7 @@ export default function JuegosScreen() {
                   marginBottom: 20,
                 }}
               >
-                Conecta toda la red girando los tiles. Rota las piezas hasta
+                Conecta toda la red girando las casillas. Rota las piezas hasta
                 formar una red completamente conectada.
               </Text>
               <Button

@@ -5,11 +5,13 @@ import { Text, Portal, Dialog, Button } from "react-native-paper";
 import { router, Stack } from "expo-router";
 import { NetGameBoard } from "@/components/NetGame/NetGameBoard";
 import { GameHeader } from "@/components/shared/GameHeader";
+import { InstructionsDialog } from "@/components/shared/InstructionsDialog";
 import { COLORS } from "@/styles/base";
 
 export default function NetGameScreen() {
   const [showQuitDialog, setShowQuitDialog] = useState(false);
   const [showResultsDialog, setShowResultsDialog] = useState(false);
+  const [showHelpDialog, setShowHelpDialog] = useState(false);
   const [gameResults, setGameResults] = useState<{
     moves: number;
     timeElapsed: number;
@@ -87,7 +89,8 @@ export default function NetGameScreen() {
           <GameHeader
             icon="🔌"
             title="NET"
-            subtitle="Conecta toda la red girando los tiles"
+            subtitle="Conecta toda la red girando las casillas"
+            onHelpPress={() => setShowHelpDialog(true)}
           />
 
           {/* Tablero de juego */}
@@ -122,6 +125,141 @@ export default function NetGameScreen() {
                 </Button>
               </Dialog.Actions>
             </Dialog>
+          </Portal>
+
+          {/* Diálogo de ayuda/instrucciones */}
+          <Portal>
+            <InstructionsDialog
+              visible={showHelpDialog}
+              onDismiss={() => setShowHelpDialog(false)}
+              title="🎮 Cómo Jugar NET"
+            >
+              <Text variant="titleMedium" style={styles.helpSectionTitle}>
+                🎯 Objetivo del Juego
+              </Text>
+              <Text variant="bodyMedium" style={styles.helpText}>
+                Conecta todas las casillas de la red girándolas hasta formar una
+                red completamente conectada sin circuitos cerrados (loops).
+              </Text>
+
+              <Text variant="titleMedium" style={styles.helpSectionTitle}>
+                🕹️ Controles
+              </Text>
+              <View style={styles.helpListItem}>
+                <Text variant="bodyMedium" style={styles.helpBullet}>
+                  •
+                </Text>
+                <Text variant="bodyMedium" style={styles.helpText}>
+                  <Text style={styles.helpBold}>Toca una casilla</Text> para
+                  rotarla 90° en sentido horario
+                </Text>
+              </View>
+              <View style={styles.helpListItem}>
+                <Text variant="bodyMedium" style={styles.helpBullet}>
+                  •
+                </Text>
+                <Text variant="bodyMedium" style={styles.helpText}>
+                  <Text style={styles.helpBold}>Mantén presionado</Text> para
+                  bloquear/desbloquear una casilla
+                </Text>
+              </View>
+
+              <Text variant="titleMedium" style={styles.helpSectionTitle}>
+                🎨 Colores
+              </Text>
+              <View style={styles.helpListItem}>
+                <Text variant="bodyMedium" style={styles.helpBullet}>
+                  •
+                </Text>
+                <Text variant="bodyMedium" style={styles.helpText}>
+                  <Text style={[styles.helpBold, { color: COLORS.success }]}>
+                    Verde claro
+                  </Text>
+                  : Casilla conectada a la red principal
+                </Text>
+              </View>
+              <View style={styles.helpListItem}>
+                <Text variant="bodyMedium" style={styles.helpBullet}>
+                  •
+                </Text>
+                <Text variant="bodyMedium" style={styles.helpText}>
+                  <Text style={styles.helpBold}>Blanco</Text>: Casilla no
+                  conectada aún
+                </Text>
+              </View>
+              <View style={styles.helpListItem}>
+                <Text variant="bodyMedium" style={styles.helpBullet}>
+                  •
+                </Text>
+                <Text variant="bodyMedium" style={styles.helpText}>
+                  <Text style={[styles.helpBold, { color: "#FFA726" }]}>
+                    Amarillo
+                  </Text>
+                  : Casilla bloqueada (no se puede rotar)
+                </Text>
+              </View>
+
+              <Text variant="titleMedium" style={styles.helpSectionTitle}>
+                ✅ Condiciones de Victoria
+              </Text>
+              <View style={styles.helpListItem}>
+                <Text variant="bodyMedium" style={styles.helpBullet}>
+                  1.
+                </Text>
+                <Text variant="bodyMedium" style={styles.helpText}>
+                  Todas las casillas deben estar conectadas (verdes)
+                </Text>
+              </View>
+              <View style={styles.helpListItem}>
+                <Text variant="bodyMedium" style={styles.helpBullet}>
+                  2.
+                </Text>
+                <Text variant="bodyMedium" style={styles.helpText}>
+                  NO debe haber circuitos cerrados (loops)
+                </Text>
+              </View>
+
+              <Text variant="titleMedium" style={styles.helpSectionTitle}>
+                ⚠️ ¿Qué es un Loop?
+              </Text>
+              <Text variant="bodyMedium" style={styles.helpText}>
+                Un loop es un camino que vuelve sobre sí mismo formando un
+                circuito cerrado. Por ejemplo, si puedes seguir las conexiones y
+                volver al punto de inicio sin retroceder, ¡hay un loop!
+              </Text>
+              <Text variant="bodyMedium" style={styles.helpText}>
+                La red debe ser un árbol (sin ciclos), donde hay exactamente un
+                camino entre cualquier par de casillas.
+              </Text>
+
+              <Text variant="titleMedium" style={styles.helpSectionTitle}>
+                💡 Consejos
+              </Text>
+              <View style={styles.helpListItem}>
+                <Text variant="bodyMedium" style={styles.helpBullet}>
+                  •
+                </Text>
+                <Text variant="bodyMedium" style={styles.helpText}>
+                  Empieza desde el centro y expándete hacia afuera
+                </Text>
+              </View>
+              <View style={styles.helpListItem}>
+                <Text variant="bodyMedium" style={styles.helpBullet}>
+                  •
+                </Text>
+                <Text variant="bodyMedium" style={styles.helpText}>
+                  Bloquea las casillas que estés seguro que están correctas
+                </Text>
+              </View>
+              <View style={styles.helpListItem}>
+                <Text variant="bodyMedium" style={styles.helpBullet}>
+                  •
+                </Text>
+                <Text variant="bodyMedium" style={styles.helpText}>
+                  Si todas están verdes pero no ganas, busca y elimina loops
+                </Text>
+              </View>
+            </InstructionsDialog>
           </Portal>
 
           {/* Diálogo de resultados */}
@@ -215,7 +353,8 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 16,
+    paddingHorizontal: 0, // Sin padding horizontal para que el tablero ocupe todo el ancho
+    paddingVertical: 16,
   },
   dialogTitle: {
     textAlign: "center",
@@ -280,5 +419,31 @@ const styles = StyleSheet.create({
   },
   dialogButton: {
     width: "100%",
+  },
+  helpSectionTitle: {
+    fontWeight: "bold",
+    color: COLORS.primary,
+    marginTop: 20,
+    marginBottom: 8,
+  },
+  helpText: {
+    color: COLORS.text,
+    lineHeight: 22,
+    marginBottom: 12,
+  },
+  helpListItem: {
+    flexDirection: "row",
+    marginBottom: 8,
+    paddingLeft: 8,
+  },
+  helpBullet: {
+    color: COLORS.primary,
+    fontWeight: "bold",
+    marginRight: 8,
+    width: 20,
+  },
+  helpBold: {
+    fontWeight: "bold",
+    color: COLORS.primary,
   },
 });
