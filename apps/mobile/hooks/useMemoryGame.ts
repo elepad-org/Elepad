@@ -59,6 +59,7 @@ export const useMemoryGame = (props?: UseMemoryGameProps) => {
     UnlockedAchievement[]
   >([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [gameId, setGameId] = useState<string>(Date.now().toString());
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<number | null>(null);
   const hasFinishedAttempt = useRef(false);
@@ -72,6 +73,11 @@ export const useMemoryGame = (props?: UseMemoryGameProps) => {
 
   // Inicializar el tablero con persistencia
   const initializeGame = useCallback(async () => {
+    // Generar un nuevo ID de juego para trackear completaciones
+    const newGameId = Date.now().toString();
+    setGameId(newGameId);
+    console.log("🆕 Nuevo juego iniciado con ID:", newGameId);
+
     // Limpiar estado anterior
     setFlippedCards([]);
     setMoves(0);
@@ -306,7 +312,18 @@ export const useMemoryGame = (props?: UseMemoryGameProps) => {
 
   // Verificar si el juego está completo
   useEffect(() => {
-    if (cards.length > 0 && cards.every((card) => card.state === "matched")) {
+    // Solo verificar si el juego ya está iniciado y hay un attemptId
+    // Esto previene que se dispare al cargar un juego nuevo
+    if (
+      cards.length > 0 &&
+      cards.every((card) => card.state === "matched") &&
+      isGameStarted &&
+      !hasFinishedAttempt.current
+    ) {
+      console.log(
+        "🎯 Todas las cartas matched, marcando juego como completo. GameId:",
+        gameId,
+      );
       setIsComplete(true);
       if (timerRef.current) {
         clearInterval(timerRef.current);
@@ -390,7 +407,15 @@ export const useMemoryGame = (props?: UseMemoryGameProps) => {
 
       finishGameAttempt();
     }
-  }, [cards, attemptId, moves, finishAttempt, checkAchievements]);
+  }, [
+    cards,
+    attemptId,
+    moves,
+    finishAttempt,
+    checkAchievements,
+    isGameStarted,
+    gameId,
+  ]);
 
   const resetGame = useCallback(() => {
     hasInitialized.current = false;
@@ -411,5 +436,6 @@ export const useMemoryGame = (props?: UseMemoryGameProps) => {
     isProcessing: flippedCards.length >= 2,
     unlockedAchievements,
     isLoading,
+    gameId,
   };
 };
