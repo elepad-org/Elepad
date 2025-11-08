@@ -87,10 +87,12 @@ export default function NetGameScreen() {
         <View style={styles.container}>
           {/* Título con botón de retroceso */}
           <GameHeader
-            icon="🔌"
+            icon="lan"
             title="NET"
             subtitle="Conecta toda la red girando las casillas"
             onHelpPress={() => setShowHelpDialog(true)}
+            iconColor="#2196F3"
+            useIconComponent={true}
           />
 
           {/* Tablero de juego */}

@@ -101,21 +101,6 @@ export const NetGameBoard: React.FC<NetGameBoardProps> = ({
               />
             ))}
           </View>
-
-          {/* Instrucciones */}
-          <Card style={styles.instructionsCard}>
-            <Card.Content>
-              <Text variant="bodySmall" style={styles.instructionsText}>
-                🎯 Toca para rotar • Mantén presionado para bloquear
-              </Text>
-              <Text variant="bodySmall" style={styles.instructionsText}>
-                💡 Conecta todas las casillas (verdes) desde el centro
-              </Text>
-              <Text variant="bodySmall" style={styles.instructionsText}>
-                ⚠️ Evita crear circuitos cerrados (loops)
-              </Text>
-            </Card.Content>
-          </Card>
         </View>
       </ScrollView>
 
@@ -188,17 +173,6 @@ const styles = StyleSheet.create({
     padding: 8,
     width: "100%",
     aspectRatio: 1, // Mantiene el tablero cuadrado
-  },
-  instructionsCard: {
-    marginTop: 12,
-    marginHorizontal: 16,
-    backgroundColor: COLORS.accent,
-    elevation: 1,
-  },
-  instructionsText: {
-    color: COLORS.textSecondary,
-    textAlign: "center",
-    marginVertical: 2,
   },
   controls: {
     flexDirection: "row",

@@ -1,5 +1,11 @@
 import { StatusBar, ScrollView, View, Image } from "react-native";
-import { ActivityIndicator, Text, Card, Button } from "react-native-paper";
+import {
+  ActivityIndicator,
+  Text,
+  Card,
+  Button,
+  Icon,
+} from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, STYLES } from "@/styles/base";
@@ -87,7 +93,8 @@ export default function JuegosScreen() {
             ]}
           >
             <Card.Content style={{ alignItems: "center" }}>
-              <Text style={{ fontSize: 64, marginBottom: 12 }}>🔌</Text>
+              <Icon source="lan" size={64} color="#2196F3" />
+              <View style={{ height: 12 }} />
               <Text
                 variant="headlineSmall"
                 style={{

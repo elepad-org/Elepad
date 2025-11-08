@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { Text, IconButton } from "react-native-paper";
+import { Text, IconButton, Icon } from "react-native-paper";
 import { router } from "expo-router";
 import { COLORS } from "@/styles/base";
 
@@ -9,6 +9,8 @@ interface GameHeaderProps {
   title: string;
   subtitle: string;
   onHelpPress?: () => void;
+  iconColor?: string;
+  useIconComponent?: boolean; // Si es true, usa Icon de Material, si no usa emoji
 }
 
 export const GameHeader: React.FC<GameHeaderProps> = ({
@@ -16,6 +18,8 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
   title,
   subtitle,
   onHelpPress,
+  iconColor,
+  useIconComponent = false,
 }) => {
   return (
     <View style={styles.header}>
@@ -26,9 +30,18 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
         style={styles.backButton}
         iconColor={COLORS.primary}
       />
-      <Text variant="headlineMedium" style={styles.title}>
-        {icon} {title}
-      </Text>
+      <View style={styles.titleContainer}>
+        {useIconComponent ? (
+          <Icon source={icon} size={32} color={iconColor || COLORS.primary} />
+        ) : (
+          <Text style={[styles.iconText, iconColor && { color: iconColor }]}>
+            {icon}
+          </Text>
+        )}
+        <Text variant="headlineMedium" style={styles.title}>
+          {title}
+        </Text>
+      </View>
       <Text variant="bodyMedium" style={styles.subtitle}>
         {subtitle}
       </Text>
@@ -63,6 +76,14 @@ const styles = StyleSheet.create({
     right: -8,
     top: 0,
     zIndex: 1,
+  },
+  titleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  iconText: {
+    fontSize: 28,
   },
   title: {
     fontWeight: "bold",
