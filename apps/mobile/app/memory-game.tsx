@@ -102,9 +102,9 @@ export default function MemoryGameScreen() {
   const handlePlayAgain = useCallback(() => {
     setShowResultsDialog(false);
     setGameResults(null);
-    setShowModeSelectionDialog(true);
-    setSelectedMode(null);
-    // El juego se reiniciará automáticamente
+    // NO cambiar el modo ni mostrar el modal de selección
+    // El juego se reiniciará automáticamente al cerrar el diálogo
+    // y el usuario puede usar el botón "Reiniciar" del tablero
   }, []);
 
   const handleBackToGames = useCallback(() => {
