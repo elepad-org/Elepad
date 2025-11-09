@@ -33,13 +33,14 @@ export const MemoryGameSchema = z
 
 export type MemoryGame = z.infer<typeof MemoryGameSchema>;
 
-// Schema para Logic Game (Lights Out, etc.)
+// Schema para Logic Game (Lights Out, NET, etc.)
 export const LogicGameSchema = z
   .object({
     puzzleId: z.string().uuid(),
     rows: z.number().int(),
     cols: z.number().int(),
     startState: z.array(z.union([z.number().int(), z.boolean()])),
+    solution: z.array(z.union([z.number().int(), z.boolean()])).optional(), // Estado ganador/solución
   })
   .openapi("LogicGame");
 

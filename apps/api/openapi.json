@@ -499,6 +499,19 @@
                 }
               ]
             }
+          },
+          "solution": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            }
           }
         },
         "required": [

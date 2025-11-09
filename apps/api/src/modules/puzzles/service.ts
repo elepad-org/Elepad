@@ -395,6 +395,7 @@ export class PuzzleService {
 
     // Convertir tiles a formato [tipo, rotación, tipo, rotación, ...]
     const startState: number[] = [];
+    const solution: number[] = []; // Guardar la solución (rotaciones correctas)
 
     for (let i = 0; i < totalTiles; i++) {
       const tileBits = tiles[i];
@@ -435,11 +436,13 @@ export class PuzzleService {
         else correctRotation = 270;
       } else {
         type = 3;
-        correctRotation = 0;
+        correctRotation = 270;
       }
 
-      // Guardar la solución (rotación correcta)
-      // Luego rotar aleatoriamente para el puzzle
+      // Guardar la solución (rotación correcta) antes de mezclar
+      solution.push(type, correctRotation);
+
+      // Luego rotar aleatoriamente para el puzzle inicial
       const randomRotations: Rotation[] = [0, 90, 180, 270];
       const randomRotation =
         randomRotations[Math.floor(Math.random() * randomRotations.length)];
@@ -472,6 +475,7 @@ export class PuzzleService {
         rows: size,
         cols: size,
         startState,
+        solution, // Agregar la solución
       })
       .select()
       .single();

@@ -83,6 +83,7 @@ export const useNetGame = ({
     Math.floor((gridSize * gridSize) / 2),
   );
   const [isSolvedAutomatically, setIsSolvedAutomatically] = useState(false);
+  const [solution, setSolution] = useState<number[]>([]); // Guardar la solución del backend
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<number | null>(null);
@@ -145,7 +146,12 @@ export const useNetGame = ({
 
       const { puzzle, logicGame } = responseData as {
         puzzle: { id: string };
-        logicGame: { startState: number[]; rows: number; cols: number };
+        logicGame: {
+          startState: number[];
+          solution?: number[];
+          rows: number;
+          cols: number;
+        };
       };
 
       if (!logicGame) {
@@ -156,7 +162,14 @@ export const useNetGame = ({
       console.log("✅ Puzzle NET creado exitosamente:", puzzle.id);
       setPuzzleId(puzzle.id);
 
-      const { startState, rows, cols } = logicGame;
+      const { startState, solution: solutionData, rows, cols } = logicGame;
+
+      // Guardar la solución si está disponible
+      if (solutionData && solutionData.length > 0) {
+        setSolution(solutionData);
+        console.log("💡 Solución guardada:", solutionData.length / 2, "tiles");
+      }
+
       const newTiles: Tile[] = [];
 
       for (let i = 0; i < rows * cols; i++) {
@@ -546,11 +559,30 @@ export const useNetGame = ({
   }, [initializeGame]);
 
   const solveGame = useCallback(() => {
-    console.warn(
-      "⚠️ Función de resolver automáticamente no disponible con backend",
-    );
+    if (!solution || solution.length === 0) {
+      console.warn("⚠️ No hay solución disponible del backend");
+      return;
+    }
+
+    console.log("🔍 Aplicando solución del backend...");
+
+    setTiles((prevTiles) => {
+      const solvedTiles = prevTiles.map((tile, index) => {
+        // Obtener la rotación correcta de la solución
+        const correctRotation = solution[index * 2 + 1] as Rotation;
+
+        return {
+          ...tile,
+          rotation: correctRotation,
+        };
+      });
+
+      return solvedTiles;
+    });
+
     setIsSolvedAutomatically(true);
-  }, []);
+    console.log("✅ Solución aplicada correctamente");
+  }, [solution]);
 
   const connectedTiles = tiles.filter(
     (tile) => tile.type !== "empty" && tile.isConnected,

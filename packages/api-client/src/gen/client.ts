@@ -194,6 +194,8 @@ export type MemoryGame = {
 
 export type LogicGameStartStateItem = number | boolean;
 
+export type LogicGameSolutionItem = number | boolean;
+
 /**
  * @nullable
  */
@@ -202,6 +204,7 @@ export type LogicGame = {
   rows: number;
   cols: number;
   startState: LogicGameStartStateItem[];
+  solution?: LogicGameSolutionItem[];
 } | null;
 
 /**
