@@ -104,7 +104,9 @@ export default function NuevoRecuerdoDialogComponent({
         )}
         {selectedTipo === "texto" && (
           <TextNoteComponent
-            onSaveText={(titulo, contenido) => onSave({ contenido, titulo })}
+            onSaveText={(titulo, contenido) =>
+              onSave({ contenido, titulo, caption: contenido })
+            }
             onCancel={onCancel}
             isUploading={isUploading}
           />

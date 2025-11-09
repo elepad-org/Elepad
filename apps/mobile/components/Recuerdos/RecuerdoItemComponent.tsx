@@ -144,7 +144,7 @@ export default function RecuerdoItemComponent({
             { backgroundColor: COLORS.accent, flex: 1, padding: 12 },
           ]}
         >
-          <IconButton icon="text" size={24} iconColor={COLORS.primary} />
+          <IconButton icon="text" size={32} iconColor={COLORS.textSecondary} />
           <Text
             numberOfLines={3}
             style={[STYLES.footerText, { textAlign: "center", marginTop: 4 }]}

@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { View, Image, Dimensions, StyleSheet } from "react-native";
-import { Dialog, Portal, Text, IconButton, Button } from "react-native-paper";
+import { View, Image, Dimensions } from "react-native";
+import { Dialog, Portal, Text, IconButton } from "react-native-paper";
 import { COLORS, STYLES, FONT } from "@/styles/base";
 import { useAudioPlayer } from "expo-audio";
 import { Video, ResizeMode } from "expo-av";
 import Slider from "@react-native-community/slider";
-import CancelButton from "@/components/shared/CancelButton";
 
 type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
 
@@ -38,7 +37,6 @@ export default function RecuerdoDetailDialog({
   const audioUrl = recuerdo?.tipo === "audio" ? recuerdo.contenido : "";
   const player = useAudioPlayer(audioUrl);
   const videoRef = useRef<Video>(null);
-  const [videoStatus, setVideoStatus] = useState<any>({});
 
   // Resetear el player cuando se abre el modal
   useEffect(() => {
@@ -79,7 +77,7 @@ export default function RecuerdoDetailDialog({
             player.pause();
           }
           player.seekTo(0);
-        } catch (error) {
+        } catch {
           console.log("Player already cleaned up");
         }
       }
@@ -238,9 +236,6 @@ export default function RecuerdoDetailDialog({
                   useNativeControls
                   resizeMode={ResizeMode.CONTAIN}
                   isLooping={false}
-                  onPlaybackStatusUpdate={(status) =>
-                    setVideoStatus(() => status)
-                  }
                 />
               </View>
 
@@ -289,21 +284,8 @@ export default function RecuerdoDetailDialog({
 
           {recuerdo.tipo === "texto" && (
             <View>
-              <View
-                style={{
-                  backgroundColor: COLORS.accent,
-                  padding: 20,
-                  paddingTop: 30,
-                  borderTopLeftRadius: 16,
-                  borderTopRightRadius: 16,
-                  minHeight: 180,
-                }}
-              >
-                <Text style={STYLES.paragraphText}>{recuerdo.contenido}</Text>
-              </View>
-
-              {/* Información debajo del texto */}
-              <View style={{ padding: 20, paddingTop: 16 }}>
+              {/* Información de la nota */}
+              <View style={{ padding: 20, paddingTop: 20 }}>
                 {recuerdo.titulo && (
                   <Text style={{ ...STYLES.heading, textAlign: "left" }}>
                     {recuerdo.titulo}

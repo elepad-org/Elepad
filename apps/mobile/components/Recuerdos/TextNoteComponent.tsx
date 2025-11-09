@@ -15,11 +15,12 @@ export default function TextNoteComponent({
   onCancel,
   isUploading = false,
 }: TextNoteProps) {
+  const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
   const handleSubmit = () => {
-    if (content.trim()) {
-      onSaveText("Nueva nota", content);
+    if (title.trim() && content.trim()) {
+      onSaveText(title, content);
     }
   };
 
@@ -31,21 +32,35 @@ export default function TextNoteComponent({
         borderRadius: 20,
       }}
     >
-      <Text style={STYLES.heading}>Nueva nota</Text>
+      <Text style={STYLES.heading}>Detalles del recuerdo</Text>
       <Text style={{ ...STYLES.subheading, marginBottom: 16 }}>
-        Escribe tu nota o recordatorio
+        Agrega un título y descripción
       </Text>
 
       <TextInput
-        value={content}
-        onChangeText={setContent}
-        style={{ marginBottom: 20, height: 120, borderRadius: 20 }}
-        multiline={true}
-        numberOfLines={6}
+        label="Título"
+        value={title}
+        onChangeText={setTitle}
+        style={{ marginBottom: 12 }}
         mode="outlined"
         outlineColor={COLORS.border}
         activeOutlineColor={COLORS.primary}
-        placeholder="Escribe aquí tu nota..."
+        placeholder="Ej: Recordatorio importante"
+        disabled={isUploading}
+      />
+
+      <TextInput
+        label="Descripción"
+        value={content}
+        onChangeText={setContent}
+        style={{ marginBottom: 20 }}
+        mode="outlined"
+        outlineColor={COLORS.border}
+        activeOutlineColor={COLORS.primary}
+        placeholder="Describe tu recuerdo..."
+        multiline={true}
+        numberOfLines={3}
+        disabled={isUploading}
       />
 
       <View
@@ -58,8 +73,8 @@ export default function TextNoteComponent({
         <CancelButton onPress={onCancel} disabled={isUploading} />
         <CancelButton
           onPress={handleSubmit}
-          text={isUploading ? "Subiendo..." : "Aceptar"}
-          disabled={!content.trim() || isUploading}
+          text={isUploading ? "Guardando..." : "Guardar"}
+          disabled={!title.trim() || !content.trim() || isUploading}
         />
       </View>
     </View>
