@@ -3,6 +3,7 @@ import { View, StyleSheet, ScrollView } from "react-native";
 import { Text, Button, Card } from "react-native-paper";
 import { NetTile } from "./NetTile";
 import { useNetGame } from "@/hooks/useNetGame";
+import { GameLoadingView } from "@/components/shared";
 import { COLORS } from "@/styles/base";
 
 interface NetGameBoardProps {
@@ -80,13 +81,7 @@ export const NetGameBoard: React.FC<NetGameBoardProps> = ({
 
   // Mostrar indicador de carga
   if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text variant="headlineSmall" style={styles.loadingText}>
-          Generando tablero...
-        </Text>
-      </View>
-    );
+    return <GameLoadingView message="Preparando el juego..." />;
   }
 
   return (
@@ -183,16 +178,6 @@ export const NetGameBoard: React.FC<NetGameBoardProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  loadingText: {
-    color: COLORS.text,
-    marginTop: 16,
   },
   statsCard: {
     marginBottom: 12,

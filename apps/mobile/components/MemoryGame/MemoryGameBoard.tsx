@@ -1,8 +1,9 @@
 import React from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
-import { Text, Button, Card, ActivityIndicator } from "react-native-paper";
+import { Text, Button, Card } from "react-native-paper";
 import { MemoryCard } from "./MemoryCard";
 import { useMemoryGame } from "@/hooks/useMemoryGame";
+import { GameLoadingView } from "@/components/shared";
 import { COLORS } from "@/styles/base";
 
 interface MemoryGameBoardProps {
@@ -146,6 +147,11 @@ export const MemoryGameBoard: React.FC<MemoryGameBoardProps> = ({
     }
   }, [stats.isComplete]);
 
+  // Mostrar loading a pantalla completa (igual que NET)
+  if (isLoading) {
+    return <GameLoadingView message="Preparando el juego..." />;
+  }
+
   return (
     <View style={styles.container}>
       {/* Estadísticas */}
@@ -177,26 +183,17 @@ export const MemoryGameBoard: React.FC<MemoryGameBoardProps> = ({
       >
         <View style={styles.boardContainer}>
           <View style={styles.board}>
-            {isLoading ? (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={COLORS.primary} />
-                <Text variant="bodyLarge" style={styles.loadingText}>
-                  Preparando el juego...
-                </Text>
-              </View>
-            ) : (
-              cards.map((card) => (
-                <MemoryCard
-                  key={card.id}
-                  id={card.id}
-                  symbol={card.symbol}
-                  state={card.state}
-                  onPress={() => flipCard(card.id)}
-                  disabled={isProcessing}
-                  mode={mode}
-                />
-              ))
-            )}
+            {cards.map((card) => (
+              <MemoryCard
+                key={card.id}
+                id={card.id}
+                symbol={card.symbol}
+                state={card.state}
+                onPress={() => flipCard(card.id)}
+                disabled={isProcessing}
+                mode={mode}
+              />
+            ))}
           </View>
         </View>
       </ScrollView>
@@ -271,17 +268,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     minHeight: 400,
     width: "100%",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-    paddingVertical: 80,
-  },
-  loadingText: {
-    marginTop: 16,
-    color: COLORS.textSecondary,
   },
   controls: {
     flexDirection: "row",

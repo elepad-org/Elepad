@@ -135,6 +135,14 @@ export interface Memory {
   createdAt: string;
 }
 
+export interface CreateNote {
+  bookId: string;
+  groupId: string;
+  /** @minLength 1 */
+  title: string;
+  caption?: string;
+}
+
 export interface Frequency {
   id: string;
   /** @minLength 1 */
@@ -3509,6 +3517,126 @@ export const useCreateMemoryWithMedia = <
   TContext
 > => {
   const mutationOptions = getCreateMemoryWithMediaMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+
+export type createNoteResponse201 = {
+  data: Memory;
+  status: 201;
+};
+
+export type createNoteResponse400 = {
+  data: Error;
+  status: 400;
+};
+
+export type createNoteResponse401 = {
+  data: Error;
+  status: 401;
+};
+
+export type createNoteResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type createNoteResponseSuccess = createNoteResponse201 & {
+  headers: Headers;
+};
+export type createNoteResponseError = (
+  | createNoteResponse400
+  | createNoteResponse401
+  | createNoteResponse500
+) & {
+  headers: Headers;
+};
+
+export type createNoteResponse =
+  | createNoteResponseSuccess
+  | createNoteResponseError;
+
+export const getCreateNoteUrl = () => {
+  return `/memories/note`;
+};
+
+export const createNote = async (
+  createNote: CreateNote,
+  options?: RequestInit,
+): Promise<createNoteResponse> => {
+  return rnFetch<createNoteResponse>(getCreateNoteUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createNote),
+  });
+};
+
+export const getCreateNoteMutationOptions = <
+  TError = Error | Error | Error,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createNote>>,
+    TError,
+    { data: CreateNote },
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createNote>>,
+  TError,
+  { data: CreateNote },
+  TContext
+> => {
+  const mutationKey = ["createNote"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createNote>>,
+    { data: CreateNote }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createNote(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateNoteMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createNote>>
+>;
+export type CreateNoteMutationBody = CreateNote;
+export type CreateNoteMutationError = Error | Error | Error;
+
+export const useCreateNote = <
+  TError = Error | Error | Error,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createNote>>,
+      TError,
+      { data: CreateNote },
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createNote>>,
+  TError,
+  { data: CreateNote },
+  TContext
+> => {
+  const mutationOptions = getCreateNoteMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };
