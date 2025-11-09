@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { View, StyleSheet, StatusBar } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text, Portal, Dialog, Button } from "react-native-paper";
+import { Text, Portal, Dialog, Button, Snackbar } from "react-native-paper";
 import { router, Stack } from "expo-router";
 import { NetGameBoard } from "@/components/NetGame/NetGameBoard";
 import { GameHeader } from "@/components/shared/GameHeader";
@@ -12,11 +12,19 @@ export default function NetGameScreen() {
   const [showQuitDialog, setShowQuitDialog] = useState(false);
   const [showResultsDialog, setShowResultsDialog] = useState(false);
   const [showHelpDialog, setShowHelpDialog] = useState(false);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
   const [wasSolvedAutomatically, setWasSolvedAutomatically] = useState(false);
   const [gameResults, setGameResults] = useState<{
     moves: number;
     timeElapsed: number;
     score?: number;
+    achievements?: Array<{
+      id: string;
+      title: string;
+      icon?: string;
+      description?: string;
+    }>;
   } | null>(null);
 
   const handleQuit = useCallback(() => {
@@ -42,6 +50,22 @@ export default function NetGameScreen() {
       );
 
       return finalScore;
+    },
+    [],
+  );
+
+  const handleAchievementUnlocked = useCallback(
+    (achievement: {
+      id: string;
+      title: string;
+      icon?: string;
+      description?: string;
+    }) => {
+      const icon = achievement.icon || "🏆";
+      const message = `${icon} ¡Logro desbloqueado! ${achievement.title}`;
+      console.log("🎉 Mostrando toast de logro:", message);
+      setSnackbarMessage(message);
+      setSnackbarVisible(true);
     },
     [],
   );
@@ -107,7 +131,26 @@ export default function NetGameScreen() {
             gridSize={5}
             onQuit={handleQuit}
             onComplete={handleComplete}
+            onAchievementUnlocked={handleAchievementUnlocked}
           />
+
+          {/* Toast de logro desbloqueado */}
+          <Snackbar
+            visible={snackbarVisible}
+            onDismiss={() => setSnackbarVisible(false)}
+            duration={3000}
+            style={styles.achievementSnackbar}
+            action={{
+              label: "Ver",
+              onPress: () => {
+                setSnackbarVisible(false);
+                setShowResultsDialog(true);
+              },
+              labelStyle: { color: "#FFF" },
+            }}
+          >
+            <Text style={styles.snackbarText}>{snackbarMessage}</Text>
+          </Snackbar>
 
           {/* Diálogo de confirmación para salir */}
           <Portal>
@@ -369,6 +412,17 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 0, // Sin padding horizontal para que el tablero ocupe todo el ancho
     paddingVertical: 16,
+  },
+  achievementSnackbar: {
+    backgroundColor: "#7C3AED", // Violeta hermoso
+    marginBottom: 16,
+    borderRadius: 12,
+    elevation: 8,
+  },
+  snackbarText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
   },
   dialogTitle: {
     textAlign: "center",

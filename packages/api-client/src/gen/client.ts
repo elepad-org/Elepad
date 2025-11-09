@@ -241,6 +241,20 @@ export interface NewMemoryPuzzle {
   cols?: number;
 }
 
+export interface NewNetPuzzle {
+  title?: string;
+  /**
+   * @minimum 1
+   * @maximum 5
+   */
+  difficulty?: number;
+  /**
+   * @minimum 3
+   * @maximum 7
+   */
+  gridSize?: number;
+}
+
 export interface StartAttempt {
   puzzleId: string;
   gameType: GameType;
@@ -4934,6 +4948,117 @@ export const usePostPuzzlesMemory = <
   TContext
 > => {
   const mutationOptions = getPostPuzzlesMemoryMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+
+export type postPuzzlesNetResponse201 = {
+  data: PuzzleWithDetails;
+  status: 201;
+};
+
+export type postPuzzlesNetResponse400 = {
+  data: Error;
+  status: 400;
+};
+
+export type postPuzzlesNetResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type postPuzzlesNetResponseSuccess = postPuzzlesNetResponse201 & {
+  headers: Headers;
+};
+export type postPuzzlesNetResponseError = (
+  | postPuzzlesNetResponse400
+  | postPuzzlesNetResponse500
+) & {
+  headers: Headers;
+};
+
+export type postPuzzlesNetResponse =
+  | postPuzzlesNetResponseSuccess
+  | postPuzzlesNetResponseError;
+
+export const getPostPuzzlesNetUrl = () => {
+  return `/puzzles/net`;
+};
+
+export const postPuzzlesNet = async (
+  newNetPuzzle: NewNetPuzzle,
+  options?: RequestInit,
+): Promise<postPuzzlesNetResponse> => {
+  return rnFetch<postPuzzlesNetResponse>(getPostPuzzlesNetUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(newNetPuzzle),
+  });
+};
+
+export const getPostPuzzlesNetMutationOptions = <
+  TError = Error | Error,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postPuzzlesNet>>,
+    TError,
+    { data: NewNetPuzzle },
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postPuzzlesNet>>,
+  TError,
+  { data: NewNetPuzzle },
+  TContext
+> => {
+  const mutationKey = ["postPuzzlesNet"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postPuzzlesNet>>,
+    { data: NewNetPuzzle }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postPuzzlesNet(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostPuzzlesNetMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postPuzzlesNet>>
+>;
+export type PostPuzzlesNetMutationBody = NewNetPuzzle;
+export type PostPuzzlesNetMutationError = Error | Error;
+
+export const usePostPuzzlesNet = <TError = Error | Error, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postPuzzlesNet>>,
+      TError,
+      { data: NewNetPuzzle },
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postPuzzlesNet>>,
+  TError,
+  { data: NewNetPuzzle },
+  TContext
+> => {
+  const mutationOptions = getPostPuzzlesNetMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };

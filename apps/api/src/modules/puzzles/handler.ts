@@ -4,6 +4,7 @@ import {
   PuzzleSchema,
   PuzzleWithDetailsSchema,
   NewMemoryPuzzleSchema,
+  NewNetPuzzleSchema,
   GameListItemSchema,
   GameTypeEnum,
 } from "./schema";
@@ -138,6 +139,48 @@ puzzlesApp.openapi(
       return c.json(puzzle, 201);
     } catch (error) {
       console.error("❌ Error creating puzzle:", error);
+      throw error;
+    }
+  },
+);
+
+// Crear un nuevo puzzle de NET
+puzzlesApp.openapi(
+  {
+    method: "post",
+    path: "/puzzles/net",
+    tags: ["puzzles"],
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: NewNetPuzzleSchema,
+          },
+        },
+        required: true,
+      },
+    },
+    responses: {
+      201: {
+        description: "Puzzle de NET creado",
+        content: { "application/json": { schema: PuzzleWithDetailsSchema } },
+      },
+      400: openApiErrorResponse("Datos inválidos"),
+      500: openApiErrorResponse("Error interno del servidor"),
+    },
+  },
+  async (c) => {
+    try {
+      console.log("🌐 POST /puzzles/net - Request received");
+      const body = c.req.valid("json");
+      console.log("📦 Request body:", body);
+
+      const puzzle = await c.var.puzzleService.createNetPuzzle(body);
+      console.log("✅ NET Puzzle created successfully:", puzzle.puzzle.id);
+
+      return c.json(puzzle, 201);
+    } catch (error) {
+      console.error("❌ Error creating NET puzzle:", error);
       throw error;
     }
   },

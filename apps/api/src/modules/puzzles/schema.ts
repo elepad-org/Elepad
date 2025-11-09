@@ -82,6 +82,17 @@ export const NewMemoryPuzzleSchema = z
 
 export type NewMemoryPuzzle = z.infer<typeof NewMemoryPuzzleSchema>;
 
+// Schema para crear un nuevo puzzle de NET
+export const NewNetPuzzleSchema = z
+  .object({
+    title: z.string().optional(),
+    difficulty: z.number().int().min(1).max(5).optional(),
+    gridSize: z.number().int().min(3).max(7).default(5),
+  })
+  .openapi("NewNetPuzzle");
+
+export type NewNetPuzzle = z.infer<typeof NewNetPuzzleSchema>;
+
 // Schema para listar juegos disponibles (agrupados por tipo)
 export const GameListItemSchema = z
   .object({

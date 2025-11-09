@@ -12,12 +12,19 @@ interface NetGameBoardProps {
     stats: { moves: number; timeElapsed: number },
     isSolvedAutomatically: boolean,
   ) => void;
+  onAchievementUnlocked?: (achievement: {
+    id: string;
+    title: string;
+    icon?: string;
+    description?: string;
+  }) => void;
 }
 
 export const NetGameBoard: React.FC<NetGameBoardProps> = ({
   gridSize,
   onQuit,
   onComplete,
+  onAchievementUnlocked,
 }) => {
   const {
     tiles,
@@ -28,8 +35,10 @@ export const NetGameBoard: React.FC<NetGameBoardProps> = ({
     stats,
     centerTile,
     isSolvedAutomatically,
+    isLoading,
   } = useNetGame({
     gridSize,
+    onAchievementUnlocked,
   });
 
   const hasCalledOnComplete = React.useRef(false);
@@ -68,6 +77,17 @@ export const NetGameBoard: React.FC<NetGameBoardProps> = ({
       hasCalledOnComplete.current = false;
     }
   }, [stats.isComplete]);
+
+  // Mostrar indicador de carga
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text variant="headlineSmall" style={styles.loadingText}>
+          Generando tablero...
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -163,6 +183,16 @@ export const NetGameBoard: React.FC<NetGameBoardProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  loadingText: {
+    color: COLORS.text,
+    marginTop: 16,
   },
   statsCard: {
     marginBottom: 12,
