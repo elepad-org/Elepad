@@ -402,80 +402,84 @@ export const useNetGame = ({
     }
   }, [puzzleId, attemptId, startAttempt]);
 
-  const handleFinishAttempt = useCallback(async () => {
-    if (
-      !attemptId ||
-      hasFinishedAttempt.current ||
-      isSolvedAutomatically ||
-      !startTimeRef.current
-    ) {
-      console.log("⏭️ Saltando finalización de intento");
-      return;
-    }
+  const handleFinishAttempt = useCallback(
+    async (wasAutoSolved: boolean = false) => {
+      if (!attemptId || hasFinishedAttempt.current || !startTimeRef.current) {
+        console.log("⏭️ Saltando finalización de intento");
+        return;
+      }
 
-    hasFinishedAttempt.current = true;
-    const endTime = Date.now();
-    const durationMs = endTime - startTimeRef.current;
-
-    try {
-      console.log("🏁 Finalizando intento:", {
-        attemptId,
-        moves,
-        durationMs,
-        success: true,
-      });
-
-      await finishAttempt.mutateAsync({
-        attemptId,
-        data: {
-          success: true,
-          moves,
-          durationMs,
-        },
-      });
-
-      console.log("✅ Intento finalizado exitosamente");
+      hasFinishedAttempt.current = true;
+      const endTime = Date.now();
+      const durationMs = endTime - startTimeRef.current;
 
       try {
-        console.log("🏆 Verificando logros para intento:", attemptId);
-        const achievementsResponse = await checkAchievements.mutateAsync({
+        console.log("🏁 Finalizando intento:", {
           attemptId,
+          moves,
+          durationMs,
+          success: true,
+          autoSolved: wasAutoSolved,
         });
 
-        const achievementsData =
-          "data" in achievementsResponse
-            ? achievementsResponse.data
-            : achievementsResponse;
-        const unlockedList = Array.isArray(achievementsData)
-          ? achievementsData
-          : (achievementsData as { unlocked?: UnlockedAchievement[] })
-              ?.unlocked || [];
+        await finishAttempt.mutateAsync({
+          attemptId,
+          data: {
+            success: true,
+            moves,
+            durationMs,
+            // Si fue resuelto automáticamente, forzar score a 0 y agregar meta
+            score: wasAutoSolved ? 0 : undefined, // El backend calculará el score si no se provee
+            meta: wasAutoSolved
+              ? { autoSolved: true, solvedAt: new Date().toISOString() }
+              : undefined,
+          },
+        });
 
-        if (unlockedList && unlockedList.length > 0) {
-          console.log("🎉 Logros desbloqueados:", unlockedList);
-          setUnlockedAchievements(unlockedList);
+        console.log("✅ Intento finalizado exitosamente");
 
-          unlockedList.forEach((achievement: UnlockedAchievement) => {
-            onAchievementUnlocked?.(achievement);
-          });
+        // Solo verificar logros si NO fue resuelto automáticamente
+        if (!wasAutoSolved) {
+          try {
+            console.log("🏆 Verificando logros para intento:", attemptId);
+            const achievementsResponse = await checkAchievements.mutateAsync({
+              attemptId,
+            });
+
+            const achievementsData =
+              "data" in achievementsResponse
+                ? achievementsResponse.data
+                : achievementsResponse;
+            const unlockedList = Array.isArray(achievementsData)
+              ? achievementsData
+              : (achievementsData as { unlocked?: UnlockedAchievement[] })
+                  ?.unlocked || [];
+
+            if (unlockedList && unlockedList.length > 0) {
+              console.log("🎉 Logros desbloqueados:", unlockedList);
+              setUnlockedAchievements(unlockedList);
+
+              unlockedList.forEach((achievement: UnlockedAchievement) => {
+                onAchievementUnlocked?.(achievement);
+              });
+            } else {
+              console.log("ℹ️ No se desbloquearon nuevos logros");
+            }
+          } catch (achError) {
+            console.error("❌ Error al verificar logros:", achError);
+          }
         } else {
-          console.log("ℹ️ No se desbloquearon nuevos logros");
+          console.log(
+            "⏭️ Saltando verificación de logros (juego resuelto automáticamente)",
+          );
         }
-      } catch (achError) {
-        console.error("❌ Error al verificar logros:", achError);
+      } catch (error) {
+        console.error("❌ Error al finalizar intento:", error);
+        hasFinishedAttempt.current = false;
       }
-    } catch (error) {
-      console.error("❌ Error al finalizar intento:", error);
-      hasFinishedAttempt.current = false;
-    }
-  }, [
-    attemptId,
-    moves,
-    isSolvedAutomatically,
-    finishAttempt,
-    checkAchievements,
-    onAchievementUnlocked,
-  ]);
+    },
+    [attemptId, moves, finishAttempt, checkAchievements, onAchievementUnlocked],
+  );
 
   useEffect(() => {
     if (tiles.length === 0) return;
@@ -495,7 +499,8 @@ export const useNetGame = ({
       }));
     });
 
-    if (isGameStarted && !isComplete) {
+    // Solo verificar completitud si el juego está activo y NO fue resuelto automáticamente
+    if (isGameStarted && !isComplete && !isSolvedAutomatically) {
       const complete = checkCompletion(tiles);
       if (complete) {
         setIsComplete(true);
@@ -503,7 +508,8 @@ export const useNetGame = ({
           clearInterval(timerRef.current);
           timerRef.current = null;
         }
-        handleFinishAttempt();
+        // Juego completado de forma natural (jugando normalmente)
+        handleFinishAttempt(false);
       }
     }
   }, [
@@ -511,6 +517,7 @@ export const useNetGame = ({
     centerTile,
     isGameStarted,
     isComplete,
+    isSolvedAutomatically, // Agregar esta dependencia
     calculateConnectedTiles,
     checkCompletion,
     handleFinishAttempt,
@@ -566,6 +573,13 @@ export const useNetGame = ({
 
     console.log("🔍 Aplicando solución del backend...");
 
+    // Verificar si hay un intento activo (el usuario ya empezó a jugar)
+    const hasActiveAttempt = attemptId !== null && !hasFinishedAttempt.current;
+
+    // Primero marcar como resuelto automáticamente
+    setIsSolvedAutomatically(true);
+
+    // Aplicar la solución a los tiles
     setTiles((prevTiles) => {
       const solvedTiles = prevTiles.map((tile, index) => {
         // Obtener la rotación correcta de la solución
@@ -580,9 +594,31 @@ export const useNetGame = ({
       return solvedTiles;
     });
 
-    setIsSolvedAutomatically(true);
+    // Marcar el juego como completo después de aplicar la solución
+    // Usamos un pequeño delay para que React termine de actualizar los tiles
+    setTimeout(() => {
+      console.log("✅ Juego completado automáticamente con la solución");
+      setIsComplete(true);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+
+      // Si hay un intento activo, finalizarlo con score 0 y meta
+      if (hasActiveAttempt) {
+        console.log(
+          "💾 Guardando intento con resolución automática (score: 0)",
+        );
+        handleFinishAttempt(true); // true = fue auto-resuelto
+      } else {
+        console.log(
+          "⏭️ No hay intento activo, no se guarda en la base de datos",
+        );
+      }
+    }, 150);
+
     console.log("✅ Solución aplicada correctamente");
-  }, [solution]);
+  }, [solution, attemptId, handleFinishAttempt]);
 
   const connectedTiles = tiles.filter(
     (tile) => tile.type !== "empty" && tile.isConnected,
