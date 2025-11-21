@@ -480,6 +480,12 @@ export type GetAttemptsParams = {
    * @maximum 100
    */
   limit?: number;
+  /**
+   * @minimum 0
+   * @nullable
+   */
+  offset?: number | null;
+  gameType?: GameType;
 };
 
 export type GetAttempts200Item = {

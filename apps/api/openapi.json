@@ -3071,6 +3071,25 @@
             "required": false,
             "name": "limit",
             "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "nullable": true,
+              "minimum": 0,
+              "default": 0
+            },
+            "required": false,
+            "name": "offset",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "$ref": "#/components/schemas/GameType"
+            },
+            "required": false,
+            "name": "gameType",
+            "in": "query"
           }
         ],
         "responses": {

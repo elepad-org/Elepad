@@ -144,6 +144,8 @@ attemptsApp.openapi(
     request: {
       query: z.object({
         limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+        offset: z.coerce.number().int().min(0).optional().default(0),
+        gameType: GameTypeEnum.optional(),
       }),
     },
     responses: {
@@ -157,9 +159,14 @@ attemptsApp.openapi(
     },
   },
   async (c) => {
-    const { limit } = c.req.valid("query");
+    const { limit, offset, gameType } = c.req.valid("query");
     const userId = c.var.user.id;
-    const attempts = await c.var.attemptService.listUserAttempts(userId, limit);
+    const attempts = await c.var.attemptService.listUserAttempts(
+      userId,
+      limit,
+      offset,
+      gameType as any,
+    );
     return c.json(attempts, 200);
   },
 );

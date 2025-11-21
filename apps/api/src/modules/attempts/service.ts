@@ -148,7 +148,12 @@ export class AttemptService {
   /**
    * Lista los intentos recientes de un usuario
    */
-  async listUserAttempts(userId: string, limit = 20) {
+  async listUserAttempts(
+    userId: string,
+    limit = 20,
+    offset = 0,
+    gameType?: Database["public"]["Enums"]["game_type"],
+  ) {
     let query = this.supabase
       .from("attempts")
       .select(
@@ -160,8 +165,21 @@ export class AttemptService {
       `,
       )
       .eq("userId", userId)
-      .order("startedAt", { ascending: false })
-      .limit(limit);
+      .order("startedAt", { ascending: false });
+
+    // Filter by gameType if provided
+    if (gameType === "memory") {
+      query = query.not("memoryPuzzleId", "is", null);
+    } else if (gameType === "logic") {
+      query = query.not("logicPuzzleId", "is", null);
+    } else if (gameType === "calculation") {
+      query = query.not("sudokuPuzzleId", "is", null);
+    }
+
+    // Apply range for pagination
+    const start = offset;
+    const end = offset + limit - 1;
+    query = (query as any).range(start, end);
 
     const { data, error } = await query;
 

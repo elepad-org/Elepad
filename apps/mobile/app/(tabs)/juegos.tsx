@@ -32,10 +32,23 @@ export default function JuegosScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={STYLES.container}>
-          {/* Título de la sección */}
-          <Text style={[STYLES.heading, { marginBottom: 16 }]}>
-            🧩 Juegos Mentales
-          </Text>
+          <View
+            style={{
+              width: "100%",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 12,
+            }}
+          >
+            <Text style={[STYLES.heading, { marginBottom: 0 }]}>
+              🧩 Juegos Mentales
+            </Text>
+            <Button mode="outlined" onPress={() => router.navigate("/history")}>
+              Historial
+            </Button>
+          </View>
+          <View style={{ height: 8 }} />
           <Text style={[STYLES.paragraphText, { marginBottom: 24 }]}>
             Entrena tu mente con nuestros juegos diseñados para estimular la
             memoria y las habilidades cognitivas.
@@ -82,6 +95,7 @@ export default function JuegosScreen() {
               >
                 Jugar Ahora
               </Button>
+              <View style={{ height: 8 }} />
             </Card.Content>
           </Card>
 
@@ -127,6 +141,7 @@ export default function JuegosScreen() {
               >
                 Jugar Ahora
               </Button>
+              <View style={{ height: 8 }} />
             </Card.Content>
           </Card>
 
