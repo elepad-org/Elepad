@@ -58,7 +58,7 @@ const server = serve({ fetch: app.fetch, port: Number(PORT) }, (info) => {
       if (error) {
         console.warn("⚠️ Error en el ping a Supabase", error.message);
       } else {
-        console.log("👍 Ping a Supabase exitoso");
+        console.log("🌐 Ping a Supabase exitoso");
       }
     })
     .catch((err) => {

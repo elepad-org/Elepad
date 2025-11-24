@@ -32,6 +32,6 @@
     "clean": {
       "cache": false
     },
-    "gen:types": {}
+    "gen": {}
   }
 }

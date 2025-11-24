@@ -154,6 +154,18 @@ Ahora:
 
 Si se desea trabajar desde el **devcontainer** configurado, se debe agregar `sudo` a algunos comandos de `supabase` ya que la CLI gestiona contenedores por fuera del contenedor.
 
+### 📲 Development Builds
+
+Expo Go es una app móvil que permite a los desarrolladores probar sus apps Expo sin necesidad de instalarlas en su dispositivo.
+La desventaja es que no se integra bien con servicios de autenticación como Google Sign-In.
+Como alternativa se pueden usar **development builds**, las cuales son más complejas de configurar pero funcionan como una app 100% nuestra, por lo que podemos configurar Google Sign-In.
+
+Utilizamos Expo EAS para construir nuestras [**developments builds**](https://expo.dev/accounts/elepad-org/projects/elepad/development-builds).
+Para ello es necesario configurar unas [variables de entorno](https://expo.dev/accounts/elepad-org/settings/environment-variables).
+Estas variables de entorno pueden variar según el entorno local de cada miembro del equipo (por ejemplo, la IP de `EXPO_PUBLIC_API_URL` va a ser distinta).
+Para que cada miembro pueda crear una dev build con sus propias variables de entorno, en EAS se define un environment distinto para cada uno.
+En `apps/mobile/eas.json` se definen las variables de entorno de cada environment (por ejemplo, `development-agustinbravop`).
+
 ### 📦 Despliegue Manual
 
 Para desplegar la aplicación a la nube por primera vez es necesario realizar algunos pasos a mano. Se asume que ya se tiene:

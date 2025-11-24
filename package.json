@@ -14,7 +14,7 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write . --list-different",
     "fix:mobile": "turbo run fix:mobile",
-    "gen:types": "turbo run gen:types",
+    "gen": "turbo run gen",
     "prepare": "husky"
   },
   "devDependencies": {

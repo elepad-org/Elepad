@@ -43,7 +43,9 @@
           "cameraPermission": "Permitir a Elepad usar la cámara para tomar una foto de perfil."
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-audio",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

@@ -38,7 +38,6 @@ jobs:
           EXPO_PUBLIC_API_URL: ${{ secrets.API_URL }}
           EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
-          EXPO_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
 
       - name: 🔧 Setup EAS
         uses: expo/expo-github-action@v8

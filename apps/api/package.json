@@ -16,6 +16,7 @@
     "lint": "eslint . && tsc --noEmit",
     "clean": "rm -rf dist",
     "format": "prettier --write .",
+    "gen": "npm run gen:openapi && npm run gen:types",
     "gen:openapi": "tsx src/emit-openapi.ts",
     "gen:types": "supabase gen types typescript --project-id sdnmoweppzszpxyggdyg > src/supabase-types.ts"
   },
