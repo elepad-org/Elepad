@@ -1,15 +1,26 @@
-import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { View, FlatList, ScrollView } from "react-native";
-import { Text, Card, ActivityIndicator, Chip } from "react-native-paper";
+import React, { useCallback, useEffect, useState } from "react";
+import { View, FlatList, SectionList, StyleSheet } from "react-native";
+import {
+  Text,
+  Card,
+  ActivityIndicator,
+  Chip,
+  Button,
+  ProgressBar,
+  useTheme,
+  Icon,
+  Avatar,
+} from "react-native-paper";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useLocalSearchParams, Stack } from "expo-router";
+import { Stack } from "expo-router";
 import {
   useGetAttemptsStatsGameType,
   GameType,
   getAttempts,
 } from "@elepad/api-client";
 import { Divider } from "react-native-paper";
-import { STYLES } from "@/styles/base";
+import { COLORS, STYLES } from "@/styles/base";
 import AttemptCard from "@/components/Historial/AttemptCard";
 
 const PAGE_SIZE = 50;
@@ -19,6 +30,7 @@ type Props = {
 };
 
 export default function HistoryScreen({ initialAttempts = [] }: Props) {
+  const theme = useTheme(); // Hook para usar colores del tema si faltan en COLORS
   const [selectedGame, setSelectedGame] = useState("all");
 
   const [attempts, setAttempts] = useState<any[]>(initialAttempts);
@@ -30,7 +42,6 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
 
   const gameTypes = Object.values(GameType) as string[];
 
-  //Puede hacerse mejor
   const gameTypesRender: Record<string, string> = {
     memory: "Memoria",
     logic: "Lógica",
@@ -46,17 +57,18 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
   const globalLoading = loading || statsLoading;
 
   const detectGameType = (a: any): string => {
-    if (!a) return "unknown";
     return (
-      (a.memoryPuzzleId && "memory") ||
-      (a.logicPuzzleId && "logic") ||
-      (a.sudokuPuzzleId && "calculation")
+      (a.memoryPuzzleId && "Memoria") ||
+      (a.logicPuzzleId && "Lógica") ||
+      (a.sudokuPuzzleId && "Cálculo") ||
+      (a.attentionPuzzleId && "Atención")
     );
   };
 
   const fetchPage = useCallback(
     async (pageOffset: number, append = true) => {
       if (append && !hasMore) return;
+
       try {
         pageOffset === 0 ? setLoading(true) : setLoadingMore(true);
 
@@ -64,12 +76,15 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
         if (selectedGame !== "all") params.gameType = selectedGame;
 
         const res = await getAttempts(params);
-        //console.log(res)
+        console.log(res);
 
-        if (Array.isArray(res) && res.length > 0) {
-          setAttempts((prev) => (append ? [...prev, ...res] : res));
-          setOffset(pageOffset + res.length);
-          setHasMore(res.length === PAGE_SIZE);
+        let items: any[] = [];
+        if (Array.isArray(res)) items = res;
+
+        if (items.length > 0) {
+          setAttempts((prev) => (append ? [...prev, ...items] : items));
+          setOffset(pageOffset + items.length);
+          setHasMore(items.length === PAGE_SIZE);
         } else {
           setHasMore(false);
         }
@@ -95,23 +110,185 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
     if (!loadingMore && hasMore) fetchPage(offset);
   };
 
-  const filteredAttempts = useMemo(() => {
-    if (selectedGame === "all") return attempts;
-    return attempts.filter((a) => detectGameType(a) === selectedGame);
-  }, [attempts, selectedGame]);
-  console.log(filteredAttempts);
-
-  const renderAttemptCard = (item: any) => <AttemptCard attempt={item} />;
-
-  const renderStatsCard = (stats: any) => (
-    <Card style={[{ marginBottom: 12 }]}>
-      <Card.Content>
-        <Text>Total intentos: {stats?.totalAttempts ?? "-"}</Text>
-        <Text>Intentos exitosos: {stats?.successfulAttempts ?? "-"}</Text>
-        <Text>Mejor puntaje: {stats?.bestScore ?? "-"}</Text>
-      </Card.Content>
-    </Card>
+  const renderAttemptCard = (item: any) => (
+    <AttemptCard attempt={item} gameType={detectGameType(item)} />
   );
+
+  // Estadisticas locales de c/ juego
+  const renderStatsCard = (stats: any) => {
+    const total = stats?.totalAttempts || 0;
+    const success = stats?.successfulAttempts || 0;
+    const best = stats?.bestScore ?? "-";
+
+    const successRate = total > 0 ? success / total : 0;
+    const successPercentage = Math.round(successRate * 100);
+
+    return (
+      <Card
+        style={[
+          styles.statsCard,
+          { backgroundColor: COLORS.backgroundSecondary },
+        ]}
+      >
+        <Card.Content>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 12,
+            }}
+          >
+            <MaterialCommunityIcons
+              name="chart-box-outline"
+              size={20}
+              color={COLORS.primary}
+            />
+            <Text
+              variant="titleSmall"
+              style={{
+                marginLeft: 8,
+                color: COLORS.primary,
+                fontWeight: "bold",
+              }}
+            >
+              RENDIMIENTO
+            </Text>
+          </View>
+
+          {/* Grid de KPIs */}
+          <View style={styles.kpiContainer}>
+            {/* KPI 1: Total partidas */}
+            <View style={styles.kpiItem}>
+              <Text variant="displaySmall" style={styles.kpiValue}>
+                {total}
+              </Text>
+              <Text variant="bodySmall" style={styles.kpiLabel}>
+                Partidas
+              </Text>
+            </View>
+
+            {/* KPI 2: Mejor Puntaje */}
+            <View style={styles.kpiItem}>
+              <View style={{ flexDirection: "row", alignItems: "baseline" }}>
+                <Text
+                  variant="displaySmall"
+                  style={[styles.kpiValue, { color: "#FBC02D" }]}
+                >
+                  {best}
+                </Text>
+              </View>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <MaterialCommunityIcons
+                  name="trophy-variant"
+                  size={12}
+                  color="#FBC02D"
+                  style={{ marginRight: 4 }}
+                />
+                <Text variant="bodySmall" style={styles.kpiLabel}>
+                  Récord
+                </Text>
+              </View>
+            </View>
+
+            {/* KPI 3: Tasa de Éxito */}
+            <View style={styles.kpiItem}>
+              <Text
+                variant="displaySmall"
+                style={[
+                  styles.kpiValue,
+                  {
+                    color:
+                      successRate > 0.5 ? COLORS.success : theme.colors.error,
+                  },
+                ]}
+              >
+                {successPercentage}%
+              </Text>
+              <Text variant="bodySmall" style={styles.kpiLabel}>
+                Éxito
+              </Text>
+            </View>
+          </View>
+
+          <Divider style={{ marginVertical: 12 }} />
+
+          {/* Barra de Progreso */}
+          <View>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginBottom: 6,
+              }}
+            >
+              <Text variant="labelSmall">Tasa de victorias</Text>
+              <Text variant="labelSmall">
+                {success}/{total}
+              </Text>
+            </View>
+            <ProgressBar
+              progress={successRate}
+              color={successRate > 0.5 ? COLORS.success : theme.colors.error}
+              style={{
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: theme.colors.surfaceVariant,
+              }}
+            />
+          </View>
+        </Card.Content>
+      </Card>
+    );
+  };
+
+  // Calcular estadísticas globales
+  const globalStats = statsQueries.reduce(
+    (acc, query) => {
+      const data = query.data;
+      console.log(data);
+      if (!data) return acc;
+      return {
+        //TODO: Arreglar tipos
+        totalAttempts: acc.totalAttempts + (data.totalAttempts || 0),
+        successfulAttempts:
+          acc.successfulAttempts + (data.successfulAttempts || 0),
+        // Para el puntaje se toma el máximo histórico de cualquier juego
+        bestScore: Math.max(acc.bestScore, data.bestScore || 0),
+      };
+    },
+    { totalAttempts: 0, successfulAttempts: 0, bestScore: 0 },
+  );
+
+  const statsToShow =
+    selectedGame === "all"
+      ? globalStats
+      : statsQueries[gameTypes.indexOf(selectedGame)]?.data;
+
+  const renderFooter = () => {
+    if (loadingMore) {
+      return (
+        <View style={{ paddingVertical: 20 }}>
+          <ActivityIndicator animating={true} />
+        </View>
+      );
+    }
+
+    if (hasMore && attempts.length > 0) {
+      return (
+        <View style={{ paddingVertical: 20, paddingHorizontal: 10 }}>
+          <Button
+            mode="contained"
+            onPress={loadMore}
+            style={{ backgroundColor: COLORS.primary }}
+          >
+            Mostrar más
+          </Button>
+        </View>
+      );
+    }
+
+    return <View style={{ height: 20 }} />;
+  };
 
   return (
     <SafeAreaView style={STYLES.safeArea}>
@@ -140,6 +317,12 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
           <Chip
             selected={selectedGame === "all"}
             onPress={() => setSelectedGame("all")}
+            style={
+              selectedGame === "all"
+                ? { backgroundColor: COLORS.success, borderColor: "#000" }
+                : { backgroundColor: COLORS.background, borderColor: "#000" }
+            }
+            textStyle={selectedGame === "all" ? { color: "#fff" } : undefined}
           >
             Todos
           </Chip>
@@ -148,74 +331,92 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
               key={gt}
               selected={selectedGame === gt}
               onPress={() => setSelectedGame(gt)}
+              style={
+                selectedGame === gt
+                  ? { backgroundColor: COLORS.success, borderColor: "#000" }
+                  : { backgroundColor: COLORS.background, borderColor: "#000" }
+              }
+              textStyle={selectedGame === gt ? { color: "#fff" } : undefined}
             >
               {gameTypesRender[gt]}
             </Chip>
           ))}
         </View>
 
-        {globalLoading && (
+        {globalLoading && !loadingMore && (
           <View style={STYLES.center}>
             <ActivityIndicator />
           </View>
         )}
-        <ScrollView>
-          {selectedGame !== "all" ? (
-            <>
-              {renderStatsCard(
-                statsQueries[gameTypes.indexOf(selectedGame)]?.data,
-              )}
 
-              <FlatList
-                data={attempts.filter(
-                  (a) => detectGameType(a) === selectedGame,
-                )}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => renderAttemptCard(item)}
-                onEndReachedThreshold={0.5}
-                onEndReached={loadMore}
-                ListFooterComponent={loadingMore ? <ActivityIndicator /> : null}
-              />
-            </>
-          ) : (
-            <>
-              {gameTypes.map((gt) => {
-                const gameAttempts = attempts.filter(
-                  (a) => detectGameType(a) === gt,
-                );
+        {globalLoading && !loadingMore && (
+          <View style={STYLES.center}>
+            <ActivityIndicator />
+          </View>
+        )}
 
-                return (
-                  <View key={gt} style={{ marginBottom: 16 }}>
-                    <Text style={[STYLES.subheading, { marginBottom: 8 }]}>
-                      {gameTypesRender[gt].toUpperCase()}
-                    </Text>
+        {/* Estadísticas */}
+        {renderStatsCard(statsToShow)}
+        <FlatList
+          data={attempts}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => renderAttemptCard(item)}
+          ListFooterComponent={renderFooter}
+          contentContainerStyle={{ paddingBottom: 20 }}
+        />
 
-                    {gameAttempts.length === 0 ? (
-                      <View
-                        style={{ alignItems: "center", paddingVertical: 24 }}
-                      >
-                        <Text style={STYLES.subheading}>
-                          No hay registro de partidas para este juego aún.
-                        </Text>
-                      </View>
-                    ) : (
-                      gameAttempts.map((item) => renderAttemptCard(item))
-                    )}
-
-                    <Divider style={{ marginTop: 10 }} />
-                  </View>
-                );
-              })}
-
-              {loadingMore && (
-                <View style={STYLES.center}>
-                  <ActivityIndicator />
-                </View>
-              )}
-            </>
-          )}
-        </ScrollView>
+        {/* Listado de intentos */}
+        {selectedGame !== "all" ? (
+          <>
+            <FlatList
+              data={attempts}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => renderAttemptCard(item)}
+              ListFooterComponent={renderFooter}
+              contentContainerStyle={{ paddingBottom: 20 }}
+            />
+          </>
+        ) : (
+          <FlatList
+            data={attempts}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => renderAttemptCard(item)}
+            ListFooterComponent={renderFooter}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          />
+        )}
       </View>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  statsCard: {
+    marginBottom: 16,
+    elevation: 2,
+    borderRadius: 12,
+    width: "80%",
+  },
+  kpiContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 4,
+  },
+  kpiItem: {
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+  },
+  kpiValue: {
+    fontWeight: "bold",
+    fontSize: 24, // Ajustado para que quepa bien
+    marginBottom: 2,
+  },
+  kpiLabel: {
+    opacity: 0.6,
+    textTransform: "uppercase",
+    fontSize: 10,
+    letterSpacing: 0.5,
+  },
+});
