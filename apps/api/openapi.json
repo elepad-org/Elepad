@@ -3295,7 +3295,7 @@
             "schema": {
               "$ref": "#/components/schemas/GameType"
             },
-            "required": false,
+            "required": true,
             "name": "gameType",
             "in": "path"
           }
@@ -3310,16 +3310,54 @@
                   "items": {
                     "type": "object",
                     "properties": {
-                      "id": {
-                        "type": "string"
+                      "achievement": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "icon": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "points": {
+                            "type": "number"
+                          },
+                          "gameType": {
+                            "$ref": "#/components/schemas/GameType"
+                          },
+                          "code": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "description",
+                          "icon",
+                          "points",
+                          "gameType",
+                          "code"
+                        ]
                       },
                       "unlocked": {
                         "type": "boolean"
+                      },
+                      "unlockedAt": {
+                        "type": "string",
+                        "nullable": true
                       }
                     },
                     "required": [
-                      "id",
-                      "unlocked"
+                      "achievement",
+                      "unlocked",
+                      "unlockedAt"
                     ]
                   }
                 }
@@ -3349,7 +3387,7 @@
             "schema": {
               "$ref": "#/components/schemas/GameType"
             },
-            "required": false,
+            "required": true,
             "name": "gameType",
             "in": "path"
           }

@@ -54,7 +54,7 @@ achievementsApp.openapi(
     path: "/achievements/user/{gameType}",
     tags: ["achievements"],
     request: {
-      params: z.object({ gameType: GameTypeEnum.optional() }),
+      params: z.object({ gameType: GameTypeEnum }),
     },
     responses: {
       200: {
@@ -63,7 +63,19 @@ achievementsApp.openapi(
         content: {
           "application/json": {
             schema: z.array(
-              z.object({ id: z.string(), unlocked: z.boolean() }),
+              z.object({
+                achievement: z.object({
+                  id: z.string(),
+                  title: z.string(),
+                  description: z.string(),
+                  icon: z.string().nullable(),
+                  points: z.number(),
+                  gameType: GameTypeEnum,
+                  code: z.string(),
+                }),
+                unlocked: z.boolean(),
+                unlockedAt: z.string().nullable(),
+              }),
             ),
           },
         },
@@ -79,11 +91,7 @@ achievementsApp.openapi(
         userId,
         gameType,
       );
-    const formatted = achievements.map((item) => ({
-      id: item.achievement.id,
-      unlocked: item.unlocked,
-    }));
-    return c.json(formatted, 200);
+    return c.json(achievements, 200);
   },
 );
 
@@ -94,7 +102,7 @@ achievementsApp.openapi(
     path: "/achievements/progress/{gameType}",
     tags: ["achievements"],
     request: {
-      params: z.object({ gameType: GameTypeEnum.optional() }),
+      params: z.object({ gameType: GameTypeEnum }),
     },
     responses: {
       200: {

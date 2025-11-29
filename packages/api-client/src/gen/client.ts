@@ -510,9 +510,22 @@ export type GetAchievementsGameType200Item = {
   title: string;
 };
 
-export type GetAchievementsUserGameType200Item = {
+export type GetAchievementsUserGameType200ItemAchievement = {
   id: string;
+  title: string;
+  description: string;
+  /** @nullable */
+  icon: string | null;
+  points: number;
+  gameType: GameType;
+  code: string;
+};
+
+export type GetAchievementsUserGameType200Item = {
+  achievement: GetAchievementsUserGameType200ItemAchievement;
   unlocked: boolean;
+  /** @nullable */
+  unlockedAt: string | null;
 };
 
 export type PostAchievementsCheckAttemptId200Item = {
@@ -6682,12 +6695,12 @@ export type getAchievementsUserGameTypeResponse =
   | getAchievementsUserGameTypeResponseSuccess
   | getAchievementsUserGameTypeResponseError;
 
-export const getGetAchievementsUserGameTypeUrl = (gameType?: GameType) => {
+export const getGetAchievementsUserGameTypeUrl = (gameType: GameType) => {
   return `/achievements/user/${gameType}`;
 };
 
 export const getAchievementsUserGameType = async (
-  gameType?: GameType,
+  gameType: GameType,
   options?: RequestInit,
 ): Promise<getAchievementsUserGameTypeResponse> => {
   return rnFetch<getAchievementsUserGameTypeResponse>(
@@ -6707,7 +6720,7 @@ export const getGetAchievementsUserGameTypeQueryOptions = <
   TData = Awaited<ReturnType<typeof getAchievementsUserGameType>>,
   TError = Error,
 >(
-  gameType?: GameType,
+  gameType: GameType,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -6750,7 +6763,7 @@ export function useGetAchievementsUserGameType<
   TData = Awaited<ReturnType<typeof getAchievementsUserGameType>>,
   TError = Error,
 >(
-  gameType: undefined | GameType,
+  gameType: GameType,
   options: {
     query: Partial<
       UseQueryOptions<
@@ -6777,7 +6790,7 @@ export function useGetAchievementsUserGameType<
   TData = Awaited<ReturnType<typeof getAchievementsUserGameType>>,
   TError = Error,
 >(
-  gameType?: GameType,
+  gameType: GameType,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -6804,7 +6817,7 @@ export function useGetAchievementsUserGameType<
   TData = Awaited<ReturnType<typeof getAchievementsUserGameType>>,
   TError = Error,
 >(
-  gameType?: GameType,
+  gameType: GameType,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -6824,7 +6837,7 @@ export function useGetAchievementsUserGameType<
   TData = Awaited<ReturnType<typeof getAchievementsUserGameType>>,
   TError = Error,
 >(
-  gameType?: GameType,
+  gameType: GameType,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -6877,12 +6890,12 @@ export type getAchievementsProgressGameTypeResponse =
   | getAchievementsProgressGameTypeResponseSuccess
   | getAchievementsProgressGameTypeResponseError;
 
-export const getGetAchievementsProgressGameTypeUrl = (gameType?: GameType) => {
+export const getGetAchievementsProgressGameTypeUrl = (gameType: GameType) => {
   return `/achievements/progress/${gameType}`;
 };
 
 export const getAchievementsProgressGameType = async (
-  gameType?: GameType,
+  gameType: GameType,
   options?: RequestInit,
 ): Promise<getAchievementsProgressGameTypeResponse> => {
   return rnFetch<getAchievementsProgressGameTypeResponse>(
@@ -6904,7 +6917,7 @@ export const getGetAchievementsProgressGameTypeQueryOptions = <
   TData = Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
   TError = Error,
 >(
-  gameType?: GameType,
+  gameType: GameType,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -6948,7 +6961,7 @@ export function useGetAchievementsProgressGameType<
   TData = Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
   TError = Error,
 >(
-  gameType: undefined | GameType,
+  gameType: GameType,
   options: {
     query: Partial<
       UseQueryOptions<
@@ -6975,7 +6988,7 @@ export function useGetAchievementsProgressGameType<
   TData = Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
   TError = Error,
 >(
-  gameType?: GameType,
+  gameType: GameType,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -7002,7 +7015,7 @@ export function useGetAchievementsProgressGameType<
   TData = Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
   TError = Error,
 >(
-  gameType?: GameType,
+  gameType: GameType,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -7022,7 +7035,7 @@ export function useGetAchievementsProgressGameType<
   TData = Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
   TError = Error,
 >(
-  gameType?: GameType,
+  gameType: GameType,
   options?: {
     query?: Partial<
       UseQueryOptions<

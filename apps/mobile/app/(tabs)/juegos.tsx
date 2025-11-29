@@ -96,6 +96,17 @@ export default function JuegosScreen() {
                 Jugar Ahora
               </Button>
               <View style={{ height: 8 }} />
+              <Button
+                mode="outlined"
+                onPress={() => router.push("/game-detail/memory")}
+                icon="information-outline"
+                style={{ width: "100%", borderColor: COLORS.primary }}
+                contentStyle={{ paddingVertical: 4 }}
+                textColor={COLORS.primary}
+              >
+                Ver detalles
+              </Button>
+              <View style={{ height: 8 }} />
             </Card.Content>
           </Card>
 
@@ -140,6 +151,17 @@ export default function JuegosScreen() {
                 contentStyle={{ paddingVertical: 4 }}
               >
                 Jugar Ahora
+              </Button>
+              <View style={{ height: 8 }} />
+              <Button
+                mode="outlined"
+                onPress={() => router.push("/game-detail/net")}
+                icon="information-outline"
+                style={{ width: "100%", borderColor: COLORS.primary }}
+                contentStyle={{ paddingVertical: 4 }}
+                textColor={COLORS.primary}
+              >
+                Ver detalles
               </Button>
               <View style={{ height: 8 }} />
             </Card.Content>
