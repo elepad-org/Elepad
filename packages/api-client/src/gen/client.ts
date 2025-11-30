@@ -163,8 +163,6 @@ export type GameType = (typeof GameType)[keyof typeof GameType];
 export const GameType = {
   memory: "memory",
   logic: "logic",
-  calculation: "calculation",
-  attention: "attention",
 } as const;
 
 export interface GameListItem {

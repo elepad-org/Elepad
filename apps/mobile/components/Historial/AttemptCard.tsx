@@ -84,11 +84,10 @@ export default function AttemptCard({ attempt, gameType }: Props) {
 
 const styles = StyleSheet.create({
   card: {
-    marginHorizontal: 10,
     marginBottom: 8,
     overflow: "hidden",
     elevation: 2,
-    width: 300,
+    width: "100%",
   },
   rowContainer: {
     flexDirection: "row",

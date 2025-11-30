@@ -159,12 +159,7 @@ export default function GameDetailScreen() {
   }
 
   const detectGameType = (a: any): string => {
-    return (
-      (a.memoryPuzzleId && "Memoria") ||
-      (a.logicPuzzleId && "Lógica") ||
-      (a.sudokuPuzzleId && "Cálculo") ||
-      (a.attentionPuzzleId && "Atención")
-    );
+    return (a.memoryPuzzleId && "Memoria") || (a.logicPuzzleId && "Lógica");
   };
 
   return (

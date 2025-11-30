@@ -388,9 +388,7 @@
         "type": "string",
         "enum": [
           "memory",
-          "logic",
-          "calculation",
-          "attention"
+          "logic"
         ]
       },
       "GameListItem": {

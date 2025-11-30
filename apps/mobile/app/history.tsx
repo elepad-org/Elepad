@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { View, FlatList, SectionList, StyleSheet } from "react-native";
 import {
   Text,
@@ -45,8 +45,6 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
   const gameTypesRender: Record<string, string> = {
     memory: "Memoria",
     logic: "Lógica",
-    calculation: "Cálculo",
-    attention: "Atención",
   };
 
   const statsQueries = gameTypes.map((gt) =>
@@ -57,12 +55,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
   const globalLoading = loading || statsLoading;
 
   const detectGameType = (a: any): string => {
-    return (
-      (a.memoryPuzzleId && "Memoria") ||
-      (a.logicPuzzleId && "Lógica") ||
-      (a.sudokuPuzzleId && "Cálculo") ||
-      (a.attentionPuzzleId && "Atención")
-    );
+    return (a.memoryPuzzleId && "Memoria") || (a.logicPuzzleId && "Lógica");
   };
 
   const fetchPage = useCallback(
@@ -241,28 +234,37 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
     );
   };
 
-  // Calcular estadísticas globales
-  const globalStats = statsQueries.reduce(
-    (acc, query) => {
-      const data = query.data;
-      console.log(data);
-      if (!data) return acc;
-      return {
-        //TODO: Arreglar tipos
-        totalAttempts: acc.totalAttempts + (data.totalAttempts || 0),
-        successfulAttempts:
-          acc.successfulAttempts + (data.successfulAttempts || 0),
-        // Para el puntaje se toma el máximo histórico de cualquier juego
-        bestScore: Math.max(acc.bestScore, data.bestScore || 0),
+  // Calcular estadísticas globales o por juego
+  const statsToShow = useMemo(() => {
+    if (selectedGame === "all") {
+      // Para "Todos", sumamos las estadísticas de cada tipo de juego
+      const result = statsQueries.reduce(
+        (acc, query, index) => {
+          const data = query.data;
+          console.log(`📊 Stats para ${gameTypes[index]}:`, data);
+          if (!data) return acc;
+          return {
+            totalAttempts: acc.totalAttempts + (data.totalAttempts || 0),
+            successfulAttempts:
+              acc.successfulAttempts + (data.successfulAttempts || 0),
+            bestScore: Math.max(acc.bestScore, data.bestScore || 0),
+          };
+        },
+        { totalAttempts: 0, successfulAttempts: 0, bestScore: 0 },
+      );
+      console.log("🎯 Stats globales calculadas:", result);
+      return result;
+    } else {
+      // Para un juego específico, usamos directamente sus estadísticas
+      const result = statsQueries[gameTypes.indexOf(selectedGame)]?.data || {
+        totalAttempts: 0,
+        successfulAttempts: 0,
+        bestScore: 0,
       };
-    },
-    { totalAttempts: 0, successfulAttempts: 0, bestScore: 0 },
-  );
-
-  const statsToShow =
-    selectedGame === "all"
-      ? globalStats
-      : statsQueries[gameTypes.indexOf(selectedGame)]?.data;
+      console.log(`🎮 Stats para ${selectedGame}:`, result);
+      return result;
+    }
+  }, [selectedGame, statsQueries]);
 
   const renderFooter = () => {
     if (loadingMore) {
@@ -292,7 +294,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
 
   return (
     <SafeAreaView style={STYLES.safeArea}>
-      <View style={STYLES.container}>
+      <View style={styles.fullWidthContainer}>
         <Stack.Screen options={{ headerShown: false }} />
         <View
           style={{
@@ -301,6 +303,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
             justifyContent: "space-between",
             alignItems: "center",
             marginBottom: 12,
+            paddingHorizontal: 16,
           }}
         >
           <Text style={[STYLES.heading, { marginBottom: 0 }]}> Historial</Text>
@@ -312,6 +315,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
             flexWrap: "wrap",
             gap: 8,
             marginVertical: 8,
+            paddingHorizontal: 16,
           }}
         >
           <Chip
@@ -349,53 +353,32 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
           </View>
         )}
 
-        {globalLoading && !loadingMore && (
-          <View style={STYLES.center}>
-            <ActivityIndicator />
-          </View>
-        )}
-
         {/* Estadísticas */}
-        {renderStatsCard(statsToShow)}
+        {!globalLoading && renderStatsCard(statsToShow)}
+
+        {/* Listado de intentos */}
         <FlatList
           data={attempts}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => renderAttemptCard(item)}
           ListFooterComponent={renderFooter}
-          contentContainerStyle={{ paddingBottom: 20 }}
+          contentContainerStyle={{ paddingBottom: 20, paddingHorizontal: 16 }}
         />
-
-        {/* Listado de intentos */}
-        {selectedGame !== "all" ? (
-          <>
-            <FlatList
-              data={attempts}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => renderAttemptCard(item)}
-              ListFooterComponent={renderFooter}
-              contentContainerStyle={{ paddingBottom: 20 }}
-            />
-          </>
-        ) : (
-          <FlatList
-            data={attempts}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => renderAttemptCard(item)}
-            ListFooterComponent={renderFooter}
-            contentContainerStyle={{ paddingBottom: 20 }}
-          />
-        )}
       </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  fullWidthContainer: {
+    flex: 1,
+    width: "100%",
+  },
   statsCard: {
     marginBottom: 16,
+    marginHorizontal: 16,
     elevation: 2,
     borderRadius: 12,
-    width: "80%",
   },
   kpiContainer: {
     flexDirection: "row",
