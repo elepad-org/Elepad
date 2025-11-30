@@ -7,7 +7,7 @@ import { COLORS } from "@/styles/base";
 interface GameHeaderProps {
   icon: string;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   onHelpPress?: () => void;
   iconColor?: string;
   useIconComponent?: boolean; // Si es true, usa Icon de Material, si no usa emoji
@@ -42,9 +42,11 @@ export const GameHeader: React.FC<GameHeaderProps> = ({
           {title}
         </Text>
       </View>
-      <Text variant="bodyMedium" style={styles.subtitle}>
-        {subtitle}
-      </Text>
+      {subtitle && (
+        <Text variant="bodyMedium" style={styles.subtitle}>
+          {subtitle}
+        </Text>
+      )}
       {onHelpPress && (
         <IconButton
           icon="help-circle-outline"

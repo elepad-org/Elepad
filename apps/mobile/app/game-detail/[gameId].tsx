@@ -22,59 +22,21 @@ import {
 import AttemptCard from "@/components/Historial/AttemptCard";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { GameHeader } from "@/components/shared/GameHeader";
+import { GAMES_INFO } from "@/constants/gamesInfo";
+import { GameInstructions } from "@/components/shared/GameInstructions";
 
 const GAMES_CONFIG: Record<
   string,
   {
-    title: string;
-    emoji: string;
-    iconName?: string;
-    iconColor?: string;
-    description: string;
-    rules: string[];
-    objective: string;
-    illustrationUrl: string;
     gameType: GameType;
     route: string;
   }
 > = {
   memory: {
-    title: "Juego de Memoria",
-    emoji: "🧠",
-    description:
-      "Un clásico juego de memoria donde debes encontrar todas las parejas de cartas iguales. Perfecta para entrenar tu memoria visual y concentración.",
-    rules: [
-      "Se muestran cartas boca abajo en el tablero",
-      "Debes voltear dos cartas por turno",
-      "Si las cartas coinciden, permanecen visibles",
-      "Si no coinciden, se vuelven a ocultar",
-      "Ganas cuando encuentras todas las parejas",
-      "Intenta completar el juego con el menor número de movimientos",
-    ],
-    objective:
-      "Encontrar todas las parejas de cartas iguales en el menor tiempo y con la menor cantidad de intentos posible.",
-    illustrationUrl: "https://picsum.photos/seed/memory/800/400",
     gameType: GameType.memory,
     route: "/memory-game",
   },
   net: {
-    title: "NET",
-    emoji: "🌐",
-    iconName: "lan",
-    iconColor: "#2196F3",
-    description:
-      "Un desafiante juego de lógica donde debes conectar toda la red girando las casillas. Perfecto para mejorar tu pensamiento espacial y habilidades de resolución de problemas.",
-    rules: [
-      "Cada casilla contiene un segmento de red",
-      "Toca una casilla para rotarla 90 grados",
-      "Conecta todas las piezas para formar una red completa",
-      "Todas las conexiones deben estar enlazadas",
-      "No debe haber piezas desconectadas",
-      "Completa el puzzle en el menor tiempo posible",
-    ],
-    objective:
-      "Rotar todas las piezas hasta formar una red completamente conectada sin segmentos sueltos.",
-    illustrationUrl: "https://picsum.photos/seed/network/800/400",
     gameType: GameType.logic,
     route: "/net-game",
   },
@@ -85,6 +47,7 @@ const PAGE_SIZE = 10;
 export default function GameDetailScreen() {
   const { gameId } = useLocalSearchParams<{ gameId: string }>();
   const gameConfig = GAMES_CONFIG[gameId as string];
+  const gameInfo = GAMES_INFO[gameId as string];
 
   const [attempts, setAttempts] = useState<any[]>([]);
   const [offset, setOffset] = useState<number>(0);
@@ -172,7 +135,7 @@ export default function GameDetailScreen() {
     fetchAttempts(0, false);
   };
 
-  if (!gameConfig) {
+  if (!gameConfig || !gameInfo) {
     return (
       <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
         <Stack.Screen
@@ -220,72 +183,26 @@ export default function GameDetailScreen() {
         <View style={STYLES.container}>
           {/* Header personalizado */}
           <GameHeader
-            icon={gameConfig.iconName || gameConfig.emoji}
-            title={gameConfig.title}
-            subtitle={gameConfig.description}
-            iconColor={gameConfig.iconColor}
-            useIconComponent={!!gameConfig.iconName}
+            icon={gameInfo.iconName || gameInfo.emoji}
+            title={gameInfo.title}
+            iconColor={gameInfo.iconColor}
+            useIconComponent={!!gameInfo.iconName}
           />
 
           {/* Información del Juego */}
           <Card style={[STYLES.titleCard, { marginBottom: 16 }]}>
             <Card.Content>
               <Text
-                variant="headlineMedium"
-                style={{
-                  fontWeight: "bold",
-                  color: COLORS.primary,
-                  marginBottom: 12,
-                }}
-              >
-                {gameConfig.title}
-              </Text>
-              <Text
                 variant="bodyLarge"
                 style={{ color: COLORS.text, marginBottom: 16 }}
               >
-                {gameConfig.description}
+                {gameInfo.description}
               </Text>
 
               <Divider style={{ marginVertical: 12 }} />
 
-              <Text
-                variant="titleMedium"
-                style={{
-                  fontWeight: "bold",
-                  color: COLORS.primary,
-                  marginBottom: 8,
-                }}
-              >
-                🎯 Objetivo
-              </Text>
-              <Text
-                variant="bodyMedium"
-                style={{ color: COLORS.text, marginBottom: 16 }}
-              >
-                {gameConfig.objective}
-              </Text>
-
-              <Divider style={{ marginVertical: 12 }} />
-
-              <Text
-                variant="titleMedium"
-                style={{
-                  fontWeight: "bold",
-                  color: COLORS.primary,
-                  marginBottom: 8,
-                }}
-              >
-                📋 Reglas
-              </Text>
-              {gameConfig.rules.map((rule, index) => (
-                <View key={index} style={styles.ruleItem}>
-                  <Text style={styles.ruleBullet}>•</Text>
-                  <Text variant="bodyMedium" style={styles.ruleText}>
-                    {rule}
-                  </Text>
-                </View>
-              ))}
+              {/* Usar el componente GameInstructions */}
+              <GameInstructions gameInfo={gameInfo} variant="card" />
             </Card.Content>
           </Card>
 
@@ -611,21 +528,6 @@ export default function GameDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  ruleItem: {
-    flexDirection: "row",
-    marginBottom: 8,
-    paddingLeft: 8,
-  },
-  ruleBullet: {
-    fontSize: 16,
-    marginRight: 8,
-    color: COLORS.primary,
-    fontWeight: "bold",
-  },
-  ruleText: {
-    flex: 1,
-    color: COLORS.text,
-  },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",

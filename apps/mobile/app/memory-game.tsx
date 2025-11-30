@@ -7,6 +7,8 @@ import { MemoryGameBoard } from "@/components/MemoryGame/MemoryGameBoard";
 import { GameHeader } from "@/components/shared/GameHeader";
 import { InstructionsDialog } from "@/components/shared/InstructionsDialog";
 import { COLORS } from "@/styles/base";
+import { GAMES_INFO } from "@/constants/gamesInfo";
+import { GameInstructions } from "@/components/shared/GameInstructions";
 
 type GameMode = "4x4" | "4x6";
 
@@ -229,129 +231,7 @@ export default function MemoryGameScreen() {
               onDismiss={() => setShowHelpDialog(false)}
               title="🎮 Cómo Jugar Memoria"
             >
-              <Text variant="titleMedium" style={styles.helpSectionTitle}>
-                🎯 Objetivo del Juego
-              </Text>
-              <Text variant="bodyMedium" style={styles.helpText}>
-                Encuentra todas las parejas de cartas idénticas en el menor
-                tiempo y con la menor cantidad de movimientos posible.
-              </Text>
-
-              <Text variant="titleMedium" style={styles.helpSectionTitle}>
-                🕹️ Cómo Jugar
-              </Text>
-              <View style={styles.helpListItem}>
-                <Text variant="bodyMedium" style={styles.helpBullet}>
-                  1.
-                </Text>
-                <Text variant="bodyMedium" style={styles.helpText}>
-                  <Text style={styles.helpBold}>Toca una carta</Text> para darle
-                  la vuelta y ver su símbolo
-                </Text>
-              </View>
-              <View style={styles.helpListItem}>
-                <Text variant="bodyMedium" style={styles.helpBullet}>
-                  2.
-                </Text>
-                <Text variant="bodyMedium" style={styles.helpText}>
-                  <Text style={styles.helpBold}>Toca otra carta</Text> para
-                  intentar encontrar su pareja
-                </Text>
-              </View>
-              <View style={styles.helpListItem}>
-                <Text variant="bodyMedium" style={styles.helpBullet}>
-                  3.
-                </Text>
-                <Text variant="bodyMedium" style={styles.helpText}>
-                  Si las cartas <Text style={styles.helpBold}>coinciden</Text>,
-                  se quedarán boca arriba
-                </Text>
-              </View>
-              <View style={styles.helpListItem}>
-                <Text variant="bodyMedium" style={styles.helpBullet}>
-                  4.
-                </Text>
-                <Text variant="bodyMedium" style={styles.helpText}>
-                  Si no coinciden, se voltearán automáticamente después de un
-                  momento
-                </Text>
-              </View>
-
-              <Text variant="titleMedium" style={styles.helpSectionTitle}>
-                🎨 Modos de Juego
-              </Text>
-              <View style={styles.helpListItem}>
-                <Text variant="bodyMedium" style={styles.helpBullet}>
-                  •
-                </Text>
-                <Text variant="bodyMedium" style={styles.helpText}>
-                  <Text style={styles.helpBold}>4x4 (Fácil)</Text>: 16 cartas, 8
-                  parejas - perfecto para principiantes
-                </Text>
-              </View>
-              <View style={styles.helpListItem}>
-                <Text variant="bodyMedium" style={styles.helpBullet}>
-                  •
-                </Text>
-                <Text variant="bodyMedium" style={styles.helpText}>
-                  <Text style={styles.helpBold}>4x6 (Difícil)</Text>: 24 cartas,
-                  12 parejas - para un desafío mayor
-                </Text>
-              </View>
-
-              <Text variant="titleMedium" style={styles.helpSectionTitle}>
-                🏆 Sistema de Puntuación
-              </Text>
-              <Text variant="bodyMedium" style={styles.helpText}>
-                Tu puntuación se calcula basándose en:
-              </Text>
-              <View style={styles.helpListItem}>
-                <Text variant="bodyMedium" style={styles.helpBullet}>
-                  •
-                </Text>
-                <Text variant="bodyMedium" style={styles.helpText}>
-                  <Text style={styles.helpBold}>Tiempo</Text>: Menos tiempo =
-                  más puntos
-                </Text>
-              </View>
-              <View style={styles.helpListItem}>
-                <Text variant="bodyMedium" style={styles.helpBullet}>
-                  •
-                </Text>
-                <Text variant="bodyMedium" style={styles.helpText}>
-                  <Text style={styles.helpBold}>Movimientos</Text>: Menos
-                  movimientos = más puntos
-                </Text>
-              </View>
-
-              <Text variant="titleMedium" style={styles.helpSectionTitle}>
-                💡 Consejos
-              </Text>
-              <View style={styles.helpListItem}>
-                <Text variant="bodyMedium" style={styles.helpBullet}>
-                  •
-                </Text>
-                <Text variant="bodyMedium" style={styles.helpText}>
-                  Intenta memorizar la posición de las cartas que ya volteaste
-                </Text>
-              </View>
-              <View style={styles.helpListItem}>
-                <Text variant="bodyMedium" style={styles.helpBullet}>
-                  •
-                </Text>
-                <Text variant="bodyMedium" style={styles.helpText}>
-                  Toma tu tiempo para recordar antes de hacer tu próximo
-                  movimiento
-                </Text>
-              </View>
-              <View style={styles.helpListItem}>
-                <Text variant="bodyMedium" style={styles.helpBullet}>
-                  •
-                </Text>
-                <Text variant="bodyMedium" style={styles.helpText}>
-                  Completa el juego para desbloquear logros especiales
-                </Text>
-              </View>
+              <GameInstructions gameInfo={GAMES_INFO.memory} variant="dialog" />
             </InstructionsDialog>
           </Portal>
 
@@ -631,31 +511,5 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "600",
-  },
-  helpSectionTitle: {
-    fontWeight: "bold",
-    color: COLORS.primary,
-    marginTop: 20,
-    marginBottom: 8,
-  },
-  helpText: {
-    color: COLORS.text,
-    lineHeight: 22,
-    marginBottom: 12,
-  },
-  helpListItem: {
-    flexDirection: "row",
-    marginBottom: 8,
-    paddingLeft: 8,
-  },
-  helpBullet: {
-    color: COLORS.primary,
-    fontWeight: "bold",
-    marginRight: 8,
-    width: 20,
-  },
-  helpBold: {
-    fontWeight: "bold",
-    color: COLORS.primary,
   },
 });
