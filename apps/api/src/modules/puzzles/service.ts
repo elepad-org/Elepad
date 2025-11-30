@@ -273,7 +273,7 @@ export class PuzzleService {
     // 0 = endpoint (1 conexión), 1 = straight (2 conexiones opuestas)
     // 2 = corner (2 conexiones adyacentes), 3 = t-junction (3 conexiones)
     type TileType = 0 | 1 | 2 | 3;
-    type Direction = 0 | 1 | 2 | 3; // 0=arriba, 1=derecha, 2=abajo, 3=izquierda
+    // Direction: 0=arriba, 1=derecha, 2=abajo, 3=izquierda
     type Rotation = 0 | 90 | 180 | 270;
 
     // Representación de direcciones como bits
@@ -338,13 +338,13 @@ export class PuzzleService {
     if (cy + 1 < size) centerDirections.push(D);
 
     const centerDir =
-      centerDirections[Math.floor(Math.random() * centerDirections.length)];
+      centerDirections[Math.floor(Math.random() * centerDirections.length)]!;
     possibilities.push({ x: cx, y: cy, direction: centerDir });
 
     // Algoritmo principal: construir árbol de expansión
     while (possibilities.length > 0) {
       const i = Math.floor(Math.random() * possibilities.length);
-      const { x: x1, y: y1, direction: d1 } = possibilities[i];
+      const { x: x1, y: y1, direction: d1 } = possibilities[i]!;
       possibilities.splice(i, 1);
 
       const neighbor = getNeighborCoords(x1, y1, d1);
@@ -445,7 +445,7 @@ export class PuzzleService {
       // Luego rotar aleatoriamente para el puzzle inicial
       const randomRotations: Rotation[] = [0, 90, 180, 270];
       const randomRotation =
-        randomRotations[Math.floor(Math.random() * randomRotations.length)];
+        randomRotations[Math.floor(Math.random() * randomRotations.length)]!;
 
       // startState almacena [tipo, rotaciónAleatoria] para cada tile
       startState.push(type, randomRotation);

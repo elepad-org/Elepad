@@ -1,7 +1,6 @@
 import { OpenAPIHono, z } from "@hono/zod-openapi";
 import { AttemptService } from "./service";
 import {
-  AttemptSchema,
   StartAttemptSchema,
   FinishAttemptSchema,
   AttemptStatsSchema,
@@ -217,7 +216,7 @@ attemptsApp.openapi(
       userId,
       limit,
       offset,
-      gameType as any,
+      gameType as "memory" | "logic" | undefined,
     );
     return c.json(attempts, 200);
   },

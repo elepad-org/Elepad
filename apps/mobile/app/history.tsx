@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState, useMemo } from "react";
-import { View, FlatList, SectionList, StyleSheet } from "react-native";
+import { View, FlatList, StyleSheet } from "react-native";
 import {
   Text,
   Card,
@@ -8,8 +8,6 @@ import {
   Button,
   ProgressBar,
   useTheme,
-  Icon,
-  Avatar,
 } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -25,22 +23,30 @@ import AttemptCard from "@/components/Historial/AttemptCard";
 
 const PAGE_SIZE = 50;
 
+interface Attempt {
+  id: string;
+  memoryPuzzleId?: string;
+  logicPuzzleId?: string;
+  success?: boolean;
+  score?: number;
+  startedAt?: string;
+}
+
 type Props = {
-  initialAttempts?: any[];
+  initialAttempts?: Attempt[];
 };
 
 export default function HistoryScreen({ initialAttempts = [] }: Props) {
   const theme = useTheme(); // Hook para usar colores del tema si faltan en COLORS
   const [selectedGame, setSelectedGame] = useState("all");
 
-  const [attempts, setAttempts] = useState<any[]>(initialAttempts);
+  const [attempts, setAttempts] = useState<Attempt[]>(initialAttempts);
   const [offset, setOffset] = useState<number>(initialAttempts.length);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
 
-  const gameTypes = Object.values(GameType) as string[];
+  const gameTypes = Object.values(GameType);
 
   const gameTypesRender: Record<string, string> = {
     memory: "Memoria",
@@ -48,14 +54,16 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
   };
 
   const statsQueries = gameTypes.map((gt) =>
-    useGetAttemptsStatsGameType(gt as any),
+    useGetAttemptsStatsGameType(gt as GameType),
   );
 
   const statsLoading = statsQueries.some((q) => q.isLoading);
   const globalLoading = loading || statsLoading;
 
-  const detectGameType = (a: any): string => {
-    return (a.memoryPuzzleId && "Memoria") || (a.logicPuzzleId && "Lógica");
+  const detectGameType = (a: Attempt): string => {
+    return (
+      (a.memoryPuzzleId && "Memoria") || (a.logicPuzzleId && "Lógica") || ""
+    );
   };
 
   const fetchPage = useCallback(
@@ -63,16 +71,24 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
       if (append && !hasMore) return;
 
       try {
-        pageOffset === 0 ? setLoading(true) : setLoadingMore(true);
+        if (pageOffset === 0) {
+          setLoading(true);
+        } else {
+          setLoadingMore(true);
+        }
 
-        const params: any = { limit: PAGE_SIZE, offset: pageOffset };
-        if (selectedGame !== "all") params.gameType = selectedGame;
+        const params: {
+          limit: number;
+          offset: number;
+          gameType?: GameType;
+        } = { limit: PAGE_SIZE, offset: pageOffset };
+        if (selectedGame !== "all") params.gameType = selectedGame as GameType;
 
         const res = await getAttempts(params);
         console.log(res);
 
-        let items: any[] = [];
-        if (Array.isArray(res)) items = res;
+        let items: Attempt[] = [];
+        if (Array.isArray(res)) items = res as Attempt[];
 
         if (items.length > 0) {
           setAttempts((prev) => (append ? [...prev, ...items] : items));
@@ -81,8 +97,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
         } else {
           setHasMore(false);
         }
-      } catch (e: any) {
-        setError(e);
+      } catch (e) {
         console.error(e);
       } finally {
         setLoading(false);
@@ -103,12 +118,16 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
     if (!loadingMore && hasMore) fetchPage(offset);
   };
 
-  const renderAttemptCard = (item: any) => (
+  const renderAttemptCard = (item: Attempt) => (
     <AttemptCard attempt={item} gameType={detectGameType(item)} />
   );
 
   // Estadisticas locales de c/ juego
-  const renderStatsCard = (stats: any) => {
+  const renderStatsCard = (stats: {
+    totalAttempts?: number;
+    successfulAttempts?: number;
+    bestScore?: number;
+  }) => {
     const total = stats?.totalAttempts || 0;
     const success = stats?.successfulAttempts || 0;
     const best = stats?.bestScore ?? "-";

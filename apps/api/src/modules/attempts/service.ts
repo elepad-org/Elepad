@@ -29,7 +29,6 @@ export class AttemptService {
       startedAt: new Date().toISOString(),
       memoryPuzzleId: gameType === "memory" ? puzzleId : null,
       logicPuzzleId: gameType === "logic" ? puzzleId : null,
-      sudokuPuzzleId: gameType === "calculation" ? puzzleId : null,
     };
 
     const { data: attempt, error: attemptError } = await this.supabase
@@ -179,7 +178,7 @@ export class AttemptService {
     // Apply range for pagination
     const start = offset;
     const end = offset + limit - 1;
-    query = (query as any).range(start, end);
+    query = query.range(start, end) as typeof query;
 
     const { data, error } = await query;
 

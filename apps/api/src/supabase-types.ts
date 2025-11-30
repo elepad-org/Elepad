@@ -278,19 +278,19 @@ export type Database = {
           cols: number;
           puzzleId: string;
           rows: number;
-          startState: boolean[];
+          startState: number[];
         };
         Insert: {
           cols: number;
           puzzleId: string;
           rows: number;
-          startState: boolean[];
+          startState: number[];
         };
         Update: {
           cols?: number;
           puzzleId?: string;
           rows?: number;
-          startState?: boolean[];
+          startState?: number[];
         };
         Relationships: [
           {
@@ -562,7 +562,7 @@ export type Database = {
       [_ in never]: never;
     };
     Enums: {
-      game_type: "memory" | "logic" | "calculation" | "attention";
+      game_type: "memory" | "logic";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -693,7 +693,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      game_type: ["memory", "logic", "calculation", "attention"],
+      game_type: ["memory", "logic"],
     },
   },
 } as const;

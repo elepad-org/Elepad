@@ -5,7 +5,13 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS } from "@/styles/base";
 
 type Props = {
-  attempt: any;
+  attempt: {
+    success?: boolean;
+    score?: number;
+    startedAt?: string;
+    durationMs?: number;
+    moves?: number;
+  };
   gameType: string;
 };
 

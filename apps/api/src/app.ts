@@ -33,13 +33,13 @@ if (typeof process !== "undefined" && process.env?.NODE_ENV === "development") {
       if (isHttps) {
         return fetch(url, {
           ...options,
-          // @ts-ignore
+          // @ts-expect-error - agent is not in the type definitions but works in Node.js
           agent,
         });
       }
       return fetch(url, options);
     };
-  } catch (e) {
+  } catch {
     // Si falla la importación (por ejemplo, en Cloudflare Workers), usar fetch normal
     customFetch = undefined;
   }

@@ -3,7 +3,6 @@ import {
   usePostPuzzlesNet,
   usePostAttemptsStart,
   usePostAttemptsAttemptIdFinish,
-  usePostAchievementsCheckAttemptId,
 } from "@elepad/api-client";
 
 export type TileType =
@@ -93,7 +92,6 @@ export const useNetGame = ({
   const createPuzzle = usePostPuzzlesNet();
   const startAttempt = usePostAttemptsStart();
   const finishAttempt = usePostAttemptsAttemptIdFinish();
-  const checkAchievements = usePostAchievementsCheckAttemptId();
 
   // Flag para evitar múltiples inicializaciones
   const hasInitialized = useRef(false);
@@ -452,9 +450,11 @@ export const useNetGame = ({
             finishResponse.unlockedAchievements as UnlockedAchievement[],
           );
 
-          finishResponse.unlockedAchievements.forEach((achievement: any) => {
-            onAchievementUnlocked?.(achievement);
-          });
+          finishResponse.unlockedAchievements.forEach(
+            (achievement: UnlockedAchievement) => {
+              onAchievementUnlocked?.(achievement);
+            },
+          );
         } else if (!wasAutoSolved) {
           console.log("ℹ️ No se desbloquearon nuevos logros");
         }

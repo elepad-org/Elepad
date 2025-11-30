@@ -32,7 +32,7 @@ const customFetch: typeof fetch = (url, options) => {
 
     return fetch(url, {
       ...options,
-      // @ts-ignore
+      // @ts-expect-error - agent is not in the type definitions but works in Node.js
       agent,
     });
   }

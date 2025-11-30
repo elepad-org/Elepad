@@ -153,7 +153,6 @@ export class AchievementService {
     let gameType: Database["public"]["Enums"]["game_type"] | null = null;
     if (attempt.memoryPuzzleId) gameType = "memory";
     else if (attempt.logicPuzzleId) gameType = "logic";
-    else if (attempt.sudokuPuzzleId) gameType = "calculation";
 
     if (!gameType) {
       console.log(`⚠️ No se pudo determinar el tipo de juego`);
@@ -225,11 +224,12 @@ export class AchievementService {
   /**
    * Obtiene el gameName del puzzle de un intento
    */
-  private async getPuzzleGameName(
-    attempt: Database["public"]["Tables"]["attempts"]["Row"],
-  ): Promise<string | null> {
-    const puzzleId =
-      attempt.memoryPuzzleId || attempt.logicPuzzleId || attempt.sudokuPuzzleId;
+  private async getPuzzleGameName(attempt: {
+    memoryPuzzleId: string | null;
+    logicPuzzleId: string | null;
+    sudokuPuzzleId: string | null;
+  }): Promise<string | null> {
+    const puzzleId = attempt.memoryPuzzleId || attempt.logicPuzzleId;
 
     if (!puzzleId) return null;
 
@@ -266,8 +266,6 @@ export class AchievementService {
       case "first_completion":
         // Si el logro es para un juego específico (ej: "net")
         if (condition.game) {
-          const gameName = await this.getPuzzleGameName(attempt);
-
           // Contar intentos previos exitosos del mismo juego específico
           const { data: prevAttempts } = await this.supabase
             .from("attempts")
@@ -304,8 +302,6 @@ export class AchievementService {
           previousQuery = previousQuery.not("memoryPuzzleId", "is", null);
         } else if (gameType === "logic" && attempt.logicPuzzleId) {
           previousQuery = previousQuery.not("logicPuzzleId", "is", null);
-        } else if (gameType === "calculation" && attempt.sudokuPuzzleId) {
-          previousQuery = previousQuery.not("sudokuPuzzleId", "is", null);
         }
 
         const { data: previousAttempts } = await previousQuery;
@@ -337,9 +333,6 @@ export class AchievementService {
       case "streak":
         const streakValue =
           typeof condition.value === "number" ? condition.value : 0;
-        const gameName = condition.game
-          ? await this.getPuzzleGameName(attempt)
-          : null;
 
         // Obtener los últimos N intentos (donde N = streakValue)
         let streakQuery = this.supabase
@@ -358,8 +351,6 @@ export class AchievementService {
             streakQuery = streakQuery.not("memoryPuzzleId", "is", null);
           } else if (gameType === "logic" && attempt.logicPuzzleId) {
             streakQuery = streakQuery.not("logicPuzzleId", "is", null);
-          } else if (gameType === "calculation" && attempt.sudokuPuzzleId) {
-            streakQuery = streakQuery.not("sudokuPuzzleId", "is", null);
           }
         }
 

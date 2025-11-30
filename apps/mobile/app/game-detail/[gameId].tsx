@@ -1,11 +1,10 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { StatusBar, ScrollView, View, Image, StyleSheet } from "react-native";
+import { StatusBar, ScrollView, View, StyleSheet } from "react-native";
 import {
   ActivityIndicator,
   Text,
   Card,
   Button,
-  Icon,
   Chip,
   Divider,
   Portal,
@@ -24,6 +23,26 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { GameHeader } from "@/components/shared/GameHeader";
 import { GAMES_INFO } from "@/constants/gamesInfo";
 import { GameInstructions } from "@/components/shared/GameInstructions";
+
+interface Achievement {
+  id: string;
+  icon?: string;
+  title: string;
+  description: string;
+  points?: number;
+}
+
+interface UserAchievement {
+  achievement: Achievement;
+  unlocked: boolean;
+  unlockedAt?: string;
+}
+
+interface Attempt {
+  id: string;
+  memoryPuzzleId?: string;
+  logicPuzzleId?: string;
+}
 
 const GAMES_CONFIG: Record<
   string,
@@ -49,13 +68,14 @@ export default function GameDetailScreen() {
   const gameConfig = GAMES_CONFIG[gameId as string];
   const gameInfo = GAMES_INFO[gameId as string];
 
-  const [attempts, setAttempts] = useState<any[]>([]);
+  const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [offset, setOffset] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [selectedAchievement, setSelectedAchievement] = useState<any>(null);
+  const [selectedAchievement, setSelectedAchievement] =
+    useState<UserAchievement | null>(null);
 
   // Obtener logros del juego
   const {
@@ -73,10 +93,12 @@ export default function GameDetailScreen() {
   console.log("⏳ Loading:", achievementsLoading);
   console.log("❌ Error:", achievementsError);
 
-  const achievementsArray = Array.isArray(achievementsData)
-    ? achievementsData
-    : achievementsData?.data || [];
-  const unlockedCount = achievementsArray.filter((a) => a.unlocked).length;
+  const achievementsArray: UserAchievement[] = Array.isArray(achievementsData)
+    ? (achievementsData as UserAchievement[])
+    : (achievementsData as { data?: UserAchievement[] })?.data || [];
+  const unlockedCount = achievementsArray.filter(
+    (a: UserAchievement) => a.unlocked,
+  ).length;
   const totalCount = achievementsArray.length;
 
   const fetchAttempts = useCallback(
@@ -85,18 +107,26 @@ export default function GameDetailScreen() {
       if (append && !hasMore) return;
 
       try {
-        pageOffset === 0 ? setLoading(true) : setLoadingMore(true);
+        if (pageOffset === 0) {
+          setLoading(true);
+        } else {
+          setLoadingMore(true);
+        }
         setError(null);
 
-        const params: any = {
+        const params: {
+          limit: number;
+          offset: number;
+          gameType: GameType;
+        } = {
           limit: PAGE_SIZE,
           offset: pageOffset,
           gameType: gameConfig.gameType,
         };
 
         const res = await getAttempts(params);
-        let items: any[] = [];
-        if (Array.isArray(res)) items = res;
+        let items: Attempt[] = [];
+        if (Array.isArray(res)) items = res as Attempt[];
 
         if (items.length > 0) {
           setAttempts((prev) => (append ? [...prev, ...items] : items));
@@ -105,8 +135,8 @@ export default function GameDetailScreen() {
         } else {
           setHasMore(false);
         }
-      } catch (e: any) {
-        setError(e);
+      } catch (e) {
+        setError(e instanceof Error ? e : new Error(String(e)));
         console.error("Error fetching attempts:", e);
       } finally {
         setLoading(false);
@@ -158,8 +188,10 @@ export default function GameDetailScreen() {
     );
   }
 
-  const detectGameType = (a: any): string => {
-    return (a.memoryPuzzleId && "Memoria") || (a.logicPuzzleId && "Lógica");
+  const detectGameType = (a: Attempt): string => {
+    return (
+      (a.memoryPuzzleId && "Memoria") || (a.logicPuzzleId && "Lógica") || ""
+    );
   };
 
   return (
@@ -204,7 +236,9 @@ export default function GameDetailScreen() {
           {/* Botón Jugar */}
           <Button
             mode="contained"
-            onPress={() => router.push(gameConfig.route as any)}
+            onPress={() =>
+              router.push(gameConfig.route as "/memory-game" | "/net-game")
+            }
             icon="play"
             buttonColor={COLORS.primary}
             style={{ marginBottom: 24 }}
@@ -277,7 +311,7 @@ export default function GameDetailScreen() {
                     </Text>
                   ) : (
                     <View style={styles.achievementsGrid}>
-                      {achievementsArray.map((achievement) => (
+                      {achievementsArray.map((achievement: UserAchievement) => (
                         <Card
                           key={achievement.achievement.id}
                           style={[

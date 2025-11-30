@@ -4,7 +4,6 @@ import {
   usePostPuzzlesMemory,
   usePostAttemptsStart,
   usePostAttemptsAttemptIdFinish,
-  usePostAchievementsCheckAttemptId,
 } from "@elepad/api-client";
 
 export interface Card {
@@ -71,7 +70,6 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
   const createPuzzle = usePostPuzzlesMemory();
   const startAttempt = usePostAttemptsStart();
   const finishAttempt = usePostAttemptsAttemptIdFinish();
-  const checkAchievements = usePostAchievementsCheckAttemptId();
 
   // Inicializar el tablero con persistencia
   const initializeGame = useCallback(async () => {
@@ -368,7 +366,7 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
               finishResponse.unlockedAchievements.length > 0
             ) {
               setUnlockedAchievements(
-                finishResponse.unlockedAchievements as any[],
+                finishResponse.unlockedAchievements as UnlockedAchievement[],
               );
               console.log(
                 "🏆 Logros desbloqueados:",
@@ -378,7 +376,7 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
 
               // Notificar cada logro desbloqueado
               finishResponse.unlockedAchievements.forEach(
-                (achievement: any) => {
+                (achievement: UnlockedAchievement) => {
                   onAchievementUnlocked?.(achievement);
                 },
               );
