@@ -350,7 +350,7 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
               Math.floor(1000 - durationSeconds * 5 - moves * 10),
             );
 
-            await finishAttempt.mutateAsync({
+            const finishResponse = await finishAttempt.mutateAsync({
               attemptId,
               data: {
                 success: true,
@@ -362,49 +362,28 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
 
             console.log("✅ Intento finalizado con score:", score);
 
-            // Verificar logros desbloqueados
-            try {
-              console.log("🔍 Verificando logros para attemptId:", attemptId);
-              const achievementsData = await checkAchievements.mutateAsync({
-                attemptId,
-              });
+            // El backend automáticamente verifica logros y los devuelve en la respuesta
+            if (
+              finishResponse.unlockedAchievements &&
+              finishResponse.unlockedAchievements.length > 0
+            ) {
+              setUnlockedAchievements(
+                finishResponse.unlockedAchievements as any[],
+              );
+              console.log(
+                "🏆 Logros desbloqueados:",
+                finishResponse.unlockedAchievements.length,
+                finishResponse.unlockedAchievements,
+              );
 
-              console.log("📦 Respuesta de logros:", achievementsData);
-
-              if (achievementsData) {
-                const responseData =
-                  "data" in achievementsData
-                    ? achievementsData.data
-                    : achievementsData;
-                console.log("📋 Datos procesados:", responseData);
-
-                const achievements = responseData as Array<{
-                  id: string;
-                  title: string;
-                  icon?: string;
-                  description?: string;
-                }>;
-
-                if (achievements && achievements.length > 0) {
-                  setUnlockedAchievements(achievements);
-                  console.log(
-                    "🏆 Logros desbloqueados:",
-                    achievements.length,
-                    achievements,
-                  );
-
-                  // Notificar cada logro desbloqueado
-                  achievements.forEach((achievement) => {
-                    onAchievementUnlocked?.(achievement);
-                  });
-                } else {
-                  console.log("ℹ️ No se desbloquearon logros nuevos");
-                }
-              } else {
-                console.log("⚠️ No hay datos de logros");
-              }
-            } catch (error) {
-              console.error("❌ Error checking achievements:", error);
+              // Notificar cada logro desbloqueado
+              finishResponse.unlockedAchievements.forEach(
+                (achievement: any) => {
+                  onAchievementUnlocked?.(achievement);
+                },
+              );
+            } else {
+              console.log("ℹ️ No se desbloquearon logros nuevos");
             }
           } catch (error) {
             console.error("❌ Error finishing attempt:", error);
@@ -419,9 +398,9 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
     attemptId,
     moves,
     finishAttempt,
-    checkAchievements,
     isGameStarted,
     gameId,
+    onAchievementUnlocked,
   ]);
 
   const resetGame = useCallback(() => {

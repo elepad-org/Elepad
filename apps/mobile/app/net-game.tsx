@@ -14,6 +14,14 @@ export default function NetGameScreen() {
   const [showHelpDialog, setShowHelpDialog] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [achievementQueue, setAchievementQueue] = useState<
+    Array<{
+      id: string;
+      title: string;
+      icon?: string;
+      description?: string;
+    }>
+  >([]);
   const [wasSolvedAutomatically, setWasSolvedAutomatically] = useState(false);
   const [gameResults, setGameResults] = useState<{
     moves: number;
@@ -61,14 +69,27 @@ export default function NetGameScreen() {
       icon?: string;
       description?: string;
     }) => {
-      const icon = achievement.icon || "🏆";
-      const message = `${icon} ¡Logro desbloqueado! ${achievement.title}`;
-      console.log("🎉 Mostrando toast de logro:", message);
-      setSnackbarMessage(message);
-      setSnackbarVisible(true);
+      console.log("🎉 Agregando logro a la cola:", achievement.title);
+      setAchievementQueue((prev) => [...prev, achievement]);
     },
     [],
   );
+
+  // Procesar cola de logros (mostrar uno a la vez)
+  React.useEffect(() => {
+    if (achievementQueue.length > 0 && !snackbarVisible) {
+      const nextAchievement = achievementQueue[0];
+      const icon = nextAchievement.icon || "🏆";
+      const message = `${icon} ¡Logro desbloqueado! ${nextAchievement.title}`;
+
+      console.log("🎉 Mostrando snackbar:", message);
+      setSnackbarMessage(message);
+      setSnackbarVisible(true);
+
+      // Remover de la cola cuando el Snackbar se cierre (3 segundos)
+      setAchievementQueue((prev) => prev.slice(1));
+    }
+  }, [achievementQueue, snackbarVisible]);
 
   const handleComplete = useCallback(
     (

@@ -465,9 +465,20 @@ export type PostAttemptsStart201 = {
   id: string;
 };
 
+export type PostAttemptsAttemptIdFinish200UnlockedAchievementsItem = {
+  id: string;
+  code: string;
+  title: string;
+  description: string;
+  /** @nullable */
+  icon: string | null;
+  points: number;
+};
+
 export type PostAttemptsAttemptIdFinish200 = {
   success: boolean;
   score: number;
+  unlockedAchievements?: PostAttemptsAttemptIdFinish200UnlockedAchievementsItem[];
 };
 
 export type GetAttemptsAttemptId200 = {

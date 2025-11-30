@@ -422,7 +422,7 @@ export const useNetGame = ({
           autoSolved: wasAutoSolved,
         });
 
-        await finishAttempt.mutateAsync({
+        const finishResponse = await finishAttempt.mutateAsync({
           attemptId,
           data: {
             success: true,
@@ -438,47 +438,32 @@ export const useNetGame = ({
 
         console.log("✅ Intento finalizado exitosamente");
 
-        // Solo verificar logros si NO fue resuelto automáticamente
-        if (!wasAutoSolved) {
-          try {
-            console.log("🏆 Verificando logros para intento:", attemptId);
-            const achievementsResponse = await checkAchievements.mutateAsync({
-              attemptId,
-            });
-
-            const achievementsData =
-              "data" in achievementsResponse
-                ? achievementsResponse.data
-                : achievementsResponse;
-            const unlockedList = Array.isArray(achievementsData)
-              ? achievementsData
-              : (achievementsData as { unlocked?: UnlockedAchievement[] })
-                  ?.unlocked || [];
-
-            if (unlockedList && unlockedList.length > 0) {
-              console.log("🎉 Logros desbloqueados:", unlockedList);
-              setUnlockedAchievements(unlockedList);
-
-              unlockedList.forEach((achievement: UnlockedAchievement) => {
-                onAchievementUnlocked?.(achievement);
-              });
-            } else {
-              console.log("ℹ️ No se desbloquearon nuevos logros");
-            }
-          } catch (achError) {
-            console.error("❌ Error al verificar logros:", achError);
-          }
-        } else {
+        // El backend automáticamente verifica logros y los devuelve en la respuesta
+        if (
+          !wasAutoSolved &&
+          finishResponse.unlockedAchievements &&
+          finishResponse.unlockedAchievements.length > 0
+        ) {
           console.log(
-            "⏭️ Saltando verificación de logros (juego resuelto automáticamente)",
+            "🎉 Logros desbloqueados:",
+            finishResponse.unlockedAchievements,
           );
+          setUnlockedAchievements(
+            finishResponse.unlockedAchievements as UnlockedAchievement[],
+          );
+
+          finishResponse.unlockedAchievements.forEach((achievement: any) => {
+            onAchievementUnlocked?.(achievement);
+          });
+        } else if (!wasAutoSolved) {
+          console.log("ℹ️ No se desbloquearon nuevos logros");
         }
       } catch (error) {
         console.error("❌ Error al finalizar intento:", error);
         hasFinishedAttempt.current = false;
       }
     },
-    [attemptId, moves, finishAttempt, checkAchievements, onAchievementUnlocked],
+    [attemptId, moves, finishAttempt, onAchievementUnlocked],
   );
 
   useEffect(() => {

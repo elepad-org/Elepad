@@ -8,6 +8,7 @@ import {
 } from "./schema";
 import { GameTypeEnum } from "../puzzles/schema";
 import { openApiErrorResponse } from "@/utils/api-error";
+import { AchievementService } from "../achievements/service";
 
 export const attemptsApp = new OpenAPIHono();
 
@@ -78,7 +79,22 @@ attemptsApp.openapi(
         description: "Intento finalizado",
         content: {
           "application/json": {
-            schema: z.object({ success: z.boolean(), score: z.number() }),
+            schema: z.object({
+              success: z.boolean(),
+              score: z.number(),
+              unlockedAchievements: z
+                .array(
+                  z.object({
+                    id: z.string(),
+                    code: z.string(),
+                    title: z.string(),
+                    description: z.string(),
+                    icon: z.string().nullable(),
+                    points: z.number(),
+                  }),
+                )
+                .optional(),
+            }),
           },
         },
       },
@@ -92,11 +108,47 @@ attemptsApp.openapi(
     const { attemptId } = c.req.valid("param");
     const body = c.req.valid("json");
     const userId = c.var.user.id;
+
+    // Finalizar el intento
     const attempt = await c.var.attemptService.finishAttempt(
       attemptId,
       userId,
       body,
     );
+
+    // Verificar y desbloquear logros si el intento fue exitoso
+    if (attempt.success) {
+      try {
+        const achievementService = new AchievementService(c.var.supabase);
+        const unlockedAchievements =
+          await achievementService.checkAndUnlockAchievements(
+            userId,
+            attemptId,
+          );
+
+        console.log(`🎉 Logros desbloqueados: ${unlockedAchievements.length}`);
+
+        return c.json(
+          {
+            success: attempt.success || false,
+            score: attempt.score || 0,
+            unlockedAchievements: unlockedAchievements.map((a) => ({
+              id: a.id,
+              code: a.code,
+              title: a.title,
+              description: a.description,
+              icon: a.icon,
+              points: a.points,
+            })),
+          },
+          200,
+        );
+      } catch (achievementError) {
+        console.error("❌ Error al verificar logros:", achievementError);
+        // No fallar la petición si hay error en logros, solo loggear
+      }
+    }
+
     return c.json(
       { success: attempt.success || false, score: attempt.score || 0 },
       200,

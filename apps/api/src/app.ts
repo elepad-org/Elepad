@@ -19,6 +19,32 @@ import { attemptsApp } from "./modules/attempts/handler.js";
 import { achievementsApp } from "./modules/achievements/handler.js";
 import { withAuth } from "./middleware/auth.js";
 
+// Configurar fetch personalizado para Node.js en desarrollo
+let customFetch: typeof fetch | undefined;
+if (typeof process !== "undefined" && process.env?.NODE_ENV === "development") {
+  try {
+    const https = await import("https");
+    const agent = new https.Agent({
+      rejectUnauthorized: false,
+    });
+
+    customFetch = (url, options) => {
+      const isHttps = typeof url === "string" && url.startsWith("https");
+      if (isHttps) {
+        return fetch(url, {
+          ...options,
+          // @ts-ignore
+          agent,
+        });
+      }
+      return fetch(url, options);
+    };
+  } catch (e) {
+    // Si falla la importación (por ejemplo, en Cloudflare Workers), usar fetch normal
+    customFetch = undefined;
+  }
+}
+
 const app = new OpenAPIHono();
 
 // Global middleware.
@@ -63,7 +89,15 @@ app.use("*", async (c, next) => {
     SUPABASE_SERVICE_ROLE_KEY: string;
   }>(c);
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+  const supabaseOptions = customFetch
+    ? { global: { fetch: customFetch } }
+    : undefined;
+
+  const supabase = createClient(
+    SUPABASE_URL,
+    SUPABASE_SERVICE_ROLE_KEY,
+    supabaseOptions,
+  );
   c.set("supabase", supabase);
   await next();
 });

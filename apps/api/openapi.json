@@ -2944,6 +2944,41 @@
                     },
                     "score": {
                       "type": "number"
+                    },
+                    "unlockedAchievements": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "icon": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "points": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "code",
+                          "title",
+                          "description",
+                          "icon",
+                          "points"
+                        ]
+                      }
                     }
                   },
                   "required": [

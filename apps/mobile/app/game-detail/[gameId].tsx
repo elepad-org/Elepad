@@ -8,6 +8,8 @@ import {
   Icon,
   Chip,
   Divider,
+  Portal,
+  Dialog,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, STYLES } from "@/styles/base";
@@ -90,6 +92,7 @@ export default function GameDetailScreen() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [selectedAchievement, setSelectedAchievement] = useState<any>(null);
 
   // Obtener logros del juego
   const {
@@ -369,6 +372,7 @@ export default function GameDetailScreen() {
                             styles.achievementCard,
                             !achievement.unlocked && styles.achievementLocked,
                           ]}
+                          onPress={() => setSelectedAchievement(achievement)}
                         >
                           <Card.Content style={styles.achievementContent}>
                             <View style={styles.achievementIcon}>
@@ -500,6 +504,108 @@ export default function GameDetailScreen() {
           </Card>
         </View>
       </ScrollView>
+
+      {/* Modal de detalle del logro */}
+      <Portal>
+        <Dialog
+          visible={!!selectedAchievement}
+          onDismiss={() => setSelectedAchievement(null)}
+        >
+          <View style={{ alignItems: "center", paddingTop: 24 }}>
+            {selectedAchievement?.unlocked ? (
+              <Text style={{ fontSize: 64 }}>
+                {selectedAchievement?.achievement?.icon || "🏆"}
+              </Text>
+            ) : (
+              <MaterialCommunityIcons name="lock" size={64} color="#999" />
+            )}
+          </View>
+          <Dialog.Title style={styles.dialogTitle}>
+            {selectedAchievement?.achievement?.title}
+          </Dialog.Title>
+          <Dialog.Content>
+            <Text
+              variant="bodyLarge"
+              style={{ marginBottom: 16, textAlign: "center" }}
+            >
+              {selectedAchievement?.achievement?.description}
+            </Text>
+
+            <Divider style={{ marginVertical: 12 }} />
+
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-around",
+                marginTop: 8,
+              }}
+            >
+              <View style={{ alignItems: "center" }}>
+                <Text
+                  variant="labelSmall"
+                  style={{ color: COLORS.textSecondary }}
+                >
+                  Puntos
+                </Text>
+                <Text
+                  variant="titleLarge"
+                  style={{ color: COLORS.primary, fontWeight: "bold" }}
+                >
+                  {selectedAchievement?.achievement?.points}
+                </Text>
+              </View>
+
+              <View style={{ alignItems: "center" }}>
+                <Text
+                  variant="labelSmall"
+                  style={{ color: COLORS.textSecondary }}
+                >
+                  Estado
+                </Text>
+                <Chip
+                  mode="flat"
+                  style={{
+                    backgroundColor: selectedAchievement?.unlocked
+                      ? COLORS.success
+                      : COLORS.backgroundSecondary,
+                    marginTop: 4,
+                  }}
+                  textStyle={{
+                    color: selectedAchievement?.unlocked ? "#fff" : COLORS.text,
+                  }}
+                >
+                  {selectedAchievement?.unlocked ? "Desbloqueado" : "Bloqueado"}
+                </Chip>
+              </View>
+            </View>
+
+            {selectedAchievement?.unlocked &&
+              selectedAchievement?.unlockedAt && (
+                <Text
+                  variant="bodySmall"
+                  style={{
+                    color: COLORS.textSecondary,
+                    textAlign: "center",
+                    marginTop: 16,
+                  }}
+                >
+                  Desbloqueado el{" "}
+                  {new Date(selectedAchievement?.unlockedAt).toLocaleDateString(
+                    "es-ES",
+                    {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    },
+                  )}
+                </Text>
+              )}
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setSelectedAchievement(null)}>Cerrar</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </SafeAreaView>
   );
 }
@@ -565,5 +671,8 @@ const styles = StyleSheet.create({
   errorContainer: {
     paddingVertical: 20,
     alignItems: "center",
+  },
+  dialogTitle: {
+    textAlign: "center",
   },
 });

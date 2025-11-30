@@ -144,13 +144,6 @@ export class AchievementService {
       throw new ApiException(404, "Intento no encontrado");
     }
 
-    console.log(`✅ Intento encontrado:`, {
-      success: attempt.success,
-      moves: attempt.moves,
-      durationMs: attempt.durationMs,
-      score: attempt.score,
-    });
-
     if (!attempt.success) {
       console.log(`⚠️ Intento no exitoso, no se verifican logros`);
       return [];
@@ -162,37 +155,48 @@ export class AchievementService {
     else if (attempt.logicPuzzleId) gameType = "logic";
     else if (attempt.sudokuPuzzleId) gameType = "calculation";
 
-    console.log(`🎮 Tipo de juego detectado: ${gameType}`);
-
     if (!gameType) {
       console.log(`⚠️ No se pudo determinar el tipo de juego`);
       return [];
     }
 
-    // Obtener todos los logros del tipo de juego
-    const achievements = await this.listAchievementsByGameType(gameType);
-    console.log(`🏆 Logros disponibles para ${gameType}:`, achievements.length);
+    // Obtener gameName del puzzle UNA SOLA VEZ
+    const gameName = await this.getPuzzleGameName(attempt);
+
+    // Obtener logros del tipo y logros ya desbloqueados EN PARALELO
+    const [achievementsResult, userAchievementsResult] = await Promise.all([
+      this.supabase
+        .from("achievements")
+        .select("*")
+        .eq("gameType", gameType)
+        .order("points", { ascending: true }),
+      this.supabase
+        .from("user_achievements")
+        .select("achievementId")
+        .eq("userId", userId),
+    ]);
+
+    if (achievementsResult.error) {
+      throw new ApiException(
+        500,
+        "Error al obtener logros",
+        achievementsResult.error,
+      );
+    }
+
+    const achievements = achievementsResult.data || [];
+    const unlockedIds = new Set(
+      userAchievementsResult.data?.map((ua) => ua.achievementId) || [],
+    );
+
+    console.log(`🏆 Verificando ${achievements.length} logros...`);
 
     // Verificar condiciones y desbloquear
     const unlockedAchievements = [];
 
     for (const achievement of achievements) {
-      console.log(
-        `🔍 Verificando logro: ${achievement.title} (${achievement.code})`,
-      );
-
-      // Verificar si ya está desbloqueado
-      const { data: existing } = await this.supabase
-        .from("user_achievements")
-        .select("id")
-        .eq("userId", userId)
-        .eq("achievementId", achievement.id)
-        .maybeSingle();
-
-      if (existing) {
-        console.log(`  ⏭️ Ya desbloqueado, saltando...`);
-        continue;
-      }
+      // Saltar si ya está desbloqueado
+      if (unlockedIds.has(achievement.id)) continue;
 
       // Verificar condición
       const meetsCondition = await this.checkAchievementCondition(
@@ -200,16 +204,14 @@ export class AchievementService {
         achievement,
         attempt,
         gameType,
+        gameName,
       );
 
-      console.log(`  ✓ Condición cumplida: ${meetsCondition}`);
-
       if (meetsCondition) {
-        console.log(`  🎉 Desbloqueando logro...`);
+        console.log(`  🎉 Desbloqueando: ${achievement.title}`);
         const result = await this.unlockAchievement(userId, achievement.code);
         if (!result.alreadyUnlocked) {
           unlockedAchievements.push(result.achievement);
-          console.log(`  ✅ Logro desbloqueado exitosamente`);
         }
       }
     }
@@ -221,6 +223,26 @@ export class AchievementService {
   }
 
   /**
+   * Obtiene el gameName del puzzle de un intento
+   */
+  private async getPuzzleGameName(
+    attempt: Database["public"]["Tables"]["attempts"]["Row"],
+  ): Promise<string | null> {
+    const puzzleId =
+      attempt.memoryPuzzleId || attempt.logicPuzzleId || attempt.sudokuPuzzleId;
+
+    if (!puzzleId) return null;
+
+    const { data: puzzle } = await this.supabase
+      .from("puzzles")
+      .select("gameName")
+      .eq("id", puzzleId)
+      .single();
+
+    return puzzle?.gameName || null;
+  }
+
+  /**
    * Verifica si se cumple la condición de un logro
    */
   private async checkAchievementCondition(
@@ -228,74 +250,146 @@ export class AchievementService {
     achievement: Database["public"]["Tables"]["achievements"]["Row"],
     attempt: Database["public"]["Tables"]["attempts"]["Row"],
     gameType: Database["public"]["Enums"]["game_type"],
+    gameName: string | null,
   ): Promise<boolean> {
     const condition = achievement.condition as Record<
       string,
       string | number | boolean
     >;
-    console.log(`    🔎 Evaluando condición:`, condition);
+
+    // Si el logro especifica un juego específico, verificar que coincida
+    if (condition.game && gameName !== condition.game) {
+      return false;
+    }
 
     switch (condition.type) {
       case "first_completion":
-        // Verificar si es el primer intento exitoso
-        const { data: previousAttempts } = await this.supabase
+        // Si el logro es para un juego específico (ej: "net")
+        if (condition.game) {
+          const gameName = await this.getPuzzleGameName(attempt);
+
+          // Contar intentos previos exitosos del mismo juego específico
+          const { data: prevAttempts } = await this.supabase
+            .from("attempts")
+            .select("id, memoryPuzzleId, logicPuzzleId, sudokuPuzzleId")
+            .eq("userId", userId)
+            .eq("success", true)
+            .neq("id", attempt.id);
+
+          if (!prevAttempts || prevAttempts.length === 0) {
+            return true;
+          }
+
+          // Verificar cuántos intentos son del mismo juego
+          let countSameGame = 0;
+          for (const prevAttempt of prevAttempts) {
+            const prevGameName = await this.getPuzzleGameName(prevAttempt);
+            if (prevGameName === condition.game) {
+              countSameGame++;
+            }
+          }
+
+          return countSameGame === 0;
+        }
+
+        // Si no especifica juego, verificar por tipo (memory, logic, calculation)
+        let previousQuery = this.supabase
           .from("attempts")
           .select("id")
           .eq("userId", userId)
           .eq("success", true)
           .neq("id", attempt.id);
 
-        console.log(
-          `    📋 Intentos previos exitosos:`,
-          previousAttempts?.length || 0,
-        );
-
-        if (gameType === "memory") {
-          const isFirst =
-            previousAttempts?.filter((a) => a.id !== attempt.id).length === 0;
-          console.log(`    ✓ Es el primer intento de memoria: ${isFirst}`);
-          return isFirst;
+        if (gameType === "memory" && attempt.memoryPuzzleId) {
+          previousQuery = previousQuery.not("memoryPuzzleId", "is", null);
+        } else if (gameType === "logic" && attempt.logicPuzzleId) {
+          previousQuery = previousQuery.not("logicPuzzleId", "is", null);
+        } else if (gameType === "calculation" && attempt.sudokuPuzzleId) {
+          previousQuery = previousQuery.not("sudokuPuzzleId", "is", null);
         }
-        const isFirst = previousAttempts?.length === 0;
-        console.log(`    ✓ Es el primer intento: ${isFirst}`);
-        return isFirst;
+
+        const { data: previousAttempts } = await previousQuery;
+        return previousAttempts?.length === 0;
 
       case "time_under":
         const timeValue =
           typeof condition.value === "number" ? condition.value : 0;
-        const timeInSeconds = (attempt.durationMs || 0) / 1000;
         const passesTime =
           attempt.durationMs !== null && attempt.durationMs < timeValue * 1000;
-        console.log(
-          `    ⏱️ Tiempo: ${timeInSeconds.toFixed(2)}s / ${timeValue}s = ${passesTime}`,
-        );
         return passesTime;
 
       case "moves_under":
         const movesValue =
           typeof condition.value === "number" ? condition.value : 0;
-        const passesMoves =
-          attempt.moves !== null && attempt.moves < movesValue;
-        console.log(
-          `    🎯 Movimientos: ${attempt.moves} / ${movesValue} = ${passesMoves}`,
-        );
-        return passesMoves;
+        return attempt.moves !== null && attempt.moves < movesValue;
 
       case "combined":
         const timeLimit =
           typeof condition.time === "number" ? condition.time : 0;
         const movesLimit =
           typeof condition.moves === "number" ? condition.moves : 0;
-        const timeInSec = (attempt.durationMs || 0) / 1000;
         const passesTimeCheck =
           attempt.durationMs !== null && attempt.durationMs < timeLimit * 1000;
         const passesMovesCheck =
           attempt.moves !== null && attempt.moves < movesLimit;
-        const passesCombined = passesTimeCheck && passesMovesCheck;
+        return passesTimeCheck && passesMovesCheck;
+
+      case "streak":
+        const streakValue =
+          typeof condition.value === "number" ? condition.value : 0;
+        const gameName = condition.game
+          ? await this.getPuzzleGameName(attempt)
+          : null;
+
+        // Obtener los últimos N intentos (donde N = streakValue)
+        let streakQuery = this.supabase
+          .from("attempts")
+          .select(
+            "id, success, memoryPuzzleId, logicPuzzleId, sudokuPuzzleId, finishedAt",
+          )
+          .eq("userId", userId)
+          .not("finishedAt", "is", null)
+          .order("finishedAt", { ascending: false })
+          .limit(streakValue);
+
+        // Filtrar por tipo de juego si no hay juego específico
+        if (!condition.game) {
+          if (gameType === "memory" && attempt.memoryPuzzleId) {
+            streakQuery = streakQuery.not("memoryPuzzleId", "is", null);
+          } else if (gameType === "logic" && attempt.logicPuzzleId) {
+            streakQuery = streakQuery.not("logicPuzzleId", "is", null);
+          } else if (gameType === "calculation" && attempt.sudokuPuzzleId) {
+            streakQuery = streakQuery.not("sudokuPuzzleId", "is", null);
+          }
+        }
+
+        const { data: recentAttempts } = await streakQuery;
+
+        if (!recentAttempts || recentAttempts.length < streakValue) {
+          console.log(
+            `    🔥 Racha insuficiente: ${recentAttempts?.length || 0}/${streakValue}`,
+          );
+          return false;
+        }
+
+        // Verificar que todos sean exitosos y del mismo juego (si aplica)
+        let consecutiveWins = 0;
+        for (const recentAttempt of recentAttempts) {
+          if (!recentAttempt.success) break;
+
+          if (condition.game) {
+            const attemptGameName = await this.getPuzzleGameName(recentAttempt);
+            if (attemptGameName !== condition.game) break;
+          }
+
+          consecutiveWins++;
+        }
+
+        const hasStreak = consecutiveWins >= streakValue;
         console.log(
-          `    ⏱️+🎯 Tiempo: ${timeInSec.toFixed(2)}s/${timeLimit}s, Movimientos: ${attempt.moves}/${movesLimit} = ${passesCombined}`,
+          `    🔥 Racha: ${consecutiveWins}/${streakValue} = ${hasStreak}`,
         );
-        return passesCombined;
+        return hasStreak;
 
       default:
         console.log(`    ⚠️ Tipo de condición desconocido: ${condition.type}`);
