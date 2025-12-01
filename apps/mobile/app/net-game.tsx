@@ -21,7 +21,7 @@ export default function NetGameScreen() {
     Array<{
       id: string;
       title: string;
-      icon?: string;
+      icon?: string | null;
       description?: string;
     }>
   >([]);
@@ -33,7 +33,7 @@ export default function NetGameScreen() {
     achievements?: Array<{
       id: string;
       title: string;
-      icon?: string;
+      icon?: string | null;
       description?: string;
     }>;
   } | null>(null);
@@ -69,7 +69,7 @@ export default function NetGameScreen() {
     (achievement: {
       id: string;
       title: string;
-      icon?: string;
+      icon?: string | null;
       description?: string;
     }) => {
       console.log("🎉 Agregando logro a la cola:", achievement.title);

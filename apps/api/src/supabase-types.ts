@@ -278,18 +278,21 @@ export type Database = {
           cols: number;
           puzzleId: string;
           rows: number;
+          solution: number[] | null;
           startState: number[];
         };
         Insert: {
           cols: number;
           puzzleId: string;
           rows: number;
+          solution?: number[] | null;
           startState: number[];
         };
         Update: {
           cols?: number;
           puzzleId?: string;
           rows?: number;
+          solution?: number[] | null;
           startState?: number[];
         };
         Relationships: [

@@ -35,7 +35,7 @@ export interface GameStats {
 export interface UnlockedAchievement {
   id: string;
   title: string;
-  icon?: string;
+  icon?: string | null;
   description?: string;
 }
 
@@ -439,18 +439,19 @@ export const useNetGame = ({
         // El backend automáticamente verifica logros y los devuelve en la respuesta
         if (
           !wasAutoSolved &&
-          finishResponse.unlockedAchievements &&
-          finishResponse.unlockedAchievements.length > 0
+          "unlockedAchievements" in finishResponse.data &&
+          finishResponse.data.unlockedAchievements &&
+          finishResponse.data.unlockedAchievements.length > 0
         ) {
           console.log(
             "🎉 Logros desbloqueados:",
-            finishResponse.unlockedAchievements,
+            finishResponse.data.unlockedAchievements,
           );
           setUnlockedAchievements(
-            finishResponse.unlockedAchievements as UnlockedAchievement[],
+            finishResponse.data.unlockedAchievements as UnlockedAchievement[],
           );
 
-          finishResponse.unlockedAchievements.forEach(
+          finishResponse.data.unlockedAchievements.forEach(
             (achievement: UnlockedAchievement) => {
               onAchievementUnlocked?.(achievement);
             },

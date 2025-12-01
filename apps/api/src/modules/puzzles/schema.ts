@@ -38,7 +38,10 @@ export const LogicGameSchema = z
     rows: z.number().int(),
     cols: z.number().int(),
     startState: z.array(z.union([z.number().int(), z.boolean()])),
-    solution: z.array(z.union([z.number().int(), z.boolean()])).optional(), // Estado ganador/solución
+    solution: z
+      .array(z.union([z.number().int(), z.boolean()]))
+      .nullable()
+      .optional(), // Estado ganador/solución
   })
   .openapi("LogicGame");
 

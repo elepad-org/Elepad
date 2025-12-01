@@ -15,14 +15,14 @@ interface MemoryGameBoardProps {
     achievements: Array<{
       id: string;
       title: string;
-      icon?: string;
+      icon?: string | null;
       description?: string;
     }>;
   }) => void;
   onAchievementUnlocked?: (achievement: {
     id: string;
     title: string;
-    icon?: string;
+    icon?: string | null;
     description?: string;
   }) => void;
 }

@@ -210,7 +210,8 @@ export type LogicGame = {
   rows: number;
   cols: number;
   startState: LogicGameStartStateItem[];
-  solution?: LogicGameSolutionItem[];
+  /** @nullable */
+  solution?: LogicGameSolutionItem[] | null;
 } | null;
 
 /**

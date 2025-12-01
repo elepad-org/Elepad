@@ -22,7 +22,7 @@ export interface GameStats {
 export interface UnlockedAchievement {
   id: string;
   title: string;
-  icon?: string;
+  icon?: string | null;
   description?: string;
 }
 
@@ -362,20 +362,34 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
 
             // El backend automáticamente verifica logros y los devuelve en la respuesta
             if (
-              finishResponse.unlockedAchievements &&
-              finishResponse.unlockedAchievements.length > 0
+              "unlockedAchievements" in finishResponse.data &&
+              finishResponse.data.unlockedAchievements &&
+              finishResponse.data.unlockedAchievements.length > 0
             ) {
               setUnlockedAchievements(
-                finishResponse.unlockedAchievements as UnlockedAchievement[],
+                finishResponse.data
+                  .unlockedAchievements as UnlockedAchievement[],
               );
               console.log(
                 "🏆 Logros desbloqueados:",
-                finishResponse.unlockedAchievements.length,
-                finishResponse.unlockedAchievements,
+                finishResponse.data.unlockedAchievements.length,
+                finishResponse.data.unlockedAchievements,
               );
 
               // Notificar cada logro desbloqueado
-              finishResponse.unlockedAchievements.forEach(
+              finishResponse.data.unlockedAchievements.forEach(
+                (achievement: UnlockedAchievement) => {
+                  onAchievementUnlocked?.(achievement);
+                },
+              );
+              console.log(
+                "🏆 Logros desbloqueados:",
+                finishResponse.data.unlockedAchievements.length,
+                finishResponse.data.unlockedAchievements,
+              );
+
+              // Notificar cada logro desbloqueado
+              finishResponse.data.unlockedAchievements.forEach(
                 (achievement: UnlockedAchievement) => {
                   onAchievementUnlocked?.(achievement);
                 },

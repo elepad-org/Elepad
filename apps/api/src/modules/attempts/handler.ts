@@ -64,7 +64,7 @@ attemptsApp.openapi(
     path: "/attempts/{attemptId}/finish",
     tags: ["attempts"],
     request: {
-      params: z.object({ attemptId: z.string().uuid() }),
+      params: z.object({ attemptId: z.uuid() }),
       body: {
         content: {
           "application/json": {

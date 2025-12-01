@@ -26,7 +26,7 @@ export default function MemoryGameScreen() {
     Array<{
       id: string;
       title: string;
-      icon?: string;
+      icon?: string | null;
       description?: string;
     }>
   >([]);
@@ -37,7 +37,7 @@ export default function MemoryGameScreen() {
     achievements?: Array<{
       id: string;
       title: string;
-      icon?: string;
+      icon?: string | null;
       description?: string;
     }>;
   } | null>(null);
@@ -73,7 +73,7 @@ export default function MemoryGameScreen() {
     (achievement: {
       id: string;
       title: string;
-      icon?: string;
+      icon?: string | null;
       description?: string;
     }) => {
       console.log("🎉 Agregando logro a la cola:", achievement.title);
@@ -105,7 +105,7 @@ export default function MemoryGameScreen() {
       achievements: Array<{
         id: string;
         title: string;
-        icon?: string;
+        icon?: string | null;
         description?: string;
       }>;
     }) => {

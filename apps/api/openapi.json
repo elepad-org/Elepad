@@ -525,6 +525,7 @@
           },
           "solution": {
             "type": "array",
+            "nullable": true,
             "items": {
               "anyOf": [
                 {
