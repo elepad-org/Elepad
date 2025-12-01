@@ -1,4 +1,5 @@
-// Componentes compartidos reutilizables
+// Reusable shared components
+export { CustomHeader } from "./CustomHeader";
 export { GameHeader } from "./GameHeader";
 export { GameLoadingView } from "./GameLoadingView";
 export { InstructionsDialog } from "./InstructionsDialog";
