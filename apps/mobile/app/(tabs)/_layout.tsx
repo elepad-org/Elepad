@@ -8,9 +8,8 @@ import ConfiguracionScreen from "./configuracion";
 import { COLORS } from "@/styles/base";
 import CalendarScreen from "./calendar";
 
-// ~8% opacity for the active tab indicator background
-const ACTIVE_INDICATOR_OPACITY = 0.08;
-const activeIndicatorColor = `rgba(0, 122, 255, ${ACTIVE_INDICATOR_OPACITY})`;
+// ~15% opacity for the active tab indicator background using primary color
+const activeIndicatorColor = "rgba(99, 75, 102, 0.15)"; // #634b66 with opacity
 
 export default function TabLayout() {
   const theme = useTheme();
@@ -59,7 +58,7 @@ export default function TabLayout() {
 
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.background }}>
-      {/* Content that occupies entire screen */}
+      {/* Content that occupies entire screen with proper bottom padding */}
       <View
         style={{
           flex: 1,
@@ -68,6 +67,7 @@ export default function TabLayout() {
           left: 0,
           right: 0,
           bottom: 0,
+          paddingBottom: 110, // Space for floating navigation bar
         }}
       >
         {renderScene({
@@ -81,7 +81,7 @@ export default function TabLayout() {
         })}
       </View>
 
-      {/* Floating navigation bar - Apple-style */}
+      {/* Floating navigation bar */}
       <View
         style={{
           position: "absolute",
@@ -90,12 +90,14 @@ export default function TabLayout() {
           right: 20,
           borderRadius: 24,
           overflow: "hidden",
-          backgroundColor: COLORS.backgroundSecondary,
+          backgroundColor: COLORS.white,
+          borderWidth: 1,
+          borderColor: COLORS.border,
           ...Platform.select({
             ios: {
-              shadowColor: "#000",
+              shadowColor: "#18020c",
               shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.12,
+              shadowOpacity: 0.08,
               shadowRadius: 16,
             },
             android: {

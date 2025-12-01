@@ -11,16 +11,15 @@ import {
   Dialog,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { COLORS, STYLES } from "@/styles/base";
-import { router, Stack, useLocalSearchParams } from "expo-router";
+import { COLORS, STYLES, SHADOWS } from "@/styles/base";
+import { router, useLocalSearchParams } from "expo-router";
 import {
   useGetAchievementsUserGameType,
   GameType,
   getAttempts,
 } from "@elepad/api-client";
-import AttemptCard from "@/components/Historial/AttemptCard";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { GameHeader } from "@/components/shared/GameHeader";
+import { CustomHeader } from "@/components/shared/CustomHeader";
 import { GAMES_INFO } from "@/constants/gamesInfo";
 import { GameInstructions } from "@/components/shared/GameInstructions";
 
@@ -42,6 +41,10 @@ interface Attempt {
   id: string;
   memoryPuzzleId?: string;
   logicPuzzleId?: string;
+  success?: boolean;
+  score?: number;
+  startedAt?: string;
+  durationMs?: number;
 }
 
 const GAMES_CONFIG: Record<
@@ -62,6 +65,42 @@ const GAMES_CONFIG: Record<
 };
 
 const PAGE_SIZE = 10;
+
+// Inline AttemptItem component
+function AttemptItem({
+  attempt,
+  gameType,
+}: {
+  attempt: Attempt;
+  gameType: string;
+}) {
+  const isSuccess = attempt?.success;
+  const statusColor = isSuccess ? COLORS.success : COLORS.error;
+  const score = attempt?.score ?? "-";
+
+  let dateFormatted = "-";
+  if (attempt?.startedAt) {
+    const dateObj = new Date(attempt.startedAt);
+    const day = dateObj.getDate().toString().padStart(2, "0");
+    const month = (dateObj.getMonth() + 1).toString().padStart(2, "0");
+    dateFormatted = `${day}/${month}`;
+  }
+
+  return (
+    <View style={styles.attemptCard}>
+      <View style={[styles.statusStrip, { backgroundColor: statusColor }]} />
+      <View style={styles.attemptContent}>
+        <View>
+          <Text style={styles.attemptGameType}>{gameType}</Text>
+          <Text style={styles.attemptDate}>{dateFormatted}</Text>
+        </View>
+        <Text style={[styles.attemptScore, { color: statusColor }]}>
+          {score} pts
+        </Text>
+      </View>
+    </View>
+  );
+}
 
 export default function GameDetailScreen() {
   const { gameId } = useLocalSearchParams<{ gameId: string }>();
@@ -167,19 +206,15 @@ export default function GameDetailScreen() {
 
   if (!gameConfig || !gameInfo) {
     return (
-      <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
-        <Stack.Screen
-          options={{
-            title: "Juego no encontrado",
-            headerBackTitle: "Juegos",
-          }}
-        />
+      <SafeAreaView style={STYLES.safeArea} edges={["left", "right"]}>
+        <CustomHeader title="Juego no encontrado" />
         <View style={STYLES.center}>
           <Text style={STYLES.heading}>❌ Juego no encontrado</Text>
           <Button
             mode="contained"
             onPress={() => router.back()}
             style={{ marginTop: 16 }}
+            buttonColor={COLORS.primary}
           >
             Volver a Juegos
           </Button>
@@ -195,29 +230,17 @@ export default function GameDetailScreen() {
   };
 
   return (
-    <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
+    <SafeAreaView style={STYLES.safeArea} edges={["left", "right"]}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
-      <Stack.Screen
-        options={{
-          headerShown: false,
-        }}
-      />
+      <CustomHeader title={gameInfo.title} />
 
       <ScrollView
         contentContainerStyle={STYLES.contentContainer}
         keyboardShouldPersistTaps="handled"
       >
         <View style={STYLES.container}>
-          {/* Header personalizado */}
-          <GameHeader
-            icon={gameInfo.iconName || gameInfo.emoji}
-            title={gameInfo.title}
-            iconColor={gameInfo.iconColor}
-            useIconComponent={!!gameInfo.iconName}
-          />
-
           {/* Información del Juego */}
-          <Card style={[STYLES.titleCard, { marginBottom: 16 }]}>
+          <Card style={[styles.gameCard, { marginBottom: 16 }]}>
             <Card.Content>
               <Text
                 variant="bodyLarge"
@@ -248,7 +271,7 @@ export default function GameDetailScreen() {
           </Button>
 
           {/* Logros */}
-          <Card style={[STYLES.titleCard, { marginBottom: 16 }]}>
+          <Card style={[styles.gameCard, { marginBottom: 16 }]}>
             <Card.Content>
               <View style={styles.sectionHeader}>
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -362,7 +385,7 @@ export default function GameDetailScreen() {
           </Card>
 
           {/* Puntajes Recientes */}
-          <Card style={[STYLES.titleCard, { marginBottom: 16 }]}>
+          <Card style={[styles.gameCard, { marginBottom: 16 }]}>
             <Card.Content>
               <View style={styles.sectionHeader}>
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -420,7 +443,7 @@ export default function GameDetailScreen() {
                   ) : (
                     <>
                       {attempts.map((attempt) => (
-                        <AttemptCard
+                        <AttemptItem
                           key={attempt.id}
                           attempt={attempt}
                           gameType={detectGameType(attempt)}
@@ -557,6 +580,11 @@ export default function GameDetailScreen() {
 }
 
 const styles = StyleSheet.create({
+  gameCard: {
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 16,
+    ...SHADOWS.card,
+  },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -571,9 +599,9 @@ const styles = StyleSheet.create({
   },
   achievementCard: {
     width: 90,
-    backgroundColor: COLORS.backgroundSecondary,
-    elevation: 2,
+    backgroundColor: COLORS.white,
     borderRadius: 12,
+    ...SHADOWS.light,
   },
   achievementLocked: {
     opacity: 0.5,
@@ -605,5 +633,38 @@ const styles = StyleSheet.create({
   },
   dialogTitle: {
     textAlign: "center",
+  },
+  attemptCard: {
+    flexDirection: "row",
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    marginBottom: 8,
+    overflow: "hidden",
+    ...SHADOWS.light,
+  },
+  statusStrip: {
+    width: 4,
+  },
+  attemptContent: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  attemptGameType: {
+    fontWeight: "600",
+    fontSize: 14,
+    color: COLORS.text,
+  },
+  attemptDate: {
+    fontSize: 12,
+    color: COLORS.textLight,
+    marginTop: 2,
+  },
+  attemptScore: {
+    fontWeight: "600",
+    fontSize: 15,
   },
 });

@@ -11,10 +11,10 @@ interface SuccessSnackbarProps {
 }
 
 /**
- * Snackbar for success messages with Apple-style design
+ * Snackbar for success messages with consistent design
  * - Border radius: 16px
- * - Color: iOS System Green
- * - Position: Always above navigation bar
+ * - Color: Success green
+ * - Position: Always above navigation bar (120px margin)
  */
 export default function SuccessSnackbar({
   visible,
@@ -22,7 +22,7 @@ export default function SuccessSnackbar({
   message,
   duration = 2200,
 }: SuccessSnackbarProps) {
-  const bottomMargin = Platform.OS === "web" ? 100 : 85;
+  const bottomMargin = Platform.OS === "web" ? 120 : 120;
 
   return (
     <Snackbar
@@ -33,6 +33,7 @@ export default function SuccessSnackbar({
         backgroundColor: COLORS.success,
         borderRadius: 16,
         marginBottom: bottomMargin,
+        marginHorizontal: 20,
       }}
     >
       <Text style={{ color: COLORS.white, fontSize: 15 }}>{message}</Text>

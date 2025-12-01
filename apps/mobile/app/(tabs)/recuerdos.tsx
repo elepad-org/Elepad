@@ -621,8 +621,9 @@ export default function RecuerdosScreen() {
         duration={2200}
         style={{
           backgroundColor: snackbarError ? COLORS.error : COLORS.success,
-          borderRadius: 8,
-          marginBottom: 80, // Agregar margen para que no se superponga con la tab bar
+          borderRadius: 16,
+          marginBottom: 120,
+          marginHorizontal: 20,
         }}
       >
         {snackbarMessage}

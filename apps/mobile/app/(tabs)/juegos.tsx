@@ -1,16 +1,64 @@
-import { StatusBar, ScrollView, View, Image } from "react-native";
 import {
-  ActivityIndicator,
-  Text,
-  Card,
-  Button,
-  Icon,
-} from "react-native-paper";
+  StatusBar,
+  ScrollView,
+  View,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
+import { ActivityIndicator, Text, Button, Icon } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { COLORS, STYLES } from "@/styles/base";
+import { COLORS, STYLES, SHADOWS } from "@/styles/base";
 import { router } from "expo-router";
-import eleCasino from "@/assets/images/ele-casino.jpeg";
+
+interface GameCardProps {
+  emoji?: string;
+  iconName?: string;
+  title: string;
+  description: string;
+  onPlay: () => void;
+  onDetails: () => void;
+}
+
+function GameCard({
+  emoji,
+  iconName,
+  title,
+  description,
+  onPlay,
+  onDetails,
+}: GameCardProps) {
+  return (
+    <TouchableOpacity
+      style={styles.gameCard}
+      onPress={onDetails}
+      activeOpacity={0.7}
+    >
+      <View style={styles.gameCardContent}>
+        <View style={styles.gameIconContainer}>
+          {iconName ? (
+            <Icon source={iconName} size={32} color={COLORS.primary} />
+          ) : (
+            <Text style={styles.gameEmoji}>{emoji}</Text>
+          )}
+        </View>
+        <View style={styles.gameInfo}>
+          <Text style={styles.gameTitle}>{title}</Text>
+          <Text style={styles.gameDescription} numberOfLines={2}>
+            {description}
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={styles.playButton}
+          onPress={onPlay}
+          activeOpacity={0.7}
+        >
+          <Icon source="play" size={20} color={COLORS.white} />
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
+  );
+}
 
 export default function JuegosScreen() {
   const { loading } = useAuth();
@@ -28,187 +76,139 @@ export default function JuegosScreen() {
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
       <ScrollView
-        contentContainerStyle={STYLES.contentContainer}
+        contentContainerStyle={[
+          STYLES.contentContainer,
+          { paddingBottom: 120 },
+        ]}
         keyboardShouldPersistTaps="handled"
       >
         <View style={STYLES.container}>
-          <View
-            style={{
-              width: "100%",
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 12,
-            }}
-          >
-            <Text style={[STYLES.heading, { marginBottom: 0 }]}>
-              🧩 Juegos Mentales
-            </Text>
-            <Button mode="outlined" onPress={() => router.navigate("/history")}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={STYLES.superHeading}>Juegos</Text>
+            <Button
+              mode="contained"
+              onPress={() => router.navigate("/history")}
+              style={STYLES.miniButton}
+              icon="history"
+            >
               Historial
             </Button>
           </View>
-          <View style={{ height: 8 }} />
-          <Text style={[STYLES.paragraphText, { marginBottom: 24 }]}>
-            Entrena tu mente con nuestros juegos diseñados para estimular la
-            memoria y las habilidades cognitivas.
-          </Text>
 
-          {/* Juego de Memoria */}
-          <Card
-            style={[
-              STYLES.titleCard,
-              { alignItems: "center", marginBottom: 16 },
-            ]}
-          >
-            <Card.Content style={{ alignItems: "center" }}>
-              <Text style={{ fontSize: 64, marginBottom: 12 }}>🧠</Text>
-              <Text
-                variant="headlineSmall"
-                style={{
-                  fontWeight: "bold",
-                  color: COLORS.primary,
-                  marginBottom: 8,
-                  textAlign: "center",
-                }}
-              >
-                Juego de Memoria
-              </Text>
-              <Text
-                variant="bodyMedium"
-                style={{
-                  color: COLORS.textSecondary,
-                  textAlign: "center",
-                  marginBottom: 20,
-                }}
-              >
-                Encuentra todas las parejas de cartas iguales y entrena tu
-                mente. ¡Desafía tu memoria!
-              </Text>
-              <Button
-                mode="contained"
-                onPress={() => router.push("/memory-game")}
-                icon="play"
-                buttonColor={COLORS.primary}
-                style={{ width: "100%" }}
-                contentStyle={{ paddingVertical: 4 }}
-              >
-                Jugar Ahora
-              </Button>
-              <View style={{ height: 8 }} />
-              <Button
-                mode="outlined"
-                onPress={() => router.push("/game-detail/memory")}
-                icon="information-outline"
-                style={{ width: "100%", borderColor: COLORS.primary }}
-                contentStyle={{ paddingVertical: 4 }}
-                textColor={COLORS.primary}
-              >
-                Ver detalles
-              </Button>
-              <View style={{ height: 8 }} />
-            </Card.Content>
-          </Card>
+          {/* Games List */}
+          <View style={styles.gamesContainer}>
+            <GameCard
+              emoji="🧠"
+              title="Memoria"
+              description="Encuentra parejas de cartas y entrena tu memoria"
+              onPlay={() => router.push("/memory-game")}
+              onDetails={() => router.push("/game-detail/memory")}
+            />
 
-          {/* Juego NET */}
-          <Card
-            style={[
-              STYLES.titleCard,
-              { alignItems: "center", marginBottom: 16 },
-            ]}
-          >
-            <Card.Content style={{ alignItems: "center" }}>
-              <Icon source="lan" size={64} color={COLORS.primary} />
-              <View style={{ height: 12 }} />
-              <Text
-                variant="headlineSmall"
-                style={{
-                  fontWeight: "bold",
-                  color: COLORS.primary,
-                  marginBottom: 8,
-                  textAlign: "center",
-                }}
-              >
-                NET
-              </Text>
-              <Text
-                variant="bodyMedium"
-                style={{
-                  color: COLORS.textSecondary,
-                  textAlign: "center",
-                  marginBottom: 20,
-                }}
-              >
-                Conecta toda la red girando las casillas. Rota las piezas hasta
-                formar una red completamente conectada.
-              </Text>
-              <Button
-                mode="contained"
-                onPress={() => router.push("/net-game")}
-                icon="play"
-                buttonColor={COLORS.primary}
-                style={{ width: "100%" }}
-                contentStyle={{ paddingVertical: 4 }}
-              >
-                Jugar Ahora
-              </Button>
-              <View style={{ height: 8 }} />
-              <Button
-                mode="outlined"
-                onPress={() => router.push("/game-detail/net")}
-                icon="information-outline"
-                style={{ width: "100%", borderColor: COLORS.primary }}
-                contentStyle={{ paddingVertical: 4 }}
-                textColor={COLORS.primary}
-              >
-                Ver detalles
-              </Button>
-              <View style={{ height: 8 }} />
-            </Card.Content>
-          </Card>
+            <GameCard
+              iconName="lan"
+              title="NET"
+              description="Conecta la red girando las piezas"
+              onPlay={() => router.push("/net-game")}
+              onDetails={() => router.push("/game-detail/net")}
+            />
+          </View>
 
-          {/* Próximamente */}
-          <Card style={[STYLES.titleCard, { alignItems: "center" }]}>
-            <Card.Content>
-              <Text
-                style={[STYLES.heading, { fontSize: 48, marginBottom: 16 }]}
-              >
-                🎮
-              </Text>
-              <Text style={[STYLES.heading, { marginBottom: 16 }]}>
-                Más juegos próximamente
-              </Text>
-              <Text
-                style={[
-                  STYLES.paragraphText,
-                  { textAlign: "center", marginBottom: 12 },
-                ]}
-              >
-                Estamos trabajando en nuevos juegos emocionantes para ti. Pronto
-                tendrás sudoku, rompecabezas y mucho más.
-              </Text>
-              <Text
-                style={[
-                  STYLES.subheading,
-                  { textAlign: "center", marginBottom: 16 },
-                ]}
-              >
-                Mantente atento a las actualizaciones 🎉
-              </Text>
-              <Image
-                source={eleCasino}
-                style={{
-                  width: "100%",
-                  height: 330,
-                  borderRadius: 16,
-                  marginTop: 8,
-                }}
-                resizeMode="cover"
-              />
-            </Card.Content>
-          </Card>
+          {/* Coming Soon */}
+          <View style={styles.comingSoonCard}>
+            <Text style={styles.comingSoonEmoji}>🎮</Text>
+            <Text style={styles.comingSoonTitle}>Próximamente</Text>
+            <Text style={styles.comingSoonText}>
+              Nuevos juegos: sudoku, rompecabezas y más
+            </Text>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  header: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  gamesContainer: {
+    width: "100%",
+    gap: 12,
+  },
+  gameCard: {
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 16,
+    padding: 16,
+    ...SHADOWS.card,
+  },
+  gameCardContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  gameIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 12,
+    backgroundColor: COLORS.white,
+    justifyContent: "center",
+    alignItems: "center",
+    ...SHADOWS.light,
+  },
+  gameEmoji: {
+    fontSize: 28,
+  },
+  gameInfo: {
+    flex: 1,
+    marginLeft: 14,
+    marginRight: 10,
+  },
+  gameTitle: {
+    fontSize: 17,
+    fontWeight: "600",
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  gameDescription: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    lineHeight: 18,
+  },
+  playButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.primary,
+    justifyContent: "center",
+    alignItems: "center",
+    ...SHADOWS.medium,
+  },
+  comingSoonCard: {
+    marginTop: 24,
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 16,
+    padding: 24,
+    alignItems: "center",
+    ...SHADOWS.card,
+  },
+  comingSoonEmoji: {
+    fontSize: 40,
+    marginBottom: 12,
+  },
+  comingSoonTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+  comingSoonText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    textAlign: "center",
+  },
+});

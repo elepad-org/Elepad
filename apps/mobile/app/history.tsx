@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState, useMemo } from "react";
-import { View, FlatList, StyleSheet } from "react-native";
+import { View, FlatList, StyleSheet, StatusBar } from "react-native";
 import {
   Text,
   Card,
@@ -7,19 +7,17 @@ import {
   Chip,
   Button,
   ProgressBar,
-  useTheme,
 } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Stack } from "expo-router";
+import { CustomHeader } from "@/components/shared";
 import {
   useGetAttemptsStatsGameType,
   GameType,
   getAttempts,
 } from "@elepad/api-client";
 import { Divider } from "react-native-paper";
-import { COLORS, STYLES } from "@/styles/base";
-import AttemptCard from "@/components/Historial/AttemptCard";
+import { COLORS, STYLES, SHADOWS } from "@/styles/base";
 
 const PAGE_SIZE = 50;
 
@@ -30,14 +28,82 @@ interface Attempt {
   success?: boolean;
   score?: number;
   startedAt?: string;
+  durationMs?: number;
 }
 
 type Props = {
   initialAttempts?: Attempt[];
 };
 
+// Inline AttemptCard component for consistency
+function AttemptItem({
+  attempt,
+  gameType,
+}: {
+  attempt: Attempt;
+  gameType: string;
+}) {
+  const isSuccess = attempt?.success;
+  const statusColor = isSuccess ? COLORS.success : COLORS.error;
+  const score = attempt?.score ?? "-";
+
+  let dateFormatted = "-";
+  if (attempt?.startedAt) {
+    const dateObj = new Date(attempt.startedAt);
+    const day = dateObj.getDate().toString().padStart(2, "0");
+    const month = (dateObj.getMonth() + 1).toString().padStart(2, "0");
+    const hours = dateObj.getHours().toString().padStart(2, "0");
+    const minutes = dateObj.getMinutes().toString().padStart(2, "0");
+    dateFormatted = `${day}/${month} - ${hours}:${minutes}`;
+  }
+
+  let durationFormatted = "-";
+  if (attempt?.durationMs) {
+    const totalSeconds = Math.floor(attempt.durationMs / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    durationFormatted = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  }
+
+  return (
+    <View
+      style={[
+        styles.attemptCard,
+        { backgroundColor: COLORS.backgroundSecondary },
+      ]}
+    >
+      <View style={[styles.statusStrip, { backgroundColor: statusColor }]} />
+      <View style={styles.attemptContent}>
+        <View style={styles.attemptLeft}>
+          <Text style={styles.attemptGameType}>{gameType}</Text>
+          <View style={styles.attemptMeta}>
+            <MaterialCommunityIcons
+              name="calendar-clock"
+              size={14}
+              color={COLORS.textLight}
+            />
+            <Text style={styles.attemptMetaText}>{dateFormatted}</Text>
+          </View>
+        </View>
+        <View style={styles.attemptRight}>
+          <Text style={[styles.attemptScore, { color: statusColor }]}>
+            {score} pts
+          </Text>
+          <View style={styles.attemptMeta}>
+            <MaterialCommunityIcons
+              name="timer-outline"
+              size={14}
+              color={COLORS.textLight}
+            />
+            <Text style={styles.attemptMetaText}>{durationFormatted}</Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+}
+
 export default function HistoryScreen({ initialAttempts = [] }: Props) {
-  const theme = useTheme(); // Hook para usar colores del tema si faltan en COLORS
   const [selectedGame, setSelectedGame] = useState("all");
 
   const [attempts, setAttempts] = useState<Attempt[]>(initialAttempts);
@@ -85,7 +151,6 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
         if (selectedGame !== "all") params.gameType = selectedGame as GameType;
 
         const res = await getAttempts(params);
-        console.log(res);
 
         let items: Attempt[] = [];
         if (Array.isArray(res)) items = res as Attempt[];
@@ -118,149 +183,18 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
     if (!loadingMore && hasMore) fetchPage(offset);
   };
 
-  const renderAttemptCard = (item: Attempt) => (
-    <AttemptCard attempt={item} gameType={detectGameType(item)} />
-  );
-
-  // Estadisticas locales de c/ juego
-  const renderStatsCard = (stats: {
+  // Type for stats response
+  type StatsData = {
     totalAttempts?: number;
     successfulAttempts?: number;
     bestScore?: number;
-  }) => {
-    const total = stats?.totalAttempts || 0;
-    const success = stats?.successfulAttempts || 0;
-    const best = stats?.bestScore ?? "-";
-
-    const successRate = total > 0 ? success / total : 0;
-    const successPercentage = Math.round(successRate * 100);
-
-    return (
-      <Card
-        style={[
-          styles.statsCard,
-          { backgroundColor: COLORS.backgroundSecondary },
-        ]}
-      >
-        <Card.Content>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 12,
-            }}
-          >
-            <MaterialCommunityIcons
-              name="chart-box-outline"
-              size={20}
-              color={COLORS.primary}
-            />
-            <Text
-              variant="titleSmall"
-              style={{
-                marginLeft: 8,
-                color: COLORS.primary,
-                fontWeight: "bold",
-              }}
-            >
-              RENDIMIENTO
-            </Text>
-          </View>
-
-          {/* Grid de KPIs */}
-          <View style={styles.kpiContainer}>
-            {/* KPI 1: Total partidas */}
-            <View style={styles.kpiItem}>
-              <Text variant="displaySmall" style={styles.kpiValue}>
-                {total}
-              </Text>
-              <Text variant="bodySmall" style={styles.kpiLabel}>
-                Partidas
-              </Text>
-            </View>
-
-            {/* KPI 2: Mejor Puntaje */}
-            <View style={styles.kpiItem}>
-              <View style={{ flexDirection: "row", alignItems: "baseline" }}>
-                <Text
-                  variant="displaySmall"
-                  style={[styles.kpiValue, { color: "#FBC02D" }]}
-                >
-                  {best}
-                </Text>
-              </View>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <MaterialCommunityIcons
-                  name="trophy-variant"
-                  size={12}
-                  color="#FBC02D"
-                  style={{ marginRight: 4 }}
-                />
-                <Text variant="bodySmall" style={styles.kpiLabel}>
-                  Récord
-                </Text>
-              </View>
-            </View>
-
-            {/* KPI 3: Tasa de Éxito */}
-            <View style={styles.kpiItem}>
-              <Text
-                variant="displaySmall"
-                style={[
-                  styles.kpiValue,
-                  {
-                    color:
-                      successRate > 0.5 ? COLORS.success : theme.colors.error,
-                  },
-                ]}
-              >
-                {successPercentage}%
-              </Text>
-              <Text variant="bodySmall" style={styles.kpiLabel}>
-                Éxito
-              </Text>
-            </View>
-          </View>
-
-          <Divider style={{ marginVertical: 12 }} />
-
-          {/* Barra de Progreso */}
-          <View>
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginBottom: 6,
-              }}
-            >
-              <Text variant="labelSmall">Tasa de victorias</Text>
-              <Text variant="labelSmall">
-                {success}/{total}
-              </Text>
-            </View>
-            <ProgressBar
-              progress={successRate}
-              color={successRate > 0.5 ? COLORS.success : theme.colors.error}
-              style={{
-                height: 8,
-                borderRadius: 4,
-                backgroundColor: theme.colors.surfaceVariant,
-              }}
-            />
-          </View>
-        </Card.Content>
-      </Card>
-    );
   };
 
-  // Calcular estadísticas globales o por juego
   const statsToShow = useMemo(() => {
     if (selectedGame === "all") {
-      // Para "Todos", sumamos las estadísticas de cada tipo de juego
-      const result = statsQueries.reduce(
-        (acc, query, index) => {
-          const data = query.data;
-          console.log(`📊 Stats para ${gameTypes[index]}:`, data);
+      return statsQueries.reduce(
+        (acc, query) => {
+          const data = query.data as StatsData | undefined;
           if (!data) return acc;
           return {
             totalAttempts: acc.totalAttempts + (data.totalAttempts || 0),
@@ -271,19 +205,24 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
         },
         { totalAttempts: 0, successfulAttempts: 0, bestScore: 0 },
       );
-      console.log("🎯 Stats globales calculadas:", result);
-      return result;
     } else {
-      // Para un juego específico, usamos directamente sus estadísticas
-      const result = statsQueries[gameTypes.indexOf(selectedGame)]?.data || {
-        totalAttempts: 0,
-        successfulAttempts: 0,
-        bestScore: 0,
-      };
-      console.log(`🎮 Stats para ${selectedGame}:`, result);
-      return result;
+      const idx = gameTypes.indexOf(selectedGame as GameType);
+      const data = statsQueries[idx]?.data as StatsData | undefined;
+      return (
+        data || {
+          totalAttempts: 0,
+          successfulAttempts: 0,
+          bestScore: 0,
+        }
+      );
     }
-  }, [selectedGame, statsQueries]);
+  }, [selectedGame, statsQueries, gameTypes]);
+
+  const total = statsToShow?.totalAttempts || 0;
+  const success = statsToShow?.successfulAttempts || 0;
+  const best = statsToShow?.bestScore ?? "-";
+  const successRate = total > 0 ? success / total : 0;
+  const successPercentage = Math.round(successRate * 100);
 
   const renderFooter = () => {
     if (loadingMore) {
@@ -296,11 +235,12 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
 
     if (hasMore && attempts.length > 0) {
       return (
-        <View style={{ paddingVertical: 20, paddingHorizontal: 10 }}>
+        <View style={{ paddingVertical: 20 }}>
           <Button
             mode="contained"
             onPress={loadMore}
-            style={{ backgroundColor: COLORS.primary }}
+            buttonColor={COLORS.primary}
+            style={{ borderRadius: 12 }}
           >
             Mostrar más
           </Button>
@@ -312,40 +252,22 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
   };
 
   return (
-    <SafeAreaView style={STYLES.safeArea}>
-      <View style={styles.fullWidthContainer}>
-        <Stack.Screen options={{ headerShown: false }} />
-        <View
-          style={{
-            width: "100%",
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 12,
-            paddingHorizontal: 16,
-          }}
-        >
-          <Text style={[STYLES.heading, { marginBottom: 0 }]}> Historial</Text>
-        </View>
+    <SafeAreaView style={STYLES.safeArea} edges={["left", "right"]}>
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+      <CustomHeader title="Historial" />
 
-        <View
-          style={{
-            flexDirection: "row",
-            flexWrap: "wrap",
-            gap: 8,
-            marginVertical: 8,
-            paddingHorizontal: 16,
-          }}
-        >
+      <View style={styles.container}>
+        {/* Filter Chips */}
+        <View style={styles.filterContainer}>
           <Chip
             selected={selectedGame === "all"}
             onPress={() => setSelectedGame("all")}
-            style={
+            style={[styles.chip, selectedGame === "all" && styles.chipSelected]}
+            textStyle={
               selectedGame === "all"
-                ? { backgroundColor: COLORS.success, borderColor: "#000" }
-                : { backgroundColor: COLORS.background, borderColor: "#000" }
+                ? { color: COLORS.white }
+                : { color: COLORS.text }
             }
-            textStyle={selectedGame === "all" ? { color: "#fff" } : undefined}
           >
             Todos
           </Chip>
@@ -354,71 +276,205 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
               key={gt}
               selected={selectedGame === gt}
               onPress={() => setSelectedGame(gt)}
-              style={
+              style={[styles.chip, selectedGame === gt && styles.chipSelected]}
+              textStyle={
                 selectedGame === gt
-                  ? { backgroundColor: COLORS.success, borderColor: "#000" }
-                  : { backgroundColor: COLORS.background, borderColor: "#000" }
+                  ? { color: COLORS.white }
+                  : { color: COLORS.text }
               }
-              textStyle={selectedGame === gt ? { color: "#fff" } : undefined}
             >
               {gameTypesRender[gt]}
             </Chip>
           ))}
         </View>
 
-        {globalLoading && !loadingMore && (
+        {globalLoading && !loadingMore ? (
           <View style={STYLES.center}>
             <ActivityIndicator />
           </View>
+        ) : (
+          <FlatList
+            data={attempts}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <AttemptItem attempt={item} gameType={detectGameType(item)} />
+            )}
+            ListHeaderComponent={
+              <Card style={styles.statsCard}>
+                <Card.Content>
+                  <View style={styles.statsHeader}>
+                    <MaterialCommunityIcons
+                      name="chart-box-outline"
+                      size={20}
+                      color={COLORS.primary}
+                    />
+                    <Text style={styles.statsTitle}>Rendimiento</Text>
+                  </View>
+
+                  <View style={styles.kpiContainer}>
+                    <View style={styles.kpiItem}>
+                      <Text style={styles.kpiValue}>{total}</Text>
+                      <Text style={styles.kpiLabel}>Partidas</Text>
+                    </View>
+                    <View style={styles.kpiItem}>
+                      <Text style={[styles.kpiValue, { color: "#FBC02D" }]}>
+                        {best}
+                      </Text>
+                      <Text style={styles.kpiLabel}>Récord</Text>
+                    </View>
+                    <View style={styles.kpiItem}>
+                      <Text
+                        style={[
+                          styles.kpiValue,
+                          {
+                            color:
+                              successRate > 0.5 ? COLORS.success : COLORS.error,
+                          },
+                        ]}
+                      >
+                        {successPercentage}%
+                      </Text>
+                      <Text style={styles.kpiLabel}>Éxito</Text>
+                    </View>
+                  </View>
+
+                  <Divider style={{ marginVertical: 12 }} />
+
+                  <View style={styles.progressRow}>
+                    <Text style={styles.progressLabel}>Tasa de victorias</Text>
+                    <Text style={styles.progressLabel}>
+                      {success}/{total}
+                    </Text>
+                  </View>
+                  <ProgressBar
+                    progress={successRate}
+                    color={successRate > 0.5 ? COLORS.success : COLORS.error}
+                    style={styles.progressBar}
+                  />
+                </Card.Content>
+              </Card>
+            }
+            ListFooterComponent={renderFooter}
+            contentContainerStyle={styles.listContent}
+          />
         )}
-
-        {/* Estadísticas */}
-        {!globalLoading && renderStatsCard(statsToShow)}
-
-        {/* Listado de intentos */}
-        <FlatList
-          data={attempts}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => renderAttemptCard(item)}
-          ListFooterComponent={renderFooter}
-          contentContainerStyle={{ paddingBottom: 20, paddingHorizontal: 16 }}
-        />
       </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  fullWidthContainer: {
+  container: {
     flex: 1,
-    width: "100%",
+  },
+  filterContainer: {
+    flexDirection: "row",
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  chip: {
+    backgroundColor: COLORS.backgroundSecondary,
+  },
+  chipSelected: {
+    backgroundColor: COLORS.primary,
+  },
+  listContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   statsCard: {
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 16,
     marginBottom: 16,
-    marginHorizontal: 16,
-    elevation: 2,
-    borderRadius: 12,
+    ...SHADOWS.card,
+  },
+  statsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  statsTitle: {
+    marginLeft: 8,
+    color: COLORS.primary,
+    fontWeight: "600",
+    fontSize: 14,
+    textTransform: "uppercase",
   },
   kpiContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 4,
+    justifyContent: "space-around",
   },
   kpiItem: {
     alignItems: "center",
-    justifyContent: "center",
-    flex: 1,
   },
   kpiValue: {
     fontWeight: "bold",
-    fontSize: 24, // Ajustado para que quepa bien
-    marginBottom: 2,
+    fontSize: 24,
+    color: COLORS.text,
   },
   kpiLabel: {
-    opacity: 0.6,
+    fontSize: 11,
+    color: COLORS.textLight,
     textTransform: "uppercase",
-    fontSize: 10,
-    letterSpacing: 0.5,
+    marginTop: 2,
+  },
+  progressRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 6,
+  },
+  progressLabel: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+  },
+  progressBar: {
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: COLORS.border,
+  },
+  attemptCard: {
+    flexDirection: "row",
+    borderRadius: 12,
+    marginBottom: 8,
+    overflow: "hidden",
+    ...SHADOWS.light,
+  },
+  statusStrip: {
+    width: 4,
+  },
+  attemptContent: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  attemptLeft: {
+    flex: 1,
+  },
+  attemptRight: {
+    alignItems: "flex-end",
+  },
+  attemptGameType: {
+    fontWeight: "600",
+    fontSize: 15,
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  attemptScore: {
+    fontWeight: "600",
+    fontSize: 15,
+    marginBottom: 4,
+  },
+  attemptMeta: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  attemptMetaText: {
+    fontSize: 12,
+    color: COLORS.textLight,
+    marginLeft: 4,
   },
 });

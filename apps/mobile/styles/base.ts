@@ -14,34 +14,37 @@ export const FONT = {
   lobster: "Lobster_400Regular",
 } as const;
 
-/** Centralized color palette for the app - Apple-style minimalist design. */
+/** Centralized color palette for the app - Custom Elepad design.
+ * Base palette: ["#e5ffde","#bbcbcb","#9590a8","#634b66","#18020c"]
+ * Plus: white (#FFFFFF), black (#000000), gray tones
+ */
 export const COLORS = {
-  // Primary colors - iOS System Blue
-  primary: "#007AFF",
-  secondary: "#5856D6",
-  border: "#E5E5EA",
+  // Primary colors from palette
+  primary: "#634b66", // Deep purple from palette
+  secondary: "#9590a8", // Medium purple from palette
+  border: "#bbcbcb", // Light gray-green from palette
 
-  // Backgrounds - Pure white base with subtle grays
+  // Backgrounds
   background: "#FFFFFF",
-  backgroundSecondary: "#F2F2F7",
-  backgroundTertiary: "#E5E5EA",
+  backgroundSecondary: "#e5ffde", // Light mint from palette
+  backgroundTertiary: "#bbcbcb", // Light gray-green from palette
   white: "#FFFFFF",
   success: "#34C759",
 
-  // Text hierarchy - High contrast, reduced fatigue
-  text: "#000000",
-  textSecondary: "#3A3A3C",
-  textLight: "#8E8E93",
-  textPlaceholder: "#C7C7CC",
+  // Text hierarchy - High contrast
+  text: "#18020c", // Dark from palette
+  textSecondary: "#634b66", // Deep purple from palette
+  textLight: "#9590a8", // Medium purple from palette
+  textPlaceholder: "#bbcbcb", // Light gray-green from palette
 
   red: "#FF3B30",
 
   // States
   error: "#FF3B30",
-  accent: "#F2F2F7",
+  accent: "#e5ffde", // Light mint from palette
 
   // Borders and separators
-  separator: "#C6C6C8",
+  separator: "#bbcbcb", // Light gray-green from palette
 } as const;
 
 /** Apple-style subtle shadows. */

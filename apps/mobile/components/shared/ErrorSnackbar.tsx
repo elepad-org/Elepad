@@ -11,10 +11,10 @@ interface ErrorSnackbarProps {
 }
 
 /**
- * Snackbar for error messages with Apple-style design
+ * Snackbar for error messages with consistent design
  * - Border radius: 16px
- * - Color: iOS System Red
- * - Position: Always above navigation bar
+ * - Color: Error red
+ * - Position: Always above navigation bar (120px margin)
  */
 export default function ErrorSnackbar({
   visible,
@@ -22,7 +22,7 @@ export default function ErrorSnackbar({
   message,
   duration = 4000,
 }: ErrorSnackbarProps) {
-  const bottomMargin = Platform.OS === "web" ? 100 : 85;
+  const bottomMargin = Platform.OS === "web" ? 120 : 120;
 
   return (
     <Snackbar
@@ -33,6 +33,7 @@ export default function ErrorSnackbar({
         backgroundColor: COLORS.error,
         borderRadius: 16,
         marginBottom: bottomMargin,
+        marginHorizontal: 20,
       }}
       action={{
         label: "OK",
