@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import { View, Alert, Image, TouchableOpacity } from "react-native";
+import { View, Alert, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { Text, TextInput, Button } from "react-native-paper";
 import { makeRedirectUri } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
@@ -7,7 +7,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import googleLogo from "@/assets/images/google.png";
 import { Link } from "expo-router";
-import { COLORS, STYLES } from "@/styles/base";
+import { COLORS } from "@/styles/base";
 
 export default function LogIn() {
   const router = useRouter();
@@ -119,42 +119,25 @@ export default function LogIn() {
   };
 
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        paddingHorizontal: 16,
-      }}
-    >
-      <View
-        style={[
-          STYLES.titleCard,
-          {
-            backgroundColor: COLORS.accent,
-            borderRadius: 20,
-            padding: 20,
-            width: "100%",
-            maxWidth: 400,
-            alignItems: "center",
-          },
-        ]}
-      >
-        <Text style={STYLES.heading}>Iniciar Sesión</Text>
-        <Text style={[STYLES.subheading, { marginTop: 8 }]}>
-          Ingresa tu email y tu contraseña
-        </Text>
+    <View style={styles.container}>
+      <View style={styles.formContainer}>
+        <Text style={styles.title}>Iniciar Sesión</Text>
+        <Text style={styles.subtitle}>Ingresa tu email y tu contraseña</Text>
 
         <TextInput
           mode="outlined"
-          placeholder="Correo"
+          placeholder="Correo electrónico"
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
           returnKeyType="next"
-          style={STYLES.input}
-          outlineStyle={STYLES.inputOutline}
+          style={styles.input}
+          outlineStyle={styles.inputOutline}
+          outlineColor="rgba(255,255,255,0.3)"
+          activeOutlineColor={COLORS.white}
+          textColor={COLORS.white}
+          placeholderTextColor="rgba(255,255,255,0.6)"
           disabled={loading}
           dense
         />
@@ -166,8 +149,12 @@ export default function LogIn() {
           secureTextEntry
           autoCapitalize="none"
           returnKeyType="done"
-          style={STYLES.input}
-          outlineStyle={STYLES.inputOutline}
+          style={styles.input}
+          outlineStyle={styles.inputOutline}
+          outlineColor="rgba(255,255,255,0.3)"
+          activeOutlineColor={COLORS.white}
+          textColor={COLORS.white}
+          placeholderTextColor="rgba(255,255,255,0.6)"
           onSubmitEditing={handleLogin}
           disabled={loading}
           dense
@@ -175,8 +162,9 @@ export default function LogIn() {
 
         <Button
           mode="contained"
-          contentStyle={STYLES.buttonContent}
-          style={STYLES.buttonPrimary}
+          contentStyle={styles.buttonContent}
+          style={styles.primaryButton}
+          buttonColor={COLORS.primary}
           onPress={handleLogin}
           loading={loading}
           disabled={loading}
@@ -184,36 +172,129 @@ export default function LogIn() {
           Continuar
         </Button>
 
-        <View style={STYLES.orRow}>
-          <View style={STYLES.orLine} />
-          <Text style={STYLES.orText}>o</Text>
-          <View style={STYLES.orLine} />
+        <View style={styles.orRow}>
+          <View style={styles.orLine} />
+          <Text style={styles.orText}>o</Text>
+          <View style={styles.orLine} />
         </View>
 
         <TouchableOpacity
-          style={STYLES.buttonGoogle}
+          style={styles.googleButton}
           activeOpacity={0.85}
           onPress={handleGoogleLogin}
           disabled={loading}
         >
-          <View style={STYLES.googleIconWrap}>
+          <View style={styles.googleIconWrap}>
             <Image
               source={googleLogo}
               style={{ width: 18, height: 18 }}
               resizeMode="contain"
             />
           </View>
-          <Text style={STYLES.googleText}>Continuar con Google</Text>
+          <Text style={styles.googleText}>Continuar con Google</Text>
         </TouchableOpacity>
 
         <Link
           href={{ pathname: "/" }}
           accessibilityRole="button"
-          style={[STYLES.subheading, { textAlign: "center", marginTop: 23 }]}
+          style={styles.backLink}
         >
-          <Text style={[STYLES.subheading]}> Volver</Text>
+          <Text style={styles.backText}>Volver</Text>
         </Link>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
+  formContainer: {
+    width: "100%",
+    maxWidth: 400,
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.4)",
+    borderRadius: 20,
+    padding: 28,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: COLORS.white,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: "rgba(255,255,255,0.8)",
+    marginBottom: 24,
+    textAlign: "center",
+  },
+  input: {
+    width: "100%",
+    marginBottom: 14,
+    backgroundColor: "transparent",
+  },
+  inputOutline: {
+    borderRadius: 12,
+  },
+  primaryButton: {
+    marginTop: 8,
+    width: "100%",
+    borderRadius: 12,
+  },
+  buttonContent: {
+    height: 50,
+  },
+  orRow: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 20,
+  },
+  orLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "rgba(255,255,255,0.3)",
+  },
+  orText: {
+    marginHorizontal: 16,
+    color: "rgba(255,255,255,0.7)",
+    fontSize: 14,
+  },
+  googleButton: {
+    width: "100%",
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  googleIconWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: COLORS.white,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+  googleText: {
+    fontSize: 15,
+    color: COLORS.text,
+    fontWeight: "600",
+  },
+  backLink: {
+    marginTop: 24,
+  },
+  backText: {
+    fontSize: 14,
+    color: COLORS.white,
+    fontWeight: "500",
+  },
+});

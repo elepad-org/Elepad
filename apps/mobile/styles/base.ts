@@ -14,34 +14,44 @@ export const FONT = {
   lobster: "Lobster_400Regular",
 } as const;
 
-/** Centralized color palette for the app - Apple-style minimalist design. */
-export const COLORS = {
-  // Primary colors - iOS System Blue
-  primary: "#007AFF",
-  secondary: "#5856D6",
-  border: "#E5E5EA",
+/** Layout constants for consistent spacing. */
+export const LAYOUT = {
+  /** Height reserved for floating bottom navigation bar + margins */
+  bottomNavHeight: 110,
+} as const;
 
-  // Backgrounds - Pure white base with subtle grays
+/** Centralized color palette for the app - Custom Elepad design.
+ * Base palette: ["#5b507a","#5b618a","#9eadc8"]
+ * Plus: white (#FFFFFF), black (#000000), gray tones
+ */
+export const COLORS = {
+  // Primary colors from palette
+  primary: "#5b507a", // Deep purple from palette
+  secondary: "#5b618a", // Medium purple-blue from palette
+  border: "#E5E5EA", // Light gray
+
+  // Backgrounds
   background: "#FFFFFF",
-  backgroundSecondary: "#F2F2F7",
-  backgroundTertiary: "#E5E5EA",
+  backgroundSecondary: "#F2F2F7", // Light gray
+  backgroundTertiary: "#9eadc8", // Light blue from palette
   white: "#FFFFFF",
   success: "#34C759",
 
-  // Text hierarchy - High contrast, reduced fatigue
-  text: "#000000",
-  textSecondary: "#3A3A3C",
-  textLight: "#8E8E93",
-  textPlaceholder: "#C7C7CC",
+  // Text hierarchy - High contrast
+  text: "#000000", // Black
+  textSecondary: "#5b507a", // Deep purple from palette
+  textLight: "#5b618a", // Medium purple-blue from palette
+  textPlaceholder: "#9eadc8", // Light blue from palette
 
-  red: "#FF3B30",
+  // Danger/Error colors - use secondary from palette
+  red: "#5b618a", // Use secondary color instead of red
+  error: "#5b618a", // Use secondary color for errors/danger
 
   // States
-  error: "#FF3B30",
-  accent: "#F2F2F7",
+  accent: "#9eadc8", // Light blue from palette
 
   // Borders and separators
-  separator: "#C6C6C8",
+  separator: "#E5E5EA", // Light gray
 } as const;
 
 /** Apple-style subtle shadows. */
@@ -114,11 +124,11 @@ export const STYLES = StyleSheet.create({
     alignItems: "center",
   },
 
-  // Buttons - Apple-style rounded
+  // Buttons - consistent 12px border radius
   buttonPrimary: {
     marginTop: 20,
     width: "85%",
-    borderRadius: 14,
+    borderRadius: 12,
     backgroundColor: COLORS.primary,
     alignItems: "center",
   },
@@ -126,7 +136,7 @@ export const STYLES = StyleSheet.create({
     marginTop: 14,
     width: "100%",
     backgroundColor: COLORS.backgroundSecondary,
-    borderRadius: 14,
+    borderRadius: 12,
     ...SHADOWS.light,
   },
   buttonContent: {
@@ -136,7 +146,7 @@ export const STYLES = StyleSheet.create({
     marginTop: 14,
     width: "100%",
     backgroundColor: COLORS.white,
-    borderRadius: 14,
+    borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 16,
     flexDirection: "row",

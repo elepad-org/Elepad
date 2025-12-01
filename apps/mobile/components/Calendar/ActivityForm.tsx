@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   saveButton: {
-    borderRadius: 20,
+    borderRadius: 12,
     paddingHorizontal: 24,
   },
 });

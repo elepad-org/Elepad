@@ -1,7 +1,7 @@
 import React from "react";
 import { Snackbar } from "react-native-paper";
-import { Text, Platform } from "react-native";
-import { COLORS } from "@/styles/base";
+import { Text } from "react-native";
+import { COLORS, LAYOUT } from "@/styles/base";
 
 interface SuccessSnackbarProps {
   visible: boolean;
@@ -11,9 +11,9 @@ interface SuccessSnackbarProps {
 }
 
 /**
- * Snackbar for success messages with Apple-style design
+ * Snackbar for success messages with consistent design
  * - Border radius: 16px
- * - Color: iOS System Green
+ * - Color: Success green
  * - Position: Always above navigation bar
  */
 export default function SuccessSnackbar({
@@ -22,8 +22,6 @@ export default function SuccessSnackbar({
   message,
   duration = 2200,
 }: SuccessSnackbarProps) {
-  const bottomMargin = Platform.OS === "web" ? 100 : 85;
-
   return (
     <Snackbar
       visible={visible}
@@ -32,7 +30,8 @@ export default function SuccessSnackbar({
       style={{
         backgroundColor: COLORS.success,
         borderRadius: 16,
-        marginBottom: bottomMargin,
+        marginBottom: LAYOUT.bottomNavHeight + 10,
+        marginHorizontal: 20,
       }}
     >
       <Text style={{ color: COLORS.white, fontSize: 15 }}>{message}</Text>

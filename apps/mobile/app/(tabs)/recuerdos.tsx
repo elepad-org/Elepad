@@ -18,7 +18,7 @@ import {
 } from "@elepad/api-client";
 import { useMutation } from "@tanstack/react-query";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { COLORS, STYLES } from "@/styles/base";
+import { COLORS, STYLES, LAYOUT } from "@/styles/base";
 import { Platform } from "react-native";
 import { uriToBlob } from "@/lib/uriToBlob";
 
@@ -576,11 +576,15 @@ export default function RecuerdosScreen() {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
           ListFooterComponent={
-            memoriesLoading && recuerdos.length > 0 ? (
-              <View style={{ padding: 16, alignItems: "center" }}>
-                <ActivityIndicator />
-              </View>
-            ) : null
+            <>
+              {memoriesLoading && recuerdos.length > 0 && (
+                <View style={{ padding: 16, alignItems: "center" }}>
+                  <ActivityIndicator />
+                </View>
+              )}
+              {/* Invisible spacer to ensure last item is visible above navigation bar */}
+              <View style={{ height: LAYOUT.bottomNavHeight + 20 }} />
+            </>
           }
         />
       )}
@@ -621,8 +625,9 @@ export default function RecuerdosScreen() {
         duration={2200}
         style={{
           backgroundColor: snackbarError ? COLORS.error : COLORS.success,
-          borderRadius: 8,
-          marginBottom: 80, // Agregar margen para que no se superponga con la tab bar
+          borderRadius: 16,
+          marginBottom: LAYOUT.bottomNavHeight + 10,
+          marginHorizontal: 20,
         }}
       >
         {snackbarMessage}

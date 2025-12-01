@@ -6,9 +6,10 @@ import { router, Stack } from "expo-router";
 import { NetGameBoard } from "@/components/NetGame/NetGameBoard";
 import { GameHeader } from "@/components/shared/GameHeader";
 import { InstructionsDialog } from "@/components/shared/InstructionsDialog";
-import { COLORS } from "@/styles/base";
+import { COLORS, STYLES } from "@/styles/base";
 import { GAMES_INFO } from "@/constants/gamesInfo";
 import { GameInstructions } from "@/components/shared/GameInstructions";
+import CancelButton from "@/components/shared/CancelButton";
 
 export default function NetGameScreen() {
   const [showQuitDialog, setShowQuitDialog] = useState(false);
@@ -180,22 +181,37 @@ export default function NetGameScreen() {
             <Dialog
               visible={showQuitDialog}
               onDismiss={() => setShowQuitDialog(false)}
+              style={{
+                backgroundColor: COLORS.background,
+                width: "90%",
+                alignSelf: "center",
+                borderRadius: 16,
+                paddingVertical: 14,
+              }}
             >
-              <Dialog.Icon icon="alert-circle" />
-              <Dialog.Title style={styles.dialogTitle}>
+              <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
                 ¿Salir de la partida?
               </Dialog.Title>
-              <Dialog.Content>
-                <Text variant="bodyMedium">
+              <Dialog.Content style={{ paddingBottom: 8 }}>
+                <Text style={{ ...STYLES.subheading, marginTop: 0 }}>
                   Si abandonas ahora, perderás tu progreso actual. ¿Estás seguro
                   de que quieres salir?
                 </Text>
               </Dialog.Content>
-              <Dialog.Actions>
-                <Button onPress={() => setShowQuitDialog(false)}>
-                  Cancelar
-                </Button>
-                <Button onPress={confirmQuit} textColor={COLORS.error}>
+              <Dialog.Actions
+                style={{
+                  paddingBottom: 12,
+                  paddingHorizontal: 20,
+                  justifyContent: "space-between",
+                }}
+              >
+                <CancelButton onPress={() => setShowQuitDialog(false)} />
+                <Button
+                  mode="contained"
+                  onPress={confirmQuit}
+                  buttonColor={COLORS.secondary}
+                  style={{ borderRadius: 12 }}
+                >
                   Salir
                 </Button>
               </Dialog.Actions>
@@ -218,9 +234,15 @@ export default function NetGameScreen() {
             <Dialog
               visible={showResultsDialog}
               onDismiss={() => setShowResultsDialog(false)}
+              style={{
+                backgroundColor: COLORS.background,
+                width: "90%",
+                alignSelf: "center",
+                borderRadius: 16,
+                paddingVertical: 14,
+              }}
             >
-              <Dialog.Icon icon={wasSolvedAutomatically ? "robot" : "trophy"} />
-              <Dialog.Title style={styles.dialogTitle}>
+              <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
                 {wasSolvedAutomatically
                   ? "Juego Terminado"
                   : "¡Felicitaciones! 🎉"}
@@ -386,5 +408,6 @@ const styles = StyleSheet.create({
   },
   dialogButton: {
     width: "100%",
+    borderRadius: 12,
   },
 });

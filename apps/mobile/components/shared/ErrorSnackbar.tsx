@@ -1,7 +1,7 @@
 import React from "react";
 import { Snackbar } from "react-native-paper";
-import { Text, Platform } from "react-native";
-import { COLORS } from "@/styles/base";
+import { Text } from "react-native";
+import { COLORS, LAYOUT } from "@/styles/base";
 
 interface ErrorSnackbarProps {
   visible: boolean;
@@ -11,9 +11,9 @@ interface ErrorSnackbarProps {
 }
 
 /**
- * Snackbar for error messages with Apple-style design
+ * Snackbar for error messages with consistent design
  * - Border radius: 16px
- * - Color: iOS System Red
+ * - Color: Error red
  * - Position: Always above navigation bar
  */
 export default function ErrorSnackbar({
@@ -22,8 +22,6 @@ export default function ErrorSnackbar({
   message,
   duration = 4000,
 }: ErrorSnackbarProps) {
-  const bottomMargin = Platform.OS === "web" ? 100 : 85;
-
   return (
     <Snackbar
       visible={visible}
@@ -32,7 +30,8 @@ export default function ErrorSnackbar({
       style={{
         backgroundColor: COLORS.error,
         borderRadius: 16,
-        marginBottom: bottomMargin,
+        marginBottom: LAYOUT.bottomNavHeight + 10,
+        marginHorizontal: 20,
       }}
       action={{
         label: "OK",

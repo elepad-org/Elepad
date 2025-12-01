@@ -154,7 +154,7 @@ export const GAMES_INFO: Record<string, GameInfo> = {
     title: "NET",
     emoji: "🌐",
     iconName: "lan",
-    iconColor: "#2196F3",
+    iconColor: COLORS.primary,
     description:
       "Un desafiante juego de lógica donde debes conectar toda la red girando las casillas. Perfecto para mejorar tu pensamiento espacial y habilidades de resolución de problemas.",
     objective:

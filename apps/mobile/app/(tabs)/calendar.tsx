@@ -228,8 +228,8 @@ export default function CalendarScreen() {
           <Button
             onPress={handleDelete}
             mode="contained"
-            buttonColor={COLORS.red}
-            style={{ borderRadius: 20, paddingHorizontal: 24 }}
+            buttonColor={COLORS.secondary}
+            style={{ borderRadius: 12, paddingHorizontal: 24 }}
           >
             Eliminar
           </Button>
