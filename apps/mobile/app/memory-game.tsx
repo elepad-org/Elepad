@@ -6,9 +6,10 @@ import { router, Stack } from "expo-router";
 import { MemoryGameBoard } from "@/components/MemoryGame/MemoryGameBoard";
 import { GameHeader } from "@/components/shared/GameHeader";
 import { InstructionsDialog } from "@/components/shared/InstructionsDialog";
-import { COLORS } from "@/styles/base";
+import { COLORS, STYLES } from "@/styles/base";
 import { GAMES_INFO } from "@/constants/gamesInfo";
 import { GameInstructions } from "@/components/shared/GameInstructions";
+import CancelButton from "@/components/shared/CancelButton";
 
 type GameMode = "4x4" | "4x6";
 
@@ -202,22 +203,37 @@ export default function MemoryGameScreen() {
             <Dialog
               visible={showQuitDialog}
               onDismiss={() => setShowQuitDialog(false)}
+              style={{
+                backgroundColor: COLORS.background,
+                width: "90%",
+                alignSelf: "center",
+                borderRadius: 16,
+                paddingVertical: 14,
+              }}
             >
-              <Dialog.Icon icon="alert-circle" />
-              <Dialog.Title style={styles.dialogTitle}>
+              <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
                 ¿Salir de la partida?
               </Dialog.Title>
-              <Dialog.Content>
-                <Text variant="bodyMedium">
+              <Dialog.Content style={{ paddingBottom: 8 }}>
+                <Text style={{ ...STYLES.subheading, marginTop: 0 }}>
                   Si abandonas ahora, perderás tu progreso actual. ¿Estás seguro
                   de que quieres salir?
                 </Text>
               </Dialog.Content>
-              <Dialog.Actions>
-                <Button onPress={() => setShowQuitDialog(false)}>
-                  Cancelar
-                </Button>
-                <Button onPress={confirmQuit} textColor={COLORS.error}>
+              <Dialog.Actions
+                style={{
+                  paddingBottom: 12,
+                  paddingHorizontal: 20,
+                  justifyContent: "space-between",
+                }}
+              >
+                <CancelButton onPress={() => setShowQuitDialog(false)} />
+                <Button
+                  mode="contained"
+                  onPress={confirmQuit}
+                  buttonColor={COLORS.secondary}
+                  style={{ borderRadius: 12 }}
+                >
                   Salir
                 </Button>
               </Dialog.Actions>
@@ -242,9 +258,15 @@ export default function MemoryGameScreen() {
             <Dialog
               visible={showAchievementsDialog}
               onDismiss={handleAchievementsDialogClose}
+              style={{
+                backgroundColor: COLORS.background,
+                width: "90%",
+                alignSelf: "center",
+                borderRadius: 16,
+                paddingVertical: 14,
+              }}
             >
-              <Dialog.Icon icon="trophy-award" />
-              <Dialog.Title style={styles.dialogTitle}>
+              <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
                 ¡Logros Desbloqueados! 🎉
               </Dialog.Title>
               <Dialog.Content>
@@ -264,11 +286,14 @@ export default function MemoryGameScreen() {
                   ))}
                 </View>
               </Dialog.Content>
-              <Dialog.Actions>
+              <Dialog.Actions
+                style={{ paddingBottom: 12, paddingHorizontal: 20 }}
+              >
                 <Button
                   mode="contained"
                   onPress={handleAchievementsDialogClose}
                   buttonColor={COLORS.primary}
+                  style={{ borderRadius: 12 }}
                 >
                   Continuar
                 </Button>
@@ -278,13 +303,28 @@ export default function MemoryGameScreen() {
 
           {/* Diálogo de selección de modo */}
           <Portal>
-            <Dialog visible={showModeSelectionDialog} dismissable={false}>
-              <Dialog.Icon icon="cards" />
-              <Dialog.Title style={styles.dialogTitle}>
+            <Dialog
+              visible={showModeSelectionDialog}
+              dismissable={false}
+              style={{
+                backgroundColor: COLORS.background,
+                width: "90%",
+                alignSelf: "center",
+                borderRadius: 16,
+                paddingVertical: 14,
+              }}
+            >
+              <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
                 Elige el modo de juego
               </Dialog.Title>
-              <Dialog.Content>
-                <Text variant="bodyMedium" style={styles.modeDescription}>
+              <Dialog.Content style={{ paddingBottom: 8 }}>
+                <Text
+                  style={{
+                    ...STYLES.subheading,
+                    marginTop: 0,
+                    marginBottom: 16,
+                  }}
+                >
                   Selecciona la dificultad del juego
                 </Text>
               </Dialog.Content>
@@ -293,7 +333,7 @@ export default function MemoryGameScreen() {
                   mode="contained"
                   onPress={() => handleModeSelection("4x4")}
                   style={styles.modeButton}
-                  buttonColor={COLORS.success}
+                  buttonColor={COLORS.secondary}
                   icon="grid"
                 >
                   4x4 (Fácil)
@@ -316,14 +356,26 @@ export default function MemoryGameScreen() {
             <Dialog
               visible={showResultsDialog}
               onDismiss={() => setShowResultsDialog(false)}
+              style={{
+                backgroundColor: COLORS.background,
+                width: "90%",
+                alignSelf: "center",
+                borderRadius: 16,
+                paddingVertical: 14,
+              }}
             >
-              <Dialog.Icon icon="trophy" />
-              <Dialog.Title style={styles.dialogTitle}>
+              <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
                 ¡Felicitaciones! 🎉
               </Dialog.Title>
               <Dialog.Content>
                 <View style={styles.resultsContainer}>
-                  <Text variant="bodyLarge" style={styles.resultsText}>
+                  <Text
+                    style={{
+                      ...STYLES.subheading,
+                      marginTop: 0,
+                      marginBottom: 16,
+                    }}
+                  >
                     ¡Has completado el juego!
                   </Text>
 
@@ -420,6 +472,7 @@ const styles = StyleSheet.create({
   },
   modeButton: {
     width: "100%",
+    borderRadius: 12,
   },
   resultsContainer: {
     alignItems: "center",
@@ -481,6 +534,7 @@ const styles = StyleSheet.create({
   },
   dialogButton: {
     width: "100%",
+    borderRadius: 12,
   },
   achievementsContainer: {
     gap: 16,
