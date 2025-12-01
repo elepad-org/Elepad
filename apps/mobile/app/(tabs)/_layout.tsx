@@ -8,6 +8,10 @@ import ConfiguracionScreen from "./configuracion";
 import { COLORS } from "@/styles/base";
 import CalendarScreen from "./calendar";
 
+// ~8% opacity for the active tab indicator background
+const ACTIVE_INDICATOR_OPACITY = 0.08;
+const activeIndicatorColor = `rgba(0, 122, 255, ${ACTIVE_INDICATOR_OPACITY})`;
+
 export default function TabLayout() {
   const theme = useTheme();
   const [index, setIndex] = useState(0);
@@ -112,7 +116,7 @@ export default function TabLayout() {
           activeColor={COLORS.primary}
           inactiveColor={COLORS.textLight}
           activeIndicatorStyle={{
-            backgroundColor: `${COLORS.primary}15`,
+            backgroundColor: activeIndicatorColor,
             borderRadius: 12,
           }}
           style={{

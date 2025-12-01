@@ -156,12 +156,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   title: {
+    // Apple HIG: Navigation bar title is 17pt with semibold weight
     fontSize: 17,
     fontFamily: FONT.semiBold,
     color: COLORS.text,
     letterSpacing: -0.2,
   },
   largeTitle: {
+    // Apple HIG: Large title is 34pt but we use 22pt for mobile optimization
     fontSize: 22,
     fontFamily: FONT.bold,
     letterSpacing: -0.4,

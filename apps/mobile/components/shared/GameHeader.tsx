@@ -128,6 +128,7 @@ const styles = StyleSheet.create({
   iconText: {
     fontSize: 26,
   },
+  // Additional styling for headlineSmall variant to match Apple HIG
   title: {
     fontFamily: FONT.semiBold,
     color: COLORS.text,
