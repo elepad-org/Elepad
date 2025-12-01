@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View } from "react-native";
+import { View, Platform } from "react-native";
 import { BottomNavigation, useTheme } from "react-native-paper";
 import HomeScreen from "./home";
 import JuegosScreen from "./juegos";
@@ -7,6 +7,10 @@ import RecuerdosScreen from "./recuerdos";
 import ConfiguracionScreen from "./configuracion";
 import { COLORS } from "@/styles/base";
 import CalendarScreen from "./calendar";
+
+// ~8% opacity for the active tab indicator background
+const ACTIVE_INDICATOR_OPACITY = 0.08;
+const activeIndicatorColor = `rgba(0, 122, 255, ${ACTIVE_INDICATOR_OPACITY})`;
 
 export default function TabLayout() {
   const theme = useTheme();
@@ -54,8 +58,8 @@ export default function TabLayout() {
   });
 
   return (
-    <View style={{ flex: 1 }}>
-      {/* Contenido que ocupa toda la pantalla */}
+    <View style={{ flex: 1, backgroundColor: COLORS.background }}>
+      {/* Content that occupies entire screen */}
       <View
         style={{
           flex: 1,
@@ -77,20 +81,28 @@ export default function TabLayout() {
         })}
       </View>
 
-      {/* Barra de navegación flotante */}
+      {/* Floating navigation bar - Apple-style */}
       <View
         style={{
           position: "absolute",
-          bottom: 25,
-          left: 16,
-          right: 16,
-          borderRadius: 28,
+          bottom: 24,
+          left: 20,
+          right: 20,
+          borderRadius: 24,
           overflow: "hidden",
-          elevation: 12,
-          shadowColor: "#000",
-          shadowOpacity: 0.2,
-          shadowRadius: 8,
-          zIndex: 1000, // Asegurar que esté por encima del contenido
+          backgroundColor: COLORS.backgroundSecondary,
+          ...Platform.select({
+            ios: {
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.12,
+              shadowRadius: 16,
+            },
+            android: {
+              elevation: 8,
+            },
+          }),
+          zIndex: 1000,
         }}
       >
         <BottomNavigation.Bar
@@ -101,21 +113,22 @@ export default function TabLayout() {
               setIndex(routeIndex);
             }
           }}
-          activeColor={theme.colors.onSurface}
-          inactiveColor={theme.colors.onSurface}
+          activeColor={COLORS.primary}
+          inactiveColor={COLORS.textLight}
           activeIndicatorStyle={{
-            backgroundColor: COLORS.primary,
+            backgroundColor: activeIndicatorColor,
+            borderRadius: 12,
           }}
           style={{
-            backgroundColor: COLORS.border,
+            backgroundColor: "transparent",
             borderTopWidth: 0,
             elevation: 0,
-            height: 77,
+            height: 72,
             justifyContent: "center",
             alignItems: "center",
           }}
           labeled={true}
-          labelMaxFontSizeMultiplier={1.4}
+          labelMaxFontSizeMultiplier={1.2}
           theme={theme}
           safeAreaInsets={{ bottom: 0 }}
         />

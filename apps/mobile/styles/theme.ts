@@ -1,7 +1,7 @@
 import { MD3LightTheme } from "react-native-paper";
 import { COLORS, FONT } from "./base";
 
-// Apply COLORS to the React Native Paper theme
+// Apple-style iOS inspired theme for React Native Paper
 export const lightTheme = {
   ...MD3LightTheme,
   colors: {
@@ -25,65 +25,69 @@ export const lightTheme = {
     success: COLORS.success,
     placeholder: COLORS.textPlaceholder,
   },
+  roundness: 2, // Base roundness multiplier for Paper components
   fonts: {
     ...MD3LightTheme.fonts,
     default: {
       fontFamily: FONT.regular,
     },
+    // Display styles - Large titles
     displayLarge: {
-      fontFamily: FONT.regular,
+      fontFamily: FONT.bold,
       fontSize: 57,
-      fontWeight: "400" as const,
-      letterSpacing: -0.25,
+      fontWeight: "700" as const,
+      letterSpacing: -0.5,
       lineHeight: 64,
     },
     displayMedium: {
-      fontFamily: FONT.regular,
+      fontFamily: FONT.bold,
       fontSize: 45,
-      fontWeight: "400" as const,
-      letterSpacing: 0,
+      fontWeight: "700" as const,
+      letterSpacing: -0.25,
       lineHeight: 52,
     },
     displaySmall: {
-      fontFamily: FONT.regular,
+      fontFamily: FONT.semiBold,
       fontSize: 36,
-      fontWeight: "400" as const,
-      letterSpacing: 0,
+      fontWeight: "600" as const,
+      letterSpacing: -0.25,
       lineHeight: 44,
     },
+    // Headline styles - Section headers
     headlineLarge: {
-      fontFamily: FONT.regular,
+      fontFamily: FONT.semiBold,
       fontSize: 32,
-      fontWeight: "400" as const,
-      letterSpacing: 0,
+      fontWeight: "600" as const,
+      letterSpacing: -0.25,
       lineHeight: 40,
     },
     headlineMedium: {
-      fontFamily: FONT.regular,
+      fontFamily: FONT.semiBold,
       fontSize: 28,
-      fontWeight: "400" as const,
-      letterSpacing: 0,
+      fontWeight: "600" as const,
+      letterSpacing: -0.15,
       lineHeight: 36,
     },
     headlineSmall: {
-      fontFamily: FONT.regular,
+      fontFamily: FONT.semiBold,
       fontSize: 24,
-      fontWeight: "400" as const,
-      letterSpacing: 0,
+      fontWeight: "600" as const,
+      letterSpacing: -0.1,
       lineHeight: 32,
     },
+    // Title styles - Card headers
     titleLarge: {
-      fontFamily: FONT.regular,
+      fontFamily: FONT.semiBold,
       fontSize: 22,
-      fontWeight: "400" as const,
-      letterSpacing: 0,
+      fontWeight: "600" as const,
+      letterSpacing: -0.05,
       lineHeight: 28,
     },
     titleMedium: {
       fontFamily: FONT.medium,
       fontSize: 16,
       fontWeight: "500" as const,
-      letterSpacing: 0.15,
+      letterSpacing: 0.1,
       lineHeight: 24,
     },
     titleSmall: {
@@ -93,10 +97,11 @@ export const lightTheme = {
       letterSpacing: 0.1,
       lineHeight: 20,
     },
+    // Label styles - Buttons and small text
     labelLarge: {
-      fontFamily: FONT.medium,
+      fontFamily: FONT.semiBold,
       fontSize: 14,
-      fontWeight: "500" as const,
+      fontWeight: "600" as const,
       letterSpacing: 0.1,
       lineHeight: 20,
     },
@@ -104,36 +109,37 @@ export const lightTheme = {
       fontFamily: FONT.medium,
       fontSize: 12,
       fontWeight: "500" as const,
-      letterSpacing: 0.5,
+      letterSpacing: 0.3,
       lineHeight: 16,
     },
     labelSmall: {
       fontFamily: FONT.medium,
       fontSize: 11,
       fontWeight: "500" as const,
-      letterSpacing: 0.5,
+      letterSpacing: 0.3,
       lineHeight: 16,
     },
+    // Body styles - Content text
     bodyLarge: {
       fontFamily: FONT.regular,
-      fontSize: 16,
+      fontSize: 17,
       fontWeight: "400" as const,
-      letterSpacing: 0.5,
-      lineHeight: 24,
+      letterSpacing: -0.02,
+      lineHeight: 26,
     },
     bodyMedium: {
       fontFamily: FONT.regular,
-      fontSize: 14,
+      fontSize: 15,
       fontWeight: "400" as const,
-      letterSpacing: 0.25,
-      lineHeight: 20,
+      letterSpacing: 0,
+      lineHeight: 22,
     },
     bodySmall: {
       fontFamily: FONT.regular,
-      fontSize: 12,
+      fontSize: 13,
       fontWeight: "400" as const,
-      letterSpacing: 0.4,
-      lineHeight: 16,
+      letterSpacing: 0.1,
+      lineHeight: 18,
     },
   },
 };

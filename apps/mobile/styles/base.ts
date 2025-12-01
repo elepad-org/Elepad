@@ -14,56 +14,64 @@ export const FONT = {
   lobster: "Lobster_400Regular",
 } as const;
 
-/** Centralized color palette for the app. */
+/** Centralized color palette for the app - Apple-style minimalist design. */
 export const COLORS = {
-  // Colores principales
-  primary: "#8998AF",
-  secondary: "#5278CD",
-  border: "#b2bed2ff",
+  // Primary colors - iOS System Blue
+  primary: "#007AFF",
+  secondary: "#5856D6",
+  border: "#E5E5EA",
 
-  // Fondos
-  background: "#F7F3F2",
-  backgroundSecondary: "#F8F9FA",
-  white: "#ffffff",
-  success: "#5278CD",
+  // Backgrounds - Pure white base with subtle grays
+  background: "#FFFFFF",
+  backgroundSecondary: "#F2F2F7",
+  backgroundTertiary: "#E5E5EA",
+  white: "#FFFFFF",
+  success: "#34C759",
 
-  // Textos
-  text: "#0f172a",
-  textSecondary: "#64748b",
-  textLight: "#666666",
-  textPlaceholder: "#B2AFAE",
+  // Text hierarchy - High contrast, reduced fatigue
+  text: "#000000",
+  textSecondary: "#3A3A3C",
+  textLight: "#8E8E93",
+  textPlaceholder: "#C7C7CC",
 
-  red: "#c82929a6",
+  red: "#FF3B30",
 
-  // Estados
-  error: "#d32f2f",
-  accent: "#F5F1F0",
-  // Bordes y líneas
+  // States
+  error: "#FF3B30",
+  accent: "#F2F2F7",
 
-  separator: "#111",
+  // Borders and separators
+  separator: "#C6C6C8",
 } as const;
 
-/** Simple shadows. */
+/** Apple-style subtle shadows. */
 export const SHADOWS = {
   light: {
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
     elevation: 1,
   },
   medium: {
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: Platform.OS === "ios" ? 0.08 : 0.15,
-    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: Platform.OS === "ios" ? 0.08 : 0.12,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  card: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
     elevation: 2,
   },
 } as const;
 
-// Estilos base minimalistas - solo lo esencial
+// Apple-style minimalist base styles
 export const STYLES = StyleSheet.create({
-  // Layouts básicos
+  // Layout basics
   safeArea: {
     flex: 1,
     backgroundColor: COLORS.background,
@@ -78,8 +86,8 @@ export const STYLES = StyleSheet.create({
   },
   contentContainer: {
     flexGrow: 1,
-    padding: 16,
-    paddingTop: 12,
+    padding: 20,
+    paddingTop: 16,
     justifyContent: "flex-start",
   },
   center: {
@@ -88,101 +96,106 @@ export const STYLES = StyleSheet.create({
     alignItems: "center",
   },
 
-  // Tarjetas
+  // Cards - Apple-style with subtle shadows
   card: {
-    width: "90%",
-    marginTop: 18,
+    width: "100%",
+    marginTop: 16,
     padding: 20,
-    backgroundColor: "transparent",
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 20,
     alignItems: "center",
+    ...SHADOWS.card,
   },
 
   miniButton: {
     width: "35%",
-    borderRadius: 20,
+    borderRadius: 12,
     backgroundColor: COLORS.primary,
     alignItems: "center",
   },
 
-  // Botones
+  // Buttons - Apple-style rounded
   buttonPrimary: {
     marginTop: 20,
     width: "85%",
-    borderRadius: 20,
+    borderRadius: 14,
     backgroundColor: COLORS.primary,
     alignItems: "center",
   },
   buttonSecondary: {
     marginTop: 14,
     width: "100%",
-    backgroundColor: COLORS.white,
-    borderRadius: 8,
-    ...SHADOWS.medium,
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 14,
+    ...SHADOWS.light,
   },
   buttonContent: {
-    height: 48,
+    height: 50,
   },
   buttonGoogle: {
     marginTop: 14,
     width: "100%",
     backgroundColor: COLORS.white,
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    ...SHADOWS.medium,
+    ...SHADOWS.light,
   },
 
-  // Inputs
+  // Inputs - Clean style
   input: {
     width: "100%",
     marginTop: 16,
-    backgroundColor: COLORS.white,
-    borderRadius: 8,
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 12,
     borderBottomWidth: 0,
     borderBottomColor: "transparent",
-    borderColor: "transparent", // para evitar borde gris en Android
-    borderWidth: 0, // elimina todos los bordes por defecto
+    borderColor: "transparent",
+    borderWidth: 0,
     borderTopWidth: 0,
     borderLeftWidth: 0,
     borderRightWidth: 0,
-    outlineWidth: 0, // para web
+    outlineWidth: 0,
   },
   inputOutline: {
-    borderRadius: 20,
+    borderRadius: 12,
     borderColor: "transparent",
     borderWidth: 0,
   },
 
-  // Textos
+  // Typography - Clear hierarchy
   superHeading: {
-    fontSize: 25,
-    fontFamily: FONT.semiBold,
+    fontSize: 28,
+    fontFamily: FONT.bold,
     color: COLORS.text,
     textAlign: "center",
+    letterSpacing: -0.5,
   },
 
   heading: {
-    fontSize: 20,
+    fontSize: 22,
     marginTop: 6,
     fontFamily: FONT.semiBold,
     color: COLORS.text,
     textAlign: "center",
+    letterSpacing: -0.3,
   },
 
   subheading: {
-    fontSize: 14,
-    color: COLORS.textLight,
+    fontSize: 15,
+    color: COLORS.textSecondary,
     marginTop: 6,
     textAlign: "center",
+    lineHeight: 22,
   },
   footerText: {
     marginTop: 18,
-    color: COLORS.textPlaceholder,
+    color: COLORS.textLight,
     fontSize: 13,
-    fontFamily: FONT.semiBold,
+    fontFamily: FONT.medium,
   },
 
   // Logo
@@ -205,32 +218,32 @@ export const STYLES = StyleSheet.create({
     paddingBottom: 8,
   },
 
-  // Separadores
+  // Separators
   separatorWrap: {
     width: "100%",
     alignItems: "center",
-    marginTop: 6,
+    marginTop: 8,
   },
   separator: {
     width: "60%",
     height: 1,
     backgroundColor: COLORS.separator,
-    opacity: 0.9,
+    opacity: 0.6,
   },
   orRow: {
     width: "100%",
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 12,
+    marginTop: 16,
   },
   orLine: {
     flex: 1,
     height: 1,
-    backgroundColor: COLORS.border,
+    backgroundColor: COLORS.separator,
   },
   orText: {
-    marginHorizontal: 12,
-    color: "#999",
+    marginHorizontal: 16,
+    color: COLORS.textLight,
   },
 
   // Google Button
@@ -250,16 +263,16 @@ export const STYLES = StyleSheet.create({
   },
   googleText: {
     fontSize: 15,
-    color: "#333",
+    color: COLORS.text,
     fontFamily: FONT.semiBold,
   },
 
-  // Avatares
+  // Avatars
   memberAvatarPlaceholder: {
-    width: 47,
-    height: 47,
-    borderRadius: 40,
-    backgroundColor: COLORS.textSecondary,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: COLORS.primary,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -269,30 +282,22 @@ export const STYLES = StyleSheet.create({
     color: COLORS.white,
   },
 
-  // Tarjeta de menú
+  // Menu card - Apple-style
   menuCard: {
-    marginVertical: 8,
-    backgroundColor: COLORS.accent,
-    borderRadius: 20,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
+    marginVertical: 12,
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 16,
+    ...SHADOWS.card,
   },
 
-  // Family Group específicos
+  // Title cards - Clean style
   titleCard: {
-    backgroundColor: COLORS.accent,
+    backgroundColor: COLORS.backgroundSecondary,
     borderRadius: 20,
-    padding: 16,
+    padding: 20,
     width: "100%",
-    marginBottom: 14,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
+    marginBottom: 16,
+    ...SHADOWS.card,
   },
 
   memberInfoRow: {
@@ -303,15 +308,16 @@ export const STYLES = StyleSheet.create({
 
   paragraphText: {
     fontSize: 16,
-    fontFamily: FONT.medium,
-    color: COLORS.text,
-    marginBottom: 2,
+    fontFamily: FONT.regular,
+    color: COLORS.textSecondary,
+    marginBottom: 4,
+    lineHeight: 24,
   },
 
   inviteCodeCard: {
     backgroundColor: COLORS.primary,
-    padding: 16,
-    borderRadius: 12,
+    padding: 20,
+    borderRadius: 16,
     marginTop: 16,
     alignItems: "center",
     ...SHADOWS.medium,
@@ -324,15 +330,15 @@ export const STYLES = StyleSheet.create({
     marginBottom: 8,
   },
   inviteCodeText: {
-    fontSize: 18,
+    fontSize: 20,
     fontFamily: FONT.bold,
     color: COLORS.white,
     textAlign: "center",
-    letterSpacing: 1,
+    letterSpacing: 2,
     marginBottom: 8,
   },
   inviteCodeExpiry: {
-    fontSize: 12,
+    fontSize: 13,
     fontFamily: FONT.regular,
     color: COLORS.white,
     textAlign: "center",
