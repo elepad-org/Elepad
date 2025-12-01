@@ -5,7 +5,7 @@ import HomeScreen from "./home";
 import JuegosScreen from "./juegos";
 import RecuerdosScreen from "./recuerdos";
 import ConfiguracionScreen from "./configuracion";
-import { COLORS } from "@/styles/base";
+import { COLORS, LAYOUT } from "@/styles/base";
 import CalendarScreen from "./calendar";
 
 // ~15% opacity for the active tab indicator background using primary color
@@ -67,7 +67,7 @@ export default function TabLayout() {
           left: 0,
           right: 0,
           bottom: 0,
-          paddingBottom: 110, // Space for floating navigation bar
+          paddingBottom: LAYOUT.bottomNavHeight,
         }}
       >
         {renderScene({

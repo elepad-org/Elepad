@@ -18,7 +18,7 @@ import {
 } from "@elepad/api-client";
 import { useMutation } from "@tanstack/react-query";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { COLORS, STYLES } from "@/styles/base";
+import { COLORS, STYLES, LAYOUT } from "@/styles/base";
 import { Platform } from "react-native";
 import { uriToBlob } from "@/lib/uriToBlob";
 
@@ -622,7 +622,7 @@ export default function RecuerdosScreen() {
         style={{
           backgroundColor: snackbarError ? COLORS.error : COLORS.success,
           borderRadius: 16,
-          marginBottom: 120,
+          marginBottom: LAYOUT.bottomNavHeight + 10,
           marginHorizontal: 20,
         }}
       >

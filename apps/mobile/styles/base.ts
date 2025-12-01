@@ -14,6 +14,12 @@ export const FONT = {
   lobster: "Lobster_400Regular",
 } as const;
 
+/** Layout constants for consistent spacing. */
+export const LAYOUT = {
+  /** Height reserved for floating bottom navigation bar + margins */
+  bottomNavHeight: 110,
+} as const;
+
 /** Centralized color palette for the app - Custom Elepad design.
  * Base palette: ["#e5ffde","#bbcbcb","#9590a8","#634b66","#18020c"]
  * Plus: white (#FFFFFF), black (#000000), gray tones

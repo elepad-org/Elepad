@@ -8,7 +8,7 @@ import {
 import { ActivityIndicator, Text, Button, Icon } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { COLORS, STYLES, SHADOWS } from "@/styles/base";
+import { COLORS, STYLES, SHADOWS, LAYOUT } from "@/styles/base";
 import { router } from "expo-router";
 
 interface GameCardProps {
@@ -78,7 +78,7 @@ export default function JuegosScreen() {
       <ScrollView
         contentContainerStyle={[
           STYLES.contentContainer,
-          { paddingBottom: 120 },
+          { paddingBottom: LAYOUT.bottomNavHeight },
         ]}
         keyboardShouldPersistTaps="handled"
       >
