@@ -576,11 +576,15 @@ export default function RecuerdosScreen() {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
           ListFooterComponent={
-            memoriesLoading && recuerdos.length > 0 ? (
-              <View style={{ padding: 16, alignItems: "center" }}>
-                <ActivityIndicator />
-              </View>
-            ) : null
+            <>
+              {memoriesLoading && recuerdos.length > 0 && (
+                <View style={{ padding: 16, alignItems: "center" }}>
+                  <ActivityIndicator />
+                </View>
+              )}
+              {/* Invisible spacer to ensure last item is visible above navigation bar */}
+              <View style={{ height: LAYOUT.bottomNavHeight + 20 }} />
+            </>
           }
         />
       )}

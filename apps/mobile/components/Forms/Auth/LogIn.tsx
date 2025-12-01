@@ -7,7 +7,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import googleLogo from "@/assets/images/google.png";
 import { Link } from "expo-router";
-import { COLORS, SHADOWS } from "@/styles/base";
+import { COLORS } from "@/styles/base";
 
 export default function LogIn() {
   const router = useRouter();
@@ -120,7 +120,7 @@ export default function LogIn() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.card}>
+      <View style={styles.formContainer}>
         <Text style={styles.title}>Iniciar Sesión</Text>
         <Text style={styles.subtitle}>Ingresa tu email y tu contraseña</Text>
 
@@ -134,8 +134,10 @@ export default function LogIn() {
           returnKeyType="next"
           style={styles.input}
           outlineStyle={styles.inputOutline}
-          outlineColor={COLORS.border}
-          activeOutlineColor={COLORS.primary}
+          outlineColor="rgba(255,255,255,0.3)"
+          activeOutlineColor={COLORS.white}
+          textColor={COLORS.white}
+          placeholderTextColor="rgba(255,255,255,0.6)"
           disabled={loading}
           dense
         />
@@ -149,8 +151,10 @@ export default function LogIn() {
           returnKeyType="done"
           style={styles.input}
           outlineStyle={styles.inputOutline}
-          outlineColor={COLORS.border}
-          activeOutlineColor={COLORS.primary}
+          outlineColor="rgba(255,255,255,0.3)"
+          activeOutlineColor={COLORS.white}
+          textColor={COLORS.white}
+          placeholderTextColor="rgba(255,255,255,0.6)"
           onSubmitEditing={handleLogin}
           disabled={loading}
           dense
@@ -209,31 +213,30 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 24,
   },
-  card: {
-    backgroundColor: COLORS.white,
-    borderRadius: 24,
-    padding: 28,
+  formContainer: {
     width: "100%",
     maxWidth: 400,
     alignItems: "center",
-    ...SHADOWS.medium,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    borderRadius: 20,
+    padding: 28,
   },
   title: {
     fontSize: 24,
     fontWeight: "700",
-    color: COLORS.text,
+    color: COLORS.white,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 15,
-    color: COLORS.textSecondary,
+    color: "rgba(255,255,255,0.8)",
     marginBottom: 24,
     textAlign: "center",
   },
   input: {
     width: "100%",
     marginBottom: 14,
-    backgroundColor: COLORS.white,
+    backgroundColor: "transparent",
   },
   inputOutline: {
     borderRadius: 12,
@@ -241,7 +244,7 @@ const styles = StyleSheet.create({
   primaryButton: {
     marginTop: 8,
     width: "100%",
-    borderRadius: 14,
+    borderRadius: 12,
   },
   buttonContent: {
     height: 50,
@@ -255,24 +258,22 @@ const styles = StyleSheet.create({
   orLine: {
     flex: 1,
     height: 1,
-    backgroundColor: COLORS.border,
+    backgroundColor: "rgba(255,255,255,0.3)",
   },
   orText: {
     marginHorizontal: 16,
-    color: COLORS.textLight,
+    color: "rgba(255,255,255,0.7)",
     fontSize: 14,
   },
   googleButton: {
     width: "100%",
     backgroundColor: COLORS.white,
-    borderRadius: 14,
+    borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: COLORS.border,
   },
   googleIconWrap: {
     width: 28,
@@ -293,7 +294,7 @@ const styles = StyleSheet.create({
   },
   backText: {
     fontSize: 14,
-    color: COLORS.primary,
+    color: COLORS.white,
     fontWeight: "500",
   },
 });

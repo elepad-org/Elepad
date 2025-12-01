@@ -166,7 +166,10 @@ export default function ConfiguracionScreen() {
               router.replace("/");
             }}
             contentStyle={STYLES.buttonContent}
-            style={[STYLES.buttonPrimary, { backgroundColor: COLORS.red }]}
+            style={[
+              STYLES.buttonPrimary,
+              { backgroundColor: COLORS.secondary },
+            ]}
           >
             Cerrar sesión
           </Button>

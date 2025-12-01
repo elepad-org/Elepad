@@ -5,11 +5,11 @@ import HomeScreen from "./home";
 import JuegosScreen from "./juegos";
 import RecuerdosScreen from "./recuerdos";
 import ConfiguracionScreen from "./configuracion";
-import { COLORS, LAYOUT } from "@/styles/base";
+import { COLORS } from "@/styles/base";
 import CalendarScreen from "./calendar";
 
 // ~15% opacity for the active tab indicator background using primary color
-const activeIndicatorColor = "rgba(99, 75, 102, 0.15)"; // #634b66 with opacity
+const activeIndicatorColor = "rgba(91, 80, 122, 0.15)"; // #5b507a with opacity
 
 export default function TabLayout() {
   const theme = useTheme();
@@ -58,7 +58,7 @@ export default function TabLayout() {
 
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.background }}>
-      {/* Content that occupies entire screen with proper bottom padding */}
+      {/* Content that occupies entire screen */}
       <View
         style={{
           flex: 1,
@@ -67,7 +67,6 @@ export default function TabLayout() {
           left: 0,
           right: 0,
           bottom: 0,
-          paddingBottom: LAYOUT.bottomNavHeight,
         }}
       >
         {renderScene({

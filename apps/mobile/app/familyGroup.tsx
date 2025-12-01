@@ -717,7 +717,10 @@ export default function FamilyGroup() {
                 }
               }}
               contentStyle={STYLES.buttonContent}
-              style={[STYLES.buttonPrimary, { backgroundColor: COLORS.red }]}
+              style={[
+                STYLES.buttonPrimary,
+                { backgroundColor: COLORS.secondary },
+              ]}
             >
               Salir del grupo familiar
             </Button>
@@ -813,7 +816,7 @@ export default function FamilyGroup() {
                   STYLES.buttonPrimary,
                   {
                     width: "40%",
-                    backgroundColor: COLORS.red,
+                    backgroundColor: COLORS.secondary,
                     marginTop: 0,
                     opacity: removeMember.isPending ? 0.7 : 1,
                   },
@@ -966,7 +969,7 @@ export default function FamilyGroup() {
                   {
                     marginTop: 12,
                     fontStyle: "italic",
-                    color: COLORS.red,
+                    color: COLORS.secondary,
                     fontSize: 14,
                   },
                 ]}
@@ -1001,7 +1004,7 @@ export default function FamilyGroup() {
                   STYLES.buttonPrimary,
                   {
                     width: "40%",
-                    backgroundColor: COLORS.red,
+                    backgroundColor: COLORS.secondary,
                     marginTop: 0,
                     opacity: transferOwnership.isPending ? 0.7 : 1,
                   },

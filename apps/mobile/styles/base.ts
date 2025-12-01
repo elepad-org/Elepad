@@ -21,36 +21,37 @@ export const LAYOUT = {
 } as const;
 
 /** Centralized color palette for the app - Custom Elepad design.
- * Base palette: ["#e5ffde","#bbcbcb","#9590a8","#634b66","#18020c"]
+ * Base palette: ["#5b507a","#5b618a","#9eadc8"]
  * Plus: white (#FFFFFF), black (#000000), gray tones
  */
 export const COLORS = {
   // Primary colors from palette
-  primary: "#634b66", // Deep purple from palette
-  secondary: "#9590a8", // Medium purple from palette
-  border: "#bbcbcb", // Light gray-green from palette
+  primary: "#5b507a", // Deep purple from palette
+  secondary: "#5b618a", // Medium purple-blue from palette
+  border: "#E5E5EA", // Light gray
 
   // Backgrounds
   background: "#FFFFFF",
-  backgroundSecondary: "#e5ffde", // Light mint from palette
-  backgroundTertiary: "#bbcbcb", // Light gray-green from palette
+  backgroundSecondary: "#F2F2F7", // Light gray
+  backgroundTertiary: "#9eadc8", // Light blue from palette
   white: "#FFFFFF",
   success: "#34C759",
 
   // Text hierarchy - High contrast
-  text: "#18020c", // Dark from palette
-  textSecondary: "#634b66", // Deep purple from palette
-  textLight: "#9590a8", // Medium purple from palette
-  textPlaceholder: "#bbcbcb", // Light gray-green from palette
+  text: "#000000", // Black
+  textSecondary: "#5b507a", // Deep purple from palette
+  textLight: "#5b618a", // Medium purple-blue from palette
+  textPlaceholder: "#9eadc8", // Light blue from palette
 
-  red: "#FF3B30",
+  // Danger/Error colors - use secondary from palette
+  red: "#5b618a", // Use secondary color instead of red
+  error: "#5b618a", // Use secondary color for errors/danger
 
   // States
-  error: "#FF3B30",
-  accent: "#e5ffde", // Light mint from palette
+  accent: "#9eadc8", // Light blue from palette
 
   // Borders and separators
-  separator: "#bbcbcb", // Light gray-green from palette
+  separator: "#E5E5EA", // Light gray
 } as const;
 
 /** Apple-style subtle shadows. */
@@ -123,11 +124,11 @@ export const STYLES = StyleSheet.create({
     alignItems: "center",
   },
 
-  // Buttons - Apple-style rounded
+  // Buttons - consistent 12px border radius
   buttonPrimary: {
     marginTop: 20,
     width: "85%",
-    borderRadius: 14,
+    borderRadius: 12,
     backgroundColor: COLORS.primary,
     alignItems: "center",
   },
@@ -135,7 +136,7 @@ export const STYLES = StyleSheet.create({
     marginTop: 14,
     width: "100%",
     backgroundColor: COLORS.backgroundSecondary,
-    borderRadius: 14,
+    borderRadius: 12,
     ...SHADOWS.light,
   },
   buttonContent: {
@@ -145,7 +146,7 @@ export const STYLES = StyleSheet.create({
     marginTop: 14,
     width: "100%",
     backgroundColor: COLORS.white,
-    borderRadius: 14,
+    borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 16,
     flexDirection: "row",

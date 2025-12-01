@@ -10,7 +10,6 @@ import {
 } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { CustomHeader } from "@/components/shared";
 import {
   useGetAttemptsStatsGameType,
   GameType,
@@ -252,11 +251,15 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
   };
 
   return (
-    <SafeAreaView style={STYLES.safeArea} edges={["left", "right"]}>
+    <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
-      <CustomHeader title="Historial" />
 
       <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={STYLES.superHeading}>Historial</Text>
+        </View>
+
         {/* Filter Chips */}
         <View style={styles.filterContainer}>
           <Chip
@@ -366,6 +369,10 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
   filterContainer: {
     flexDirection: "row",

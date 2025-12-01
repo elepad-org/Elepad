@@ -1,5 +1,5 @@
 import { Button } from "react-native-paper";
-import { STYLES } from "@/styles/base";
+import { COLORS } from "@/styles/base";
 
 const CancelButton = ({
   onPress,
@@ -12,14 +12,12 @@ const CancelButton = ({
 }) => {
   return (
     <Button
+      mode="outlined"
       style={{
-        ...STYLES.miniButton,
-        alignSelf: "center",
-        paddingVertical: 2,
+        borderRadius: 12,
+        borderColor: COLORS.secondary,
       }}
-      labelStyle={{
-        color: "#ffffff",
-      }}
+      textColor={COLORS.secondary}
       onPress={onPress}
       disabled={disabled}
     >
