@@ -31,6 +31,7 @@ export default function CalendarScreen() {
   const [snackbarType, setSnackbarType] = useState<"success" | "error">(
     "success",
   );
+  const [googleCalendarEnabled] = useState(false);
 
   const [formVisible, setFormVisible] = useState(false);
   const [editing, setEditing] = useState<Activity | null>(null);
@@ -58,7 +59,12 @@ export default function CalendarScreen() {
       retry: 2, // Reintentar 2 veces antes de fallar
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000), // Exponential backoff: 1s, 2s
       onSuccess: async () => {
-        setSnackbarMessage("Actividad creada correctamente");
+        setSnackbarMessage(
+          "Actividad creada correctamente" +
+            (googleCalendarEnabled
+              ? " y sincronizada con Google Calendar"
+              : ""),
+        );
         setSnackbarType("success");
         setFormVisible(false);
         setEditing(null);
@@ -78,7 +84,12 @@ export default function CalendarScreen() {
       retry: 2, // Reintentar 2 veces antes de fallar
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000), // Exponential backoff: 1s, 2s
       onSuccess: async () => {
-        setSnackbarMessage("Actividad actualizada correctamente");
+        setSnackbarMessage(
+          "Actividad actualizada correctamente" +
+            (googleCalendarEnabled
+              ? " y sincronizada con Google Calendar"
+              : ""),
+        );
         setSnackbarType("success");
         setFormVisible(false);
         setEditing(null);
@@ -96,7 +107,10 @@ export default function CalendarScreen() {
   const deleteActivity = useDeleteActivitiesId({
     mutation: {
       onSuccess: async () => {
-        setSnackbarMessage("Actividad eliminada correctamente");
+        setSnackbarMessage(
+          "Actividad eliminada correctamente" +
+            (googleCalendarEnabled ? " y eliminada de Google Calendar" : ""),
+        );
         setSnackbarType("success");
         setSnackbarVisible(true);
         await activitiesQuery.refetch();

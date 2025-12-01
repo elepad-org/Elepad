@@ -6,10 +6,17 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "environment": "development"
+    },
+    "development-agustinbravop": {
+      "developmentClient": true,
+      "environment": "development",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://glynis-scleritic-unwildly.ngrok-free.dev"
+      }
     },
     "preview": {
-      "distribution": "internal"
+      "environment": "preview"
     },
     "production": {
       "autoIncrement": true

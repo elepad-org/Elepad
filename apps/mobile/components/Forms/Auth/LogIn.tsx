@@ -1,5 +1,12 @@
 import { supabase } from "@/lib/supabase";
-import { View, Alert, Image, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Alert,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  Platform,
+} from "react-native";
 import { Text, TextInput, Button } from "react-native-paper";
 import { makeRedirectUri } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
@@ -32,6 +39,18 @@ export default function LogIn() {
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
+      if (Platform.OS === "web") {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: {
+            redirectTo: `${window.location.origin}/(tabs)/home`,
+          },
+        });
+
+        if (error) Alert.alert(error.message);
+        return;
+      }
+
       const redirectTo = makeRedirectUri({
         scheme: "elepad",
         path: "(tabs)/home",

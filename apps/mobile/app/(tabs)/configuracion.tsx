@@ -7,6 +7,7 @@ import {
   List,
   Portal,
   TextInput,
+  Switch,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,6 +15,7 @@ import { patchUsersId } from "@elepad/api-client/src/gen/client";
 import { UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import ProfileHeader from "@/components/ProfileHeader";
 import SuccessSnackbar from "@/components/shared/SuccessSnackbar";
+import ErrorSnackbar from "@/components/shared/ErrorSnackbar";
 import { useRouter } from "expo-router";
 import { COLORS, STYLES } from "@/styles/base";
 
@@ -29,7 +31,13 @@ export default function ConfiguracionScreen() {
   const [formName, setFormName] = useState(displayName);
   const [saving, setSaving] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarType, setSnackbarType] = useState<"success" | "error">(
+    "success",
+  );
   const [photoOpen, setPhotoOpen] = useState(false);
+  const [googleCalendarEnabled, setGoogleCalendarEnabled] = useState(false);
+  const [loadingGoogleCalendar, setLoadingGoogleCalendar] = useState(false);
   const getInitials = (name: string) =>
     name
       .split(/\s+/)
@@ -39,6 +47,30 @@ export default function ConfiguracionScreen() {
       .join("")
       .toUpperCase() || "U";
   const initials = useMemo(() => getInitials(displayName), [displayName]);
+
+  const handleGoogleCalendarToggle = async () => {
+    if (!userElepad?.id) return;
+
+    setLoadingGoogleCalendar(true);
+    try {
+      const newValue = !googleCalendarEnabled;
+      // TODO: Implement API call to enable/disable Google Calendar
+      // For now, just toggle the state
+      setGoogleCalendarEnabled(newValue);
+      setSnackbarMessage(
+        `Google Calendar ${newValue ? "habilitado" : "deshabilitado"}`,
+      );
+      setSnackbarType("success");
+      setSnackbarVisible(true);
+    } catch (error) {
+      console.error("Error toggling Google Calendar:", error);
+      setSnackbarMessage("Error al cambiar configuración de Google Calendar");
+      setSnackbarType("error");
+      setSnackbarVisible(true);
+    } finally {
+      setLoadingGoogleCalendar(false);
+    }
+  };
 
   return (
     <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
@@ -147,6 +179,19 @@ export default function ConfiguracionScreen() {
 
             <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
             <List.Item
+              title="Google Calendar"
+              description="Sincronizar actividades con Google Calendar"
+              left={(props) => <List.Icon {...props} icon="calendar" />}
+              right={() => (
+                <Switch
+                  value={googleCalendarEnabled}
+                  onValueChange={handleGoogleCalendarToggle}
+                  disabled={loadingGoogleCalendar}
+                />
+              )}
+            />
+            <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
+            <List.Item
               title="Grupo familiar"
               left={(props) => <List.Icon {...props} icon="account-group" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
@@ -188,11 +233,19 @@ export default function ConfiguracionScreen() {
               setSnackbarVisible(true);
             }}
           />
-          <SuccessSnackbar
-            visible={snackbarVisible}
-            onDismiss={() => setSnackbarVisible(false)}
-            message="✓ Información actualizada correctamente"
-          />
+          {snackbarType === "success" ? (
+            <SuccessSnackbar
+              visible={snackbarVisible}
+              onDismiss={() => setSnackbarVisible(false)}
+              message={snackbarMessage}
+            />
+          ) : (
+            <ErrorSnackbar
+              visible={snackbarVisible}
+              onDismiss={() => setSnackbarVisible(false)}
+              message={snackbarMessage}
+            />
+          )}
         </Portal>
       </ScrollView>
     </SafeAreaView>

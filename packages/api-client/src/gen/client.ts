@@ -357,6 +357,23 @@ export type TransferFamilyGroupOwnership200 = {
   newOwner: TransferFamilyGroupOwnership200NewOwner;
 };
 
+export type PostActivitiesGoogleCalendarEnableBody = {
+  calendarId?: string;
+};
+
+export type PostActivitiesGoogleCalendarEnable200 = {
+  success: boolean;
+};
+
+export type PostActivitiesGoogleCalendarDisable200 = {
+  success: boolean;
+};
+
+export type GetActivitiesGoogleCalendarStatus200 = {
+  enabled: boolean;
+  calendarId?: string;
+};
+
 export type GetMemoriesParams = {
   bookId?: string;
   groupId?: string;
@@ -2911,6 +2928,420 @@ export const usePostActivities = <TError = Error | Error, TContext = unknown>(
 
   return useMutation(mutationOptions, queryClient);
 };
+
+export type postActivitiesGoogleCalendarEnableResponse200 = {
+  data: PostActivitiesGoogleCalendarEnable200;
+  status: 200;
+};
+
+export type postActivitiesGoogleCalendarEnableResponse400 = {
+  data: Error;
+  status: 400;
+};
+
+export type postActivitiesGoogleCalendarEnableResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type postActivitiesGoogleCalendarEnableResponseSuccess =
+  postActivitiesGoogleCalendarEnableResponse200 & {
+    headers: Headers;
+  };
+export type postActivitiesGoogleCalendarEnableResponseError = (
+  | postActivitiesGoogleCalendarEnableResponse400
+  | postActivitiesGoogleCalendarEnableResponse500
+) & {
+  headers: Headers;
+};
+
+export type postActivitiesGoogleCalendarEnableResponse =
+  | postActivitiesGoogleCalendarEnableResponseSuccess
+  | postActivitiesGoogleCalendarEnableResponseError;
+
+export const getPostActivitiesGoogleCalendarEnableUrl = () => {
+  return `/activities/google-calendar/enable`;
+};
+
+export const postActivitiesGoogleCalendarEnable = async (
+  postActivitiesGoogleCalendarEnableBody: PostActivitiesGoogleCalendarEnableBody,
+  options?: RequestInit,
+): Promise<postActivitiesGoogleCalendarEnableResponse> => {
+  return rnFetch<postActivitiesGoogleCalendarEnableResponse>(
+    getPostActivitiesGoogleCalendarEnableUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(postActivitiesGoogleCalendarEnableBody),
+    },
+  );
+};
+
+export const getPostActivitiesGoogleCalendarEnableMutationOptions = <
+  TError = Error | Error,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postActivitiesGoogleCalendarEnable>>,
+    TError,
+    { data: PostActivitiesGoogleCalendarEnableBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postActivitiesGoogleCalendarEnable>>,
+  TError,
+  { data: PostActivitiesGoogleCalendarEnableBody },
+  TContext
+> => {
+  const mutationKey = ["postActivitiesGoogleCalendarEnable"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postActivitiesGoogleCalendarEnable>>,
+    { data: PostActivitiesGoogleCalendarEnableBody }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postActivitiesGoogleCalendarEnable(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostActivitiesGoogleCalendarEnableMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postActivitiesGoogleCalendarEnable>>
+>;
+export type PostActivitiesGoogleCalendarEnableMutationBody =
+  PostActivitiesGoogleCalendarEnableBody;
+export type PostActivitiesGoogleCalendarEnableMutationError = Error | Error;
+
+export const usePostActivitiesGoogleCalendarEnable = <
+  TError = Error | Error,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postActivitiesGoogleCalendarEnable>>,
+      TError,
+      { data: PostActivitiesGoogleCalendarEnableBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postActivitiesGoogleCalendarEnable>>,
+  TError,
+  { data: PostActivitiesGoogleCalendarEnableBody },
+  TContext
+> => {
+  const mutationOptions =
+    getPostActivitiesGoogleCalendarEnableMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+
+export type postActivitiesGoogleCalendarDisableResponse200 = {
+  data: PostActivitiesGoogleCalendarDisable200;
+  status: 200;
+};
+
+export type postActivitiesGoogleCalendarDisableResponse400 = {
+  data: Error;
+  status: 400;
+};
+
+export type postActivitiesGoogleCalendarDisableResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type postActivitiesGoogleCalendarDisableResponseSuccess =
+  postActivitiesGoogleCalendarDisableResponse200 & {
+    headers: Headers;
+  };
+export type postActivitiesGoogleCalendarDisableResponseError = (
+  | postActivitiesGoogleCalendarDisableResponse400
+  | postActivitiesGoogleCalendarDisableResponse500
+) & {
+  headers: Headers;
+};
+
+export type postActivitiesGoogleCalendarDisableResponse =
+  | postActivitiesGoogleCalendarDisableResponseSuccess
+  | postActivitiesGoogleCalendarDisableResponseError;
+
+export const getPostActivitiesGoogleCalendarDisableUrl = () => {
+  return `/activities/google-calendar/disable`;
+};
+
+export const postActivitiesGoogleCalendarDisable = async (
+  options?: RequestInit,
+): Promise<postActivitiesGoogleCalendarDisableResponse> => {
+  return rnFetch<postActivitiesGoogleCalendarDisableResponse>(
+    getPostActivitiesGoogleCalendarDisableUrl(),
+    {
+      ...options,
+      method: "POST",
+    },
+  );
+};
+
+export const getPostActivitiesGoogleCalendarDisableMutationOptions = <
+  TError = Error | Error,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postActivitiesGoogleCalendarDisable>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postActivitiesGoogleCalendarDisable>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["postActivitiesGoogleCalendarDisable"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postActivitiesGoogleCalendarDisable>>,
+    void
+  > = () => {
+    return postActivitiesGoogleCalendarDisable(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostActivitiesGoogleCalendarDisableMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postActivitiesGoogleCalendarDisable>>
+>;
+
+export type PostActivitiesGoogleCalendarDisableMutationError = Error | Error;
+
+export const usePostActivitiesGoogleCalendarDisable = <
+  TError = Error | Error,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postActivitiesGoogleCalendarDisable>>,
+      TError,
+      void,
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postActivitiesGoogleCalendarDisable>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationOptions =
+    getPostActivitiesGoogleCalendarDisableMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+
+export type getActivitiesGoogleCalendarStatusResponse200 = {
+  data: GetActivitiesGoogleCalendarStatus200;
+  status: 200;
+};
+
+export type getActivitiesGoogleCalendarStatusResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type getActivitiesGoogleCalendarStatusResponseSuccess =
+  getActivitiesGoogleCalendarStatusResponse200 & {
+    headers: Headers;
+  };
+export type getActivitiesGoogleCalendarStatusResponseError =
+  getActivitiesGoogleCalendarStatusResponse500 & {
+    headers: Headers;
+  };
+
+export type getActivitiesGoogleCalendarStatusResponse =
+  | getActivitiesGoogleCalendarStatusResponseSuccess
+  | getActivitiesGoogleCalendarStatusResponseError;
+
+export const getGetActivitiesGoogleCalendarStatusUrl = () => {
+  return `/activities/google-calendar/status`;
+};
+
+export const getActivitiesGoogleCalendarStatus = async (
+  options?: RequestInit,
+): Promise<getActivitiesGoogleCalendarStatusResponse> => {
+  return rnFetch<getActivitiesGoogleCalendarStatusResponse>(
+    getGetActivitiesGoogleCalendarStatusUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetActivitiesGoogleCalendarStatusQueryKey = () => {
+  return [`/activities/google-calendar/status`] as const;
+};
+
+export const getGetActivitiesGoogleCalendarStatusQueryOptions = <
+  TData = Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+  TError = Error,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetActivitiesGoogleCalendarStatusQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>
+  > = ({ signal }) =>
+    getActivitiesGoogleCalendarStatus({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetActivitiesGoogleCalendarStatusQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>
+>;
+export type GetActivitiesGoogleCalendarStatusQueryError = Error;
+
+export function useGetActivitiesGoogleCalendarStatus<
+  TData = Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+  TError = Error,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+          TError,
+          Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetActivitiesGoogleCalendarStatus<
+  TData = Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+  TError = Error,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+          TError,
+          Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetActivitiesGoogleCalendarStatus<
+  TData = Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+  TError = Error,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetActivitiesGoogleCalendarStatus<
+  TData = Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+  TError = Error,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions =
+    getGetActivitiesGoogleCalendarStatusQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
 
 export type getMemoriesResponse200 = {
   data: GetMemories200;

@@ -2,9 +2,14 @@ import { ApiException } from "@/utils/api-error";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/supabase-types";
 import type { NewActivity, UpdateActivity } from "./schema";
+import { GoogleCalendarService } from "@/services/google-calendar";
 
 export class ActivityService {
-  constructor(private supabase: SupabaseClient<Database>) {}
+  private googleCalendarService: GoogleCalendarService;
+
+  constructor(private supabase: SupabaseClient<Database>) {
+    this.googleCalendarService = new GoogleCalendarService(supabase);
+  }
 
   async getActivityById(id: string) {
     const { data, error } = await this.supabase
@@ -80,6 +85,30 @@ export class ActivityService {
     if (error) {
       throw new ApiException(500, "Error al crear la actividad", error);
     }
+
+    // Sync with Google Calendar if enabled
+    try {
+      const isEnabled =
+        await this.googleCalendarService.isGoogleCalendarEnabled(
+          payload.createdBy,
+        );
+      if (isEnabled) {
+        await this.googleCalendarService.createEvent(payload.createdBy, {
+          id: data.id,
+          title: data.title,
+          description: data.description || undefined,
+          startsAt: new Date(data.startsAt),
+          endsAt: data.endsAt ? new Date(data.endsAt) : undefined,
+        });
+
+        // TODO: After migration, update activity with Google event ID and sync status
+        console.log("Google Calendar event created for activity:", data.id);
+      }
+    } catch (googleError) {
+      console.error("Google Calendar sync failed:", googleError);
+      // TODO: After migration, update activity with error status
+    }
+
     return data;
   }
 
@@ -96,10 +125,33 @@ export class ActivityService {
     if (!data) {
       throw new ApiException(404, "Actividad no encontrada");
     }
+
+    // Sync with Google Calendar if enabled
+    try {
+      const isEnabled =
+        await this.googleCalendarService.isGoogleCalendarEnabled(
+          data.createdBy,
+        );
+      if (isEnabled) {
+        // TODO: After migration, get google_event_id from activity
+        // For now, we'll skip Google Calendar sync on updates
+        console.log("Would sync Google Calendar update for activity:", id);
+      }
+    } catch (googleError) {
+      console.error("Google Calendar sync failed:", googleError);
+    }
+
     return data;
   }
 
   async remove(id: string) {
+    // Get activity details before deletion for Google Calendar sync
+    const { data: activity } = await this.supabase
+      .from("activities")
+      .select("createdBy")
+      .eq("id", id)
+      .single();
+
     const { error } = await this.supabase
       .from("activities")
       .delete()
@@ -107,6 +159,24 @@ export class ActivityService {
     if (error) {
       throw new ApiException(500, "Error al eliminar la actividad", error);
     }
+
+    // Delete from Google Calendar if enabled
+    if (activity) {
+      try {
+        const isEnabled =
+          await this.googleCalendarService.isGoogleCalendarEnabled(
+            activity.createdBy,
+          );
+        if (isEnabled) {
+          // TODO: After migration, get google_event_id from activity
+          // For now, we'll skip Google Calendar sync on deletion
+          console.log("Would delete from Google Calendar for activity:", id);
+        }
+      } catch (googleError) {
+        console.error("Google Calendar sync failed:", googleError);
+      }
+    }
+
     return true;
   }
 }

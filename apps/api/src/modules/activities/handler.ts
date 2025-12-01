@@ -6,18 +6,22 @@ import {
   UpdateActivitySchema,
 } from "./schema";
 import { openApiErrorResponse } from "@/utils/api-error";
+import { GoogleCalendarService } from "@/services/google-calendar";
 
 export const activitiesApp = new OpenAPIHono();
 
 declare module "hono" {
   interface ContextVariableMap {
     activityService: ActivityService;
+    googleCalendarService: GoogleCalendarService;
   }
 }
 
 activitiesApp.use("/activities/*", async (c, next) => {
   const activityService = new ActivityService(c.var.supabase);
+  const googleCalendarService = new GoogleCalendarService(c.var.supabase);
   c.set("activityService", activityService);
+  c.set("googleCalendarService", googleCalendarService);
   await next();
 });
 
@@ -149,5 +153,182 @@ activitiesApp.openapi(
     const { id } = c.req.valid("param");
     const event = await c.var.activityService.remove(id);
     return c.json(event, 200);
+  },
+);
+
+// Google Calendar endpoints
+activitiesApp.openapi(
+  {
+    method: "post",
+    path: "/activities/google-calendar/enable",
+    tags: ["activities"],
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: z.object({ calendarId: z.string().optional() }),
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        description: "Google Calendar enabled",
+        content: {
+          "application/json": { schema: z.object({ success: z.boolean() }) },
+        },
+      },
+      400: openApiErrorResponse("Error al habilitar Google Calendar"),
+      500: openApiErrorResponse("Error interno del servidor"),
+    },
+  },
+  async (c) => {
+    const userId = c.var.user.id;
+    const body = c.req.valid("json");
+
+    try {
+      await c.var.googleCalendarService.enableGoogleCalendar(
+        userId,
+        body.calendarId,
+      );
+      return c.json({ success: true }, 200);
+    } catch (error) {
+      console.error("Error enabling Google Calendar:", error);
+      return c.json(
+        { error: { message: "Failed to enable Google Calendar" } },
+        400,
+      );
+    }
+  },
+);
+
+activitiesApp.openapi(
+  {
+    method: "post",
+    path: "/activities/google-calendar/disable",
+    tags: ["activities"],
+    responses: {
+      200: {
+        description: "Google Calendar disabled",
+        content: {
+          "application/json": { schema: z.object({ success: z.boolean() }) },
+        },
+      },
+      400: openApiErrorResponse("Error al deshabilitar Google Calendar"),
+      500: openApiErrorResponse("Error interno del servidor"),
+    },
+  },
+  async (c) => {
+    const userId = c.var.user.id;
+
+    try {
+      await c.var.googleCalendarService.disableGoogleCalendar(userId);
+      return c.json({ success: true }, 200);
+    } catch (error) {
+      console.error("Error disabling Google Calendar:", error);
+      return c.json(
+        { error: { message: "Failed to disable Google Calendar" } },
+        400,
+      );
+    }
+  },
+);
+
+activitiesApp.openapi(
+  {
+    method: "post",
+    path: "/activities/google-calendar/disable",
+    tags: ["activities"],
+    responses: {
+      200: {
+        description: "Google Calendar disabled",
+        content: {
+          "application/json": { schema: z.object({ success: z.boolean() }) },
+        },
+      },
+      400: openApiErrorResponse("Error al deshabilitar Google Calendar"),
+      500: openApiErrorResponse("Error interno del servidor"),
+    },
+  },
+  async (c) => {
+    const userId = c.var.user.id;
+    try {
+      await c.var.googleCalendarService.disableGoogleCalendar(userId);
+      return c.json({ success: true }, 200);
+    } catch (error) {
+      console.error("Error disabling Google Calendar:", error);
+      return c.json(
+        { error: { message: "Failed to disable Google Calendar" } },
+        400,
+      );
+    }
+  },
+);
+
+activitiesApp.openapi(
+  {
+    method: "get",
+    path: "/activities/google-calendar/status",
+    tags: ["activities"],
+    responses: {
+      200: {
+        description: "Google Calendar status",
+        content: {
+          "application/json": {
+            schema: z.object({
+              enabled: z.boolean(),
+              calendarId: z.string().optional(),
+            }),
+          },
+        },
+      },
+      500: openApiErrorResponse("Error interno del servidor"),
+    },
+  },
+  async (c) => {
+    const userId = c.var.user.id;
+
+    try {
+      const enabled =
+        await c.var.googleCalendarService.isGoogleCalendarEnabled(userId);
+      return c.json({ enabled, calendarId: undefined }, 200);
+    } catch (error) {
+      console.error("Error checking Google Calendar status:", error);
+      return c.json({ enabled: false, calendarId: undefined }, 200);
+    }
+  },
+);
+
+activitiesApp.openapi(
+  {
+    method: "get",
+    path: "/activities/google-calendar/status",
+    tags: ["activities"],
+    responses: {
+      200: {
+        description: "Google Calendar status",
+        content: {
+          "application/json": {
+            schema: z.object({
+              enabled: z.boolean(),
+              calendarId: z.string().optional(),
+            }),
+          },
+        },
+      },
+      500: openApiErrorResponse("Error interno del servidor"),
+    },
+  },
+  async (c) => {
+    const userId = c.var.user.id;
+
+    try {
+      const enabled =
+        await c.var.googleCalendarService.isGoogleCalendarEnabled(userId);
+      return c.json({ enabled, calendarId: undefined }, 200);
+    } catch (error) {
+      console.error("Error checking Google Calendar status:", error);
+      return c.json({ enabled: false, calendarId: undefined }, 200);
+    }
   },
 );

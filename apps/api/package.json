@@ -6,7 +6,7 @@
   "types": "src/app.ts",
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "start": "node dist/src/server.js",
@@ -26,6 +26,7 @@
     "@hono/zod-openapi": "^1.1.0",
     "@supabase/supabase-js": "^2.55.0",
     "dotenv": "^17.2.1",
+    "googleapis": "^144.0.0",
     "hono": "^4.6.0"
   },
   "devDependencies": {
