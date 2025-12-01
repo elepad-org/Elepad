@@ -118,7 +118,7 @@ export default function JuegosScreen() {
             ]}
           >
             <Card.Content style={{ alignItems: "center" }}>
-              <Icon source="lan" size={64} color="#2196F3" />
+              <Icon source="lan" size={64} color={COLORS.primary} />
               <View style={{ height: 12 }} />
               <Text
                 variant="headlineSmall"

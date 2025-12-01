@@ -1,6 +1,7 @@
 import React from "react";
 import { Snackbar } from "react-native-paper";
 import { Text, Platform } from "react-native";
+import { COLORS } from "@/styles/base";
 
 interface ErrorSnackbarProps {
   visible: boolean;
@@ -10,10 +11,10 @@ interface ErrorSnackbarProps {
 }
 
 /**
- * Snackbar de error con estilos consistentes para toda la app
- * - Border radius: 20px
- * - Color: Rojo error (#dc3545)
- * - Posición: Siempre sobre la barra de navegación
+ * Snackbar for error messages with Apple-style design
+ * - Border radius: 16px
+ * - Color: iOS System Red
+ * - Position: Always above navigation bar
  */
 export default function ErrorSnackbar({
   visible,
@@ -21,7 +22,6 @@ export default function ErrorSnackbar({
   message,
   duration = 4000,
 }: ErrorSnackbarProps) {
-  // Margen estandarizado para todas las plataformas
   const bottomMargin = Platform.OS === "web" ? 100 : 85;
 
   return (
@@ -30,17 +30,17 @@ export default function ErrorSnackbar({
       onDismiss={onDismiss}
       duration={duration}
       style={{
-        backgroundColor: "#dc3545",
-        borderRadius: 20,
+        backgroundColor: COLORS.error,
+        borderRadius: 16,
         marginBottom: bottomMargin,
       }}
       action={{
         label: "OK",
         onPress: onDismiss,
-        textColor: "#fff",
+        textColor: COLORS.white,
       }}
     >
-      <Text style={{ color: "#fff", fontSize: 15 }}>{message}</Text>
+      <Text style={{ color: COLORS.white, fontSize: 15 }}>{message}</Text>
     </Snackbar>
   );
 }

@@ -327,7 +327,7 @@ export default function CalendarCard(props: CalendarCardProps) {
       { marked?: boolean; dotColor?: string; selected?: boolean }
     > = {};
     for (const d of Object.keys(eventsByDate)) {
-      obj[d] = { marked: true, dotColor: "#FF8C00" };
+      obj[d] = { marked: true, dotColor: COLORS.primary };
     }
     obj[selectedDay] = obj[selectedDay]
       ? { ...obj[selectedDay], selected: true }
@@ -432,19 +432,19 @@ export default function CalendarCard(props: CalendarCardProps) {
           enableSwipeMonths
           style={styles.calendar}
           theme={{
-            backgroundColor: "#ffffff",
-            calendarBackground: "#ffffff",
-            textSectionTitleColor: "#555",
-            selectedDayBackgroundColor: "#8998AF",
-            selectedDayTextColor: "#fff",
-            todayTextColor: "#8998AF",
-            dayTextColor: "#333",
-            textDisabledColor: "#ccc",
-            monthTextColor: "#4A4A4A",
+            backgroundColor: COLORS.background,
+            calendarBackground: COLORS.background,
+            textSectionTitleColor: COLORS.textSecondary,
+            selectedDayBackgroundColor: COLORS.primary,
+            selectedDayTextColor: COLORS.white,
+            todayTextColor: COLORS.primary,
+            dayTextColor: COLORS.text,
+            textDisabledColor: COLORS.textPlaceholder,
+            monthTextColor: COLORS.text,
             textMonthFontSize: 20,
             textDayFontSize: 18,
             textDayHeaderFontSize: 14,
-            arrowColor: "#8998AF",
+            arrowColor: COLORS.primary,
           }}
         />
       </View>
@@ -489,8 +489,8 @@ export default function CalendarCard(props: CalendarCardProps) {
             setSelectedDay(today);
           }}
           style={styles.todayIconButton}
-          containerColor="#8998AF"
-          iconColor="#fff"
+          containerColor={COLORS.primary}
+          iconColor={COLORS.white}
         />
       </View>
 
@@ -563,30 +563,30 @@ const styles = StyleSheet.create({
   },
   segmentedButtons: {
     flex: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    backgroundColor: COLORS.backgroundSecondary,
     borderRadius: 24,
     borderWidth: 0,
-    shadowColor: "#8998AF",
+    shadowColor: COLORS.primary,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.15,
     shadowRadius: 8,
-    elevation: 5,
+    elevation: 3,
   },
   segmentedButtonActive: {
-    backgroundColor: "rgba(137, 152, 175, 0.75)",
+    backgroundColor: COLORS.primary,
     borderRadius: 20,
     borderWidth: 0,
   },
   segmentedButtonInactive: {
-    backgroundColor: "rgba(255, 255, 255, 0.25)",
+    backgroundColor: COLORS.backgroundSecondary,
     borderRadius: 20,
     borderWidth: 0,
   },
   segmentedLabelActive: {
-    color: "#ffffff",
+    color: COLORS.white,
   },
   segmentedLabelInactive: {
-    color: "rgba(137, 152, 175, 0.8)",
+    color: COLORS.textSecondary,
   },
   todayIconButton: {
     margin: 0,
@@ -597,7 +597,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   emptyText: {
-    color: "#6c757d",
+    color: COLORS.textLight,
     fontSize: 15,
     textAlign: "center",
   },

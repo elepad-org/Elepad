@@ -2,6 +2,7 @@ import { useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { Text, Card, List, IconButton } from "react-native-paper";
 import { Activity, GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
+import { COLORS } from "@/styles/base";
 
 interface ActivityItemProps {
   item: Activity;
@@ -111,7 +112,7 @@ export default function ActivityItem({
           <View style={styles.checkboxContainer}>
             <IconButton
               icon={isCompleted ? "checkbox-marked" : "checkbox-blank-outline"}
-              iconColor={isCompleted ? "#8998AF" : "#6c757d"}
+              iconColor={isCompleted ? COLORS.primary : COLORS.textLight}
               size={24}
               onPress={() => onToggleComplete(item)}
             />
@@ -130,7 +131,7 @@ export default function ActivityItem({
               <>
                 <IconButton
                   icon="pencil"
-                  iconColor="#8998AF"
+                  iconColor={COLORS.primary}
                   size={20}
                   onPress={(e) => {
                     e.stopPropagation();
@@ -139,7 +140,7 @@ export default function ActivityItem({
                 />
                 <IconButton
                   icon="delete"
-                  iconColor="#dc3545"
+                  iconColor={COLORS.error}
                   size={20}
                   onPress={(e) => {
                     e.stopPropagation();
@@ -165,24 +166,20 @@ export default function ActivityItem({
 const styles = StyleSheet.create({
   card: {
     marginBottom: 8,
-    borderRadius: 34,
-    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    borderRadius: 20,
+    backgroundColor: COLORS.backgroundSecondary,
     borderWidth: 0,
-    borderColor: "rgba(137, 152, 175, 0.18)",
     overflow: "hidden",
-
-    shadowColor: "#8998AF",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 2,
   },
   completedCard: {
-    backgroundColor: "rgba(248, 249, 250, 0.5)",
-    borderWidth: 1,
-    borderColor: "rgba(137, 152, 175, 0.12)",
+    backgroundColor: COLORS.backgroundTertiary,
     opacity: 0.7,
-    shadowOpacity: 0.04,
+    shadowOpacity: 0.03,
   },
   listItem: {
     paddingVertical: 2,
@@ -193,11 +190,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   timeText: {
-    color: "#495057",
+    color: COLORS.textSecondary,
     marginBottom: 2,
   },
   ownerText: {
-    color: "#6c757d",
+    color: COLORS.textLight,
     fontStyle: "italic",
   },
   descriptionContent: {
@@ -207,10 +204,10 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     paddingLeft: 27,
     borderTopWidth: 1,
-    borderTopColor: "#f0f0f0",
+    borderTopColor: COLORS.separator,
   },
   descriptionText: {
-    color: "#495057",
+    color: COLORS.textSecondary,
     lineHeight: 22,
   },
 });
