@@ -1948,10 +1948,10 @@
         }
       }
     },
-    "/activities/google-calendar/authorize": {
+    "/oauth/google-calendar/authorize": {
       "post": {
         "tags": [
-          "activities"
+          "oauth"
         ],
         "responses": {
           "200": {
@@ -1995,10 +1995,10 @@
         }
       }
     },
-    "/activities/google-calendar/callback": {
+    "/oauth/google-calendar/callback": {
       "post": {
         "tags": [
-          "activities"
+          "oauth"
         ],
         "requestBody": {
           "content": {
@@ -2042,6 +2042,16 @@
           },
           "400": {
             "description": "Error al procesar callback de Google OAuth",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Estado OAuth inválido",
             "content": {
               "application/json": {
                 "schema": {

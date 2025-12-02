@@ -141,7 +141,7 @@ export default function ConfiguracionScreen() {
     try {
       // Get OAuth authorization URL
       const response = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/activities/google-calendar/authorize`,
+        `${process.env.EXPO_PUBLIC_API_URL}/oauth/google-calendar/authorize`,
         {
           method: "POST",
           headers: {
@@ -202,12 +202,11 @@ export default function ConfiguracionScreen() {
 
     try {
       const response = await fetch(
-        `${process.env.EXPO_PUBLIC_API_URL}/activities/google-calendar/callback`,
+        `${process.env.EXPO_PUBLIC_API_URL}/oauth/google-calendar/callback`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${await getAuthToken()}`,
           },
           body: JSON.stringify({ code, state }),
         },

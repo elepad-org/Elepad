@@ -10,6 +10,7 @@ import { cors } from "hono/cors";
 import { swaggerUI } from "@hono/swagger-ui";
 import { familyGroupApp } from "./modules/familyGroups/handler.js";
 import { activitiesApp } from "./modules/activities/handler.js";
+import { oauthApp } from "./modules/oauth/handler.js";
 import { Database } from "./supabase-types.js";
 import { memoriesApp } from "./modules/memories/handler.js";
 import { frequenciesApp } from "./modules/frequencies/handler.js";
@@ -106,9 +107,10 @@ app.route("/", healthApp);
 app.route("/", usersApp);
 app.route("/", familyGroupApp);
 app.route("/", activitiesApp);
+app.route("/oauth", oauthApp);
 app.route("/", memoriesApp);
 app.route("/", frequenciesApp);
-app.route("/activity-completions", activityCompletionsHandler);
+app.route("/", activityCompletionsHandler);
 app.route("/", puzzlesApp);
 app.route("/", achievementsApp);
 app.route("/", attemptsApp);
@@ -122,6 +124,8 @@ app.doc("/openapi.json", {
     { name: "memories" },
     { name: "familyGroups" },
     { name: "frequencies" },
+    { name: "activities" },
+    { name: "oauth" },
     { name: "ActivityCompletions" },
     { name: "games" },
     { name: "puzzles" },

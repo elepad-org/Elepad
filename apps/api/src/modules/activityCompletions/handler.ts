@@ -21,7 +21,7 @@ export const activityCompletionsHandler = new OpenAPIHono<{
 }>();
 
 // Aplicar autenticación a todas las rutas
-activityCompletionsHandler.use("/*", withAuth);
+activityCompletionsHandler.use("/activity-completions/*", withAuth);
 
 // Esquema de respuestas comunes
 const ErrorSchema = z.object({
@@ -31,7 +31,7 @@ const ErrorSchema = z.object({
 // Ruta GET /activity-completions
 const getCompletionsRoute = createRoute({
   method: "get",
-  path: "/",
+  path: "/activity-completions",
   tags: ["ActivityCompletions"],
   summary: "Obtener completaciones del usuario",
   request: {
@@ -78,7 +78,7 @@ activityCompletionsHandler.openapi(getCompletionsRoute, async (c) => {
 // Ruta POST /activity-completions/toggle
 const toggleCompletionRoute = createRoute({
   method: "post",
-  path: "/toggle",
+  path: "/activity-completions/toggle",
   tags: ["ActivityCompletions"],
   summary: "Toggle completación de actividad para un día",
   request: {

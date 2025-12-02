@@ -34,7 +34,7 @@ export class GoogleCalendarService {
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
       process.env.GOOGLE_REDIRECT_URI ||
-        `${process.env.API_BASE_URL}/activities/google-calendar/callback`,
+        `${process.env.API_BASE_URL}/oauth/google-calendar/callback`,
     );
   }
 

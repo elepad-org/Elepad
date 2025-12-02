@@ -375,16 +375,16 @@ export type GetActivitiesGoogleCalendarStatus200 = {
   calendarId?: string;
 };
 
-export type PostActivitiesGoogleCalendarAuthorize200 = {
+export type PostOauthGoogleCalendarAuthorize200 = {
   authUrl: string;
 };
 
-export type PostActivitiesGoogleCalendarCallbackBody = {
+export type PostOauthGoogleCalendarCallbackBody = {
   code: string;
   state: string;
 };
 
-export type PostActivitiesGoogleCalendarCallback200 = {
+export type PostOauthGoogleCalendarCallback200 = {
   success: boolean;
 };
 
@@ -3357,45 +3357,45 @@ export function useGetActivitiesGoogleCalendarStatus<
   return query;
 }
 
-export type postActivitiesGoogleCalendarAuthorizeResponse200 = {
-  data: PostActivitiesGoogleCalendarAuthorize200;
+export type postOauthGoogleCalendarAuthorizeResponse200 = {
+  data: PostOauthGoogleCalendarAuthorize200;
   status: 200;
 };
 
-export type postActivitiesGoogleCalendarAuthorizeResponse400 = {
+export type postOauthGoogleCalendarAuthorizeResponse400 = {
   data: Error;
   status: 400;
 };
 
-export type postActivitiesGoogleCalendarAuthorizeResponse500 = {
+export type postOauthGoogleCalendarAuthorizeResponse500 = {
   data: Error;
   status: 500;
 };
 
-export type postActivitiesGoogleCalendarAuthorizeResponseSuccess =
-  postActivitiesGoogleCalendarAuthorizeResponse200 & {
+export type postOauthGoogleCalendarAuthorizeResponseSuccess =
+  postOauthGoogleCalendarAuthorizeResponse200 & {
     headers: Headers;
   };
-export type postActivitiesGoogleCalendarAuthorizeResponseError = (
-  | postActivitiesGoogleCalendarAuthorizeResponse400
-  | postActivitiesGoogleCalendarAuthorizeResponse500
+export type postOauthGoogleCalendarAuthorizeResponseError = (
+  | postOauthGoogleCalendarAuthorizeResponse400
+  | postOauthGoogleCalendarAuthorizeResponse500
 ) & {
   headers: Headers;
 };
 
-export type postActivitiesGoogleCalendarAuthorizeResponse =
-  | postActivitiesGoogleCalendarAuthorizeResponseSuccess
-  | postActivitiesGoogleCalendarAuthorizeResponseError;
+export type postOauthGoogleCalendarAuthorizeResponse =
+  | postOauthGoogleCalendarAuthorizeResponseSuccess
+  | postOauthGoogleCalendarAuthorizeResponseError;
 
-export const getPostActivitiesGoogleCalendarAuthorizeUrl = () => {
-  return `/activities/google-calendar/authorize`;
+export const getPostOauthGoogleCalendarAuthorizeUrl = () => {
+  return `/oauth/google-calendar/authorize`;
 };
 
-export const postActivitiesGoogleCalendarAuthorize = async (
+export const postOauthGoogleCalendarAuthorize = async (
   options?: RequestInit,
-): Promise<postActivitiesGoogleCalendarAuthorizeResponse> => {
-  return rnFetch<postActivitiesGoogleCalendarAuthorizeResponse>(
-    getPostActivitiesGoogleCalendarAuthorizeUrl(),
+): Promise<postOauthGoogleCalendarAuthorizeResponse> => {
+  return rnFetch<postOauthGoogleCalendarAuthorizeResponse>(
+    getPostOauthGoogleCalendarAuthorizeUrl(),
     {
       ...options,
       method: "POST",
@@ -3403,24 +3403,24 @@ export const postActivitiesGoogleCalendarAuthorize = async (
   );
 };
 
-export const getPostActivitiesGoogleCalendarAuthorizeMutationOptions = <
+export const getPostOauthGoogleCalendarAuthorizeMutationOptions = <
   TError = Error | Error,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postActivitiesGoogleCalendarAuthorize>>,
+    Awaited<ReturnType<typeof postOauthGoogleCalendarAuthorize>>,
     TError,
     void,
     TContext
   >;
   request?: SecondParameter<typeof rnFetch>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postActivitiesGoogleCalendarAuthorize>>,
+  Awaited<ReturnType<typeof postOauthGoogleCalendarAuthorize>>,
   TError,
   void,
   TContext
 > => {
-  const mutationKey = ["postActivitiesGoogleCalendarAuthorize"];
+  const mutationKey = ["postOauthGoogleCalendarAuthorize"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -3430,28 +3430,28 @@ export const getPostActivitiesGoogleCalendarAuthorizeMutationOptions = <
     : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postActivitiesGoogleCalendarAuthorize>>,
+    Awaited<ReturnType<typeof postOauthGoogleCalendarAuthorize>>,
     void
   > = () => {
-    return postActivitiesGoogleCalendarAuthorize(requestOptions);
+    return postOauthGoogleCalendarAuthorize(requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostActivitiesGoogleCalendarAuthorizeMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postActivitiesGoogleCalendarAuthorize>>
+export type PostOauthGoogleCalendarAuthorizeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postOauthGoogleCalendarAuthorize>>
 >;
 
-export type PostActivitiesGoogleCalendarAuthorizeMutationError = Error | Error;
+export type PostOauthGoogleCalendarAuthorizeMutationError = Error | Error;
 
-export const usePostActivitiesGoogleCalendarAuthorize = <
+export const usePostOauthGoogleCalendarAuthorize = <
   TError = Error | Error,
   TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof postActivitiesGoogleCalendarAuthorize>>,
+      Awaited<ReturnType<typeof postOauthGoogleCalendarAuthorize>>,
       TError,
       void,
       TContext
@@ -3460,84 +3460,90 @@ export const usePostActivitiesGoogleCalendarAuthorize = <
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
-  Awaited<ReturnType<typeof postActivitiesGoogleCalendarAuthorize>>,
+  Awaited<ReturnType<typeof postOauthGoogleCalendarAuthorize>>,
   TError,
   void,
   TContext
 > => {
   const mutationOptions =
-    getPostActivitiesGoogleCalendarAuthorizeMutationOptions(options);
+    getPostOauthGoogleCalendarAuthorizeMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };
 
-export type postActivitiesGoogleCalendarCallbackResponse200 = {
-  data: PostActivitiesGoogleCalendarCallback200;
+export type postOauthGoogleCalendarCallbackResponse200 = {
+  data: PostOauthGoogleCalendarCallback200;
   status: 200;
 };
 
-export type postActivitiesGoogleCalendarCallbackResponse400 = {
+export type postOauthGoogleCalendarCallbackResponse400 = {
   data: Error;
   status: 400;
 };
 
-export type postActivitiesGoogleCalendarCallbackResponse500 = {
+export type postOauthGoogleCalendarCallbackResponse401 = {
+  data: Error;
+  status: 401;
+};
+
+export type postOauthGoogleCalendarCallbackResponse500 = {
   data: Error;
   status: 500;
 };
 
-export type postActivitiesGoogleCalendarCallbackResponseSuccess =
-  postActivitiesGoogleCalendarCallbackResponse200 & {
+export type postOauthGoogleCalendarCallbackResponseSuccess =
+  postOauthGoogleCalendarCallbackResponse200 & {
     headers: Headers;
   };
-export type postActivitiesGoogleCalendarCallbackResponseError = (
-  | postActivitiesGoogleCalendarCallbackResponse400
-  | postActivitiesGoogleCalendarCallbackResponse500
+export type postOauthGoogleCalendarCallbackResponseError = (
+  | postOauthGoogleCalendarCallbackResponse400
+  | postOauthGoogleCalendarCallbackResponse401
+  | postOauthGoogleCalendarCallbackResponse500
 ) & {
   headers: Headers;
 };
 
-export type postActivitiesGoogleCalendarCallbackResponse =
-  | postActivitiesGoogleCalendarCallbackResponseSuccess
-  | postActivitiesGoogleCalendarCallbackResponseError;
+export type postOauthGoogleCalendarCallbackResponse =
+  | postOauthGoogleCalendarCallbackResponseSuccess
+  | postOauthGoogleCalendarCallbackResponseError;
 
-export const getPostActivitiesGoogleCalendarCallbackUrl = () => {
-  return `/activities/google-calendar/callback`;
+export const getPostOauthGoogleCalendarCallbackUrl = () => {
+  return `/oauth/google-calendar/callback`;
 };
 
-export const postActivitiesGoogleCalendarCallback = async (
-  postActivitiesGoogleCalendarCallbackBody: PostActivitiesGoogleCalendarCallbackBody,
+export const postOauthGoogleCalendarCallback = async (
+  postOauthGoogleCalendarCallbackBody: PostOauthGoogleCalendarCallbackBody,
   options?: RequestInit,
-): Promise<postActivitiesGoogleCalendarCallbackResponse> => {
-  return rnFetch<postActivitiesGoogleCalendarCallbackResponse>(
-    getPostActivitiesGoogleCalendarCallbackUrl(),
+): Promise<postOauthGoogleCalendarCallbackResponse> => {
+  return rnFetch<postOauthGoogleCalendarCallbackResponse>(
+    getPostOauthGoogleCalendarCallbackUrl(),
     {
       ...options,
       method: "POST",
       headers: { "Content-Type": "application/json", ...options?.headers },
-      body: JSON.stringify(postActivitiesGoogleCalendarCallbackBody),
+      body: JSON.stringify(postOauthGoogleCalendarCallbackBody),
     },
   );
 };
 
-export const getPostActivitiesGoogleCalendarCallbackMutationOptions = <
-  TError = Error | Error,
+export const getPostOauthGoogleCalendarCallbackMutationOptions = <
+  TError = Error | Error | Error,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postActivitiesGoogleCalendarCallback>>,
+    Awaited<ReturnType<typeof postOauthGoogleCalendarCallback>>,
     TError,
-    { data: PostActivitiesGoogleCalendarCallbackBody },
+    { data: PostOauthGoogleCalendarCallbackBody },
     TContext
   >;
   request?: SecondParameter<typeof rnFetch>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postActivitiesGoogleCalendarCallback>>,
+  Awaited<ReturnType<typeof postOauthGoogleCalendarCallback>>,
   TError,
-  { data: PostActivitiesGoogleCalendarCallbackBody },
+  { data: PostOauthGoogleCalendarCallbackBody },
   TContext
 > => {
-  const mutationKey = ["postActivitiesGoogleCalendarCallback"];
+  const mutationKey = ["postOauthGoogleCalendarCallback"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -3547,46 +3553,49 @@ export const getPostActivitiesGoogleCalendarCallbackMutationOptions = <
     : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postActivitiesGoogleCalendarCallback>>,
-    { data: PostActivitiesGoogleCalendarCallbackBody }
+    Awaited<ReturnType<typeof postOauthGoogleCalendarCallback>>,
+    { data: PostOauthGoogleCalendarCallbackBody }
   > = (props) => {
     const { data } = props ?? {};
 
-    return postActivitiesGoogleCalendarCallback(data, requestOptions);
+    return postOauthGoogleCalendarCallback(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostActivitiesGoogleCalendarCallbackMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postActivitiesGoogleCalendarCallback>>
+export type PostOauthGoogleCalendarCallbackMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postOauthGoogleCalendarCallback>>
 >;
-export type PostActivitiesGoogleCalendarCallbackMutationBody =
-  PostActivitiesGoogleCalendarCallbackBody;
-export type PostActivitiesGoogleCalendarCallbackMutationError = Error | Error;
+export type PostOauthGoogleCalendarCallbackMutationBody =
+  PostOauthGoogleCalendarCallbackBody;
+export type PostOauthGoogleCalendarCallbackMutationError =
+  | Error
+  | Error
+  | Error;
 
-export const usePostActivitiesGoogleCalendarCallback = <
-  TError = Error | Error,
+export const usePostOauthGoogleCalendarCallback = <
+  TError = Error | Error | Error,
   TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof postActivitiesGoogleCalendarCallback>>,
+      Awaited<ReturnType<typeof postOauthGoogleCalendarCallback>>,
       TError,
-      { data: PostActivitiesGoogleCalendarCallbackBody },
+      { data: PostOauthGoogleCalendarCallbackBody },
       TContext
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
-  Awaited<ReturnType<typeof postActivitiesGoogleCalendarCallback>>,
+  Awaited<ReturnType<typeof postOauthGoogleCalendarCallback>>,
   TError,
-  { data: PostActivitiesGoogleCalendarCallbackBody },
+  { data: PostOauthGoogleCalendarCallbackBody },
   TContext
 > => {
   const mutationOptions =
-    getPostActivitiesGoogleCalendarCallbackMutationOptions(options);
+    getPostOauthGoogleCalendarCallbackMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };
