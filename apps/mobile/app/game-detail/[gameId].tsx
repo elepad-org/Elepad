@@ -206,20 +206,26 @@ export default function GameDetailScreen() {
 
   if (!gameConfig || !gameInfo) {
     return (
-      <SafeAreaView style={STYLES.safeArea} edges={["left", "right"]}>
-        <CustomHeader title="Juego no encontrado" />
-        <View style={STYLES.center}>
-          <Text style={STYLES.heading}>❌ Juego no encontrado</Text>
-          <Button
-            mode="contained"
-            onPress={() => router.back()}
-            style={{ marginTop: 16 }}
-            buttonColor={COLORS.primary}
-          >
-            Volver a Juegos
-          </Button>
-        </View>
-      </SafeAreaView>
+      <>
+        <Stack.Screen options={{ headerShown: false }} />
+        <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
+          <StatusBar
+            barStyle="dark-content"
+            backgroundColor={COLORS.background}
+          />
+          <View style={STYLES.center}>
+            <Text style={STYLES.heading}>❌ Juego no encontrado</Text>
+            <Button
+              mode="contained"
+              onPress={() => router.back()}
+              style={{ marginTop: 16 }}
+              buttonColor={COLORS.primary}
+            >
+              Volver a Juegos
+            </Button>
+          </View>
+        </SafeAreaView>
+      </>
     );
   }
 
@@ -244,8 +250,8 @@ export default function GameDetailScreen() {
         >
           <View style={styles.fullWidthContainer}>
             {/* Título del juego */}
-            <Text style={styles.gameTitle}>
-              {gameInfo.emoji || gameInfo.iconName} {gameInfo.title}
+            <Text style={[STYLES.superHeading, styles.title]}>
+              {gameInfo.title}
             </Text>
 
             {/* Descripción del Juego */}
@@ -499,6 +505,12 @@ export default function GameDetailScreen() {
           <Dialog
             visible={!!selectedAchievement}
             onDismiss={() => setSelectedAchievement(null)}
+            style={{
+              backgroundColor: COLORS.background,
+              borderRadius: 16,
+              width: "90%",
+              alignSelf: "center",
+            }}
           >
             <View style={{ alignItems: "center", paddingTop: 24 }}>
               {selectedAchievement?.unlocked ? (
@@ -506,21 +518,36 @@ export default function GameDetailScreen() {
                   {selectedAchievement?.achievement?.icon || "🏆"}
                 </Text>
               ) : (
-                <MaterialCommunityIcons name="lock" size={64} color="#999" />
+                <MaterialCommunityIcons
+                  name="lock"
+                  size={64}
+                  color={COLORS.textLight}
+                />
               )}
             </View>
-            <Dialog.Title style={styles.dialogTitle}>
+            <Dialog.Title
+              style={[
+                styles.dialogTitle,
+                { color: COLORS.text, fontWeight: "bold" },
+              ]}
+            >
               {selectedAchievement?.achievement?.title}
             </Dialog.Title>
             <Dialog.Content>
               <Text
                 variant="bodyLarge"
-                style={{ marginBottom: 16, textAlign: "center" }}
+                style={{
+                  marginBottom: 16,
+                  textAlign: "center",
+                  color: COLORS.textSecondary,
+                }}
               >
                 {selectedAchievement?.achievement?.description}
               </Text>
 
-              <Divider style={{ marginVertical: 12 }} />
+              <Divider
+                style={{ marginVertical: 12, backgroundColor: COLORS.border }}
+              />
 
               <View
                 style={{
@@ -555,19 +582,20 @@ export default function GameDetailScreen() {
                     mode="flat"
                     style={{
                       backgroundColor: selectedAchievement?.unlocked
-                        ? COLORS.success
+                        ? COLORS.primary
                         : COLORS.backgroundSecondary,
                       marginTop: 4,
                     }}
                     textStyle={{
                       color: selectedAchievement?.unlocked
-                        ? "#fff"
+                        ? COLORS.white
                         : COLORS.text,
+                      fontWeight: "bold",
                     }}
                   >
                     {selectedAchievement?.unlocked
-                      ? "Desbloqueado"
-                      : "Bloqueado"}
+                      ? "✓ Desbloqueado"
+                      : "🔒 Bloqueado"}
                   </Chip>
                 </View>
               </View>
@@ -593,8 +621,16 @@ export default function GameDetailScreen() {
                   </Text>
                 )}
             </Dialog.Content>
-            <Dialog.Actions>
-              <Button onPress={() => setSelectedAchievement(null)}>
+            <Dialog.Actions
+              style={{ paddingHorizontal: 24, paddingBottom: 16 }}
+            >
+              <Button
+                mode="contained"
+                onPress={() => setSelectedAchievement(null)}
+                buttonColor={COLORS.primary}
+                style={{ borderRadius: 12, width: "100%" }}
+                contentStyle={{ paddingVertical: 8 }}
+              >
                 Cerrar
               </Button>
             </Dialog.Actions>
@@ -610,12 +646,10 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingHorizontal: 0,
   },
-  gameTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: COLORS.text,
-    marginBottom: 20,
-    textAlign: "center",
+  title: {
+    paddingHorizontal: 24,
+    paddingTop: 8,
+    paddingBottom: 16,
   },
   gameCard: {
     backgroundColor: COLORS.backgroundSecondary,

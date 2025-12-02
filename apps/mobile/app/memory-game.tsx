@@ -320,24 +320,28 @@ export default function MemoryGameScreen() {
                 </Text>
               </Dialog.Content>
               <Dialog.Actions style={styles.modeActions}>
-                <Button
-                  mode="contained"
-                  onPress={() => handleModeSelection("4x4")}
-                  style={styles.modeButton}
-                  buttonColor={COLORS.secondary}
-                  icon="grid"
-                >
-                  4x4 (Fácil)
-                </Button>
-                <Button
-                  mode="contained"
-                  onPress={() => handleModeSelection("4x6")}
-                  style={styles.modeButton}
-                  buttonColor={COLORS.primary}
-                  icon="grid"
-                >
-                  4x6 (Difícil)
-                </Button>
+                <View style={styles.modeButtonsContainer}>
+                  <Button
+                    mode="contained"
+                    onPress={() => handleModeSelection("4x4")}
+                    style={styles.modeButton}
+                    buttonColor={COLORS.secondary}
+                    icon="grid"
+                    contentStyle={styles.buttonContent}
+                  >
+                    4x4 (Fácil)
+                  </Button>
+                  <Button
+                    mode="contained"
+                    onPress={() => handleModeSelection("4x6")}
+                    style={styles.modeButton}
+                    buttonColor={COLORS.primary}
+                    icon="grid"
+                    contentStyle={styles.buttonContent}
+                  >
+                    4x6 (Difícil)
+                  </Button>
+                </View>
               </Dialog.Actions>
             </Dialog>
           </Portal>
@@ -457,13 +461,20 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
   },
   modeActions: {
-    flexDirection: "column",
+    paddingBottom: 12,
+    paddingHorizontal: 20,
+  },
+  modeButtonsContainer: {
+    flexDirection: "row",
     gap: 12,
-    padding: 16,
+    width: "100%",
   },
   modeButton: {
-    width: "100%",
+    flex: 1,
     borderRadius: 12,
+  },
+  buttonContent: {
+    paddingVertical: 8,
   },
   resultsContainer: {
     alignItems: "center",

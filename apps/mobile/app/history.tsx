@@ -17,7 +17,7 @@ import {
   getAttempts,
 } from "@elepad/api-client";
 import { Divider } from "react-native-paper";
-import { COLORS, STYLES, SHADOWS } from "@/styles/base";
+import { COLORS, STYLES, SHADOWS, FONT } from "@/styles/base";
 
 const PAGE_SIZE = 50;
 
@@ -262,9 +262,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
 
         <View style={styles.container}>
           {/* Header */}
-          <View style={styles.header}>
-            <Text style={STYLES.superHeading}>Historial</Text>
-          </View>
+          <Text style={[styles.title]}>Historial </Text>
 
           {/* Filter Chips */}
           <View style={styles.filterContainer}>
@@ -323,7 +321,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
                         size={20}
                         color={COLORS.primary}
                       />
-                      <Text style={styles.statsTitle}>Rendimiento</Text>
+                      <Text style={styles.statsTitle}>Rendimiento </Text>
                     </View>
 
                     <View style={styles.kpiContainer}>
@@ -387,10 +385,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    alignContent: "flex-start",
+  title: {
+    paddingHorizontal: 24,
+    paddingTop: 20,
+    paddingBottom: 16,
+    fontSize: 26,
+    fontFamily: FONT.bold,
   },
   filterContainer: {
     flexDirection: "row",
