@@ -14,6 +14,7 @@ import { Provider as PaperProvider } from "react-native-paper";
 import { lightTheme, darkTheme } from "@/styles/theme";
 import { supabase } from "@/lib/supabase";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { Linking } from "react-native";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,40 @@ let AUTH_TOKEN: string | undefined;
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useAppFonts();
+
+  // Handle OAuth deep links
+  useEffect(() => {
+    const handleDeepLink = (url: string) => {
+      if (url.includes("google-calendar-callback")) {
+        // Parse OAuth callback parameters
+        const urlParams = new URLSearchParams(url.split("?")[1] || "");
+        const code = urlParams.get("code");
+        const state = urlParams.get("state");
+
+        if (code && state) {
+          // Store callback data for the configuration screen to process
+          // We'll use a simple global state or event emitter
+          (
+            globalThis as {
+              googleCalendarOAuthCallback?: { code: string; state: string };
+            }
+          ).googleCalendarOAuthCallback = { code, state };
+        }
+      }
+    };
+
+    // Handle initial URL (app opened from deep link)
+    Linking.getInitialURL().then((url) => {
+      if (url) handleDeepLink(url);
+    });
+
+    // Handle subsequent URLs (app already open)
+    const subscription = Linking.addEventListener("url", ({ url }) => {
+      handleDeepLink(url);
+    });
+
+    return () => subscription?.remove();
+  }, []);
 
   // Mantener el token actualizado en AUTH_TOKEN de forma reactiva
   useEffect(() => {

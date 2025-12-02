@@ -265,6 +265,13 @@ export interface NewNetPuzzle {
   gridSize?: number;
 }
 
+export interface AchievementProgress {
+  totalAchievements: number;
+  unlockedAchievements: number;
+  totalPoints: number;
+  earnedPoints: number;
+}
+
 export interface StartAttempt {
   puzzleId: string;
   gameType: GameType;
@@ -297,13 +304,6 @@ export interface AttemptStats {
   bestTime: number | null;
   /** @nullable */
   bestMoves: number | null;
-}
-
-export interface AchievementProgress {
-  totalAchievements: number;
-  unlockedAchievements: number;
-  totalPoints: number;
-  earnedPoints: number;
 }
 
 export type PatchUsersIdAvatarBody = {
@@ -373,6 +373,19 @@ export type PostActivitiesGoogleCalendarDisable200 = {
 export type GetActivitiesGoogleCalendarStatus200 = {
   enabled: boolean;
   calendarId?: string;
+};
+
+export type PostActivitiesGoogleCalendarAuthorize200 = {
+  authUrl: string;
+};
+
+export type PostActivitiesGoogleCalendarCallbackBody = {
+  code: string;
+  state: string;
+};
+
+export type PostActivitiesGoogleCalendarCallback200 = {
+  success: boolean;
 };
 
 export type GetMemoriesParams = {
@@ -477,6 +490,34 @@ export type GetPuzzlesRecentGameTypeParams = {
   limit?: number;
 };
 
+export type GetAchievementsGameType200Item = {
+  id: string;
+  title: string;
+};
+
+export type GetAchievementsUserGameType200ItemAchievement = {
+  id: string;
+  title: string;
+  description: string;
+  /** @nullable */
+  icon: string | null;
+  points: number;
+  gameType: GameType;
+  code: string;
+};
+
+export type GetAchievementsUserGameType200Item = {
+  achievement: GetAchievementsUserGameType200ItemAchievement;
+  unlocked: boolean;
+  /** @nullable */
+  unlockedAt: string | null;
+};
+
+export type PostAchievementsCheckAttemptId200Item = {
+  id: string;
+  title: string;
+};
+
 export type PostAttemptsStart201 = {
   id: string;
 };
@@ -530,34 +571,6 @@ export type GetAttemptsLeaderboardGameTypeParams = {
 export type GetAttemptsLeaderboardGameType200Item = {
   id: string;
   score: number;
-};
-
-export type GetAchievementsGameType200Item = {
-  id: string;
-  title: string;
-};
-
-export type GetAchievementsUserGameType200ItemAchievement = {
-  id: string;
-  title: string;
-  description: string;
-  /** @nullable */
-  icon: string | null;
-  points: number;
-  gameType: GameType;
-  code: string;
-};
-
-export type GetAchievementsUserGameType200Item = {
-  achievement: GetAchievementsUserGameType200ItemAchievement;
-  unlocked: boolean;
-  /** @nullable */
-  unlockedAt: string | null;
-};
-
-export type PostAchievementsCheckAttemptId200Item = {
-  id: string;
-  title: string;
 };
 
 type AwaitedInput<T> = PromiseLike<T> | T;
@@ -3344,6 +3357,240 @@ export function useGetActivitiesGoogleCalendarStatus<
   return query;
 }
 
+export type postActivitiesGoogleCalendarAuthorizeResponse200 = {
+  data: PostActivitiesGoogleCalendarAuthorize200;
+  status: 200;
+};
+
+export type postActivitiesGoogleCalendarAuthorizeResponse400 = {
+  data: Error;
+  status: 400;
+};
+
+export type postActivitiesGoogleCalendarAuthorizeResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type postActivitiesGoogleCalendarAuthorizeResponseSuccess =
+  postActivitiesGoogleCalendarAuthorizeResponse200 & {
+    headers: Headers;
+  };
+export type postActivitiesGoogleCalendarAuthorizeResponseError = (
+  | postActivitiesGoogleCalendarAuthorizeResponse400
+  | postActivitiesGoogleCalendarAuthorizeResponse500
+) & {
+  headers: Headers;
+};
+
+export type postActivitiesGoogleCalendarAuthorizeResponse =
+  | postActivitiesGoogleCalendarAuthorizeResponseSuccess
+  | postActivitiesGoogleCalendarAuthorizeResponseError;
+
+export const getPostActivitiesGoogleCalendarAuthorizeUrl = () => {
+  return `/activities/google-calendar/authorize`;
+};
+
+export const postActivitiesGoogleCalendarAuthorize = async (
+  options?: RequestInit,
+): Promise<postActivitiesGoogleCalendarAuthorizeResponse> => {
+  return rnFetch<postActivitiesGoogleCalendarAuthorizeResponse>(
+    getPostActivitiesGoogleCalendarAuthorizeUrl(),
+    {
+      ...options,
+      method: "POST",
+    },
+  );
+};
+
+export const getPostActivitiesGoogleCalendarAuthorizeMutationOptions = <
+  TError = Error | Error,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postActivitiesGoogleCalendarAuthorize>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postActivitiesGoogleCalendarAuthorize>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["postActivitiesGoogleCalendarAuthorize"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postActivitiesGoogleCalendarAuthorize>>,
+    void
+  > = () => {
+    return postActivitiesGoogleCalendarAuthorize(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostActivitiesGoogleCalendarAuthorizeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postActivitiesGoogleCalendarAuthorize>>
+>;
+
+export type PostActivitiesGoogleCalendarAuthorizeMutationError = Error | Error;
+
+export const usePostActivitiesGoogleCalendarAuthorize = <
+  TError = Error | Error,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postActivitiesGoogleCalendarAuthorize>>,
+      TError,
+      void,
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postActivitiesGoogleCalendarAuthorize>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationOptions =
+    getPostActivitiesGoogleCalendarAuthorizeMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+
+export type postActivitiesGoogleCalendarCallbackResponse200 = {
+  data: PostActivitiesGoogleCalendarCallback200;
+  status: 200;
+};
+
+export type postActivitiesGoogleCalendarCallbackResponse400 = {
+  data: Error;
+  status: 400;
+};
+
+export type postActivitiesGoogleCalendarCallbackResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type postActivitiesGoogleCalendarCallbackResponseSuccess =
+  postActivitiesGoogleCalendarCallbackResponse200 & {
+    headers: Headers;
+  };
+export type postActivitiesGoogleCalendarCallbackResponseError = (
+  | postActivitiesGoogleCalendarCallbackResponse400
+  | postActivitiesGoogleCalendarCallbackResponse500
+) & {
+  headers: Headers;
+};
+
+export type postActivitiesGoogleCalendarCallbackResponse =
+  | postActivitiesGoogleCalendarCallbackResponseSuccess
+  | postActivitiesGoogleCalendarCallbackResponseError;
+
+export const getPostActivitiesGoogleCalendarCallbackUrl = () => {
+  return `/activities/google-calendar/callback`;
+};
+
+export const postActivitiesGoogleCalendarCallback = async (
+  postActivitiesGoogleCalendarCallbackBody: PostActivitiesGoogleCalendarCallbackBody,
+  options?: RequestInit,
+): Promise<postActivitiesGoogleCalendarCallbackResponse> => {
+  return rnFetch<postActivitiesGoogleCalendarCallbackResponse>(
+    getPostActivitiesGoogleCalendarCallbackUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      body: JSON.stringify(postActivitiesGoogleCalendarCallbackBody),
+    },
+  );
+};
+
+export const getPostActivitiesGoogleCalendarCallbackMutationOptions = <
+  TError = Error | Error,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postActivitiesGoogleCalendarCallback>>,
+    TError,
+    { data: PostActivitiesGoogleCalendarCallbackBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postActivitiesGoogleCalendarCallback>>,
+  TError,
+  { data: PostActivitiesGoogleCalendarCallbackBody },
+  TContext
+> => {
+  const mutationKey = ["postActivitiesGoogleCalendarCallback"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postActivitiesGoogleCalendarCallback>>,
+    { data: PostActivitiesGoogleCalendarCallbackBody }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postActivitiesGoogleCalendarCallback(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostActivitiesGoogleCalendarCallbackMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postActivitiesGoogleCalendarCallback>>
+>;
+export type PostActivitiesGoogleCalendarCallbackMutationBody =
+  PostActivitiesGoogleCalendarCallbackBody;
+export type PostActivitiesGoogleCalendarCallbackMutationError = Error | Error;
+
+export const usePostActivitiesGoogleCalendarCallback = <
+  TError = Error | Error,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postActivitiesGoogleCalendarCallback>>,
+      TError,
+      { data: PostActivitiesGoogleCalendarCallbackBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postActivitiesGoogleCalendarCallback>>,
+  TError,
+  { data: PostActivitiesGoogleCalendarCallbackBody },
+  TContext
+> => {
+  const mutationOptions =
+    getPostActivitiesGoogleCalendarCallbackMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+
 export type getMemoriesResponse200 = {
   data: GetMemories200;
   status: 200;
@@ -5875,6 +6122,711 @@ export function useGetPuzzlesRecentGameType<
   return query;
 }
 
+export type getAchievementsGameTypeResponse200 = {
+  data: GetAchievementsGameType200Item[];
+  status: 200;
+};
+
+export type getAchievementsGameTypeResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type getAchievementsGameTypeResponseSuccess =
+  getAchievementsGameTypeResponse200 & {
+    headers: Headers;
+  };
+export type getAchievementsGameTypeResponseError =
+  getAchievementsGameTypeResponse500 & {
+    headers: Headers;
+  };
+
+export type getAchievementsGameTypeResponse =
+  | getAchievementsGameTypeResponseSuccess
+  | getAchievementsGameTypeResponseError;
+
+export const getGetAchievementsGameTypeUrl = (gameType: GameType) => {
+  return `/achievements/${gameType}`;
+};
+
+export const getAchievementsGameType = async (
+  gameType: GameType,
+  options?: RequestInit,
+): Promise<getAchievementsGameTypeResponse> => {
+  return rnFetch<getAchievementsGameTypeResponse>(
+    getGetAchievementsGameTypeUrl(gameType),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetAchievementsGameTypeQueryKey = (gameType?: GameType) => {
+  return [`/achievements/${gameType}`] as const;
+};
+
+export const getGetAchievementsGameTypeQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAchievementsGameType>>,
+  TError = Error,
+>(
+  gameType: GameType,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAchievementsGameType>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetAchievementsGameTypeQueryKey(gameType);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getAchievementsGameType>>
+  > = ({ signal }) =>
+    getAchievementsGameType(gameType, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!gameType,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAchievementsGameType>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetAchievementsGameTypeQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAchievementsGameType>>
+>;
+export type GetAchievementsGameTypeQueryError = Error;
+
+export function useGetAchievementsGameType<
+  TData = Awaited<ReturnType<typeof getAchievementsGameType>>,
+  TError = Error,
+>(
+  gameType: GameType,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAchievementsGameType>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAchievementsGameType>>,
+          TError,
+          Awaited<ReturnType<typeof getAchievementsGameType>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetAchievementsGameType<
+  TData = Awaited<ReturnType<typeof getAchievementsGameType>>,
+  TError = Error,
+>(
+  gameType: GameType,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAchievementsGameType>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAchievementsGameType>>,
+          TError,
+          Awaited<ReturnType<typeof getAchievementsGameType>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetAchievementsGameType<
+  TData = Awaited<ReturnType<typeof getAchievementsGameType>>,
+  TError = Error,
+>(
+  gameType: GameType,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAchievementsGameType>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetAchievementsGameType<
+  TData = Awaited<ReturnType<typeof getAchievementsGameType>>,
+  TError = Error,
+>(
+  gameType: GameType,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAchievementsGameType>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetAchievementsGameTypeQueryOptions(
+    gameType,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export type getAchievementsUserGameTypeResponse200 = {
+  data: GetAchievementsUserGameType200Item[];
+  status: 200;
+};
+
+export type getAchievementsUserGameTypeResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type getAchievementsUserGameTypeResponseSuccess =
+  getAchievementsUserGameTypeResponse200 & {
+    headers: Headers;
+  };
+export type getAchievementsUserGameTypeResponseError =
+  getAchievementsUserGameTypeResponse500 & {
+    headers: Headers;
+  };
+
+export type getAchievementsUserGameTypeResponse =
+  | getAchievementsUserGameTypeResponseSuccess
+  | getAchievementsUserGameTypeResponseError;
+
+export const getGetAchievementsUserGameTypeUrl = (gameType: GameType) => {
+  return `/achievements/user/${gameType}`;
+};
+
+export const getAchievementsUserGameType = async (
+  gameType: GameType,
+  options?: RequestInit,
+): Promise<getAchievementsUserGameTypeResponse> => {
+  return rnFetch<getAchievementsUserGameTypeResponse>(
+    getGetAchievementsUserGameTypeUrl(gameType),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetAchievementsUserGameTypeQueryKey = (gameType?: GameType) => {
+  return [`/achievements/user/${gameType}`] as const;
+};
+
+export const getGetAchievementsUserGameTypeQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAchievementsUserGameType>>,
+  TError = Error,
+>(
+  gameType: GameType,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAchievementsUserGameType>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetAchievementsUserGameTypeQueryKey(gameType);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getAchievementsUserGameType>>
+  > = ({ signal }) =>
+    getAchievementsUserGameType(gameType, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!gameType,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAchievementsUserGameType>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetAchievementsUserGameTypeQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAchievementsUserGameType>>
+>;
+export type GetAchievementsUserGameTypeQueryError = Error;
+
+export function useGetAchievementsUserGameType<
+  TData = Awaited<ReturnType<typeof getAchievementsUserGameType>>,
+  TError = Error,
+>(
+  gameType: GameType,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAchievementsUserGameType>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAchievementsUserGameType>>,
+          TError,
+          Awaited<ReturnType<typeof getAchievementsUserGameType>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetAchievementsUserGameType<
+  TData = Awaited<ReturnType<typeof getAchievementsUserGameType>>,
+  TError = Error,
+>(
+  gameType: GameType,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAchievementsUserGameType>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAchievementsUserGameType>>,
+          TError,
+          Awaited<ReturnType<typeof getAchievementsUserGameType>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetAchievementsUserGameType<
+  TData = Awaited<ReturnType<typeof getAchievementsUserGameType>>,
+  TError = Error,
+>(
+  gameType: GameType,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAchievementsUserGameType>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetAchievementsUserGameType<
+  TData = Awaited<ReturnType<typeof getAchievementsUserGameType>>,
+  TError = Error,
+>(
+  gameType: GameType,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAchievementsUserGameType>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetAchievementsUserGameTypeQueryOptions(
+    gameType,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export type getAchievementsProgressGameTypeResponse200 = {
+  data: AchievementProgress;
+  status: 200;
+};
+
+export type getAchievementsProgressGameTypeResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type getAchievementsProgressGameTypeResponseSuccess =
+  getAchievementsProgressGameTypeResponse200 & {
+    headers: Headers;
+  };
+export type getAchievementsProgressGameTypeResponseError =
+  getAchievementsProgressGameTypeResponse500 & {
+    headers: Headers;
+  };
+
+export type getAchievementsProgressGameTypeResponse =
+  | getAchievementsProgressGameTypeResponseSuccess
+  | getAchievementsProgressGameTypeResponseError;
+
+export const getGetAchievementsProgressGameTypeUrl = (gameType: GameType) => {
+  return `/achievements/progress/${gameType}`;
+};
+
+export const getAchievementsProgressGameType = async (
+  gameType: GameType,
+  options?: RequestInit,
+): Promise<getAchievementsProgressGameTypeResponse> => {
+  return rnFetch<getAchievementsProgressGameTypeResponse>(
+    getGetAchievementsProgressGameTypeUrl(gameType),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetAchievementsProgressGameTypeQueryKey = (
+  gameType?: GameType,
+) => {
+  return [`/achievements/progress/${gameType}`] as const;
+};
+
+export const getGetAchievementsProgressGameTypeQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
+  TError = Error,
+>(
+  gameType: GameType,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetAchievementsProgressGameTypeQueryKey(gameType);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getAchievementsProgressGameType>>
+  > = ({ signal }) =>
+    getAchievementsProgressGameType(gameType, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!gameType,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetAchievementsProgressGameTypeQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAchievementsProgressGameType>>
+>;
+export type GetAchievementsProgressGameTypeQueryError = Error;
+
+export function useGetAchievementsProgressGameType<
+  TData = Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
+  TError = Error,
+>(
+  gameType: GameType,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
+          TError,
+          Awaited<ReturnType<typeof getAchievementsProgressGameType>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetAchievementsProgressGameType<
+  TData = Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
+  TError = Error,
+>(
+  gameType: GameType,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
+          TError,
+          Awaited<ReturnType<typeof getAchievementsProgressGameType>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetAchievementsProgressGameType<
+  TData = Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
+  TError = Error,
+>(
+  gameType: GameType,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetAchievementsProgressGameType<
+  TData = Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
+  TError = Error,
+>(
+  gameType: GameType,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetAchievementsProgressGameTypeQueryOptions(
+    gameType,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export type postAchievementsCheckAttemptIdResponse200 = {
+  data: PostAchievementsCheckAttemptId200Item[];
+  status: 200;
+};
+
+export type postAchievementsCheckAttemptIdResponse404 = {
+  data: Error;
+  status: 404;
+};
+
+export type postAchievementsCheckAttemptIdResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type postAchievementsCheckAttemptIdResponseSuccess =
+  postAchievementsCheckAttemptIdResponse200 & {
+    headers: Headers;
+  };
+export type postAchievementsCheckAttemptIdResponseError = (
+  | postAchievementsCheckAttemptIdResponse404
+  | postAchievementsCheckAttemptIdResponse500
+) & {
+  headers: Headers;
+};
+
+export type postAchievementsCheckAttemptIdResponse =
+  | postAchievementsCheckAttemptIdResponseSuccess
+  | postAchievementsCheckAttemptIdResponseError;
+
+export const getPostAchievementsCheckAttemptIdUrl = (attemptId: string) => {
+  return `/achievements/check/${attemptId}`;
+};
+
+export const postAchievementsCheckAttemptId = async (
+  attemptId: string,
+  options?: RequestInit,
+): Promise<postAchievementsCheckAttemptIdResponse> => {
+  return rnFetch<postAchievementsCheckAttemptIdResponse>(
+    getPostAchievementsCheckAttemptIdUrl(attemptId),
+    {
+      ...options,
+      method: "POST",
+    },
+  );
+};
+
+export const getPostAchievementsCheckAttemptIdMutationOptions = <
+  TError = Error | Error,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postAchievementsCheckAttemptId>>,
+    TError,
+    { attemptId: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postAchievementsCheckAttemptId>>,
+  TError,
+  { attemptId: string },
+  TContext
+> => {
+  const mutationKey = ["postAchievementsCheckAttemptId"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postAchievementsCheckAttemptId>>,
+    { attemptId: string }
+  > = (props) => {
+    const { attemptId } = props ?? {};
+
+    return postAchievementsCheckAttemptId(attemptId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostAchievementsCheckAttemptIdMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postAchievementsCheckAttemptId>>
+>;
+
+export type PostAchievementsCheckAttemptIdMutationError = Error | Error;
+
+export const usePostAchievementsCheckAttemptId = <
+  TError = Error | Error,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postAchievementsCheckAttemptId>>,
+      TError,
+      { attemptId: string },
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postAchievementsCheckAttemptId>>,
+  TError,
+  { attemptId: string },
+  TContext
+> => {
+  const mutationOptions =
+    getPostAchievementsCheckAttemptIdMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+
 export type postAttemptsStartResponse201 = {
   data: PostAttemptsStart201;
   status: 201;
@@ -6917,708 +7869,3 @@ export function useGetAttemptsLeaderboardGameType<
 
   return query;
 }
-
-export type getAchievementsGameTypeResponse200 = {
-  data: GetAchievementsGameType200Item[];
-  status: 200;
-};
-
-export type getAchievementsGameTypeResponse500 = {
-  data: Error;
-  status: 500;
-};
-
-export type getAchievementsGameTypeResponseSuccess =
-  getAchievementsGameTypeResponse200 & {
-    headers: Headers;
-  };
-export type getAchievementsGameTypeResponseError =
-  getAchievementsGameTypeResponse500 & {
-    headers: Headers;
-  };
-
-export type getAchievementsGameTypeResponse =
-  | getAchievementsGameTypeResponseSuccess
-  | getAchievementsGameTypeResponseError;
-
-export const getGetAchievementsGameTypeUrl = (gameType: GameType) => {
-  return `/achievements/${gameType}`;
-};
-
-export const getAchievementsGameType = async (
-  gameType: GameType,
-  options?: RequestInit,
-): Promise<getAchievementsGameTypeResponse> => {
-  return rnFetch<getAchievementsGameTypeResponse>(
-    getGetAchievementsGameTypeUrl(gameType),
-    {
-      ...options,
-      method: "GET",
-    },
-  );
-};
-
-export const getGetAchievementsGameTypeQueryKey = (gameType?: GameType) => {
-  return [`/achievements/${gameType}`] as const;
-};
-
-export const getGetAchievementsGameTypeQueryOptions = <
-  TData = Awaited<ReturnType<typeof getAchievementsGameType>>,
-  TError = Error,
->(
-  gameType: GameType,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getAchievementsGameType>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof rnFetch>;
-  },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey =
-    queryOptions?.queryKey ?? getGetAchievementsGameTypeQueryKey(gameType);
-
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getAchievementsGameType>>
-  > = ({ signal }) =>
-    getAchievementsGameType(gameType, { signal, ...requestOptions });
-
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!gameType,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof getAchievementsGameType>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
-
-export type GetAchievementsGameTypeQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getAchievementsGameType>>
->;
-export type GetAchievementsGameTypeQueryError = Error;
-
-export function useGetAchievementsGameType<
-  TData = Awaited<ReturnType<typeof getAchievementsGameType>>,
-  TError = Error,
->(
-  gameType: GameType,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getAchievementsGameType>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAchievementsGameType>>,
-          TError,
-          Awaited<ReturnType<typeof getAchievementsGameType>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof rnFetch>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetAchievementsGameType<
-  TData = Awaited<ReturnType<typeof getAchievementsGameType>>,
-  TError = Error,
->(
-  gameType: GameType,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getAchievementsGameType>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAchievementsGameType>>,
-          TError,
-          Awaited<ReturnType<typeof getAchievementsGameType>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof rnFetch>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetAchievementsGameType<
-  TData = Awaited<ReturnType<typeof getAchievementsGameType>>,
-  TError = Error,
->(
-  gameType: GameType,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getAchievementsGameType>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof rnFetch>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-
-export function useGetAchievementsGameType<
-  TData = Awaited<ReturnType<typeof getAchievementsGameType>>,
-  TError = Error,
->(
-  gameType: GameType,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getAchievementsGameType>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof rnFetch>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getGetAchievementsGameTypeQueryOptions(
-    gameType,
-    options,
-  );
-
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  query.queryKey = queryOptions.queryKey;
-
-  return query;
-}
-
-export type getAchievementsUserGameTypeResponse200 = {
-  data: GetAchievementsUserGameType200Item[];
-  status: 200;
-};
-
-export type getAchievementsUserGameTypeResponse500 = {
-  data: Error;
-  status: 500;
-};
-
-export type getAchievementsUserGameTypeResponseSuccess =
-  getAchievementsUserGameTypeResponse200 & {
-    headers: Headers;
-  };
-export type getAchievementsUserGameTypeResponseError =
-  getAchievementsUserGameTypeResponse500 & {
-    headers: Headers;
-  };
-
-export type getAchievementsUserGameTypeResponse =
-  | getAchievementsUserGameTypeResponseSuccess
-  | getAchievementsUserGameTypeResponseError;
-
-export const getGetAchievementsUserGameTypeUrl = (gameType: GameType) => {
-  return `/achievements/user/${gameType}`;
-};
-
-export const getAchievementsUserGameType = async (
-  gameType: GameType,
-  options?: RequestInit,
-): Promise<getAchievementsUserGameTypeResponse> => {
-  return rnFetch<getAchievementsUserGameTypeResponse>(
-    getGetAchievementsUserGameTypeUrl(gameType),
-    {
-      ...options,
-      method: "GET",
-    },
-  );
-};
-
-export const getGetAchievementsUserGameTypeQueryKey = (gameType?: GameType) => {
-  return [`/achievements/user/${gameType}`] as const;
-};
-
-export const getGetAchievementsUserGameTypeQueryOptions = <
-  TData = Awaited<ReturnType<typeof getAchievementsUserGameType>>,
-  TError = Error,
->(
-  gameType: GameType,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getAchievementsUserGameType>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof rnFetch>;
-  },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey =
-    queryOptions?.queryKey ?? getGetAchievementsUserGameTypeQueryKey(gameType);
-
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getAchievementsUserGameType>>
-  > = ({ signal }) =>
-    getAchievementsUserGameType(gameType, { signal, ...requestOptions });
-
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!gameType,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof getAchievementsUserGameType>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
-
-export type GetAchievementsUserGameTypeQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getAchievementsUserGameType>>
->;
-export type GetAchievementsUserGameTypeQueryError = Error;
-
-export function useGetAchievementsUserGameType<
-  TData = Awaited<ReturnType<typeof getAchievementsUserGameType>>,
-  TError = Error,
->(
-  gameType: GameType,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getAchievementsUserGameType>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAchievementsUserGameType>>,
-          TError,
-          Awaited<ReturnType<typeof getAchievementsUserGameType>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof rnFetch>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetAchievementsUserGameType<
-  TData = Awaited<ReturnType<typeof getAchievementsUserGameType>>,
-  TError = Error,
->(
-  gameType: GameType,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getAchievementsUserGameType>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAchievementsUserGameType>>,
-          TError,
-          Awaited<ReturnType<typeof getAchievementsUserGameType>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof rnFetch>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetAchievementsUserGameType<
-  TData = Awaited<ReturnType<typeof getAchievementsUserGameType>>,
-  TError = Error,
->(
-  gameType: GameType,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getAchievementsUserGameType>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof rnFetch>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-
-export function useGetAchievementsUserGameType<
-  TData = Awaited<ReturnType<typeof getAchievementsUserGameType>>,
-  TError = Error,
->(
-  gameType: GameType,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getAchievementsUserGameType>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof rnFetch>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getGetAchievementsUserGameTypeQueryOptions(
-    gameType,
-    options,
-  );
-
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  query.queryKey = queryOptions.queryKey;
-
-  return query;
-}
-
-export type getAchievementsProgressGameTypeResponse200 = {
-  data: AchievementProgress;
-  status: 200;
-};
-
-export type getAchievementsProgressGameTypeResponse500 = {
-  data: Error;
-  status: 500;
-};
-
-export type getAchievementsProgressGameTypeResponseSuccess =
-  getAchievementsProgressGameTypeResponse200 & {
-    headers: Headers;
-  };
-export type getAchievementsProgressGameTypeResponseError =
-  getAchievementsProgressGameTypeResponse500 & {
-    headers: Headers;
-  };
-
-export type getAchievementsProgressGameTypeResponse =
-  | getAchievementsProgressGameTypeResponseSuccess
-  | getAchievementsProgressGameTypeResponseError;
-
-export const getGetAchievementsProgressGameTypeUrl = (gameType: GameType) => {
-  return `/achievements/progress/${gameType}`;
-};
-
-export const getAchievementsProgressGameType = async (
-  gameType: GameType,
-  options?: RequestInit,
-): Promise<getAchievementsProgressGameTypeResponse> => {
-  return rnFetch<getAchievementsProgressGameTypeResponse>(
-    getGetAchievementsProgressGameTypeUrl(gameType),
-    {
-      ...options,
-      method: "GET",
-    },
-  );
-};
-
-export const getGetAchievementsProgressGameTypeQueryKey = (
-  gameType?: GameType,
-) => {
-  return [`/achievements/progress/${gameType}`] as const;
-};
-
-export const getGetAchievementsProgressGameTypeQueryOptions = <
-  TData = Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
-  TError = Error,
->(
-  gameType: GameType,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof rnFetch>;
-  },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey =
-    queryOptions?.queryKey ??
-    getGetAchievementsProgressGameTypeQueryKey(gameType);
-
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getAchievementsProgressGameType>>
-  > = ({ signal }) =>
-    getAchievementsProgressGameType(gameType, { signal, ...requestOptions });
-
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!gameType,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
-
-export type GetAchievementsProgressGameTypeQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getAchievementsProgressGameType>>
->;
-export type GetAchievementsProgressGameTypeQueryError = Error;
-
-export function useGetAchievementsProgressGameType<
-  TData = Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
-  TError = Error,
->(
-  gameType: GameType,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
-          TError,
-          Awaited<ReturnType<typeof getAchievementsProgressGameType>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof rnFetch>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetAchievementsProgressGameType<
-  TData = Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
-  TError = Error,
->(
-  gameType: GameType,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
-          TError,
-          Awaited<ReturnType<typeof getAchievementsProgressGameType>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof rnFetch>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetAchievementsProgressGameType<
-  TData = Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
-  TError = Error,
->(
-  gameType: GameType,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof rnFetch>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-
-export function useGetAchievementsProgressGameType<
-  TData = Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
-  TError = Error,
->(
-  gameType: GameType,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof rnFetch>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getGetAchievementsProgressGameTypeQueryOptions(
-    gameType,
-    options,
-  );
-
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  query.queryKey = queryOptions.queryKey;
-
-  return query;
-}
-
-export type postAchievementsCheckAttemptIdResponse200 = {
-  data: PostAchievementsCheckAttemptId200Item[];
-  status: 200;
-};
-
-export type postAchievementsCheckAttemptIdResponse404 = {
-  data: Error;
-  status: 404;
-};
-
-export type postAchievementsCheckAttemptIdResponse500 = {
-  data: Error;
-  status: 500;
-};
-
-export type postAchievementsCheckAttemptIdResponseSuccess =
-  postAchievementsCheckAttemptIdResponse200 & {
-    headers: Headers;
-  };
-export type postAchievementsCheckAttemptIdResponseError = (
-  | postAchievementsCheckAttemptIdResponse404
-  | postAchievementsCheckAttemptIdResponse500
-) & {
-  headers: Headers;
-};
-
-export type postAchievementsCheckAttemptIdResponse =
-  | postAchievementsCheckAttemptIdResponseSuccess
-  | postAchievementsCheckAttemptIdResponseError;
-
-export const getPostAchievementsCheckAttemptIdUrl = (attemptId: string) => {
-  return `/achievements/check/${attemptId}`;
-};
-
-export const postAchievementsCheckAttemptId = async (
-  attemptId: string,
-  options?: RequestInit,
-): Promise<postAchievementsCheckAttemptIdResponse> => {
-  return rnFetch<postAchievementsCheckAttemptIdResponse>(
-    getPostAchievementsCheckAttemptIdUrl(attemptId),
-    {
-      ...options,
-      method: "POST",
-    },
-  );
-};
-
-export const getPostAchievementsCheckAttemptIdMutationOptions = <
-  TError = Error | Error,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postAchievementsCheckAttemptId>>,
-    TError,
-    { attemptId: string },
-    TContext
-  >;
-  request?: SecondParameter<typeof rnFetch>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof postAchievementsCheckAttemptId>>,
-  TError,
-  { attemptId: string },
-  TContext
-> => {
-  const mutationKey = ["postAchievementsCheckAttemptId"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postAchievementsCheckAttemptId>>,
-    { attemptId: string }
-  > = (props) => {
-    const { attemptId } = props ?? {};
-
-    return postAchievementsCheckAttemptId(attemptId, requestOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type PostAchievementsCheckAttemptIdMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postAchievementsCheckAttemptId>>
->;
-
-export type PostAchievementsCheckAttemptIdMutationError = Error | Error;
-
-export const usePostAchievementsCheckAttemptId = <
-  TError = Error | Error,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof postAchievementsCheckAttemptId>>,
-      TError,
-      { attemptId: string },
-      TContext
-    >;
-    request?: SecondParameter<typeof rnFetch>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof postAchievementsCheckAttemptId>>,
-  TError,
-  { attemptId: string },
-  TContext
-> => {
-  const mutationOptions =
-    getPostAchievementsCheckAttemptIdMutationOptions(options);
-
-  return useMutation(mutationOptions, queryClient);
-};

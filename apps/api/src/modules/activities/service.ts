@@ -26,7 +26,7 @@ export class ActivityService {
     return data;
   }
 
-  // TODO: Check if the user id exist
+  // TODO: Check if user id exist
   async getActivitiesWithFamilyCode(idFamilyGroup: string) {
     // Obtener los IDs de los usuarios del grupo familiar
     const { data: usersIds, error: usersError } = await this.supabase
@@ -93,20 +93,35 @@ export class ActivityService {
           payload.createdBy,
         );
       if (isEnabled) {
-        await this.googleCalendarService.createEvent(payload.createdBy, {
-          id: data.id,
-          title: data.title,
-          description: data.description || undefined,
-          startsAt: new Date(data.startsAt),
-          endsAt: data.endsAt ? new Date(data.endsAt) : undefined,
-        });
+        const googleEventId = await this.googleCalendarService.createEvent(
+          payload.createdBy,
+          {
+            id: data.id,
+            title: data.title,
+            description: data.description || undefined,
+            startsAt: new Date(data.startsAt),
+            endsAt: data.endsAt ? new Date(data.endsAt) : undefined,
+          },
+        );
 
-        // TODO: After migration, update activity with Google event ID and sync status
-        console.log("Google Calendar event created for activity:", data.id);
+        // Update activity with Google event ID and sync status
+        await this.supabase
+          .from("activities")
+          .update({
+            google_event_id: googleEventId,
+            google_sync_status: "synced",
+          })
+          .eq("id", data.id);
       }
-    } catch (googleError) {
+    } catch (googleError: unknown) {
       console.error("Google Calendar sync failed:", googleError);
-      // TODO: After migration, update activity with error status
+      // Update activity with error status
+      await this.supabase
+        .from("activities")
+        .update({
+          google_sync_status: "error",
+        })
+        .eq("id", data.id);
     }
 
     return data;
@@ -133,11 +148,27 @@ export class ActivityService {
           data.createdBy,
         );
       if (isEnabled) {
-        // TODO: After migration, get google_event_id from activity
-        // For now, we'll skip Google Calendar sync on updates
-        console.log("Would sync Google Calendar update for activity:", id);
+        // Get Google event ID from activity
+        const { data: activityData } = await this.supabase
+          .from("activities")
+          .select("google_event_id")
+          .eq("id", id)
+          .single();
+
+        if (activityData?.google_event_id) {
+          await this.googleCalendarService.updateEvent(
+            data.createdBy,
+            activityData.google_event_id,
+            {
+              title: data.title,
+              description: data.description || undefined,
+              startsAt: new Date(data.startsAt),
+              endsAt: data.endsAt ? new Date(data.endsAt) : undefined,
+            },
+          );
+        }
       }
-    } catch (googleError) {
+    } catch (googleError: unknown) {
       console.error("Google Calendar sync failed:", googleError);
     }
 
@@ -148,7 +179,7 @@ export class ActivityService {
     // Get activity details before deletion for Google Calendar sync
     const { data: activity } = await this.supabase
       .from("activities")
-      .select("createdBy")
+      .select("createdBy, google_event_id")
       .eq("id", id)
       .single();
 
@@ -167,12 +198,13 @@ export class ActivityService {
           await this.googleCalendarService.isGoogleCalendarEnabled(
             activity.createdBy,
           );
-        if (isEnabled) {
-          // TODO: After migration, get google_event_id from activity
-          // For now, we'll skip Google Calendar sync on deletion
-          console.log("Would delete from Google Calendar for activity:", id);
+        if (isEnabled && activity.google_event_id) {
+          await this.googleCalendarService.deleteEvent(
+            activity.createdBy,
+            activity.google_event_id,
+          );
         }
-      } catch (googleError) {
+      } catch (googleError: unknown) {
         console.error("Google Calendar sync failed:", googleError);
       }
     }

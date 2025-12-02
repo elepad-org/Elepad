@@ -92,6 +92,7 @@ export default function TabLayout() {
           backgroundColor: COLORS.white,
           borderWidth: 1,
           borderColor: COLORS.border,
+          justifyContent: "space-around",
           ...Platform.select({
             ios: {
               shadowColor: "#18020c",
@@ -126,7 +127,6 @@ export default function TabLayout() {
             elevation: 0,
             height: 72,
             justifyContent: "center",
-            alignItems: "center",
           }}
           labeled={true}
           labelMaxFontSizeMultiplier={1.2}

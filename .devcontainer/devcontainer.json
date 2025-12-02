@@ -9,7 +9,7 @@
   ],
   "postCreateCommand": "npm install",
 
-  // Forward only ports that are served *inside* the app container
+  "//": "Forward only ports that are served *inside* the app container",
   "forwardPorts": [8787, 8081, 19000, 19001, 19002, 5432],
   "portsAttributes": {
     "8787": { "label": "Hono API", "requireLocalPort": true },
@@ -18,7 +18,7 @@
     "19001": { "label": "Expo Debug (LAN)", "requireLocalPort": true },
     "19002": { "label": "Expo DevTools (WS)", "requireLocalPort": true }
   },
-  // Avoid VS Code auto-forwarding random ports
+  "//": "Avoid VS Code auto-forwarding random ports",
   "otherPortsAttributes": { "onAutoForward": "ignore" },
 
   "customizations": {
@@ -26,7 +26,7 @@
       "settings": {
         "editor.formatOnSave": true,
         "eslint.workingDirectories": [{ "mode": "auto" }],
-        // Make sure the forward ports listen on localhost (not LAN)
+        "//": "Make sure the forward ports listen on localhost (not LAN)",
         "remote.localPortHost": "localhost",
         "remote.autoForwardPorts": true
       },

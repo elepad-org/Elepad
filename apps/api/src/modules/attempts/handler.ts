@@ -8,6 +8,7 @@ import {
 import { GameTypeEnum } from "../puzzles/schema";
 import { openApiErrorResponse } from "@/utils/api-error";
 import { AchievementService } from "../achievements/service";
+import { withAuth } from "@/middleware/auth";
 
 export const attemptsApp = new OpenAPIHono();
 
@@ -16,6 +17,8 @@ declare module "hono" {
     attemptService: AttemptService;
   }
 }
+
+attemptsApp.use("/attempts/*", withAuth);
 
 attemptsApp.use("/attempts/*", async (c, next) => {
   const attemptService = new AttemptService(c.var.supabase);

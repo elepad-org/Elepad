@@ -3,6 +3,7 @@ import { AchievementService } from "./service";
 import { AchievementProgressSchema } from "./schema";
 import { GameTypeEnum } from "../puzzles/schema";
 import { openApiErrorResponse } from "@/utils/api-error";
+import { withAuth } from "@/middleware/auth";
 
 export const achievementsApp = new OpenAPIHono();
 
@@ -11,6 +12,8 @@ declare module "hono" {
     achievementService: AchievementService;
   }
 }
+
+achievementsApp.use("/*", withAuth);
 
 achievementsApp.use("/achievements/*", async (c, next) => {
   const achievementService = new AchievementService(c.var.supabase);

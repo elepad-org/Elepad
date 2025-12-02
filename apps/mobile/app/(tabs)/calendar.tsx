@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { View, StatusBar } from "react-native";
 import { useAuth } from "@/hooks/useAuth";
 import CalendarCard from "@/components/Calendar/CalendarCard";
@@ -20,6 +20,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import CancelButton from "@/components/shared/CancelButton";
 import SuccessSnackbar from "@/components/shared/SuccessSnackbar";
 import ErrorSnackbar from "@/components/shared/ErrorSnackbar";
+import { supabase } from "@/lib/supabase";
 
 export default function CalendarScreen() {
   const { userElepad } = useAuth();
@@ -31,7 +32,40 @@ export default function CalendarScreen() {
   const [snackbarType, setSnackbarType] = useState<"success" | "error">(
     "success",
   );
-  const [googleCalendarEnabled] = useState(false);
+  const [googleCalendarEnabled, setGoogleCalendarEnabled] = useState(false);
+
+  // Helper function to get auth token
+  const getAuthToken = async () => {
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token || "";
+  };
+
+  // Fetch Google Calendar status on mount
+  useEffect(() => {
+    const fetchGoogleCalendarStatus = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.EXPO_PUBLIC_API_URL}/activities/google-calendar/status`,
+          {
+            headers: {
+              Authorization: `Bearer ${await getAuthToken()}`,
+            },
+          },
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setGoogleCalendarEnabled(data.enabled);
+        }
+      } catch (error) {
+        console.error("Error fetching Google Calendar status:", error);
+      }
+    };
+
+    if (userElepad?.id) {
+      fetchGoogleCalendarStatus();
+    }
+  }, [userElepad?.id]);
 
   const [formVisible, setFormVisible] = useState(false);
   const [editing, setEditing] = useState<Activity | null>(null);

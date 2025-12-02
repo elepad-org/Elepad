@@ -58,6 +58,8 @@ export type Database = {
           description: string | null;
           endsAt: string | null;
           frequencyId: string | null;
+          google_event_id: string | null;
+          google_sync_status: string | null;
           id: string;
           startsAt: string;
           title: string;
@@ -70,6 +72,8 @@ export type Database = {
           description?: string | null;
           endsAt?: string | null;
           frequencyId?: string | null;
+          google_event_id?: string | null;
+          google_sync_status?: string | null;
           id?: string;
           startsAt: string;
           title: string;
@@ -82,6 +86,8 @@ export type Database = {
           description?: string | null;
           endsAt?: string | null;
           frequencyId?: string | null;
+          google_event_id?: string | null;
+          google_sync_status?: string | null;
           id?: string;
           startsAt?: string;
           title?: string;
@@ -519,12 +525,47 @@ export type Database = {
           },
         ];
       };
+      user_google_tokens: {
+        Row: {
+          access_token: string;
+          created_at: string | null;
+          expires_at: string;
+          id: string;
+          refresh_token: string;
+          scope: string;
+          updated_at: string | null;
+          user_id: string;
+        };
+        Insert: {
+          access_token: string;
+          created_at?: string | null;
+          expires_at: string;
+          id?: string;
+          refresh_token: string;
+          scope: string;
+          updated_at?: string | null;
+          user_id: string;
+        };
+        Update: {
+          access_token?: string;
+          created_at?: string | null;
+          expires_at?: string;
+          id?: string;
+          refresh_token?: string;
+          scope?: string;
+          updated_at?: string | null;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       users: {
         Row: {
           avatarUrl: string | null;
           createdAt: string;
           displayName: string;
           email: string;
+          google_calendar_enabled: boolean | null;
+          google_calendar_id: string | null;
           groupId: string | null;
           id: string;
           updatedAt: string;
@@ -534,6 +575,8 @@ export type Database = {
           createdAt?: string;
           displayName?: string;
           email: string;
+          google_calendar_enabled?: boolean | null;
+          google_calendar_id?: string | null;
           groupId?: string | null;
           id: string;
           updatedAt?: string;
@@ -543,6 +586,8 @@ export type Database = {
           createdAt?: string;
           displayName?: string;
           email?: string;
+          google_calendar_enabled?: boolean | null;
+          google_calendar_id?: string | null;
           groupId?: string | null;
           id?: string;
           updatedAt?: string;
@@ -562,7 +607,25 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      get_google_tokens: {
+        Args: { p_user_id: string };
+        Returns: {
+          access_token: string;
+          expires_at: string;
+          refresh_token: string;
+          scope: string;
+        }[];
+      };
+      store_google_tokens: {
+        Args: {
+          p_access_token: string;
+          p_expires_at: string;
+          p_refresh_token: string;
+          p_scope: string;
+          p_user_id: string;
+        };
+        Returns: undefined;
+      };
     };
     Enums: {
       game_type: "memory" | "logic";

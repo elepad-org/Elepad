@@ -641,6 +641,29 @@
           }
         }
       },
+      "AchievementProgress": {
+        "type": "object",
+        "properties": {
+          "totalAchievements": {
+            "type": "integer"
+          },
+          "unlockedAchievements": {
+            "type": "integer"
+          },
+          "totalPoints": {
+            "type": "integer"
+          },
+          "earnedPoints": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "totalAchievements",
+          "unlockedAchievements",
+          "totalPoints",
+          "earnedPoints"
+        ]
+      },
       "StartAttempt": {
         "type": "object",
         "properties": {
@@ -730,29 +753,6 @@
           "bestScore",
           "bestTime",
           "bestMoves"
-        ]
-      },
-      "AchievementProgress": {
-        "type": "object",
-        "properties": {
-          "totalAchievements": {
-            "type": "integer"
-          },
-          "unlockedAchievements": {
-            "type": "integer"
-          },
-          "totalPoints": {
-            "type": "integer"
-          },
-          "earnedPoints": {
-            "type": "integer"
-          }
-        },
-        "required": [
-          "totalAchievements",
-          "unlockedAchievements",
-          "totalPoints",
-          "earnedPoints"
         ]
       }
     },
@@ -1948,6 +1948,121 @@
         }
       }
     },
+    "/activities/google-calendar/authorize": {
+      "post": {
+        "tags": [
+          "activities"
+        ],
+        "responses": {
+          "200": {
+            "description": "Google OAuth authorization URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "authUrl": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "authUrl"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error al generar URL de autorización",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/activities/google-calendar/callback": {
+      "post": {
+        "tags": [
+          "activities"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "state"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Google OAuth callback handled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error al procesar callback de Google OAuth",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/memories": {
       "get": {
         "tags": [
@@ -2997,6 +3112,256 @@
         }
       }
     },
+    "/achievements/{gameType}": {
+      "get": {
+        "tags": [
+          "achievements"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/GameType"
+            },
+            "required": true,
+            "name": "gameType",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de logros del tipo de juego",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "title"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/achievements/user/{gameType}": {
+      "get": {
+        "tags": [
+          "achievements"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/GameType"
+            },
+            "required": true,
+            "name": "gameType",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de logros con información de si el usuario los desbloqueó",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "achievement": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "icon": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "points": {
+                            "type": "number"
+                          },
+                          "gameType": {
+                            "$ref": "#/components/schemas/GameType"
+                          },
+                          "code": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "title",
+                          "description",
+                          "icon",
+                          "points",
+                          "gameType",
+                          "code"
+                        ]
+                      },
+                      "unlocked": {
+                        "type": "boolean"
+                      },
+                      "unlockedAt": {
+                        "type": "string",
+                        "nullable": true
+                      }
+                    },
+                    "required": [
+                      "achievement",
+                      "unlocked",
+                      "unlockedAt"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/achievements/progress/{gameType}": {
+      "get": {
+        "tags": [
+          "achievements"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "$ref": "#/components/schemas/GameType"
+            },
+            "required": true,
+            "name": "gameType",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Progreso de logros del usuario",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AchievementProgress"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/achievements/check/{attemptId}": {
+      "post": {
+        "tags": [
+          "achievements"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "attemptId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logros desbloqueados (si hay alguno)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "title": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "title"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Intento no encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/attempts/start": {
       "post": {
         "tags": [
@@ -3396,256 +3761,6 @@
                       "score"
                     ]
                   }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Error interno del servidor",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/achievements/{gameType}": {
-      "get": {
-        "tags": [
-          "achievements"
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "$ref": "#/components/schemas/GameType"
-            },
-            "required": true,
-            "name": "gameType",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Lista de logros del tipo de juego",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "title": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "title"
-                    ]
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Error interno del servidor",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/achievements/user/{gameType}": {
-      "get": {
-        "tags": [
-          "achievements"
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "$ref": "#/components/schemas/GameType"
-            },
-            "required": true,
-            "name": "gameType",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Lista de logros con información de si el usuario los desbloqueó",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "achievement": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "title": {
-                            "type": "string"
-                          },
-                          "description": {
-                            "type": "string"
-                          },
-                          "icon": {
-                            "type": "string",
-                            "nullable": true
-                          },
-                          "points": {
-                            "type": "number"
-                          },
-                          "gameType": {
-                            "$ref": "#/components/schemas/GameType"
-                          },
-                          "code": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "title",
-                          "description",
-                          "icon",
-                          "points",
-                          "gameType",
-                          "code"
-                        ]
-                      },
-                      "unlocked": {
-                        "type": "boolean"
-                      },
-                      "unlockedAt": {
-                        "type": "string",
-                        "nullable": true
-                      }
-                    },
-                    "required": [
-                      "achievement",
-                      "unlocked",
-                      "unlockedAt"
-                    ]
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Error interno del servidor",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/achievements/progress/{gameType}": {
-      "get": {
-        "tags": [
-          "achievements"
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "$ref": "#/components/schemas/GameType"
-            },
-            "required": true,
-            "name": "gameType",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Progreso de logros del usuario",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AchievementProgress"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Error interno del servidor",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/achievements/check/{attemptId}": {
-      "post": {
-        "tags": [
-          "achievements"
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "required": true,
-            "name": "attemptId",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Logros desbloqueados (si hay alguno)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      },
-                      "title": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "title"
-                    ]
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Intento no encontrado",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
                 }
               }
             }

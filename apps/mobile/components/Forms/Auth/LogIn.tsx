@@ -44,6 +44,16 @@ export default function LogIn() {
           provider: "google",
           options: {
             redirectTo: `${window.location.origin}/(tabs)/home`,
+            scopes: [
+              "https://www.googleapis.com/auth/userinfo.email",
+              "https://www.googleapis.com/auth/userinfo.profile",
+              "https://www.googleapis.com/auth/calendar.app.created",
+              "https://www.googleapis.com/auth/calendar.events",
+            ].join(" "),
+            queryParams: {
+              access_type: "offline",
+              prompt: "consent",
+            },
           },
         });
 
@@ -59,7 +69,19 @@ export default function LogIn() {
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo },
+        options: {
+          redirectTo,
+          scopes: [
+            "https://www.googleapis.com/auth/userinfo.email",
+            "https://www.googleapis.com/auth/userinfo.profile",
+            "https://www.googleapis.com/auth/calendar",
+            "https://www.googleapis.com/auth/calendar.events",
+          ].join(" "),
+          queryParams: {
+            access_type: "offline",
+            prompt: "consent",
+          },
+        },
       });
 
       if (error) {

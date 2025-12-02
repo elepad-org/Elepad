@@ -7,6 +7,12 @@ import {
 } from "./schema";
 import { openApiErrorResponse } from "@/utils/api-error";
 import { GoogleCalendarService } from "@/services/google-calendar";
+import { withAuth } from "@/middleware/auth";
+
+const GoogleAuthSchema = z.object({
+  code: z.string(),
+  state: z.string(),
+});
 
 export const activitiesApp = new OpenAPIHono();
 
@@ -16,6 +22,9 @@ declare module "hono" {
     googleCalendarService: GoogleCalendarService;
   }
 }
+
+// Aplicar autenticación a todas las rutas
+activitiesApp.use("/*", withAuth);
 
 activitiesApp.use("/activities/*", async (c, next) => {
   const activityService = new ActivityService(c.var.supabase);
@@ -187,10 +196,36 @@ activitiesApp.openapi(
     const body = c.req.valid("json");
 
     try {
+      // Check if user has Google Calendar tokens
+      const { data: tokens, error } = await c.var.supabase.rpc(
+        "get_google_tokens",
+        {
+          p_user_id: userId,
+        },
+      );
+
+      console.log("Tokens check for user", userId, ":", { tokens, error });
+
+      if (!tokens || tokens.length === 0) {
+        return c.json(
+          {
+            error: {
+              message:
+                "Google Calendar authorization required. Please complete OAuth first.",
+            },
+          },
+          400,
+        );
+      }
+
       await c.var.googleCalendarService.enableGoogleCalendar(
         userId,
         body.calendarId,
       );
+
+      // Sync existing activities when enabling Google Calendar
+      await c.var.googleCalendarService.syncExistingActivities(userId, c);
+
       return c.json({ success: true }, 200);
     } catch (error) {
       console.error("Error enabling Google Calendar:", error);
@@ -236,99 +271,119 @@ activitiesApp.openapi(
 
 activitiesApp.openapi(
   {
-    method: "post",
-    path: "/activities/google-calendar/disable",
+    method: "get",
+    path: "/activities/google-calendar/status",
     tags: ["activities"],
     responses: {
       200: {
-        description: "Google Calendar disabled",
+        description: "Google Calendar status",
         content: {
-          "application/json": { schema: z.object({ success: z.boolean() }) },
+          "application/json": {
+            schema: z.object({
+              enabled: z.boolean(),
+              calendarId: z.string().optional(),
+            }),
+          },
         },
       },
-      400: openApiErrorResponse("Error al deshabilitar Google Calendar"),
       500: openApiErrorResponse("Error interno del servidor"),
     },
   },
   async (c) => {
     const userId = c.var.user.id;
+
     try {
-      await c.var.googleCalendarService.disableGoogleCalendar(userId);
-      return c.json({ success: true }, 200);
+      const enabled =
+        await c.var.googleCalendarService.isGoogleCalendarEnabled(userId);
+      return c.json({ enabled, calendarId: undefined }, 200);
     } catch (error) {
-      console.error("Error disabling Google Calendar:", error);
+      console.error("Error checking Google Calendar status:", error);
+      return c.json({ enabled: false, calendarId: undefined }, 200);
+    }
+  },
+);
+
+// Google OAuth authorization endpoint
+activitiesApp.openapi(
+  {
+    method: "post",
+    path: "/activities/google-calendar/authorize",
+    tags: ["activities"],
+    responses: {
+      200: {
+        description: "Google OAuth authorization URL",
+        content: {
+          "application/json": { schema: z.object({ authUrl: z.string() }) },
+        },
+      },
+      400: openApiErrorResponse("Error al generar URL de autorización"),
+      500: openApiErrorResponse("Error interno del servidor"),
+    },
+  },
+  async (c) => {
+    const userId = c.var.user.id;
+
+    try {
+      const googleCalendarService = new GoogleCalendarService(c.var.supabase);
+      const authUrl = googleCalendarService.getAuthUrl(userId);
+
+      return c.json({ authUrl }, 200);
+    } catch (error) {
+      console.error("Error generating Google OAuth URL:", error);
       return c.json(
-        { error: { message: "Failed to disable Google Calendar" } },
+        { error: { message: "Failed to generate authorization URL" } },
         400,
       );
     }
   },
 );
 
+// Google OAuth callback endpoint
 activitiesApp.openapi(
   {
-    method: "get",
-    path: "/activities/google-calendar/status",
+    method: "post",
+    path: "/activities/google-calendar/callback",
     tags: ["activities"],
-    responses: {
-      200: {
-        description: "Google Calendar status",
+    request: {
+      body: {
         content: {
-          "application/json": {
-            schema: z.object({
-              enabled: z.boolean(),
-              calendarId: z.string().optional(),
-            }),
-          },
+          "application/json": { schema: GoogleAuthSchema },
         },
       },
+    },
+    responses: {
+      200: {
+        description: "Google OAuth callback handled",
+        content: {
+          "application/json": { schema: z.object({ success: z.boolean() }) },
+        },
+      },
+      400: openApiErrorResponse("Error al procesar callback de Google OAuth"),
       500: openApiErrorResponse("Error interno del servidor"),
     },
   },
   async (c) => {
     const userId = c.var.user.id;
+    const body = c.req.valid("json");
 
     try {
-      const enabled =
-        await c.var.googleCalendarService.isGoogleCalendarEnabled(userId);
-      return c.json({ enabled, calendarId: undefined }, 200);
-    } catch (error) {
-      console.error("Error checking Google Calendar status:", error);
-      return c.json({ enabled: false, calendarId: undefined }, 200);
-    }
-  },
-);
+      const googleCalendarService = new GoogleCalendarService(c.var.supabase);
 
-activitiesApp.openapi(
-  {
-    method: "get",
-    path: "/activities/google-calendar/status",
-    tags: ["activities"],
-    responses: {
-      200: {
-        description: "Google Calendar status",
-        content: {
-          "application/json": {
-            schema: z.object({
-              enabled: z.boolean(),
-              calendarId: z.string().optional(),
-            }),
-          },
-        },
-      },
-      500: openApiErrorResponse("Error interno del servidor"),
-    },
-  },
-  async (c) => {
-    const userId = c.var.user.id;
+      // Exchange authorization code for tokens
+      const tokens = await googleCalendarService.exchangeCodeForTokens(
+        body.code,
+      );
 
-    try {
-      const enabled =
-        await c.var.googleCalendarService.isGoogleCalendarEnabled(userId);
-      return c.json({ enabled, calendarId: undefined }, 200);
+      // Store tokens for user
+      await googleCalendarService.storeTokens(userId, tokens);
+
+      return c.json({ success: true }, 200);
     } catch (error) {
-      console.error("Error checking Google Calendar status:", error);
-      return c.json({ enabled: false, calendarId: undefined }, 200);
+      console.error("Error handling Google OAuth callback:", error);
+      return c.json(
+        { error: { message: "Failed to process Google OAuth callback" } },
+        400,
+      );
     }
   },
 );

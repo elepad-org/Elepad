@@ -17,7 +17,6 @@ import { activityCompletionsHandler } from "./modules/activityCompletions/handle
 import { puzzlesApp } from "./modules/puzzles/handler.js";
 import { attemptsApp } from "./modules/attempts/handler.js";
 import { achievementsApp } from "./modules/achievements/handler.js";
-import { withAuth } from "./middleware/auth.js";
 
 // Configurar fetch personalizado para Node.js en desarrollo
 let customFetch: typeof fetch | undefined;
@@ -110,16 +109,9 @@ app.route("/", activitiesApp);
 app.route("/", memoriesApp);
 app.route("/", frequenciesApp);
 app.route("/activity-completions", activityCompletionsHandler);
-
-// Mount games/puzzles routes (public)
 app.route("/", puzzlesApp);
-
-// Mount attempts and achievements routes (require auth)
-app.use("/attempts/*", withAuth);
-app.route("/", attemptsApp);
-
-app.use("/achievements/*", withAuth);
 app.route("/", achievementsApp);
+app.route("/", attemptsApp);
 
 // OpenAPI spec.
 app.doc("/openapi.json", {
