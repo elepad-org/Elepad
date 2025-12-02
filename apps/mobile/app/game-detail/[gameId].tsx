@@ -11,7 +11,7 @@ import {
   Dialog,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { COLORS, STYLES, SHADOWS } from "@/styles/base";
+import { COLORS, STYLES, SHADOWS, FONT } from "@/styles/base";
 import { router, useLocalSearchParams, Stack } from "expo-router";
 import {
   useGetAchievementsUserGameType,
@@ -250,14 +250,12 @@ export default function GameDetailScreen() {
         >
           <View style={styles.fullWidthContainer}>
             {/* Título del juego */}
-            <Text style={[STYLES.superHeading, styles.title]}>
-              {gameInfo.title}
-            </Text>
+            <Text style={[styles.title]}>{gameInfo.title}</Text>
 
             {/* Descripción del Juego */}
             <Card style={[styles.gameCard, { marginBottom: 16 }]}>
               <Card.Content>
-                <Text variant="bodyLarge" style={{ color: COLORS.text }}>
+                <Text variant="bodyMedium" style={{ color: COLORS.text }}>
                   {gameInfo.description}
                 </Text>
               </Card.Content>
@@ -650,6 +648,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 8,
     paddingBottom: 16,
+    fontSize: 24,
+    fontFamily: FONT.bold,
   },
   gameCard: {
     backgroundColor: COLORS.backgroundSecondary,
