@@ -35,7 +35,7 @@ const HelpBold: React.FC<{ children: React.ReactNode; color?: string }> = ({
 export const GAMES_INFO: Record<string, GameInfo> = {
   memory: {
     id: "memory",
-    title: "Juego de Memoria",
+    title: "Memoria",
     emoji: "",
     description:
       "Un clásico juego de memoria donde debes encontrar todas las parejas de cartas iguales. Perfecto para entrenar tu memoria visual y concentración.",

@@ -255,7 +255,10 @@ export default function GameDetailScreen() {
             {/* Descripción del Juego */}
             <Card style={[styles.gameCard, { marginBottom: 16 }]}>
               <Card.Content>
-                <Text variant="bodyMedium" style={{ color: COLORS.text }}>
+                <Text
+                  variant="bodyMedium"
+                  style={{ color: COLORS.text, textAlign: "justify" }}
+                >
                   {gameInfo.description}
                 </Text>
               </Card.Content>
@@ -264,7 +267,7 @@ export default function GameDetailScreen() {
                   mode="text"
                   onPress={() => setShowInstructions(!showInstructions)}
                   icon={showInstructions ? "chevron-up" : "chevron-down"}
-                  contentStyle={{ flexDirection: "row-reverse" }}
+                  contentStyle={{ flexDirection: "row-reverse", paddingTop: 4 }}
                   labelStyle={{ fontSize: 16, fontWeight: "bold" }}
                   style={{ marginBottom: showInstructions ? 16 : 0 }}
                 >
