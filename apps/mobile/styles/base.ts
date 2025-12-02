@@ -35,7 +35,7 @@ export const COLORS = {
   backgroundSecondary: "#F2F2F7", // Light gray
   backgroundTertiary: "#9eadc8", // Light blue from palette
   white: "#FFFFFF",
-  success: "#34C759",
+  success: "#6B8DD6", // Azul violáceo que combina con el tema principal
 
   // Text hierarchy - High contrast
   text: "#000000", // Black

@@ -4,7 +4,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, Portal, Dialog, Button, Snackbar } from "react-native-paper";
 import { router, Stack } from "expo-router";
 import { MemoryGameBoard } from "@/components/MemoryGame/MemoryGameBoard";
-import { GameHeader } from "@/components/shared/GameHeader";
 import { InstructionsDialog } from "@/components/shared/InstructionsDialog";
 import { COLORS, STYLES } from "@/styles/base";
 import { GAMES_INFO } from "@/constants/gamesInfo";
@@ -162,14 +161,6 @@ export default function MemoryGameScreen() {
         />
 
         <View style={styles.container}>
-          {/* Título con botón de retroceso flotante */}
-          <GameHeader
-            icon="🧠"
-            title="Juego de Memoria"
-            subtitle="Encuentra todas las parejas"
-            onHelpPress={() => setShowHelpDialog(true)}
-          />
-
           {/* Tablero de juego */}
           {selectedMode && (
             <MemoryGameBoard

@@ -4,7 +4,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, Portal, Dialog, Button, Snackbar } from "react-native-paper";
 import { router, Stack } from "expo-router";
 import { NetGameBoard } from "@/components/NetGame/NetGameBoard";
-import { GameHeader } from "@/components/shared/GameHeader";
 import { InstructionsDialog } from "@/components/shared/InstructionsDialog";
 import { COLORS, STYLES } from "@/styles/base";
 import { GAMES_INFO } from "@/constants/gamesInfo";
@@ -140,16 +139,6 @@ export default function NetGameScreen() {
         />
 
         <View style={styles.container}>
-          {/* Título con botón de retroceso */}
-          <GameHeader
-            icon="lan"
-            title="NET"
-            subtitle="Conecta toda la red girando las casillas"
-            onHelpPress={() => setShowHelpDialog(true)}
-            iconColor="#2196F3"
-            useIconComponent={true}
-          />
-
           {/* Tablero de juego */}
           <NetGameBoard
             gridSize={5}

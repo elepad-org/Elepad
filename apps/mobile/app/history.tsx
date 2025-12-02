@@ -10,6 +10,7 @@ import {
 } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Stack } from "expo-router";
 import {
   useGetAttemptsStatsGameType,
   GameType,
@@ -251,118 +252,134 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
   };
 
   return (
-    <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
+      <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor={COLORS.background}
+        />
 
-      <View style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={STYLES.superHeading}>Historial</Text>
-        </View>
+        <View style={styles.container}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={STYLES.superHeading}>Historial</Text>
+          </View>
 
-        {/* Filter Chips */}
-        <View style={styles.filterContainer}>
-          <Chip
-            selected={selectedGame === "all"}
-            onPress={() => setSelectedGame("all")}
-            style={[styles.chip, selectedGame === "all" && styles.chipSelected]}
-            textStyle={
-              selectedGame === "all"
-                ? { color: COLORS.white }
-                : { color: COLORS.text }
-            }
-          >
-            Todos
-          </Chip>
-          {gameTypes.map((gt) => (
+          {/* Filter Chips */}
+          <View style={styles.filterContainer}>
             <Chip
-              key={gt}
-              selected={selectedGame === gt}
-              onPress={() => setSelectedGame(gt)}
-              style={[styles.chip, selectedGame === gt && styles.chipSelected]}
+              selected={selectedGame === "all"}
+              onPress={() => setSelectedGame("all")}
+              style={[
+                styles.chip,
+                selectedGame === "all" && styles.chipSelected,
+              ]}
               textStyle={
-                selectedGame === gt
+                selectedGame === "all"
                   ? { color: COLORS.white }
                   : { color: COLORS.text }
               }
             >
-              {gameTypesRender[gt]}
+              Todos
             </Chip>
-          ))}
-        </View>
-
-        {globalLoading && !loadingMore ? (
-          <View style={STYLES.center}>
-            <ActivityIndicator />
+            {gameTypes.map((gt) => (
+              <Chip
+                key={gt}
+                selected={selectedGame === gt}
+                onPress={() => setSelectedGame(gt)}
+                style={[
+                  styles.chip,
+                  selectedGame === gt && styles.chipSelected,
+                ]}
+                textStyle={
+                  selectedGame === gt
+                    ? { color: COLORS.white }
+                    : { color: COLORS.text }
+                }
+              >
+                {gameTypesRender[gt]}
+              </Chip>
+            ))}
           </View>
-        ) : (
-          <FlatList
-            data={attempts}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <AttemptItem attempt={item} gameType={detectGameType(item)} />
-            )}
-            ListHeaderComponent={
-              <Card style={styles.statsCard}>
-                <Card.Content>
-                  <View style={styles.statsHeader}>
-                    <MaterialCommunityIcons
-                      name="chart-box-outline"
-                      size={20}
-                      color={COLORS.primary}
+
+          {globalLoading && !loadingMore ? (
+            <View style={STYLES.center}>
+              <ActivityIndicator />
+            </View>
+          ) : (
+            <FlatList
+              data={attempts}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <AttemptItem attempt={item} gameType={detectGameType(item)} />
+              )}
+              ListHeaderComponent={
+                <Card style={styles.statsCard}>
+                  <Card.Content>
+                    <View style={styles.statsHeader}>
+                      <MaterialCommunityIcons
+                        name="chart-box-outline"
+                        size={20}
+                        color={COLORS.primary}
+                      />
+                      <Text style={styles.statsTitle}>Rendimiento</Text>
+                    </View>
+
+                    <View style={styles.kpiContainer}>
+                      <View style={styles.kpiItem}>
+                        <Text style={styles.kpiValue}>{total}</Text>
+                        <Text style={styles.kpiLabel}>Partidas</Text>
+                      </View>
+                      <View style={styles.kpiItem}>
+                        <Text style={[styles.kpiValue, { color: "#FBC02D" }]}>
+                          {best}
+                        </Text>
+                        <Text style={styles.kpiLabel}>Récord</Text>
+                      </View>
+                      <View style={styles.kpiItem}>
+                        <Text
+                          style={[
+                            styles.kpiValue,
+                            {
+                              color:
+                                successRate > 0.5
+                                  ? COLORS.success
+                                  : COLORS.error,
+                            },
+                          ]}
+                        >
+                          {successPercentage}%
+                        </Text>
+                        <Text style={styles.kpiLabel}>Éxito</Text>
+                      </View>
+                    </View>
+
+                    <Divider style={{ marginVertical: 12 }} />
+
+                    <View style={styles.progressRow}>
+                      <Text style={styles.progressLabel}>
+                        Tasa de victorias
+                      </Text>
+                      <Text style={styles.progressLabel}>
+                        {success}/{total}
+                      </Text>
+                    </View>
+                    <ProgressBar
+                      progress={successRate}
+                      color={successRate > 0.5 ? COLORS.success : COLORS.error}
+                      style={styles.progressBar}
                     />
-                    <Text style={styles.statsTitle}>Rendimiento</Text>
-                  </View>
-
-                  <View style={styles.kpiContainer}>
-                    <View style={styles.kpiItem}>
-                      <Text style={styles.kpiValue}>{total}</Text>
-                      <Text style={styles.kpiLabel}>Partidas</Text>
-                    </View>
-                    <View style={styles.kpiItem}>
-                      <Text style={[styles.kpiValue, { color: "#FBC02D" }]}>
-                        {best}
-                      </Text>
-                      <Text style={styles.kpiLabel}>Récord</Text>
-                    </View>
-                    <View style={styles.kpiItem}>
-                      <Text
-                        style={[
-                          styles.kpiValue,
-                          {
-                            color:
-                              successRate > 0.5 ? COLORS.success : COLORS.error,
-                          },
-                        ]}
-                      >
-                        {successPercentage}%
-                      </Text>
-                      <Text style={styles.kpiLabel}>Éxito</Text>
-                    </View>
-                  </View>
-
-                  <Divider style={{ marginVertical: 12 }} />
-
-                  <View style={styles.progressRow}>
-                    <Text style={styles.progressLabel}>Tasa de victorias</Text>
-                    <Text style={styles.progressLabel}>
-                      {success}/{total}
-                    </Text>
-                  </View>
-                  <ProgressBar
-                    progress={successRate}
-                    color={successRate > 0.5 ? COLORS.success : COLORS.error}
-                    style={styles.progressBar}
-                  />
-                </Card.Content>
-              </Card>
-            }
-            ListFooterComponent={renderFooter}
-            contentContainerStyle={styles.listContent}
-          />
-        )}
-      </View>
-    </SafeAreaView>
+                  </Card.Content>
+                </Card>
+              }
+              ListFooterComponent={renderFooter}
+              contentContainerStyle={styles.listContent}
+            />
+          )}
+        </View>
+      </SafeAreaView>
+    </>
   );
 }
 
@@ -372,7 +389,8 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 20,
+    alignContent: "flex-start",
   },
   filterContainer: {
     flexDirection: "row",

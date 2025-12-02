@@ -20,7 +20,7 @@ export function GameInstructions({
       {/* Objetivo del juego */}
       <View style={styles.section}>
         <Text variant="titleMedium" style={styles.sectionTitle}>
-          🎯 Objetivo del Juego
+          Objetivo
         </Text>
         <Text variant="bodyMedium" style={styles.text}>
           {gameInfo.objective}
@@ -31,7 +31,7 @@ export function GameInstructions({
       {gameInfo.sections.map((section, index) => (
         <View key={index} style={styles.section}>
           <Text variant="titleMedium" style={styles.sectionTitle}>
-            {section.title}
+            {section.title.replace(/[🎯🕹️🎨🏆💡✅⚠️]/g, "").trim()}
           </Text>
           {section.content && typeof section.content === "string" ? (
             <Text variant="bodyMedium" style={styles.text}>
