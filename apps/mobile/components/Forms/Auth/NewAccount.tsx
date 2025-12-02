@@ -4,7 +4,7 @@ import { Link } from "expo-router";
 import { useState } from "react";
 import { View, Alert, StyleSheet } from "react-native";
 import { TextInput, Button, Text } from "react-native-paper";
-import { COLORS, STYLES } from "@/styles/base";
+import { COLORS } from "@/styles/base";
 
 export default function NewAccount() {
   const [email, setEmail] = useState("");

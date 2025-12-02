@@ -2,10 +2,9 @@ import NewAccount from "@/components/Forms/Auth/NewAccount";
 import { useAuth } from "@/hooks/useAuth";
 import { Redirect } from "expo-router";
 import { useRef } from "react";
-import { Animated, ImageBackground, StyleSheet, View } from "react-native";
+import { Animated, StyleSheet, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator } from "react-native-paper";
-import bh from "@/assets/images/bh7.jpeg";
 import { FONT } from "@/styles/base";
 
 export default function SignupScreen() {

@@ -11,23 +11,14 @@ import {
   Dialog,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-<<<<<<< HEAD
 import { COLORS, STYLES, SHADOWS, FONT } from "@/styles/base";
 import { router, useLocalSearchParams, Stack } from "expo-router";
-=======
-import { COLORS, STYLES, SHADOWS } from "@/styles/base";
-import { router, useLocalSearchParams } from "expo-router";
->>>>>>> 412a822 (Mate hiperbolico (Final de la Release 3) (#69))
 import {
   useGetAchievementsUserGameType,
   GameType,
   getAttempts,
 } from "@elepad/api-client";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-<<<<<<< HEAD
-=======
-import { CustomHeader } from "@/components/shared/CustomHeader";
->>>>>>> 412a822 (Mate hiperbolico (Final de la Release 3) (#69))
 import { GAMES_INFO } from "@/constants/gamesInfo";
 import { GameInstructions } from "@/components/shared/GameInstructions";
 
@@ -123,10 +114,7 @@ export default function GameDetailScreen() {
   const [error, setError] = useState<Error | null>(null);
   const [selectedAchievement, setSelectedAchievement] =
     useState<UserAchievement | null>(null);
-<<<<<<< HEAD
   const [showInstructions, setShowInstructions] = useState(false);
-=======
->>>>>>> 412a822 (Mate hiperbolico (Final de la Release 3) (#69))
 
   // Obtener logros del juego
   const {
@@ -218,7 +206,6 @@ export default function GameDetailScreen() {
 
   if (!gameConfig || !gameInfo) {
     return (
-<<<<<<< HEAD
       <>
         <Stack.Screen options={{ headerShown: false }} />
         <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
@@ -239,22 +226,6 @@ export default function GameDetailScreen() {
           </View>
         </SafeAreaView>
       </>
-=======
-      <SafeAreaView style={STYLES.safeArea} edges={["left", "right"]}>
-        <CustomHeader title="Juego no encontrado" />
-        <View style={STYLES.center}>
-          <Text style={STYLES.heading}>❌ Juego no encontrado</Text>
-          <Button
-            mode="contained"
-            onPress={() => router.back()}
-            style={{ marginTop: 16 }}
-            buttonColor={COLORS.primary}
-          >
-            Volver a Juegos
-          </Button>
-        </View>
-      </SafeAreaView>
->>>>>>> 412a822 (Mate hiperbolico (Final de la Release 3) (#69))
     );
   }
 
@@ -265,7 +236,6 @@ export default function GameDetailScreen() {
   };
 
   return (
-<<<<<<< HEAD
     <>
       <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
@@ -327,73 +297,15 @@ export default function GameDetailScreen() {
             <Card style={[styles.gameCard, { marginBottom: 16 }]}>
               <Card.Content>
                 <View style={styles.sectionHeader}>
-=======
-    <SafeAreaView style={STYLES.safeArea} edges={["left", "right"]}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
-      <CustomHeader title={gameInfo.title} />
-
-      <ScrollView
-        contentContainerStyle={STYLES.contentContainer}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={STYLES.container}>
-          {/* Información del Juego */}
-          <Card style={[styles.gameCard, { marginBottom: 16 }]}>
-            <Card.Content>
-              <Text
-                variant="bodyLarge"
-                style={{ color: COLORS.text, marginBottom: 16 }}
-              >
-                {gameInfo.description}
-              </Text>
-
-              <Divider style={{ marginVertical: 12 }} />
-
-              {/* Usar el componente GameInstructions */}
-              <GameInstructions gameInfo={gameInfo} variant="card" />
-            </Card.Content>
-          </Card>
-
-          {/* Botón Jugar */}
-          <Button
-            mode="contained"
-            onPress={() =>
-              router.push(gameConfig.route as "/memory-game" | "/net-game")
-            }
-            icon="play"
-            buttonColor={COLORS.primary}
-            style={{ marginBottom: 24 }}
-            contentStyle={{ paddingVertical: 8 }}
-          >
-            Jugar Ahora
-          </Button>
-
-          {/* Logros */}
-          <Card style={[styles.gameCard, { marginBottom: 16 }]}>
-            <Card.Content>
-              <View style={styles.sectionHeader}>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <MaterialCommunityIcons
-                    name="trophy"
-                    size={24}
-                    color={COLORS.primary}
-                  />
->>>>>>> 412a822 (Mate hiperbolico (Final de la Release 3) (#69))
                   <Text
                     variant="titleLarge"
                     style={{
                       fontWeight: "bold",
-<<<<<<< HEAD
                       color: COLORS.text,
-=======
-                      color: COLORS.primary,
-                      marginLeft: 8,
->>>>>>> 412a822 (Mate hiperbolico (Final de la Release 3) (#69))
                     }}
                   >
                     Logros
                   </Text>
-<<<<<<< HEAD
                   <Chip
                     mode="flat"
                     style={{ backgroundColor: COLORS.primary }}
@@ -727,299 +639,10 @@ export default function GameDetailScreen() {
         </Portal>
       </SafeAreaView>
     </>
-=======
-                </View>
-                <Chip
-                  mode="flat"
-                  style={{ backgroundColor: COLORS.backgroundSecondary }}
-                >
-                  {unlockedCount}/{totalCount}
-                </Chip>
-              </View>
-
-              {achievementsLoading && (
-                <View style={{ paddingVertical: 20 }}>
-                  <ActivityIndicator />
-                </View>
-              )}
-
-              {achievementsError && (
-                <View style={styles.errorContainer}>
-                  <Text
-                    variant="bodyMedium"
-                    style={{ color: COLORS.error, marginBottom: 12 }}
-                  >
-                    ❌ Error al cargar los logros
-                  </Text>
-                  <Button mode="outlined" onPress={handleRetry}>
-                    Reintentar
-                  </Button>
-                </View>
-              )}
-
-              {!achievementsLoading && !achievementsError && (
-                <>
-                  {achievementsArray.length === 0 ? (
-                    <Text
-                      variant="bodyMedium"
-                      style={{
-                        color: COLORS.textSecondary,
-                        textAlign: "center",
-                        paddingVertical: 20,
-                      }}
-                    >
-                      No hay logros disponibles para este juego aún.
-                    </Text>
-                  ) : (
-                    <View style={styles.achievementsGrid}>
-                      {achievementsArray.map((achievement: UserAchievement) => (
-                        <Card
-                          key={achievement.achievement.id}
-                          style={[
-                            styles.achievementCard,
-                            !achievement.unlocked && styles.achievementLocked,
-                          ]}
-                          onPress={() => setSelectedAchievement(achievement)}
-                        >
-                          <Card.Content style={styles.achievementContent}>
-                            <View style={styles.achievementIcon}>
-                              {achievement.unlocked ? (
-                                <Text style={{ fontSize: 32 }}>
-                                  {achievement.achievement.icon || "🏆"}
-                                </Text>
-                              ) : (
-                                <MaterialCommunityIcons
-                                  name="lock"
-                                  size={32}
-                                  color="#999"
-                                />
-                              )}
-                            </View>
-                            <Text
-                              variant="labelSmall"
-                              style={[
-                                styles.achievementTitle,
-                                !achievement.unlocked &&
-                                  styles.achievementTitleLocked,
-                              ]}
-                              numberOfLines={2}
-                            >
-                              {achievement.achievement.title}
-                            </Text>
-                            <Text
-                              variant="labelSmall"
-                              style={styles.achievementPoints}
-                            >
-                              {achievement.achievement.points} pts
-                            </Text>
-                          </Card.Content>
-                        </Card>
-                      ))}
-                    </View>
-                  )}
-                </>
-              )}
-            </Card.Content>
-          </Card>
-
-          {/* Puntajes Recientes */}
-          <Card style={[styles.gameCard, { marginBottom: 16 }]}>
-            <Card.Content>
-              <View style={styles.sectionHeader}>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <MaterialCommunityIcons
-                    name="history"
-                    size={24}
-                    color={COLORS.primary}
-                  />
-                  <Text
-                    variant="titleLarge"
-                    style={{
-                      fontWeight: "bold",
-                      color: COLORS.primary,
-                      marginLeft: 8,
-                    }}
-                  >
-                    Puntajes Recientes
-                  </Text>
-                </View>
-              </View>
-
-              {loading && !loadingMore && (
-                <View style={{ paddingVertical: 20 }}>
-                  <ActivityIndicator />
-                </View>
-              )}
-
-              {error && !loading && (
-                <View style={styles.errorContainer}>
-                  <Text
-                    variant="bodyMedium"
-                    style={{ color: COLORS.error, marginBottom: 12 }}
-                  >
-                    ❌ Error al cargar el historial
-                  </Text>
-                  <Button mode="outlined" onPress={handleRetry}>
-                    Reintentar
-                  </Button>
-                </View>
-              )}
-
-              {!loading && !error && (
-                <>
-                  {attempts.length === 0 ? (
-                    <Text
-                      variant="bodyMedium"
-                      style={{
-                        color: COLORS.textSecondary,
-                        textAlign: "center",
-                        paddingVertical: 20,
-                      }}
-                    >
-                      Aún no has jugado este juego. ¡Comienza ahora!
-                    </Text>
-                  ) : (
-                    <>
-                      {attempts.map((attempt) => (
-                        <AttemptItem
-                          key={attempt.id}
-                          attempt={attempt}
-                          gameType={detectGameType(attempt)}
-                        />
-                      ))}
-
-                      {loadingMore && (
-                        <View style={{ paddingVertical: 20 }}>
-                          <ActivityIndicator />
-                        </View>
-                      )}
-
-                      {hasMore && !loadingMore && (
-                        <Button
-                          mode="outlined"
-                          onPress={loadMoreAttempts}
-                          style={{ marginTop: 12 }}
-                        >
-                          Ver más
-                        </Button>
-                      )}
-                    </>
-                  )}
-                </>
-              )}
-            </Card.Content>
-          </Card>
-        </View>
-      </ScrollView>
-
-      {/* Modal de detalle del logro */}
-      <Portal>
-        <Dialog
-          visible={!!selectedAchievement}
-          onDismiss={() => setSelectedAchievement(null)}
-        >
-          <View style={{ alignItems: "center", paddingTop: 24 }}>
-            {selectedAchievement?.unlocked ? (
-              <Text style={{ fontSize: 64 }}>
-                {selectedAchievement?.achievement?.icon || "🏆"}
-              </Text>
-            ) : (
-              <MaterialCommunityIcons name="lock" size={64} color="#999" />
-            )}
-          </View>
-          <Dialog.Title style={styles.dialogTitle}>
-            {selectedAchievement?.achievement?.title}
-          </Dialog.Title>
-          <Dialog.Content>
-            <Text
-              variant="bodyLarge"
-              style={{ marginBottom: 16, textAlign: "center" }}
-            >
-              {selectedAchievement?.achievement?.description}
-            </Text>
-
-            <Divider style={{ marginVertical: 12 }} />
-
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-around",
-                marginTop: 8,
-              }}
-            >
-              <View style={{ alignItems: "center" }}>
-                <Text
-                  variant="labelSmall"
-                  style={{ color: COLORS.textSecondary }}
-                >
-                  Puntos
-                </Text>
-                <Text
-                  variant="titleLarge"
-                  style={{ color: COLORS.primary, fontWeight: "bold" }}
-                >
-                  {selectedAchievement?.achievement?.points}
-                </Text>
-              </View>
-
-              <View style={{ alignItems: "center" }}>
-                <Text
-                  variant="labelSmall"
-                  style={{ color: COLORS.textSecondary }}
-                >
-                  Estado
-                </Text>
-                <Chip
-                  mode="flat"
-                  style={{
-                    backgroundColor: selectedAchievement?.unlocked
-                      ? COLORS.success
-                      : COLORS.backgroundSecondary,
-                    marginTop: 4,
-                  }}
-                  textStyle={{
-                    color: selectedAchievement?.unlocked ? "#fff" : COLORS.text,
-                  }}
-                >
-                  {selectedAchievement?.unlocked ? "Desbloqueado" : "Bloqueado"}
-                </Chip>
-              </View>
-            </View>
-
-            {selectedAchievement?.unlocked &&
-              selectedAchievement?.unlockedAt && (
-                <Text
-                  variant="bodySmall"
-                  style={{
-                    color: COLORS.textSecondary,
-                    textAlign: "center",
-                    marginTop: 16,
-                  }}
-                >
-                  Desbloqueado el{" "}
-                  {new Date(selectedAchievement?.unlockedAt).toLocaleDateString(
-                    "es-ES",
-                    {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    },
-                  )}
-                </Text>
-              )}
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button onPress={() => setSelectedAchievement(null)}>Cerrar</Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
-    </SafeAreaView>
->>>>>>> 412a822 (Mate hiperbolico (Final de la Release 3) (#69))
   );
 }
 
 const styles = StyleSheet.create({
-<<<<<<< HEAD
   fullWidthContainer: {
     width: "100%",
     paddingHorizontal: 0,
@@ -1031,8 +654,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: FONT.bold,
   },
-=======
->>>>>>> 412a822 (Mate hiperbolico (Final de la Release 3) (#69))
   gameCard: {
     backgroundColor: COLORS.backgroundSecondary,
     borderRadius: 16,
@@ -1048,18 +669,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 12,
-<<<<<<< HEAD
     justifyContent: "space-between",
   },
   achievementCard: {
     width: "30%",
     minWidth: 100,
-=======
-    justifyContent: "center",
-  },
-  achievementCard: {
-    width: 90,
->>>>>>> 412a822 (Mate hiperbolico (Final de la Release 3) (#69))
     backgroundColor: COLORS.white,
     borderRadius: 12,
     ...SHADOWS.light,
@@ -1069,39 +683,20 @@ const styles = StyleSheet.create({
   },
   achievementContent: {
     alignItems: "center",
-<<<<<<< HEAD
     padding: 12,
   },
   achievementIcon: {
     marginBottom: 12,
-=======
-    padding: 8,
-  },
-  achievementIcon: {
-    marginBottom: 8,
->>>>>>> 412a822 (Mate hiperbolico (Final de la Release 3) (#69))
   },
   achievementTitle: {
     textAlign: "center",
     fontWeight: "bold",
     color: COLORS.text,
-<<<<<<< HEAD
     minHeight: 36,
-=======
-    height: 28,
->>>>>>> 412a822 (Mate hiperbolico (Final de la Release 3) (#69))
   },
   achievementTitleLocked: {
     color: "#999",
   },
-<<<<<<< HEAD
-=======
-  achievementPoints: {
-    color: COLORS.primary,
-    fontWeight: "bold",
-    marginTop: 4,
-  },
->>>>>>> 412a822 (Mate hiperbolico (Final de la Release 3) (#69))
   errorContainer: {
     paddingVertical: 20,
     alignItems: "center",

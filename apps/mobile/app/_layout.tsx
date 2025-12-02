@@ -65,10 +65,6 @@ export default function RootLayout() {
                   name="familyGroup"
                   options={{ headerShown: false }}
                 />
-                <Stack.Screen
-                  name="game-detail/[gameId]"
-                  options={{ headerShown: false }}
-                />
                 <Stack.Screen name="+not-found" />
               </Stack>
             </NavigationThemeProvider>
