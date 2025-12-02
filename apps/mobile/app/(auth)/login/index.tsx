@@ -26,19 +26,12 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <StatusBar />
-      <ImageBackground
-        source={bh}
-        resizeMode="cover"
-        style={{
-          flex: 1,
-          width: "100%",
-          height: "100%",
-        }}
+
+      <Animated.View
+        style={{ flex: 1, opacity: fadeAnim, backgroundColor: "#FFFFFF" }}
       >
-        <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
-          <LogIn />
-        </Animated.View>
-      </ImageBackground>
+        <LogIn />
+      </Animated.View>
     </View>
   );
 }

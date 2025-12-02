@@ -153,10 +153,10 @@ export default function LogIn() {
           returnKeyType="next"
           style={styles.input}
           outlineStyle={styles.inputOutline}
-          outlineColor="rgba(255,255,255,0.3)"
-          activeOutlineColor={COLORS.white}
-          textColor={COLORS.white}
-          placeholderTextColor="rgba(255,255,255,0.6)"
+          outlineColor="rgba(203, 203, 203, 0.92)"
+          activeOutlineColor={COLORS.textLight}
+          textColor={COLORS.text}
+          placeholderTextColor={COLORS.textSecondary}
           disabled={loading}
           dense
         />
@@ -170,10 +170,10 @@ export default function LogIn() {
           returnKeyType="done"
           style={styles.input}
           outlineStyle={styles.inputOutline}
-          outlineColor="rgba(255,255,255,0.3)"
-          activeOutlineColor={COLORS.white}
-          textColor={COLORS.white}
-          placeholderTextColor="rgba(255,255,255,0.6)"
+          outlineColor="rgba(203, 203, 203, 0.92)"
+          activeOutlineColor={COLORS.textLight}
+          textColor={COLORS.text}
+          placeholderTextColor={COLORS.textSecondary}
           onSubmitEditing={handleLogin}
           disabled={loading}
           dense
@@ -236,19 +236,19 @@ const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 400,
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: COLORS.backgroundSecondary,
     borderRadius: 20,
     padding: 28,
   },
   title: {
     fontSize: 24,
     fontWeight: "700",
-    color: COLORS.white,
+    color: COLORS.text,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 15,
-    color: "rgba(255,255,255,0.8)",
+    color: COLORS.textSecondary,
     marginBottom: 24,
     textAlign: "center",
   },
@@ -277,11 +277,11 @@ const styles = StyleSheet.create({
   orLine: {
     flex: 1,
     height: 1,
-    backgroundColor: "rgba(255,255,255,0.3)",
+    backgroundColor: "rgba(84, 83, 83, 0.3)",
   },
   orText: {
     marginHorizontal: 16,
-    color: "rgba(255,255,255,0.7)",
+    color: "rgba(100, 97, 97, 0.7)",
     fontSize: 14,
   },
   googleButton: {
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
   },
   backText: {
     fontSize: 14,
-    color: COLORS.white,
+    color: COLORS.textSecondary,
     fontWeight: "500",
   },
 });

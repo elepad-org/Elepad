@@ -34,7 +34,18 @@ export default function IndexRedirect() {
         <View style={STYLES.separatorWrap}>
           <View style={STYLES.separator} />
         </View>
-        <Animated.View style={[STYLES.card, { opacity: fadeAnim }]}>
+        <Animated.View
+          style={[
+            {
+              width: "100%",
+              marginTop: 16,
+              padding: 20,
+              borderRadius: 20,
+              alignItems: "center",
+            },
+            { opacity: fadeAnim },
+          ]}
+        >
           <Text style={STYLES.heading}>¡Bienvenido!</Text>
           <Text style={STYLES.subheading}>Elija una opción para continuar</Text>
 
