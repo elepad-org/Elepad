@@ -126,7 +126,6 @@ export default function TabLayout() {
             elevation: 0,
             height: 72,
             justifyContent: "center",
-            alignItems: "center",
           }}
           labeled={true}
           labelMaxFontSizeMultiplier={1.2}

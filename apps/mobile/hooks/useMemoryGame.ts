@@ -394,6 +394,11 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
                   onAchievementUnlocked?.(achievement);
                 },
               );
+
+              // Notificar cada logro desbloqueado
+              achievements.forEach((achievement: UnlockedAchievement) => {
+                onAchievementUnlocked?.(achievement);
+              });
             } else {
               console.log("ℹ️ No se desbloquearon logros nuevos");
             }
