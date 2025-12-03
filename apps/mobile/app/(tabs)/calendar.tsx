@@ -172,7 +172,8 @@ export default function CalendarScreen() {
       <View
         style={{
           paddingHorizontal: 24,
-          paddingVertical: 20,
+          paddingTop: 20,
+          paddingBottom: 8,
           borderBottomColor: COLORS.border,
           flexDirection: "row",
           justifyContent: "space-between",

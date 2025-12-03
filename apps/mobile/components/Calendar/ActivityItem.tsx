@@ -1,6 +1,15 @@
 import { useState } from "react";
 import { View, StyleSheet } from "react-native";
-import { Text, Card, List, IconButton } from "react-native-paper";
+import {
+  Text,
+  Card,
+  List,
+  IconButton,
+  Portal,
+  Dialog,
+  Button,
+  Divider,
+} from "react-native-paper";
 import { Activity, GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 import { COLORS } from "@/styles/base";
 
@@ -25,7 +34,7 @@ export default function ActivityItem({
   groupInfo,
   completed, // Usar esta prop en lugar de item.completed
 }: ActivityItemProps) {
-  const [expanded, setExpanded] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   // Usar completed de la prop si está disponible, sino usar item.completed
   const isCompleted = completed !== undefined ? completed : item.completed;
@@ -107,7 +116,7 @@ export default function ActivityItem({
             )}
           </View>
         }
-        onPress={hasDescription ? () => setExpanded(!expanded) : undefined}
+        onPress={hasDescription ? () => setShowModal(true) : undefined}
         left={() => (
           <View style={styles.checkboxContainer}>
             <IconButton
@@ -120,13 +129,6 @@ export default function ActivityItem({
         )}
         right={() => (
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            {hasDescription && (
-              <IconButton
-                icon={expanded ? "chevron-up" : "chevron-down"}
-                size={20}
-                onPress={() => setExpanded(!expanded)}
-              />
-            )}
             {canEdit && (
               <>
                 <IconButton
@@ -152,13 +154,106 @@ export default function ActivityItem({
           </View>
         )}
       />
-      {hasDescription && expanded && (
-        <Card.Content style={styles.descriptionContent}>
-          <Text variant="bodyMedium" style={styles.descriptionText}>
-            {item.description}
-          </Text>
-        </Card.Content>
-      )}
+
+      {/* Modal de detalle */}
+      <Portal>
+        <Dialog
+          visible={showModal}
+          onDismiss={() => setShowModal(false)}
+          style={{
+            backgroundColor: COLORS.background,
+            borderRadius: 16,
+            width: "90%",
+            alignSelf: "center",
+          }}
+        >
+          <Dialog.Title style={{ fontWeight: "bold", color: COLORS.text }}>
+            {item.title}
+          </Dialog.Title>
+          <Dialog.Content>
+            {/* Fecha y hora */}
+            <View style={styles.modalRow}>
+              <IconButton
+                icon="clock-outline"
+                size={20}
+                iconColor={COLORS.primary}
+                style={{ margin: 0 }}
+              />
+              <Text variant="bodyMedium" style={styles.modalText}>
+                {timeDescription}
+              </Text>
+            </View>
+
+            {/* Creador */}
+            {activityOwner && (
+              <View style={styles.modalRow}>
+                <IconButton
+                  icon="account"
+                  size={20}
+                  iconColor={COLORS.primary}
+                  style={{ margin: 0 }}
+                />
+                <Text variant="bodyMedium" style={styles.modalText}>
+                  Por: {activityOwner}
+                </Text>
+              </View>
+            )}
+
+            {/* Estado */}
+            <View style={styles.modalRow}>
+              <IconButton
+                icon={
+                  isCompleted
+                    ? "checkbox-marked-circle"
+                    : "checkbox-blank-circle-outline"
+                }
+                size={20}
+                iconColor={isCompleted ? COLORS.primary : COLORS.textLight}
+                style={{ margin: 0 }}
+              />
+              <Text variant="bodyMedium" style={styles.modalText}>
+                {isCompleted ? "Completada" : "Pendiente"}
+              </Text>
+            </View>
+
+            {/* Descripción */}
+            {hasDescription && (
+              <>
+                <Divider
+                  style={{ marginVertical: 12, backgroundColor: COLORS.border }}
+                />
+                <Text
+                  variant="labelMedium"
+                  style={{
+                    color: COLORS.primary,
+                    marginBottom: 8,
+                    fontWeight: "bold",
+                  }}
+                >
+                  Descripción
+                </Text>
+                <Text
+                  variant="bodyMedium"
+                  style={{ color: COLORS.text, lineHeight: 22 }}
+                >
+                  {item.description}
+                </Text>
+              </>
+            )}
+          </Dialog.Content>
+          <Dialog.Actions style={{ paddingHorizontal: 24, paddingBottom: 16 }}>
+            <Button
+              mode="contained"
+              onPress={() => setShowModal(false)}
+              buttonColor={COLORS.primary}
+              style={{ borderRadius: 12, flex: 1 }}
+              contentStyle={{ paddingVertical: 8 }}
+            >
+              Cerrar
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </Card>
   );
 }
@@ -197,17 +292,13 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     fontStyle: "italic",
   },
-  descriptionContent: {
-    paddingTop: 4,
-    paddingBottom: 8,
-    paddingHorizontal: 12,
-    backgroundColor: "transparent",
-    paddingLeft: 27,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.separator,
+  modalRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
   },
-  descriptionText: {
+  modalText: {
+    flex: 1,
     color: COLORS.textSecondary,
-    lineHeight: 22,
   },
 });
