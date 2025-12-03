@@ -109,11 +109,6 @@ export default function ActivityItem({
             <Text variant="bodySmall" style={styles.timeText}>
               {timeDescription}
             </Text>
-            {activityOwner && (
-              <Text variant="bodySmall" style={styles.ownerText}>
-                Por: {activityOwner}
-              </Text>
-            )}
           </View>
         }
         onPress={hasDescription ? () => setShowModal(true) : undefined}
@@ -260,25 +255,27 @@ export default function ActivityItem({
 
 const styles = StyleSheet.create({
   card: {
-    marginBottom: 8,
-    borderRadius: 20,
-    backgroundColor: COLORS.backgroundSecondary,
+    marginBottom: 10,
+    borderRadius: 16,
+    backgroundColor: COLORS.white,
     borderWidth: 0,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
     elevation: 2,
   },
   completedCard: {
-    backgroundColor: COLORS.backgroundTertiary,
-    opacity: 0.7,
-    shadowOpacity: 0.03,
+    backgroundColor: COLORS.primary + "10",
+    opacity: 0.85,
+    shadowOpacity: 0.04,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.primary,
   },
   listItem: {
-    paddingVertical: 2,
-    paddingHorizontal: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
   },
   checkboxContainer: {
     justifyContent: "center",

@@ -137,118 +137,137 @@ export default function ActivityForm({
       onDismiss={onClose}
       style={{
         backgroundColor: COLORS.background,
-        width: "90%",
+        width: "92%",
         alignSelf: "center",
-        borderRadius: 16,
-        paddingVertical: 14,
+        borderRadius: 20,
+        maxHeight: "100%",
       }}
     >
       <Dialog.Title
-        style={{ ...STYLES.heading, paddingTop: 8, marginBottom: 0 }}
+        style={{
+          fontSize: 22,
+          fontWeight: "bold",
+          color: COLORS.text,
+          paddingTop: 8,
+          paddingBottom: 0,
+          textAlign: "center",
+        }}
       >
         {initial ? "Editar evento" : "Nuevo evento"}
       </Dialog.Title>
-      <Dialog.Content style={{ paddingBottom: 8, paddingTop: 4 }}>
-        <Text style={{ ...STYLES.subheading, marginBottom: 16, marginTop: 0 }}>
-          {initial
-            ? "Edita los detalles del evento"
-            : "Completa los detalles del nuevo evento"}
-        </Text>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <TextInput
-            label="Título"
-            value={title}
-            onChangeText={setTitle}
-            style={styles.inputFirst}
-            mode="outlined"
-          />
-          <TextInput
-            label="Descripción"
-            value={description}
-            onChangeText={setDescription}
-            multiline
-            numberOfLines={3}
-            style={styles.input}
-            mode="outlined"
-          />
+      <Dialog.Content style={{ paddingBottom: 15 }}>
+        <TextInput
+          label="Título"
+          value={title}
+          onChangeText={setTitle}
+          style={styles.inputFirst}
+          mode="outlined"
+        />
+        <TextInput
+          label="Descripción"
+          value={description}
+          onChangeText={setDescription}
+          multiline
+          numberOfLines={3}
+          style={styles.input}
+          mode="outlined"
+        />
 
-          <View style={styles.pickerRow}>
+        <View style={styles.dateRow}>
+          <View style={styles.dateColumn}>
             <Button
               mode="outlined"
               onPress={() => setShowStartPicker(true)}
               style={styles.pickerButton}
               icon="calendar"
+              contentStyle={{ paddingVertical: 4 }}
             >
-              Inicio: {formatDateTime(startsAtDate)}
+              Inicio
             </Button>
+            <Text style={styles.dateText}>{formatDateTime(startsAtDate)}</Text>
           </View>
 
-          <View style={styles.pickerRow}>
+          <View style={styles.dateColumn}>
             <Button
               mode="outlined"
               onPress={() => setShowEndPicker(true)}
               style={styles.pickerButton}
               icon="calendar"
+              contentStyle={{ paddingVertical: 4 }}
             >
-              Fin: {formatDateTime(endsAtDate)}
+              Fin
             </Button>
+            <Text style={styles.dateText}>
+              {endsAtDate ? formatDateTime(endsAtDate) : "No definido"}
+            </Text>
           </View>
+        </View>
 
-          <View style={styles.pickerRow}>
-            <Menu
-              visible={showFrequencyMenu}
-              onDismiss={() => setShowFrequencyMenu(false)}
-              anchor={
-                <Button
-                  mode="outlined"
-                  onPress={() => setShowFrequencyMenu(true)}
-                  style={styles.pickerButton}
-                  icon="repeat"
-                >
-                  Frecuencia: {frequencyLabel}
-                </Button>
-              }
+        <Menu
+          visible={showFrequencyMenu}
+          onDismiss={() => setShowFrequencyMenu(false)}
+          contentStyle={{
+            backgroundColor: COLORS.background,
+            borderRadius: 12,
+          }}
+          anchor={
+            <Button
+              mode="outlined"
+              onPress={() => setShowFrequencyMenu(true)}
+              style={styles.pickerButton}
+              icon="repeat"
             >
-              {frequencies.map((freq: Frequency) => (
-                <Menu.Item
-                  key={freq.id}
-                  onPress={() => {
-                    setFrequencyId(freq.id);
-                    setShowFrequencyMenu(false);
-                  }}
-                  title={freq.label}
-                />
-              ))}
-            </Menu>
-          </View>
+              Frecuencia: {frequencyLabel}
+            </Button>
+          }
+        >
+          <ScrollView style={{ maxHeight: 300 }}>
+            <Menu.Item
+              onPress={() => {
+                setFrequencyId(undefined);
+                setShowFrequencyMenu(false);
+              }}
+              title="Una vez"
+            />
+            {frequencies.map((freq: Frequency) => (
+              <Menu.Item
+                key={freq.id}
+                onPress={() => {
+                  setFrequencyId(freq.id);
+                  setShowFrequencyMenu(false);
+                }}
+                title={freq.label}
+              />
+            ))}
+          </ScrollView>
+        </Menu>
 
-          <DateTimePickerModal
-            isVisible={showStartPicker}
-            date={startsAtDate}
-            mode="datetime"
-            onConfirm={(date) => {
-              setShowStartPicker(false);
-              setStartsAtDate(date);
-            }}
-            onCancel={() => setShowStartPicker(false)}
-          />
-          <DateTimePickerModal
-            isVisible={showEndPicker}
-            date={endsAtDate ?? new Date()}
-            mode="datetime"
-            onConfirm={(date) => {
-              setShowEndPicker(false);
-              setEndsAtDate(date);
-            }}
-            onCancel={() => setShowEndPicker(false)}
-          />
+        <DateTimePickerModal
+          isVisible={showStartPicker}
+          date={startsAtDate}
+          mode="datetime"
+          onConfirm={(date) => {
+            setShowStartPicker(false);
+            setStartsAtDate(date);
+          }}
+          onCancel={() => setShowStartPicker(false)}
+        />
+        <DateTimePickerModal
+          isVisible={showEndPicker}
+          date={endsAtDate ?? new Date()}
+          mode="datetime"
+          onConfirm={(date) => {
+            setShowEndPicker(false);
+            setEndsAtDate(date);
+          }}
+          onCancel={() => setShowEndPicker(false)}
+        />
 
-          {error && <Text style={styles.error}>{error}</Text>}
-        </ScrollView>
+        {error && <Text style={styles.error}>{error}</Text>}
       </Dialog.Content>
       <Dialog.Actions
         style={{
-          paddingBottom: 12,
+          paddingBottom: 20,
           paddingHorizontal: 20,
           justifyContent: "space-between",
         }}
@@ -271,19 +290,35 @@ export default function ActivityForm({
 
 const styles = StyleSheet.create({
   inputFirst: {
-    marginBottom: 14,
-    backgroundColor: "transparent",
+    marginBottom: 16,
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 12,
   },
   input: {
-    marginBottom: 14,
-    backgroundColor: "transparent",
+    marginBottom: 16,
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 12,
   },
-  pickerRow: {
-    marginBottom: 14,
+  dateRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 16,
+  },
+  dateColumn: {
+    flex: 1,
+  },
+  dateText: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    marginTop: 6,
+    textAlign: "center",
   },
   pickerButton: {
     borderRadius: 12,
+    borderWidth: 1,
     borderColor: COLORS.border,
+    backgroundColor: COLORS.backgroundSecondary,
+    marginBottom: 16,
   },
   error: {
     color: COLORS.error,
@@ -294,5 +329,6 @@ const styles = StyleSheet.create({
   saveButton: {
     borderRadius: 12,
     paddingHorizontal: 24,
+    elevation: 0,
   },
 });
