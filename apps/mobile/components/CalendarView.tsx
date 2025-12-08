@@ -134,7 +134,7 @@ export default function CalendarView() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Calendario</Text>
+      <Text style={styles.heading}>Calendario 4</Text>
       <View style={styles.header}>
         <IconButton
           icon="chevron-left"
@@ -180,7 +180,10 @@ export default function CalendarView() {
           <Card style={styles.noEventsCard}>
             <Card.Content>
               <Text style={{ color: "#666" }}>
-                No hay eventos para este día.
+                {selectedDate ===
+                `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`
+                  ? "No hay eventos para hoy."
+                  : "No hay eventos para este día."}
               </Text>
             </Card.Content>
           </Card>
