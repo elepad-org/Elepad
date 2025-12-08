@@ -50,7 +50,9 @@ export default function HomeScreen() {
 
   // Fetch recent memories
   const memoriesQuery = useGetMemories(
-    { limit: 1 },
+    userElepad?.familyGroupId
+      ? { limit: 1, groupId: userElepad.familyGroupId }
+      : { limit: 1 },
     {
       query: {
         enabled: !!userElepad,
