@@ -1,6 +1,3 @@
-// Lógica del juego: generación de prompts, estado y validación.
-// Diseñado para ser independiente de la UI y fácil de testear.
-
 export type ColorName =
   | "Rojo"
   | "Azul"
@@ -27,7 +24,6 @@ export interface Validator {
   isCorrect(prompt: Prompt, selection: ColorName): boolean;
 }
 
-// Regla por defecto: el jugador debe seleccionar el color indicado por "word".
 export class TextValueValidator implements Validator {
   isCorrect(prompt: Prompt, selection: ColorName) {
     return selection === prompt.word;

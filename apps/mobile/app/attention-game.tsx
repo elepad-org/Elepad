@@ -27,7 +27,7 @@ export default function AttentionGameScreen() {
           rounds={10}
           onFinish={(score) => {
             console.log("Juego terminado", score);
-            router.back();
+            //router.back();
           }}
         />
 
