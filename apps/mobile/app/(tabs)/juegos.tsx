@@ -113,6 +113,14 @@ export default function JuegosScreen() {
               onPlay={() => router.push("/net-game")}
               onDetails={() => router.push("/game-detail/net")}
             />
+
+            <GameCard
+              emoji="🎯"
+              title="Atención"
+              description="Reacciona al color indicado por la palabra."
+              onPlay={() => router.push("/attention-game")}
+              onDetails={() => router.push("/game-detail/attention")}
+            />
           </View>
 
           {/* Coming Soon */}
