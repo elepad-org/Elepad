@@ -15,6 +15,7 @@ import {
   Snackbar,
   ActivityIndicator,
   IconButton,
+  Menu,
   SegmentedButtons,
   TextInput,
 } from "react-native-paper";
@@ -122,6 +123,7 @@ export default function RecuerdosScreen() {
   );
   const [selectedBook, setSelectedBook] = useState<MemoriesBook | null>(null);
   const [editingBook, setEditingBook] = useState<MemoriesBook | null>(null);
+  const [bookMenuVisible, setBookMenuVisible] = useState(false);
 
   const [bookDialogVisible, setBookDialogVisible] = useState(false);
   const [bookDialogMode, setBookDialogMode] = useState<"create" | "edit">(
@@ -780,7 +782,7 @@ export default function RecuerdosScreen() {
         <View
           style={{
             paddingHorizontal: 24,
-            paddingVertical: 20,
+            paddingVertical: 16,
             borderBottomColor: COLORS.border,
             flexDirection: "row",
             justifyContent: "space-between",
@@ -843,18 +845,18 @@ export default function RecuerdosScreen() {
               paddingBottom: LAYOUT.bottomNavHeight,
             }}
             numColumns={2}
+            columnWrapperStyle={{ justifyContent: "space-between" }}
             refreshControl={
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
-            renderItem={({ item, index }) => {
+            renderItem={({ item }) => {
               const title = item.title || "(Sin nombre)";
               const color = item.color || COLORS.primary;
               return (
                 <View
                   style={{
-                    flex: 1,
+                    width: "48%",
                     marginBottom: 16,
-                    marginRight: index % 2 === 0 ? 12 : 0,
                   }}
                 >
                   <Pressable onPress={() => setSelectedBook(item)}>
@@ -938,7 +940,7 @@ export default function RecuerdosScreen() {
         <View
           style={{
             paddingHorizontal: 24,
-            paddingVertical: 20,
+            paddingVertical: 16,
             borderBottomColor: COLORS.border,
             flexDirection: "row",
             justifyContent: "space-between",
@@ -949,8 +951,10 @@ export default function RecuerdosScreen() {
             <IconButton
               icon="chevron-left"
               size={24}
+              style={{ margin: 0 }}
               onPress={() => {
                 setSelectedBook(null);
+                setBookMenuVisible(false);
                 setDialogVisible(false);
                 setDetailDialogVisible(false);
                 setSelectedRecuerdo(null);
@@ -963,25 +967,52 @@ export default function RecuerdosScreen() {
               {selectedBook.title || "Baúl"}
             </Text>
           </View>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <IconButton
-              icon="pencil"
-              size={20}
-              onPress={() => openEditBookDialog(selectedBook)}
-            />
-            <IconButton
-              icon="trash-can"
-              size={20}
-              onPress={() => setBookToDelete(selectedBook)}
-            />
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "flex-end",
+            }}
+          >
             <Button
               mode="contained"
               onPress={() => setDialogVisible(true)}
-              style={{ ...STYLES.miniButton }}
+              buttonColor={COLORS.primary}
+              textColor={COLORS.white}
+              style={{ borderRadius: 12 }}
               icon="plus"
             >
               Agregar
             </Button>
+            <Menu
+              visible={bookMenuVisible}
+              onDismiss={() => setBookMenuVisible(false)}
+              anchor={
+                <IconButton
+                  icon="dots-horizontal"
+                  size={22}
+                  style={{ margin: 0 }}
+                  onPress={() => setBookMenuVisible(true)}
+                />
+              }
+            >
+              <Menu.Item
+                leadingIcon="pencil"
+                onPress={() => {
+                  setBookMenuVisible(false);
+                  openEditBookDialog(selectedBook);
+                }}
+                title="Modificar baúl"
+              />
+              <Menu.Item
+                leadingIcon="trash-can"
+                onPress={() => {
+                  setBookMenuVisible(false);
+                  setBookToDelete(selectedBook);
+                }}
+                title="Eliminar baúl"
+              />
+            </Menu>
           </View>
         </View>
 
@@ -1057,7 +1088,7 @@ export default function RecuerdosScreen() {
       <View
         style={{
           paddingHorizontal: 24,
-          paddingVertical: 20,
+          paddingVertical: 16,
           borderBottomColor: COLORS.border,
           flexDirection: "row",
           justifyContent: "space-between",
@@ -1068,8 +1099,10 @@ export default function RecuerdosScreen() {
           <IconButton
             icon="chevron-left"
             size={24}
+            style={{ margin: 0 }}
             onPress={() => {
               setSelectedBook(null);
+              setBookMenuVisible(false);
               setDialogVisible(false);
               setDetailDialogVisible(false);
               setSelectedRecuerdo(null);
@@ -1082,25 +1115,52 @@ export default function RecuerdosScreen() {
             {selectedBook.title || "Baúl"}
           </Text>
         </View>
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <IconButton
-            icon="pencil"
-            size={20}
-            onPress={() => openEditBookDialog(selectedBook)}
-          />
-          <IconButton
-            icon="trash-can"
-            size={20}
-            onPress={() => setBookToDelete(selectedBook)}
-          />
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "flex-end",
+          }}
+        >
           <Button
             mode="contained"
             onPress={() => setDialogVisible(true)}
-            style={{ ...STYLES.miniButton }}
+            buttonColor={COLORS.primary}
+            textColor={COLORS.white}
+            style={{ borderRadius: 12 }}
             icon="plus"
           >
             Agregar
           </Button>
+          <Menu
+            visible={bookMenuVisible}
+            onDismiss={() => setBookMenuVisible(false)}
+            anchor={
+              <IconButton
+                icon="dots-horizontal"
+                size={22}
+                style={{ margin: 0 }}
+                onPress={() => setBookMenuVisible(true)}
+              />
+            }
+          >
+            <Menu.Item
+              leadingIcon="pencil"
+              onPress={() => {
+                setBookMenuVisible(false);
+                openEditBookDialog(selectedBook);
+              }}
+              title="Modificar baúl"
+            />
+            <Menu.Item
+              leadingIcon="trash-can"
+              onPress={() => {
+                setBookMenuVisible(false);
+                setBookToDelete(selectedBook);
+              }}
+              title="Eliminar baúl"
+            />
+          </Menu>
         </View>
       </View>
 

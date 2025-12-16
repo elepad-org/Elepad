@@ -76,10 +76,7 @@ export default function ChestIcon({ width, height, color }: Props) {
       <Rect x={320} y={290} width={40} height={30} fill="#4E342E" />
 
       {/* Cuerpo madera */}
-      <Path
-        d="M20,40 h360 a20,20 0 0 1 20,20 v230 a0,0 0 0 1 0,0 h-400 a0,0 0 0 1 0,0 v-230 a20,20 0 0 1 20,-20 z"
-        fill={woodFill}
-      />
+      <Rect x={20} y={40} width={360} height={250} rx={20} fill={woodFill} />
 
       {/* Vetas madera */}
       <Line
