@@ -97,14 +97,14 @@ interface Recuerdo {
 }
 
 const BAUL_COLOR_OPTIONS = [
-  { key: "red", value: "#E53935" },
-  { key: "green", value: "#43A047" },
-  { key: "blue", value: "#1E88E5" },
-  { key: "magenta", value: "#D81B60" },
-  { key: "yellow", value: "#FDD835" },
-  { key: "cyan", value: "#00ACC1" },
-  { key: "white", value: "#FFFFFF" },
-  { key: "purple", value: COLORS.primary },
+  { key: "red", color: "#E53935" },
+  { key: "green", color: "#43A047" },
+  { key: "blue", color: "#1E88E5" },
+  { key: "magenta", color: "#D81B60" },
+  { key: "yellow", color: "#FDD835" },
+  { key: "cyan", color: "#00ACC1" },
+  { key: "white", color: "#FFFFFF" },
+  { key: "purple", color: COLORS.primary },
 ] as const;
 
 export default function RecuerdosScreen() {
@@ -583,171 +583,197 @@ export default function RecuerdosScreen() {
     setSelectedRecuerdo(null);
   };
 
-  const renderBookDialogs = () => (
-    <Portal>
-      <Dialog
-        visible={bookDialogVisible}
-        onDismiss={() => {
-          setBookDialogVisible(false);
-          setEditingBook(null);
-        }}
-        style={{
-          backgroundColor: COLORS.background,
-          width: "92%",
-          alignSelf: "center",
-          borderRadius: 16,
-        }}
-      >
-        <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
-          {bookDialogMode === "create" ? "Nuevo baúl" : "Editar baúl"}
-        </Dialog.Title>
-        <Dialog.Content>
-          <TextInput
-            label="Nombre"
-            value={bookFormTitle}
-            onChangeText={setBookFormTitle}
-            mode="outlined"
-            outlineColor={COLORS.border}
-            activeOutlineColor={COLORS.primary}
-            style={{ marginBottom: 12 }}
-          />
-          <TextInput
-            label="Descripción"
-            value={bookFormDescription}
-            onChangeText={setBookFormDescription}
-            mode="outlined"
-            outlineColor={COLORS.border}
-            activeOutlineColor={COLORS.primary}
-            multiline
-            numberOfLines={3}
-            style={{ marginBottom: 12 }}
-          />
+  const renderBookDialogs = () => {
+    if (!bookDialogVisible && !bookToDelete) return null;
 
-          <Text
-            style={{
-              ...STYLES.subheading,
-              textAlign: "left",
-              marginTop: 0,
-            }}
-          >
-            Color del baúl
-          </Text>
+    return (
+      <Portal>
+        <Dialog
+          visible={bookDialogVisible}
+          onDismiss={() => {
+            setBookDialogVisible(false);
+            setEditingBook(null);
+          }}
+          style={{
+            backgroundColor: COLORS.background,
+            width: "92%",
+            alignSelf: "center",
+            borderRadius: 16,
+          }}
+        >
+          <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
+            {bookDialogMode === "create" ? "Nuevo baúl" : "Editar baúl"}
+          </Dialog.Title>
+          <Dialog.Content>
+            <TextInput
+              label="Nombre"
+              value={bookFormTitle}
+              onChangeText={setBookFormTitle}
+              mode="outlined"
+              outlineColor={COLORS.border}
+              activeOutlineColor={COLORS.primary}
+              style={{ marginBottom: 12 }}
+            />
+            <TextInput
+              label="Descripción"
+              value={bookFormDescription}
+              onChangeText={setBookFormDescription}
+              mode="outlined"
+              outlineColor={COLORS.border}
+              activeOutlineColor={COLORS.primary}
+              multiline
+              numberOfLines={3}
+              style={{ marginBottom: 12 }}
+            />
 
-          <View
-            style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 10 }}
-          >
-            {BAUL_COLOR_OPTIONS.map((opt) => {
-              const selected =
-                bookFormColor?.toLowerCase?.() === opt.value.toLowerCase();
-              return (
-                <Pressable
-                  key={opt.key}
-                  onPress={() => setBookFormColor(opt.value)}
-                  style={{ marginRight: 10, marginBottom: 10 }}
-                >
-                  <View
-                    style={{
-                      width: 34,
-                      height: 34,
-                      borderRadius: 17,
-                      borderWidth: selected ? 2 : 1,
-                      borderColor: selected ? COLORS.text : COLORS.border,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
+            <Text
+              style={{
+                ...STYLES.subheading,
+                textAlign: "left",
+                marginTop: 0,
+              }}
+            >
+              Color del baúl
+            </Text>
+
+            <View
+              style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 10 }}
+            >
+              {BAUL_COLOR_OPTIONS.map((opt) => {
+                const selected =
+                  bookFormColor?.toLowerCase?.() === opt.color.toLowerCase();
+                return (
+                  <Pressable
+                    key={opt.key}
+                    onPress={() => setBookFormColor(opt.color)}
+                    style={{ marginRight: 10, marginBottom: 10 }}
                   >
                     <View
                       style={{
-                        width: 26,
-                        height: 26,
-                        borderRadius: 13,
-                        backgroundColor: opt.value,
-                        borderWidth:
-                          opt.value.toLowerCase() === "#ffffff" ? 1 : 0,
-                        borderColor: COLORS.border,
+                        width: 34,
+                        height: 34,
+                        borderRadius: 17,
+                        borderWidth: selected ? 2 : 1,
+                        borderColor: selected ? COLORS.text : COLORS.border,
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
-                    />
-                  </View>
-                </Pressable>
-              );
-            })}
-          </View>
+                    >
+                      <View
+                        style={{
+                          width: 26,
+                          height: 26,
+                          borderRadius: 13,
+                          backgroundColor: opt.color,
+                          borderWidth:
+                            opt.color.toLowerCase() === "#ffffff" ? 1 : 0,
+                          borderColor: COLORS.border,
+                        }}
+                      />
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
 
-          <View style={{ alignItems: "center", marginTop: 12 }}>
-            <View
-              style={{
-                width: 180,
-                aspectRatio: 1,
-                backgroundColor: "transparent",
-                borderRadius: 18,
-                borderWidth: 1,
-                borderColor: COLORS.border,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <View style={{ width: "94%", height: "94%" }}>
-                <ChestIcon color={bookFormColor} />
+            <View style={{ alignItems: "center", marginTop: 12 }}>
+              <View
+                style={{
+                  width: 180,
+                  aspectRatio: 1,
+                  backgroundColor: "transparent",
+                  borderRadius: 18,
+                  borderWidth: 1,
+                  borderColor: COLORS.border,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <View style={{ width: "94%", height: "94%" }}>
+                  <ChestIcon color={bookFormColor} />
+                </View>
               </View>
             </View>
-          </View>
-        </Dialog.Content>
-        <Dialog.Actions style={{ paddingBottom: 12, paddingRight: 16 }}>
-          <Button
-            onPress={() => {
-              setBookDialogVisible(false);
-              setEditingBook(null);
-            }}
-          >
-            Cancelar
-          </Button>
-          <Button
-            mode="contained"
-            onPress={submitBookDialog}
-            buttonColor={COLORS.primary}
-            textColor={COLORS.white}
-            disabled={!groupId}
-          >
-            Guardar
-          </Button>
-        </Dialog.Actions>
-      </Dialog>
+          </Dialog.Content>
+          <Dialog.Actions style={{ paddingBottom: 12, paddingRight: 16 }}>
+            <Button
+              onPress={() => {
+                setBookDialogVisible(false);
+                setEditingBook(null);
+              }}
+              disabled={
+                createBookMutation.isPending || updateBookMutation.isPending
+              }
+            >
+              Cancelar
+            </Button>
+            <Button
+              mode="contained"
+              onPress={submitBookDialog}
+              buttonColor={COLORS.primary}
+              textColor={COLORS.white}
+              loading={
+                createBookMutation.isPending || updateBookMutation.isPending
+              }
+              disabled={
+                !groupId ||
+                createBookMutation.isPending ||
+                updateBookMutation.isPending ||
+                deleteBookMutation.isPending
+              }
+            >
+              Guardar
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
 
-      <Dialog
-        visible={!!bookToDelete}
-        onDismiss={() => setBookToDelete(null)}
-        style={{
-          backgroundColor: COLORS.background,
-          width: "90%",
-          alignSelf: "center",
-          borderRadius: 16,
-        }}
-      >
-        <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
-          Eliminar baúl
-        </Dialog.Title>
-        <Dialog.Content>
-          <Text style={{ ...STYLES.subheading, marginTop: 0 }}>
-            Esto eliminará también los recuerdos dentro del baúl.
-          </Text>
-        </Dialog.Content>
-        <Dialog.Actions style={{ paddingBottom: 12, paddingRight: 16 }}>
-          <Button onPress={() => setBookToDelete(null)}>Cancelar</Button>
-          <Button
-            mode="contained"
-            buttonColor={COLORS.primary}
-            textColor={COLORS.white}
-            onPress={() => {
-              if (!bookToDelete) return;
-              deleteBookMutation.mutate(bookToDelete.id);
-            }}
-          >
-            Eliminar
-          </Button>
-        </Dialog.Actions>
-      </Dialog>
-    </Portal>
-  );
+        <Dialog
+          visible={!!bookToDelete}
+          onDismiss={() => setBookToDelete(null)}
+          style={{
+            backgroundColor: COLORS.background,
+            width: "90%",
+            alignSelf: "center",
+            borderRadius: 16,
+          }}
+        >
+          <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
+            Eliminar baúl
+          </Dialog.Title>
+          <Dialog.Content>
+            <Text style={{ ...STYLES.subheading, marginTop: 0 }}>
+              Esto eliminará también los recuerdos dentro del baúl.
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions style={{ paddingBottom: 12, paddingRight: 16 }}>
+            <Button
+              onPress={() => setBookToDelete(null)}
+              disabled={deleteBookMutation.isPending}
+            >
+              Cancelar
+            </Button>
+            <Button
+              mode="contained"
+              buttonColor={COLORS.primary}
+              textColor={COLORS.white}
+              onPress={() => {
+                if (!bookToDelete) return;
+                deleteBookMutation.mutate(bookToDelete.id);
+              }}
+              loading={deleteBookMutation.isPending}
+              disabled={
+                deleteBookMutation.isPending ||
+                createBookMutation.isPending ||
+                updateBookMutation.isPending
+              }
+            >
+              Eliminar
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+    );
+  };
 
   // -------- Vista: Lista de baúles --------
   const booksPayload =
