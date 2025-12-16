@@ -41,6 +41,10 @@
     "expo": "^54.0.6",
     "react": "19.1.0",
     "react-native": "0.81.5",
-    "react-native-reanimated": "~4.1.1"
+    "react-native-reanimated": "4.1.1"
+  },
+  "overrides": {
+    "react-native-reanimated": "4.1.1",
+    "react-native-worklets": "0.5.1"
   }
 }

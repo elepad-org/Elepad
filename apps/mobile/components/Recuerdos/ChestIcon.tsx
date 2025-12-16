@@ -4,9 +4,65 @@ import Svg, { Circle, G, Line, Path, Rect } from "react-native-svg";
 type Props = {
   width?: number;
   height?: number;
+  color?: string;
 };
 
-export default function ChestIcon({ width, height }: Props) {
+function clamp01(v: number) {
+  return Math.max(0, Math.min(1, v));
+}
+
+function parseHexColor(input: string) {
+  const hex = input.trim();
+  const match = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.exec(hex);
+  if (!match) return null;
+
+  const raw = match[1];
+  const full =
+    raw.length === 3
+      ? raw
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : raw;
+
+  const r = parseInt(full.slice(0, 2), 16);
+  const g = parseInt(full.slice(2, 4), 16);
+  const b = parseInt(full.slice(4, 6), 16);
+  return { r, g, b };
+}
+
+function toHex({ r, g, b }: { r: number; g: number; b: number }) {
+  const hh = (n: number) => n.toString(16).padStart(2, "0");
+  return `#${hh(Math.round(r))}${hh(Math.round(g))}${hh(Math.round(b))}`;
+}
+
+function mix(
+  a: { r: number; g: number; b: number },
+  b: { r: number; g: number; b: number },
+  t: number
+) {
+  const tt = clamp01(t);
+  return {
+    r: a.r + (b.r - a.r) * tt,
+    g: a.g + (b.g - a.g) * tt,
+    b: a.b + (b.b - a.b) * tt,
+  };
+}
+
+export default function ChestIcon({ width, height, color }: Props) {
+  const base = color ? parseHexColor(color) : null;
+  const defaultWood = parseHexColor("#CD9965");
+  const defaultGrain = parseHexColor("#A67C52");
+
+  const woodFill =
+    base && defaultWood
+      ? toHex(mix(base, { r: 255, g: 255, b: 255 }, 0.35))
+      : "#CD9965";
+  const grainStroke =
+    base && defaultGrain
+      ? toHex(mix(base, { r: 0, g: 0, b: 0 }, 0.25))
+      : "#A67C52";
+
   return (
     <Svg
       width={width ?? "100%"}
@@ -22,17 +78,24 @@ export default function ChestIcon({ width, height }: Props) {
       {/* Cuerpo madera */}
       <Path
         d="M20,40 h360 a20,20 0 0 1 20,20 v230 a0,0 0 0 1 0,0 h-400 a0,0 0 0 1 0,0 v-230 a20,20 0 0 1 20,-20 z"
-        fill="#CD9965"
+        fill={woodFill}
       />
 
       {/* Vetas madera */}
-      <Line x1={20} y1={90} x2={380} y2={90} stroke="#A67C52" strokeWidth={2} />
+      <Line
+        x1={20}
+        y1={90}
+        x2={380}
+        y2={90}
+        stroke={grainStroke}
+        strokeWidth={2}
+      />
       <Line
         x1={20}
         y1={140}
         x2={380}
         y2={140}
-        stroke="#A67C52"
+        stroke={grainStroke}
         strokeWidth={2}
       />
       <Line
@@ -40,7 +103,7 @@ export default function ChestIcon({ width, height }: Props) {
         y1={190}
         x2={380}
         y2={190}
-        stroke="#A67C52"
+        stroke={grainStroke}
         strokeWidth={2}
       />
       <Line
@@ -48,7 +111,7 @@ export default function ChestIcon({ width, height }: Props) {
         y1={240}
         x2={380}
         y2={240}
-        stroke="#A67C52"
+        stroke={grainStroke}
         strokeWidth={2}
       />
 

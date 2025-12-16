@@ -95,6 +95,17 @@ interface Recuerdo {
   fecha: Date;
 }
 
+const BAUL_COLOR_OPTIONS = [
+  { key: "red", value: "#E53935" },
+  { key: "green", value: "#43A047" },
+  { key: "blue", value: "#1E88E5" },
+  { key: "magenta", value: "#D81B60" },
+  { key: "yellow", value: "#FDD835" },
+  { key: "cyan", value: "#00ACC1" },
+  { key: "white", value: "#FFFFFF" },
+  { key: "purple", value: COLORS.primary },
+] as const;
+
 export default function RecuerdosScreen() {
   const { loading: authLoading, userElepad } = useAuth();
 
@@ -619,17 +630,65 @@ export default function RecuerdosScreen() {
           >
             Color del baúl
           </Text>
-          <SegmentedButtons
-            style={{ marginTop: 8 }}
-            value={bookFormColor}
-            onValueChange={(v) => setBookFormColor(v)}
-            buttons={[
-              { value: COLORS.primary, label: "Primario" },
-              { value: COLORS.secondary, label: "Secundario" },
-              { value: COLORS.accent, label: "Acento" },
-              { value: COLORS.backgroundTertiary, label: "Suave" },
-            ]}
-          />
+
+          <View
+            style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 10 }}
+          >
+            {BAUL_COLOR_OPTIONS.map((opt) => {
+              const selected =
+                bookFormColor?.toLowerCase?.() === opt.value.toLowerCase();
+              return (
+                <Pressable
+                  key={opt.key}
+                  onPress={() => setBookFormColor(opt.value)}
+                  style={{ marginRight: 10, marginBottom: 10 }}
+                >
+                  <View
+                    style={{
+                      width: 34,
+                      height: 34,
+                      borderRadius: 17,
+                      borderWidth: selected ? 2 : 1,
+                      borderColor: selected ? COLORS.text : COLORS.border,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: 26,
+                        height: 26,
+                        borderRadius: 13,
+                        backgroundColor: opt.value,
+                        borderWidth:
+                          opt.value.toLowerCase() === "#ffffff" ? 1 : 0,
+                        borderColor: COLORS.border,
+                      }}
+                    />
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <View style={{ alignItems: "center", marginTop: 12 }}>
+            <View
+              style={{
+                width: 180,
+                aspectRatio: 1,
+                backgroundColor: "transparent",
+                borderRadius: 18,
+                borderWidth: 1,
+                borderColor: COLORS.border,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <View style={{ width: "94%", height: "94%" }}>
+                <ChestIcon color={bookFormColor} />
+              </View>
+            </View>
+          </View>
         </Dialog.Content>
         <Dialog.Actions style={{ paddingBottom: 12, paddingRight: 16 }}>
           <Button
@@ -789,6 +848,7 @@ export default function RecuerdosScreen() {
             }
             renderItem={({ item, index }) => {
               const title = item.title || "(Sin nombre)";
+              const color = item.color || COLORS.primary;
               return (
                 <View
                   style={{
@@ -809,7 +869,7 @@ export default function RecuerdosScreen() {
                       }}
                     >
                       <View style={{ width: "92%", height: "92%" }}>
-                        <ChestIcon />
+                        <ChestIcon color={color} />
                       </View>
                       <View
                         style={{
