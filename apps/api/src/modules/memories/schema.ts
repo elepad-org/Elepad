@@ -6,7 +6,10 @@ export const MemoriesBookSchema = z
     id: z.string().uuid(),
     groupId: z.string().uuid(),
     title: z.string().nullable(),
+    description: z.string().nullable().optional(),
+    color: z.string().nullable().optional(),
     createdAt: z.string().datetime(), // timestamp with time zone como string ISO
+    updatedAt: z.string().datetime().optional(),
   })
   .openapi("MemoriesBook");
 
@@ -16,7 +19,9 @@ export type MemoriesBook = z.infer<typeof MemoriesBookSchema>;
 export const NewMemoriesBookSchema = z
   .object({
     groupId: z.string().uuid(),
-    title: z.string().min(1).optional(),
+    title: z.string().min(1),
+    description: z.string().optional(),
+    color: z.string().min(1),
   })
   .openapi("NewMemoriesBook");
 
@@ -26,6 +31,8 @@ export type NewMemoriesBook = z.infer<typeof NewMemoriesBookSchema>;
 export const UpdateMemoriesBookSchema = z
   .object({
     title: z.string().min(1).optional(),
+    description: z.string().optional(),
+    color: z.string().min(1).optional(),
   })
   .strict()
   .openapi("UpdateMemoriesBook");

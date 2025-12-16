@@ -372,21 +372,30 @@ export type Database = {
       memoriesBooks: {
         Row: {
           createdAt: string;
+          description: string | null;
+          color: string | null;
           groupId: string;
           id: string;
           title: string | null;
+          updatedAt: string;
         };
         Insert: {
           createdAt?: string;
+          description?: string | null;
+          color?: string | null;
           groupId: string;
           id?: string;
           title?: string | null;
+          updatedAt?: string;
         };
         Update: {
           createdAt?: string;
+          description?: string | null;
+          color?: string | null;
           groupId?: string;
           id?: string;
           title?: string | null;
+          updatedAt?: string;
         };
         Relationships: [
           {

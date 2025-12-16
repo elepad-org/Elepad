@@ -3,18 +3,26 @@ import { StatusBar, View, Image, FlatList, RefreshControl } from "react-native";
 import {
   Text,
   Portal,
+  Dialog,
   Button,
   Snackbar,
   ActivityIndicator,
   IconButton,
   SegmentedButtons,
+  TextInput,
 } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import {
+  useGetMemoriesBooks,
   useGetMemories,
+  createMemoriesBook,
   createMemoryWithMedia,
   createNote,
+  deleteMemoriesBook,
   Memory,
+  MemoriesBook,
+  UpdateMemoriesBook,
+  updateMemoriesBook,
 } from "@elepad/api-client";
 import { useMutation } from "@tanstack/react-query";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -82,6 +90,8 @@ interface Recuerdo {
 export default function RecuerdosScreen() {
   const { loading: authLoading, userElepad } = useAuth();
 
+  const groupId = userElepad?.groupId || "";
+
   // Estados locales
   const [refreshing, setRefreshing] = useState(false);
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
@@ -91,6 +101,18 @@ export default function RecuerdosScreen() {
   const [selectedRecuerdo, setSelectedRecuerdo] = useState<Recuerdo | null>(
     null,
   );
+  const [selectedBook, setSelectedBook] = useState<MemoriesBook | null>(null);
+  const [editingBook, setEditingBook] = useState<MemoriesBook | null>(null);
+
+  const [bookDialogVisible, setBookDialogVisible] = useState(false);
+  const [bookDialogMode, setBookDialogMode] = useState<"create" | "edit">(
+    "create",
+  );
+  const [bookFormTitle, setBookFormTitle] = useState("");
+  const [bookFormDescription, setBookFormDescription] = useState("");
+  const [bookFormColor, setBookFormColor] = useState<string>(COLORS.primary);
+  const [bookToDelete, setBookToDelete] = useState<MemoriesBook | null>(null);
+
   const [currentStep, setCurrentStep] = useState<
     "select" | "create" | "metadata"
   >("select");
@@ -101,14 +123,100 @@ export default function RecuerdosScreen() {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarError, setSnackbarError] = useState(false);
 
+  const {
+    data: booksResponse,
+    isLoading: booksLoading,
+    refetch: refetchBooks,
+  } = useGetMemoriesBooks(
+    { groupId },
+    {
+      query: {
+        enabled: !!groupId,
+      },
+    },
+  );
+
   // Hook del API client
   const {
     data: memoriesResponse,
     isLoading: memoriesLoading,
     refetch: refetchMemories,
-  } = useGetMemories({
-    groupId: userElepad?.groupId || "",
-    limit: 20,
+  } = useGetMemories(
+    {
+      groupId,
+      bookId: selectedBook?.id,
+      limit: 20,
+    },
+    {
+      query: {
+        enabled: !!groupId && !!selectedBook,
+      },
+    },
+  );
+
+  const createBookMutation = useMutation({
+    mutationFn: async (data: {
+      groupId: string;
+      title: string;
+      description?: string;
+      color: string;
+    }) => {
+      return createMemoriesBook(data);
+    },
+    onSuccess: async () => {
+      await refetchBooks();
+      setSnackbarMessage("Baúl creado");
+      setSnackbarError(false);
+      setSnackbarVisible(true);
+      setBookDialogVisible(false);
+    },
+    onError: (error) => {
+      setSnackbarMessage(
+        `Error al crear el baúl: ${error instanceof Error ? error.message : "Error desconocido"}`,
+      );
+      setSnackbarError(true);
+      setSnackbarVisible(true);
+    },
+  });
+
+  const updateBookMutation = useMutation({
+    mutationFn: async (data: { id: string; patch: UpdateMemoriesBook }) => {
+      return updateMemoriesBook(data.id, data.patch);
+    },
+    onSuccess: async () => {
+      await refetchBooks();
+      setSnackbarMessage("Baúl actualizado");
+      setSnackbarError(false);
+      setSnackbarVisible(true);
+      setBookDialogVisible(false);
+    },
+    onError: (error) => {
+      setSnackbarMessage(
+        `Error al actualizar el baúl: ${error instanceof Error ? error.message : "Error desconocido"}`,
+      );
+      setSnackbarError(true);
+      setSnackbarVisible(true);
+    },
+  });
+
+  const deleteBookMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return deleteMemoriesBook(id);
+    },
+    onSuccess: async () => {
+      await refetchBooks();
+      setSnackbarMessage("Baúl eliminado");
+      setSnackbarError(false);
+      setSnackbarVisible(true);
+      setBookToDelete(null);
+    },
+    onError: (error) => {
+      setSnackbarMessage(
+        `Error al eliminar el baúl: ${error instanceof Error ? error.message : "Error desconocido"}`,
+      );
+      setSnackbarError(true);
+      setSnackbarVisible(true);
+    },
   });
 
   // Hook de mutación para subir archivos
@@ -236,6 +344,16 @@ export default function RecuerdosScreen() {
     }
   }, [refetchMemories]);
 
+  const cargarBaules = useCallback(async () => {
+    try {
+      await refetchBooks();
+    } catch {
+      setSnackbarMessage("Error al cargar los baúles");
+      setSnackbarError(true);
+      setSnackbarVisible(true);
+    }
+  }, [refetchBooks]);
+
   // Extraer los datos de la respuesta
   const memoriesData =
     memoriesResponse && "data" in memoriesResponse ? memoriesResponse.data : [];
@@ -261,7 +379,11 @@ export default function RecuerdosScreen() {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await cargarRecuerdos();
+      if (selectedBook) {
+        await cargarRecuerdos();
+      } else {
+        await cargarBaules();
+      }
     } catch {
       setSnackbarMessage("Error al refrescar los recuerdos");
       setSnackbarError(true);
@@ -269,7 +391,64 @@ export default function RecuerdosScreen() {
     } finally {
       setRefreshing(false);
     }
-  }, [cargarRecuerdos]);
+  }, [cargarRecuerdos, cargarBaules, selectedBook]);
+
+  const openCreateBookDialog = () => {
+    setBookDialogMode("create");
+    setEditingBook(null);
+    setBookFormTitle("");
+    setBookFormDescription("");
+    setBookFormColor(COLORS.primary);
+    setBookDialogVisible(true);
+  };
+
+  const openEditBookDialog = (book: MemoriesBook) => {
+    setBookDialogMode("edit");
+    setBookFormTitle(book.title || "");
+    setBookFormDescription(book.description || "");
+    setBookFormColor(book.color || COLORS.primary);
+    setEditingBook(book);
+    setBookDialogVisible(true);
+  };
+
+  const submitBookDialog = async () => {
+    const title = bookFormTitle.trim();
+    const description = bookFormDescription.trim();
+    const color = bookFormColor;
+
+    if (!title) {
+      setSnackbarMessage("El nombre del baúl es obligatorio");
+      setSnackbarError(true);
+      setSnackbarVisible(true);
+      return;
+    }
+    if (!color) {
+      setSnackbarMessage("El color del baúl es obligatorio");
+      setSnackbarError(true);
+      setSnackbarVisible(true);
+      return;
+    }
+
+    if (bookDialogMode === "create") {
+      await createBookMutation.mutateAsync({
+        groupId,
+        title,
+        description: description || undefined,
+        color,
+      });
+      return;
+    }
+
+    if (!editingBook?.id) return;
+    await updateBookMutation.mutateAsync({
+      id: editingBook.id,
+      patch: {
+        title,
+        description: description || undefined,
+        color,
+      },
+    });
+  };
 
   // Manejador para crear un nuevo recuerdo
   const handleNuevoRecuerdo = (tipo: RecuerdoTipo) => {
@@ -287,14 +466,18 @@ export default function RecuerdosScreen() {
   // Función para crear un nuevo recuerdo con multimedia
   const handleGuardarRecuerdo = async (data: RecuerdoData) => {
     try {
-      // Usar bookId por defecto para el grupo
-      const defaultBookId = "070ac9a2-832f-4c05-bfa5-cec689a4181c";
+      if (!selectedBook?.id) {
+        setSnackbarMessage("Selecciona un baúl antes de agregar recuerdos");
+        setSnackbarError(true);
+        setSnackbarVisible(true);
+        return;
+      }
 
       if (selectedTipo === "texto") {
         // Para notas, usar el endpoint de createNote
         const noteData = {
-          bookId: defaultBookId,
-          groupId: userElepad!.groupId!,
+          bookId: selectedBook.id,
+          groupId,
           title: data.titulo || "Sin título",
           caption: data.caption || data.contenido,
         };
@@ -331,8 +514,8 @@ export default function RecuerdosScreen() {
         }
 
         const uploadData = {
-          bookId: defaultBookId,
-          groupId: userElepad!.groupId!,
+          bookId: selectedBook.id,
+          groupId,
           title: data.titulo,
           caption: data.caption,
           image: fileData,
@@ -367,6 +550,316 @@ export default function RecuerdosScreen() {
     setSelectedRecuerdo(null);
   };
 
+  // -------- Vista: Lista de baúles --------
+  const booksPayload =
+    booksResponse && "data" in booksResponse
+      ? (booksResponse as unknown as { data: unknown }).data
+      : undefined;
+
+  const booksData = Array.isArray(booksPayload)
+    ? booksPayload
+    : booksPayload &&
+        typeof booksPayload === "object" &&
+        "data" in (booksPayload as Record<string, unknown>)
+      ? (booksPayload as { data: unknown }).data
+      : [];
+
+  const books = Array.isArray(booksData) ? (booksData as MemoriesBook[]) : [];
+  const isBooksLoading =
+    authLoading ||
+    booksLoading ||
+    createBookMutation.isPending ||
+    updateBookMutation.isPending ||
+    deleteBookMutation.isPending;
+
+  if (!selectedBook) {
+    return (
+      <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor={COLORS.background}
+        />
+
+        <View
+          style={{
+            paddingHorizontal: 24,
+            paddingVertical: 20,
+            borderBottomColor: COLORS.border,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Text style={STYLES.superHeading}>Baúles</Text>
+          <Button
+            mode="contained"
+            onPress={openCreateBookDialog}
+            style={{ ...STYLES.miniButton }}
+            icon="plus"
+            disabled={!groupId}
+          >
+            Nuevo
+          </Button>
+        </View>
+
+        {isBooksLoading && books.length === 0 ? (
+          <View style={{ ...STYLES.center, paddingHorizontal: 24 }}>
+            <ActivityIndicator size="large" color={COLORS.primary} />
+            <Text style={{ ...STYLES.subheading, marginTop: 14 }}>
+              Cargando baúles...
+            </Text>
+          </View>
+        ) : books.length === 0 ? (
+          <View
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          >
+            <Image
+              source={eleEmpthy}
+              style={{
+                width: 180,
+                height: 180,
+                borderRadius: 18,
+                marginBottom: 16,
+              }}
+            />
+            <Text style={STYLES.heading}>Todavía no hay baúles</Text>
+            <Text style={{ ...STYLES.subheading, paddingHorizontal: 24 }}>
+              Crea un baúl para agrupar tus recuerdos.
+            </Text>
+            <Button
+              mode="contained"
+              onPress={openCreateBookDialog}
+              style={{ ...STYLES.buttonPrimary, width: "60%" }}
+              icon="plus"
+              disabled={!groupId}
+            >
+              Crear baúl
+            </Button>
+          </View>
+        ) : (
+          <FlatList
+            data={books}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={{
+              paddingHorizontal: 24,
+              paddingTop: 16,
+              paddingBottom: LAYOUT.bottomNavHeight,
+            }}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+            renderItem={({ item }) => {
+              const color = item.color || COLORS.primary;
+              const description = item.description || "";
+              return (
+                <View
+                  style={{
+                    backgroundColor: COLORS.backgroundSecondary,
+                    borderRadius: 20,
+                    padding: 16,
+                    marginBottom: 12,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Button
+                    onPress={() => setSelectedBook(item)}
+                    style={{ flex: 1, alignItems: "flex-start" }}
+                    contentStyle={{ justifyContent: "flex-start" }}
+                    textColor={COLORS.text}
+                    mode="text"
+                  >
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        flex: 1,
+                      }}
+                    >
+                      <View
+                        style={{
+                          width: 14,
+                          height: 14,
+                          borderRadius: 7,
+                          backgroundColor: color,
+                          marginRight: 10,
+                        }}
+                      />
+                      <View style={{ flex: 1 }}>
+                        <Text
+                          style={{
+                            ...STYLES.heading,
+                            fontSize: 16,
+                            textAlign: "left",
+                          }}
+                        >
+                          {item.title || "(Sin nombre)"}
+                        </Text>
+                        {description ? (
+                          <Text
+                            style={{
+                              fontSize: 13,
+                              color: COLORS.textSecondary,
+                              marginTop: 4,
+                              textAlign: "left",
+                            }}
+                          >
+                            {description}
+                          </Text>
+                        ) : null}
+                      </View>
+                    </View>
+                  </Button>
+
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <IconButton
+                      icon="pencil"
+                      size={20}
+                      onPress={() => openEditBookDialog(item)}
+                    />
+                    <IconButton
+                      icon="trash-can"
+                      size={20}
+                      onPress={() => setBookToDelete(item)}
+                    />
+                  </View>
+                </View>
+              );
+            }}
+          />
+        )}
+
+        <Portal>
+          <Dialog
+            visible={bookDialogVisible}
+            onDismiss={() => {
+              setBookDialogVisible(false);
+              setEditingBook(null);
+            }}
+            style={{
+              backgroundColor: COLORS.background,
+              width: "92%",
+              alignSelf: "center",
+              borderRadius: 16,
+            }}
+          >
+            <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
+              {bookDialogMode === "create" ? "Nuevo baúl" : "Editar baúl"}
+            </Dialog.Title>
+            <Dialog.Content>
+              <TextInput
+                label="Nombre"
+                value={bookFormTitle}
+                onChangeText={setBookFormTitle}
+                mode="outlined"
+                outlineColor={COLORS.border}
+                activeOutlineColor={COLORS.primary}
+                style={{ marginBottom: 12 }}
+              />
+              <TextInput
+                label="Descripción"
+                value={bookFormDescription}
+                onChangeText={setBookFormDescription}
+                mode="outlined"
+                outlineColor={COLORS.border}
+                activeOutlineColor={COLORS.primary}
+                multiline
+                numberOfLines={3}
+                style={{ marginBottom: 12 }}
+              />
+
+              <Text
+                style={{
+                  ...STYLES.subheading,
+                  textAlign: "left",
+                  marginTop: 0,
+                }}
+              >
+                Color del baúl
+              </Text>
+              <SegmentedButtons
+                style={{ marginTop: 8 }}
+                value={bookFormColor}
+                onValueChange={(v) => setBookFormColor(v)}
+                buttons={[
+                  { value: COLORS.primary, label: "Primario" },
+                  { value: COLORS.secondary, label: "Secundario" },
+                  { value: COLORS.accent, label: "Acento" },
+                  { value: COLORS.backgroundTertiary, label: "Suave" },
+                ]}
+              />
+            </Dialog.Content>
+            <Dialog.Actions style={{ paddingBottom: 12, paddingRight: 16 }}>
+              <Button
+                onPress={() => {
+                  setBookDialogVisible(false);
+                  setEditingBook(null);
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                mode="contained"
+                onPress={submitBookDialog}
+                buttonColor={COLORS.primary}
+                textColor={COLORS.white}
+                disabled={!groupId}
+              >
+                Guardar
+              </Button>
+            </Dialog.Actions>
+          </Dialog>
+
+          <Dialog
+            visible={!!bookToDelete}
+            onDismiss={() => setBookToDelete(null)}
+            style={{
+              backgroundColor: COLORS.background,
+              width: "90%",
+              alignSelf: "center",
+              borderRadius: 16,
+            }}
+          >
+            <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
+              Eliminar baúl
+            </Dialog.Title>
+            <Dialog.Content>
+              <Text style={{ ...STYLES.subheading, marginTop: 0 }}>
+                Esto eliminará también los recuerdos dentro del baúl.
+              </Text>
+            </Dialog.Content>
+            <Dialog.Actions style={{ paddingBottom: 12, paddingRight: 16 }}>
+              <Button onPress={() => setBookToDelete(null)}>Cancelar</Button>
+              <Button
+                mode="contained"
+                buttonColor={COLORS.primary}
+                textColor={COLORS.white}
+                onPress={() => {
+                  if (!bookToDelete) return;
+                  deleteBookMutation.mutate(bookToDelete.id);
+                }}
+              >
+                Eliminar
+              </Button>
+            </Dialog.Actions>
+          </Dialog>
+        </Portal>
+
+        <Snackbar
+          visible={snackbarVisible}
+          onDismiss={() => setSnackbarVisible(false)}
+          duration={3000}
+          style={{
+            backgroundColor: snackbarError ? COLORS.error : COLORS.primary,
+          }}
+        >
+          {snackbarMessage}
+        </Snackbar>
+      </SafeAreaView>
+    );
+  }
+
   if (isLoading && recuerdos.length === 0) {
     return (
       <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
@@ -385,7 +878,24 @@ export default function RecuerdosScreen() {
             alignItems: "center",
           }}
         >
-          <Text style={STYLES.superHeading}>Mis Recuerdos</Text>
+          <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+            <IconButton
+              icon="chevron-left"
+              size={24}
+              onPress={() => {
+                setSelectedBook(null);
+                setDialogVisible(false);
+                setDetailDialogVisible(false);
+                setSelectedRecuerdo(null);
+              }}
+            />
+            <Text
+              style={{ ...STYLES.superHeading, textAlign: "left", flex: 1 }}
+              numberOfLines={1}
+            >
+              {selectedBook.title || "Baúl"}
+            </Text>
+          </View>
           <Button
             mode="contained"
             onPress={() => setDialogVisible(true)}
@@ -475,7 +985,24 @@ export default function RecuerdosScreen() {
           alignItems: "center",
         }}
       >
-        <Text style={STYLES.superHeading}>Mis Recuerdos</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+          <IconButton
+            icon="chevron-left"
+            size={24}
+            onPress={() => {
+              setSelectedBook(null);
+              setDialogVisible(false);
+              setDetailDialogVisible(false);
+              setSelectedRecuerdo(null);
+            }}
+          />
+          <Text
+            style={{ ...STYLES.superHeading, textAlign: "left", flex: 1 }}
+            numberOfLines={1}
+          >
+            {selectedBook.title || "Baúl"}
+          </Text>
+        </View>
         <Button
           mode="contained"
           onPress={() => setDialogVisible(true)}

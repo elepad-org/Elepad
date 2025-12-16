@@ -135,6 +135,36 @@ export interface Memory {
   createdAt: string;
 }
 
+export interface MemoriesBook {
+  id: string;
+  groupId: string;
+  /** @nullable */
+  title: string | null;
+  /** @nullable */
+  description?: string | null;
+  /** @nullable */
+  color?: string | null;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface NewMemoriesBook {
+  groupId: string;
+  /** @minLength 1 */
+  title: string;
+  description?: string;
+  /** @minLength 1 */
+  color: string;
+}
+
+export interface UpdateMemoriesBook {
+  /** @minLength 1 */
+  title?: string;
+  description?: string;
+  /** @minLength 1 */
+  color?: string;
+}
+
 export interface CreateNote {
   bookId: string;
   groupId: string;
@@ -397,6 +427,14 @@ export type GetMemories200 = {
   total: number;
   limit: number;
   offset: number;
+};
+
+export type GetMemoriesBooksParams = {
+  groupId: string;
+};
+
+export type GetMemoriesBooks200 = {
+  data: MemoriesBook[];
 };
 
 export type CreateMemoryWithMediaBody = {
@@ -3523,6 +3561,623 @@ export function useGetMemories<
 
   return query;
 }
+
+export type getMemoriesBooksResponse200 = {
+  data: GetMemoriesBooks200;
+  status: 200;
+};
+
+export type getMemoriesBooksResponse400 = {
+  data: Error;
+  status: 400;
+};
+
+export type getMemoriesBooksResponse401 = {
+  data: Error;
+  status: 401;
+};
+
+export type getMemoriesBooksResponse403 = {
+  data: Error;
+  status: 403;
+};
+
+export type getMemoriesBooksResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type getMemoriesBooksResponseSuccess = getMemoriesBooksResponse200 & {
+  headers: Headers;
+};
+export type getMemoriesBooksResponseError = (
+  | getMemoriesBooksResponse400
+  | getMemoriesBooksResponse401
+  | getMemoriesBooksResponse403
+  | getMemoriesBooksResponse500
+) & {
+  headers: Headers;
+};
+
+export type getMemoriesBooksResponse =
+  | getMemoriesBooksResponseSuccess
+  | getMemoriesBooksResponseError;
+
+export const getGetMemoriesBooksUrl = (params: GetMemoriesBooksParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/memories/books?${stringifiedParams}`
+    : `/memories/books`;
+};
+
+export const getMemoriesBooks = async (
+  params: GetMemoriesBooksParams,
+  options?: RequestInit,
+): Promise<getMemoriesBooksResponse> => {
+  return rnFetch<getMemoriesBooksResponse>(getGetMemoriesBooksUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetMemoriesBooksQueryKey = (
+  params?: GetMemoriesBooksParams,
+) => {
+  return [`/memories/books`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetMemoriesBooksQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMemoriesBooks>>,
+  TError = Error | Error | Error | Error,
+>(
+  params: GetMemoriesBooksParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getMemoriesBooks>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetMemoriesBooksQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getMemoriesBooks>>
+  > = ({ signal }) => getMemoriesBooks(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMemoriesBooks>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetMemoriesBooksQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getMemoriesBooks>>
+>;
+export type GetMemoriesBooksQueryError = Error | Error | Error | Error;
+
+export function useGetMemoriesBooks<
+  TData = Awaited<ReturnType<typeof getMemoriesBooks>>,
+  TError = Error | Error | Error | Error,
+>(
+  params: GetMemoriesBooksParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getMemoriesBooks>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMemoriesBooks>>,
+          TError,
+          Awaited<ReturnType<typeof getMemoriesBooks>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetMemoriesBooks<
+  TData = Awaited<ReturnType<typeof getMemoriesBooks>>,
+  TError = Error | Error | Error | Error,
+>(
+  params: GetMemoriesBooksParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getMemoriesBooks>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMemoriesBooks>>,
+          TError,
+          Awaited<ReturnType<typeof getMemoriesBooks>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetMemoriesBooks<
+  TData = Awaited<ReturnType<typeof getMemoriesBooks>>,
+  TError = Error | Error | Error | Error,
+>(
+  params: GetMemoriesBooksParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getMemoriesBooks>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetMemoriesBooks<
+  TData = Awaited<ReturnType<typeof getMemoriesBooks>>,
+  TError = Error | Error | Error | Error,
+>(
+  params: GetMemoriesBooksParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getMemoriesBooks>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetMemoriesBooksQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export type createMemoriesBookResponse201 = {
+  data: MemoriesBook;
+  status: 201;
+};
+
+export type createMemoriesBookResponse400 = {
+  data: Error;
+  status: 400;
+};
+
+export type createMemoriesBookResponse401 = {
+  data: Error;
+  status: 401;
+};
+
+export type createMemoriesBookResponse403 = {
+  data: Error;
+  status: 403;
+};
+
+export type createMemoriesBookResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type createMemoriesBookResponseSuccess =
+  createMemoriesBookResponse201 & {
+    headers: Headers;
+  };
+export type createMemoriesBookResponseError = (
+  | createMemoriesBookResponse400
+  | createMemoriesBookResponse401
+  | createMemoriesBookResponse403
+  | createMemoriesBookResponse500
+) & {
+  headers: Headers;
+};
+
+export type createMemoriesBookResponse =
+  | createMemoriesBookResponseSuccess
+  | createMemoriesBookResponseError;
+
+export const getCreateMemoriesBookUrl = () => {
+  return `/memories/books`;
+};
+
+export const createMemoriesBook = async (
+  newMemoriesBook: NewMemoriesBook,
+  options?: RequestInit,
+): Promise<createMemoriesBookResponse> => {
+  return rnFetch<createMemoriesBookResponse>(getCreateMemoriesBookUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(newMemoriesBook),
+  });
+};
+
+export const getCreateMemoriesBookMutationOptions = <
+  TError = Error | Error | Error | Error,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createMemoriesBook>>,
+    TError,
+    { data: NewMemoriesBook },
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createMemoriesBook>>,
+  TError,
+  { data: NewMemoriesBook },
+  TContext
+> => {
+  const mutationKey = ["createMemoriesBook"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createMemoriesBook>>,
+    { data: NewMemoriesBook }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createMemoriesBook(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateMemoriesBookMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createMemoriesBook>>
+>;
+export type CreateMemoriesBookMutationBody = NewMemoriesBook;
+export type CreateMemoriesBookMutationError = Error | Error | Error | Error;
+
+export const useCreateMemoriesBook = <
+  TError = Error | Error | Error | Error,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createMemoriesBook>>,
+      TError,
+      { data: NewMemoriesBook },
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createMemoriesBook>>,
+  TError,
+  { data: NewMemoriesBook },
+  TContext
+> => {
+  const mutationOptions = getCreateMemoriesBookMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+
+export type updateMemoriesBookResponse200 = {
+  data: MemoriesBook;
+  status: 200;
+};
+
+export type updateMemoriesBookResponse400 = {
+  data: Error;
+  status: 400;
+};
+
+export type updateMemoriesBookResponse401 = {
+  data: Error;
+  status: 401;
+};
+
+export type updateMemoriesBookResponse403 = {
+  data: Error;
+  status: 403;
+};
+
+export type updateMemoriesBookResponse404 = {
+  data: Error;
+  status: 404;
+};
+
+export type updateMemoriesBookResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type updateMemoriesBookResponseSuccess =
+  updateMemoriesBookResponse200 & {
+    headers: Headers;
+  };
+export type updateMemoriesBookResponseError = (
+  | updateMemoriesBookResponse400
+  | updateMemoriesBookResponse401
+  | updateMemoriesBookResponse403
+  | updateMemoriesBookResponse404
+  | updateMemoriesBookResponse500
+) & {
+  headers: Headers;
+};
+
+export type updateMemoriesBookResponse =
+  | updateMemoriesBookResponseSuccess
+  | updateMemoriesBookResponseError;
+
+export const getUpdateMemoriesBookUrl = (id: string) => {
+  return `/memories/books/${id}`;
+};
+
+export const updateMemoriesBook = async (
+  id: string,
+  updateMemoriesBook: UpdateMemoriesBook,
+  options?: RequestInit,
+): Promise<updateMemoriesBookResponse> => {
+  return rnFetch<updateMemoriesBookResponse>(getUpdateMemoriesBookUrl(id), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateMemoriesBook),
+  });
+};
+
+export const getUpdateMemoriesBookMutationOptions = <
+  TError = Error | Error | Error | Error | Error,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateMemoriesBook>>,
+    TError,
+    { id: string; data: UpdateMemoriesBook },
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateMemoriesBook>>,
+  TError,
+  { id: string; data: UpdateMemoriesBook },
+  TContext
+> => {
+  const mutationKey = ["updateMemoriesBook"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateMemoriesBook>>,
+    { id: string; data: UpdateMemoriesBook }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return updateMemoriesBook(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateMemoriesBookMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateMemoriesBook>>
+>;
+export type UpdateMemoriesBookMutationBody = UpdateMemoriesBook;
+export type UpdateMemoriesBookMutationError =
+  | Error
+  | Error
+  | Error
+  | Error
+  | Error;
+
+export const useUpdateMemoriesBook = <
+  TError = Error | Error | Error | Error | Error,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateMemoriesBook>>,
+      TError,
+      { id: string; data: UpdateMemoriesBook },
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateMemoriesBook>>,
+  TError,
+  { id: string; data: UpdateMemoriesBook },
+  TContext
+> => {
+  const mutationOptions = getUpdateMemoriesBookMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+
+export type deleteMemoriesBookResponse200 = {
+  data: void;
+  status: 200;
+};
+
+export type deleteMemoriesBookResponse400 = {
+  data: Error;
+  status: 400;
+};
+
+export type deleteMemoriesBookResponse401 = {
+  data: Error;
+  status: 401;
+};
+
+export type deleteMemoriesBookResponse403 = {
+  data: Error;
+  status: 403;
+};
+
+export type deleteMemoriesBookResponse404 = {
+  data: Error;
+  status: 404;
+};
+
+export type deleteMemoriesBookResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type deleteMemoriesBookResponseSuccess =
+  deleteMemoriesBookResponse200 & {
+    headers: Headers;
+  };
+export type deleteMemoriesBookResponseError = (
+  | deleteMemoriesBookResponse400
+  | deleteMemoriesBookResponse401
+  | deleteMemoriesBookResponse403
+  | deleteMemoriesBookResponse404
+  | deleteMemoriesBookResponse500
+) & {
+  headers: Headers;
+};
+
+export type deleteMemoriesBookResponse =
+  | deleteMemoriesBookResponseSuccess
+  | deleteMemoriesBookResponseError;
+
+export const getDeleteMemoriesBookUrl = (id: string) => {
+  return `/memories/books/${id}`;
+};
+
+export const deleteMemoriesBook = async (
+  id: string,
+  options?: RequestInit,
+): Promise<deleteMemoriesBookResponse> => {
+  return rnFetch<deleteMemoriesBookResponse>(getDeleteMemoriesBookUrl(id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteMemoriesBookMutationOptions = <
+  TError = Error | Error | Error | Error | Error,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteMemoriesBook>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteMemoriesBook>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationKey = ["deleteMemoriesBook"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteMemoriesBook>>,
+    { id: string }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return deleteMemoriesBook(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteMemoriesBookMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteMemoriesBook>>
+>;
+
+export type DeleteMemoriesBookMutationError =
+  | Error
+  | Error
+  | Error
+  | Error
+  | Error;
+
+export const useDeleteMemoriesBook = <
+  TError = Error | Error | Error | Error | Error,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deleteMemoriesBook>>,
+      TError,
+      { id: string },
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteMemoriesBook>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationOptions = getDeleteMemoriesBookMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
 
 export type getMemoriesIdResponse200 = {
   data: Memory;

@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { View, Image, Dimensions } from "react-native";
 import { Dialog, Portal, Text, IconButton } from "react-native-paper";
 import { COLORS, STYLES, FONT } from "@/styles/base";
 import { useAudioPlayer } from "expo-audio";
-import { Video, ResizeMode } from "expo-av";
+import { VideoView, useVideoPlayer } from "expo-video";
 import Slider from "@react-native-community/slider";
 
 type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
@@ -36,7 +36,10 @@ export default function RecuerdoDetailDialog({
   const [duration, setDuration] = useState(0);
   const audioUrl = recuerdo?.tipo === "audio" ? recuerdo.contenido : "";
   const player = useAudioPlayer(audioUrl);
-  const videoRef = useRef<Video>(null);
+  const videoUrl = recuerdo?.tipo === "video" ? recuerdo.contenido : "";
+  const videoPlayer = useVideoPlayer({ uri: videoUrl }, (p) => {
+    p.loop = false;
+  });
 
   // Resetear el player cuando se abre el modal
   useEffect(() => {
@@ -49,11 +52,15 @@ export default function RecuerdoDetailDialog({
     }
 
     // Resetear video si existe
-    if (visible && recuerdo?.tipo === "video" && videoRef.current) {
-      videoRef.current.setPositionAsync(0);
-      videoRef.current.pauseAsync();
+    if (visible && recuerdo?.tipo === "video") {
+      try {
+        videoPlayer.pause();
+        videoPlayer.currentTime = 0;
+      } catch {
+        // ignore
+      }
     }
-  }, [visible, recuerdo, player]);
+  }, [visible, recuerdo, player, videoPlayer]);
 
   useEffect(() => {
     // Sincronizar estado con el player
@@ -139,8 +146,13 @@ export default function RecuerdoDetailDialog({
     if (recuerdo.tipo === "audio") {
       stopAudio();
     }
-    if (recuerdo.tipo === "video" && videoRef.current) {
-      videoRef.current.pauseAsync();
+    if (recuerdo.tipo === "video") {
+      try {
+        videoPlayer.pause();
+        videoPlayer.currentTime = 0;
+      } catch {
+        // ignore
+      }
     }
     onDismiss();
   };
@@ -225,17 +237,15 @@ export default function RecuerdoDetailDialog({
           {recuerdo.tipo === "video" && recuerdo.contenido && (
             <View>
               <View style={{ padding: 14, paddingBottom: 0 }}>
-                <Video
-                  ref={videoRef}
-                  source={{ uri: recuerdo.contenido }}
+                <VideoView
+                  player={videoPlayer}
                   style={{
                     width: "100%",
                     height: screenWidth * 0.84,
                     borderRadius: 0,
                   }}
-                  useNativeControls
-                  resizeMode={ResizeMode.CONTAIN}
-                  isLooping={false}
+                  nativeControls
+                  contentFit="contain"
                 />
               </View>
 

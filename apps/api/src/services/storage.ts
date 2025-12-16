@@ -57,6 +57,7 @@ export async function uploadUserAvatarImage(
 export async function uploadMemoryImage(
   supabase: SupabaseClient<Database>,
   groupId: string,
+  bookId: string,
   file: File,
 ): Promise<string> {
   const originalName = file.name || `memory-${Date.now()}`;
@@ -67,7 +68,7 @@ export async function uploadMemoryImage(
   const mediaTypeFolder = getMediaTypeFolder(
     file.type || "application/octet-stream",
   );
-  const path = `${groupId}/${mediaTypeFolder}/${fileName}`;
+  const path = `${groupId}/${bookId}/${mediaTypeFolder}/${fileName}`;
 
   const { error } = await supabase.storage
     .from(MEMORIES_BUCKET)
