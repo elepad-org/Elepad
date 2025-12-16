@@ -25,6 +25,7 @@
     "eslint-config-flat-gitignore": "^2.1.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-react": "^7.37.5",
+    "expo-module-scripts": "^5.0.8",
     "husky": "^9.1.7",
     "orval": "^7.11.2",
     "prettier": "^3.6.2",

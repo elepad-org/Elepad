@@ -1,5 +1,12 @@
 import { useState, useCallback } from "react";
-import { StatusBar, View, Image, FlatList, RefreshControl } from "react-native";
+import {
+  StatusBar,
+  View,
+  Image,
+  FlatList,
+  RefreshControl,
+  Pressable,
+} from "react-native";
 import {
   Text,
   Portal,
@@ -33,6 +40,7 @@ import { uriToBlob } from "@/lib/uriToBlob";
 import RecuerdoItemComponent from "@/components/Recuerdos/RecuerdoItemComponent";
 import NuevoRecuerdoDialogComponent from "@/components/Recuerdos/NuevoRecuerdoDialogComponent";
 import RecuerdoDetailDialog from "@/components/Recuerdos/RecuerdoDetailDialog";
+import ChestIcon from "@/components/Recuerdos/ChestIcon";
 import eleEmpthy from "@/assets/images/ele-idea.jpeg";
 
 // Tipos de recuerdos
@@ -99,14 +107,14 @@ export default function RecuerdosScreen() {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [detailDialogVisible, setDetailDialogVisible] = useState(false);
   const [selectedRecuerdo, setSelectedRecuerdo] = useState<Recuerdo | null>(
-    null,
+    null
   );
   const [selectedBook, setSelectedBook] = useState<MemoriesBook | null>(null);
   const [editingBook, setEditingBook] = useState<MemoriesBook | null>(null);
 
   const [bookDialogVisible, setBookDialogVisible] = useState(false);
   const [bookDialogMode, setBookDialogMode] = useState<"create" | "edit">(
-    "create",
+    "create"
   );
   const [bookFormTitle, setBookFormTitle] = useState("");
   const [bookFormDescription, setBookFormDescription] = useState("");
@@ -133,7 +141,7 @@ export default function RecuerdosScreen() {
       query: {
         enabled: !!groupId,
       },
-    },
+    }
   );
 
   // Hook del API client
@@ -151,7 +159,7 @@ export default function RecuerdosScreen() {
       query: {
         enabled: !!groupId && !!selectedBook,
       },
-    },
+    }
   );
 
   const createBookMutation = useMutation({
@@ -172,7 +180,9 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       setSnackbarMessage(
-        `Error al crear el baúl: ${error instanceof Error ? error.message : "Error desconocido"}`,
+        `Error al crear el baúl: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`
       );
       setSnackbarError(true);
       setSnackbarVisible(true);
@@ -192,7 +202,9 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       setSnackbarMessage(
-        `Error al actualizar el baúl: ${error instanceof Error ? error.message : "Error desconocido"}`,
+        `Error al actualizar el baúl: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`
       );
       setSnackbarError(true);
       setSnackbarVisible(true);
@@ -212,7 +224,9 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       setSnackbarMessage(
-        `Error al eliminar el baúl: ${error instanceof Error ? error.message : "Error desconocido"}`,
+        `Error al eliminar el baúl: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`
       );
       setSnackbarError(true);
       setSnackbarVisible(true);
@@ -235,8 +249,8 @@ export default function RecuerdosScreen() {
           data.image instanceof Blob
             ? "Blob"
             : typeof data.image === "object"
-              ? "File object"
-              : typeof data.image,
+            ? "File object"
+            : typeof data.image,
       });
       try {
         const result = await createMemoryWithMedia(data);
@@ -274,7 +288,9 @@ export default function RecuerdosScreen() {
     onError: (error) => {
       console.error("Upload mutation onError:", error);
       setSnackbarMessage(
-        `Error al subir el recuerdo: ${error instanceof Error ? error.message : "Error desconocido"}`,
+        `Error al subir el recuerdo: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`
       );
       setSnackbarError(true);
       setSnackbarVisible(true);
@@ -326,7 +342,9 @@ export default function RecuerdosScreen() {
     onError: (error) => {
       console.error("Create note mutation onError:", error);
       setSnackbarMessage(
-        `Error al crear la nota: ${error instanceof Error ? error.message : "Error desconocido"}`,
+        `Error al crear la nota: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`
       );
       setSnackbarError(true);
       setSnackbarVisible(true);
@@ -491,15 +509,15 @@ export default function RecuerdosScreen() {
           selectedTipo === "imagen"
             ? "memory.jpg"
             : selectedTipo === "video"
-              ? "memory.mp4"
-              : "memory.m4a";
+            ? "memory.mp4"
+            : "memory.m4a";
         const mimeType =
           data.mimeType ||
           (selectedTipo === "imagen"
             ? "image/jpeg"
             : selectedTipo === "video"
-              ? "video/mp4"
-              : "audio/mp4");
+            ? "video/mp4"
+            : "audio/mp4");
 
         if (Platform.OS === "web") {
           // Para web, convertir URI a blob
@@ -525,7 +543,9 @@ export default function RecuerdosScreen() {
       }
     } catch (error) {
       setSnackbarMessage(
-        `Error al preparar el archivo: ${error instanceof Error ? error.message : "Error desconocido"}`,
+        `Error al preparar el archivo: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`
       );
       setSnackbarError(true);
       setSnackbarVisible(true);
@@ -550,6 +570,124 @@ export default function RecuerdosScreen() {
     setSelectedRecuerdo(null);
   };
 
+  const renderBookDialogs = () => (
+    <Portal>
+      <Dialog
+        visible={bookDialogVisible}
+        onDismiss={() => {
+          setBookDialogVisible(false);
+          setEditingBook(null);
+        }}
+        style={{
+          backgroundColor: COLORS.background,
+          width: "92%",
+          alignSelf: "center",
+          borderRadius: 16,
+        }}
+      >
+        <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
+          {bookDialogMode === "create" ? "Nuevo baúl" : "Editar baúl"}
+        </Dialog.Title>
+        <Dialog.Content>
+          <TextInput
+            label="Nombre"
+            value={bookFormTitle}
+            onChangeText={setBookFormTitle}
+            mode="outlined"
+            outlineColor={COLORS.border}
+            activeOutlineColor={COLORS.primary}
+            style={{ marginBottom: 12 }}
+          />
+          <TextInput
+            label="Descripción"
+            value={bookFormDescription}
+            onChangeText={setBookFormDescription}
+            mode="outlined"
+            outlineColor={COLORS.border}
+            activeOutlineColor={COLORS.primary}
+            multiline
+            numberOfLines={3}
+            style={{ marginBottom: 12 }}
+          />
+
+          <Text
+            style={{
+              ...STYLES.subheading,
+              textAlign: "left",
+              marginTop: 0,
+            }}
+          >
+            Color del baúl
+          </Text>
+          <SegmentedButtons
+            style={{ marginTop: 8 }}
+            value={bookFormColor}
+            onValueChange={(v) => setBookFormColor(v)}
+            buttons={[
+              { value: COLORS.primary, label: "Primario" },
+              { value: COLORS.secondary, label: "Secundario" },
+              { value: COLORS.accent, label: "Acento" },
+              { value: COLORS.backgroundTertiary, label: "Suave" },
+            ]}
+          />
+        </Dialog.Content>
+        <Dialog.Actions style={{ paddingBottom: 12, paddingRight: 16 }}>
+          <Button
+            onPress={() => {
+              setBookDialogVisible(false);
+              setEditingBook(null);
+            }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            mode="contained"
+            onPress={submitBookDialog}
+            buttonColor={COLORS.primary}
+            textColor={COLORS.white}
+            disabled={!groupId}
+          >
+            Guardar
+          </Button>
+        </Dialog.Actions>
+      </Dialog>
+
+      <Dialog
+        visible={!!bookToDelete}
+        onDismiss={() => setBookToDelete(null)}
+        style={{
+          backgroundColor: COLORS.background,
+          width: "90%",
+          alignSelf: "center",
+          borderRadius: 16,
+        }}
+      >
+        <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
+          Eliminar baúl
+        </Dialog.Title>
+        <Dialog.Content>
+          <Text style={{ ...STYLES.subheading, marginTop: 0 }}>
+            Esto eliminará también los recuerdos dentro del baúl.
+          </Text>
+        </Dialog.Content>
+        <Dialog.Actions style={{ paddingBottom: 12, paddingRight: 16 }}>
+          <Button onPress={() => setBookToDelete(null)}>Cancelar</Button>
+          <Button
+            mode="contained"
+            buttonColor={COLORS.primary}
+            textColor={COLORS.white}
+            onPress={() => {
+              if (!bookToDelete) return;
+              deleteBookMutation.mutate(bookToDelete.id);
+            }}
+          >
+            Eliminar
+          </Button>
+        </Dialog.Actions>
+      </Dialog>
+    </Portal>
+  );
+
   // -------- Vista: Lista de baúles --------
   const booksPayload =
     booksResponse && "data" in booksResponse
@@ -559,10 +697,10 @@ export default function RecuerdosScreen() {
   const booksData = Array.isArray(booksPayload)
     ? booksPayload
     : booksPayload &&
-        typeof booksPayload === "object" &&
-        "data" in (booksPayload as Record<string, unknown>)
-      ? (booksPayload as { data: unknown }).data
-      : [];
+      typeof booksPayload === "object" &&
+      "data" in (booksPayload as Record<string, unknown>)
+    ? (booksPayload as { data: unknown }).data
+    : [];
 
   const books = Array.isArray(booksData) ? (booksData as MemoriesBook[]) : [];
   const isBooksLoading =
@@ -645,206 +783,75 @@ export default function RecuerdosScreen() {
               paddingTop: 16,
               paddingBottom: LAYOUT.bottomNavHeight,
             }}
+            numColumns={2}
             refreshControl={
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
-            renderItem={({ item }) => {
-              const color = item.color || COLORS.primary;
-              const description = item.description || "";
+            renderItem={({ item, index }) => {
+              const title = item.title || "(Sin nombre)";
               return (
                 <View
                   style={{
-                    backgroundColor: COLORS.backgroundSecondary,
-                    borderRadius: 20,
-                    padding: 16,
-                    marginBottom: 12,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
+                    flex: 1,
+                    marginBottom: 16,
+                    marginRight: index % 2 === 0 ? 12 : 0,
                   }}
                 >
-                  <Button
-                    onPress={() => setSelectedBook(item)}
-                    style={{ flex: 1, alignItems: "flex-start" }}
-                    contentStyle={{ justifyContent: "flex-start" }}
-                    textColor={COLORS.text}
-                    mode="text"
-                  >
+                  <Pressable onPress={() => setSelectedBook(item)}>
                     <View
                       style={{
-                        flexDirection: "row",
+                        backgroundColor: COLORS.backgroundSecondary,
+                        borderRadius: 18,
+                        aspectRatio: 1,
                         alignItems: "center",
-                        flex: 1,
+                        justifyContent: "center",
+                        overflow: "hidden",
                       }}
                     >
+                      <View style={{ width: "92%", height: "92%" }}>
+                        <ChestIcon />
+                      </View>
                       <View
                         style={{
-                          width: 14,
-                          height: 14,
-                          borderRadius: 7,
-                          backgroundColor: color,
-                          marginRight: 10,
+                          position: "absolute",
+                          top: 6,
+                          right: 6,
+                          flexDirection: "row",
                         }}
-                      />
-                      <View style={{ flex: 1 }}>
-                        <Text
-                          style={{
-                            ...STYLES.heading,
-                            fontSize: 16,
-                            textAlign: "left",
-                          }}
-                        >
-                          {item.title || "(Sin nombre)"}
-                        </Text>
-                        {description ? (
-                          <Text
-                            style={{
-                              fontSize: 13,
-                              color: COLORS.textSecondary,
-                              marginTop: 4,
-                              textAlign: "left",
-                            }}
-                          >
-                            {description}
-                          </Text>
-                        ) : null}
+                      >
+                        <IconButton
+                          icon="pencil"
+                          size={18}
+                          onPress={() => openEditBookDialog(item)}
+                          style={{ margin: 0 }}
+                        />
+                        <IconButton
+                          icon="trash-can"
+                          size={18}
+                          onPress={() => setBookToDelete(item)}
+                          style={{ margin: 0 }}
+                        />
                       </View>
                     </View>
-                  </Button>
-
-                  <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <IconButton
-                      icon="pencil"
-                      size={20}
-                      onPress={() => openEditBookDialog(item)}
-                    />
-                    <IconButton
-                      icon="trash-can"
-                      size={20}
-                      onPress={() => setBookToDelete(item)}
-                    />
-                  </View>
+                    <Text
+                      style={{
+                        ...STYLES.heading,
+                        fontSize: 14,
+                        textAlign: "center",
+                        marginTop: 10,
+                      }}
+                      numberOfLines={2}
+                    >
+                      {title}
+                    </Text>
+                  </Pressable>
                 </View>
               );
             }}
           />
         )}
 
-        <Portal>
-          <Dialog
-            visible={bookDialogVisible}
-            onDismiss={() => {
-              setBookDialogVisible(false);
-              setEditingBook(null);
-            }}
-            style={{
-              backgroundColor: COLORS.background,
-              width: "92%",
-              alignSelf: "center",
-              borderRadius: 16,
-            }}
-          >
-            <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
-              {bookDialogMode === "create" ? "Nuevo baúl" : "Editar baúl"}
-            </Dialog.Title>
-            <Dialog.Content>
-              <TextInput
-                label="Nombre"
-                value={bookFormTitle}
-                onChangeText={setBookFormTitle}
-                mode="outlined"
-                outlineColor={COLORS.border}
-                activeOutlineColor={COLORS.primary}
-                style={{ marginBottom: 12 }}
-              />
-              <TextInput
-                label="Descripción"
-                value={bookFormDescription}
-                onChangeText={setBookFormDescription}
-                mode="outlined"
-                outlineColor={COLORS.border}
-                activeOutlineColor={COLORS.primary}
-                multiline
-                numberOfLines={3}
-                style={{ marginBottom: 12 }}
-              />
-
-              <Text
-                style={{
-                  ...STYLES.subheading,
-                  textAlign: "left",
-                  marginTop: 0,
-                }}
-              >
-                Color del baúl
-              </Text>
-              <SegmentedButtons
-                style={{ marginTop: 8 }}
-                value={bookFormColor}
-                onValueChange={(v) => setBookFormColor(v)}
-                buttons={[
-                  { value: COLORS.primary, label: "Primario" },
-                  { value: COLORS.secondary, label: "Secundario" },
-                  { value: COLORS.accent, label: "Acento" },
-                  { value: COLORS.backgroundTertiary, label: "Suave" },
-                ]}
-              />
-            </Dialog.Content>
-            <Dialog.Actions style={{ paddingBottom: 12, paddingRight: 16 }}>
-              <Button
-                onPress={() => {
-                  setBookDialogVisible(false);
-                  setEditingBook(null);
-                }}
-              >
-                Cancelar
-              </Button>
-              <Button
-                mode="contained"
-                onPress={submitBookDialog}
-                buttonColor={COLORS.primary}
-                textColor={COLORS.white}
-                disabled={!groupId}
-              >
-                Guardar
-              </Button>
-            </Dialog.Actions>
-          </Dialog>
-
-          <Dialog
-            visible={!!bookToDelete}
-            onDismiss={() => setBookToDelete(null)}
-            style={{
-              backgroundColor: COLORS.background,
-              width: "90%",
-              alignSelf: "center",
-              borderRadius: 16,
-            }}
-          >
-            <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
-              Eliminar baúl
-            </Dialog.Title>
-            <Dialog.Content>
-              <Text style={{ ...STYLES.subheading, marginTop: 0 }}>
-                Esto eliminará también los recuerdos dentro del baúl.
-              </Text>
-            </Dialog.Content>
-            <Dialog.Actions style={{ paddingBottom: 12, paddingRight: 16 }}>
-              <Button onPress={() => setBookToDelete(null)}>Cancelar</Button>
-              <Button
-                mode="contained"
-                buttonColor={COLORS.primary}
-                textColor={COLORS.white}
-                onPress={() => {
-                  if (!bookToDelete) return;
-                  deleteBookMutation.mutate(bookToDelete.id);
-                }}
-              >
-                Eliminar
-              </Button>
-            </Dialog.Actions>
-          </Dialog>
-        </Portal>
+        {renderBookDialogs()}
 
         <Snackbar
           visible={snackbarVisible}
@@ -896,14 +903,26 @@ export default function RecuerdosScreen() {
               {selectedBook.title || "Baúl"}
             </Text>
           </View>
-          <Button
-            mode="contained"
-            onPress={() => setDialogVisible(true)}
-            style={{ ...STYLES.miniButton }}
-            icon="plus"
-          >
-            Agregar
-          </Button>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <IconButton
+              icon="pencil"
+              size={20}
+              onPress={() => openEditBookDialog(selectedBook)}
+            />
+            <IconButton
+              icon="trash-can"
+              size={20}
+              onPress={() => setBookToDelete(selectedBook)}
+            />
+            <Button
+              mode="contained"
+              onPress={() => setDialogVisible(true)}
+              style={{ ...STYLES.miniButton }}
+              icon="plus"
+            >
+              Agregar
+            </Button>
+          </View>
         </View>
 
         {/* Controles de ordenamiento y vista */}
@@ -1003,14 +1022,26 @@ export default function RecuerdosScreen() {
             {selectedBook.title || "Baúl"}
           </Text>
         </View>
-        <Button
-          mode="contained"
-          onPress={() => setDialogVisible(true)}
-          style={{ ...STYLES.miniButton }}
-          icon="plus"
-        >
-          Agregar
-        </Button>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <IconButton
+            icon="pencil"
+            size={20}
+            onPress={() => openEditBookDialog(selectedBook)}
+          />
+          <IconButton
+            icon="trash-can"
+            size={20}
+            onPress={() => setBookToDelete(selectedBook)}
+          />
+          <Button
+            mode="contained"
+            onPress={() => setDialogVisible(true)}
+            style={{ ...STYLES.miniButton }}
+            icon="plus"
+          >
+            Agregar
+          </Button>
+        </View>
       </View>
 
       {/* Controles de ordenamiento y vista */}
@@ -1137,6 +1168,8 @@ export default function RecuerdosScreen() {
           }
         />
       </Portal>
+
+      {renderBookDialogs()}
 
       {/* Diálogo de detalle del recuerdo */}
       <RecuerdoDetailDialog
