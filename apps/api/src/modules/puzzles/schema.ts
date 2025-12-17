@@ -1,13 +1,15 @@
 import { z } from "@hono/zod-openapi";
 
 // Enum para los tipos de juego (categorías)
-export const GameTypeEnum = z.enum(["memory", "logic"]).openapi("GameType");
+export const GameTypeEnum = z
+  .enum(["memory", "logic", "attention"])
+  .openapi("GameType");
 export type GameType = z.infer<typeof GameTypeEnum>;
 
 // Schema para el puzzle base
 export const PuzzleSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     gameType: GameTypeEnum,
     gameName: z.string().nullable(),
     title: z.string().nullable(),
@@ -21,7 +23,7 @@ export type Puzzle = z.infer<typeof PuzzleSchema>;
 // Schema para Memory Game con detalles completos
 export const MemoryGameSchema = z
   .object({
-    puzzleId: z.string().uuid(),
+    puzzleId: z.uuid(),
     rows: z.number().int(),
     cols: z.number().int(),
     symbols: z.array(z.string()),
@@ -34,7 +36,7 @@ export type MemoryGame = z.infer<typeof MemoryGameSchema>;
 // Schema para Logic Game (Lights Out, NET, etc.)
 export const LogicGameSchema = z
   .object({
-    puzzleId: z.string().uuid(),
+    puzzleId: z.uuid(),
     rows: z.number().int(),
     cols: z.number().int(),
     startState: z.array(z.union([z.number().int(), z.boolean()])),
@@ -50,7 +52,7 @@ export type LogicGame = z.infer<typeof LogicGameSchema>;
 // Schema para Sudoku Game
 export const SudokuGameSchema = z
   .object({
-    puzzleId: z.string().uuid(),
+    puzzleId: z.uuid(),
     rows: z.number().int(),
     cols: z.number().int(),
     given: z.string(),
@@ -94,6 +96,15 @@ export const NewNetPuzzleSchema = z
   .openapi("NewNetPuzzle");
 
 export type NewNetPuzzle = z.infer<typeof NewNetPuzzleSchema>;
+
+// Schema para crear un nuevo puzzle de atención (focus / stroop-like)
+export const NewFocusPuzzleSchema = z
+  .object({
+    rounds: z.number().int().min(1).max(100).optional().default(10),
+  })
+  .openapi("NewFocusPuzzle");
+
+export type NewFocusPuzzle = z.infer<typeof NewFocusPuzzleSchema>;
 
 // Schema para listar juegos disponibles (agrupados por tipo)
 export const GameListItemSchema = z

@@ -29,6 +29,7 @@ export class AttemptService {
       startedAt: new Date().toISOString(),
       memoryPuzzleId: gameType === "memory" ? puzzleId : null,
       logicPuzzleId: gameType === "logic" ? puzzleId : null,
+      isFocusGame: gameType === "attention" ? true : null,
     };
 
     const { data: attempt, error: attemptError } = await this.supabase
@@ -171,6 +172,8 @@ export class AttemptService {
       query = query.not("memoryPuzzleId", "is", null);
     } else if (gameType === "logic") {
       query = query.not("logicPuzzleId", "is", null);
+    } else if (gameType === "attention") {
+      query = query.not("isFocusGame", "is", false);
     } else if (gameType === "calculation") {
       query = query.not("sudokuPuzzleId", "is", null);
     }
@@ -204,6 +207,8 @@ export class AttemptService {
       query = query.not("memoryPuzzleId", "is", null);
     } else if (gameType === "logic") {
       query = query.not("logicPuzzleId", "is", null);
+    } else if (gameType === "attention") {
+      query = query.not("isFocusGame", "is", false);
     } else if (gameType === "calculation") {
       query = query.not("sudokuPuzzleId", "is", null);
     }
@@ -296,6 +301,8 @@ export class AttemptService {
       query = query.not("memoryPuzzleId", "is", null);
     } else if (gameType === "logic") {
       query = query.not("logicPuzzleId", "is", null);
+    } else if (gameType === "attention") {
+      query = query.not("isFocusGame", "is", false);
     } else if (gameType === "calculation") {
       query = query.not("sudokuPuzzleId", "is", null);
     }

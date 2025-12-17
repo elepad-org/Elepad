@@ -157,6 +157,7 @@ export type Database = {
           durationMs: number | null;
           finishedAt: string | null;
           id: string;
+          isFocusGame: boolean | null;
           logicPuzzleId: string | null;
           memoryPuzzleId: string | null;
           meta: Json | null;
@@ -171,6 +172,7 @@ export type Database = {
           durationMs?: number | null;
           finishedAt?: string | null;
           id?: string;
+          isFocusGame?: boolean | null;
           logicPuzzleId?: string | null;
           memoryPuzzleId?: string | null;
           meta?: Json | null;
@@ -185,6 +187,7 @@ export type Database = {
           durationMs?: number | null;
           finishedAt?: string | null;
           id?: string;
+          isFocusGame?: boolean | null;
           logicPuzzleId?: string | null;
           memoryPuzzleId?: string | null;
           meta?: Json | null;
@@ -371,22 +374,31 @@ export type Database = {
       };
       memoriesBooks: {
         Row: {
+          color: string | null;
           createdAt: string;
+          description: string | null;
           groupId: string;
           id: string;
           title: string | null;
+          updatedAt: string;
         };
         Insert: {
+          color?: string | null;
           createdAt?: string;
+          description?: string | null;
           groupId: string;
           id?: string;
           title?: string | null;
+          updatedAt?: string;
         };
         Update: {
+          color?: string | null;
           createdAt?: string;
+          description?: string | null;
           groupId?: string;
           id?: string;
           title?: string | null;
+          updatedAt?: string;
         };
         Relationships: [
           {
@@ -628,7 +640,7 @@ export type Database = {
       };
     };
     Enums: {
-      game_type: "memory" | "logic";
+      game_type: "memory" | "logic" | "attention";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -759,7 +771,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      game_type: ["memory", "logic"],
+      game_type: ["memory", "logic", "attention"],
     },
   },
 } as const;

@@ -120,6 +120,8 @@ export class PuzzleService {
         );
       }
       logicGame = data;
+    } else if (puzzle.gameType === "attention") {
+      console.log("You shouldn't be here...");
     } else if (puzzle.gameType === "calculation") {
       const { data, error } = await this.supabase
         .from("sudokuGames")
@@ -494,6 +496,42 @@ export class PuzzleService {
       puzzle,
       memoryGame: null,
       logicGame,
+      sudokuGame: null,
+    };
+  }
+
+  /**
+   * Crea un nuevo puzzle de atención (focus)
+   */
+  async createFocusPuzzle(payload: { rounds?: number }) {
+    const { rounds } = payload;
+
+    // Crear el puzzle base
+    const { data: puzzle, error: puzzleError } = await this.supabase
+      .from("puzzles")
+      .insert({
+        gameType: "attention",
+        gameName: "focus",
+        title: `Focus ${rounds ?? 10} rondas`,
+        difficulty: 1,
+      })
+      .select()
+      .single();
+
+    if (puzzleError) {
+      throw new ApiException(
+        500,
+        "Error al crear el puzzle de atención",
+        puzzleError,
+      );
+    }
+
+    // Actualmente no tenemos una tabla específica para detalles de attention,
+    // así que devolvemos únicamente el puzzle creado y dejamos los detalles en null.
+    return {
+      puzzle,
+      memoryGame: null,
+      logicGame: null,
       sudokuGame: null,
     };
   }
