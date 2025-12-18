@@ -14,6 +14,7 @@ import { Provider as PaperProvider } from "react-native-paper";
 import { lightTheme, darkTheme } from "@/styles/theme";
 import { supabase } from "@/lib/supabase";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { initializeWidgets } from "@/widgets";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,11 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useAppFonts();
 
+  // Inicializar widgets (solo funciona en builds nativos)
+  useEffect(() => {
+    initializeWidgets();
+  }, []);
+
   // Mantener el token actualizado en AUTH_TOKEN de forma reactiva
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -32,7 +38,7 @@ export default function RootLayout() {
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         AUTH_TOKEN = session?.access_token ?? undefined;
-      },
+      }
     );
     return () => listener?.subscription?.unsubscribe?.();
   }, []);
