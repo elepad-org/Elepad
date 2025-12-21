@@ -34,16 +34,27 @@ export default function RecuerdoDetailDialog({
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const audioUrl = recuerdo?.tipo === "audio" ? recuerdo.contenido : "";
+
+  // SIEMPRE crear los players (regla de hooks), pero con valores seguros
+  const audioUrl =
+    recuerdo?.tipo === "audio" && recuerdo.contenido
+      ? recuerdo.contenido
+      : "https://example.com/dummy.m4a";
+  const shouldUseAudio = recuerdo?.tipo === "audio" && recuerdo.contenido;
   const player = useAudioPlayer(audioUrl);
-  const videoUrl = recuerdo?.tipo === "video" ? recuerdo.contenido : "";
+
+  const videoUrl =
+    recuerdo?.tipo === "video" && recuerdo.contenido
+      ? recuerdo.contenido
+      : "https://example.com/dummy.mp4";
+  const shouldUseVideo = recuerdo?.tipo === "video" && recuerdo.contenido;
   const videoPlayer = useVideoPlayer({ uri: videoUrl }, (p) => {
     p.loop = false;
   });
 
   // Resetear el player cuando se abre el modal
   useEffect(() => {
-    if (visible && recuerdo?.tipo === "audio") {
+    if (visible && shouldUseAudio) {
       console.log("Modal opened, resetting player");
       player.pause();
       player.seekTo(0);
@@ -52,7 +63,7 @@ export default function RecuerdoDetailDialog({
     }
 
     // Resetear video si existe
-    if (visible && recuerdo?.tipo === "video") {
+    if (visible && shouldUseVideo) {
       try {
         videoPlayer.pause();
         videoPlayer.currentTime = 0;
@@ -60,9 +71,11 @@ export default function RecuerdoDetailDialog({
         // ignore
       }
     }
-  }, [visible, recuerdo, player, videoPlayer]);
+  }, [visible, shouldUseAudio, shouldUseVideo, player, videoPlayer]);
 
   useEffect(() => {
+    if (!shouldUseAudio) return;
+
     // Sincronizar estado con el player
     const checkStatus = () => {
       setIsPlaying(player.playing);
@@ -72,12 +85,12 @@ export default function RecuerdoDetailDialog({
 
     const interval = setInterval(checkStatus, 100);
     return () => clearInterval(interval);
-  }, [player]);
+  }, [shouldUseAudio, player]);
 
   // Limpiar el player cuando se cierra el modal
   useEffect(() => {
     return () => {
-      if (recuerdo?.tipo === "audio" && player) {
+      if (shouldUseAudio) {
         try {
           console.log("Cleaning up player");
           if (player.playing) {
@@ -89,11 +102,13 @@ export default function RecuerdoDetailDialog({
         }
       }
     };
-  }, [player, recuerdo]);
+  }, [shouldUseAudio, player]);
 
   if (!recuerdo) return null;
 
   const playAudio = () => {
+    if (!shouldUseAudio) return;
+
     console.log("Play audio clicked, URL:", recuerdo.contenido);
     console.log("Player state:", player.playing);
 
@@ -116,6 +131,8 @@ export default function RecuerdoDetailDialog({
   };
 
   const stopAudio = () => {
+    if (!shouldUseAudio) return;
+
     try {
       player.pause();
       player.seekTo(0);
@@ -127,6 +144,8 @@ export default function RecuerdoDetailDialog({
   };
 
   const handleSliderChange = (value: number) => {
+    if (!shouldUseAudio) return;
+
     try {
       player.seekTo(value);
       setCurrentTime(value);
@@ -143,10 +162,10 @@ export default function RecuerdoDetailDialog({
   };
 
   const handleDismiss = () => {
-    if (recuerdo.tipo === "audio") {
+    if (shouldUseAudio) {
       stopAudio();
     }
-    if (recuerdo.tipo === "video") {
+    if (shouldUseVideo) {
       try {
         videoPlayer.pause();
         videoPlayer.currentTime = 0;

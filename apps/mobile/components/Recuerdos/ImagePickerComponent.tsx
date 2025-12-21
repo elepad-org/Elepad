@@ -23,7 +23,7 @@ export default function ImagePickerComponent({
     if (status !== "granted") {
       Alert.alert(
         "Permisos insuficientes",
-        "Necesitamos permisos para acceder a tu galería.",
+        "Necesitamos permisos para acceder a tu galería."
       );
       return false;
     }
@@ -38,14 +38,25 @@ export default function ImagePickerComponent({
       setUploading(true);
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["images", "videos"],
-        allowsEditing: true,
+        allowsEditing: false,
         quality: 0.8,
         allowsMultipleSelection: false,
+        videoMaxDuration: 300, // 5 minutos máximo
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const asset = result.assets[0];
-        onImageSelected(asset.uri, asset.mimeType);
+        // Asegurar que el mimeType sea correcto
+        let mimeType = asset.mimeType;
+        if (!mimeType) {
+          // Inferir mimeType basado en el tipo de asset
+          if (asset.type === "video") {
+            mimeType = "video/mp4";
+          } else if (asset.type === "image") {
+            mimeType = "image/jpeg";
+          }
+        }
+        onImageSelected(asset.uri, mimeType);
       }
     } catch {
       Alert.alert("Error", "No se pudo seleccionar la imagen");
@@ -59,7 +70,7 @@ export default function ImagePickerComponent({
     if (status !== "granted") {
       Alert.alert(
         "Permisos insuficientes",
-        "Necesitamos permisos para acceder a tu cámara.",
+        "Necesitamos permisos para acceder a tu cámara."
       );
       return;
     }
@@ -68,13 +79,24 @@ export default function ImagePickerComponent({
       setUploading(true);
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ["images", "videos"],
-        allowsEditing: true,
+        allowsEditing: false,
         quality: 0.8,
+        videoMaxDuration: 300, // 5 minutos máximo
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const asset = result.assets[0];
-        onImageSelected(asset.uri, asset.mimeType);
+        // Asegurar que el mimeType sea correcto
+        let mimeType = asset.mimeType;
+        if (!mimeType) {
+          // Inferir mimeType basado en el tipo de asset
+          if (asset.type === "video") {
+            mimeType = "video/mp4";
+          } else if (asset.type === "image") {
+            mimeType = "image/jpeg";
+          }
+        }
+        onImageSelected(asset.uri, mimeType);
       }
     } catch {
       Alert.alert("Error", "No se pudo tomar la foto");

@@ -153,7 +153,7 @@ export default function RecuerdosScreen() {
   >("select");
   const [selectedTipo, setSelectedTipo] = useState<RecuerdoTipo | null>(null);
   const [selectedFileUri, setSelectedFileUri] = useState<string | null>(null);
-  const [, setSelectedMimeType] = useState<string | null>(null);
+  const [selectedMimeType, setSelectedMimeType] = useState<string | null>(null);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarError, setSnackbarError] = useState(false);
@@ -544,19 +544,34 @@ export default function RecuerdosScreen() {
             ? "image/jpeg"
             : selectedTipo === "video"
             ? "video/mp4"
-            : "audio/mp4");
+            : "audio/m4a");
 
         if (Platform.OS === "web") {
           // Para web, convertir URI a blob
           fileData = await uriToBlob(data.contenido);
         } else {
-          // Para React Native, usar objeto con propiedades de Blob (igual que avatar)
+          // Para React Native, asegurar que la URI tenga el prefijo file://
+          let fileUri = data.contenido;
+          if (
+            !fileUri.startsWith("file://") &&
+            !fileUri.startsWith("content://")
+          ) {
+            fileUri = `file://${fileUri}`;
+          }
+
+          console.log("Creating file object with:", {
+            uri: fileUri,
+            name: fileName,
+            type: mimeType,
+          });
           fileData = {
-            uri: data.contenido,
+            uri: fileUri,
             name: fileName,
             type: mimeType,
           } as unknown as Blob;
         }
+
+        console.log("File data prepared:", fileData);
 
         const uploadData = {
           bookId: selectedBook.id,
@@ -1367,6 +1382,7 @@ export default function RecuerdosScreen() {
             uploadMemoryMutation.isPending || createNoteMutation.isPending
           }
           selectedFileUri={selectedFileUri || undefined}
+          selectedFileMimeType={selectedMimeType || undefined}
           onFileSelected={
             selectedTipo === "imagen" || selectedTipo === "audio"
               ? handleFileSelected
