@@ -124,6 +124,20 @@ export default function RecuerdosScreen() {
   const [selectedBook, setSelectedBook] = useState<MemoriesBook | null>(null);
   const [editingBook, setEditingBook] = useState<MemoriesBook | null>(null);
   const [bookMenuVisible, setBookMenuVisible] = useState(false);
+  const [menuMounted, setMenuMounted] = useState(true);
+
+  const handleOpenBookMenu = useCallback(() => {
+    setBookMenuVisible(true);
+  }, []);
+
+  const handleCloseBookMenu = useCallback(() => {
+    setBookMenuVisible(false);
+    // Desmontar y volver a montar el menú para resetear completamente su estado
+    setMenuMounted(false);
+    setTimeout(() => {
+      setMenuMounted(true);
+    }, 50);
+  }, []);
 
   const [bookDialogVisible, setBookDialogVisible] = useState(false);
   const [bookDialogMode, setBookDialogMode] = useState<"create" | "edit">(
@@ -966,14 +980,18 @@ export default function RecuerdosScreen() {
         <View
           style={{
             paddingHorizontal: 24,
-            paddingVertical: 16,
+            paddingTop: 12,
+            paddingBottom: 12,
             borderBottomColor: COLORS.border,
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
           }}
         >
-          <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
             <IconButton
               icon="chevron-left"
               size={24}
@@ -986,59 +1004,78 @@ export default function RecuerdosScreen() {
                 setSelectedRecuerdo(null);
               }}
             />
-            <Text
-              style={{ ...STYLES.superHeading, textAlign: "left", flex: 1 }}
-              numberOfLines={1}
+
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "flex-end",
+              }}
             >
+              <Button
+                mode="contained"
+                onPress={() => setDialogVisible(true)}
+                buttonColor={COLORS.primary}
+                textColor={COLORS.white}
+                style={{ borderRadius: 12 }}
+                icon="plus"
+              >
+                Agregar
+              </Button>
+              {menuMounted && (
+                <Menu
+                  visible={bookMenuVisible}
+                  onDismiss={handleCloseBookMenu}
+                  contentStyle={{
+                    backgroundColor: COLORS.background,
+                    borderRadius: 12,
+                  }}
+                  anchor={
+                    <IconButton
+                      icon="dots-horizontal"
+                      size={22}
+                      style={{ margin: 0 }}
+                      onPress={handleOpenBookMenu}
+                    />
+                  }
+                >
+                  <Menu.Item
+                    leadingIcon="pencil"
+                    onPress={() => {
+                      setBookMenuVisible(false);
+                      openEditBookDialog(selectedBook);
+                    }}
+                    title="Modificar baúl"
+                  />
+                  <Menu.Item
+                    leadingIcon="trash-can"
+                    onPress={() => {
+                      setBookMenuVisible(false);
+                      setBookToDelete(selectedBook);
+                    }}
+                    title="Eliminar baúl"
+                  />
+                </Menu>
+              )}
+            </View>
+          </View>
+
+          <View style={{ paddingTop: 10 }}>
+            <Text style={{ ...STYLES.superHeading, textAlign: "left" }}>
               {selectedBook.title || "Baúl"}
             </Text>
-          </View>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "flex-end",
-            }}
-          >
-            <Button
-              mode="contained"
-              onPress={() => setDialogVisible(true)}
-              buttonColor={COLORS.primary}
-              textColor={COLORS.white}
-              style={{ borderRadius: 12 }}
-              icon="plus"
-            >
-              Agregar
-            </Button>
-            <Menu
-              visible={bookMenuVisible}
-              onDismiss={() => setBookMenuVisible(false)}
-              anchor={
-                <IconButton
-                  icon="dots-horizontal"
-                  size={22}
-                  style={{ margin: 0 }}
-                  onPress={() => setBookMenuVisible(true)}
-                />
-              }
-            >
-              <Menu.Item
-                leadingIcon="pencil"
-                onPress={() => {
-                  setBookMenuVisible(false);
-                  openEditBookDialog(selectedBook);
+            {!!selectedBook.description && (
+              <Text
+                style={{
+                  ...STYLES.subheading,
+                  marginTop: 6,
+                  color: COLORS.textSecondary,
+                  textAlign: "left",
                 }}
-                title="Modificar baúl"
-              />
-              <Menu.Item
-                leadingIcon="trash-can"
-                onPress={() => {
-                  setBookMenuVisible(false);
-                  setBookToDelete(selectedBook);
-                }}
-                title="Eliminar baúl"
-              />
-            </Menu>
+              >
+                {selectedBook.description}
+              </Text>
+            )}
           </View>
         </View>
 
@@ -1114,14 +1151,18 @@ export default function RecuerdosScreen() {
       <View
         style={{
           paddingHorizontal: 24,
-          paddingVertical: 16,
+          paddingTop: 12,
+          paddingBottom: 12,
           borderBottomColor: COLORS.border,
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
         }}
       >
-        <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <IconButton
             icon="chevron-left"
             size={24}
@@ -1134,59 +1175,78 @@ export default function RecuerdosScreen() {
               setSelectedRecuerdo(null);
             }}
           />
-          <Text
-            style={{ ...STYLES.superHeading, textAlign: "left", flex: 1 }}
-            numberOfLines={1}
+
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "flex-end",
+            }}
           >
+            <Button
+              mode="contained"
+              onPress={() => setDialogVisible(true)}
+              buttonColor={COLORS.primary}
+              textColor={COLORS.white}
+              style={{ borderRadius: 12 }}
+              icon="plus"
+            >
+              Agregar
+            </Button>
+            {menuMounted && (
+              <Menu
+                visible={bookMenuVisible}
+                onDismiss={handleCloseBookMenu}
+                contentStyle={{
+                  backgroundColor: COLORS.background,
+                  borderRadius: 12,
+                }}
+                anchor={
+                  <IconButton
+                    icon="dots-horizontal"
+                    size={22}
+                    style={{ margin: 0 }}
+                    onPress={handleOpenBookMenu}
+                  />
+                }
+              >
+                <Menu.Item
+                  leadingIcon="pencil"
+                  onPress={() => {
+                    setBookMenuVisible(false);
+                    openEditBookDialog(selectedBook);
+                  }}
+                  title="Modificar baúl"
+                />
+                <Menu.Item
+                  leadingIcon="trash-can"
+                  onPress={() => {
+                    setBookMenuVisible(false);
+                    setBookToDelete(selectedBook);
+                  }}
+                  title="Eliminar baúl"
+                />
+              </Menu>
+            )}
+          </View>
+        </View>
+
+        <View style={{ paddingTop: 10 }}>
+          <Text style={{ ...STYLES.superHeading, textAlign: "left" }}>
             {selectedBook.title || "Baúl"}
           </Text>
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "flex-end",
-          }}
-        >
-          <Button
-            mode="contained"
-            onPress={() => setDialogVisible(true)}
-            buttonColor={COLORS.primary}
-            textColor={COLORS.white}
-            style={{ borderRadius: 12 }}
-            icon="plus"
-          >
-            Agregar
-          </Button>
-          <Menu
-            visible={bookMenuVisible}
-            onDismiss={() => setBookMenuVisible(false)}
-            anchor={
-              <IconButton
-                icon="dots-horizontal"
-                size={22}
-                style={{ margin: 0 }}
-                onPress={() => setBookMenuVisible(true)}
-              />
-            }
-          >
-            <Menu.Item
-              leadingIcon="pencil"
-              onPress={() => {
-                setBookMenuVisible(false);
-                openEditBookDialog(selectedBook);
+          {!!selectedBook.description && (
+            <Text
+              style={{
+                ...STYLES.subheading,
+                marginTop: 6,
+                color: COLORS.textSecondary,
+                textAlign: "left",
               }}
-              title="Modificar baúl"
-            />
-            <Menu.Item
-              leadingIcon="trash-can"
-              onPress={() => {
-                setBookMenuVisible(false);
-                setBookToDelete(selectedBook);
-              }}
-              title="Eliminar baúl"
-            />
-          </Menu>
+            >
+              {selectedBook.description}
+            </Text>
+          )}
         </View>
       </View>
 
