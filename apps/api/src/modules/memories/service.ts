@@ -7,10 +7,14 @@ import {
   Memory,
   CreateMemoryWithImage,
   CreateNote,
+  UpdateMemory,
   UpdateMemoriesBook,
 } from "./schema";
 import { Database } from "@/supabase-types";
-import { uploadMemoryImage } from "@/services/storage";
+import {
+  deleteMemoryMediaByPublicUrl,
+  uploadMemoryImage,
+} from "@/services/storage";
 
 export class MemoriesService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -117,7 +121,7 @@ export class MemoriesService {
   async createMemoryWithImage(
     memoryData: CreateMemoryWithImage,
     imageFile: File,
-    userId: string,
+    userId: string
   ): Promise<Memory> {
     try {
       // 1. Subir imagen al storage usando el servicio centralizado
@@ -125,7 +129,7 @@ export class MemoriesService {
         this.supabase,
         memoryData.groupId,
         memoryData.bookId,
-        imageFile,
+        imageFile
       );
 
       // 2. Crear el registro en la tabla memories
@@ -210,7 +214,7 @@ export class MemoriesService {
   async updateMemoriesBook(
     bookId: string,
     patch: UpdateMemoriesBook,
-    userId: string,
+    userId: string
   ) {
     const { data: existing, error: fetchErr } = await this.supabase
       .from("memoriesBooks")
@@ -308,6 +312,46 @@ export class MemoriesService {
   }
 
   /**
+   * Update a memory metadata (title/caption) with authorization check.
+   */
+  async updateMemory(
+    memoryId: string,
+    patch: UpdateMemory,
+    userId: string
+  ): Promise<Memory> {
+    const memory = await this.getMemoryById(memoryId);
+    if (!memory) {
+      throw new ApiException(404, "Memory not found");
+    }
+
+    if (memory.createdBy !== userId) {
+      throw new ApiException(403, "You can only edit your own memories");
+    }
+
+    const update: Partial<Pick<Memory, "title" | "caption">> = {};
+    if (patch.title !== undefined) update.title = patch.title;
+    if (patch.caption !== undefined) update.caption = patch.caption;
+
+    const { data, error } = await this.supabase
+      .from("memories")
+      .update(update)
+      .eq("id", memoryId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error updating memory:", error);
+      throw new ApiException(500, "Error updating memory");
+    }
+
+    if (!data) {
+      throw new ApiException(500, "Failed to update memory");
+    }
+
+    return data;
+  }
+
+  /**
    * Delete a memory (with authorization check)
    */
   async deleteMemory(memoryId: string, userId: string): Promise<boolean> {
@@ -321,6 +365,16 @@ export class MemoriesService {
     if (memory.createdBy !== userId) {
       // Optionally, you could also check if user is owner of the group
       throw new ApiException(403, "You can only delete your own memories");
+    }
+
+    // If the memory has a media URL, delete it from Storage first
+    if (memory.mediaUrl && memory.mimeType && memory.mimeType !== "text/note") {
+      try {
+        await deleteMemoryMediaByPublicUrl(this.supabase, memory.mediaUrl);
+      } catch (error) {
+        console.error("Error deleting memory media from storage:", error);
+        throw new ApiException(500, "Error deleting memory media");
+      }
     }
 
     const { error } = await this.supabase

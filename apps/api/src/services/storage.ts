@@ -30,7 +30,7 @@ function getMediaTypeFolder(mimeType: string): string {
 export async function uploadUserAvatarImage(
   supabase: SupabaseClient<Database>,
   userId: string,
-  file: File,
+  file: File
 ): Promise<string> {
   const originalName = file.name || `avatar-${Date.now()}`;
   const path = `${userId}/${Date.now()}-${urlify(originalName)}`;
@@ -58,15 +58,17 @@ export async function uploadMemoryImage(
   supabase: SupabaseClient<Database>,
   groupId: string,
   bookId: string,
-  file: File,
+  file: File
 ): Promise<string> {
   const originalName = file.name || `memory-${Date.now()}`;
   const fileExtension = originalName.split(".").pop() || "bin";
-  const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExtension}`;
+  const fileName = `${Date.now()}_${Math.random()
+    .toString(36)
+    .substring(2)}.${fileExtension}`;
 
   // Determinar el tipo de media y crear el path organizado
   const mediaTypeFolder = getMediaTypeFolder(
-    file.type || "application/octet-stream",
+    file.type || "application/octet-stream"
   );
   const path = `${groupId}/${bookId}/${mediaTypeFolder}/${fileName}`;
 
@@ -84,4 +86,31 @@ export async function uploadMemoryImage(
 
   const { data } = supabase.storage.from(MEMORIES_BUCKET).getPublicUrl(path);
   return data.publicUrl;
+}
+
+/**
+ * Deletes a memory media object from Supabase Storage.
+ * Expects a public URL produced by `getPublicUrl` for the `memories` bucket.
+ */
+export async function deleteMemoryMediaByPublicUrl(
+  supabase: SupabaseClient<Database>,
+  publicUrl: string
+): Promise<void> {
+  const normalizedUrl = publicUrl.split("?")[0] ?? publicUrl;
+  const marker = `/storage/v1/object/public/${MEMORIES_BUCKET}/`;
+  const index = normalizedUrl.indexOf(marker);
+
+  if (index === -1) {
+    throw new Error("Unsupported memories public URL format");
+  }
+
+  const path = normalizedUrl.substring(index + marker.length);
+  if (!path) {
+    throw new Error("Could not extract storage path from memories public URL");
+  }
+
+  const { error } = await supabase.storage.from(MEMORIES_BUCKET).remove([path]);
+  if (error) {
+    throw new Error(`Memory media delete failed: ${error.message}`);
+  }
 }

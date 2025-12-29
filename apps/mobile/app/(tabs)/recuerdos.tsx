@@ -26,10 +26,12 @@ import {
   createMemoriesBook,
   createMemoryWithMedia,
   createNote,
+  deleteMemory,
   deleteMemoriesBook,
   Memory,
   MemoriesBook,
   UpdateMemoriesBook,
+  updateMemory,
   updateMemoriesBook,
 } from "@elepad/api-client";
 import { useMutation } from "@tanstack/react-query";
@@ -260,6 +262,66 @@ export default function RecuerdosScreen() {
     },
   });
 
+  const updateMemoryMutation = useMutation({
+    mutationFn: async (data: {
+      id: string;
+      patch: { title?: string; caption?: string };
+    }) => {
+      // rnFetch (mutator) devuelve el JSON directamente y tira excepción si !res.ok
+      // (aunque el tipo generado por orval incluya {status, data}).
+      const updated = await updateMemory(data.id, data.patch);
+      return updated as unknown as Memory;
+    },
+    onSuccess: async (updated) => {
+      await refetchMemories();
+      setSelectedRecuerdo((prev) => {
+        if (!prev || prev.id !== updated.id) return prev;
+        return {
+          ...prev,
+          titulo: updated.title || undefined,
+          descripcion: updated.caption || undefined,
+        };
+      });
+      setSnackbarMessage("Recuerdo actualizado");
+      setSnackbarError(false);
+      setSnackbarVisible(true);
+    },
+    onError: (error) => {
+      setSnackbarMessage(
+        `Error al actualizar el recuerdo: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`
+      );
+      setSnackbarError(true);
+      setSnackbarVisible(true);
+    },
+  });
+
+  const deleteMemoryMutation = useMutation({
+    mutationFn: async (id: string) => {
+      // rnFetch tira excepción si !res.ok. En success, el body puede ser {message} o vacío.
+      await deleteMemory(id);
+      return true;
+    },
+    onSuccess: async () => {
+      await refetchMemories();
+      setDetailDialogVisible(false);
+      setSelectedRecuerdo(null);
+      setSnackbarMessage("Recuerdo eliminado");
+      setSnackbarError(false);
+      setSnackbarVisible(true);
+    },
+    onError: (error) => {
+      setSnackbarMessage(
+        `Error al eliminar el recuerdo: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`
+      );
+      setSnackbarError(true);
+      setSnackbarVisible(true);
+    },
+  });
+
   // Hook de mutación para subir archivos
   const uploadMemoryMutation = useMutation({
     mutationFn: async (data: {
@@ -399,10 +461,23 @@ export default function RecuerdosScreen() {
     }
   }, [refetchBooks]);
 
-  // Extraer los datos de la respuesta
-  const memoriesData =
-    memoriesResponse && "data" in memoriesResponse ? memoriesResponse.data : [];
-  const memories = Array.isArray(memoriesData) ? memoriesData : [];
+  // Extraer los datos de la respuesta (GET /memories devuelve { data: Memory[], total, ... })
+  const memoriesPayload =
+    memoriesResponse && "data" in memoriesResponse
+      ? (memoriesResponse as unknown as { data: unknown }).data
+      : undefined;
+
+  const memoriesData = Array.isArray(memoriesPayload)
+    ? memoriesPayload
+    : memoriesPayload &&
+      typeof memoriesPayload === "object" &&
+      "data" in (memoriesPayload as Record<string, unknown>)
+    ? (memoriesPayload as { data: unknown }).data
+    : [];
+
+  const memories = Array.isArray(memoriesData)
+    ? (memoriesData as Memory[])
+    : [];
 
   // Convertir memories a recuerdos para compatibilidad con componentes existentes
   const recuerdos = memories.map(memoryToRecuerdo).sort((a, b) => {
@@ -418,7 +493,9 @@ export default function RecuerdosScreen() {
     authLoading ||
     memoriesLoading ||
     uploadMemoryMutation.isPending ||
-    createNoteMutation.isPending;
+    createNoteMutation.isPending ||
+    updateMemoryMutation.isPending ||
+    deleteMemoryMutation.isPending;
 
   // Función para refrescar la galería (patrón original)
   const onRefresh = useCallback(async () => {
@@ -844,7 +921,7 @@ export default function RecuerdosScreen() {
             alignItems: "center",
           }}
         >
-          <Text style={STYLES.superHeading}>Baúles</Text>
+          <Text style={STYLES.superHeading}>Recuerdos</Text>
           <Button
             mode="contained"
             onPress={openCreateBookDialog}
@@ -1398,6 +1475,15 @@ export default function RecuerdosScreen() {
         visible={detailDialogVisible}
         recuerdo={selectedRecuerdo}
         onDismiss={handleCloseDetail}
+        onUpdateRecuerdo={async (id, patch) => {
+          await updateMemoryMutation.mutateAsync({ id, patch });
+        }}
+        onDeleteRecuerdo={async (id) => {
+          await deleteMemoryMutation.mutateAsync(id);
+        }}
+        isMutating={
+          updateMemoryMutation.isPending || deleteMemoryMutation.isPending
+        }
       />
 
       {/* Snackbar para mostrar mensajes */}

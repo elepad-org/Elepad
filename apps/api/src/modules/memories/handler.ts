@@ -5,6 +5,7 @@ import {
   MemoryFiltersSchema,
   MemorySchema,
   NewMemoriesBookSchema,
+  UpdateMemorySchema,
   UpdateMemoriesBookSchema,
 } from "./schema";
 import { MemoriesService } from "./service";
@@ -69,9 +70,9 @@ memoriesApp.openapi(
         limit: filters.limit,
         offset: filters.offset,
       },
-      200,
+      200
     );
-  },
+  }
 );
 
 // GET /memories/books - Listar baules (memoriesBooks) del grupo del usuario
@@ -119,7 +120,7 @@ memoriesApp.openapi(
 
     const books = await c.var.memoriesService.getMemoriesBooks(groupId);
     return c.json({ data: books }, 200);
-  },
+  }
 );
 
 // POST /memories/books - Crear baul
@@ -172,7 +173,7 @@ memoriesApp.openapi(
 
     const created = await c.var.memoriesService.createMemoriesBook(body);
     return c.json(created, 201);
-  },
+  }
 );
 
 // PATCH /memories/books/{id} - Editar baul
@@ -217,13 +218,13 @@ memoriesApp.openapi(
     const updated = await c.var.memoriesService.updateMemoriesBook(
       id,
       body,
-      user.id,
+      user.id
     );
     if (!updated) {
       throw new ApiException(404, "Memories book not found");
     }
     return c.json(updated, 200);
-  },
+  }
 );
 
 // DELETE /memories/books/{id} - Eliminar baul
@@ -253,7 +254,7 @@ memoriesApp.openapi(
 
     await c.var.memoriesService.deleteMemoriesBook(id, user.id);
     return c.json({ message: "Memories book deleted" }, 200);
-  },
+  }
 );
 
 // GET /memories/{id} - Traer una memory específica por ID
@@ -289,7 +290,55 @@ memoriesApp.openapi(
     }
 
     return c.json(memory, 200);
+  }
+);
+
+// PATCH /memories/{id} - Editar metadata (título/descripcion) de una memory
+memoriesApp.openapi(
+  {
+    method: "patch",
+    path: "/memories/{id}",
+    tags: ["memories"],
+    operationId: "updateMemory",
+    request: {
+      params: z.object({ id: z.string().uuid() }),
+      body: {
+        content: {
+          "application/json": {
+            schema: UpdateMemorySchema,
+          },
+        },
+        required: true,
+      },
+    },
+    responses: {
+      200: {
+        description: "Memory updated successfully",
+        content: {
+          "application/json": {
+            schema: MemorySchema,
+          },
+        },
+      },
+      400: openApiErrorResponse("Invalid request"),
+      401: openApiErrorResponse("Unauthorized"),
+      403: openApiErrorResponse("You can only edit your own memories"),
+      404: openApiErrorResponse("Memory not found"),
+      500: openApiErrorResponse("Internal Server Error"),
+    },
   },
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const patch = c.req.valid("json");
+    const user = c.var.user;
+
+    const updated = await c.var.memoriesService.updateMemory(
+      id,
+      patch,
+      user.id
+    );
+    return c.json(updated, 200);
+  }
 );
 
 // POST /memories/upload - Crear una nueva memory con archivo multimedia (imagen, video o audio)
@@ -331,10 +380,10 @@ memoriesApp.openapi(
       400: openApiErrorResponse("Invalid request or invalid media file"),
       401: openApiErrorResponse("Unauthorized"),
       413: openApiErrorResponse(
-        "File too large (max 50MB for images/audio, 100MB for video)",
+        "File too large (max 50MB for images/audio, 100MB for video)"
       ),
       415: openApiErrorResponse(
-        "Unsupported media type - only images, videos, and audio files allowed",
+        "Unsupported media type - only images, videos, and audio files allowed"
       ),
       500: openApiErrorResponse("Internal Server Error"),
     },
@@ -382,7 +431,9 @@ memoriesApp.openapi(
     if (!allowedTypes.includes(mediaFile.type)) {
       throw new ApiException(
         415,
-        `File type not allowed: ${mediaFile.type}. Allowed types: ${allowedTypes.join(", ")}`,
+        `File type not allowed: ${
+          mediaFile.type
+        }. Allowed types: ${allowedTypes.join(", ")}`
       );
     }
 
@@ -393,7 +444,7 @@ memoriesApp.openapi(
       const maxSizeText = isVideo ? "50MB" : "50MB";
       throw new ApiException(
         413,
-        `File size too large. Maximum size is ${maxSizeText}`,
+        `File size too large. Maximum size is ${maxSizeText}`
       );
     }
 
@@ -414,11 +465,11 @@ memoriesApp.openapi(
     const createdMemory = await c.var.memoriesService.createMemoryWithImage(
       memoryData,
       mediaFile,
-      user.id,
+      user.id
     );
 
     return c.json(createdMemory, 201);
-  },
+  }
 );
 
 // POST /memories/note - Crear una nota (memory sin archivo multimedia)
@@ -458,11 +509,11 @@ memoriesApp.openapi(
 
     const createdNote = await c.var.memoriesService.createNote(
       noteData,
-      user.id,
+      user.id
     );
 
     return c.json(createdNote, 201);
-  },
+  }
 );
 
 // DELETE /memories/{id} - Eliminar una memory
@@ -493,5 +544,5 @@ memoriesApp.openapi(
     await c.var.memoriesService.deleteMemory(id, user.id);
 
     return c.json({ message: "Memory deleted successfully" }, 200);
-  },
+  }
 );

@@ -165,6 +165,12 @@ export interface UpdateMemoriesBook {
   color?: string;
 }
 
+export interface UpdateMemory {
+  /** @minLength 1 */
+  title?: string;
+  caption?: string;
+}
+
 export interface CreateNote {
   bookId: string;
   groupId: string;
@@ -4357,6 +4363,139 @@ export function useGetMemoriesId<
 
   return query;
 }
+
+export type updateMemoryResponse200 = {
+  data: Memory;
+  status: 200;
+};
+
+export type updateMemoryResponse400 = {
+  data: Error;
+  status: 400;
+};
+
+export type updateMemoryResponse401 = {
+  data: Error;
+  status: 401;
+};
+
+export type updateMemoryResponse403 = {
+  data: Error;
+  status: 403;
+};
+
+export type updateMemoryResponse404 = {
+  data: Error;
+  status: 404;
+};
+
+export type updateMemoryResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type updateMemoryResponseSuccess = updateMemoryResponse200 & {
+  headers: Headers;
+};
+export type updateMemoryResponseError = (
+  | updateMemoryResponse400
+  | updateMemoryResponse401
+  | updateMemoryResponse403
+  | updateMemoryResponse404
+  | updateMemoryResponse500
+) & {
+  headers: Headers;
+};
+
+export type updateMemoryResponse =
+  | updateMemoryResponseSuccess
+  | updateMemoryResponseError;
+
+export const getUpdateMemoryUrl = (id: string) => {
+  return `/memories/${id}`;
+};
+
+export const updateMemory = async (
+  id: string,
+  updateMemory: UpdateMemory,
+  options?: RequestInit
+): Promise<updateMemoryResponse> => {
+  return rnFetch<updateMemoryResponse>(getUpdateMemoryUrl(id), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateMemory),
+  });
+};
+
+export const getUpdateMemoryMutationOptions = <
+  TError = Error | Error | Error | Error | Error,
+  TContext = unknown
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateMemory>>,
+    TError,
+    { id: string; data: UpdateMemory },
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateMemory>>,
+  TError,
+  { id: string; data: UpdateMemory },
+  TContext
+> => {
+  const mutationKey = ["updateMemory"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateMemory>>,
+    { id: string; data: UpdateMemory }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return updateMemory(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateMemoryMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateMemory>>
+>;
+export type UpdateMemoryMutationBody = UpdateMemory;
+export type UpdateMemoryMutationError = Error | Error | Error | Error | Error;
+
+export const useUpdateMemory = <
+  TError = Error | Error | Error | Error | Error,
+  TContext = unknown
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateMemory>>,
+      TError,
+      { id: string; data: UpdateMemory },
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateMemory>>,
+  TError,
+  { id: string; data: UpdateMemory },
+  TContext
+> => {
+  const mutationOptions = getUpdateMemoryMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
 
 export type deleteMemoryResponse200 = {
   data: void;

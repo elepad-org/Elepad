@@ -76,8 +76,6 @@ export const UpdateMemorySchema = z
   .object({
     title: z.string().min(1).optional(),
     caption: z.string().optional(),
-    mediaUrl: z.string().url().optional(),
-    mimeType: z.string().optional(),
   })
   .strict()
   .openapi("UpdateMemory");
