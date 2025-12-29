@@ -23,6 +23,8 @@ interface Recuerdo {
   miniatura?: string;
   titulo?: string;
   descripcion?: string;
+  autorId?: string;
+  autorNombre?: string;
   fecha: Date;
 }
 
@@ -254,6 +256,17 @@ export default function RecuerdoDetailDialog({
           {recuerdo.descripcion}
         </Text>
       )}
+
+      <Text
+        style={{
+          fontSize: 13,
+          color: COLORS.textSecondary,
+          marginTop: 8,
+          fontFamily: FONT.regular,
+        }}
+      >
+        Subido por: {recuerdo.autorNombre || "Desconocido"}
+      </Text>
 
       <Text
         style={{

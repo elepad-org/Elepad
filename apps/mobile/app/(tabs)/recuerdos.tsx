@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   StatusBar,
   View,
@@ -23,11 +23,13 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   useGetMemoriesBooks,
   useGetMemories,
+  useGetFamilyGroupIdGroupMembers,
   createMemoriesBook,
   createMemoryWithMedia,
   createNote,
   deleteMemory,
   deleteMemoriesBook,
+  GetFamilyGroupIdGroupMembers200,
   Memory,
   MemoriesBook,
   UpdateMemoriesBook,
@@ -57,7 +59,10 @@ interface RecuerdoData {
 }
 
 // Función auxiliar para convertir Memory a Recuerdo para compatibilidad con componentes existentes
-const memoryToRecuerdo = (memory: Memory): Recuerdo => {
+const memoryToRecuerdo = (
+  memory: Memory,
+  memberNameById: Record<string, string>
+): Recuerdo => {
   let tipo: RecuerdoTipo = "texto";
 
   if (memory.mimeType) {
@@ -84,6 +89,8 @@ const memoryToRecuerdo = (memory: Memory): Recuerdo => {
         : undefined,
     titulo: memory.title || undefined,
     descripcion: memory.caption || undefined,
+    autorId: memory.createdBy,
+    autorNombre: memberNameById[memory.createdBy] || undefined,
     fecha: new Date(memory.createdAt),
   };
 };
@@ -95,6 +102,8 @@ interface Recuerdo {
   miniatura?: string;
   titulo?: string;
   descripcion?: string;
+  autorId?: string;
+  autorNombre?: string;
   fecha: Date;
 }
 
@@ -113,6 +122,44 @@ export default function RecuerdosScreen() {
   const { loading: authLoading, userElepad } = useAuth();
 
   const groupId = userElepad?.groupId || "";
+
+  const membersQuery = useGetFamilyGroupIdGroupMembers(groupId, {
+    query: { enabled: !!groupId },
+  });
+
+  // Normaliza la respuesta del hook (envuelta en {data} o directa)
+  const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
+    const resp = membersQuery.data as
+      | { data?: GetFamilyGroupIdGroupMembers200 }
+      | GetFamilyGroupIdGroupMembers200
+      | undefined;
+    if (!resp) return undefined;
+    return (
+      (resp as { data?: GetFamilyGroupIdGroupMembers200 }).data ??
+      (resp as GetFamilyGroupIdGroupMembers200)
+    );
+  };
+
+  const groupInfo = selectGroupInfo();
+  const groupMembers = useMemo(() => {
+    if (!groupInfo) return [] as Array<{ id: string; displayName: string }>;
+
+    const raw = [groupInfo.owner, ...groupInfo.members];
+    const byId = new Map<string, { id: string; displayName: string }>();
+    for (const m of raw) {
+      if (!m?.id) continue;
+      byId.set(m.id, { id: m.id, displayName: m.displayName });
+    }
+    return Array.from(byId.values());
+  }, [groupInfo]);
+
+  const memberNameById = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const m of groupMembers) {
+      map[m.id] = m.displayName;
+    }
+    return map;
+  }, [groupMembers]);
 
   // Estados locales
   const [refreshing, setRefreshing] = useState(false);
@@ -160,6 +207,16 @@ export default function RecuerdosScreen() {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarError, setSnackbarError] = useState(false);
 
+  const [memberFilterId, setMemberFilterId] = useState<string | null>(null);
+  const [memberMenuVisible, setMemberMenuVisible] = useState(false);
+  const [memberMenuMounted, setMemberMenuMounted] = useState(true);
+
+  const closeMemberMenu = useCallback(() => {
+    setMemberMenuVisible(false);
+    setMemberMenuMounted(false);
+    setTimeout(() => setMemberMenuMounted(true), 50);
+  }, []);
+
   const {
     data: booksResponse,
     isLoading: booksLoading,
@@ -182,6 +239,7 @@ export default function RecuerdosScreen() {
     {
       groupId,
       bookId: selectedBook?.id,
+      createdBy: memberFilterId || undefined,
       limit: 20,
     },
     {
@@ -480,13 +538,15 @@ export default function RecuerdosScreen() {
     : [];
 
   // Convertir memories a recuerdos para compatibilidad con componentes existentes
-  const recuerdos = memories.map(memoryToRecuerdo).sort((a, b) => {
-    if (sortOrder === "desc") {
-      return b.fecha.getTime() - a.fecha.getTime();
-    } else {
-      return a.fecha.getTime() - b.fecha.getTime();
-    }
-  });
+  const recuerdos = memories
+    .map((memory) => memoryToRecuerdo(memory, memberNameById))
+    .sort((a, b) => {
+      if (sortOrder === "desc") {
+        return b.fecha.getTime() - a.fecha.getTime();
+      } else {
+        return a.fecha.getTime() - b.fecha.getTime();
+      }
+    });
 
   // Estados de carga y error (patrón original restaurado)
   const isLoading =
@@ -496,6 +556,20 @@ export default function RecuerdosScreen() {
     createNoteMutation.isPending ||
     updateMemoryMutation.isPending ||
     deleteMemoryMutation.isPending;
+
+  const memberFilterLabel = memberFilterId
+    ? memberNameById[memberFilterId] || "Miembro"
+    : "Todos";
+
+  const emptyTitle = memberFilterId
+    ? `${
+        memberNameById[memberFilterId] || "Este miembro"
+      } aún no ha subido recuerdos`
+    : "No hay recuerdos aún";
+
+  const emptySubtitle = memberFilterId
+    ? "Probá con otro miembro o con Todos."
+    : "Añade un recuerdo recuerdo con + Agregar.";
 
   // Función para refrescar la galería (patrón original)
   const onRefresh = useCallback(async () => {
@@ -991,7 +1065,12 @@ export default function RecuerdosScreen() {
                     marginBottom: 16,
                   }}
                 >
-                  <Pressable onPress={() => setSelectedBook(item)}>
+                  <Pressable
+                    onPress={() => {
+                      setSelectedBook(item);
+                      setMemberFilterId(null);
+                    }}
+                  >
                     <View
                       style={{
                         backgroundColor: COLORS.backgroundSecondary,
@@ -1090,6 +1169,8 @@ export default function RecuerdosScreen() {
               style={{ margin: 0 }}
               onPress={() => {
                 setSelectedBook(null);
+                setMemberFilterId(null);
+                setMemberMenuVisible(false);
                 setBookMenuVisible(false);
                 setDialogVisible(false);
                 setDetailDialogVisible(false);
@@ -1261,6 +1342,8 @@ export default function RecuerdosScreen() {
             style={{ margin: 0 }}
             onPress={() => {
               setSelectedBook(null);
+              setMemberFilterId(null);
+              setMemberMenuVisible(false);
               setBookMenuVisible(false);
               setDialogVisible(false);
               setDetailDialogVisible(false);
@@ -1369,28 +1452,68 @@ export default function RecuerdosScreen() {
             mode="contained-tonal"
           />
         </View>
-        <SegmentedButtons
-          value={numColumns.toString()}
-          onValueChange={(value) => setNumColumns(parseInt(value))}
-          buttons={[
-            {
-              value: "2",
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          {memberMenuMounted && (
+            <Menu
+              visible={memberMenuVisible}
+              onDismiss={closeMemberMenu}
+              contentStyle={{
+                backgroundColor: COLORS.background,
+                borderRadius: 12,
+              }}
+              anchor={
+                <Button
+                  mode="outlined"
+                  onPress={() => setMemberMenuVisible(true)}
+                  style={{ borderRadius: 12, marginRight: 10 }}
+                >
+                  {memberFilterLabel}
+                </Button>
+              }
+            >
+              <Menu.Item
+                title="Todos"
+                onPress={() => {
+                  setMemberFilterId(null);
+                  closeMemberMenu();
+                }}
+              />
+              {groupMembers.map((m) => (
+                <Menu.Item
+                  key={m.id}
+                  title={m.displayName}
+                  onPress={() => {
+                    setMemberFilterId(m.id);
+                    closeMemberMenu();
+                  }}
+                />
+              ))}
+            </Menu>
+          )}
 
-              icon: "view-grid",
-            },
-            {
-              value: "3",
-              icon: "view-comfy",
-            },
-          ]}
-          style={{ width: 140 }}
-          theme={{
-            colors: {
-              secondaryContainer: COLORS.primary,
-              onSecondaryContainer: COLORS.white,
-            },
-          }}
-        />
+          <SegmentedButtons
+            value={numColumns.toString()}
+            onValueChange={(value) => setNumColumns(parseInt(value))}
+            buttons={[
+              {
+                value: "2",
+
+                icon: "view-grid",
+              },
+              {
+                value: "3",
+                icon: "view-comfy",
+              },
+            ]}
+            style={{ width: 140 }}
+            theme={{
+              colors: {
+                secondaryContainer: COLORS.primary,
+                onSecondaryContainer: COLORS.white,
+              },
+            }}
+          />
+        </View>
       </View>
 
       {recuerdos.length === 0 ? (
@@ -1406,10 +1529,8 @@ export default function RecuerdosScreen() {
             source={eleEmpthy}
             style={{ width: 220, height: 220, marginBottom: 10 }}
           />
-          <Text style={STYLES.heading}>No hay recuerdos aún</Text>
-          <Text style={STYLES.subheading}>
-            Añade un recuerdo recuerdo con + Agregar.
-          </Text>
+          <Text style={STYLES.heading}>{emptyTitle}</Text>
+          <Text style={STYLES.subheading}>{emptySubtitle}</Text>
         </View>
       ) : (
         <FlatList
