@@ -29,7 +29,8 @@ export class AttemptService {
       startedAt: new Date().toISOString(),
       memoryPuzzleId: gameType === "memory" ? puzzleId : null,
       logicPuzzleId: gameType === "logic" ? puzzleId : null,
-      isFocusGame: gameType === "attention" ? true : null,
+      sudokuPuzzleId: gameType === "attention" ? puzzleId : null,
+      isFocusGame: !gameType ? true : null, // TODO: redefinir para focus
     };
 
     const { data: attempt, error: attemptError } = await this.supabase

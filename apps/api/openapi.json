@@ -561,10 +561,22 @@
             "type": "integer"
           },
           "given": {
-            "type": "string"
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
           },
           "solution": {
-            "type": "string"
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
           }
         },
         "required": [
@@ -650,6 +662,23 @@
             "minimum": 1,
             "maximum": 100,
             "default": 10
+          }
+        }
+      },
+      "NewSudokuPuzzle": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "easy",
+              "medium",
+              "hard"
+            ],
+            "default": "easy"
           }
         }
       },
@@ -2977,6 +3006,55 @@
         "responses": {
           "201": {
             "description": "Puzzle de atención creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PuzzleWithDetails"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/puzzles/sudoku": {
+      "post": {
+        "tags": [
+          "puzzles"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewSudokuPuzzle"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Puzzle de Sudoku creado",
             "content": {
               "application/json": {
                 "schema": {

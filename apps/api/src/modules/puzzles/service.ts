@@ -3,6 +3,132 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/supabase-types";
 import type { NewMemoryPuzzle, NewNetPuzzle, GameListItem } from "./schema";
 
+/**
+ * Funciones para crear Sudoku
+ * Puede extenderse a puzzles en general
+ * TODO: Ver si es mejor crear 10-15 niveles y pedirlos desde supabase en vez de generar nuevos por cada request
+ */
+const createEmptyGrid = () => Array.from({ length: 9 }, () => Array(9).fill(0));
+
+const isValidMove = (
+  grid: number[][],
+  row: number,
+  col: number,
+  num: number,
+) => {
+  // Verificar fila y columna
+  for (let x = 0; x < 9; x++) {
+    if (grid[row][x] === num || grid[x][col] === num) return false;
+  }
+
+  // Verificar cuadrante 3x3
+  const startRow = row - (row % 3);
+  const startCol = col - (col % 3);
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 3; j++) {
+      if (grid[i + startRow][j + startCol] === num) return false;
+    }
+  }
+  return true;
+};
+
+const solveSudoku = (grid: number[][]): boolean => {
+  for (let row = 0; row < 9; row++) {
+    for (let col = 0; col < 9; col++) {
+      if (grid[row][col] === 0) {
+        // Intentar números del 1 al 9 en orden aleatorio para generar tableros distintos
+        const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(
+          () => Math.random() - 0.5,
+        );
+
+        for (const num of nums) {
+          if (isValidMove(grid, row, col, num)) {
+            grid[row][col] = num;
+            if (solveSudoku(grid)) return true;
+            grid[row][col] = 0; // Backtracking
+          }
+        }
+        return false;
+      }
+    }
+  }
+  return true;
+};
+
+// Helper para llenar un cuadro 3x3 diagonal (no requiere validación compleja)
+const fillBox = (grid: number[][], row: number, col: number) => {
+  let num: number;
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 3; j++) {
+      do {
+        num = Math.floor(Math.random() * 9) + 1;
+      } while (!isSafeInBox(grid, row, col, num));
+      grid[row + i][col + j] = num;
+    }
+  }
+};
+
+const generateSudoku = (difficulty: "easy" | "medium" | "hard") => {
+  // 1. Generar grid resuelto
+  const solutionGrid = createEmptyGrid();
+
+  // Llenar las diagonales principales primero (son independientes) para optimizar
+  // Esto asegura aleatoriedad antes de correr el solver
+  for (let i = 0; i < 9; i = i + 3) {
+    fillBox(solutionGrid, i, i);
+  }
+
+  // Resolver el resto
+  solveSudoku(solutionGrid);
+
+  // 2. Crear copia para el puzzle (tablero inicial)
+  const initialGrid = solutionGrid.map((row) => [...row]);
+
+  // 3. Determinar cuántas celdas borrar según dificultad
+  let attempts = 0;
+  switch (difficulty) {
+    case "easy":
+      attempts = 30;
+      break; // Quedan ~51 pistas
+    case "medium":
+      attempts = 45;
+      break; // Quedan ~36 pistas
+    case "hard":
+      attempts = 55;
+      break; // Quedan ~26 pistas
+    default:
+      attempts = 30;
+  }
+
+  // 4. Remover números
+  while (attempts > 0) {
+    let row = Math.floor(Math.random() * 9);
+    let col = Math.floor(Math.random() * 9);
+    while (initialGrid[row][col] === 0) {
+      row = Math.floor(Math.random() * 9);
+      col = Math.floor(Math.random() * 9);
+    }
+    initialGrid[row][col] = 0; // 0 representa celda vacía
+    attempts--;
+  }
+
+  return { initialGrid, solutionGrid };
+};
+
+const isSafeInBox = (
+  grid: number[][],
+  rowStart: number,
+  colStart: number,
+  num: number,
+) => {
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 3; j++) {
+      if (grid[rowStart + i][colStart + j] === num) return false;
+    }
+  }
+  return true;
+};
+
 export class PuzzleService {
   constructor(private supabase: SupabaseClient<Database>) {}
 
@@ -240,6 +366,71 @@ export class PuzzleService {
       memoryGame,
       logicGame: null,
       sudokuGame: null,
+    };
+  }
+
+  /**
+   * Crea un nuevo puzzle de Sudoku
+   */
+  async createSudokuPuzzle(payload: {
+    title?: string;
+    difficulty: "easy" | "medium" | "hard";
+  }) {
+    const { title, difficulty } = payload;
+
+    // Usa los helpers de arriba
+    const { initialGrid, solutionGrid } = generateSudoku(difficulty);
+
+    // Crea el puzzle
+    const { data: puzzle, error: puzzleError } = await this.supabase
+      .from("puzzles")
+      .insert({
+        gameType: "logic",
+        gameName: "sudoku",
+        title:
+          title ||
+          `Sudoku ${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`,
+        difficulty: difficulty === "hard" ? 3 : difficulty === "medium" ? 2 : 1,
+      })
+      .select()
+      .single();
+
+    if (puzzleError) {
+      throw new ApiException(
+        500,
+        "Error al crear el puzzle de sudoku",
+        puzzleError,
+      );
+    }
+
+    const { data: sudokuGame, error: sudokuError } = await this.supabase
+      .from("sudokuGames")
+      .insert({
+        puzzleId: puzzle.id,
+        rows: 9,
+        cols: 9,
+        given: initialGrid,
+        solution: solutionGrid,
+      })
+      .select()
+      .single();
+
+    if (sudokuError) {
+      // Rollback: eliminar el puzzle si falla la inserción de los detalles
+      await this.supabase.from("puzzles").delete().eq("id", puzzle.id);
+      console.error("Error detallado sudoku:", sudokuError);
+      throw new ApiException(
+        500,
+        "Error al guardar los datos del Sudoku",
+        sudokuError,
+      );
+    }
+
+    return {
+      puzzle,
+      sudokuGame,
+      memoryGame: null,
+      logicGame: null,
     };
   }
 
@@ -505,6 +696,7 @@ export class PuzzleService {
    */
   async createFocusPuzzle(payload: { rounds?: number }) {
     const { rounds } = payload;
+    console.log(rounds);
 
     // Crear el puzzle base
     const { data: puzzle, error: puzzleError } = await this.supabase
@@ -519,11 +711,7 @@ export class PuzzleService {
       .single();
 
     if (puzzleError) {
-      throw new ApiException(
-        500,
-        "Error al crear el puzzle de atención",
-        puzzleError,
-      );
+      throw new ApiException(500, "Error al crear el puzzle", puzzleError);
     }
 
     // Actualmente no tenemos una tabla específica para detalles de attention,

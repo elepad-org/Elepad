@@ -55,8 +55,8 @@ export const SudokuGameSchema = z
     puzzleId: z.uuid(),
     rows: z.number().int(),
     cols: z.number().int(),
-    given: z.string(),
-    solution: z.string(),
+    given: z.array(z.array(z.number().int())), // Matriz de números iniciales
+    solution: z.array(z.array(z.number().int())), // Matriz de números iniciales
   })
   .openapi("SudokuGame");
 
@@ -105,6 +105,16 @@ export const NewFocusPuzzleSchema = z
   .openapi("NewFocusPuzzle");
 
 export type NewFocusPuzzle = z.infer<typeof NewFocusPuzzleSchema>;
+
+// Schema para crear un nuevo puzzle de Sudoku
+export const NewSudokuPuzzleSchema = z
+  .object({
+    title: z.string().optional(),
+    difficulty: z.enum(["easy", "medium", "hard"]).optional().default("easy"),
+  })
+  .openapi("NewSudokuPuzzle");
+
+export type NewSudokuPuzzle = z.infer<typeof NewSudokuPuzzleSchema>;
 
 // Schema para listar juegos disponibles (agrupados por tipo)
 export const GameListItemSchema = z

@@ -2,23 +2,29 @@ import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import styles from "./styles";
 import { AttentionGameCore, COLORS_MAP, ColorName } from "./game";
-import { Button, Portal, Dialog, Paragraph } from "react-native-paper";
+import { Button, Portal, Dialog } from "react-native-paper";
 import { router } from "expo-router";
 
 type Props = {
   rounds?: number; // cantidad de rondas a jugar (para test por ahora), se podría cambiar por vidas
-  onFinish?: (score: { correct: number; total: number }) => void;
+  onFinish?: (score: { correct: number; rounds: number }) => void;
+  onRestart?: (score: { correct: number; rounds: number }) => void;
 };
 
-export default function AttentionGame({ rounds = 10, onFinish }: Props) {
+export default function AttentionGame({
+  rounds = 10,
+  onFinish,
+  onRestart,
+}: Props) {
   const core = useMemo(() => new AttentionGameCore(), []);
   const [tick, setTick] = useState(0); // forzar re-render cuando cambia core
-  const [score, setScore] = useState({ correct: 0, total: 0 });
+  const [score, setScore] = useState({ correct: 0, rounds: rounds });
   const [lives, setLives] = useState(3);
   const [lastResult, setLastResult] = useState<boolean | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
   const [modalMessage, setModalMessage] = useState("");
+  const [currentRound, setCurrentRound] = useState(1);
 
   useEffect(() => {
     // iniciar primera ronda
@@ -29,9 +35,15 @@ export default function AttentionGame({ rounds = 10, onFinish }: Props) {
   const prompt = core.currentPrompt;
 
   const restartGame = () => {
+    // notify parent before resetting so it can register attempt finish
+    try {
+      onRestart?.(score);
+    } catch (e) {
+      // ignore errors from parent
+    }
     core.reset();
     core.startRound();
-    setScore({ correct: 0, total: 0 });
+    setScore({ ...score, correct: 0 });
     setLives(3);
     setLastResult(null);
     setModalVisible(false);
@@ -48,11 +60,8 @@ export default function AttentionGame({ rounds = 10, onFinish }: Props) {
       word: prompt.word,
     });
 
-    const newScore = {
-      correct: score.correct + (correct ? 1 : 0),
-      total: score.total + 1,
-    };
-    setScore(newScore);
+    setScore({ ...score, correct: score.correct + (correct ? 1 : 0) });
+    setCurrentRound((prev) => prev + 1);
     setTick((t) => t + 1);
 
     // manejar vidas y finalizar o continuar
@@ -64,10 +73,10 @@ export default function AttentionGame({ rounds = 10, onFinish }: Props) {
           setTimeout(() => {
             setModalTitle("Perdiste");
             setModalMessage(
-              `Te quedaste sin vidas.\n Tu puntaje fue de: ${newScore.correct} aciertos.`,
+              `Te quedaste sin vidas.\n Tu puntaje fue de: ${score.correct} aciertos.`,
             );
             setModalVisible(true);
-            onFinish?.(newScore);
+            onFinish?.(score);
           }, 350);
         } else {
           setTimeout(() => {
@@ -81,14 +90,12 @@ export default function AttentionGame({ rounds = 10, onFinish }: Props) {
       });
     } else {
       // acierto: comprobar condición de victoria por rondas
-      if (newScore.total >= rounds) {
+      if (currentRound == rounds) {
         setTimeout(() => {
           setModalTitle("¡Ganaste!");
-          setModalMessage(
-            `Acertaste ${newScore.correct}/${newScore.total} rondas.`,
-          );
+          setModalMessage(`Acertaste ${score.correct}/${score.rounds} rondas.`);
           setModalVisible(true);
-          onFinish?.(newScore);
+          onFinish?.(score);
         }, 350);
       } else {
         setTimeout(() => {
@@ -159,7 +166,7 @@ export default function AttentionGame({ rounds = 10, onFinish }: Props) {
 
       <View style={{ marginTop: 12 }}>
         <Text>
-          Rondas: {score.total} / {rounds}
+          Rondas: {currentRound} / {rounds}
         </Text>
         <Text>Aciertos: {score.correct}</Text>
         <Text>Vidas: {lives}</Text>

@@ -472,24 +472,24 @@ export type Database = {
       sudokuGames: {
         Row: {
           cols: number;
-          given: string;
+          given: Json | null;
           puzzleId: string;
           rows: number;
-          solution: string;
+          solution: Json | null;
         };
         Insert: {
           cols: number;
-          given: string;
+          given?: Json | null;
           puzzleId: string;
           rows: number;
-          solution: string;
+          solution?: Json | null;
         };
         Update: {
           cols?: number;
-          given?: string;
+          given?: Json | null;
           puzzleId?: string;
           rows?: number;
-          solution?: string;
+          solution?: Json | null;
         };
         Relationships: [
           {
