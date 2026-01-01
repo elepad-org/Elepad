@@ -151,7 +151,7 @@ export default function ActivityForm({
         maxHeight: "100%",
       }}
     >
-      <View style={{ paddingTop: 8, paddingBottom: 0, paddingHorizontal: 24 }}>
+      <View style={{ paddingHorizontal: 24, paddingBottom: 2, marginTop: 10 }}>
         <TextInput
           ref={titleInputRef}
           value={title}
@@ -164,6 +164,7 @@ export default function ActivityForm({
           }}
           selection={titleSelection}
           style={styles.titleInput}
+          contentStyle={{ fontWeight: "700" }}
           underlineColor="transparent"
           activeUnderlineColor="transparent"
           textColor={COLORS.text}
@@ -207,7 +208,7 @@ export default function ActivityForm({
               icon="calendar"
               contentStyle={{ paddingVertical: 4 }}
             >
-              Inicio 2
+              Inicio 
             </Button>
             <Text style={styles.dateText}>{formatDateTime(startsAtDate)}</Text>
           </View>
@@ -242,18 +243,12 @@ export default function ActivityForm({
               style={styles.pickerButton}
               icon="repeat"
             >
-              Frecuencia 2: {frequencyLabel}
+              Frecuencia: {frequencyLabel}
             </Button>
           }
         >
           <ScrollView style={{ maxHeight: 300 }}>
-            <Menu.Item
-              onPress={() => {
-                setFrequencyId(undefined);
-                setShowFrequencyMenu(false);
-              }}
-              title="Una vez"
-            />
+        
             {frequencies.map((freq: Frequency) => (
               <Menu.Item
                 key={freq.id}
@@ -292,7 +287,7 @@ export default function ActivityForm({
       </Dialog.Content>
       <Dialog.Actions
         style={{
-          paddingBottom: 20,
+          paddingBottom: 30,
           paddingHorizontal: 20,
           justifyContent: "space-between",
         }}
@@ -320,7 +315,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     backgroundColor: "transparent",
     paddingHorizontal: 0,
-    marginBottom: 0,
+    marginBottom: 8,
   },
   inputWrapper: {
     backgroundColor: COLORS.backgroundSecondary,
