@@ -256,7 +256,6 @@ export const useSudoku = (props: UseSudokuProps) => {
         setFilledCells((prev) => prev + 1);
 
         // Chequear si completó el número para animaciones (opcional) o si ganó
-        // La verificación de victoria está en el useEffect
       } else {
         // MOVIMIENTO INCORRECTO
         setMistakes((prev) => {
@@ -355,7 +354,7 @@ export const useSudoku = (props: UseSudokuProps) => {
   }, [filledCells, isGameStarted, isComplete, attemptId, mistakes]);
 
   // --- Helpers ---
-
+  // TODO: Todavia no se usa
   const eraseCell = useCallback(() => {
     if (!selectedCell || isComplete) return;
     const { row, col } = selectedCell;
@@ -364,14 +363,41 @@ export const useSudoku = (props: UseSudokuProps) => {
     const newBoard = [...board];
     newBoard[row][col] = { ...newBoard[row][col], value: null, isError: false };
     setBoard(newBoard);
-    // Nota: Si borras, filledCells debería bajar si tenía un valor correcto antes
-    // Aquí habría que ajustar la lógica de filledCells si permites borrar aciertos (normalmente en apps de sudoku, si aciertas se bloquea la celda, si permites borrar, ajusta filledCells).
   }, [board, selectedCell, isComplete]);
 
   const resetGame = useCallback(() => {
     hasInitialized.current = false;
     initializeGame();
   }, [initializeGame]);
+
+  const quitGame = useCallback(async () => {
+    // Detener el temporizador
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    // Evitar múltiples finalizaciones
+    if (hasFinishedAttempt.current) return;
+
+    // Finalizar el intento en el backend
+    if (attemptId && startTimeRef.current) {
+      hasFinishedAttempt.current = true;
+      const durationMs = Date.now() - startTimeRef.current;
+
+      try {
+        const response = await finishAttempt.mutateAsync({
+          attemptId,
+          data: {
+            success: false,
+            moves: filledCells,
+            durationMs,
+            score: 0,
+          },
+        });
+        console.log("❌ Intento abandonado:", response);
+      } catch (e) {
+        console.error("Error al abandonar la partida", e);
+      }
+    }
+  }, [attemptId, filledCells]);
 
   return {
     board,
@@ -386,6 +412,7 @@ export const useSudoku = (props: UseSudokuProps) => {
       inputNumber: handleNumberInput,
       erase: eraseCell,
       resetGame,
+      quitGame,
     },
   };
 };

@@ -43,6 +43,11 @@ export const SudokuGameBoard: React.FC<SudokuGameBoardProps> = ({
 
   const hasCalledOnComplete = useRef(false);
 
+  const handleQuit = () => {
+    actions.quitGame();
+    onQuit();
+  };
+
   // Formatear el tiempo
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -220,7 +225,7 @@ export const SudokuGameBoard: React.FC<SudokuGameBoardProps> = ({
         </Button>
         <Button
           mode="outlined"
-          onPress={onQuit}
+          onPress={handleQuit}
           icon="exit-to-app"
           style={styles.button}
           textColor={COLORS.error}
