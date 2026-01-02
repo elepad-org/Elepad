@@ -6508,7 +6508,7 @@ export const getPostPuzzlesFocusUrl = () => {
 
 export const postPuzzlesFocus = async (
   newFocusPuzzle: NewFocusPuzzle,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postPuzzlesFocusResponse> => {
   return rnFetch<postPuzzlesFocusResponse>(getPostPuzzlesFocusUrl(), {
     ...options,
@@ -6520,7 +6520,7 @@ export const postPuzzlesFocus = async (
 
 export const getPostPuzzlesFocusMutationOptions = <
   TError = Error | Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postPuzzlesFocus>>,
@@ -6572,7 +6572,7 @@ export const usePostPuzzlesFocus = <TError = Error | Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postPuzzlesFocus>>,
   TError,
@@ -6619,7 +6619,7 @@ export const getPostPuzzlesSudokuUrl = () => {
 
 export const postPuzzlesSudoku = async (
   newSudokuPuzzle: NewSudokuPuzzle,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postPuzzlesSudokuResponse> => {
   return rnFetch<postPuzzlesSudokuResponse>(getPostPuzzlesSudokuUrl(), {
     ...options,
@@ -6631,7 +6631,7 @@ export const postPuzzlesSudoku = async (
 
 export const getPostPuzzlesSudokuMutationOptions = <
   TError = Error | Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postPuzzlesSudoku>>,
@@ -6675,7 +6675,7 @@ export type PostPuzzlesSudokuMutationError = Error | Error;
 
 export const usePostPuzzlesSudoku = <
   TError = Error | Error,
-  TContext = unknown,
+  TContext = unknown
 >(
   options?: {
     mutation?: UseMutationOptions<
@@ -6686,7 +6686,7 @@ export const usePostPuzzlesSudoku = <
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postPuzzlesSudoku>>,
   TError,
