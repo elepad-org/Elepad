@@ -1,5 +1,10 @@
-import { useEffect, useState } from "react";
-import { View, StyleSheet, ScrollView } from "react-native";
+import { useEffect, useState, useRef } from "react";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  TextInput as RNTextInput,
+} from "react-native";
 import { TextInput, Button, Text, Menu, Dialog } from "react-native-paper";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import type { Activity } from "@elepad/api-client";
@@ -42,6 +47,12 @@ export default function ActivityForm({
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [showFrequencyMenu, setShowFrequencyMenu] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [titleSelection, setTitleSelection] = useState<
+    { start: number; end: number } | undefined
+  >(undefined);
+  const titleInputRef = useRef<RNTextInput>(null);
+  const [showFrequencyModal, setShowFrequencyModal] = useState(false);
+
 
   // Fetch available frequencies
   const frequenciesQuery = useGetFrequencies();
@@ -75,10 +86,9 @@ export default function ActivityForm({
 
   const handleSave = async () => {
     setError(null);
-    if (!title.trim()) {
-      setError("El título es obligatorio.");
-      return;
-    }
+    const finalTitle =
+      title.trim() || (initial ? "Evento sin título" : "Nuevo evento");
+
     if (!startsAtDate) {
       setError("La fecha de inicio es obligatoria.");
       return;
@@ -95,7 +105,7 @@ export default function ActivityForm({
 
       await Promise.race([
         onSave({
-          title,
+          title: finalTitle,
           description,
           startsAt: startsAtDate.toISOString(),
           endsAt: endsAtDate ? endsAtDate.toISOString() : undefined,
@@ -132,6 +142,7 @@ export default function ActivityForm({
   };
 
   return (
+    <>
     <Dialog
       visible={visible}
       onDismiss={onClose}
@@ -143,35 +154,54 @@ export default function ActivityForm({
         maxHeight: "100%",
       }}
     >
-      <Dialog.Title
-        style={{
-          fontSize: 22,
-          fontWeight: "bold",
-          color: COLORS.text,
-          paddingTop: 8,
-          paddingBottom: 0,
-          textAlign: "center",
-        }}
-      >
-        {initial ? "Editar evento" : "Nuevo evento"}
-      </Dialog.Title>
-      <Dialog.Content style={{ paddingBottom: 15 }}>
+      <View style={{ paddingHorizontal: 24, paddingBottom: 2, marginTop: 10 }}>
         <TextInput
-          label="Título"
+          ref={titleInputRef}
           value={title}
-          onChangeText={setTitle}
-          style={styles.inputFirst}
-          mode="outlined"
+          onChangeText={(text) => {
+            setTitle(text);
+            setTitleSelection(undefined);
+          }}
+          onFocus={() => {
+            setTitleSelection({ start: title.length, end: title.length });
+          }}
+          selection={titleSelection}
+          style={styles.titleInput}
+          contentStyle={{ fontWeight: "700" }}
+          underlineColor="transparent"
+          activeUnderlineColor="transparent"
+          textColor={COLORS.text}
+          placeholder={initial ? "Agregar evento" : "Nuevo evento"}
+          placeholderTextColor={COLORS.textSecondary}
+      
+          theme={{
+            colors: {
+              primary: "transparent",
+              background: "transparent",
+            },
+          }}
         />
-        <TextInput
-          label="Descripción"
-          value={description}
-          onChangeText={setDescription}
-          multiline
-          numberOfLines={3}
-          style={styles.input}
-          mode="outlined"
-        />
+      </View>
+      <Dialog.Content style={{ paddingBottom: 15 }}>
+        <View style={styles.inputWrapper}>
+          <TextInput
+            value={description}
+            onChangeText={setDescription}
+            multiline
+            numberOfLines={3}
+            placeholder="Descripción (opcional)"
+            placeholderTextColor={COLORS.textSecondary}
+            style={styles.input}
+            mode="flat"
+            underlineColor="transparent"
+            activeUnderlineColor="transparent"
+            theme={{
+              colors: {
+                background: "transparent",
+              },
+            }}
+          />
+        </View>
 
         <View style={styles.dateRow}>
           <View style={styles.dateColumn}>
@@ -182,7 +212,7 @@ export default function ActivityForm({
               icon="calendar"
               contentStyle={{ paddingVertical: 4 }}
             >
-              Inicio
+              Inicio 
             </Button>
             <Text style={styles.dateText}>{formatDateTime(startsAtDate)}</Text>
           </View>
@@ -203,44 +233,36 @@ export default function ActivityForm({
           </View>
         </View>
 
-        <Menu
+       <Menu
           visible={showFrequencyMenu}
-          onDismiss={() => setShowFrequencyMenu(false)}
+          onDismiss={() => setShowFrequencyMenu((prev) => !prev)}
           contentStyle={{
             backgroundColor: COLORS.background,
             borderRadius: 12,
+            maxHeight: 300,
           }}
           anchor={
-            <Button
-              mode="outlined"
-              onPress={() => setShowFrequencyMenu(true)}
-              style={styles.pickerButton}
-              icon="repeat"
-            >
-              Frecuencia: {frequencyLabel}
-            </Button>
+           <Button
+  mode="outlined"
+  onPress={() => setShowFrequencyModal(true)}
+  icon="repeat"
+>
+  Frecuencia: {frequencyLabel}
+</Button>
           }
         >
-          <ScrollView style={{ maxHeight: 300 }}>
+          {frequencies.map((freq: Frequency) => (
             <Menu.Item
+              key={freq.id}
               onPress={() => {
-                setFrequencyId(undefined);
-                setShowFrequencyMenu(false);
+                setFrequencyId(freq.id);
+                setShowFrequencyMenu((prev) => !prev)
               }}
-              title="Una vez"
+              title={freq.label}
             />
-            {frequencies.map((freq: Frequency) => (
-              <Menu.Item
-                key={freq.id}
-                onPress={() => {
-                  setFrequencyId(freq.id);
-                  setShowFrequencyMenu(false);
-                }}
-                title={freq.label}
-              />
-            ))}
-          </ScrollView>
+          ))}
         </Menu>
+
 
         <DateTimePickerModal
           isVisible={showStartPicker}
@@ -267,7 +289,7 @@ export default function ActivityForm({
       </Dialog.Content>
       <Dialog.Actions
         style={{
-          paddingBottom: 20,
+          paddingBottom: 30,
           paddingHorizontal: 20,
           justifyContent: "space-between",
         }}
@@ -285,19 +307,70 @@ export default function ActivityForm({
         </Button>
       </Dialog.Actions>
     </Dialog>
+    <Dialog
+      visible={showFrequencyModal}
+      onDismiss={() => setShowFrequencyModal(false)}
+      style={{
+        backgroundColor: COLORS.background,
+        width: "92%",
+        alignSelf: "center",
+        borderRadius: 20,
+      }}
+    >
+      <Dialog.Title style={{ 
+        textAlign: "center", 
+        color: COLORS.primary,
+        fontWeight: "bold",
+        fontSize: 20,
+      }}>
+        Seleccionar frecuencia
+      </Dialog.Title>
+      <Dialog.Content>
+        <ScrollView style={{ maxHeight: 310 }}>
+          {frequencies.map((freq) => (
+            <Button
+              key={freq.id}
+              mode="outlined"
+              onPress={() => {
+                setFrequencyId(freq.id);
+                setShowFrequencyModal(false);
+              }}
+              style={{
+                marginBottom: 8,
+                borderRadius: 12,
+                borderColor: frequencyId === freq.id ? COLORS.primary : COLORS.border,
+                backgroundColor: frequencyId === freq.id ? `${COLORS.primary}15` : COLORS.backgroundSecondary,
+              }}
+              textColor={frequencyId === freq.id ? COLORS.primary : COLORS.textSecondary}
+            >
+              {freq.label}
+            </Button>
+          ))}
+        </ScrollView>
+      </Dialog.Content>
+    </Dialog>
+  </>
   );
 }
 
 const styles = StyleSheet.create({
-  inputFirst: {
-    marginBottom: 16,
+  titleInput: {
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
+    backgroundColor: "transparent",
+    paddingHorizontal: 0,
+    marginBottom: 8,
+  },
+  inputWrapper: {
     backgroundColor: COLORS.backgroundSecondary,
-    borderRadius: 12,
+    borderRadius: 16,
+    overflow: "hidden",
+    marginBottom: 16,
   },
   input: {
-    marginBottom: 16,
-    backgroundColor: COLORS.backgroundSecondary,
-    borderRadius: 12,
+    backgroundColor: "transparent",
+    minHeight: 80,
   },
   dateRow: {
     flexDirection: "row",
@@ -314,7 +387,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   pickerButton: {
-    borderRadius: 12,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: COLORS.border,
     backgroundColor: COLORS.backgroundSecondary,
