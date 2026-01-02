@@ -1,19 +1,39 @@
 import { getApiBaseUrl, getAuthToken } from "./runtime";
 
+function extractErrorMessage(body: unknown): string | undefined {
+  if (!body) return undefined;
+  if (typeof body === "string") return body;
+
+  if (typeof body === "object") {
+    const anyBody = body as Record<string, unknown>;
+    const err = anyBody.error;
+
+    if (typeof err === "string") return err;
+    if (err && typeof err === "object") {
+      const anyErr = err as Record<string, unknown>;
+      if (typeof anyErr.message === "string") return anyErr.message;
+    }
+
+    if (typeof anyBody.message === "string") return anyBody.message;
+  }
+
+  return undefined;
+}
+
 export class ApiError extends Error {
   constructor(
     public status: number,
     public statusText: string,
-    public body?: { error?: string },
+    public body?: unknown
   ) {
-    super(body?.error || `HTTP ${status}: ${statusText}`);
+    super(extractErrorMessage(body) || `HTTP ${status}: ${statusText}`);
     this.name = "ApiError";
   }
 }
 
 export async function rnFetch<T>(
   url: string,
-  init: RequestInit = {},
+  init: RequestInit = {}
 ): Promise<T> {
   const headers = new Headers(init.headers);
 

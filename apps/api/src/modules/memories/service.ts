@@ -7,12 +7,34 @@ import {
   Memory,
   CreateMemoryWithImage,
   CreateNote,
+  UpdateMemory,
+  UpdateMemoriesBook,
 } from "./schema";
 import { Database } from "@/supabase-types";
-import { uploadMemoryImage } from "@/services/storage";
+import {
+  deleteMemoryMediaByPublicUrl,
+  uploadMemoryImage,
+} from "@/services/storage";
 
 export class MemoriesService {
   constructor(private supabase: SupabaseClient<Database>) {}
+
+  private async assertUserInGroup(userId: string, groupId: string) {
+    const { data, error } = await this.supabase
+      .from("users")
+      .select("groupId")
+      .eq("id", userId)
+      .single();
+
+    if (error) {
+      console.error("Error fetching user for group check:", error);
+      throw new ApiException(500, "Error fetching user");
+    }
+
+    if (!data?.groupId || data.groupId !== groupId) {
+      throw new ApiException(403, "Forbidden");
+    }
+  }
 
   /**
    * Get all memories with optional filters
@@ -99,14 +121,15 @@ export class MemoriesService {
   async createMemoryWithImage(
     memoryData: CreateMemoryWithImage,
     imageFile: File,
-    userId: string,
+    userId: string
   ): Promise<Memory> {
     try {
       // 1. Subir imagen al storage usando el servicio centralizado
       const mediaUrl = await uploadMemoryImage(
         this.supabase,
         memoryData.groupId,
-        imageFile,
+        memoryData.bookId,
+        imageFile
       );
 
       // 2. Crear el registro en la tabla memories
@@ -186,6 +209,77 @@ export class MemoriesService {
   }
 
   /**
+   * Update a memories book (baul), only if the user belongs to the book's group.
+   */
+  async updateMemoriesBook(
+    bookId: string,
+    patch: UpdateMemoriesBook,
+    userId: string
+  ) {
+    const { data: existing, error: fetchErr } = await this.supabase
+      .from("memoriesBooks")
+      .select("id, groupId")
+      .eq("id", bookId)
+      .single();
+
+    if (fetchErr) {
+      if (fetchErr.code === "PGRST116") return null;
+      console.error("Error fetching memories book:", fetchErr);
+      throw new ApiException(500, "Error fetching memories book");
+    }
+
+    await this.assertUserInGroup(userId, existing.groupId);
+
+    const { data, error } = await this.supabase
+      .from("memoriesBooks")
+      .update({ ...patch, updatedAt: new Date().toISOString() })
+      .eq("id", bookId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error updating memories book:", error);
+      throw new ApiException(500, "Error updating memories book");
+    }
+
+    return data;
+  }
+
+  /**
+   * Delete a memories book (baul), only if the user belongs to the book's group.
+   * DB cascade will delete related memories.
+   */
+  async deleteMemoriesBook(bookId: string, userId: string) {
+    const { data: existing, error: fetchErr } = await this.supabase
+      .from("memoriesBooks")
+      .select("id, groupId")
+      .eq("id", bookId)
+      .single();
+
+    if (fetchErr) {
+      if (fetchErr.code === "PGRST116") {
+        throw new ApiException(404, "Memories book not found");
+      }
+      console.error("Error fetching memories book:", fetchErr);
+      throw new ApiException(500, "Error fetching memories book");
+    }
+
+    await this.assertUserInGroup(userId, existing.groupId);
+
+    const { error } = await this.supabase
+      .from("memoriesBooks")
+      .delete()
+      .eq("id", bookId);
+
+    if (error) {
+      console.error("Error deleting memories book:", error);
+      throw new ApiException(500, "Error deleting memories book");
+    }
+
+    return true;
+  }
+
+  /**
    * Create a note (memory without multimedia file)
    */
   async createNote(noteData: CreateNote, userId: string): Promise<Memory> {
@@ -218,6 +312,46 @@ export class MemoriesService {
   }
 
   /**
+   * Update a memory metadata (title/caption) with authorization check.
+   */
+  async updateMemory(
+    memoryId: string,
+    patch: UpdateMemory,
+    userId: string
+  ): Promise<Memory> {
+    const memory = await this.getMemoryById(memoryId);
+    if (!memory) {
+      throw new ApiException(404, "Memory not found");
+    }
+
+    if (memory.createdBy !== userId) {
+      throw new ApiException(403, "You can only edit your own memories");
+    }
+
+    const update: Partial<Pick<Memory, "title" | "caption">> = {};
+    if (patch.title !== undefined) update.title = patch.title;
+    if (patch.caption !== undefined) update.caption = patch.caption;
+
+    const { data, error } = await this.supabase
+      .from("memories")
+      .update(update)
+      .eq("id", memoryId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error updating memory:", error);
+      throw new ApiException(500, "Error updating memory");
+    }
+
+    if (!data) {
+      throw new ApiException(500, "Failed to update memory");
+    }
+
+    return data;
+  }
+
+  /**
    * Delete a memory (with authorization check)
    */
   async deleteMemory(memoryId: string, userId: string): Promise<boolean> {
@@ -231,6 +365,16 @@ export class MemoriesService {
     if (memory.createdBy !== userId) {
       // Optionally, you could also check if user is owner of the group
       throw new ApiException(403, "You can only delete your own memories");
+    }
+
+    // If the memory has a media URL, delete it from Storage first
+    if (memory.mediaUrl && memory.mimeType && memory.mimeType !== "text/note") {
+      try {
+        await deleteMemoryMediaByPublicUrl(this.supabase, memory.mediaUrl);
+      } catch (error) {
+        console.error("Error deleting memory media from storage:", error);
+        throw new ApiException(500, "Error deleting memory media");
+      }
     }
 
     const { error } = await this.supabase

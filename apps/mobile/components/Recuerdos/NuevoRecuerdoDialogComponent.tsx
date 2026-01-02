@@ -26,6 +26,7 @@ interface NuevoRecuerdoDialogProps {
   onCancel: () => void;
   isUploading?: boolean;
   selectedFileUri?: string;
+  selectedFileMimeType?: string;
   onFileSelected?: (uri: string, mimeType?: string) => void;
 }
 
@@ -39,9 +40,10 @@ export default function NuevoRecuerdoDialogComponent({
   onCancel,
   isUploading = false,
   selectedFileUri,
+  selectedFileMimeType,
   onFileSelected,
 }: NuevoRecuerdoDialogProps) {
-  // Paso de metadata para imágenes y audio
+  // Paso de metadata para imágenes, videos y audio
   if (
     step === "metadata" &&
     selectedTipo &&
@@ -61,13 +63,12 @@ export default function NuevoRecuerdoDialogComponent({
       >
         <MetadataInputComponent
           onSave={(title, caption) => {
-            const mimeType =
-              selectedTipo === "imagen" ? "image/jpeg" : "audio/m4a";
+            // Usar el mimeType que se recibió del archivo seleccionado
             onSave({
               contenido: selectedFileUri,
               titulo: title,
               caption: caption,
-              mimeType: mimeType,
+              mimeType: selectedFileMimeType,
             });
           }}
           onCancel={onCancel}
