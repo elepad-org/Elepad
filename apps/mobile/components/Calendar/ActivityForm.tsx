@@ -319,7 +319,7 @@ export default function ActivityForm({
     >
       <Dialog.Title style={{ 
         textAlign: "center", 
-        color: COLORS.text,
+        color: COLORS.primary,
         fontWeight: "bold",
         fontSize: 20,
       }}>
@@ -339,9 +339,9 @@ export default function ActivityForm({
                 marginBottom: 8,
                 borderRadius: 12,
                 borderColor: frequencyId === freq.id ? COLORS.primary : COLORS.border,
-                backgroundColor: frequencyId === freq.id ? `${COLORS.primary}20` : COLORS.backgroundSecondary,
+                backgroundColor: frequencyId === freq.id ? `${COLORS.primary}15` : COLORS.backgroundSecondary,
               }}
-              textColor={frequencyId === freq.id ? COLORS.primary : COLORS.text}
+              textColor={frequencyId === freq.id ? COLORS.primary : COLORS.textSecondary}
             >
               {freq.label}
             </Button>
