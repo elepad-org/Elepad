@@ -504,7 +504,11 @@ export default function CalendarCard(props: CalendarCardProps) {
       )}
       {dayEvents.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No hay eventos para este día.</Text>
+          <Text style={styles.emptyText}>
+            {selectedDay === today
+              ? "No hay eventos para hoy."
+              : "No hay eventos para este día."}
+          </Text>
         </View>
       ) : (
         <FlatList

@@ -25,25 +25,38 @@ export default function AudioRecorderComponent({
 }: AudioRecorderProps) {
   const [audioUri, setAudioUri] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
 
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
-  const player = useAudioPlayer(audioUri);
   const recorderState = useAudioRecorderState(recorder);
+
+  // Crear player con URL dummy inicial
+  const player = useAudioPlayer("https://example.com/dummy.m4a", {
+    updateInterval: 100,
+  });
+  const hasValidAudio = !!audioUri;
 
   // Watch for recording completion and set audioUri
   useEffect(() => {
     if (recorderState.url && !audioUri) {
+      console.log("Recording finished, URL:", recorderState.url);
       setAudioUri(recorderState.url);
     }
   }, [recorderState.url, audioUri]);
 
-  // Watch for audio playback completion
+  // Sincronizar estado del player
   useEffect(() => {
-    if (player && !player.playing && isPlaying) {
-      // Audio has stopped playing, reset the playing state
-      setIsPlaying(false);
-    }
-  }, [player?.playing, isPlaying]);
+    if (!hasValidAudio) return;
+
+    const interval = setInterval(() => {
+      setIsPlaying(player.playing);
+      setCurrentTime(player.currentTime);
+      setDuration(player.duration);
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [hasValidAudio, player]);
 
   const requestPermissions = async () => {
     try {
@@ -51,7 +64,7 @@ export default function AudioRecorderComponent({
       if (status !== "granted") {
         Alert.alert(
           "Permisos insuficientes",
-          "Necesitamos permisos para acceder al micrófono.",
+          "Necesitamos permisos para acceder al micrófono."
         );
         return false;
       }
@@ -71,8 +84,18 @@ export default function AudioRecorderComponent({
     if (!hasPermission) return;
 
     try {
-      await recorder.prepareToRecordAsync();
-      recorder.record();
+      // Limpiar audio anterior si existe
+      if (audioUri) {
+        setAudioUri(null);
+        setIsPlaying(false);
+        setCurrentTime(0);
+        setDuration(0);
+      }
+
+      // Usar preset HIGH_QUALITY directamente sin sobrescribir
+      await recorder.prepareToRecordAsync(RecordingPresets.HIGH_QUALITY);
+      await recorder.record();
+      console.log("Recording started");
     } catch (error) {
       console.error("Error al iniciar grabación:", error);
       Alert.alert("Error", "No se pudo iniciar la grabación");
@@ -81,19 +104,57 @@ export default function AudioRecorderComponent({
 
   const stopRecording = async () => {
     try {
-      await recorder.stop();
+      const result = await recorder.stop();
+      console.log("Recording stopped, result:", result);
+
+      // El resultado puede ser un string (URI) o un objeto con {url}
+      let uri: string | null = null;
+      if (typeof result === "string") {
+        uri = result;
+      } else if (result && typeof result === "object" && "url" in result) {
+        uri = result.url;
+      }
+
+      console.log("Extracted URI:", uri);
+      if (uri) {
+        setAudioUri(uri);
+        // Usar replace para cambiar la fuente del player existente
+        try {
+          player.replace(uri);
+          console.log("Player source replaced with:", uri);
+          // Esperar un poco para que cargue
+          setTimeout(() => {
+            console.log("After replace - duration:", player.duration);
+          }, 500);
+        } catch (error) {
+          console.error("Error replacing player source:", error);
+        }
+      }
     } catch (error) {
       console.error("Error al detener grabación:", error);
     }
   };
 
   const playSound = () => {
-    if (!audioUri || !player) return;
+    if (!hasValidAudio) return;
+    console.log("Play/Pause audio, URL:", audioUri);
+    console.log("Player duration:", player.duration);
+    console.log("Player currentTime:", player.currentTime);
+
     try {
-      if (isPlaying) {
+      if (player.playing) {
+        console.log("Pausing...");
         player.pause();
         setIsPlaying(false);
       } else {
+        console.log("Playing...");
+        // Si el audio terminó, volver al inicio
+        if (
+          player.currentTime >= player.duration - 0.1 &&
+          player.duration > 0
+        ) {
+          player.seekTo(0);
+        }
         player.play();
         setIsPlaying(true);
       }
@@ -103,9 +164,12 @@ export default function AudioRecorderComponent({
   };
 
   const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    if (!seconds || isNaN(seconds)) return "0:00";
+    // Redondear a 2 decimales
+    const rounded = Math.round(seconds * 100) / 100;
+    const mins = Math.floor(rounded / 60);
+    const secs = Math.floor(rounded % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   return (
@@ -120,10 +184,14 @@ export default function AudioRecorderComponent({
 
       <Text style={{ ...STYLES.subheading, marginBottom: 16 }}>
         {recorderState.isRecording
-          ? `Grabando... ${formatTime(Math.floor(recorderState.durationMillis / 1000))}`
+          ? `Grabando... ${formatTime(
+              Math.floor(recorderState.durationMillis / 1000)
+            )}`
           : audioUri
-            ? "Audio grabado - Presiona reproducir para escuchar"
-            : "Presiona el botón para comenzar a grabar"}
+          ? `Audio grabado (${formatTime(duration)}) - ${
+              isPlaying ? "Reproduciendo..." : "Presiona play para escuchar"
+            }`
+          : "Presiona el botón para comenzar a grabar"}
       </Text>
 
       <View style={{ alignItems: "center", marginVertical: 20 }}>

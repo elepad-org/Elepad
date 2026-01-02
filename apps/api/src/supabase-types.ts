@@ -377,6 +377,7 @@ export type Database = {
           color: string | null;
           createdAt: string;
           description: string | null;
+          color: string | null;
           groupId: string;
           id: string;
           title: string | null;
@@ -386,6 +387,7 @@ export type Database = {
           color?: string | null;
           createdAt?: string;
           description?: string | null;
+          color?: string | null;
           groupId: string;
           id?: string;
           title?: string | null;
@@ -395,6 +397,7 @@ export type Database = {
           color?: string | null;
           createdAt?: string;
           description?: string | null;
+          color?: string | null;
           groupId?: string;
           id?: string;
           title?: string | null;
