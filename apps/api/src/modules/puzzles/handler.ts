@@ -7,6 +7,8 @@ import {
   NewNetPuzzleSchema,
   GameListItemSchema,
   GameTypeEnum,
+  NewFocusPuzzleSchema,
+  NewSudokuPuzzleSchema,
 } from "./schema";
 import { openApiErrorResponse } from "@/utils/api-error";
 
@@ -181,6 +183,90 @@ puzzlesApp.openapi(
       return c.json(puzzle, 201);
     } catch (error) {
       console.error("❌ Error creating NET puzzle:", error);
+      throw error;
+    }
+  },
+);
+
+// Crear un nuevo puzzle de atención (focus)
+puzzlesApp.openapi(
+  {
+    method: "post",
+    path: "/puzzles/focus",
+    tags: ["puzzles"],
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: NewFocusPuzzleSchema,
+          },
+        },
+        required: true,
+      },
+    },
+    responses: {
+      201: {
+        description: "Puzzle de atención creado",
+        content: { "application/json": { schema: PuzzleWithDetailsSchema } },
+      },
+      400: openApiErrorResponse("Datos inválidos"),
+      500: openApiErrorResponse("Error interno del servidor"),
+    },
+  },
+  async (c) => {
+    try {
+      console.log("🎯 POST /puzzles/focus - Request received");
+      const body = c.req.valid("json");
+      console.log("📦 Request body:", body);
+
+      const puzzle = await c.var.puzzleService.createFocusPuzzle(body as any);
+      console.log("✅ Focus Puzzle created successfully:", puzzle.puzzle.id);
+
+      return c.json(puzzle, 201);
+    } catch (error) {
+      console.error("❌ Error creating focus puzzle:", error);
+      throw error;
+    }
+  },
+);
+
+// Crear un nuevo puzzle de Sudoku
+puzzlesApp.openapi(
+  {
+    method: "post",
+    path: "/puzzles/sudoku",
+    tags: ["puzzles"],
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: NewSudokuPuzzleSchema,
+          },
+        },
+        required: true,
+      },
+    },
+    responses: {
+      201: {
+        description: "Puzzle de Sudoku creado",
+        content: { "application/json": { schema: PuzzleWithDetailsSchema } },
+      },
+      400: openApiErrorResponse("Datos inválidos"),
+      500: openApiErrorResponse("Error interno del servidor"),
+    },
+  },
+  async (c) => {
+    try {
+      console.log("🌐 POST /puzzles/sudoku - Request received");
+      const body = c.req.valid("json");
+      console.log("📦 Request body:", body);
+
+      const puzzle = await c.var.puzzleService.createSudokuPuzzle(body);
+      console.log("✅ Sudoku Puzzle created successfully:", puzzle.puzzle.id);
+
+      return c.json(puzzle, 201);
+    } catch (error) {
+      console.error("❌ Error creating Sudoku puzzle:", error);
       throw error;
     }
   },

@@ -113,6 +113,22 @@ export default function JuegosScreen() {
               onPlay={() => router.push("/net-game")}
               onDetails={() => router.push("/game-detail/net")}
             />
+
+            <GameCard
+              emoji="🔢"
+              title="Sudoku"
+              description="Completa el tablero con números del 1 al 9"
+              onPlay={() => router.push("/sudoku-game")}
+              onDetails={() => router.push("/game-detail/sudoku")}
+            />
+
+            <GameCard
+              emoji="🎯"
+              title="Focus"
+              description="Selecciona el color indicado por la palabra."
+              onPlay={() => router.push("/focus-game")}
+              onDetails={() => router.push("/game-detail/focus")}
+            />
           </View>
 
           {/* Coming Soon */}
@@ -120,7 +136,7 @@ export default function JuegosScreen() {
             <Text style={styles.comingSoonEmoji}>🎮</Text>
             <Text style={styles.comingSoonTitle}>Próximamente</Text>
             <Text style={styles.comingSoonText}>
-              Nuevos juegos: sudoku, rompecabezas y más
+              Nuevos juegos: rompecabezas y más
             </Text>
           </View>
         </View>
