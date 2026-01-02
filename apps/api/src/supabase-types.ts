@@ -157,6 +157,7 @@ export type Database = {
           durationMs: number | null;
           finishedAt: string | null;
           id: string;
+          isFocusGame: boolean | null;
           logicPuzzleId: string | null;
           memoryPuzzleId: string | null;
           meta: Json | null;
@@ -171,6 +172,7 @@ export type Database = {
           durationMs?: number | null;
           finishedAt?: string | null;
           id?: string;
+          isFocusGame?: boolean | null;
           logicPuzzleId?: string | null;
           memoryPuzzleId?: string | null;
           meta?: Json | null;
@@ -185,6 +187,7 @@ export type Database = {
           durationMs?: number | null;
           finishedAt?: string | null;
           id?: string;
+          isFocusGame?: boolean | null;
           logicPuzzleId?: string | null;
           memoryPuzzleId?: string | null;
           meta?: Json | null;
@@ -371,6 +374,7 @@ export type Database = {
       };
       memoriesBooks: {
         Row: {
+          color: string | null;
           createdAt: string;
           description: string | null;
           color: string | null;
@@ -380,6 +384,7 @@ export type Database = {
           updatedAt: string;
         };
         Insert: {
+          color?: string | null;
           createdAt?: string;
           description?: string | null;
           color?: string | null;
@@ -389,6 +394,7 @@ export type Database = {
           updatedAt?: string;
         };
         Update: {
+          color?: string | null;
           createdAt?: string;
           description?: string | null;
           color?: string | null;
@@ -469,24 +475,24 @@ export type Database = {
       sudokuGames: {
         Row: {
           cols: number;
-          given: string;
+          given: Json | null;
           puzzleId: string;
           rows: number;
-          solution: string;
+          solution: Json | null;
         };
         Insert: {
           cols: number;
-          given: string;
+          given?: Json | null;
           puzzleId: string;
           rows: number;
-          solution: string;
+          solution?: Json | null;
         };
         Update: {
           cols?: number;
-          given?: string;
+          given?: Json | null;
           puzzleId?: string;
           rows?: number;
-          solution?: string;
+          solution?: Json | null;
         };
         Relationships: [
           {
@@ -637,7 +643,7 @@ export type Database = {
       };
     };
     Enums: {
-      game_type: "memory" | "logic";
+      game_type: "memory" | "logic" | "attention";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -768,7 +774,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      game_type: ["memory", "logic"],
+      game_type: ["memory", "logic", "attention"],
     },
   },
 } as const;

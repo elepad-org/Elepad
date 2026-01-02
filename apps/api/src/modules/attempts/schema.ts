@@ -4,11 +4,11 @@ import { GameTypeEnum } from "../puzzles/schema";
 // Schema para un intento/attempt
 export const AttemptSchema = z
   .object({
-    id: z.string().uuid(),
-    userId: z.string().uuid(),
-    sudokuPuzzleId: z.string().uuid().nullable(),
-    memoryPuzzleId: z.string().uuid().nullable(),
-    logicPuzzleId: z.string().uuid().nullable(),
+    id: z.uuid(),
+    userId: z.uuid(),
+    sudokuPuzzleId: z.uuid().nullable(),
+    memoryPuzzleId: z.uuid().nullable(),
+    logicPuzzleId: z.uuid().nullable(),
     startedAt: z.string().datetime(),
     finishedAt: z.string().datetime().nullable(),
     durationMs: z.number().int().nullable(),
@@ -16,6 +16,7 @@ export const AttemptSchema = z
     success: z.boolean().nullable(),
     moves: z.number().int().nullable(),
     meta: z.record(z.string(), z.any()).nullable(),
+    isFocusGame: z.boolean().optional(), // TODO: revisar
   })
   .openapi("Attempt");
 
@@ -24,7 +25,7 @@ export type Attempt = z.infer<typeof AttemptSchema>;
 // Schema para crear un nuevo intento
 export const StartAttemptSchema = z
   .object({
-    puzzleId: z.string().uuid(),
+    puzzleId: z.uuid(),
     gameType: GameTypeEnum,
   })
   .openapi("StartAttempt");
@@ -39,6 +40,7 @@ export const FinishAttemptSchema = z
     durationMs: z.number().int().min(0),
     score: z.number().int().min(0).optional(),
     meta: z.record(z.string(), z.any()).optional(),
+    isFocusGame: z.boolean().optional(), // TODO: revisar
   })
   .openapi("FinishAttempt");
 
