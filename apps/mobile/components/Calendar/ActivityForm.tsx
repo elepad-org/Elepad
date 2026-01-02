@@ -51,6 +51,8 @@ export default function ActivityForm({
     { start: number; end: number } | undefined
   >(undefined);
   const titleInputRef = useRef<RNTextInput>(null);
+  const [showFrequencyModal, setShowFrequencyModal] = useState(false);
+
 
   // Fetch available frequencies
   const frequenciesQuery = useGetFrequencies();
@@ -140,6 +142,7 @@ export default function ActivityForm({
   };
 
   return (
+    <>
     <Dialog
       visible={visible}
       onDismiss={onClose}
@@ -168,8 +171,9 @@ export default function ActivityForm({
           underlineColor="transparent"
           activeUnderlineColor="transparent"
           textColor={COLORS.text}
-          placeholder={initial ? "Editar evento" : "Nuevo evento"}
-          placeholderTextColor={COLORS.text}
+          placeholder={initial ? "Agregar evento" : "Nuevo evento"}
+          placeholderTextColor={COLORS.textSecondary}
+      
           theme={{
             colors: {
               primary: "transparent",
@@ -229,38 +233,36 @@ export default function ActivityForm({
           </View>
         </View>
 
-        <Menu
+       <Menu
           visible={showFrequencyMenu}
-          onDismiss={() => setShowFrequencyMenu(false)}
+          onDismiss={() => setShowFrequencyMenu((prev) => !prev)}
           contentStyle={{
             backgroundColor: COLORS.background,
             borderRadius: 12,
+            maxHeight: 300,
           }}
           anchor={
-            <Button
-              mode="outlined"
-              onPress={() => setShowFrequencyMenu(true)}
-              style={styles.pickerButton}
-              icon="repeat"
-            >
-              Frecuencia: {frequencyLabel}
-            </Button>
+           <Button
+  mode="outlined"
+  onPress={() => setShowFrequencyModal(true)}
+  icon="repeat"
+>
+  Frecuencia: {frequencyLabel}
+</Button>
           }
         >
-          <ScrollView style={{ maxHeight: 300 }}>
-        
-            {frequencies.map((freq: Frequency) => (
-              <Menu.Item
-                key={freq.id}
-                onPress={() => {
-                  setFrequencyId(freq.id);
-                  setShowFrequencyMenu(false);
-                }}
-                title={freq.label}
-              />
-            ))}
-          </ScrollView>
+          {frequencies.map((freq: Frequency) => (
+            <Menu.Item
+              key={freq.id}
+              onPress={() => {
+                setFrequencyId(freq.id);
+                setShowFrequencyMenu((prev) => !prev)
+              }}
+              title={freq.label}
+            />
+          ))}
         </Menu>
+
 
         <DateTimePickerModal
           isVisible={showStartPicker}
@@ -305,6 +307,49 @@ export default function ActivityForm({
         </Button>
       </Dialog.Actions>
     </Dialog>
+    <Dialog
+      visible={showFrequencyModal}
+      onDismiss={() => setShowFrequencyModal(false)}
+      style={{
+        backgroundColor: COLORS.background,
+        width: "92%",
+        alignSelf: "center",
+        borderRadius: 20,
+      }}
+    >
+      <Dialog.Title style={{ 
+        textAlign: "center", 
+        color: COLORS.text,
+        fontWeight: "bold",
+        fontSize: 20,
+      }}>
+        Seleccionar frecuencia
+      </Dialog.Title>
+      <Dialog.Content>
+        <ScrollView style={{ maxHeight: 310 }}>
+          {frequencies.map((freq) => (
+            <Button
+              key={freq.id}
+              mode="outlined"
+              onPress={() => {
+                setFrequencyId(freq.id);
+                setShowFrequencyModal(false);
+              }}
+              style={{
+                marginBottom: 8,
+                borderRadius: 12,
+                borderColor: frequencyId === freq.id ? COLORS.primary : COLORS.border,
+                backgroundColor: frequencyId === freq.id ? `${COLORS.primary}20` : COLORS.backgroundSecondary,
+              }}
+              textColor={frequencyId === freq.id ? COLORS.primary : COLORS.text}
+            >
+              {freq.label}
+            </Button>
+          ))}
+        </ScrollView>
+      </Dialog.Content>
+    </Dialog>
+  </>
   );
 }
 
