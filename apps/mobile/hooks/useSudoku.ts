@@ -62,7 +62,6 @@ export const useSudoku = (props: UseSudokuProps) => {
   // IDs para el backend
   const [puzzleId, setPuzzleId] = useState<string | null>(null);
   const [attemptId, setAttemptId] = useState<string | null>(null);
-  const [gameId, setGameId] = useState<string>(Date.now().toString());
 
   // Refs para lógica interna
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -78,9 +77,6 @@ export const useSudoku = (props: UseSudokuProps) => {
   // --- Lógica de Inicialización ---
 
   const initializeGame = useCallback(async () => {
-    const newGameId = Date.now().toString();
-    setGameId(newGameId);
-
     // Resetear estados
     setBoard([]);
     setMistakes(0);
@@ -206,6 +202,66 @@ export const useSudoku = (props: UseSudokuProps) => {
     [board, isComplete],
   );
 
+  // TODO: Revisar si tiene sentido que esten separadas las funciones de LoseGame y QuitGame
+  // Las dos hacen lo mismo practicamente por ahora
+  const quitGame = useCallback(async () => {
+    // Detener el temporizador
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    // Evitar múltiples finalizaciones
+    if (hasFinishedAttempt.current) return;
+
+    // Finalizar el intento en el backend
+    if (attemptId && startTimeRef.current) {
+      hasFinishedAttempt.current = true;
+      const durationMs = Date.now() - startTimeRef.current;
+
+      try {
+        const response = await finishAttempt.mutateAsync({
+          attemptId,
+          data: {
+            success: false,
+            moves: 0,
+            durationMs,
+            score: 0,
+          },
+        });
+        console.log("❌ Intento abandonado:", response);
+      } catch (e) {
+        console.error("Error al abandonar la partida", e);
+      }
+    }
+  }, [attemptId, filledCells]);
+
+  const loseGame = useCallback(async () => {
+    // Detener el temporizador
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    // Evitar múltiples finalizaciones
+    if (hasFinishedAttempt.current) return;
+
+    // Finalizar el intento en el backend
+    if (attemptId && startTimeRef.current) {
+      hasFinishedAttempt.current = true;
+      const durationMs = Date.now() - startTimeRef.current;
+
+      try {
+        const response = await finishAttempt.mutateAsync({
+          attemptId,
+          data: {
+            success: false,
+            moves: filledCells,
+            durationMs,
+            score: 81 - maxMistakes,
+          },
+        });
+        console.log("❌ Intento abandonado:", response);
+      } catch (e) {
+        console.error("Error al abandonar la partida", e);
+      }
+    }
+  }, [attemptId, filledCells]);
+
   const handleNumberInput = useCallback(
     (number: number) => {
       if (!selectedCell || isComplete || isLoading) return;
@@ -262,6 +318,7 @@ export const useSudoku = (props: UseSudokuProps) => {
           const newMistakes = prev + 1;
           if (newMistakes >= maxMistakes && onGameOver) {
             // Lógica de Game Over
+            loseGame();
             onGameOver();
           }
           return newMistakes;
@@ -369,35 +426,6 @@ export const useSudoku = (props: UseSudokuProps) => {
     hasInitialized.current = false;
     initializeGame();
   }, [initializeGame]);
-
-  const quitGame = useCallback(async () => {
-    // Detener el temporizador
-    if (timerRef.current) clearInterval(timerRef.current);
-
-    // Evitar múltiples finalizaciones
-    if (hasFinishedAttempt.current) return;
-
-    // Finalizar el intento en el backend
-    if (attemptId && startTimeRef.current) {
-      hasFinishedAttempt.current = true;
-      const durationMs = Date.now() - startTimeRef.current;
-
-      try {
-        const response = await finishAttempt.mutateAsync({
-          attemptId,
-          data: {
-            success: false,
-            moves: filledCells,
-            durationMs,
-            score: 0,
-          },
-        });
-        console.log("❌ Intento abandonado:", response);
-      } catch (e) {
-        console.error("Error al abandonar la partida", e);
-      }
-    }
-  }, [attemptId, filledCells]);
 
   return {
     board,

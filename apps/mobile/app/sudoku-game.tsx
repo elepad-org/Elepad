@@ -92,7 +92,6 @@ export default function SudokuGameScreen() {
 
   const handleGameOver = useCallback(() => {
     // Cuando el jugador pierde por 3 errores (por definir algo)
-    // TODO: definir este comportamiento en el hook
     setShowResultsDialog(true);
     setGameResults({
       moves: 0,
