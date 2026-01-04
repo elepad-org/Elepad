@@ -4,14 +4,17 @@ import {
   View,
   StyleSheet,
   Pressable,
+  Image,
+  ImageBackground,
+  Dimensions,
 } from "react-native";
 import {
   ActivityIndicator,
   Text,
   Avatar,
-  Card,
   Button,
   Chip,
+  IconButton,
 } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -23,6 +26,9 @@ import {
 } from "@elepad/api-client";
 import { useRouter } from "expo-router";
 import { useMemo } from "react";
+import { LinearGradient } from "expo-linear-gradient";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function HomeScreen() {
   const { userElepad, loading } = useAuth();
@@ -121,256 +127,280 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={STYLES.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
       <ScrollView
-        contentContainerStyle={STYLES.contentContainer}
-        keyboardShouldPersistTaps="handled"
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
       >
-        <View style={STYLES.container}>
-          {/* Header compacto y elegante */}
-          <View style={styles.compactHeader}>
-            <View style={styles.greetingContainer}>
-              <Text style={styles.greeting}>{getGreeting()}</Text>
-              <Text style={styles.userName} numberOfLines={1}>
-                {displayName}
-              </Text>
-            </View>
-            {userElepad?.avatarUrl ? (
-              <Avatar.Image
-                size={56}
-                source={{ uri: userElepad?.avatarUrl }}
-                style={styles.avatar}
-              />
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.greetingContainer}>
+            <Text style={styles.greeting}>{getGreeting()}</Text>
+            <Text style={styles.userName} numberOfLines={1}>
+              {displayName}
+            </Text>
+          </View>
+          {userElepad?.avatarUrl ? (
+            <Avatar.Image
+              size={60}
+              source={{ uri: userElepad?.avatarUrl }}
+              style={styles.avatar}
+            />
+          ) : (
+            <Avatar.Text
+              size={60}
+              label={getInitials(displayName)}
+              style={[styles.avatar, { backgroundColor: COLORS.primary }]}
+              labelStyle={{ color: COLORS.white, fontSize: 22 }}
+            />
+          )}
+        </View>
+
+        {/* Último Recuerdo - DESTACADO */}
+        {memoriesQuery.isLoading ? (
+          <View style={styles.memoryCardLoading}>
+            <ActivityIndicator size="large" />
+          </View>
+        ) : lastMemory ? (
+          <Pressable
+            style={styles.memoryCard}
+            onPress={() => router.push("/(tabs)/memories")}
+          >
+            {lastMemory.imageUrl ? (
+              <ImageBackground
+                source={{ uri: lastMemory.imageUrl }}
+                style={styles.memoryImage}
+                imageStyle={styles.memoryImageStyle}
+              >
+                <LinearGradient
+                  colors={["transparent", "rgba(0,0,0,0.7)"]}
+                  style={styles.memoryGradient}
+                >
+                  <View style={styles.memoryContent}>
+                    <Text style={styles.memoryLabel}>ÚLTIMO RECUERDO</Text>
+                    <Text style={styles.memoryTitle} numberOfLines={2}>
+                      {lastMemory.title || "Sin título"}
+                    </Text>
+                    {lastMemory.description && (
+                      <Text style={styles.memoryDescription} numberOfLines={2}>
+                        {lastMemory.description}
+                      </Text>
+                    )}
+                    <Text style={styles.memoryDate}>
+                      {new Date(lastMemory.createdAt).toLocaleDateString("es", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </Text>
+                  </View>
+                </LinearGradient>
+              </ImageBackground>
             ) : (
-              <Avatar.Text
-                size={56}
-                label={getInitials(displayName)}
-                style={[styles.avatar, { backgroundColor: COLORS.primary }]}
-                labelStyle={{ color: COLORS.white, fontSize: 20 }}
-              />
+              <View style={styles.memoryNoImage}>
+                <View style={styles.memoryNoImageIcon}>
+                  <IconButton icon="heart" size={40} iconColor={COLORS.primary} />
+                </View>
+                <View style={styles.memoryContent}>
+                  <Text style={styles.memoryLabelDark}>ÚLTIMO RECUERDO</Text>
+                  <Text style={styles.memoryTitleDark} numberOfLines={2}>
+                    {lastMemory.title || "Sin título"}
+                  </Text>
+                  {lastMemory.description && (
+                    <Text style={styles.memoryDescriptionDark} numberOfLines={3}>
+                      {lastMemory.description}
+                    </Text>
+                  )}
+                  <Text style={styles.memoryDateDark}>
+                    {new Date(lastMemory.createdAt).toLocaleDateString("es", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </Text>
+                </View>
+              </View>
+            )}
+          </Pressable>
+        ) : (
+          <View style={styles.memoryCardEmpty}>
+            <IconButton icon="heart-outline" size={48} iconColor={COLORS.textSecondary} />
+            <Text style={styles.emptyTitle}>No hay recuerdos guardados</Text>
+            <Text style={styles.emptySubtitle}>
+              Comienza a crear tus momentos especiales
+            </Text>
+            <Button
+              mode="contained"
+              onPress={() => router.push("/(tabs)/memories")}
+              style={styles.emptyButton}
+              buttonColor={COLORS.primary}
+            >
+              Crear recuerdo
+            </Button>
+          </View>
+        )}
+
+        {/* Próximos Eventos */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Próximos eventos</Text>
+            {upcomingActivities.length > 0 && (
+              <Button
+                mode="text"
+                onPress={() => router.push("/calendar")}
+                labelStyle={styles.sectionLink}
+                compact
+              >
+                Ver todos
+              </Button>
             )}
           </View>
 
-          {/* Widget: Próximos eventos */}
-          <Card style={styles.widgetCard}>
-            <Card.Content>
-              <View style={styles.widgetHeader}>
-                <Text style={styles.widgetTitle}>Próximos eventos</Text>
-              </View>
-              {activitiesQuery.isLoading ? (
-                <ActivityIndicator size="small" style={{ marginTop: 12 }} />
-              ) : upcomingActivities.length > 0 ? (
-                <View style={styles.widgetContent}>
-                  {upcomingActivities.map((activity: any) => {
-                    const activityDate = new Date(activity.startsAt);
-                    const isToday =
-                      activityDate.toDateString() === new Date().toDateString();
-                    const isTomorrow =
-                      activityDate.toDateString() ===
-                      new Date(Date.now() + 86400000).toDateString();
+          {activitiesQuery.isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator />
+            </View>
+          ) : upcomingActivities.length > 0 ? (
+            <View style={styles.eventsContainer}>
+              {upcomingActivities.map((activity: any) => {
+                const activityDate = new Date(activity.startsAt);
+                const isToday =
+                  activityDate.toDateString() === new Date().toDateString();
+                const isTomorrow =
+                  activityDate.toDateString() ===
+                  new Date(Date.now() + 86400000).toDateString();
 
-                    let dateLabel = activityDate.toLocaleDateString("es", {
-                      day: "numeric",
-                      month: "short",
-                    });
+                let dateLabel = activityDate.toLocaleDateString("es", {
+                  day: "numeric",
+                  month: "short",
+                });
 
-                    if (isToday) dateLabel = "Hoy";
-                    if (isTomorrow) dateLabel = "Mañana";
+                if (isToday) dateLabel = "Hoy";
+                if (isTomorrow) dateLabel = "Mañana";
 
-                    return (
-                      <View key={activity.id} style={styles.activityItem}>
-                        <View style={styles.activityLeft}>
-                          <Text style={styles.activityDate}>{dateLabel}</Text>
-                          <Text style={styles.activityTime}>
-                            {activityDate.toLocaleTimeString("es", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </Text>
-                        </View>
-                        <View style={styles.activityDivider} />
-                        <View style={{ flex: 1 }}>
-                          <Text style={styles.activityTitle} numberOfLines={1}>
-                            {activity.title}
-                          </Text>
-                          {activity.description && (
-                            <Text
-                              style={styles.activityDescription}
-                              numberOfLines={1}
-                            >
-                              {activity.description}
-                            </Text>
-                          )}
-                        </View>
-                        {activity.completed && (
-                          <Chip
-                            mode="flat"
-                            style={styles.completedChip}
-                            textStyle={styles.completedChipText}
-                          >
-                            ✓
-                          </Chip>
-                        )}
-                      </View>
-                    );
-                  })}
-                  <Button
-                    mode="text"
-                    onPress={() => router.push("/calendar")}
-                    style={{ marginTop: 8 }}
-                    labelStyle={{ color: COLORS.primary }}
-                  >
-                    Ver todos los eventos
-                  </Button>
-                </View>
-              ) : (
-                <View style={styles.emptyWidget}>
-                  <Text style={styles.emptyText}>No hay eventos próximos</Text>
-                  <Button
-                    mode="contained"
-                    onPress={() => router.push("/calendar")}
-                    style={{ marginTop: 16, borderRadius: 12 }}
-                    buttonColor={COLORS.primary}
-                  >
-                    Crear evento
-                  </Button>
-                </View>
-              )}
-            </Card.Content>
-          </Card>
-
-          {/* Widget: Último juego */}
-          <Card style={styles.widgetCard}>
-            <Card.Content>
-              <View style={styles.widgetHeader}>
-                <Text style={styles.widgetTitle}>Actividad reciente</Text>
-              </View>
-              {attemptsQuery.isLoading ? (
-                <ActivityIndicator size="small" style={{ marginTop: 12 }} />
-              ) : lastAttempt ? (
-                <Pressable
-                  style={styles.widgetContent}
-                  onPress={() => router.push("/history")}
-                >
-                  <View style={styles.gameInfo}>
-                    <View style={styles.gameHeader}>
-                      <Text style={styles.gameIcon}>
-                        {lastAttempt.gameType === "memory" ? "🧠" : "🧩"}
+                return (
+                  <View key={activity.id} style={styles.eventItem}>
+                    <View style={styles.eventTime}>
+                      <Text style={styles.eventDate}>{dateLabel}</Text>
+                      <Text style={styles.eventHour}>
+                        {activityDate.toLocaleTimeString("es", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </Text>
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.gameName}>
-                          {lastAttempt.gameType === "memory"
-                            ? "Juego de Memoria"
-                            : "Juego NET"}
-                        </Text>
-                        <Text style={styles.gameTime}>
-                          {new Date(lastAttempt.createdAt).toLocaleDateString(
-                            "es",
-                            {
-                              day: "numeric",
-                              month: "long",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            },
-                          )}
-                        </Text>
-                      </View>
-                      <View style={styles.scoreContainer}>
-                        <Text style={styles.scoreLabel}>Puntuación</Text>
-                        <Text style={styles.scoreValue}>
-                          {lastAttempt.score || 0}
-                        </Text>
-                      </View>
                     </View>
-                  </View>
-                </Pressable>
-              ) : (
-                <View style={styles.emptyWidget}>
-                  <Text style={styles.emptyText}>Aún no has jugado</Text>
-                  <Button
-                    mode="contained"
-                    onPress={() => router.push("/games")}
-                    style={{ marginTop: 16, borderRadius: 12 }}
-                    buttonColor={COLORS.primary}
-                  >
-                    Explorar juegos
-                  </Button>
-                </View>
-              )}
-            </Card.Content>
-          </Card>
-
-          {/* Widget: Recuerdo reciente */}
-          <Card style={styles.widgetCard}>
-            <Card.Content>
-              <View style={styles.widgetHeader}>
-                <Text style={styles.widgetTitle}>Último recuerdo</Text>
-              </View>
-              {memoriesQuery.isLoading ? (
-                <ActivityIndicator size="small" style={{ marginTop: 12 }} />
-              ) : lastMemory ? (
-                <Pressable
-                  style={styles.widgetContent}
-                  onPress={() => router.push("/(tabs)/memories")}
-                >
-                  <View style={styles.memoryInfo}>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.memoryTitle} numberOfLines={2}>
-                        {lastMemory.title || "Sin título"}
+                    <View style={styles.eventDivider} />
+                    <View style={styles.eventContent}>
+                      <Text style={styles.eventTitle} numberOfLines={1}>
+                        {activity.title}
                       </Text>
-                      {lastMemory.description && (
-                        <Text
-                          style={styles.memoryDescription}
-                          numberOfLines={3}
-                        >
-                          {lastMemory.description}
+                      {activity.description && (
+                        <Text style={styles.eventDesc} numberOfLines={1}>
+                          {activity.description}
                         </Text>
                       )}
-                      <Text style={styles.memoryDate}>
-                        {new Date(lastMemory.createdAt).toLocaleDateString(
-                          "es",
-                          {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          },
-                        )}
-                      </Text>
                     </View>
+                    {activity.completed && (
+                      <Chip mode="flat" style={styles.eventChip} textStyle={styles.eventChipText}>
+                        ✓
+                      </Chip>
+                    )}
                   </View>
-                </Pressable>
-              ) : (
-                <View style={styles.emptyWidget}>
-                  <Text style={styles.emptyText}>
-                    No hay recuerdos guardados
-                  </Text>
-                  <Button
-                    mode="contained"
-                    onPress={() => router.push("/(tabs)/memories")}
-                    style={{ marginTop: 16, borderRadius: 12 }}
-                    buttonColor={COLORS.primary}
-                  >
-                    Crear recuerdo
-                  </Button>
-                </View>
-              )}
-            </Card.Content>
-          </Card>
+                );
+              })}
+            </View>
+          ) : (
+            <View style={styles.emptySection}>
+              <Text style={styles.emptyText}>No hay eventos próximos</Text>
+              <Button
+                mode="outlined"
+                onPress={() => router.push("/calendar")}
+                style={styles.emptyButtonOutline}
+                labelStyle={{ color: COLORS.primary }}
+              >
+                Crear evento
+              </Button>
+            </View>
+          )}
         </View>
+
+        {/* Actividad Reciente */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Actividad reciente</Text>
+
+          {attemptsQuery.isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator />
+            </View>
+          ) : lastAttempt ? (
+            <Pressable style={styles.gameCard} onPress={() => router.push("/history")}>
+              <View style={styles.gameIcon}>
+                <Text style={styles.gameEmoji}>
+                  {lastAttempt.gameType === "memory" ? "🧠" : "🧩"}
+                </Text>
+              </View>
+              <View style={styles.gameInfo}>
+                <Text style={styles.gameName}>
+                  {lastAttempt.gameType === "memory" ? "Juego de Memoria" : "Juego NET"}
+                </Text>
+                <Text style={styles.gameTime}>
+                  {new Date(lastAttempt.createdAt).toLocaleDateString("es", {
+                    day: "numeric",
+                    month: "long",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+              </View>
+              <View style={styles.gameScore}>
+                <Text style={styles.scoreLabel}>PUNTOS</Text>
+                <Text style={styles.scoreValue}>{lastAttempt.score || 0}</Text>
+              </View>
+            </Pressable>
+          ) : (
+            <View style={styles.emptySection}>
+              <Text style={styles.emptyText}>Aún no has jugado</Text>
+              <Button
+                mode="outlined"
+                onPress={() => router.push("/games")}
+                style={styles.emptyButtonOutline}
+                labelStyle={{ color: COLORS.primary }}
+              >
+                Explorar juegos
+              </Button>
+            </View>
+          )}
+        </View>
+
+        <View style={{ height: 20 }} />
       </ScrollView>
     </SafeAreaView>
   );
 }
 
+
 const styles = StyleSheet.create({
-  compactHeader: {
+  safeArea: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 24,
-    paddingHorizontal: 4,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 20,
+    backgroundColor: COLORS.background,
   },
   greetingContainer: {
     flex: 1,
@@ -379,115 +409,242 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.textSecondary,
     fontWeight: "500",
-    marginBottom: 2,
+    marginBottom: 4,
   },
   userName: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: "bold",
     color: COLORS.text,
+    letterSpacing: -0.5,
   },
   avatar: {
-    elevation: 4,
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-  },
-  widgetCard: {
-    backgroundColor: COLORS.backgroundSecondary,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
     ...SHADOWS.card,
   },
-  widgetHeader: {
+  
+  // Memory Card - DESTACADO
+  memoryCard: {
+    width: SCREEN_WIDTH,
+    height: 280,
+    marginBottom: 24,
+  },
+  memoryCardLoading: {
+    width: SCREEN_WIDTH,
+    height: 280,
+    marginBottom: 24,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: COLORS.backgroundSecondary,
+  },
+  memoryCardEmpty: {
+    width: SCREEN_WIDTH,
+    height: 280,
+    marginBottom: 24,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: COLORS.backgroundSecondary,
+    paddingHorizontal: 32,
+  },
+  memoryImage: {
+    width: "100%",
+    height: "100%",
+  },
+  memoryImageStyle: {
+    resizeMode: "cover",
+  },
+  memoryGradient: {
+    flex: 1,
+    justifyContent: "flex-end",
+    padding: 24,
+  },
+  memoryNoImage: {
+    flex: 1,
+    backgroundColor: COLORS.backgroundSecondary,
+    padding: 24,
+    justifyContent: "flex-end",
+  },
+  memoryNoImageIcon: {
+    position: "absolute",
+    top: 24,
+    right: 24,
+    opacity: 0.3,
+  },
+  memoryContent: {
+    gap: 6,
+  },
+  memoryLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: COLORS.white,
+    letterSpacing: 1.5,
+    marginBottom: 4,
+  },
+  memoryLabelDark: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: COLORS.primary,
+    letterSpacing: 1.5,
+    marginBottom: 4,
+  },
+  memoryTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: COLORS.white,
+    lineHeight: 30,
+  },
+  memoryTitleDark: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: COLORS.text,
+    lineHeight: 30,
+  },
+  memoryDescription: {
+    fontSize: 15,
+    color: "rgba(255,255,255,0.9)",
+    lineHeight: 22,
+  },
+  memoryDescriptionDark: {
+    fontSize: 15,
+    color: COLORS.textSecondary,
+    lineHeight: 22,
+  },
+  memoryDate: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.8)",
+    fontWeight: "600",
+    marginTop: 4,
+  },
+  memoryDateDark: {
+    fontSize: 13,
+    color: COLORS.primary,
+    fontWeight: "600",
+    marginTop: 4,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: COLORS.text,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  emptyButton: {
+    borderRadius: 12,
+  },
+
+  // Sections
+  section: {
+    paddingHorizontal: 20,
+    marginBottom: 28,
+  },
+  sectionHeader: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 16,
   },
-  widgetTitle: {
-    fontSize: 17,
-    fontWeight: "600",
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
     color: COLORS.text,
   },
-  widgetContent: {
-    gap: 12,
+  sectionLink: {
+    fontSize: 14,
+    color: COLORS.primary,
   },
-  activityItem: {
+  loadingContainer: {
+    paddingVertical: 20,
+    alignItems: "center",
+  },
+
+  // Events
+  eventsContainer: {
+    gap: 10,
+  },
+  eventItem: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: COLORS.white,
-    padding: 14,
-    borderRadius: 12,
-    gap: 12,
-    ...SHADOWS.light,
+    borderRadius: 16,
+    padding: 16,
+    gap: 14,
+    ...SHADOWS.card,
   },
-  activityLeft: {
+  eventTime: {
     alignItems: "center",
     minWidth: 70,
   },
-  activityDate: {
-    fontSize: 13,
-    fontWeight: "700",
+  eventDate: {
+    fontSize: 14,
+    fontWeight: "800",
     color: COLORS.primary,
-    marginBottom: 2,
+    marginBottom: 3,
   },
-  activityTime: {
+  eventHour: {
     fontSize: 12,
     color: COLORS.textSecondary,
-    fontWeight: "500",
-  },
-  activityDivider: {
-    width: 2,
-    height: 40,
-    backgroundColor: COLORS.primary + "30",
-    borderRadius: 1,
-  },
-  activityTitle: {
-    fontSize: 15,
     fontWeight: "600",
-    color: COLORS.text,
-    marginBottom: 2,
   },
-  activityDescription: {
+  eventDivider: {
+    width: 3,
+    height: 44,
+    backgroundColor: COLORS.primary,
+    borderRadius: 2,
+    opacity: 0.3,
+  },
+  eventContent: {
+    flex: 1,
+  },
+  eventTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  eventDesc: {
     fontSize: 13,
     color: COLORS.textSecondary,
-    marginTop: 2,
   },
-  completedChip: {
+  eventChip: {
     backgroundColor: COLORS.success,
-    height: 28,
+    height: 32,
   },
-  completedChipText: {
-    fontSize: 14,
+  eventChipText: {
+    fontSize: 16,
     color: COLORS.white,
   },
-  emptyWidget: {
-    alignItems: "center",
-    paddingVertical: 24,
-  },
-  emptyText: {
-    fontSize: 15,
-    color: COLORS.textSecondary,
-    textAlign: "center",
-  },
-  gameInfo: {
-    backgroundColor: COLORS.white,
-    padding: 16,
-    borderRadius: 12,
-    ...SHADOWS.light,
-  },
-  gameHeader: {
+
+  // Game Card
+  gameCard: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    padding: 18,
+    gap: 16,
+    ...SHADOWS.card,
   },
   gameIcon: {
-    fontSize: 40,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: COLORS.primary + "15",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  gameEmoji: {
+    fontSize: 32,
+  },
+  gameInfo: {
+    flex: 1,
   },
   gameName: {
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 17,
+    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 4,
   },
@@ -495,45 +652,41 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: COLORS.textSecondary,
   },
-  scoreContainer: {
+  gameScore: {
     alignItems: "center",
     backgroundColor: COLORS.primary,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 14,
+    minWidth: 70,
   },
   scoreLabel: {
-    fontSize: 11,
+    fontSize: 10,
     color: COLORS.white,
-    fontWeight: "600",
-    marginBottom: 2,
+    fontWeight: "700",
+    marginBottom: 4,
+    letterSpacing: 0.5,
   },
   scoreValue: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "bold",
     color: COLORS.white,
   },
-  memoryInfo: {
-    backgroundColor: COLORS.white,
-    padding: 16,
-    borderRadius: 12,
-    ...SHADOWS.light,
+
+  // Empty States
+  emptySection: {
+    alignItems: "center",
+    paddingVertical: 32,
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 16,
   },
-  memoryTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: COLORS.text,
-    marginBottom: 8,
-  },
-  memoryDescription: {
-    fontSize: 14,
+  emptyText: {
+    fontSize: 15,
     color: COLORS.textSecondary,
-    lineHeight: 20,
-    marginBottom: 12,
+    marginBottom: 16,
   },
-  memoryDate: {
-    fontSize: 12,
-    color: COLORS.primary,
-    fontWeight: "600",
+  emptyButtonOutline: {
+    borderRadius: 12,
+    borderColor: COLORS.primary,
   },
 });
