@@ -483,7 +483,8 @@
         "enum": [
           "memory",
           "logic",
-          "attention"
+          "attention",
+          "calculation"
         ]
       },
       "GameListItem": {

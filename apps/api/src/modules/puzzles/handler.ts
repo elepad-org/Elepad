@@ -188,7 +188,7 @@ puzzlesApp.openapi(
   },
 );
 
-// Crear un nuevo puzzle de atención (focus)
+// Crear un nuevo puzzle de focus
 puzzlesApp.openapi(
   {
     method: "post",
