@@ -3,17 +3,27 @@ import { View } from "react-native";
 import { TextInput, Text } from "react-native-paper";
 import { STYLES, COLORS } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
+import MentionInput from "./MentionInput";
+
+interface FamilyMember {
+  id: string;
+  displayName: string;
+}
 
 interface TextNoteProps {
   onSaveText: (title: string, content: string) => void;
   onCancel: () => void;
   isUploading?: boolean;
+  familyMembers?: FamilyMember[];
+  currentUserId?: string;
 }
 
 export default function TextNoteComponent({
   onSaveText,
   onCancel,
   isUploading = false,
+  familyMembers = [],
+  currentUserId,
 }: TextNoteProps) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -49,18 +59,17 @@ export default function TextNoteComponent({
         disabled={isUploading}
       />
 
-      <TextInput
+      <MentionInput
         label="Descripción"
         value={content}
         onChangeText={setContent}
-        style={{ marginBottom: 20 }}
-        mode="outlined"
-        outlineColor={COLORS.border}
-        activeOutlineColor={COLORS.primary}
-        placeholder="Describe tu recuerdo..."
-        multiline={true}
+        placeholder="Describe tu recuerdo... Usa @ para mencionar"
+        multiline
         numberOfLines={3}
         disabled={isUploading}
+        familyMembers={familyMembers}
+        currentUserId={currentUserId}
+        style={{ marginBottom: 20 }}
       />
 
       <View

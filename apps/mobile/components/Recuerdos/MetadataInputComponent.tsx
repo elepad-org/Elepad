@@ -3,17 +3,27 @@ import { View } from "react-native";
 import { TextInput, Text } from "react-native-paper";
 import { STYLES, COLORS } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
+import MentionInput from "./MentionInput";
+
+interface FamilyMember {
+  id: string;
+  displayName: string;
+}
 
 interface MetadataInputProps {
   onSave: (title?: string, caption?: string) => void;
   onCancel: () => void;
   isUploading?: boolean;
+  familyMembers?: FamilyMember[];
+  currentUserId?: string;
 }
 
 export default function MetadataInputComponent({
   onSave,
   onCancel,
   isUploading = false,
+  familyMembers = [],
+  currentUserId,
 }: MetadataInputProps) {
   const [title, setTitle] = useState("");
   const [caption, setCaption] = useState("");
@@ -47,18 +57,17 @@ export default function MetadataInputComponent({
         disabled={isUploading}
       />
 
-      <TextInput
+      <MentionInput
         label="Descripción"
         value={caption}
         onChangeText={setCaption}
-        style={{ marginBottom: 20 }}
-        mode="outlined"
-        outlineColor={COLORS.border}
-        activeOutlineColor={COLORS.primary}
-        placeholder="Describe tu recuerdo..."
-        multiline={true}
+        placeholder="Describe tu recuerdo... Usa @ para mencionar"
+        multiline
         numberOfLines={3}
         disabled={isUploading}
+        familyMembers={familyMembers}
+        currentUserId={currentUserId}
+        style={{ marginBottom: 20 }}
       />
 
       <View

@@ -1586,6 +1586,8 @@ export default function RecuerdosScreen() {
               ? handleFileSelected
               : undefined
           }
+          familyMembers={groupMembers}
+          currentUserId={userElepad?.id}
         />
       </Portal>
 

@@ -9,6 +9,11 @@ import CancelButton from "../shared/CancelButton";
 
 type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
 
+interface FamilyMember {
+  id: string;
+  displayName: string;
+}
+
 interface RecuerdoData {
   contenido: string; // URI del archivo o texto
   titulo?: string;
@@ -28,6 +33,8 @@ interface NuevoRecuerdoDialogProps {
   selectedFileUri?: string;
   selectedFileMimeType?: string;
   onFileSelected?: (uri: string, mimeType?: string) => void;
+  familyMembers?: FamilyMember[];
+  currentUserId?: string;
 }
 
 export default function NuevoRecuerdoDialogComponent({
@@ -42,6 +49,8 @@ export default function NuevoRecuerdoDialogComponent({
   selectedFileUri,
   selectedFileMimeType,
   onFileSelected,
+  familyMembers = [],
+  currentUserId,
 }: NuevoRecuerdoDialogProps) {
   // Paso de metadata para imágenes, videos y audio
   if (
@@ -73,6 +82,8 @@ export default function NuevoRecuerdoDialogComponent({
           }}
           onCancel={onCancel}
           isUploading={isUploading}
+          familyMembers={familyMembers}
+          currentUserId={currentUserId}
         />
       </Dialog>
     );
@@ -110,6 +121,8 @@ export default function NuevoRecuerdoDialogComponent({
             }
             onCancel={onCancel}
             isUploading={isUploading}
+            familyMembers={familyMembers}
+            currentUserId={currentUserId}
           />
         )}
         {selectedTipo === "audio" && (
