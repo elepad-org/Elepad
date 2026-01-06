@@ -478,6 +478,15 @@
           "label"
         ]
       },
+      "GameType": {
+        "type": "string",
+        "enum": [
+          "memory",
+          "logic",
+          "attention",
+          "calculation"
+        ]
+      },
       "GameListItem": {
         "type": "object",
         "properties": {
