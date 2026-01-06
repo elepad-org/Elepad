@@ -324,11 +324,47 @@ export default function CalendarCard(props: CalendarCardProps) {
   const marked = useMemo(() => {
     const obj: Record<
       string,
-      { marked?: boolean; dotColor?: string; selected?: boolean }
+      { 
+        marked?: boolean; 
+        dotColor?: string; 
+        selected?: boolean;
+        customStyles?: {
+          container?: {
+            borderColor?: string;
+            borderWidth?: number;
+            borderRadius?: number;
+          };
+        };
+      }
     > = {};
+    
+    // Calcular los 4 días anteriores a hoy para simular racha
+    const today = new Date();
+    const streakDays: string[] = [];
+    for (let i = 1; i <= 4; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      streakDays.push(date.toISOString().slice(0, 10));
+    }
+    
     for (const d of Object.keys(eventsByDate)) {
       obj[d] = { marked: true, dotColor: COLORS.primary };
     }
+    
+    // Agregar círculos naranjas para días con racha
+    for (const streakDay of streakDays) {
+      if (!obj[streakDay]) {
+        obj[streakDay] = {};
+      }
+      obj[streakDay].customStyles = {
+        container: {
+          borderColor: '#FF6B35',
+          borderWidth: 2,
+          borderRadius: 18,
+        },
+      };
+    }
+    
     obj[selectedDay] = obj[selectedDay]
       ? { ...obj[selectedDay], selected: true }
       : { selected: true };
@@ -429,6 +465,7 @@ export default function CalendarCard(props: CalendarCardProps) {
         <Calendar
           onDayPress={(d: DateData) => setSelectedDay(d.dateString)}
           markedDates={marked}
+          markingType={'custom'}
           enableSwipeMonths
           style={styles.calendar}
           theme={{

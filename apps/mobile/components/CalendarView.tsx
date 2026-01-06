@@ -103,9 +103,13 @@ export default function CalendarView() {
     const dateStr = `${viewYear}-${pad(viewMonth + 1)}-${pad(day)}`;
     const hasEvents = !!eventsByDate[dateStr];
     const isSelected = selectedDate === dateStr;
-    const isToday =
-      dateStr ===
-      `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+    const todayStr = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+    const isToday = dateStr === todayStr;
+
+    // Simular racha: días 2, 3, 4, 5 de enero tienen racha (asumiendo hoy es 6 de enero)
+    // Hardcodeamos los días de racha para estar seguros
+    const streakDays = ['2026-01-02', '2026-01-03', '2026-01-04', '2026-01-05'];
+    const hasStreak = streakDays.includes(dateStr);
 
     return (
       <View>
@@ -113,6 +117,7 @@ export default function CalendarView() {
           key={dateStr}
           style={[
             styles.dayCell,
+            hasStreak && styles.dayCellStreak,
             isSelected && styles.dayCellSelected,
             isToday && styles.dayCellToday,
           ]}
@@ -278,6 +283,10 @@ const styles = StyleSheet.create({
   dayCellSelected: { backgroundColor: "#7fb3d3" },
   dayNumberSelected: { color: "#fff", fontFamily: FONT.bold },
   dayCellToday: { borderWidth: 1, borderColor: "#7fb3d3" },
+  dayCellStreak: { 
+    borderWidth: 2, 
+    borderColor: "#FF6B35",
+  },
   dot: {
     width: 6,
     height: 6,

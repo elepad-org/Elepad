@@ -27,6 +27,7 @@ import {
 import { useRouter } from "expo-router";
 import { useMemo } from "react";
 import { LinearGradient } from "expo-linear-gradient";
+import StreakCounter from "@/components/StreakCounter";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -242,6 +243,9 @@ export default function HomeScreen() {
             </Button>
           </View>
         )}
+
+        {/* Contador de Racha */}
+        <StreakCounter streak={4} />
 
         {/* Próximos Eventos */}
         <View style={styles.section}>
