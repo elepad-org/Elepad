@@ -212,7 +212,7 @@ export default function RecuerdoDetailDialog({
         {recuerdo.titulo || "Sin título"}
       </Text>
 
-      {menuMounted && (
+      {menuMounted && recuerdo.autorId === currentUserId && (
         <Menu
           visible={menuVisible}
           onDismiss={closeMenu}
