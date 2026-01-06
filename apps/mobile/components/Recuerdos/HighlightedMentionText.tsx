@@ -50,7 +50,7 @@ export default function HighlightedMentionText({
         style={[
           style,
           {
-            backgroundColor: COLORS.primary + "15",
+            backgroundColor: COLORS.backgroundSecondary,
             color: COLORS.primary,
             fontWeight: "600",
             paddingHorizontal: 4,

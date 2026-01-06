@@ -449,7 +449,7 @@ export default function RecuerdoDetailDialog({
               <View>
                 <View
                   style={{
-                    backgroundColor: COLORS.accent,
+                    backgroundColor: COLORS.backgroundSecondary,
                     paddingTop: 50,
                     paddingBottom: 10,
                     paddingHorizontal: 20,
