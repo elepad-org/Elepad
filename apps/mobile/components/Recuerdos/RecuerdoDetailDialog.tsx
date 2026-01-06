@@ -13,6 +13,8 @@ import { COLORS, STYLES, FONT } from "@/styles/base";
 import { useAudioPlayer } from "expo-audio";
 import { VideoView, useVideoPlayer } from "expo-video";
 import Slider from "@react-native-community/slider";
+import HighlightedMentionText from "./HighlightedMentionText";
+import MentionInput from "./MentionInput";
 
 type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
 
@@ -38,6 +40,8 @@ interface RecuerdoDetailDialogProps {
   ) => Promise<void>;
   onDeleteRecuerdo: (id: string) => Promise<void>;
   isMutating?: boolean;
+  familyMembers?: Array<{ id: string; displayName: string }>;
+  currentUserId?: string;
 }
 
 const screenWidth = Dimensions.get("window").width;
@@ -49,6 +53,8 @@ export default function RecuerdoDetailDialog({
   onUpdateRecuerdo,
   onDeleteRecuerdo,
   isMutating = false,
+  familyMembers = [],
+  currentUserId,
 }: RecuerdoDetailDialogProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -246,15 +252,15 @@ export default function RecuerdoDetailDialog({
       <InfoHeader />
 
       {!!recuerdo.descripcion && (
-        <Text
+        <HighlightedMentionText
+          text={recuerdo.descripcion}
+          familyMembers={familyMembers}
           style={{
             ...STYLES.subheading,
             marginTop: 8,
             textAlign: "left",
           }}
-        >
-          {recuerdo.descripcion}
-        </Text>
+        />
       )}
 
       <Text
@@ -527,7 +533,7 @@ export default function RecuerdoDetailDialog({
               activeOutlineColor={COLORS.primary}
               style={{ marginBottom: 12 }}
             />
-            <TextInput
+            <MentionInput
               label="Descripción"
               value={editDescription}
               onChangeText={setEditDescription}
@@ -536,6 +542,8 @@ export default function RecuerdoDetailDialog({
               activeOutlineColor={COLORS.primary}
               multiline
               numberOfLines={3}
+              familyMembers={familyMembers}
+              currentUserId={currentUserId}
             />
           </Dialog.Content>
           <Dialog.Actions style={{ paddingBottom: 12, paddingRight: 16 }}>

@@ -1586,6 +1586,8 @@ export default function RecuerdosScreen() {
               ? handleFileSelected
               : undefined
           }
+          familyMembers={groupMembers}
+          currentUserId={userElepad?.id}
         />
       </Portal>
 
@@ -1605,6 +1607,8 @@ export default function RecuerdosScreen() {
         isMutating={
           updateMemoryMutation.isPending || deleteMemoryMutation.isPending
         }
+        familyMembers={groupMembers}
+        currentUserId={userElepad?.id}
       />
 
       {/* Snackbar para mostrar mensajes */}

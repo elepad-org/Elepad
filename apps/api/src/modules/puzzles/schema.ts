@@ -2,7 +2,7 @@ import { z } from "@hono/zod-openapi";
 
 // Enum para los tipos de juego (categorías)
 export const GameTypeEnum = z
-  .enum(["memory", "logic", "attention"])
+  .enum(["memory", "logic", "attention", "calculation"])
   .openapi("GameType");
 export type GameType = z.infer<typeof GameTypeEnum>;
 
@@ -97,7 +97,7 @@ export const NewNetPuzzleSchema = z
 
 export type NewNetPuzzle = z.infer<typeof NewNetPuzzleSchema>;
 
-// Schema para crear un nuevo puzzle de atención (focus / stroop-like)
+// Schema para crear un nuevo puzzle de focus
 export const NewFocusPuzzleSchema = z
   .object({
     rounds: z.number().int().min(1).max(100).optional().default(10),

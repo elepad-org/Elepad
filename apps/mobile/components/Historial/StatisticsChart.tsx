@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { View, StyleSheet, Dimensions, ScrollView } from "react-native";
+import { View, StyleSheet, Dimensions } from "react-native";
 import { Text, SegmentedButtons } from "react-native-paper";
 import { LineChart } from "react-native-chart-kit";
 import { COLORS, FONT } from "@/styles/base";
@@ -26,6 +26,16 @@ interface DataPoint {
 
 const screenWidth = Dimensions.get("window").width;
 
+function getGroupKey(date: Date, timeRange: "week" | "month" | "year"): string {
+  if (timeRange === "week") {
+    return date.toLocaleDateString("es-ES", { weekday: "short" });
+  } else if (timeRange === "month") {
+    return date.getDate().toString();
+  } else {
+    return date.toLocaleDateString("es-ES", { month: "short" });
+  }
+}
+
 export default function StatisticsChart({
   attempts,
   timeRange,
@@ -36,13 +46,12 @@ export default function StatisticsChart({
       return null;
     }
 
-    // Filtrar intentos por rango de tiempo
     const now = new Date();
     const filteredAttempts = attempts.filter((attempt) => {
       if (!attempt.startedAt) return false;
       const attemptDate = new Date(attempt.startedAt);
       const daysDiff = Math.floor(
-        (now.getTime() - attemptDate.getTime()) / (1000 * 60 * 60 * 24),
+        (now.getTime() - attemptDate.getTime()) / (1000 * 60 * 60 * 24)
       );
 
       if (timeRange === "week") return daysDiff <= 7;
@@ -53,7 +62,6 @@ export default function StatisticsChart({
 
     if (filteredAttempts.length === 0) return null;
 
-    // Agrupar datos según el rango de tiempo
     const groupedData = new Map<string, DataPoint>();
 
     filteredAttempts.forEach((attempt) => {
@@ -62,15 +70,12 @@ export default function StatisticsChart({
       let key: string;
 
       if (timeRange === "week") {
-        // Agrupar por día
         key = attemptDate.toLocaleDateString("es-ES", {
           weekday: "short",
         });
       } else if (timeRange === "month") {
-        // Agrupar por día del mes
         key = attemptDate.getDate().toString();
       } else {
-        // Agrupar por mes
         key = attemptDate.toLocaleDateString("es-ES", {
           month: "short",
         });
@@ -91,27 +96,23 @@ export default function StatisticsChart({
       }
     });
 
-    // Convertir a arrays y ordenar
     const sortedEntries = Array.from(groupedData.entries()).sort(
-      ([, a], [, b]) => a.date.getTime() - b.date.getTime(),
+      ([, a], [, b]) => a.date.getTime() - b.date.getTime()
     );
 
-    // Limitar a los últimos N puntos
     const maxPoints = timeRange === "week" ? 7 : timeRange === "month" ? 10 : 12;
     const limitedEntries = sortedEntries.slice(-maxPoints);
 
-    // Calcular promedios
     const labels = limitedEntries.map(([key]) => key);
-    const avgScores = limitedEntries.map(
-      ([, data]) => data.score / data.count,
-    );
+    const avgScores = limitedEntries.map(([, data]) => data.score / data.count);
     const successRates = limitedEntries.map(([key]) => {
-      const data = groupedData.get(key)!;
+      const data = groupedData.get(key);
+      if (!data) return 0;
       const successCount = filteredAttempts.filter(
         (a) =>
           a.startedAt &&
           getGroupKey(new Date(a.startedAt), timeRange) === key &&
-          a.success,
+          a.success
       ).length;
       return (successCount / data.count) * 100;
     });
@@ -121,12 +122,12 @@ export default function StatisticsChart({
       datasets: [
         {
           data: avgScores,
-          color: (opacity = 1) => `rgba(91, 80, 122, ${opacity})`, // COLORS.primary
+          color: (opacity = 1) => `rgba(91, 80, 122, ${opacity})`,
           strokeWidth: 2,
         },
         {
           data: successRates,
-          color: (opacity = 1) => `rgba(107, 141, 214, ${opacity})`, // COLORS.success
+          color: (opacity = 1) => `rgba(107, 141, 214, ${opacity})`,
           strokeWidth: 2,
         },
       ],
@@ -149,7 +150,7 @@ export default function StatisticsChart({
       stroke: COLORS.white,
     },
     propsForBackgroundLines: {
-      strokeDasharray: "", // solid background lines
+      strokeDasharray: "",
       stroke: COLORS.separator,
       strokeWidth: 1,
     },
@@ -158,7 +159,7 @@ export default function StatisticsChart({
   if (!chartData) {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Estadísticas mormo</Text>
+        <Text style={styles.title}>Estadísticas</Text>
         <SegmentedButtons
           value={timeRange}
           onValueChange={(value) =>
@@ -235,16 +236,6 @@ export default function StatisticsChart({
   );
 }
 
-function getGroupKey(date: Date, timeRange: "week" | "month" | "year"): string {
-  if (timeRange === "week") {
-    return date.toLocaleDateString("es-ES", { weekday: "short" });
-  } else if (timeRange === "month") {
-    return date.getDate().toString();
-  } else {
-    return date.toLocaleDateString("es-ES", { month: "short" });
-  }
-}
-
 const styles = StyleSheet.create({
   container: {
     marginBottom: 24,
@@ -266,13 +257,13 @@ const styles = StyleSheet.create({
   segmentedButtons: {
     marginBottom: 20,
   },
-  chartScroll: {
-    marginHorizontal: -20,
-    paddingHorizontal: 20,
-  },
   chartContainer: {
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
+  },
+  chart: {
+    marginVertical: 8,
+    borderRadius: 16,
   },
   legendContainer: {
     flexDirection: "row",

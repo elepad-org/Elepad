@@ -81,10 +81,10 @@ const generateSudoku = (difficulty: "easy" | "medium" | "hard") => {
   // Resolver el resto
   solveSudoku(solutionGrid);
 
-  // 2. Crear copia para el puzzle (tablero inicial)
+  // 2. Crear copia para el tablero inicial
   const initialGrid = solutionGrid.map((row) => [...row]);
 
-  // 3. Determinar cuántas celdas borrar según dificultad
+  // 3. Borrar celdas según dificultad
   let attempts = 0;
   switch (difficulty) {
     case "easy":
@@ -165,11 +165,12 @@ export class PuzzleService {
         comingSoon: true,
       },
       {
-        gameType: "logic",
+        gameType: "attention",
         gameName: "sudoku",
         displayName: "Sudoku",
         description: "Completa el tablero con los números del 1 al 9",
         icon: "🔢",
+        // TODO: Check if this works (it should)
         isAvailable: false,
         comingSoon: true,
       },
@@ -247,8 +248,6 @@ export class PuzzleService {
       }
       logicGame = data;
     } else if (puzzle.gameType === "attention") {
-      console.log("You shouldn't be here...");
-    } else if (puzzle.gameType === "calculation") {
       const { data, error } = await this.supabase
         .from("sudokuGames")
         .select("*")
@@ -264,6 +263,9 @@ export class PuzzleService {
         );
       }
       sudokuGame = data;
+    } else if (puzzle.gameType === "calculation") {
+      console.log("You shouldn't be here...");
+      console.log("Work in progress...");      
     }
 
     return {
@@ -385,7 +387,7 @@ export class PuzzleService {
     const { data: puzzle, error: puzzleError } = await this.supabase
       .from("puzzles")
       .insert({
-        gameType: "logic",
+        gameType: "attention",
         gameName: "sudoku",
         title:
           title ||
@@ -692,19 +694,18 @@ export class PuzzleService {
   }
 
   /**
-   * Crea un nuevo puzzle de atención (focus)
+   * Crea un nuevo puzzle de focus
    */
   async createFocusPuzzle(payload: { rounds?: number }) {
     const { rounds } = payload;
-    console.log(rounds);
 
     // Crear el puzzle base
     const { data: puzzle, error: puzzleError } = await this.supabase
       .from("puzzles")
       .insert({
-        gameType: "attention",
+        gameType: "calculation",
         gameName: "focus",
-        title: `Focus ${rounds ?? 10} rondas`,
+        title: `Focus ${rounds} rondas`,
         difficulty: 1,
       })
       .select()
@@ -714,8 +715,6 @@ export class PuzzleService {
       throw new ApiException(500, "Error al crear el puzzle", puzzleError);
     }
 
-    // Actualmente no tenemos una tabla específica para detalles de attention,
-    // así que devolvemos únicamente el puzzle creado y dejamos los detalles en null.
     return {
       puzzle,
       memoryGame: null,
