@@ -42,6 +42,7 @@ export default function MentionInput({
   const [showMentionMenu, setShowMentionMenu] = useState(false);
   const [mentionSearch, setMentionSearch] = useState("");
   const [mentionStartPos, setMentionStartPos] = useState(0);
+  const [selection, setSelection] = useState<{ start: number; end: number }>({ start: 0, end: 0 });
   const inputRef = useRef<RNTextInput>(null);
 
   // Filtrar al usuario actual de las opciones
@@ -120,6 +121,10 @@ export default function MentionInput({
     setShowMentionMenu(false);
     setMentionSearch("");
 
+    // Posicionar el cursor después de la mención
+    const cursorPosition = mentionStartPos + `@${member.displayName} `.length;
+    setSelection({ start: cursorPosition, end: cursorPosition });
+
     // Devolver el foco al input
     setTimeout(() => {
       if (inputRef.current) {
@@ -185,6 +190,9 @@ export default function MentionInput({
         label={label}
         value={displayValue}
         onChangeText={handleTextChange}
+        onSelectionChange={(e) => {
+          setSelection(e.nativeEvent.selection);
+        }}
         mode={mode}
         outlineColor={outlineColor}
         activeOutlineColor={activeOutlineColor}

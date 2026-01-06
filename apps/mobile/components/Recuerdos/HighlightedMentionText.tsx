@@ -1,4 +1,4 @@
-import { Text as RNText, View } from "react-native";
+import { Text as RNText } from "react-native";
 import { COLORS } from "@/styles/base";
 
 interface FamilyMember {
@@ -36,7 +36,7 @@ export default function HighlightedMentionText({
     // Texto antes de la mención
     if (match.index > lastIndex) {
       parts.push(
-        <RNText key={`text-${lastIndex}`} style={{ ...style, flexShrink: 1 }}>
+        <RNText key={`text-${lastIndex}`} style={style}>
           {text.substring(lastIndex, match.index)}
         </RNText>
       );
@@ -44,24 +44,19 @@ export default function HighlightedMentionText({
 
     // Mención resaltada
     parts.push(
-      <View
+      <RNText
         key={`mention-${match.index}`}
         style={{
           backgroundColor: COLORS.primary + "15",
           borderRadius: 8,
           paddingHorizontal: 6,
           paddingVertical: 2,
+          color: COLORS.primary,
+          fontWeight: "600",
         }}
       >
-        <RNText
-          style={{
-            color: COLORS.primary,
-            fontWeight: "600",
-          }}
-        >
-          {displayName}
-        </RNText>
-      </View>
+        {displayName}
+      </RNText>
     );
 
     lastIndex = match.index + match[0].length;
@@ -70,15 +65,15 @@ export default function HighlightedMentionText({
   // Texto después de la última mención
   if (lastIndex < text.length) {
     parts.push(
-      <RNText key={`text-${lastIndex}`} style={{ ...style, flexShrink: 1 }}>
+      <RNText key={`text-${lastIndex}`} style={style}>
         {text.substring(lastIndex)}
       </RNText>
     );
   }
 
   return (
-    <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 2 }}>
+    <RNText style={style}>
       {parts}
-    </View>
+    </RNText>
   );
 }

@@ -1608,6 +1608,7 @@ export default function RecuerdosScreen() {
           updateMemoryMutation.isPending || deleteMemoryMutation.isPending
         }
         familyMembers={groupMembers}
+        currentUserId={userElepad?.id}
       />
 
       {/* Snackbar para mostrar mensajes */}
