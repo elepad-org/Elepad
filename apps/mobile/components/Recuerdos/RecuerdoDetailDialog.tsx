@@ -40,7 +40,7 @@ interface RecuerdoDetailDialogProps {
   ) => Promise<void>;
   onDeleteRecuerdo: (id: string) => Promise<void>;
   isMutating?: boolean;
-  familyMembers?: Array<{ id: string; displayName: string }>;
+  familyMembers?: Array<{ id: string; displayName: string; avatarUrl?: string | null }>;
   currentUserId?: string;
 }
 

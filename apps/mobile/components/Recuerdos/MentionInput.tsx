@@ -1,11 +1,12 @@
 import { useState, useRef } from "react";
-import { View, ScrollView, TouchableOpacity, TextInput as RNTextInput } from "react-native";
+import { View, ScrollView, TouchableOpacity, TextInput as RNTextInput, Image } from "react-native";
 import { TextInput, Text, Portal, Surface } from "react-native-paper";
 import { COLORS } from "@/styles/base";
 
 interface FamilyMember {
   id: string;
   displayName: string;
+  avatarUrl?: string | null;
 }
 
 interface MentionInputProps {
@@ -269,27 +270,39 @@ export default function MentionInput({
                           alignItems: "center",
                         }}
                       >
-                        <View
-                          style={{
-                            width: 32,
-                            height: 32,
-                            borderRadius: 16,
-                            backgroundColor: COLORS.primary,
-                            alignItems: "center",
-                            justifyContent: "center",
-                            marginRight: 12,
-                          }}
-                        >
-                          <Text
+                        {member.avatarUrl ? (
+                          <Image
+                            source={{ uri: member.avatarUrl }}
                             style={{
-                              color: COLORS.white,
-                              fontSize: 14,
-                              fontWeight: "600",
+                              width: 32,
+                              height: 32,
+                              borderRadius: 16,
+                              marginRight: 12,
+                            }}
+                          />
+                        ) : (
+                          <View
+                            style={{
+                              width: 32,
+                              height: 32,
+                              borderRadius: 16,
+                              backgroundColor: COLORS.primary,
+                              alignItems: "center",
+                              justifyContent: "center",
+                              marginRight: 12,
                             }}
                           >
-                            {member.displayName.charAt(0).toUpperCase()}
-                          </Text>
-                        </View>
+                            <Text
+                              style={{
+                                color: COLORS.white,
+                                fontSize: 14,
+                                fontWeight: "600",
+                              }}
+                            >
+                              {member.displayName.charAt(0).toUpperCase()}
+                            </Text>
+                          </View>
+                        )}
                         <Text
                           style={{
                             fontSize: 16,

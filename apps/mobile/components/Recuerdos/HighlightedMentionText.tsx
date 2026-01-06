@@ -4,6 +4,7 @@ import { COLORS } from "@/styles/base";
 interface FamilyMember {
   id: string;
   displayName: string;
+  avatarUrl?: string | null;
 }
 
 interface HighlightedMentionTextProps {

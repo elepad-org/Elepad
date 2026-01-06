@@ -142,13 +142,13 @@ export default function RecuerdosScreen() {
 
   const groupInfo = selectGroupInfo();
   const groupMembers = useMemo(() => {
-    if (!groupInfo) return [] as Array<{ id: string; displayName: string }>;
+    if (!groupInfo) return [] as Array<{ id: string; displayName: string; avatarUrl?: string | null }>;
 
     const raw = [groupInfo.owner, ...groupInfo.members];
-    const byId = new Map<string, { id: string; displayName: string }>();
+    const byId = new Map<string, { id: string; displayName: string; avatarUrl?: string | null }>();
     for (const m of raw) {
       if (!m?.id) continue;
-      byId.set(m.id, { id: m.id, displayName: m.displayName });
+      byId.set(m.id, { id: m.id, displayName: m.displayName, avatarUrl: m.avatarUrl ?? null });
     }
     return Array.from(byId.values());
   }, [groupInfo]);
