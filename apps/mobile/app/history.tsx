@@ -18,6 +18,7 @@ import {
 } from "@elepad/api-client";
 import { Divider } from "react-native-paper";
 import { COLORS, STYLES, SHADOWS, FONT } from "@/styles/base";
+import StatisticsChart from "@/components/Historial/StatisticsChart";
 
 const PAGE_SIZE = 50;
 
@@ -105,6 +106,7 @@ function AttemptItem({
 
 export default function HistoryScreen({ initialAttempts = [] }: Props) {
   const [selectedGame, setSelectedGame] = useState("all");
+  const [timeRange, setTimeRange] = useState<"week" | "month" | "year">("week");
 
   const [attempts, setAttempts] = useState<Attempt[]>(initialAttempts);
   const [offset, setOffset] = useState<number>(initialAttempts.length);
@@ -313,63 +315,73 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
                 <AttemptItem attempt={item} gameType={detectGameType(item)} />
               )}
               ListHeaderComponent={
-                <Card style={styles.statsCard}>
-                  <Card.Content>
-                    <View style={styles.statsHeader}>
-                      <MaterialCommunityIcons
-                        name="chart-box-outline"
-                        size={20}
-                        color={COLORS.primary}
+                <>
+                  {/* Sección de Estadísticas */}
+                  <StatisticsChart
+                    attempts={attempts}
+                    timeRange={timeRange}
+                    onTimeRangeChange={setTimeRange}
+                  />
+
+                  {/* Tarjeta de Rendimiento */}
+                  <Card style={styles.statsCard}>
+                    <Card.Content>
+                      <View style={styles.statsHeader}>
+                        <MaterialCommunityIcons
+                          name="chart-box-outline"
+                          size={20}
+                          color={COLORS.primary}
+                        />
+                        <Text style={styles.statsTitle}>Rendimiento </Text>
+                      </View>
+
+                      <View style={styles.kpiContainer}>
+                        <View style={styles.kpiItem}>
+                          <Text style={styles.kpiValue}>{total}</Text>
+                          <Text style={styles.kpiLabel}>Partidas</Text>
+                        </View>
+                        <View style={styles.kpiItem}>
+                          <Text style={[styles.kpiValue, { color: "#FBC02D" }]}>
+                            {best}
+                          </Text>
+                          <Text style={styles.kpiLabel}>Récord</Text>
+                        </View>
+                        <View style={styles.kpiItem}>
+                          <Text
+                            style={[
+                              styles.kpiValue,
+                              {
+                                color:
+                                  successRate > 0.5
+                                    ? COLORS.success
+                                    : COLORS.error,
+                              },
+                            ]}
+                          >
+                            {successPercentage}%
+                          </Text>
+                          <Text style={styles.kpiLabel}>Éxito</Text>
+                        </View>
+                      </View>
+
+                      <Divider style={{ marginVertical: 12 }} />
+
+                      <View style={styles.progressRow}>
+                        <Text style={styles.progressLabel}>
+                          Tasa de victorias
+                        </Text>
+                        <Text style={styles.progressLabel}>
+                          {success}/{total}
+                        </Text>
+                      </View>
+                      <ProgressBar
+                        progress={successRate}
+                        color={successRate > 0.5 ? COLORS.success : COLORS.error}
+                        style={styles.progressBar}
                       />
-                      <Text style={styles.statsTitle}>Rendimiento </Text>
-                    </View>
-
-                    <View style={styles.kpiContainer}>
-                      <View style={styles.kpiItem}>
-                        <Text style={styles.kpiValue}>{total}</Text>
-                        <Text style={styles.kpiLabel}>Partidas</Text>
-                      </View>
-                      <View style={styles.kpiItem}>
-                        <Text style={[styles.kpiValue, { color: "#FBC02D" }]}>
-                          {best}
-                        </Text>
-                        <Text style={styles.kpiLabel}>Récord</Text>
-                      </View>
-                      <View style={styles.kpiItem}>
-                        <Text
-                          style={[
-                            styles.kpiValue,
-                            {
-                              color:
-                                successRate > 0.5
-                                  ? COLORS.success
-                                  : COLORS.error,
-                            },
-                          ]}
-                        >
-                          {successPercentage}%
-                        </Text>
-                        <Text style={styles.kpiLabel}>Éxito</Text>
-                      </View>
-                    </View>
-
-                    <Divider style={{ marginVertical: 12 }} />
-
-                    <View style={styles.progressRow}>
-                      <Text style={styles.progressLabel}>
-                        Tasa de victorias
-                      </Text>
-                      <Text style={styles.progressLabel}>
-                        {success}/{total}
-                      </Text>
-                    </View>
-                    <ProgressBar
-                      progress={successRate}
-                      color={successRate > 0.5 ? COLORS.success : COLORS.error}
-                      style={styles.progressBar}
-                    />
-                  </Card.Content>
-                </Card>
+                    </Card.Content>
+                  </Card>
+                </>
               }
               ListFooterComponent={renderFooter}
               contentContainerStyle={styles.listContent}
