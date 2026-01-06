@@ -376,6 +376,11 @@ export default function RecuerdoDetailDialog({
             backgroundColor: "transparent",
             alignItems: "center",
             justifyContent: "center",
+            elevation: 0,
+            shadowColor: "transparent",
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 0,
+            shadowRadius: 0,
           }}
         >
           <View
@@ -384,6 +389,11 @@ export default function RecuerdoDetailDialog({
               borderRadius: 10,
               overflow: "hidden",
               width: screenWidth * 0.92,
+              elevation: 0,
+              shadowColor: "transparent",
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: 0,
+              shadowRadius: 0,
             }}
           >
             {/* Contenido principal según el tipo */}
