@@ -1,4 +1,4 @@
-import { Text as RNText } from "react-native";
+import { Text as RNText} from "react-native";
 import { COLORS } from "@/styles/base";
 
 interface FamilyMember {
@@ -46,16 +46,17 @@ export default function HighlightedMentionText({
     parts.push(
       <RNText
         key={`mention-${match.index}`}
-        style={{
-          backgroundColor: COLORS.primary + "15",
-          borderRadius: 8,
-          paddingHorizontal: 6,
-          paddingVertical: 2,
-          color: COLORS.primary,
-          fontWeight: "600",
-        }}
+        style={[
+          style,
+          {
+            backgroundColor: COLORS.primary + "15",
+            color: COLORS.primary,
+            fontWeight: "600",
+            paddingHorizontal: 4,
+          },
+        ]}
       >
-        {displayName}
+        {" " + displayName + " "}
       </RNText>
     );
 
