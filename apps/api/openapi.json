@@ -167,12 +167,12 @@
           },
           "startsAt": {
             "type": "string",
-            "format": "date"
+            "format": "date-time"
           },
           "endsAt": {
             "type": "string",
             "nullable": true,
-            "format": "date"
+            "format": "date-time"
           },
           "completed": {
             "type": "boolean"
@@ -183,11 +183,11 @@
           },
           "createdAt": {
             "type": "string",
-            "format": "date"
+            "format": "date-time"
           },
           "updatedAt": {
             "type": "string",
-            "format": "date"
+            "format": "date-time"
           },
           "frequencyId": {
             "type": "string",
@@ -478,14 +478,6 @@
           "label"
         ]
       },
-      "GameType": {
-        "type": "string",
-        "enum": [
-          "memory",
-          "logic",
-          "attention"
-        ]
-      },
       "GameListItem": {
         "type": "object",
         "properties": {
@@ -518,6 +510,37 @@
           "description",
           "icon",
           "isAvailable"
+        ]
+      },
+      "GameType": {
+        "type": "string",
+        "enum": [
+          "memory",
+          "logic",
+          "attention"
+        ]
+      },
+      "PuzzleWithDetails": {
+        "type": "object",
+        "properties": {
+          "puzzle": {
+            "$ref": "#/components/schemas/Puzzle"
+          },
+          "memoryGame": {
+            "$ref": "#/components/schemas/MemoryGame"
+          },
+          "logicGame": {
+            "$ref": "#/components/schemas/LogicGame"
+          },
+          "sudokuGame": {
+            "$ref": "#/components/schemas/SudokuGame"
+          }
+        },
+        "required": [
+          "puzzle",
+          "memoryGame",
+          "logicGame",
+          "sudokuGame"
         ]
       },
       "Puzzle": {
@@ -679,29 +702,6 @@
           "cols",
           "given",
           "solution"
-        ]
-      },
-      "PuzzleWithDetails": {
-        "type": "object",
-        "properties": {
-          "puzzle": {
-            "$ref": "#/components/schemas/Puzzle"
-          },
-          "memoryGame": {
-            "$ref": "#/components/schemas/MemoryGame"
-          },
-          "logicGame": {
-            "$ref": "#/components/schemas/LogicGame"
-          },
-          "sudokuGame": {
-            "$ref": "#/components/schemas/SudokuGame"
-          }
-        },
-        "required": [
-          "puzzle",
-          "memoryGame",
-          "logicGame",
-          "sudokuGame"
         ]
       },
       "NewMemoryPuzzle": {
