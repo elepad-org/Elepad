@@ -52,21 +52,26 @@ export default function MentionInput({
 
   // Convertir formato interno <@user_id> a formato de display @nombre
   const toDisplayValue = (internalValue: string): string => {
+    if (!internalValue) return "";
     let result = internalValue;
     availableMembers.forEach((member) => {
       const internalMention = `<@${member.id}>`;
-      result = result.replaceAll(internalMention, `@${member.displayName}`);
+      // Eliminar espacios del nombre para facilitar el parsing
+      const displayName = member.displayName.replace(/\s+/g, '');
+      result = result.split(internalMention).join(`@${displayName}`);
     });
     return result;
   };
 
   // Convertir formato de display @nombre a formato interno <@user_id>
   const toInternalValue = (displayValue: string): string => {
+    if (!displayValue) return "";
     let result = displayValue;
     availableMembers.forEach((member) => {
-      const displayMention = `@${member.displayName}`;
-      const regex = new RegExp(displayMention.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-      result = result.replace(regex, `<@${member.id}>`);
+      // Eliminar espacios del nombre para facilitar el parsing
+      const displayName = member.displayName.replace(/\s+/g, '');
+      const displayMention = `@${displayName}`;
+      result = result.split(displayMention).join(`<@${member.id}>`);
     });
     return result;
   };
@@ -74,10 +79,6 @@ export default function MentionInput({
   const displayValue = toDisplayValue(value);
 
   const handleTextChange = (text: string) => {
-    // Convertir a formato interno antes de guardar
-    const internalText = toInternalValue(text);
-    onChangeText(internalText);
-
     // Detectar si se escribió @ y activar el menú de menciones
     const lastAtSymbol = text.lastIndexOf("@");
 
@@ -103,16 +104,21 @@ export default function MentionInput({
     } else {
       setShowMentionMenu(false);
     }
+    
+    // Convertir a formato interno antes de guardar
+    const internalText = toInternalValue(text);
+    onChangeText(internalText);
   };
 
   const handleMentionSelect = (member: FamilyMember) => {
+    const displayName = member.displayName.replace(/\s+/g, '');
     const beforeMention = displayValue.substring(0, mentionStartPos);
     const afterMention = displayValue.substring(
       mentionStartPos + mentionSearch.length + 1
     );
     
     // Crear el nuevo valor en formato display
-    const newDisplayValue = `${beforeMention}@${member.displayName} ${afterMention}`;
+    const newDisplayValue = `${beforeMention}@${displayName} ${afterMention}`;
     
     // Convertir a formato interno para guardar
     const newInternalValue = toInternalValue(newDisplayValue);
@@ -122,7 +128,7 @@ export default function MentionInput({
     setMentionSearch("");
 
     // Posicionar el cursor después de la mención
-    const cursorPosition = mentionStartPos + `@${member.displayName} `.length;
+    const cursorPosition = mentionStartPos + `@${displayName} `.length;
     setSelection({ start: cursorPosition, end: cursorPosition });
 
     // Devolver el foco al input
@@ -133,9 +139,10 @@ export default function MentionInput({
     }, 100);
   };
 
-  const filteredMembers = availableMembers.filter((member) =>
-    member.displayName.toLowerCase().includes(mentionSearch.toLowerCase())
-  );
+  const filteredMembers = availableMembers.filter((member) => {
+    const searchName = member.displayName.replace(/\s+/g, '').toLowerCase();
+    return searchName.includes(mentionSearch.toLowerCase());
+  });
 
   // Renderizar menciones resaltadas
   const renderHighlightedText = () => {
