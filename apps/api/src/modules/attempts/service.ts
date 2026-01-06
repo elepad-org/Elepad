@@ -30,7 +30,7 @@ export class AttemptService {
       memoryPuzzleId: gameType === "memory" ? puzzleId : null,
       logicPuzzleId: gameType === "logic" ? puzzleId : null,
       sudokuPuzzleId: gameType === "attention" ? puzzleId : null,
-      isFocusGame: !gameType ? true : null, // TODO: redefinir para focus
+      isFocusGame: gameType === "calculation" ? true : false,
     };
 
     const { data: attempt, error: attemptError } = await this.supabase
@@ -176,7 +176,8 @@ export class AttemptService {
     } else if (gameType === "attention") {
       query = query.not("isFocusGame", "is", false);
     } else if (gameType === "calculation") {
-      query = query.not("sudokuPuzzleId", "is", null);
+      //query = query.not("sudokuPuzzleId", "is", null);
+      console.log("En construcción...")
     }
 
     // Apply range for pagination

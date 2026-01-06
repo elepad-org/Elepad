@@ -27,6 +27,7 @@ import {
 import { useRouter } from "expo-router";
 import { useMemo } from "react";
 import { LinearGradient } from "expo-linear-gradient";
+import StreakCounter from "@/components/StreakCounter";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -145,13 +146,13 @@ export default function HomeScreen() {
           </View>
           {userElepad?.avatarUrl ? (
             <Avatar.Image
-              size={60}
+              size={55}
               source={{ uri: userElepad?.avatarUrl }}
               style={styles.avatar}
             />
           ) : (
             <Avatar.Text
-              size={60}
+              size={55}
               label={getInitials(displayName)}
               style={[styles.avatar, { backgroundColor: COLORS.primary }]}
               labelStyle={{ color: COLORS.white, fontSize: 22 }}
@@ -167,11 +168,13 @@ export default function HomeScreen() {
         ) : lastMemory ? (
           <Pressable
             style={styles.memoryCard}
-            onPress={() => router.push("/(tabs)/memories")}
+            onPress={() => router.push("/(tabs)/recuerdos")}
           >
-            {lastMemory.imageUrl ? (
+            {lastMemory.mediaUrl && 
+             lastMemory.mimeType && 
+             (lastMemory.mimeType.startsWith("image/") || lastMemory.mimeType.startsWith("video/")) ? (
               <ImageBackground
-                source={{ uri: lastMemory.imageUrl }}
+                source={{ uri: lastMemory.mediaUrl }}
                 style={styles.memoryImage}
                 imageStyle={styles.memoryImageStyle}
               >
@@ -184,9 +187,9 @@ export default function HomeScreen() {
                     <Text style={styles.memoryTitle} numberOfLines={2}>
                       {lastMemory.title || "Sin título"}
                     </Text>
-                    {lastMemory.description && (
+                    {lastMemory.caption && (
                       <Text style={styles.memoryDescription} numberOfLines={2}>
-                        {lastMemory.description}
+                        {lastMemory.caption}
                       </Text>
                     )}
                     <Text style={styles.memoryDate}>
@@ -209,9 +212,9 @@ export default function HomeScreen() {
                   <Text style={styles.memoryTitleDark} numberOfLines={2}>
                     {lastMemory.title || "Sin título"}
                   </Text>
-                  {lastMemory.description && (
+                  {lastMemory.caption && (
                     <Text style={styles.memoryDescriptionDark} numberOfLines={3}>
-                      {lastMemory.description}
+                      {lastMemory.caption}
                     </Text>
                   )}
                   <Text style={styles.memoryDateDark}>
@@ -234,7 +237,7 @@ export default function HomeScreen() {
             </Text>
             <Button
               mode="contained"
-              onPress={() => router.push("/(tabs)/memories")}
+              onPress={() => router.push("/(tabs)/recuerdos")}
               style={styles.emptyButton}
               buttonColor={COLORS.primary}
             >
@@ -242,6 +245,9 @@ export default function HomeScreen() {
             </Button>
           </View>
         )}
+
+        {/* Contador de Racha */}
+        <StreakCounter streak={4} />
 
         {/* Próximos Eventos */}
         <View style={styles.section}>
@@ -375,7 +381,8 @@ export default function HomeScreen() {
           )}
         </View>
 
-        <View style={{ height: 20 }} />
+        {/* Espacio inferior para que el contenido no quede debajo del menú */}
+        <View style={{ height: 100 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -412,7 +419,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   userName: {
-    fontSize: 32,
+    fontSize: 25,
     fontWeight: "bold",
     color: COLORS.text,
     letterSpacing: -0.5,

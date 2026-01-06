@@ -115,8 +115,8 @@ export const useFocusGame = (props: UseFocusGameProps) => {
       const res = await startAttempt
         .mutateAsync({
           data: {
-            puzzleId: currentPuzzleId, // <--- Usar la variable local
-            gameType: "attention",
+            puzzleId: currentPuzzleId,
+            gameType: "calculation",
           },
         })
         .then((attemptData) => {
@@ -168,17 +168,13 @@ export const useFocusGame = (props: UseFocusGameProps) => {
         stats.durationMs ??
         (startTimeRef.current ? Date.now() - startTimeRef.current : 0);
 
-      // Cálculo de score (puedes ajustar esta lógica según tu juego)
-      const score = Math.max(0, stats.correct * 100 - durationMs / 1000);
-
       try {
         const finishResponse = await finishAttempt.mutateAsync({
           attemptId,
           data: {
             success,
             durationMs,
-            score,
-            moves: 0, // Hardcodeado por ahora, no aplica en focus
+            moves: stats.rounds - stats.correct, // Es para calcular el puntaje en backend
           },
         });
 
@@ -192,7 +188,6 @@ export const useFocusGame = (props: UseFocusGameProps) => {
           throw new Error("Failed to create puzzle");
         }
 
-        console.log("✅ Intento finalizado con score:", score);
 
         // Manejo de Logros (Achievements) siguiendo el modelo
         const resData = finishResponse.data;
