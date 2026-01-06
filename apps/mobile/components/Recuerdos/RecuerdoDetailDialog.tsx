@@ -453,8 +453,8 @@ export default function RecuerdoDetailDialog({
                     paddingTop: 50,
                     paddingBottom: 10,
                     paddingHorizontal: 20,
-                    borderTopLeftRadius: 16,
-                    borderTopRightRadius: 16,
+                    borderTopLeftRadius: 10,
+                    borderTopRightRadius: 10,
                     minHeight: 220,
                   }}
                 >
