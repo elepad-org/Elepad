@@ -132,6 +132,8 @@ export interface Memory {
   mediaUrl: string | null;
   /** @nullable */
   mimeType: string | null;
+  /** @nullable */
+  mentions: string[] | null;
   createdAt: string;
 }
 
@@ -169,6 +171,7 @@ export interface UpdateMemory {
   /** @minLength 1 */
   title?: string;
   caption?: string;
+  mentions?: string[];
 }
 
 export interface CreateNote {
@@ -177,6 +180,7 @@ export interface CreateNote {
   /** @minLength 1 */
   title: string;
   caption?: string;
+  mentions?: string[];
 }
 
 export interface Frequency {
@@ -474,6 +478,8 @@ export type CreateMemoryWithMediaBody = {
   groupId: string;
   title?: string;
   caption?: string;
+  /** JSON array of strings for mentions */
+  mentions?: string;
   /** Media file to upload (image, video, or audio) */
   image: Blob;
 };
@@ -4661,6 +4667,9 @@ export const createMemoryWithMedia = async (
   }
   if (createMemoryWithMediaBody.caption !== undefined) {
     formData.append(`caption`, createMemoryWithMediaBody.caption);
+  }
+  if (createMemoryWithMediaBody.mentions !== undefined) {
+    formData.append(`mentions`, createMemoryWithMediaBody.mentions);
   }
   formData.append(`image`, createMemoryWithMediaBody.image);
 
