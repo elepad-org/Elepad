@@ -46,6 +46,7 @@ import RecuerdoItemComponent from "@/components/Recuerdos/RecuerdoItemComponent"
 import NuevoRecuerdoDialogComponent from "@/components/Recuerdos/NuevoRecuerdoDialogComponent";
 import RecuerdoDetailDialog from "@/components/Recuerdos/RecuerdoDetailDialog";
 import ChestIcon from "@/components/Recuerdos/ChestIcon";
+import BookCover from "@/components/Recuerdos/BookCover";
 import eleEmpthy from "@/assets/images/ele-idea.jpeg";
 
 // Tipos de recuerdos
@@ -1081,9 +1082,7 @@ export default function RecuerdosScreen() {
                         overflow: "hidden",
                       }}
                     >
-                      <View style={{ width: "92%", height: "92%" }}>
-                        <ChestIcon color={color} />
-                      </View>
+                      <BookCover bookId={item.id} groupId={groupId} color={color} />
                       <View
                         style={{
                           position: "absolute",
