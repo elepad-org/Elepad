@@ -1607,6 +1607,7 @@ export default function RecuerdosScreen() {
         isMutating={
           updateMemoryMutation.isPending || deleteMemoryMutation.isPending
         }
+        familyMembers={groupMembers}
       />
 
       {/* Snackbar para mostrar mensajes */}

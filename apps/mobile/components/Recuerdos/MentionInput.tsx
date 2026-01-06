@@ -49,8 +49,33 @@ export default function MentionInput({
     (member) => member.id !== currentUserId
   );
 
+  // Convertir formato interno <@user_id> a formato de display @nombre
+  const toDisplayValue = (internalValue: string): string => {
+    let result = internalValue;
+    availableMembers.forEach((member) => {
+      const internalMention = `<@${member.id}>`;
+      result = result.replaceAll(internalMention, `@${member.displayName}`);
+    });
+    return result;
+  };
+
+  // Convertir formato de display @nombre a formato interno <@user_id>
+  const toInternalValue = (displayValue: string): string => {
+    let result = displayValue;
+    availableMembers.forEach((member) => {
+      const displayMention = `@${member.displayName}`;
+      const regex = new RegExp(displayMention.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+      result = result.replace(regex, `<@${member.id}>`);
+    });
+    return result;
+  };
+
+  const displayValue = toDisplayValue(value);
+
   const handleTextChange = (text: string) => {
-    onChangeText(text);
+    // Convertir a formato interno antes de guardar
+    const internalText = toInternalValue(text);
+    onChangeText(internalText);
 
     // Detectar si se escribió @ y activar el menú de menciones
     const lastAtSymbol = text.lastIndexOf("@");
@@ -80,13 +105,18 @@ export default function MentionInput({
   };
 
   const handleMentionSelect = (member: FamilyMember) => {
-    const beforeMention = value.substring(0, mentionStartPos);
-    const afterMention = value.substring(
+    const beforeMention = displayValue.substring(0, mentionStartPos);
+    const afterMention = displayValue.substring(
       mentionStartPos + mentionSearch.length + 1
     );
-    const newValue = `${beforeMention}@${member.displayName} ${afterMention}`;
+    
+    // Crear el nuevo valor en formato display
+    const newDisplayValue = `${beforeMention}@${member.displayName} ${afterMention}`;
+    
+    // Convertir a formato interno para guardar
+    const newInternalValue = toInternalValue(newDisplayValue);
 
-    onChangeText(newValue);
+    onChangeText(newInternalValue);
     setShowMentionMenu(false);
     setMentionSearch("");
 
@@ -102,12 +132,58 @@ export default function MentionInput({
     member.displayName.toLowerCase().includes(mentionSearch.toLowerCase())
   );
 
+  // Renderizar menciones resaltadas
+  const renderHighlightedText = () => {
+    const parts: React.ReactElement[] = [];
+    let lastIndex = 0;
+    
+    availableMembers.forEach((member) => {
+      const mentionPattern = `@${member.displayName}`;
+      let index = displayValue.indexOf(mentionPattern, lastIndex);
+      
+      while (index !== -1 && index >= lastIndex) {
+        if (index > lastIndex) {
+          parts.push(
+            <Text key={`text-${lastIndex}`} style={{ color: COLORS.text }}>
+              {displayValue.substring(lastIndex, index)}
+            </Text>
+          );
+        }
+        
+        parts.push(
+          <Text
+            key={`mention-${index}`}
+            style={{
+              color: COLORS.primary,
+              fontWeight: "700",
+            }}
+          >
+            {mentionPattern}
+          </Text>
+        );
+        
+        lastIndex = index + mentionPattern.length;
+        index = displayValue.indexOf(mentionPattern, lastIndex);
+      }
+    });
+    
+    if (lastIndex < displayValue.length) {
+      parts.push(
+        <Text key={`text-${lastIndex}`} style={{ color: COLORS.text }}>
+          {displayValue.substring(lastIndex)}
+        </Text>
+      );
+    }
+    
+    return parts.length > 0 ? parts : <Text style={{ color: COLORS.text }}>{displayValue}</Text>;
+  };
+
   return (
     <View style={{ position: "relative", ...style }}>
       <TextInput
         ref={inputRef}
         label={label}
-        value={value}
+        value={displayValue}
         onChangeText={handleTextChange}
         mode={mode}
         outlineColor={outlineColor}
@@ -116,6 +192,7 @@ export default function MentionInput({
         multiline={multiline}
         numberOfLines={numberOfLines}
         disabled={disabled}
+        selectionColor={COLORS.primary + "40"}
       />
 
       {showMentionMenu && filteredMembers.length > 0 && (
