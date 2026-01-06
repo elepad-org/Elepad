@@ -130,7 +130,6 @@ export default function StatisticsChart({
           strokeWidth: 2,
         },
       ],
-      legend: ["Puntuación promedio", "Tasa de éxito (%)"],
     };
   }, [attempts, timeRange]);
 
@@ -159,7 +158,7 @@ export default function StatisticsChart({
   if (!chartData) {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Estadísticas</Text>
+        <Text style={styles.title}>Estadísticas mormo</Text>
         <SegmentedButtons
           value={timeRange}
           onValueChange={(value) =>
@@ -198,14 +197,10 @@ export default function StatisticsChart({
         style={styles.segmentedButtons}
       />
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.chartScroll}
-      >
+      <View style={styles.chartContainer}>
         <LineChart
           data={chartData}
-          width={Math.max(screenWidth - 40, chartData.labels.length * 50)}
+          width={screenWidth - 60}
           height={220}
           chartConfig={chartConfig}
           bezier
@@ -220,7 +215,7 @@ export default function StatisticsChart({
           withHorizontalLines={true}
           fromZero={true}
         />
-      </ScrollView>
+      </View>
 
       <View style={styles.legendContainer}>
         <View style={styles.legendItem}>
@@ -275,9 +270,9 @@ const styles = StyleSheet.create({
     marginHorizontal: -20,
     paddingHorizontal: 20,
   },
-  chart: {
-    marginVertical: 8,
-    borderRadius: 16,
+  chartContainer: {
+    alignItems: "center",
+    justifyContent: "center"
   },
   legendContainer: {
     flexDirection: "row",
