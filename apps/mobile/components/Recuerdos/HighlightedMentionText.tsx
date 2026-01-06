@@ -1,4 +1,4 @@
-import { Text as RNText } from "react-native";
+import { Text as RNText, View } from "react-native";
 import { COLORS } from "@/styles/base";
 
 interface FamilyMember {
@@ -36,7 +36,7 @@ export default function HighlightedMentionText({
     // Texto antes de la mención
     if (match.index > lastIndex) {
       parts.push(
-        <RNText key={`text-${lastIndex}`} style={style}>
+        <RNText key={`text-${lastIndex}`} style={{ ...style, flexShrink: 1 }}>
           {text.substring(lastIndex, match.index)}
         </RNText>
       );
@@ -44,24 +44,24 @@ export default function HighlightedMentionText({
 
     // Mención resaltada
     parts.push(
-      <RNText
+      <View
         key={`mention-${match.index}`}
-        style={[
-          style,
-          {
+        style={{
+          backgroundColor: COLORS.primary + "15",
+          borderRadius: 8,
+          paddingHorizontal: 6,
+          paddingVertical: 2,
+        }}
+      >
+        <RNText
+          style={{
             color: COLORS.primary,
             fontWeight: "600",
-            backgroundColor: COLORS.primary + "15",
-            borderWidth: 1.5,
-            borderColor: COLORS.primary + "40",
-            borderRadius: 6,
-            paddingHorizontal: 6,
-            paddingVertical: 2,
-          },
-        ]}
-      >
-        {displayName}
-      </RNText>
+          }}
+        >
+          {displayName}
+        </RNText>
+      </View>
     );
 
     lastIndex = match.index + match[0].length;
@@ -70,11 +70,15 @@ export default function HighlightedMentionText({
   // Texto después de la última mención
   if (lastIndex < text.length) {
     parts.push(
-      <RNText key={`text-${lastIndex}`} style={style}>
+      <RNText key={`text-${lastIndex}`} style={{ ...style, flexShrink: 1 }}>
         {text.substring(lastIndex)}
       </RNText>
     );
   }
 
-  return <RNText style={style}>{parts}</RNText>;
+  return (
+    <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 2 }}>
+      {parts}
+    </View>
+  );
 }
