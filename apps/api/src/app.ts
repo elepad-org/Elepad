@@ -19,7 +19,7 @@ import { attemptsApp } from "./modules/attempts/handler.js";
 import { achievementsApp } from "./modules/achievements/handler.js";
 import { streaksApp } from "./modules/streaks/handler.js";
 import { withAuth } from "./middleware/auth.js";
-import { notificationsRouter } from "./modules/notifications/handler.js";
+import { notificationsApp } from "./modules/notifications/handler.js";
 
 // Configurar fetch personalizado para Node.js en desarrollo
 let customFetch: typeof fetch | undefined;
@@ -129,7 +129,7 @@ app.use("/streaks/*", withAuth);
 app.route("/", streaksApp);
 
 app.use("/notifications/*", withAuth);
-app.route("/notifications", notificationsRouter);
+app.route("/", notificationsApp);
 
 // OpenAPI spec.
 app.doc("/openapi.json", {

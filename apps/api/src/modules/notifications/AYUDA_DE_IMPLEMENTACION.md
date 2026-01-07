@@ -4,71 +4,91 @@
 
 Se ha implementado un sistema completo de notificaciones que crea automáticamente notificaciones para los usuarios cuando son mencionados en un recuerdo (memory).
 
+## Arquitectura
+
+El módulo de notificaciones sigue la arquitectura estándar del proyecto:
+
+```
+modules/notifications/
+├── handler.ts     # Endpoints OpenAPI y middleware
+├── schema.ts      # Esquemas de validación Zod
+└── service.ts     # Lógica de negocio
+
+services/
+└── mentions.ts    # Servicio auxiliar compartido (sin endpoints propios)
+```
+
 ## Cambios Realizados
 
-### 1. Servicio de Notificaciones (`services/notifications.ts`)
-- Creado servicio completo para gestionar notificaciones
-- Métodos implementados:
-  - `createNotification()`: Crear una notificación individual
-  - `createNotifications()`: Crear múltiples notificaciones en batch
-  - `getNotificationsByUser()`: Obtener notificaciones de un usuario
-  - `getUnreadCount()`: Contar notificaciones no leídas
-  - `markAsRead()`: Marcar una notificación como leída
-  - `markAllAsRead()`: Marcar todas las notificaciones como leídas
-  - `deleteNotification()`: Eliminar una notificación
-  - `notifyMentionedUsers()`: Crear notificaciones para usuarios mencionados
+### 1. Módulo de Notificaciones (`modules/notifications/`)
 
-### 2. Módulo de Notificaciones (`modules/notifications/`)
-- `handler.ts`: Router con endpoints RESTful:
-  - `GET /notifications`: Obtener notificaciones del usuario autenticado
-  - `GET /notifications/unread-count`: Obtener contador de no leídas
-  - `PATCH /notifications/:id/read`: Marcar como leída
-  - `PATCH /notifications/read-all`: Marcar todas como leídas
-  - `DELETE /notifications/:id`: Eliminar notificación
-- `schema.ts`: Esquemas de validación con Zod
+#### **handler.ts**
+- Usa `OpenAPIHono` para documentación automática en Swagger
+- Middleware que inyecta `NotificationsService` en el contexto
+- Endpoints RESTful documentados:
+  - `GET /notifications?limit=50&offset=0` - Lista de notificaciones con paginación
+  - `GET /notifications/unread-count` - Contador de notificaciones no leídas
+  - `PATCH /notifications/:id/read` - Marcar notificación como leída
+  - `PATCH /notifications/read-all` - Marcar todas como leídas
+  - `DELETE /notifications/:id` - Eliminar notificación
 
-### 3. Integración con Memories (`modules/memories/service.ts`)
-Se agregó lógica para crear notificaciones cuando:
-- Se crea un recuerdo con imagen (`createMemoryWithImage`)
-- Se crea una nota (`createNote`)
-- Se actualiza un recuerdo (`updateMemory`) - solo para nuevas menciones
+#### **schema.ts**
+- Esquemas de validación con Zod:
+  - `getNotificationsQuerySchema` - Query params para paginación
+  - `markAsReadParamsSchema` - Path params para operaciones por ID
 
-La lógica:
-1. Extrae los IDs de usuarios mencionados del título y caption
-2. Obtiene el nombre del usuario que creó el recuerdo
-3. Crea notificaciones para cada usuario mencionado (excepto el autor)
-4. Las notificaciones no son críticas - si fallan no interrumpen el flujo
+#### **service.ts** (NotificationsService)
+Métodos implementados:
+- `createNotification()` - Crear una notificación individual
+- `createNotifications()` - Crear múltiples notificaciones en batch
+- `getNotificationsByUser()` - Obtener notificaciones con paginación
+- `getUnreadCount()` - Contar notificaciones no leídas
+- `markAsRead()` - Marcar una notificación como leída
+- `markAllAsRead()` - Marcar todas las notificaciones como leídas
+- `deleteNotification()` - Eliminar una notificación
+- `notifyMentionedUsers()` - Crear notificaciones para usuarios mencionados
 
-### 4. Actualización de Menciones (`services/mentions.ts`)
-- El método `extractMentionIds()` ahora es público para poder ser usado por el servicio de memories
+### 2. Integración con Memories (`modules/memories/service.ts`)
 
-### 5. Configuración de la API (`app.ts`)
-- Agregado router de notificaciones con autenticación requerida
-- Actualizado el contexto de Hono para incluir `userId`
-- Agregado tag "notifications" en la documentación OpenAPI
+Se agregó lógica para crear notificaciones automáticamente cuando:
 
-### 6. Middleware de Autenticación (`middleware/auth.ts`)
-- Actualizado para incluir `userId` en el contexto
+- **Se crea un recuerdo con imagen** (`createMemoryWithImage`)
+- **Se crea una nota** (`createNote`)
+- **Se actualiza un recuerdo** (`updateMemory`) - solo para nuevas menciones
+
+#### Flujo de integración:
+1. Extrae los IDs de usuarios mencionados del título y caption (formato `<@user_id>`)
+2. Sincroniza menciones en la tabla `mentions`
+3. Obtiene el `displayName` del usuario que creó el recuerdo
+4. Crea notificaciones para cada usuario mencionado (excepto el autor)
+5. Las notificaciones no son críticas - si fallan no interrumpen el flujo
+
+### 3. Actualización de Menciones (`services/mentions.ts`)
+- El método `extractMentionIds()` ahora es público
+- Permite ser usado por otros servicios para extraer menciones
+
+### 4. Configuración de la API (`app.ts`)
+- Router de notificaciones montado en `/notifications`
+- Autenticación requerida con `withAuth` middleware
+- Tag "notifications" agregado en la documentación OpenAPI
+
+### 5. Middleware de Autenticación (`middleware/auth.ts`)
+- Expone `userId` en el contexto para compatibilidad
+- Usa `c.var.user.id` como estándar
 
 ## Tipos de Supabase
 
-⚠️ **IMPORTANTE**: Los tipos de Supabase necesitan ser regenerados para incluir las tablas `notifications` y `mentions`.
+✅ **Los tipos ya están actualizados** - Las tablas `notifications` y `mentions` están incluidas en `supabase-types.ts`.
 
-### Regenerar Tipos
+### Regenerar Tipos (cuando se agreguen nuevas tablas)
 
 Ejecuta el siguiente comando desde la raíz del proyecto:
 
 ```bash
-# Opción 1: Si tienes acceso al proyecto en Supabase
-npx supabase gen types typescript --project-id YOUR_PROJECT_ID > apps/api/src/supabase-types.ts
-
-# Opción 2: Si tienes Supabase CLI configurado localmente
-npx supabase gen types typescript --local > apps/api/src/supabase-types.ts
+npx supabase gen types typescript --project-id YOUR_PROJECT_ID --schema public > apps/api/src/supabase-types.ts
 ```
 
 Reemplaza `YOUR_PROJECT_ID` con el ID de tu proyecto en Supabase.
-
-Mientras tanto, se han agregado comentarios `@ts-expect-error` para evitar errores de compilación.
 
 ## Estructura de la Tabla Notifications
 
@@ -100,33 +120,131 @@ create table public.notifications (
    - `event_type`: "mention"
    - `entity_type`: "memory"
    - `entity_id`: ID del recuerdo
-   - `title`: "{Nombre de Usuario A} te mencionó en un recuerdo"
+   - `title`: "<@user_id_de_A> te mencionó en un recuerdo"
    - `body`: Título del recuerdo
    - `actor_id`: ID de Usuario A
 4. Usuario B puede ver la notificación en `/notifications`
+5. El frontend procesa la mención `<@user_id_de_A>` y muestra el nombre del usuario
+
+### Ventajas del formato `<@user_id>`
+
+- **Consistencia**: Mismo formato que las menciones en recuerdos
+- **Nombres actualizados**: Si el usuario cambia su nombre, se muestra el actual
+- **Reutilización**: Usa la función `extractMentions` existente en el mobile
+- **Interactividad**: Las menciones pueden ser clickeables
 
 ## Endpoints de la API
 
-Todos los endpoints requieren autenticación (Bearer token):
+Todos los endpoints requieren autenticación (Bearer token) y están documentados en Swagger:
 
-- `GET /notifications?limit=50&offset=0` - Lista de notificaciones
+- `GET /notifications?limit=50&offset=0` - Lista de notificaciones con paginación
 - `GET /notifications/unread-count` - Contador de no leídas
 - `PATCH /notifications/:id/read` - Marcar como leída
 - `PATCH /notifications/read-all` - Marcar todas como leídas
 - `DELETE /notifications/:id` - Eliminar notificación
 
+### Ejemplo de Respuesta
+
+```json
+[
+  {
+    "id": "uuid",
+    "user_id": "uuid",
+    "actor_id": "uuid",
+    "event_type": "mention",
+    "entity_type": "memory",
+    "entity_id": "uuid",
+    "title": "<@actor-uuid> te mencionó en un recuerdo",
+    "body": "Título del recuerdo",
+    "read": false,
+    "created_at": "2026-01-07T12:00:00Z"
+  }
+]
+```
+
+## Consistencia con la Arquitectura
+
+El módulo de notificaciones sigue el mismo patrón que los demás módulos del proyecto:
+
+### Patrón Estándar
+1. **OpenAPIHono**: Documentación automática en Swagger
+2. **Middleware de servicio**: Inyecta el servicio en `c.var.notificationsService`
+3. **Acceso a usuario**: Usa `c.var.user.id` del contexto
+4. **Estructura de archivos**: `handler.ts`, `schema.ts`, `service.ts`
+5. **Montaje de rutas**: Con `app.route("/", notificationsApp)`
+6. **Autenticación**: Con `withAuth` middleware en `app.ts`
+
+### Comparación con Otros Módulos
+
+```typescript
+// Patrón usado por achievements, memories, streaks, y ahora notifications:
+
+// 1. Declarar el servicio en el contexto
+declare module "hono" {
+  interface ContextVariableMap {
+    notificationsService: NotificationsService;
+  }
+}
+
+// 2. Middleware para inyectar el servicio
+notificationsApp.use("/notifications/*", async (c, next) => {
+  const service = new NotificationsService(c.var.supabase);
+  c.set("notificationsService", service);
+  await next();
+});
+
+// 3. Usar el servicio desde el contexto
+notificationsApp.openapi({ /* config */ }, async (c) => {
+  const userId = c.var.user.id;
+  const data = await c.var.notificationsService.getNotificationsByUser(userId);
+  return c.json(data);
+});
+```
+
 ## Testing
 
 Para probar el sistema:
 
-1. Crea un recuerdo mencionando a otro usuario: `"Mira esto <@uuid-del-usuario>"`
-2. Verifica que se cree la notificación: `GET /notifications`
-3. Comprueba el contador: `GET /notifications/unread-count`
-4. Marca como leída: `PATCH /notifications/:id/read`
+1. **Crear un recuerdo con mención**:
+   ```
+   POST /memories
+   {
+     "title": "Mira esto <@uuid-del-usuario>",
+     "caption": "Un recuerdo especial",
+     "groupId": "...",
+     "bookId": "..."
+   }
+   ```
+
+2. **Verificar notificaciones**:
+   ```
+   GET /notifications
+   ```
+
+3. **Revisar contador**:
+   ```
+   GET /notifications/unread-count
+   ```
+
+4. **Marcar como leída**:
+   ```
+   PATCH /notifications/:id/read
+   ```
+
+## Swagger Documentation
+
+Todas las rutas están documentadas en Swagger UI:
+- Abre `http://localhost:54321/` (o tu URL de desarrollo)
+- Busca la sección "notifications"
+- Verás todos los endpoints con sus esquemas de request/response
 
 ## Próximos Pasos
 
-- [ ] Regenerar tipos de Supabase
+- [x] Implementar servicio de notificaciones
+- [x] Crear endpoints REST con OpenAPI
+- [x] Integrar con sistema de menciones
+- [x] Seguir arquitectura estándar del proyecto
+- [x] Documentar en Swagger
 - [ ] Implementar notificaciones push (opcional)
 - [ ] Agregar notificaciones para otros eventos (logros, actividades, etc.)
-- [ ] Implementar notificaciones en el frontend mobile
+- [ ] Implementar UI de notificaciones en el frontend mobile

@@ -4415,7 +4415,7 @@
         }
       }
     },
-    "/notifications/notifications": {
+    "/notifications": {
       "get": {
         "tags": [
           "notifications"
@@ -4513,7 +4513,7 @@
         }
       }
     },
-    "/notifications/notifications/unread-count": {
+    "/notifications/unread-count": {
       "get": {
         "tags": [
           "notifications"
@@ -4541,7 +4541,7 @@
         }
       }
     },
-    "/notifications/notifications/{id}/read": {
+    "/notifications/{id}/read": {
       "patch": {
         "tags": [
           "notifications"
@@ -4580,7 +4580,7 @@
         }
       }
     },
-    "/notifications/notifications/read-all": {
+    "/notifications/read-all": {
       "patch": {
         "tags": [
           "notifications"
@@ -4608,7 +4608,7 @@
         }
       }
     },
-    "/notifications/notifications/{id}": {
+    "/notifications/{id}": {
       "delete": {
         "tags": [
           "notifications"

@@ -3,10 +3,23 @@ import { NotificationsService } from "./service";
 import { getNotificationsQuerySchema, markAsReadParamsSchema } from "./schema";
 import { openApiErrorResponse } from "@/utils/api-error";
 
-export const notificationsRouter = new OpenAPIHono();
+export const notificationsApp = new OpenAPIHono();
 
-// Get all notifications for the authenticated user
-notificationsRouter.openapi(
+declare module "hono" {
+  interface ContextVariableMap {
+    notificationsService: NotificationsService;
+  }
+}
+
+// Middleware para inyectar el NotificationsService en cada request
+notificationsApp.use("/notifications/*", async (c, next) => {
+  const notificationsService = new NotificationsService(c.var.supabase);
+  c.set("notificationsService", notificationsService);
+  await next();
+});
+
+// GET /notifications - Get all notifications for the authenticated user
+notificationsApp.openapi(
   {
     method: "get",
     path: "/notifications",
@@ -42,11 +55,9 @@ notificationsRouter.openapi(
   },
   async (c) => {
     const { limit, offset } = c.req.valid("query");
-    const userId = c.get("userId");
-    const supabase = c.get("supabase");
+    const userId = c.var.user.id;
 
-    const notificationsService = new NotificationsService(supabase);
-    const notifications = await notificationsService.getNotificationsByUser(
+    const notifications = await c.var.notificationsService.getNotificationsByUser(
       userId,
       limit,
       offset
@@ -78,11 +89,9 @@ notificationsRouter.openapi(
       },
     },
     async (c) => {
-      const userId = c.get("userId");
-      const supabase = c.get("supabase");
+      const userId = c.var.user.id;
 
-      const notificationsService = new NotificationsService(supabase);
-      const count = await notificationsService.getUnreadCount(userId);
+      const count = await c.var.notificationsService.getUnreadCount(userId);
 
       return c.json({ count });
     }
@@ -114,11 +123,9 @@ notificationsRouter.openapi(
     },
     async (c) => {
       const { id } = c.req.valid("param");
-      const userId = c.get("userId");
-      const supabase = c.get("supabase");
+      const userId = c.var.user.id;
 
-      const notificationsService = new NotificationsService(supabase);
-      await notificationsService.markAsRead(id, userId);
+      await c.var.notificationsService.markAsRead(id, userId);
 
       return c.json({ success: true });
     }
@@ -146,11 +153,9 @@ notificationsRouter.openapi(
       },
     },
     async (c) => {
-      const userId = c.get("userId");
-      const supabase = c.get("supabase");
+      const userId = c.var.user.id;
 
-      const notificationsService = new NotificationsService(supabase);
-      await notificationsService.markAllAsRead(userId);
+      await c.var.notificationsService.markAllAsRead(userId);
 
       return c.json({ success: true });
     }
@@ -182,11 +187,9 @@ notificationsRouter.openapi(
     },
     async (c) => {
       const { id } = c.req.valid("param");
-      const userId = c.get("userId");
-      const supabase = c.get("supabase");
+      const userId = c.var.user.id;
 
-      const notificationsService = new NotificationsService(supabase);
-      await notificationsService.deleteNotification(id, userId);
+      await c.var.notificationsService.deleteNotification(id, userId);
 
       return c.json({ success: true });
     }
