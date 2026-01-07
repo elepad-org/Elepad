@@ -145,4 +145,5 @@ export type ElepadUser = {
   displayName: string;
   avatarUrl?: string;
   groupId?: string;
+  elder: boolean;
 };
