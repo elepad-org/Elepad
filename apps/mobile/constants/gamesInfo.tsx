@@ -261,4 +261,294 @@ export const GAMES_INFO: Record<string, GameInfo> = {
       },
     ],
   },
+  focus: {
+    id: "focus",
+    title: "Focus",
+    emoji: "🎯",
+    description:
+      "Un juego de atención y velocidad mental donde debes identificar el color que indica la palabra, ignorando el color con el que está escrita. ¡Pon a prueba tu concentración!",
+    objective:
+      "Completa 10 rondas seleccionando correctamente el color que indica la palabra escrita. Tienes 3 vidas, ¡no te equivoques!",
+    sections: [
+      {
+        title: "🕹️ Cómo Jugar",
+        emoji: "🕹️",
+        content: "",
+        items: [
+          {
+            bullet: "1.",
+            text: (
+              <>
+                Verás una palabra de color (como <HelpBold>ROJO</HelpBold>,{" "}
+                <HelpBold>AZUL</HelpBold>, etc.)
+              </>
+            ),
+          },
+          {
+            bullet: "2.",
+            text: (
+              <>
+                <HelpBold>Lee la palabra</HelpBold>, NO el color con el que está
+                pintada
+              </>
+            ),
+          },
+          {
+            bullet: "3.",
+            text: (
+              <>
+                <HelpBold>Selecciona el botón</HelpBold> del color que indica la
+                palabra
+              </>
+            ),
+          },
+          {
+            bullet: "4.",
+            text: (
+              <>
+                Por ejemplo: si ves la palabra "ROJO" pintada en azul, debes
+                seleccionar <HelpBold>ROJO</HelpBold>
+              </>
+            ),
+          },
+        ],
+      },
+      {
+        title: "❤️ Sistema de Vidas",
+        emoji: "❤️",
+        content: "",
+        items: [
+          {
+            bullet: "•",
+            text: (
+              <>
+                Comienzas con <HelpBold>3 vidas</HelpBold>
+              </>
+            ),
+          },
+          {
+            bullet: "•",
+            text: "Cada error te cuesta 1 vida",
+          },
+          {
+            bullet: "•",
+            text: (
+              <>
+                Si pierdes las 3 vidas, <HelpBold>la partida termina</HelpBold>
+              </>
+            ),
+          },
+        ],
+      },
+      {
+        title: "🎮 Formato del Juego",
+        emoji: "🎮",
+        content: "",
+        items: [
+          {
+            bullet: "•",
+            text: (
+              <>
+                Cada partida tiene <HelpBold>10 rondas</HelpBold>
+              </>
+            ),
+          },
+          {
+            bullet: "•",
+            text: "Completa las 10 rondas sin perder tus 3 vidas para ganar",
+          },
+        ],
+      },
+      {
+        title: "🏆 Sistema de Puntuación",
+        emoji: "🏆",
+        content: "Tu puntuación depende de:",
+        items: [
+          {
+            bullet: "•",
+            text: (
+              <>
+                <HelpBold>Velocidad</HelpBold>: Responder más rápido da más
+                puntos
+              </>
+            ),
+          },
+          {
+            bullet: "•",
+            text: (
+              <>
+                <HelpBold>Precisión</HelpBold>: Menos errores = mejor puntuación
+              </>
+            ),
+          },
+        ],
+      },
+      {
+        title: "💡 Consejos",
+        emoji: "💡",
+        content: "",
+        items: [
+          {
+            bullet: "•",
+            text: "Lee la palabra, no te dejes engañar por el color con el que está pintada",
+          },
+          {
+            bullet: "•",
+            text: "Concéntrate y toma tu tiempo, la velocidad viene con la práctica",
+          },
+          {
+            bullet: "•",
+            text: "Respira y mantén la calma, es fácil confundirse si vas muy rápido",
+          },
+        ],
+      },
+    ],
+  },
+  sudoku: {
+    id: "sudoku",
+    title: "Sudoku",
+    emoji: "🔢",
+    description:
+      "El clásico juego de lógica japonés donde debes completar una cuadrícula 9x9 con números del 1 al 9. Perfecto para ejercitar tu pensamiento lógico y concentración.",
+    objective:
+      "Completa la cuadrícula de 9x9 de modo que cada fila, columna y región de 3x3 contenga todos los números del 1 al 9 sin repetir.",
+    sections: [
+      {
+        title: "🕹️ Cómo Jugar",
+        emoji: "🕹️",
+        content: "",
+        items: [
+          {
+            bullet: "1.",
+            text: (
+              <>
+                <HelpBold>Toca una casilla vacía</HelpBold> para seleccionarla
+              </>
+            ),
+          },
+          {
+            bullet: "2.",
+            text: (
+              <>
+                <HelpBold>Selecciona un número</HelpBold> del teclado numérico
+                (1-9)
+              </>
+            ),
+          },
+          {
+            bullet: "3.",
+            text: "El número se colocará si es válido según las reglas del Sudoku",
+          },
+          {
+            bullet: "4.",
+            text: "Si cometes un error, perderás una vida",
+          },
+        ],
+      },
+      {
+        title: "❤️ Sistema de Vidas",
+        emoji: "❤️",
+        content: "",
+        items: [
+          {
+            bullet: "•",
+            text: (
+              <>
+                Tienes <HelpBold>3 vidas</HelpBold> para completar el tablero
+              </>
+            ),
+          },
+          {
+            bullet: "•",
+            text: "Cada número incorrecto te cuesta 1 vida",
+          },
+          {
+            bullet: "•",
+            text: (
+              <>
+                Si pierdes las 3 vidas,{" "}
+                <HelpBold>el juego termina</HelpBold>
+              </>
+            ),
+          },
+        ],
+      },
+      {
+        title: "🎨 Niveles de Dificultad",
+        emoji: "🎨",
+        content: "",
+        items: [
+          {
+            bullet: "•",
+            text: (
+              <>
+                <HelpBold>Fácil</HelpBold>: Más casillas completadas al inicio,
+                ideal para principiantes
+              </>
+            ),
+          },
+          {
+            bullet: "•",
+            text: (
+              <>
+                <HelpBold>Medio</HelpBold>: Menos pistas, requiere más
+                razonamiento
+              </>
+            ),
+          },
+          {
+            bullet: "•",
+            text: (
+              <>
+                <HelpBold>Difícil</HelpBold>: Pocas pistas iniciales, para
+                expertos en Sudoku
+              </>
+            ),
+          },
+        ],
+      },
+      {
+        title: "📏 Reglas del Sudoku",
+        emoji: "📏",
+        content: "Un número es válido solo si:",
+        items: [
+          {
+            bullet: "1.",
+            text: "No se repite en la misma fila",
+          },
+          {
+            bullet: "2.",
+            text: "No se repite en la misma columna",
+          },
+          {
+            bullet: "3.",
+            text: "No se repite en el mismo bloque de 3x3",
+          },
+        ],
+      },
+      {
+        title: "💡 Consejos",
+        emoji: "💡",
+        content: "",
+        items: [
+          {
+            bullet: "•",
+            text: "Busca las casillas que solo puedan tener un número posible",
+          },
+          {
+            bullet: "•",
+            text: "Completa primero las filas, columnas o bloques que tienen más números",
+          },
+          {
+            bullet: "•",
+            text: "Tómate tu tiempo para pensar antes de colocar un número",
+          },
+          {
+            bullet: "•",
+            text: "Si no estás seguro, analiza todas las restricciones antes de decidir",
+          },
+        ],
+      },
+    ],
+  },
 };

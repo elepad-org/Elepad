@@ -156,21 +156,27 @@ export class PuzzleService {
         isAvailable: true,
       },
       {
-        gameType: "logic",
-        gameName: "lights_out",
-        displayName: "Lights Out",
-        description: "Apaga todas las luces del tablero",
-        icon: "💡",
-        isAvailable: false,
-        comingSoon: true,
-      },
-      {
         gameType: "attention",
         gameName: "sudoku",
         displayName: "Sudoku",
         description: "Completa el tablero con los números del 1 al 9",
         icon: "🔢",
-        // TODO: Check if this works (it should)
+        isAvailable: true,
+      },
+      {
+        gameType: "reaction",
+        gameName: "focus",
+        displayName: "Focus",
+        description: "Selecciona el color correcto lo más rápido posible",
+        icon: "🎯",
+        isAvailable: true,
+      },
+      {
+        gameType: "logic",
+        gameName: "lights_out",
+        displayName: "Lights Out",
+        description: "Apaga todas las luces del tablero",
+        icon: "💡",
         isAvailable: false,
         comingSoon: true,
       },
@@ -263,9 +269,6 @@ export class PuzzleService {
         );
       }
       sudokuGame = data;
-    } else if (puzzle.gameType === "calculation") {
-      console.log("You shouldn't be here...");
-      console.log("Work in progress...");      
     }
 
     return {
@@ -703,7 +706,7 @@ export class PuzzleService {
     const { data: puzzle, error: puzzleError } = await this.supabase
       .from("puzzles")
       .insert({
-        gameType: "calculation",
+        gameType: "reaction",
         gameName: "focus",
         title: `Focus ${rounds} rondas`,
         difficulty: 1,

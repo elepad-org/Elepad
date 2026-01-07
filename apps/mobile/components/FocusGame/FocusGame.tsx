@@ -4,6 +4,7 @@ import styles from "./styles";
 import { AttentionGameCore, COLORS_MAP, ColorName } from "./game";
 import { Button, Portal, Dialog } from "react-native-paper";
 import { router } from "expo-router";
+import { COLORS } from "@/styles/base";
 
 type Props = {
   rounds?: number; // cantidad de rondas a jugar (para test por ahora), se podría cambiar por vidas
@@ -90,7 +91,7 @@ export default function AttentionGame({
       });
     } else {
       // acierto: comprobar condición de victoria por rondas
-      if (currentRound == rounds) {
+      if (currentRound === rounds) {
         setTimeout(() => {
           setModalTitle("¡Ganaste!");
           setModalMessage(`Acertaste ${score.correct}/${score.rounds} rondas.`);
@@ -110,6 +111,25 @@ export default function AttentionGame({
 
   return (
     <View style={styles.container}>
+      {/* Estadísticas superiores, mismas líneas visuales que otros juegos */}
+      <View style={styles.statsCard}>
+        <View style={styles.statsContent}>
+          <View style={styles.stat}>
+            <Text style={styles.statLabel}>🎯 Ronda</Text>
+            <Text style={styles.statValue}>
+              {currentRound} / {rounds}
+            </Text>
+          </View>
+          <View style={styles.stat}>
+            <Text style={styles.statLabel}>✅ Aciertos</Text>
+            <Text style={styles.statValue}>{score.correct}</Text>
+          </View>
+          <View style={styles.stat}>
+            <Text style={styles.statLabel}>❤️ Vidas</Text>
+            <Text style={styles.statValue}>{lives}</Text>
+          </View>
+        </View>
+      </View>
       <View
         style={[
           styles.promptBox,
@@ -159,18 +179,15 @@ export default function AttentionGame({
       </View>
 
       <View style={styles.controls}>
-        <Button mode="outlined" onPress={restartGame}>
+        <Button mode="contained" onPress={restartGame} icon="refresh" style={styles.button}>
           Reiniciar
+        </Button>
+        <Button mode="outlined" onPress={() => router.back()} icon="exit-to-app" style={styles.button}>
+          Abandonar
         </Button>
       </View>
 
-      <View style={{ marginTop: 12 }}>
-        <Text>
-          Rondas: {currentRound} / {rounds}
-        </Text>
-        <Text>Aciertos: {score.correct}</Text>
-        <Text>Vidas: {lives}</Text>
-      </View>
+      {/* Se elimina el bloque de texto simple de estadísticas para evitar duplicar UI */}
 
       <Portal>
         <Dialog
@@ -179,12 +196,19 @@ export default function AttentionGame({
             setModalVisible(false);
             router.back();
           }}
+          style={{
+            backgroundColor: COLORS.background,
+            width: "90%",
+            alignSelf: "center",
+            borderRadius: 16,
+            paddingVertical: 14,
+          }}
         >
           <Dialog.Title>{modalTitle}</Dialog.Title>
           <Dialog.Content>
             <Text>{modalMessage}</Text>
           </Dialog.Content>
-          <Dialog.Actions>
+          <Dialog.Actions style={{ paddingBottom: 12, paddingHorizontal: 20 }}>
             <Button
               onPress={() => {
                 restartGame();

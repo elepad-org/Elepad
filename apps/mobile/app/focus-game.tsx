@@ -12,12 +12,6 @@ export default function AttentionGameScreen() {
 
   const focus = useFocusGame({ rounds: ROUNDS });
 
-  // start a new attempt when the screen mounts
-  /* React.useEffect(() => {
-    
-    focus.startGame();
-  }, []); */
-
   const handleFinish = async (score: { correct: number; rounds: number }) => {
     const hasWon = score.rounds - score.correct < 3;
     try {

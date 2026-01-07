@@ -66,7 +66,6 @@ export class AttentionGameCore {
     const correct = this.validator.isCorrect(this._currentPrompt, selection);
     this.lastResult = correct;
     this.roundsPlayed += 1;
-    // por ahora, la acción sobre acierto/error es un console.log
     return correct;
   }
 

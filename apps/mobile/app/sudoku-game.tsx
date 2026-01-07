@@ -127,18 +127,6 @@ export default function SudokuGameScreen() {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // TODO: Unificar los estilos de los botones con los de los otros juegos
-  const getDifficultyColor = (diff: Difficulty) => {
-    switch (diff) {
-      case "easy":
-        return "#4CAF50";
-      case "medium":
-        return "#FF9800";
-      case "hard":
-        return "#F44336";
-    }
-  };
-
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
@@ -196,46 +184,47 @@ export default function SudokuGameScreen() {
                 Selecciona la dificultad
               </Dialog.Title>
               <Dialog.Content style={{ paddingBottom: 8 }}>
-                <View style={styles.difficultyButtons}>
+                <Text
+                  style={{
+                    ...STYLES.subheading,
+                    marginTop: 0,
+                    marginBottom: 16,
+                  }}
+                >
+                  Elige el nivel de dificultad del juego
+                </Text>
+              </Dialog.Content>
+              <Dialog.Actions style={styles.modeActions}>
+                <View style={styles.modeButtonsContainer}>
                   <Button
                     mode="contained"
                     onPress={() => handleDifficultySelect("easy")}
-                    buttonColor={getDifficultyColor("easy")}
-                    style={styles.difficultyButton}
+                    style={styles.modeButton}
+                    buttonColor={COLORS.secondary}
+                    contentStyle={styles.buttonContent}
                   >
-                    🟢 Fácil
+                    Fácil
                   </Button>
                   <Button
                     mode="contained"
                     onPress={() => handleDifficultySelect("medium")}
-                    buttonColor={getDifficultyColor("medium")}
-                    style={styles.difficultyButton}
+                    style={styles.modeButton}
+                    buttonColor={COLORS.primary}
+                    contentStyle={styles.buttonContent}
                   >
-                    🟡 Medio
+                    Medio
                   </Button>
                   <Button
                     mode="contained"
                     onPress={() => handleDifficultySelect("hard")}
-                    buttonColor={getDifficultyColor("hard")}
-                    style={styles.difficultyButton}
+                    style={styles.modeButton}
+                    buttonColor="#F44336"
+                    contentStyle={styles.buttonContent}
                   >
-                    🔴 Difícil
+                    Difícil
                   </Button>
                 </View>
-              </Dialog.Content>
-              <Dialog.Actions
-                style={{
-                  paddingBottom: 12,
-                  paddingHorizontal: 20,
-                }}
-              >
-                <Button
-                  mode="outlined"
-                  onPress={confirmQuit}
-                  style={{ borderRadius: 12 }}
-                >
-                  Cancelar
-                </Button>
+             
               </Dialog.Actions>
             </Dialog>
           </Portal>
@@ -386,6 +375,22 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "600",
+  },
+  modeActions: {
+    paddingBottom: 12,
+    paddingHorizontal: 20,
+  },
+  modeButtonsContainer: {
+    flexDirection: "row",
+    gap: 12,
+    width: "100%",
+  },
+  modeButton: {
+    flex: 1,
+    borderRadius: 12,
+  },
+  buttonContent: {
+    paddingVertical: 8,
   },
   difficultyButtons: {
     gap: 12,

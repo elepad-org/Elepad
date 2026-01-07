@@ -116,7 +116,7 @@ export const useFocusGame = (props: UseFocusGameProps) => {
         .mutateAsync({
           data: {
             puzzleId: currentPuzzleId,
-            gameType: "calculation",
+            gameType: "reaction",
           },
         })
         .then((attemptData) => {
