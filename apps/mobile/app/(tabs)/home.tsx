@@ -31,12 +31,14 @@ import { useMemo } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import StreakCounter from "@/components/StreakCounter";
 import HighlightedMentionText from "@/components/Recuerdos/HighlightedMentionText";
+import { useNotifications } from "@/hooks/useNotifications";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function HomeScreen() {
   const { userElepad, loading } = useAuth();
   const router = useRouter();
+  const { unreadCount } = useNotifications();
 
   // Fetch today's activities
   const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(
@@ -201,20 +203,43 @@ export default function HomeScreen() {
               </Text>
             </View>
           </View>
-          {userElepad?.avatarUrl ? (
-            <Avatar.Image
-              size={55}
-              source={{ uri: userElepad?.avatarUrl }}
-              style={styles.avatar}
-            />
-          ) : (
-            <Avatar.Text
-              size={55}
-              label={getInitials(displayName)}
-              style={[styles.avatar, { backgroundColor: COLORS.primary }]}
-              labelStyle={{ color: COLORS.white, fontSize: 22 }}
-            />
-          )}
+          <View style={styles.headerRight}>
+            {/* Notification Button */}
+            <View style={styles.notificationContainer}>
+              <IconButton
+                icon="bell-outline"
+                size={24}
+                iconColor={COLORS.primary}
+                onPress={() => {
+                  // TODO: Navegar a pantalla de notificaciones
+                  console.log("Abrir notificaciones");
+                }}
+                style={styles.notificationButton}
+              />
+              {unreadCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </Text>
+                </View>
+              )}
+            </View>
+            {/* Avatar */}
+            {userElepad?.avatarUrl ? (
+              <Avatar.Image
+                size={55}
+                source={{ uri: userElepad?.avatarUrl }}
+                style={styles.avatar}
+              />
+            ) : (
+              <Avatar.Text
+                size={55}
+                label={getInitials(displayName)}
+                style={[styles.avatar, { backgroundColor: COLORS.primary }]}
+                labelStyle={{ color: COLORS.white, fontSize: 22 }}
+              />
+            )}
+          </View>
         </View>
 
         {/* Último Recuerdo - DESTACADO */}
@@ -501,6 +526,36 @@ const styles = StyleSheet.create({
     letterSpacing: 0,
     marginTop: -2,
     opacity: 0.7,
+  },
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  notificationContainer: {
+    position: "relative",
+  },
+  notificationButton: {
+    margin: 0,
+  },
+  badge: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    backgroundColor: COLORS.error,
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 5,
+    borderWidth: 2,
+    borderColor: COLORS.background,
+  },
+  badgeText: {
+    color: COLORS.white,
+    fontSize: 11,
+    fontWeight: "bold",
   },
   avatar: {
     ...SHADOWS.card,
