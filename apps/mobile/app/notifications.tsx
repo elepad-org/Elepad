@@ -155,7 +155,7 @@ export default function NotificationsScreen() {
     },
     {
       query: {
-        refetchOnWindowFocus: true,
+        refetchOnWindowFocus: false,
       },
     },
   );
@@ -238,11 +238,6 @@ export default function NotificationsScreen() {
         read: notification.read,
       });
 
-      // Mark as read if not already read
-      if (!notification.read) {
-        await handleMarkAsRead(notification.id);
-      }
-
       // Navigate or show detail based on notification type
       if (notification.entity_type === "memory" && notification.entity_id) {
         console.log('📖 Opening memory detail:', notification.entity_id);
@@ -253,6 +248,11 @@ export default function NotificationsScreen() {
         router.push("/(tabs)/calendar");
       } else {
         console.log('⚠️ No action for this notification type');
+      }
+
+      // Mark as read in background (optimistic update)
+      if (!notification.read) {
+        handleMarkAsRead(notification.id);
       }
       // Add more navigation logic as needed
     },
@@ -419,7 +419,7 @@ export default function NotificationsScreen() {
           <Text style={styles.headerTitle}>Notificaciones</Text>
         </View>
         
-        {notifications.length > 0 && unreadCount > 0 && (
+        {notifications.length > 0 && (
           <View style={styles.headerActions}>
             <Chip
               icon="bell"
@@ -432,7 +432,7 @@ export default function NotificationsScreen() {
               mode="text"
               onPress={handleMarkAllAsRead}
               loading={markAllAsReadMutation.isPending}
-              disabled={markAllAsReadMutation.isPending}
+              disabled={markAllAsReadMutation.isPending || unreadCount === 0}
               textColor={COLORS.primary}
               compact
               style={styles.markAllButton}
@@ -452,7 +452,7 @@ export default function NotificationsScreen() {
         <FlatList
           data={notifications}
           renderItem={renderNotification}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => `${item.id}-${item.read}`}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl
@@ -568,19 +568,20 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     padding: 16,
     borderRadius: 16,
-    borderWidth: 0,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 2,
     position: "relative",
   },
   unreadCard: {
     backgroundColor: COLORS.primary + "10",
     borderLeftWidth: 4,
     borderLeftColor: COLORS.primary,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
   },
   pressedCard: {
     opacity: 0.85,
