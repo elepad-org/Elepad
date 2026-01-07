@@ -82,11 +82,6 @@ export default function HomeScreen() {
     },
   );
 
-  console.log('🔍 HOME - userElepad?.groupId:', userElepad?.groupId);
-  console.log('🔍 HOME - membersQuery.isLoading:', membersQuery.isLoading);
-  console.log('🔍 HOME - membersQuery.data:', membersQuery.data);
-  console.log('🔍 HOME - membersQuery.error:', membersQuery.error);
-
   const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
     const resp = membersQuery.data as
       | { data?: GetFamilyGroupIdGroupMembers200 }
@@ -109,9 +104,7 @@ export default function HomeScreen() {
       if (!m?.id) continue;
       byId.set(m.id, { id: m.id, displayName: m.displayName, avatarUrl: m.avatarUrl ?? null });
     }
-    const result = Array.from(byId.values());
-    console.log('🔍 HOME - groupMembers:', result);
-    return result;
+    return Array.from(byId.values());
   }, [groupInfo]);
 
   const upcomingActivities = useMemo(() => {
@@ -144,11 +137,7 @@ export default function HomeScreen() {
     const memories = Array.isArray(memoriesQuery.data)
       ? memoriesQuery.data
       : memoriesQuery.data.data || [];
-    const result = memories[0] || null;
-    if (result?.caption) {
-      console.log('📝 HOME - lastMemory.caption:', result.caption);
-    }
-    return result;
+    return memories[0] || null;
   }, [memoriesQuery.data]);
 
   if (loading) {
@@ -275,14 +264,11 @@ export default function HomeScreen() {
                       {lastMemory.title || "Sin título"}
                     </Text>
                     {lastMemory.caption && (
-                      <>
-                        {console.log('🎨 HOME - Rendering HighlightedMentionText with groupMembers:', groupMembers)}
-                        <HighlightedMentionText
-                          text={lastMemory.caption}
-                          familyMembers={groupMembers}
-                          style={styles.memoryDescription}
-                        />
-                      </>
+                      <HighlightedMentionText
+                        text={lastMemory.caption}
+                        familyMembers={groupMembers}
+                        style={styles.memoryDescription}
+                      />
                     )}
                     <Text style={styles.memoryDate}>
                       {new Date(lastMemory.createdAt).toLocaleDateString("es", {
