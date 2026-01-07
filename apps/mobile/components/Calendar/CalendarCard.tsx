@@ -338,9 +338,10 @@ export default function CalendarCard(props: CalendarCardProps) {
       }
     > = {};
     
-    // Calcular los 4 días anteriores a hoy para simular racha
+    // Calcular los 4 días anteriores + el día actual para simular racha completa
     const today = new Date();
-    const streakDays: string[] = [];
+    const todayStr = today.toISOString().slice(0, 10);
+    const streakDays: string[] = [todayStr]; // Incluir hoy
     for (let i = 1; i <= 4; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() - i);
@@ -351,7 +352,7 @@ export default function CalendarCard(props: CalendarCardProps) {
       obj[d] = { marked: true, dotColor: COLORS.primary };
     }
     
-    // Agregar círculos naranjas para días con racha
+    // Agregar círculos naranjas para días con racha (incluyendo hoy)
     for (const streakDay of streakDays) {
       if (!obj[streakDay]) {
         obj[streakDay] = {};
