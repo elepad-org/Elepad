@@ -205,15 +205,20 @@ export default function HomeScreen() {
           </View>
           <View style={styles.headerRight}>
             {/* Notification Button */}
-            <View style={styles.notificationContainer}>
+            <Pressable 
+              style={({ pressed }) => [
+                styles.notificationContainer,
+                pressed && { opacity: 0.6 }
+              ]}
+              onPress={() => {
+                router.push("/notifications");
+              }}
+              android_ripple={{ color: COLORS.primary + "30", borderless: true, radius: 24 }}
+            >
               <IconButton
                 icon="bell-outline"
-                size={24}
+                size={26}
                 iconColor={COLORS.primary}
-                onPress={() => {
-                  // TODO: Navegar a pantalla de notificaciones
-                  console.log("Abrir notificaciones");
-                }}
                 style={styles.notificationButton}
               />
               {unreadCount > 0 && (
@@ -223,7 +228,7 @@ export default function HomeScreen() {
                   </Text>
                 </View>
               )}
-            </View>
+            </Pressable>
             {/* Avatar */}
             {userElepad?.avatarUrl ? (
               <Avatar.Image
@@ -534,14 +539,18 @@ const styles = StyleSheet.create({
   },
   notificationContainer: {
     position: "relative",
+    minWidth: 48,
+    minHeight: 48,
+    justifyContent: "center",
+    alignItems: "center",
   },
   notificationButton: {
     margin: 0,
   },
   badge: {
     position: "absolute",
-    top: 4,
-    right: 4,
+    top: 6,
+    right: 6,
     backgroundColor: COLORS.error,
     borderRadius: 10,
     minWidth: 20,
