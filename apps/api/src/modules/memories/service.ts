@@ -15,9 +15,14 @@ import {
   deleteMemoryMediaByPublicUrl,
   uploadMemoryImage,
 } from "@/services/storage";
+import { MentionsService } from "@/services/mentions";
 
 export class MemoriesService {
-  constructor(private supabase: SupabaseClient<Database>) {}
+  private mentionsService: MentionsService;
+
+  constructor(private supabase: SupabaseClient<Database>) {
+    this.mentionsService = new MentionsService(supabase);
+  }
 
   private async assertUserInGroup(userId: string, groupId: string) {
     const { data, error } = await this.supabase
@@ -139,7 +144,6 @@ export class MemoriesService {
         createdBy: userId,
         title: memoryData.title,
         caption: memoryData.caption,
-        mentions: memoryData.mentions,
         mediaUrl,
         mimeType: imageFile.type,
       };
@@ -157,6 +161,19 @@ export class MemoriesService {
 
       if (!data) {
         throw new ApiException(500, "Failed to create memory");
+      }
+
+      // Sync mentions from title and caption
+      try {
+        await this.mentionsService.syncMentions(
+          "memory",
+          data.id,
+          memoryData.title,
+          memoryData.caption
+        );
+      } catch (error) {
+        console.error("Error syncing mentions:", error);
+        // Don't throw - mentions are not critical
       }
 
       return data;
@@ -290,7 +307,6 @@ export class MemoriesService {
       createdBy: userId,
       title: noteData.title,
       caption: noteData.caption,
-      mentions: noteData.mentions,
       mediaUrl: undefined, // No media URL for notes
       mimeType: "text/note", // Special mime type to identify notes
     };
@@ -308,6 +324,19 @@ export class MemoriesService {
 
     if (!data) {
       throw new ApiException(500, "Failed to create note");
+    }
+
+    // Sync mentions from title and caption
+    try {
+      await this.mentionsService.syncMentions(
+        "memory",
+        data.id,
+        noteData.title,
+        noteData.caption
+      );
+    } catch (error) {
+      console.error("Error syncing mentions:", error);
+      // Don't throw - mentions are not critical
     }
 
     return data;
@@ -330,10 +359,9 @@ export class MemoriesService {
       throw new ApiException(403, "You can only edit your own memories");
     }
 
-    const update: Partial<Pick<Memory, "title" | "caption" | "mentions">> = {};
+    const update: Partial<Pick<Memory, "title" | "caption">> = {};
     if (patch.title !== undefined) update.title = patch.title;
     if (patch.caption !== undefined) update.caption = patch.caption;
-    if (patch.mentions !== undefined) update.mentions = patch.mentions;
 
     const { data, error } = await this.supabase
       .from("memories")
@@ -349,6 +377,19 @@ export class MemoriesService {
 
     if (!data) {
       throw new ApiException(500, "Failed to update memory");
+    }
+
+    // Sync mentions from title and caption
+    try {
+      await this.mentionsService.syncMentions(
+        "memory",
+        data.id,
+        data.title,
+        data.caption
+      );
+    } catch (error) {
+      console.error("Error syncing mentions:", error);
+      // Don't throw - mentions are not critical
     }
 
     return data;
@@ -378,6 +419,14 @@ export class MemoriesService {
         console.error("Error deleting memory media from storage:", error);
         throw new ApiException(500, "Error deleting memory media");
       }
+    }
+
+    // Delete mentions first
+    try {
+      await this.mentionsService.deleteMentionsForEntity("memory", memoryId);
+    } catch (error) {
+      console.error("Error deleting mentions:", error);
+      // Continue with memory deletion even if mentions fail
     }
 
     const { error } = await this.supabase

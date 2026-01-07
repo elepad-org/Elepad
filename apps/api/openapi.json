@@ -306,13 +306,6 @@
             "type": "string",
             "nullable": true
           },
-          "mentions": {
-            "type": "array",
-            "nullable": true,
-            "items": {
-              "type": "string"
-            }
-          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -327,7 +320,6 @@
           "caption",
           "mediaUrl",
           "mimeType",
-          "mentions",
           "createdAt"
         ]
       },
@@ -421,12 +413,6 @@
           },
           "caption": {
             "type": "string"
-          },
-          "mentions": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         },
         "additionalProperties": false
@@ -448,12 +434,6 @@
           },
           "caption": {
             "type": "string"
-          },
-          "mentions": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         },
         "required": [
@@ -2780,10 +2760,6 @@
                   },
                   "caption": {
                     "type": "string"
-                  },
-                  "mentions": {
-                    "type": "string",
-                    "description": "JSON array of strings for mentions"
                   },
                   "image": {
                     "type": "string",
