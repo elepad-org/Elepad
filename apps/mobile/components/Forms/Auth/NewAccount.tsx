@@ -3,7 +3,7 @@ import { postFamilyGroupCreate, postFamilyGroupLink } from "@elepad/api-client";
 import { Link } from "expo-router";
 import { useState } from "react";
 import { View, Alert, StyleSheet } from "react-native";
-import { TextInput, Button, Text } from "react-native-paper";
+import { TextInput, Button, Text, Switch } from "react-native-paper";
 import { COLORS } from "@/styles/base";
 
 export default function NewAccount() {
@@ -11,6 +11,7 @@ export default function NewAccount() {
   const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
   const [familyCode, setFamilyCode] = useState("");
+  const [isElder, setIsElder] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async () => {
@@ -18,7 +19,7 @@ export default function NewAccount() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { displayName } },
+      options: { data: { displayName, elder: isElder } },
     });
     if (error) {
       Alert.alert(error.message);
@@ -106,6 +107,17 @@ export default function NewAccount() {
           disabled={loading}
           dense
         />
+
+        <View style={styles.switchContainer}>
+          <Text style={styles.switchLabel}>¿Es adulto mayor?</Text>
+          <Switch
+            value={isElder}
+            onValueChange={setIsElder}
+            color={COLORS.primary}
+            disabled={loading}
+          />
+        </View>
+
         <TextInput
           mode="outlined"
           placeholder="Contraseña"
@@ -189,6 +201,20 @@ const styles = StyleSheet.create({
   },
   inputOutline: {
     borderRadius: 12,
+  },
+  switchContainer: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+    marginBottom: 14,
+  },
+  switchLabel: {
+    fontSize: 16,
+    color: COLORS.text,
+    fontWeight: "500",
   },
   primaryButton: {
     marginTop: 8,
