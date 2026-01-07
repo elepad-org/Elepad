@@ -264,7 +264,7 @@ export default function HomeScreen() {
                 <View style={styles.memoryContent}>
                   <Text style={styles.memoryLabelDark}>ÚLTIMO RECUERDO</Text>
                   <Text style={styles.memoryTitleDark} numberOfLines={2}>
-                    {lastMemory.caption || "Sin título"}
+                    {lastMemory.title || "Sin título"}
                   </Text>
 
                   {lastMemory.caption && (
