@@ -22,6 +22,7 @@
     "@expo-google-fonts/lobster": "^0.4.0",
     "@expo-google-fonts/montserrat": "^0.4.1",
     "@react-native-async-storage/async-storage": "^2.2.0",
+    "@react-native-clipboard/clipboard": "^1.16.3",
     "@react-native-community/slider": "5.0.1",
     "@react-navigation/native": "^7.1.6",
     "@supabase/supabase-js": "^2.55.0",

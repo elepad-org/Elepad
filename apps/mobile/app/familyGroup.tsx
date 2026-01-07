@@ -19,6 +19,7 @@ import {
   Card,
 } from "react-native-paper";
 import { router } from "expo-router";
+import Clipboard from '@react-native-clipboard/clipboard';
 import {
   useGetFamilyGroupIdGroupInvite,
   getFamilyGroupIdGroupInviteResponse,
@@ -51,9 +52,6 @@ export default function FamilyGroup() {
     }
   }, [userElepad, groupId, refreshUserElepad]);
 
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarError, setSnackbarError] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [advancedOptionsExpanded, setAdvancedOptionsExpanded] = useState(false);
@@ -118,20 +116,20 @@ export default function FamilyGroup() {
       const result = await inviteQuery.refetch();
       if (result.data) {
         setInvitationCode(result.data);
-        setSnackbarMessage(
-          `Enlace de invitación generado correctamente: http://elepad.com/invite/${result.data}`,
-        );
-        setSnackbarError(false);
-        setSnackbarVisible(true);
       }
     } catch (e: unknown) {
       const msg =
         e instanceof Error
           ? e.message
           : "Error al generar el enlace de invitación";
-      setSnackbarMessage(msg);
-      setSnackbarError(true);
-      setSnackbarVisible(true);
+      Alert.alert("Error", msg);
+    }
+  };
+
+  const copyInvitationCode = async () => {
+    if (invitationCode) {
+      Clipboard.setString(String(invitationCode));
+      Alert.alert("¡Copiado!", "El código se ha copiado al portapapeles");
     }
   };
 
@@ -747,30 +745,27 @@ export default function FamilyGroup() {
           </View>
 
           {invitationCode && (
-            <View style={STYLES.inviteCodeCard}>
-              <Text style={STYLES.inviteCodeTitle}>Código de invitación</Text>
-              <Text style={STYLES.inviteCodeText}>
-                {String(invitationCode)}
-              </Text>
-              <Text style={STYLES.inviteCodeExpiry}>
+            <View style={styles.inviteCodeContainer}>
+              <Text style={styles.inviteCodeLabel}>Código de invitación</Text>
+              <View style={styles.codeCard}>
+                <Text style={styles.codeText}>
+                  {String(invitationCode)}
+                </Text>
+                <IconButton
+                  icon="content-copy"
+                  size={20}
+                  iconColor={COLORS.primary}
+                  onPress={copyInvitationCode}
+                  style={styles.copyButton}
+                />
+              </View>
+              <Text style={styles.expiryText}>
                 Expira 10 minutos luego de su creación.
               </Text>
             </View>
           )}
         </View>
         <Portal>
-          <Snackbar
-            visible={snackbarVisible}
-            onDismiss={() => setSnackbarVisible(false)}
-            duration={2200}
-            style={{
-              backgroundColor: snackbarError ? COLORS.error : COLORS.success,
-              borderRadius: 8,
-            }}
-          >
-            {snackbarMessage}
-          </Snackbar>
-
           <Dialog
             visible={confirmVisible}
             onDismiss={closeConfirm}
@@ -1038,3 +1033,45 @@ export default function FamilyGroup() {
     </SafeAreaView>
   );
 }
+
+const styles = {
+  inviteCodeContainer: {
+    marginTop: 16,
+    marginBottom: 16,
+  },
+  inviteCodeLabel: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    marginBottom: 8,
+    fontWeight: '500',
+  },
+  codeCard: {
+    backgroundColor: 'rgba(128, 128, 128, 0.15)',
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: 'rgba(128, 128, 128, 0.2)',
+  },
+  codeText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.text,
+    letterSpacing: 2,
+    flex: 1,
+  },
+  copyButton: {
+    margin: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderRadius: 8,
+  },
+  expiryText: {
+    fontSize: 12,
+    color: COLORS.textLight,
+    marginTop: 8,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+};
