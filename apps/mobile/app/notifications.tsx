@@ -188,7 +188,13 @@ export default function NotificationsScreen() {
   }, [notificationsQuery.isFetching, notifications.length, page]);
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    
     const date = new Date(dateString);
+    
+    // Validar que la fecha sea válida
+    if (isNaN(date.getTime())) return "";
+    
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
@@ -269,7 +275,7 @@ export default function NotificationsScreen() {
               </Text>
             )}
             <Text style={styles.notificationDate}>
-              {formatDate(item.createdAt)}
+              {formatDate(item.created_at)}
             </Text>
           </View>
 
