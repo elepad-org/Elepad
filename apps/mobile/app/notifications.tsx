@@ -323,36 +323,30 @@ export default function NotificationsScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <Stack.Screen
-        options={{
-          title: "Notificaciones",
-          headerStyle: {
-            backgroundColor: COLORS.background,
-          },
-          headerTintColor: COLORS.text,
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
-          headerShadowVisible: false,
-        }}
-      />
+      <Stack.Screen options={{ headerShown: false }} />
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
-      {/* Header Actions */}
-      {notifications.length > 0 && (
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            {unreadCount > 0 && (
-              <Chip
-                icon="bell"
-                style={styles.chip}
-                textStyle={styles.chipText}
-              >
-                {unreadCount} sin leer
-              </Chip>
-            )}
-          </View>
-          {unreadCount > 0 && (
+      {/* Manual Header */}
+      <View style={styles.headerContainer}>
+        <View style={styles.headerTop}>
+          <IconButton
+            icon="chevron-left"
+            size={24}
+            onPress={() => router.back()}
+            style={styles.backButton}
+          />
+          <Text style={styles.headerTitle}>Notificaciones</Text>
+        </View>
+        
+        {notifications.length > 0 && unreadCount > 0 && (
+          <View style={styles.headerActions}>
+            <Chip
+              icon="bell"
+              style={styles.chip}
+              textStyle={styles.chipText}
+            >
+              {unreadCount} sin leer
+            </Chip>
             <Button
               mode="text"
               onPress={handleMarkAllAsRead}
@@ -360,12 +354,13 @@ export default function NotificationsScreen() {
               disabled={markAllAsReadMutation.isPending}
               textColor={COLORS.primary}
               compact
+              style={styles.markAllButton}
             >
               Marcar todo como leído
             </Button>
-          )}
-        </View>
-      )}
+          </View>
+        )}
+      </View>
 
       {/* Notifications List */}
       {notificationsQuery.isLoading ? (
@@ -401,25 +396,47 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  header: {
+  headerContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 8,
+    backgroundColor: COLORS.background,
+  },
+  headerTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  backButton: {
+    margin: 0,
+    marginLeft: -12,
+    marginRight: 4,
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: COLORS.text,
+    letterSpacing: -0.5,
+    flex: 1,
+  },
+  headerActions: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: COLORS.background,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  headerLeft: {
-    flex: 1,
+    paddingTop: 4,
   },
   chip: {
     backgroundColor: COLORS.primary + "15",
+    alignSelf: "flex-start",
+    height: 32,
   },
   chipText: {
     color: COLORS.primary,
     fontWeight: "600",
+    fontSize: 13,
+  },
+  markAllButton: {
+    marginRight: -8,
   },
   loadingContainer: {
     flex: 1,
@@ -429,31 +446,37 @@ const styles = StyleSheet.create({
   listContent: {
     flexGrow: 1,
     paddingVertical: 8,
+    paddingHorizontal: 16,
   },
   notificationCard: {
     flexDirection: "row",
     alignItems: "flex-start",
     backgroundColor: COLORS.white,
-    marginHorizontal: 16,
-    marginVertical: 6,
+    marginBottom: 10,
     padding: 16,
     borderRadius: 16,
-    ...SHADOWS.card,
+    borderWidth: 0,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
     position: "relative",
   },
   unreadCard: {
-    backgroundColor: COLORS.primary + "05",
+    backgroundColor: COLORS.primary + "10",
     borderLeftWidth: 4,
     borderLeftColor: COLORS.primary,
   },
   pressedCard: {
-    opacity: 0.7,
+    opacity: 0.85,
   },
   notificationIconContainer: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: COLORS.backgroundSecondary,
+    backgroundColor: COLORS.primary + "15",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
@@ -486,7 +509,6 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     margin: 0,
-    marginTop: -8,
   },
   unreadDot: {
     position: "absolute",
