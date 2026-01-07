@@ -8,6 +8,7 @@ import {
 import { GameTypeEnum } from "../puzzles/schema";
 import { openApiErrorResponse } from "@/utils/api-error";
 import { AchievementService } from "../achievements/service";
+import { StreakService } from "../streaks/service";
 
 export const attemptsApp = new OpenAPIHono();
 
@@ -126,6 +127,16 @@ attemptsApp.openapi(
           );
 
         console.log(`🎉 Logros desbloqueados: ${unlockedAchievements.length}`);
+
+        // Actualizar racha del usuario
+        try {
+          const streakService = new StreakService(c.var.supabase);
+          await streakService.updateStreakOnGameCompletion(userId);
+          console.log("🔥 Racha actualizada");
+        } catch (streakError) {
+          console.error("❌ Error al actualizar racha:", streakError);
+          // No fallar la petición si hay error en rachas
+        }
 
         return c.json(
           {

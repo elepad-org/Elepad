@@ -312,7 +312,7 @@ export default function HomeScreen() {
         )}
 
         {/* Contador de Racha */}
-        <StreakCounter streak={4} />
+        <StreakCounter />
 
         {/* Próximos Eventos */}
         <View style={styles.section}>

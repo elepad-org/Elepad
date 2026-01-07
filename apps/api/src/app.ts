@@ -17,6 +17,7 @@ import { activityCompletionsHandler } from "./modules/activityCompletions/handle
 import { puzzlesApp } from "./modules/puzzles/handler.js";
 import { attemptsApp } from "./modules/attempts/handler.js";
 import { achievementsApp } from "./modules/achievements/handler.js";
+import { streaksApp } from "./modules/streaks/handler.js";
 import { withAuth } from "./middleware/auth.js";
 
 // Configurar fetch personalizado para Node.js en desarrollo
@@ -121,6 +122,9 @@ app.route("/", attemptsApp);
 app.use("/achievements/*", withAuth);
 app.route("/", achievementsApp);
 
+app.use("/streaks/*", withAuth);
+app.route("/", streaksApp);
+
 // OpenAPI spec.
 app.doc("/openapi.json", {
   openapi: "3.1.0",
@@ -135,6 +139,7 @@ app.doc("/openapi.json", {
     { name: "puzzles" },
     { name: "attempts" },
     { name: "achievements" },
+    { name: "streaks" },
   ],
 });
 
