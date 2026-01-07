@@ -8,6 +8,7 @@ import MentionInput from "./MentionInput";
 interface FamilyMember {
   id: string;
   displayName: string;
+  avatarUrl?: string | null;
 }
 
 interface MetadataInputProps {

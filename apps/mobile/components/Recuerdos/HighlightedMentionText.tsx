@@ -4,6 +4,7 @@ import { COLORS } from "@/styles/base";
 interface FamilyMember {
   id: string;
   displayName: string;
+  avatarUrl?: string | null;
 }
 
 interface HighlightedMentionTextProps {
@@ -49,7 +50,7 @@ export default function HighlightedMentionText({
         style={[
           style,
           {
-            backgroundColor: COLORS.primary + "15",
+            backgroundColor: COLORS.primary + "20",
             color: COLORS.primary,
             fontWeight: "600",
             paddingHorizontal: 4,

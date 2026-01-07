@@ -139,6 +139,7 @@ export class MemoriesService {
         createdBy: userId,
         title: memoryData.title,
         caption: memoryData.caption,
+        mentions: memoryData.mentions,
         mediaUrl,
         mimeType: imageFile.type,
       };
@@ -289,6 +290,7 @@ export class MemoriesService {
       createdBy: userId,
       title: noteData.title,
       caption: noteData.caption,
+      mentions: noteData.mentions,
       mediaUrl: undefined, // No media URL for notes
       mimeType: "text/note", // Special mime type to identify notes
     };
@@ -328,9 +330,10 @@ export class MemoriesService {
       throw new ApiException(403, "You can only edit your own memories");
     }
 
-    const update: Partial<Pick<Memory, "title" | "caption">> = {};
+    const update: Partial<Pick<Memory, "title" | "caption" | "mentions">> = {};
     if (patch.title !== undefined) update.title = patch.title;
     if (patch.caption !== undefined) update.caption = patch.caption;
+    if (patch.mentions !== undefined) update.mentions = patch.mentions;
 
     const { data, error } = await this.supabase
       .from("memories")

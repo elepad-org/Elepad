@@ -23,11 +23,14 @@ import {
   useGetActivitiesFamilyCodeIdFamilyGroup,
   useGetAttempts,
   useGetMemories,
+  useGetFamilyGroupIdGroupMembers,
+  GetFamilyGroupIdGroupMembers200,
 } from "@elepad/api-client";
 import { useRouter } from "expo-router";
 import { useMemo } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import StreakCounter from "@/components/StreakCounter";
+import HighlightedMentionText from "@/components/Recuerdos/HighlightedMentionText";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -37,10 +40,10 @@ export default function HomeScreen() {
 
   // Fetch today's activities
   const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(
-    userElepad?.familyGroupId || "",
+    userElepad?.groupId || "",
     {
       query: {
-        enabled: !!userElepad?.familyGroupId,
+        enabled: !!userElepad?.groupId,
       },
     },
   );
@@ -57,8 +60,8 @@ export default function HomeScreen() {
 
   // Fetch recent memories
   const memoriesQuery = useGetMemories(
-    userElepad?.familyGroupId
-      ? { limit: 1, groupId: userElepad.familyGroupId }
+    userElepad?.groupId
+      ? { limit: 1, groupId: userElepad.groupId }
       : { limit: 1 },
     {
       query: {
@@ -66,6 +69,48 @@ export default function HomeScreen() {
       },
     },
   );
+
+  // Fetch family members
+  const membersQuery = useGetFamilyGroupIdGroupMembers(
+    userElepad?.groupId || "",
+    {
+      query: {
+        enabled: !!userElepad?.groupId,
+      },
+    },
+  );
+
+  console.log('🔍 HOME - userElepad?.groupId:', userElepad?.groupId);
+  console.log('🔍 HOME - membersQuery.isLoading:', membersQuery.isLoading);
+  console.log('🔍 HOME - membersQuery.data:', membersQuery.data);
+  console.log('🔍 HOME - membersQuery.error:', membersQuery.error);
+
+  const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
+    const resp = membersQuery.data as
+      | { data?: GetFamilyGroupIdGroupMembers200 }
+      | GetFamilyGroupIdGroupMembers200
+      | undefined;
+    if (!resp) return undefined;
+    return (
+      (resp as { data?: GetFamilyGroupIdGroupMembers200 }).data ??
+      (resp as GetFamilyGroupIdGroupMembers200)
+    );
+  };
+
+  const groupInfo = selectGroupInfo();
+  const groupMembers = useMemo(() => {
+    if (!groupInfo) return [] as Array<{ id: string; displayName: string; avatarUrl?: string | null }>;
+
+    const raw = [groupInfo.owner, ...groupInfo.members];
+    const byId = new Map<string, { id: string; displayName: string; avatarUrl?: string | null }>();
+    for (const m of raw) {
+      if (!m?.id) continue;
+      byId.set(m.id, { id: m.id, displayName: m.displayName, avatarUrl: m.avatarUrl ?? null });
+    }
+    const result = Array.from(byId.values());
+    console.log('🔍 HOME - groupMembers:', result);
+    return result;
+  }, [groupInfo]);
 
   const upcomingActivities = useMemo(() => {
     if (!activitiesQuery.data) return [];
@@ -97,7 +142,11 @@ export default function HomeScreen() {
     const memories = Array.isArray(memoriesQuery.data)
       ? memoriesQuery.data
       : memoriesQuery.data.data || [];
-    return memories[0] || null;
+    const result = memories[0] || null;
+    if (result?.caption) {
+      console.log('📝 HOME - lastMemory.caption:', result.caption);
+    }
+    return result;
   }, [memoriesQuery.data]);
 
   if (loading) {
@@ -188,9 +237,14 @@ export default function HomeScreen() {
                       {lastMemory.title || "Sin título"}
                     </Text>
                     {lastMemory.caption && (
-                      <Text style={styles.memoryDescription} numberOfLines={2}>
-                        {lastMemory.caption}
-                      </Text>
+                      <>
+                        {console.log('🎨 HOME - Rendering HighlightedMentionText with groupMembers:', groupMembers)}
+                        <HighlightedMentionText
+                          text={lastMemory.caption}
+                          familyMembers={groupMembers}
+                          style={styles.memoryDescription}
+                        />
+                      </>
                     )}
                     <Text style={styles.memoryDate}>
                       {new Date(lastMemory.createdAt).toLocaleDateString("es", {
@@ -210,12 +264,15 @@ export default function HomeScreen() {
                 <View style={styles.memoryContent}>
                   <Text style={styles.memoryLabelDark}>ÚLTIMO RECUERDO</Text>
                   <Text style={styles.memoryTitleDark} numberOfLines={2}>
-                    {lastMemory.title || "Sin título"}
+                    {lastMemory.caption || "Sin título"}
                   </Text>
+
                   {lastMemory.caption && (
-                    <Text style={styles.memoryDescriptionDark} numberOfLines={3}>
-                      {lastMemory.caption}
-                    </Text>
+                    <HighlightedMentionText
+                      text={lastMemory.caption}
+                      familyMembers={groupMembers}
+                      style={styles.memoryDescriptionDark}
+                    />
                   )}
                   <Text style={styles.memoryDateDark}>
                     {new Date(lastMemory.createdAt).toLocaleDateString("es", {

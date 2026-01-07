@@ -357,6 +357,9 @@ memoriesApp.openapi(
               groupId: z.string().uuid(),
               title: z.string().optional(),
               caption: z.string().optional(),
+              mentions: z.string().optional().openapi({
+                description: "JSON array of strings for mentions",
+              }),
               image: z.instanceof(File).openapi({
                 type: "string",
                 format: "binary",
@@ -449,11 +452,21 @@ memoriesApp.openapi(
     }
 
     // Preparar datos para crear la memory
+    let mentions: string[] | undefined;
+    if (body.mentions && typeof body.mentions === "string") {
+      try {
+        mentions = JSON.parse(body.mentions);
+      } catch {
+        throw new ApiException(400, "Invalid mentions format. Must be a JSON array of strings");
+      }
+    }
+
     const memoryData = {
       bookId: body.bookId as string,
       groupId: body.groupId as string,
       title: body.title as string | undefined,
       caption: body.caption as string | undefined,
+      mentions,
     };
 
     // Validar que los campos requeridos están presentes

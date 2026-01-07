@@ -12,6 +12,7 @@ type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
 interface FamilyMember {
   id: string;
   displayName: string;
+  avatarUrl?: string | null;
 }
 
 interface RecuerdoData {
