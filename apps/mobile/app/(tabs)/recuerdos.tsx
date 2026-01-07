@@ -41,6 +41,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, STYLES, LAYOUT } from "@/styles/base";
 import { Platform } from "react-native";
 import { uriToBlob } from "@/lib/uriToBlob";
+import { extractMentions } from "@/lib/extractMentions";
 
 import RecuerdoItemComponent from "@/components/Recuerdos/RecuerdoItemComponent";
 import NuevoRecuerdoDialogComponent from "@/components/Recuerdos/NuevoRecuerdoDialogComponent";
@@ -57,6 +58,7 @@ interface RecuerdoData {
   titulo?: string;
   caption?: string;
   mimeType?: string;
+  mentions?: string[];
 }
 
 // Función auxiliar para convertir Memory a Recuerdo para compatibilidad con componentes existentes
@@ -324,7 +326,7 @@ export default function RecuerdosScreen() {
   const updateMemoryMutation = useMutation({
     mutationFn: async (data: {
       id: string;
-      patch: { title?: string; caption?: string };
+      patch: { title?: string; caption?: string; mentions?: string[] };
     }) => {
       // rnFetch (mutator) devuelve el JSON directamente y tira excepción si !res.ok
       // (aunque el tipo generado por orval incluya {status, data}).
@@ -672,11 +674,15 @@ export default function RecuerdosScreen() {
 
       if (selectedTipo === "texto") {
         // Para notas, usar el endpoint de createNote
+        const caption = data.caption || data.contenido;
+        const mentions = extractMentions(caption);
+        
         const noteData = {
           bookId: selectedBook.id,
           groupId,
           title: data.titulo || "Sin título",
-          caption: data.caption || data.contenido,
+          caption,
+          mentions: mentions.length > 0 ? mentions : undefined,
         };
 
         await createNoteMutation.mutateAsync(noteData);
@@ -725,11 +731,14 @@ export default function RecuerdosScreen() {
 
         console.log("File data prepared:", fileData);
 
+        const mentions = extractMentions(data.caption);
+
         const uploadData = {
           bookId: selectedBook.id,
           groupId,
           title: data.titulo,
           caption: data.caption,
+          mentions: mentions.length > 0 ? JSON.stringify(mentions) : undefined,
           image: fileData,
         };
 
@@ -1598,7 +1607,14 @@ export default function RecuerdosScreen() {
         recuerdo={selectedRecuerdo}
         onDismiss={handleCloseDetail}
         onUpdateRecuerdo={async (id, patch) => {
-          await updateMemoryMutation.mutateAsync({ id, patch });
+          const mentions = extractMentions(patch.caption);
+          await updateMemoryMutation.mutateAsync({ 
+            id, 
+            patch: {
+              ...patch,
+              mentions: mentions.length > 0 ? mentions : undefined,
+            }
+          });
         }}
         onDeleteRecuerdo={async (id) => {
           await deleteMemoryMutation.mutateAsync(id);

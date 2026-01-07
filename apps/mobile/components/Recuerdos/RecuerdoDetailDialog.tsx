@@ -36,7 +36,7 @@ interface RecuerdoDetailDialogProps {
   onDismiss: () => void;
   onUpdateRecuerdo: (
     id: string,
-    patch: { title?: string; caption?: string }
+    patch: { title?: string; caption?: string; mentions?: string[] }
   ) => Promise<void>;
   onDeleteRecuerdo: (id: string) => Promise<void>;
   isMutating?: boolean;
@@ -180,6 +180,7 @@ export default function RecuerdoDetailDialog({
     const title = editTitle.trim();
     const caption = editDescription.trim();
 
+    // El padre (recuerdos.tsx) se encargará de extraer los mentions
     await onUpdateRecuerdo(recuerdo.id, {
       title: title || undefined,
       caption: caption || undefined,
