@@ -45,6 +45,9 @@
             "type": "string",
             "nullable": true,
             "format": "uuid"
+          },
+          "elder": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -52,7 +55,8 @@
           "email",
           "displayName",
           "avatarUrl",
-          "groupId"
+          "groupId",
+          "elder"
         ]
       },
       "Error": {

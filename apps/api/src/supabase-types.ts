@@ -575,6 +575,7 @@ export type Database = {
           avatarUrl: string | null
           createdAt: string
           displayName: string
+          elder: boolean
           email: string
           google_calendar_enabled: boolean | null
           google_calendar_id: string | null
@@ -586,6 +587,7 @@ export type Database = {
           avatarUrl?: string | null
           createdAt?: string
           displayName?: string
+          elder?: boolean
           email: string
           google_calendar_enabled?: boolean | null
           google_calendar_id?: string | null
@@ -597,6 +599,7 @@ export type Database = {
           avatarUrl?: string | null
           createdAt?: string
           displayName?: string
+          elder?: boolean
           email?: string
           google_calendar_enabled?: boolean | null
           google_calendar_id?: string | null
