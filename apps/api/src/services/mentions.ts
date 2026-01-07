@@ -9,7 +9,7 @@ export class MentionsService {
   /**
    * Extract user IDs from text with mentions in format <@user_id>
    */
-  private extractMentionIds(text: string | null | undefined): string[] {
+  extractMentionIds(text: string | null | undefined): string[] {
     if (!text) return [];
 
     const mentionRegex = /<@([a-zA-Z0-9-]+)>/g;

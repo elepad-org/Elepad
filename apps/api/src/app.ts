@@ -19,6 +19,7 @@ import { attemptsApp } from "./modules/attempts/handler.js";
 import { achievementsApp } from "./modules/achievements/handler.js";
 import { streaksApp } from "./modules/streaks/handler.js";
 import { withAuth } from "./middleware/auth.js";
+import { notificationsRouter } from "./modules/notifications/handler.js";
 
 // Configurar fetch personalizado para Node.js en desarrollo
 let customFetch: typeof fetch | undefined;
@@ -76,6 +77,8 @@ declare module "hono" {
     supabase: SupabaseClient<Database>;
     /** The authenticated user from Supabase Auth (available after withAuth middleware). */
     user: { id: string };
+    /** The authenticated user ID (available after withAuth middleware). */
+    userId: string;
   }
 }
 
@@ -125,6 +128,9 @@ app.route("/", achievementsApp);
 app.use("/streaks/*", withAuth);
 app.route("/", streaksApp);
 
+app.use("/notifications/*", withAuth);
+app.route("/notifications", notificationsRouter);
+
 // OpenAPI spec.
 app.doc("/openapi.json", {
   openapi: "3.1.0",
@@ -140,6 +146,7 @@ app.doc("/openapi.json", {
     { name: "attempts" },
     { name: "achievements" },
     { name: "streaks" },
+    { name: "notifications" },
   ],
 });
 
