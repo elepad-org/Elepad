@@ -636,6 +636,24 @@ export type PostAchievementsCheckAttemptId200Item = {
   title: string;
 };
 
+export type GetStreaksMe200 = {
+  /** @minimum 0 */
+  currentStreak: number;
+  /** @minimum 0 */
+  longestStreak: number;
+  /** @nullable */
+  lastPlayedDate: string | null;
+};
+
+export type GetStreaksHistoryParams = {
+  startDate?: string;
+  endDate?: string;
+};
+
+export type GetStreaksHistory200 = {
+  dates: string[];
+};
+
 type AwaitedInput<T> = PromiseLike<T> | T;
 
 type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
@@ -8596,3 +8614,350 @@ export const usePostAchievementsCheckAttemptId = <
 
   return useMutation(mutationOptions, queryClient);
 };
+
+export type getStreaksMeResponse200 = {
+  data: GetStreaksMe200;
+  status: 200;
+};
+
+export type getStreaksMeResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type getStreaksMeResponseSuccess = getStreaksMeResponse200 & {
+  headers: Headers;
+};
+export type getStreaksMeResponseError = getStreaksMeResponse500 & {
+  headers: Headers;
+};
+
+export type getStreaksMeResponse =
+  | getStreaksMeResponseSuccess
+  | getStreaksMeResponseError;
+
+export const getGetStreaksMeUrl = () => {
+  return `/streaks/me`;
+};
+
+export const getStreaksMe = async (
+  options?: RequestInit,
+): Promise<getStreaksMeResponse> => {
+  return rnFetch<getStreaksMeResponse>(getGetStreaksMeUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetStreaksMeQueryKey = () => {
+  return [`/streaks/me`] as const;
+};
+
+export const getGetStreaksMeQueryOptions = <
+  TData = Awaited<ReturnType<typeof getStreaksMe>>,
+  TError = Error,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof getStreaksMe>>, TError, TData>
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetStreaksMeQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getStreaksMe>>> = ({
+    signal,
+  }) => getStreaksMe({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getStreaksMe>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetStreaksMeQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getStreaksMe>>
+>;
+export type GetStreaksMeQueryError = Error;
+
+export function useGetStreaksMe<
+  TData = Awaited<ReturnType<typeof getStreaksMe>>,
+  TError = Error,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getStreaksMe>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStreaksMe>>,
+          TError,
+          Awaited<ReturnType<typeof getStreaksMe>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetStreaksMe<
+  TData = Awaited<ReturnType<typeof getStreaksMe>>,
+  TError = Error,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getStreaksMe>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStreaksMe>>,
+          TError,
+          Awaited<ReturnType<typeof getStreaksMe>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetStreaksMe<
+  TData = Awaited<ReturnType<typeof getStreaksMe>>,
+  TError = Error,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getStreaksMe>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetStreaksMe<
+  TData = Awaited<ReturnType<typeof getStreaksMe>>,
+  TError = Error,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getStreaksMe>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetStreaksMeQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export type getStreaksHistoryResponse200 = {
+  data: GetStreaksHistory200;
+  status: 200;
+};
+
+export type getStreaksHistoryResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type getStreaksHistoryResponseSuccess = getStreaksHistoryResponse200 & {
+  headers: Headers;
+};
+export type getStreaksHistoryResponseError = getStreaksHistoryResponse500 & {
+  headers: Headers;
+};
+
+export type getStreaksHistoryResponse =
+  | getStreaksHistoryResponseSuccess
+  | getStreaksHistoryResponseError;
+
+export const getGetStreaksHistoryUrl = (params?: GetStreaksHistoryParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/streaks/history?${stringifiedParams}`
+    : `/streaks/history`;
+};
+
+export const getStreaksHistory = async (
+  params?: GetStreaksHistoryParams,
+  options?: RequestInit,
+): Promise<getStreaksHistoryResponse> => {
+  return rnFetch<getStreaksHistoryResponse>(getGetStreaksHistoryUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetStreaksHistoryQueryKey = (
+  params?: GetStreaksHistoryParams,
+) => {
+  return [`/streaks/history`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetStreaksHistoryQueryOptions = <
+  TData = Awaited<ReturnType<typeof getStreaksHistory>>,
+  TError = Error,
+>(
+  params?: GetStreaksHistoryParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getStreaksHistory>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetStreaksHistoryQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getStreaksHistory>>
+  > = ({ signal }) => getStreaksHistory(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getStreaksHistory>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetStreaksHistoryQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getStreaksHistory>>
+>;
+export type GetStreaksHistoryQueryError = Error;
+
+export function useGetStreaksHistory<
+  TData = Awaited<ReturnType<typeof getStreaksHistory>>,
+  TError = Error,
+>(
+  params: undefined | GetStreaksHistoryParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getStreaksHistory>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStreaksHistory>>,
+          TError,
+          Awaited<ReturnType<typeof getStreaksHistory>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetStreaksHistory<
+  TData = Awaited<ReturnType<typeof getStreaksHistory>>,
+  TError = Error,
+>(
+  params?: GetStreaksHistoryParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getStreaksHistory>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStreaksHistory>>,
+          TError,
+          Awaited<ReturnType<typeof getStreaksHistory>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetStreaksHistory<
+  TData = Awaited<ReturnType<typeof getStreaksHistory>>,
+  TError = Error,
+>(
+  params?: GetStreaksHistoryParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getStreaksHistory>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetStreaksHistory<
+  TData = Awaited<ReturnType<typeof getStreaksHistory>>,
+  TError = Error,
+>(
+  params?: GetStreaksHistoryParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getStreaksHistory>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetStreaksHistoryQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}

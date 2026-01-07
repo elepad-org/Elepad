@@ -11,6 +11,7 @@ import {
   usePostActivityCompletionsToggle,
 } from "@elepad/api-client/src/gen/client";
 import ErrorSnackbar from "@/components/shared/ErrorSnackbar";
+import { useStreakHistory } from "@/hooks/useStreak";
 
 import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 
@@ -202,7 +203,9 @@ export default function CalendarCard(props: CalendarCardProps) {
   const [errorSnackbar, setErrorSnackbar] = useState<{
     visible: boolean;
     message: string;
-  }>({ visible: false, message: "" }); // Calcular rango de fechas para cargar completaciones (3 meses antes y después)
+  }>({ visible: false, message: "" });
+  
+  // Calcular rango de fechas para cargar completaciones (3 meses antes y después)
   const dateRange = useMemo(() => {
     const now = new Date();
     const start = new Date(now);
@@ -220,6 +223,12 @@ export default function CalendarCard(props: CalendarCardProps) {
     startDate: dateRange.startDate,
     endDate: dateRange.endDate,
   });
+
+  // Cargar historial de rachas
+  const streakHistoryQuery = useStreakHistory(
+    dateRange.startDate,
+    dateRange.endDate,
+  );
 
   // Mutation para toggle de completaciones
   const toggleCompletionMutation = usePostActivityCompletionsToggle();
@@ -338,21 +347,14 @@ export default function CalendarCard(props: CalendarCardProps) {
       }
     > = {};
     
-    // Calcular los 4 días anteriores + el día actual para simular racha completa
-    const today = new Date();
-    const todayStr = today.toISOString().slice(0, 10);
-    const streakDays: string[] = [todayStr]; // Incluir hoy
-    for (let i = 1; i <= 4; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() - i);
-      streakDays.push(date.toISOString().slice(0, 10));
-    }
+    // Obtener las fechas del historial de rachas
+    const streakDays = streakHistoryQuery.data?.dates || [];
     
     for (const d of Object.keys(eventsByDate)) {
       obj[d] = { marked: true, dotColor: COLORS.primary };
     }
     
-    // Agregar círculos naranjas para días con racha (incluyendo hoy)
+    // Agregar círculos naranjas para días con racha
     for (const streakDay of streakDays) {
       if (!obj[streakDay]) {
         obj[streakDay] = {};
@@ -370,7 +372,7 @@ export default function CalendarCard(props: CalendarCardProps) {
       ? { ...obj[selectedDay], selected: true }
       : { selected: true };
     return obj;
-  }, [eventsByDate, selectedDay]);
+  }, [eventsByDate, selectedDay, streakHistoryQuery.data]);
 
   // Only user's activities only, ordenados: primero incompletos, luego completados
   const dayEvents = useMemo(() => {
