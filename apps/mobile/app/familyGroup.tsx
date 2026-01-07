@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   SafeAreaView,
   StatusBar,
@@ -38,6 +38,18 @@ export default function FamilyGroup() {
     useState<getFamilyGroupIdGroupInviteResponse>();
 
   const groupId = userElepad?.groupId;
+
+  // Debug: Log user data when component mounts or userElepad changes
+  useEffect(() => {
+    console.log("FamilyGroup - userElepad:", userElepad);
+    console.log("FamilyGroup - groupId:", groupId);
+    
+    // If we don't have a groupId but we have a user, try refreshing
+    if (userElepad && !groupId) {
+      console.log("FamilyGroup - No groupId found, refreshing user data...");
+      refreshUserElepad();
+    }
+  }, [userElepad, groupId, refreshUserElepad]);
 
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");

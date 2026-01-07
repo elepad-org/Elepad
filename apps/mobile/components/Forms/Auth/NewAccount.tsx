@@ -1,12 +1,14 @@
 import { supabase } from "@/lib/supabase";
 import { postFamilyGroupCreate, postFamilyGroupLink } from "@elepad/api-client";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import { View, Alert, StyleSheet } from "react-native";
 import { TextInput, Button, Text, Switch } from "react-native-paper";
 import { COLORS } from "@/styles/base";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function NewAccount() {
+  const { refreshUserElepad } = useAuth();
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
@@ -51,6 +53,11 @@ export default function NewAccount() {
               "Advertencia",
               "La cuenta se creó pero hubo un problema al crear el grupo familiar"
             );
+          } else {
+            // Wait a bit for the database to update
+            await new Promise(resolve => setTimeout(resolve, 500));
+            // Refresh user data to get the new groupId
+            await refreshUserElepad();
           }
         } catch (err: any) {
           console.error("Error creating family group:", err);
@@ -71,6 +78,11 @@ export default function NewAccount() {
               "Advertencia",
               "La cuenta se creó pero no se pudo vincular al grupo familiar. Verifica el código."
             );
+          } else {
+            // Wait a bit for the database to update
+            await new Promise(resolve => setTimeout(resolve, 500));
+            // Refresh user data to get the new groupId
+            await refreshUserElepad();
           }
         } catch (err: any) {
           console.error("Error linking to family group:", err);
