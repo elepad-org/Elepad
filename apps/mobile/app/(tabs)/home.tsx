@@ -159,6 +159,9 @@ export default function HomeScreen() {
 
   const displayName =
     (userElepad?.displayName as string) || userElepad?.email || "Usuario";
+  
+  const userRole = userElepad?.elder ? "Adulto mayor" : "Ayudante";
+  const displayNameWithRole = `${displayName} (${userRole})`;
 
   const getInitials = (name: string) =>
     name
@@ -189,9 +192,14 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View style={styles.greetingContainer}>
             <Text style={styles.greeting}>{getGreeting()}</Text>
-            <Text style={styles.userName} numberOfLines={1}>
-              {displayName}
-            </Text>
+            <View style={styles.userNameContainer}>
+              <Text style={styles.userName} numberOfLines={1}>
+                {displayName}
+              </Text>
+              <Text style={styles.userRole} numberOfLines={1}>
+                ({userRole})
+              </Text>
+            </View>
           </View>
           {userElepad?.avatarUrl ? (
             <Avatar.Image
@@ -480,6 +488,19 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: COLORS.text,
     letterSpacing: -0.5,
+  },
+  userNameContainer: {
+    flexDirection: "column",
+    flex: 1,
+    alignItems: "flex-start",
+  },
+  userRole: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: COLORS.textLight,
+    letterSpacing: 0,
+    marginTop: -2,
+    opacity: 0.7,
   },
   avatar: {
     ...SHADOWS.card,

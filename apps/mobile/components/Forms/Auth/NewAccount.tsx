@@ -1,54 +1,103 @@
 import { supabase } from "@/lib/supabase";
 import { postFamilyGroupCreate, postFamilyGroupLink } from "@elepad/api-client";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import { View, Alert, StyleSheet } from "react-native";
-import { TextInput, Button, Text } from "react-native-paper";
+import { TextInput, Button, Text, Switch } from "react-native-paper";
 import { COLORS } from "@/styles/base";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function NewAccount() {
+  const { refreshUserElepad } = useAuth();
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
   const [familyCode, setFamilyCode] = useState("");
+  const [isElder, setIsElder] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSignUp = async () => {
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { displayName } },
-    });
-    if (error) {
-      Alert.alert(error.message);
-      setLoading(false);
-      return;
-    }
-    if (!data.session) {
-      Alert.alert("No se pudo crear un grupo familiar");
-      setLoading(false);
-      return;
-    }
-    if (!familyCode) {
-      const res = await postFamilyGroupCreate({
-        name: displayName,
-        ownerUserId: data.session.user.id,
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { displayName, elder: isElder } },
       });
-      // TODO: The workflow when this fails needs to be defined!!
-      if (!res) {
-        Alert.alert("No se pudo crear un grupo familiar");
+      
+      if (error) {
+        Alert.alert("Error al crear cuenta", error.message);
+        setLoading(false);
+        return;
       }
-    } else {
-      const res = await postFamilyGroupLink({
-        invitationCode: familyCode,
-        userId: data.session.user.id,
-      });
-      if (!res) {
-        Alert.alert("No se pudo vincular al grupo familiar");
+      
+      if (!data.session) {
+        Alert.alert(
+          "Verificación requerida",
+          "Por favor verifica tu correo electrónico para continuar"
+        );
+        setLoading(false);
+        return;
       }
+
+      // Handle family group
+      if (!familyCode) {
+        // Create new family group
+        try {
+          const res = await postFamilyGroupCreate({
+            name: displayName,
+            ownerUserId: data.session.user.id,
+          });
+          if (!res) {
+            Alert.alert(
+              "Advertencia",
+              "La cuenta se creó pero hubo un problema al crear el grupo familiar"
+            );
+          } else {
+            // Wait a bit for the database to update
+            await new Promise(resolve => setTimeout(resolve, 500));
+            // Refresh user data to get the new groupId
+            await refreshUserElepad();
+          }
+        } catch (err: any) {
+          console.error("Error creating family group:", err);
+          Alert.alert(
+            "Advertencia",
+            `La cuenta se creó pero hubo un problema al crear el grupo familiar: ${err.message || "Error desconocido"}`
+          );
+        }
+      } else {
+        // Link to existing family group
+        try {
+          const res = await postFamilyGroupLink({
+            invitationCode: familyCode,
+            userId: data.session.user.id,
+          });
+          if (!res) {
+            Alert.alert(
+              "Advertencia",
+              "La cuenta se creó pero no se pudo vincular al grupo familiar. Verifica el código."
+            );
+          } else {
+            // Wait a bit for the database to update
+            await new Promise(resolve => setTimeout(resolve, 500));
+            // Refresh user data to get the new groupId
+            await refreshUserElepad();
+          }
+        } catch (err: any) {
+          console.error("Error linking to family group:", err);
+          Alert.alert(
+            "Advertencia",
+            `La cuenta se creó pero no se pudo vincular al grupo familiar: ${err.message || "Código inválido o expirado"}`
+          );
+        }
+      }
+    } catch (err: any) {
+      console.error("Signup error:", err);
+      Alert.alert("Error", err.message || "Error al crear la cuenta");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -106,6 +155,17 @@ export default function NewAccount() {
           disabled={loading}
           dense
         />
+
+        <View style={styles.switchContainer}>
+          <Text style={styles.switchLabel}>¿Es adulto mayor?</Text>
+          <Switch
+            value={isElder}
+            onValueChange={setIsElder}
+            color={COLORS.primary}
+            disabled={loading}
+          />
+        </View>
+
         <TextInput
           mode="outlined"
           placeholder="Contraseña"
@@ -189,6 +249,20 @@ const styles = StyleSheet.create({
   },
   inputOutline: {
     borderRadius: 12,
+  },
+  switchContainer: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+    marginBottom: 14,
+  },
+  switchLabel: {
+    fontSize: 16,
+    color: COLORS.text,
+    fontWeight: "500",
   },
   primaryButton: {
     marginTop: 8,
