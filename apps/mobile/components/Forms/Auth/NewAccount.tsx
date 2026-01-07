@@ -16,40 +16,76 @@ export default function NewAccount() {
 
   const handleSignUp = async () => {
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { displayName, elder: isElder } },
-    });
-    if (error) {
-      Alert.alert(error.message);
-      setLoading(false);
-      return;
-    }
-    if (!data.session) {
-      Alert.alert("No se pudo crear un grupo familiar");
-      setLoading(false);
-      return;
-    }
-    if (!familyCode) {
-      const res = await postFamilyGroupCreate({
-        name: displayName,
-        ownerUserId: data.session.user.id,
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { displayName, elder: isElder } },
       });
-      // TODO: The workflow when this fails needs to be defined!!
-      if (!res) {
-        Alert.alert("No se pudo crear un grupo familiar");
+      
+      if (error) {
+        Alert.alert("Error al crear cuenta", error.message);
+        setLoading(false);
+        return;
       }
-    } else {
-      const res = await postFamilyGroupLink({
-        invitationCode: familyCode,
-        userId: data.session.user.id,
-      });
-      if (!res) {
-        Alert.alert("No se pudo vincular al grupo familiar");
+      
+      if (!data.session) {
+        Alert.alert(
+          "Verificación requerida",
+          "Por favor verifica tu correo electrónico para continuar"
+        );
+        setLoading(false);
+        return;
       }
+
+      // Handle family group
+      if (!familyCode) {
+        // Create new family group
+        try {
+          const res = await postFamilyGroupCreate({
+            name: displayName,
+            ownerUserId: data.session.user.id,
+          });
+          if (!res) {
+            Alert.alert(
+              "Advertencia",
+              "La cuenta se creó pero hubo un problema al crear el grupo familiar"
+            );
+          }
+        } catch (err: any) {
+          console.error("Error creating family group:", err);
+          Alert.alert(
+            "Advertencia",
+            `La cuenta se creó pero hubo un problema al crear el grupo familiar: ${err.message || "Error desconocido"}`
+          );
+        }
+      } else {
+        // Link to existing family group
+        try {
+          const res = await postFamilyGroupLink({
+            invitationCode: familyCode,
+            userId: data.session.user.id,
+          });
+          if (!res) {
+            Alert.alert(
+              "Advertencia",
+              "La cuenta se creó pero no se pudo vincular al grupo familiar. Verifica el código."
+            );
+          }
+        } catch (err: any) {
+          console.error("Error linking to family group:", err);
+          Alert.alert(
+            "Advertencia",
+            `La cuenta se creó pero no se pudo vincular al grupo familiar: ${err.message || "Código inválido o expirado"}`
+          );
+        }
+      }
+    } catch (err: any) {
+      console.error("Signup error:", err);
+      Alert.alert("Error", err.message || "Error al crear la cuenta");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
