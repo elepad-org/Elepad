@@ -46,7 +46,7 @@ export const useFocusGame = (props: UseFocusGameProps) => {
   const isInitializing = useRef(false);
   const hasInitialized = useRef(false);
 
-  // 1. Inicializar el Puzzle (Equivalente a initializeGame en Memory)
+  // 1. Inicializar
   const initializeGame = useCallback(async () => {
     // Reset de estados
     setIsRunning(false);
@@ -57,15 +57,12 @@ export const useFocusGame = (props: UseFocusGameProps) => {
     setIsLoading(true);
 
     try {
-      // Crear el puzzle en el backend
       const puzzleData = await createPuzzle.mutateAsync({
         data: {
-          // Aquí puedes añadir parámetros específicos de dificultad si tu API los requiere
           rounds: props.rounds,
         },
       });
 
-      // Verificar que sea una respuesta exitosa (status 201)
       if ("status" in puzzleData && puzzleData.status !== 201) {
         console.error("❌ Status de respuesta inválido:", puzzleData.status);
         throw new Error("Failed to create puzzle");
@@ -77,33 +74,30 @@ export const useFocusGame = (props: UseFocusGameProps) => {
         throw new Error("Invalid puzzle response");
       }
 
-      const newPuzzleId = responseData.puzzle.id; // Guardamos en variable local
-      setPuzzleId(newPuzzleId); // Actualizamos estado (para el futuro)
+      const newPuzzleId = responseData.puzzle.id;
+      setPuzzleId(newPuzzleId);
       setIsLoading(false);
 
       console.log("✅ Focus Puzzle creado:", newPuzzleId);
 
-      return newPuzzleId; // <--- RETORNAR EL ID AQUÍ
+      return newPuzzleId;
     } catch (error) {
       console.error("❌ Error al inicializar Focus Game:", error);
       const fallbackId = `local-${Date.now()}`;
       setPuzzleId(fallbackId);
       setIsLoading(false);
-      return fallbackId; // <--- RETORNAR EL FALLBACK
+      return fallbackId;
     }
   }, []);
 
-  // 2. Iniciar el Intento (Start Attempt)
+  // 2. Iniciar el Intento
   const startGame = useCallback(
     async (manualPuzzleId?: string) => {
-      // <--- Aceptar parámetro
 
-      // Usar el parámetro si existe, sino usar el del estado
       const currentPuzzleId = manualPuzzleId || puzzleId;
 
       console.log("Puzzle ID a usar:", currentPuzzleId);
 
-      // Validación de seguridad
       if (!currentPuzzleId) {
         console.error("No hay puzzleId disponible para iniciar");
         return;
@@ -130,15 +124,12 @@ export const useFocusGame = (props: UseFocusGameProps) => {
         })
         .catch((error) => {
           console.error("❌ Error starting attempt:", error);
-          // TODO: Mostrar snackbar de error si es necesario
-          // Por ahora solo logueamos, el juego continúa
         });
       console.log("Respuesta de Inicio de Intento:", res);
     },
     [puzzleId, startAttempt],
   );
 
-  // Auto-inicializar al montar
   useEffect(() => {
     if (!hasInitialized.current && !isInitializing.current) {
       isInitializing.current = true;
@@ -147,7 +138,6 @@ export const useFocusGame = (props: UseFocusGameProps) => {
       initializeGame()
         .then((newId) => {
           if (newId) {
-            // Pasamos el ID directamente, evitando esperar al re-render
             startGame(newId);
           }
         })
@@ -158,7 +148,7 @@ export const useFocusGame = (props: UseFocusGameProps) => {
     }
   }, [initializeGame, startGame]);
 
-  // 3. Finalizar el Intento (Finish Attempt)
+  // 3. Finalizar el Intento
   const finishGame = useCallback(
     async (stats: FocusStats, success: boolean) => {
       if (!attemptId || hasFinishedAttempt.current) return null;
@@ -189,7 +179,7 @@ export const useFocusGame = (props: UseFocusGameProps) => {
         }
 
 
-        // Manejo de Logros (Achievements) siguiendo el modelo
+        // Manejo de Logros
         const resData = finishResponse.data;
         if (
           resData?.unlockedAchievements &&
@@ -207,7 +197,7 @@ export const useFocusGame = (props: UseFocusGameProps) => {
         return finishResponse;
       } catch (error) {
         console.error("❌ Error finishing focus attempt", error);
-        hasFinishedAttempt.current = false; // Permitir reintento si falló la red
+        hasFinishedAttempt.current = false;
         throw error;
       }
     },

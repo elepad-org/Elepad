@@ -91,7 +91,7 @@ export default function SudokuGameScreen() {
   );
 
   const handleGameOver = useCallback(() => {
-    // Cuando el jugador pierde por 3 errores (por definir algo)
+    // Cuando el jugador pierde por errores
     setShowResultsDialog(true);
     setGameResults({
       moves: 0,
@@ -272,7 +272,6 @@ export default function SudokuGameScreen() {
           </Portal>
 
           {/* Diálogo de ayuda/instrucciones */}
-          {/* TODO: Crear las instrucciones y descripción del juego */}
           <Portal>
             <InstructionsDialog
               visible={showHelpDialog}
@@ -298,7 +297,7 @@ export default function SudokuGameScreen() {
             >
               <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
                 {gameResults?.hasWon === false
-                  ? "Game Over 😢"
+                  ? "Fin del juego 😢"
                   : "¡Felicitaciones! 🎉"}
               </Dialog.Title>
               <Dialog.Content>

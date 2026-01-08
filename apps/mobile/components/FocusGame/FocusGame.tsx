@@ -1,11 +1,10 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-// import styles from "./styles"; // COMENTADO: Usaremos los estilos definidos abajo para garantizar el diseño
 import { AttentionGameCore, COLORS_MAP, ColorName } from "./game";
 import { Button, Portal, Dialog } from "react-native-paper";
 import { router } from "expo-router";
 import { COLORS, STYLES } from "@/styles/base";
-import CancelButton from "@/components/shared/CancelButton"; // Asumo que tienes este componente del Sudoku
+import CancelButton from "@/components/shared/CancelButton";
 
 type Props = {
   rounds?: number;
@@ -22,15 +21,13 @@ export default function AttentionGame({
   const [tick, setTick] = useState(0);
   const [score, setScore] = useState({ correct: 0, rounds: rounds });
   const [lives, setLives] = useState(3);
-  const [lastResult, setLastResult] = useState<boolean | null>(null);
-  
-  // Estados para los Diálogos
+  const [lastResult, setLastResult] = useState<boolean | null>(null);  
+
   const [showResultsDialog, setShowResultsDialog] = useState(false);
   const [showQuitDialog, setShowQuitDialog] = useState(false);
-  
   const [modalTitle, setModalTitle] = useState("");
   const [modalMessage, setModalMessage] = useState("");
-  const [gameWon, setGameWon] = useState(false); // Para saber qué icono mostrar
+  const [gameWon, setGameWon] = useState(false);
 
   const [currentRound, setCurrentRound] = useState(1);
 
@@ -145,7 +142,7 @@ export default function AttentionGame({
         </View>
       </View>
 
-      {/* Área del Prompt (Palabra) */}
+      {/* Área del Prompt (palabra) */}
       <View
         style={[
           styles.promptBox,
@@ -170,7 +167,7 @@ export default function AttentionGame({
         )}
       </View>
 
-      {/* Grilla de colores */}
+      {/* Opciones de colores */}
       <View style={styles.grid}>
         {Object.keys(COLORS_MAP).map((k) => {
           const key = k as ColorName;
@@ -216,7 +213,6 @@ export default function AttentionGame({
         </Button>
       </View>
 
-      {/* ================= DIÁLOGO DE SALIDA (IGUAL A SUDOKU) ================= */}
       <Portal>
         <Dialog
           visible={showQuitDialog}
@@ -251,7 +247,6 @@ export default function AttentionGame({
         </Dialog>
       </Portal>
 
-      {/* ================= DIÁLOGO DE RESULTADOS (ESTILO SUDOKU) ================= */}
       <Portal>
         <Dialog
           visible={showResultsDialog}
@@ -311,7 +306,6 @@ export default function AttentionGame({
   );
 }
 
-// Estilos unificados (Focus Styles + Sudoku Dialog Styles)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -397,14 +391,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 16,
     width: "100%",
-    marginTop: "auto", // Push to bottom
+    marginTop: "auto",
   },
   actionButton: {
     flex: 1,
     borderRadius: 12,
   },
-  
-  // --- Estilos Específicos de los Dialogs (Portados de Sudoku) ---
   dialogContainer: {
     backgroundColor: COLORS.background,
     width: "90%",

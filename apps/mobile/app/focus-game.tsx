@@ -5,7 +5,7 @@ import { COLORS, STYLES, LAYOUT } from "@/styles/base";
 import { AttentionGame } from "@/components/FocusGame";
 import { useFocusGame } from "@/hooks/useFocusGame";
 import { Text } from "react-native-paper";
-import { Stack } from "expo-router"; // <--- Importante: Importar Stack
+import { Stack } from "expo-router";
 
 export default function AttentionGameScreen() {
   const ROUNDS = 10;
@@ -35,13 +35,11 @@ export default function AttentionGameScreen() {
     } catch (e) {
       console.warn("Error registrando intento restart", e);
     }
-    // start a fresh attempt immediately
     await focus.startGame();
   };
 
   return (
     <>
-      {/* Esto elimina la barra negra de navegación */}
       <Stack.Screen options={{ headerShown: false }} />
       
       <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
@@ -59,7 +57,6 @@ export default function AttentionGameScreen() {
             Selecciona el color que indica la palabra (no el color del texto).
           </Text>
 
-          {/* El componente del juego ya incluye los botones de control */}
           <AttentionGame
             rounds={ROUNDS}
             onFinish={handleFinish}

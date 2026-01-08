@@ -1,12 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-// Asumo que estos hooks existen o los crearás siguiendo tu patrón actual
 import {
   usePostPuzzlesSudoku,
   usePostAttemptsStart,
   usePostAttemptsAttemptIdFinish,
 } from "@elepad/api-client";
-
-// --- Tipos e Interfaces ---
 
 export type Difficulty = "easy" | "medium" | "hard";
 
@@ -21,15 +18,15 @@ export interface SudokuCell {
 }
 
 export interface SudokuStats {
-  mistakes: number; // Errores del jugador, sirve para terminar el juego en dev
-  moves: number; // Cantidad de celdas rellenadas
+  mistakes: number;
+  moves: number;
   timeElapsed: number;
   isComplete: boolean;
 }
 
 export interface UseSudokuProps {
   difficulty: Difficulty;
-  maxMistakes?: number; // Límite de errores permitidos (ej: 3)
+  maxMistakes?: number;
   onGameOver?: () => void; // Callback si pierde por errores
   onAchievementUnlocked?: (achievement: any) => void;
 }
@@ -157,11 +154,10 @@ export const useSudoku = (props: UseSudokuProps) => {
       setIsLoading(false);
     } catch (error) {
       console.error("❌ Error inicializando Sudoku:", error);
-      // Aquí podrías implementar un fallback local para generar sudokus offline
       setIsLoading(false);
     }
   }, [createPuzzle]);
-  // Inicializar al montar (solo una vez)
+  // Inicializar
   const isInitializing = useRef(false);
   const hasInitialized = useRef(false);
 
@@ -185,17 +181,15 @@ export const useSudoku = (props: UseSudokuProps) => {
     };
   }, [isGameStarted, isComplete]);
 
-  // --- Lógica del Juego (Input) ---
+  // --- Lógica del Juego ---
 
   const handleCellPress = useCallback(
     (row: number, col: number) => {
       if (isComplete) return;
       const cell = board[row][col];
-      // Solo permitir seleccionar celdas editables
       if (!cell.isReadOnly) {
         setSelectedCell({ row, col });
       } else {
-        // Opcional: Permitir seleccionar readOnly solo para resaltar números iguales
         setSelectedCell({ row, col });
       }
     },
@@ -208,7 +202,6 @@ export const useSudoku = (props: UseSudokuProps) => {
     // Detener el temporizador
     if (timerRef.current) clearInterval(timerRef.current);
 
-    // Evitar múltiples finalizaciones
     if (hasFinishedAttempt.current) return;
 
     // Finalizar el intento en el backend
@@ -237,7 +230,6 @@ export const useSudoku = (props: UseSudokuProps) => {
     // Detener el temporizador
     if (timerRef.current) clearInterval(timerRef.current);
 
-    // Evitar múltiples finalizaciones
     if (hasFinishedAttempt.current) return;
 
     // Finalizar el intento en el backend
@@ -277,7 +269,7 @@ export const useSudoku = (props: UseSudokuProps) => {
         setIsGameStarted(true);
         startTimeRef.current = Date.now();
 
-        // Iniciar attempt en backend (no bloqueante)
+        // Iniciar attempt en backend
         if (puzzleId && !attemptId && !isStartingAttempt.current) {
           isStartingAttempt.current = true;
           startAttempt
@@ -295,12 +287,10 @@ export const useSudoku = (props: UseSudokuProps) => {
       // 2. Lógica de validación
       const isCorrect = number === currentCell.solutionValue;
 
-      // Copiar tablero para inmutabilidad
       const newBoard = [...board];
       const newRow = [...newBoard[row]];
 
       if (isCorrect) {
-        // MOVIMIENTO CORRECTO
         newRow[col] = {
           ...currentCell,
           value: number,
@@ -311,18 +301,15 @@ export const useSudoku = (props: UseSudokuProps) => {
         setBoard(newBoard);
         setFilledCells((prev) => prev + 1);
 
-        // Chequear si completó el número para animaciones (opcional) o si ganó
       } else {
         // MOVIMIENTO INCORRECTO
-        setMistakes((prev) => {
-          const newMistakes = prev + 1;
-          if (newMistakes >= maxMistakes && onGameOver) {
-            // Lógica de Game Over
-            loseGame();
-            onGameOver();
-          }
-          return newMistakes;
-        });
+        const newMistakes = mistakes + 1;
+        setMistakes(newMistakes);
+
+        if (newMistakes >= maxMistakes && onGameOver) {
+          loseGame();
+          onGameOver();
+        }
 
         // Mostrar error visualmente
         newRow[col] = {
@@ -354,13 +341,14 @@ export const useSudoku = (props: UseSudokuProps) => {
       attemptId,
       maxMistakes,
       onGameOver,
+      mistakes,
+      loseGame,
     ],
   );
 
   // --- Verificación de Victoria ---
 
   useEffect(() => {
-    // 81 celdas en total
     if (
       filledCells === 81 &&
       isGameStarted &&
@@ -375,7 +363,6 @@ export const useSudoku = (props: UseSudokuProps) => {
           hasFinishedAttempt.current = true;
           const durationMs = Date.now() - startTimeRef.current;
 
-          // Cálculo de score simple
           const score = 81 - mistakes;
 
           try {
@@ -395,7 +382,6 @@ export const useSudoku = (props: UseSudokuProps) => {
               return;
             }
 
-            // Manejo de logros (igual que en tu ejemplo)
             if (response.data?.unlockedAchievements) {
               response.data.unlockedAchievements.forEach((a: any) =>
                 onAchievementUnlocked?.(a),
