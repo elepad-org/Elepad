@@ -112,7 +112,7 @@ export const useSudoku = (props: UseSudokuProps) => {
       if ("status" in puzzleResponse && puzzleResponse.status !== 201) {
         console.error(
           "❌ Status de respuesta inválido:",
-          puzzleResponse.status,
+          puzzleResponse.status
         );
         throw new Error("Failed to create puzzle");
       }
@@ -140,7 +140,7 @@ export const useSudoku = (props: UseSudokuProps) => {
             isReadOnly: val !== 0, // Si viene con valor, es fijo
             isError: false,
             notes: [],
-          })),
+          }))
       );
 
       // Calcular celdas iniciales llenas
@@ -148,7 +148,7 @@ export const useSudoku = (props: UseSudokuProps) => {
       newBoard.forEach((row) =>
         row.forEach((cell) => {
           if (cell.value !== null) initialFilled++;
-        }),
+        })
       );
       console.log("Celdas llenas: ", initialFilled);
 
@@ -196,7 +196,7 @@ export const useSudoku = (props: UseSudokuProps) => {
         setSelectedCell({ row, col });
       }
     },
-    [board, isComplete],
+    [board, isComplete]
   );
 
   // TODO: Revisar si tiene sentido que esten separadas las funciones de LoseGame y QuitGame
@@ -303,7 +303,6 @@ export const useSudoku = (props: UseSudokuProps) => {
         newBoard[row] = newRow;
         setBoard(newBoard);
         setFilledCells((prev) => prev + 1);
-
       } else {
         // MOVIMIENTO INCORRECTO
         const newMistakes = mistakes + 1;
@@ -346,7 +345,7 @@ export const useSudoku = (props: UseSudokuProps) => {
       onGameOver,
       mistakes,
       loseGame,
-    ],
+    ]
   );
 
   // --- Verificación de Victoria ---
@@ -369,7 +368,7 @@ export const useSudoku = (props: UseSudokuProps) => {
           const score = 81 - mistakes;
 
           try {
-            const response = await finishAttempt.mutateAsync({
+            const finishResponse = await finishAttempt.mutateAsync({
               attemptId,
               data: {
                 success: true,
@@ -378,21 +377,28 @@ export const useSudoku = (props: UseSudokuProps) => {
                 score: score,
               },
             });
-            console.log(response);
 
-            if (response.status !== 200) {
-              console.error("Error al finalizar el intento", response.data);
-              return;
+            if ("status" in finishResponse && finishResponse.status !== 200) {
+              console.error(
+                "❌ Status de respuesta inválido:",
+                finishResponse.status
+              );
+              throw new Error("Failed to create puzzle");
             }
 
             // Invalidar queries de rachas para refrescar datos
-            queryClient.invalidateQueries({ queryKey: ['getStreaksMe'] });
-            queryClient.invalidateQueries({ queryKey: ['getStreaksHistory'] });
+            queryClient.invalidateQueries({ queryKey: ["getStreaksMe"] });
+            queryClient.invalidateQueries({ queryKey: ["getStreaksHistory"] });
 
-            if (response.data?.unlockedAchievements) {
-              response.data.unlockedAchievements.forEach((a: any) =>
-                onAchievementUnlocked?.(a),
-              );
+            // Manejo de Logros
+            const resData = finishResponse.data;
+            if (
+              resData?.unlockedAchievements &&
+              resData.unlockedAchievements.length > 0
+            ) {
+              resData.unlockedAchievements.forEach((achievement) => {
+                onAchievementUnlocked?.(achievement);
+              });
             }
           } catch (e) {
             console.error("Error finalizando attempt", e);
