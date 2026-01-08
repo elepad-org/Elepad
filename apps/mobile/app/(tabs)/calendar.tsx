@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { View, StatusBar } from "react-native";
 import { useAuth } from "@/hooks/useAuth";
 import CalendarCard from "@/components/Calendar/CalendarCard";
@@ -55,12 +55,19 @@ export default function CalendarScreen() {
   const isOwnerOfGroup = groupInfo?.owner?.id === userElepad?.id;
 
   // Preparar lista de miembros de la familia para menciones
-  const familyMembers =
-    groupInfo?.members?.map((member) => ({
-      id: member.id,
-      displayName: member.displayName || "Usuario",
-      avatarUrl: member.avatarUrl || null,
-    })) || [];
+  const familyMembers = useMemo(() => {
+    if (!groupInfo) {
+      return [] as Array<{ id: string; displayName: string; avatarUrl: string | null }>;
+    }
+
+    const raw = [groupInfo.owner, ...groupInfo.members];
+    const byId = new Map<string, { id: string; displayName: string; avatarUrl: string | null }>();
+    for (const m of raw) {
+      if (!m?.id) continue;
+      byId.set(m.id, { id: m.id, displayName: m.displayName, avatarUrl: m.avatarUrl ?? null });
+    }
+    return Array.from(byId.values());
+  }, [groupInfo]);
 
   const postActivity = usePostActivities({
     mutation: {
