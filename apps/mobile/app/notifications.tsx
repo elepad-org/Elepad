@@ -13,6 +13,8 @@ import {
   IconButton,
   Button,
   Chip,
+  Dialog,
+  Divider,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
@@ -23,9 +25,10 @@ import {
   useDeleteNotificationsId,
   useGetFamilyGroupIdGroupMembers,
   GetFamilyGroupIdGroupMembers200,
-  Notification,
   useGetMemoriesId,
   Memory,
+  useGetActivitiesId,
+  Activity,
 } from "@elepad/api-client";
 import { COLORS, STYLES, SHADOWS } from "@/styles/base";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -96,6 +99,8 @@ export default function NotificationsScreen() {
   const [page, setPage] = useState(0);
   const [selectedMemoryId, setSelectedMemoryId] = useState<string | null>(null);
   const [detailDialogVisible, setDetailDialogVisible] = useState(false);
+  const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
+  const [activityDetailDialogVisible, setActivityDetailDialogVisible] = useState(false);
 
   // Fetch family members for displaying names in mentions
   const membersQuery = useGetFamilyGroupIdGroupMembers(
@@ -127,6 +132,16 @@ export default function NotificationsScreen() {
     {
       query: {
         enabled: !!selectedMemoryId,
+      },
+    },
+  );
+
+  // Query para obtener la actividad seleccionada
+  const activityQuery = useGetActivitiesId(
+    selectedActivityId || "",
+    {
+      query: {
+        enabled: !!selectedActivityId,
       },
     },
   );
@@ -171,13 +186,14 @@ export default function NotificationsScreen() {
 
   const notifications = useMemo(() => {
     if (!notificationsQuery.data) return [];
-    return Array.isArray(notificationsQuery.data)
-      ? notificationsQuery.data
-      : notificationsQuery.data.notifications || [];
+    const data = notificationsQuery.data as any;
+    return Array.isArray(data)
+      ? data
+      : data.notifications || [];
   }, [notificationsQuery.data]);
 
   const unreadCount = useMemo(() => {
-    return notifications.filter((n) => !n.read).length;
+    return notifications.filter((n: any) => !n.read).length;
   }, [notifications]);
 
   const handleRefresh = useCallback(() => {
@@ -229,7 +245,7 @@ export default function NotificationsScreen() {
   );
 
   const handleNotificationPress = useCallback(
-    async (notification: Notification) => {
+    async (notification: any) => {
       console.log('🔔 Notification pressed:', {
         id: notification.id,
         entity_type: notification.entity_type,
@@ -244,8 +260,11 @@ export default function NotificationsScreen() {
         // Mostrar el detalle del recuerdo
         setSelectedMemoryId(notification.entity_id);
         setDetailDialogVisible(true);
-      } else if (notification.entity_type === "activity") {
-        router.push("/(tabs)/calendar");
+      } else if (notification.entity_type === "activity" && notification.entity_id) {
+        console.log('📅 Opening activity detail:', notification.entity_id);
+        // Mostrar el detalle de la actividad
+        setSelectedActivityId(notification.entity_id);
+        setActivityDetailDialogVisible(true);
       } else {
         console.log('⚠️ No action for this notification type');
       }
@@ -292,9 +311,15 @@ export default function NotificationsScreen() {
     return `${day}/${month}`;
   };
 
-  const getNotificationIcon = (eventType: string) => {
+  const getNotificationIcon = (eventType: string, entityType?: string) => {
     switch (eventType) {
       case "mention":
+        // Diferentes iconos según el tipo de entidad
+        if (entityType === "memory") {
+          return "image-text";
+        } else if (entityType === "activity") {
+          return "calendar-text";
+        }
         return "at";
       case "activity_created":
         return "calendar-plus";
@@ -306,7 +331,7 @@ export default function NotificationsScreen() {
   };
 
   const renderNotification = useCallback(
-    ({ item }: { item: Notification }) => {
+    ({ item }: { item: any }) => {
       // Para menciones, detectar si el título contiene formato <@id>
       const hasMention = /<@([^>]+)>/.test(item.title);
       const isMention = item.event_type === "mention" || hasMention;
@@ -322,7 +347,7 @@ export default function NotificationsScreen() {
         >
           <View style={styles.notificationIconContainer}>
             <MaterialCommunityIcons
-              name={getNotificationIcon(item.event_type)}
+              name={getNotificationIcon(item.event_type, item.entity_type)}
               size={24}
               color={item.read ? COLORS.textSecondary : COLORS.primary}
             />
@@ -333,10 +358,15 @@ export default function NotificationsScreen() {
               <HighlightedMentionText
                 text={item.title}
                 groupMembers={groupMembers}
-                style={[
-                  styles.notificationTitle,
-                  !item.read && styles.unreadTitle,
-                ]}
+                style={
+                  item.read
+                    ? styles.notificationTitle
+                    : {
+                        fontSize: 14,
+                        color: COLORS.text,
+                        fontWeight: "700" as const,
+                      }
+                }
                 numberOfLines={2}
               />
             ) : (
@@ -475,7 +505,7 @@ export default function NotificationsScreen() {
         recuerdo={
           memoryQuery.data && groupMembers
             ? memoryToRecuerdo(
-                memoryQuery.data as Memory,
+                (memoryQuery.data as any) as Memory,
                 groupMembers.reduce((acc, m) => {
                   acc[m.id] = m.displayName;
                   return acc;
@@ -498,8 +528,148 @@ export default function NotificationsScreen() {
         isMutating={false}
         familyMembers={groupMembers}
         currentUserId={userElepad?.id}
-        showBackdrop={true}
       />
+
+      {/* Dialog para mostrar detalle de la actividad */}
+      <Portal>
+        <Dialog
+          visible={activityDetailDialogVisible}
+          onDismiss={() => {
+            setActivityDetailDialogVisible(false);
+            setSelectedActivityId(null);
+          }}
+          style={{
+            backgroundColor: COLORS.background,
+            borderRadius: 16,
+            width: "90%",
+            alignSelf: "center",
+          }}
+        >
+          {activityQuery.data && (() => {
+            const activity = (activityQuery.data as any) as Activity;
+            return [
+              <Dialog.Title key="title" style={{ fontWeight: "bold", color: COLORS.text }}>
+                {activity.title}
+              </Dialog.Title>,
+              <Dialog.Content key="content">
+                  {/* Fecha y hora */}
+                  <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+                    <MaterialCommunityIcons
+                      name="clock-outline"
+                      size={20}
+                      color={COLORS.primary}
+                      style={{ marginRight: 12 }}
+                    />
+                    <Text variant="bodyMedium" style={{ flex: 1, color: COLORS.textSecondary }}>
+                      {new Date(activity.startsAt).toLocaleDateString([], {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}{" "}
+                      {new Date(activity.startsAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </Text>
+                  </View>
+
+                  {/* Creador */}
+                  {(() => {
+                    const creator = groupMembers.find((m) => m.id === activity.createdBy);
+                    return creator ? (
+                      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+                        <MaterialCommunityIcons
+                          name="account"
+                          size={20}
+                          color={COLORS.primary}
+                          style={{ marginRight: 12 }}
+                        />
+                        <Text variant="bodyMedium" style={{ flex: 1, color: COLORS.textSecondary }}>
+                          Por: {creator.displayName}
+                        </Text>
+                      </View>
+                    ) : null;
+                  })()}
+
+                  {/* Estado */}
+                  <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+                    <MaterialCommunityIcons
+                      name={
+                        activity.completed
+                          ? "checkbox-marked-circle"
+                          : "checkbox-blank-circle-outline"
+                      }
+                      size={20}
+                      color={
+                        activity.completed
+                          ? COLORS.primary
+                          : COLORS.textLight
+                      }
+                      style={{ marginRight: 12 }}
+                    />
+                    <Text variant="bodyMedium" style={{ flex: 1, color: COLORS.textSecondary }}>
+                      {activity.completed ? "Completada" : "Pendiente"}
+                    </Text>
+                  </View>
+
+                  {/* Descripción */}
+                  {activity.description && (
+                    <View>
+                      <Divider style={{ marginVertical: 12, backgroundColor: COLORS.border }} />
+                      <Text
+                        variant="labelMedium"
+                        style={{
+                          color: COLORS.primary,
+                          marginBottom: 8,
+                          fontWeight: "bold",
+                        }}
+                      >
+                        Descripción
+                      </Text>
+                      <HighlightedMentionText
+                        text={activity.description || ""}
+                        groupMembers={groupMembers}
+                        style={{ color: COLORS.text, lineHeight: 22, fontSize: 14 }}
+                      />
+                    </View>
+                  )}
+                </Dialog.Content>,
+              <Dialog.Actions key="actions" style={{ paddingHorizontal: 24, paddingBottom: 16 }}>
+                <Button
+                    mode="text"
+                    onPress={() => {
+                      setActivityDetailDialogVisible(false);
+                      setSelectedActivityId(null);
+                    }}
+                    style={{ marginRight: 8 }}
+                  >
+                    Cerrar
+                  </Button>
+                  <Button
+                    mode="contained"
+                    onPress={() => {
+                      setActivityDetailDialogVisible(false);
+                      setSelectedActivityId(null);
+                      router.push("/(tabs)/calendar");
+                    }}
+                    buttonColor={COLORS.primary}
+                    style={{ borderRadius: 12 }}
+                    contentStyle={{ paddingVertical: 8 }}
+                  >
+                    Ir al Calendario
+                  </Button>
+                </Dialog.Actions>
+            ];
+          })()}
+          {!activityQuery.data && (
+            <Dialog.Content>
+              <View style={{ alignItems: "center", paddingVertical: 20 }}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+              </View>
+            </Dialog.Content>
+          )}
+        </Dialog>
+      </Portal>
     </SafeAreaView>
   );
 }

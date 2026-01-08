@@ -216,7 +216,7 @@ export default function ActivityItem({
 
             {/* Descripción */}
             {hasDescription && (
-              <>
+              <View>
                 <Divider
                   style={{ marginVertical: 12, backgroundColor: COLORS.border }}
                 />
@@ -235,7 +235,7 @@ export default function ActivityItem({
                   familyMembers={familyMembers}
                   style={{ color: COLORS.text, lineHeight: 22, fontSize: 14 }}
                 />
-              </>
+              </View>
             )}
           </Dialog.Content>
           <Dialog.Actions style={{ paddingHorizontal: 24, paddingBottom: 16 }}>
