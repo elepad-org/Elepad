@@ -171,7 +171,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
 
   // Calculate stats locally for helpers from filtered attempts
   const getStatsFromAttempts = useCallback((gameType: GameType | "all") => {
-    if (!isHelper || !selectedElderId) {
+    if (!isHelper) {
       // For non-helpers, use regular stats queries
       if (gameType === "all") {
         return statsQueries.reduce(
@@ -193,7 +193,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
       }
     }
 
-    // For helpers, calculate stats from filtered attempts
+    // For helpers, ALWAYS calculate stats from filtered attempts
     const filteredAttempts = gameType === "all" 
       ? attempts 
       : attempts.filter(attempt => {
@@ -207,9 +207,9 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
     return {
       totalAttempts: filteredAttempts.length,
       successfulAttempts: filteredAttempts.filter(a => a.success === true).length,
-      bestScore: Math.max(...filteredAttempts.map(a => a.score || 0), 0),
+      bestScore: filteredAttempts.length > 0 ? Math.max(...filteredAttempts.map(a => a.score || 0)) : 0,
     };
-  }, [attempts, isHelper, selectedElderId, statsQueries, gameTypes]);
+  }, [attempts, isHelper, statsQueries, gameTypes]);
 
   const statsLoading = statsQueries.some((q) => q.isLoading);
   const globalLoading = loading || statsLoading;
@@ -243,8 +243,10 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
         // If helper, filter by selected elder's attempts
         if (isHelper && selectedElderId) {
           params.userId = selectedElderId;
+          console.log('Fetching attempts for elder:', selectedElderId);
         }
 
+        console.log('Fetch params:', params);
         const res = await getAttempts(params);
 
         let items: Attempt[] = [];
@@ -286,8 +288,16 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
   };
 
   const statsToShow = useMemo(() => {
-    return getStatsFromAttempts(selectedGame);
-  }, [selectedGame, getStatsFromAttempts]);
+    const stats = getStatsFromAttempts(selectedGame);
+    console.log('Stats calculation:', {
+      isHelper,
+      selectedGame,
+      selectedElderId,
+      attemptsLength: attempts.length,
+      calculatedStats: stats
+    });
+    return stats;
+  }, [selectedGame, getStatsFromAttempts, isHelper, selectedElderId, attempts]);
 
   const total = statsToShow?.totalAttempts || 0;
   const success = statsToShow?.successfulAttempts || 0;
