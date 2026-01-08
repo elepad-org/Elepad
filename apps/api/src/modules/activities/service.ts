@@ -3,12 +3,18 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/supabase-types";
 import type { NewActivity, UpdateActivity } from "./schema";
 import { GoogleCalendarService } from "@/services/google-calendar";
+import { MentionsService } from "@/services/mentions";
+import { NotificationsService } from "@/modules/notifications/service";
 
 export class ActivityService {
   private googleCalendarService: GoogleCalendarService;
+  private mentionsService: MentionsService;
+  private notificationsService: NotificationsService;
 
   constructor(private supabase: SupabaseClient<Database>) {
     this.googleCalendarService = new GoogleCalendarService(supabase);
+    this.mentionsService = new MentionsService(supabase);
+    this.notificationsService = new NotificationsService(supabase);
   }
 
   async getActivityById(id: string) {
@@ -86,6 +92,45 @@ export class ActivityService {
       throw new ApiException(500, "Error al crear la actividad", error);
     }
 
+    // Sync mentions from title and description
+    try {
+      await this.mentionsService.syncMentions(
+        "activity",
+        data.id,
+        payload.title,
+        payload.description
+      );
+
+      // Extract mentioned user IDs and create notifications
+      const mentionedIds = [
+        ...this.mentionsService.extractMentionIds(payload.title),
+        ...this.mentionsService.extractMentionIds(payload.description),
+      ];
+
+      if (mentionedIds.length > 0) {
+        // Get the actor's name
+        const { data: actor, error: actorError } = await this.supabase
+          .from("users")
+          .select("displayName")
+          .eq("id", payload.createdBy)
+          .single();
+
+        if (!actorError && actor) {
+          await this.notificationsService.notifyMentionedUsers(
+            mentionedIds,
+            payload.createdBy,
+            actor.displayName || "Un usuario",
+            "activity",
+            data.id,
+            payload.title || "Sin título"
+          );
+        }
+      }
+    } catch (mentionError) {
+      console.error("Error syncing mentions or creating notifications:", mentionError);
+      // Don't throw - mentions and notifications are not critical
+    }
+
     // Sync with Google Calendar if enabled
     try {
       const isEnabled =
@@ -126,6 +171,45 @@ export class ActivityService {
       throw new ApiException(404, "Actividad no encontrada");
     }
 
+    // Sync mentions from title and description
+    try {
+      await this.mentionsService.syncMentions(
+        "activity",
+        data.id,
+        data.title,
+        data.description
+      );
+
+      // Extract mentioned user IDs and create notifications
+      const mentionedIds = [
+        ...this.mentionsService.extractMentionIds(data.title),
+        ...this.mentionsService.extractMentionIds(data.description),
+      ];
+
+      if (mentionedIds.length > 0) {
+        // Get the actor's name
+        const { data: actor, error: actorError } = await this.supabase
+          .from("users")
+          .select("displayName")
+          .eq("id", data.createdBy)
+          .single();
+
+        if (!actorError && actor) {
+          await this.notificationsService.notifyMentionedUsers(
+            mentionedIds,
+            data.createdBy,
+            actor.displayName || "Un usuario",
+            "activity",
+            data.id,
+            data.title || "Sin título"
+          );
+        }
+      }
+    } catch (mentionError) {
+      console.error("Error syncing mentions or creating notifications:", mentionError);
+      // Don't throw - mentions and notifications are not critical
+    }
+
     // Sync with Google Calendar if enabled
     try {
       const isEnabled =
@@ -151,6 +235,14 @@ export class ActivityService {
       .select("createdBy")
       .eq("id", id)
       .single();
+
+    // Delete mentions for this activity
+    try {
+      await this.mentionsService.deleteMentionsForEntity("activity", id);
+    } catch (mentionError) {
+      console.error("Error deleting mentions:", mentionError);
+      // Don't throw - continue with activity deletion
+    }
 
     const { error } = await this.supabase
       .from("activities")
