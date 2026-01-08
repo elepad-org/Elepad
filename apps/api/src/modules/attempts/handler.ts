@@ -227,7 +227,7 @@ attemptsApp.openapi(
       userId,
       limit,
       offset,
-      gameType as "memory" | "logic" | undefined,
+      gameType as "memory" | "logic" | "attention" | "reaction" | undefined,
     );
     return c.json(attempts, 200);
   },

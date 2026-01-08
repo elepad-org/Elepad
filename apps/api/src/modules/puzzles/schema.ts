@@ -2,7 +2,7 @@ import { z } from "@hono/zod-openapi";
 
 // Enum para los tipos de juego (categorías)
 export const GameTypeEnum = z
-  .enum(["memory", "logic", "attention", "calculation"])
+  .enum(["memory", "logic", "attention", "reaction"])
   .openapi("GameType");
 export type GameType = z.infer<typeof GameTypeEnum>;
 

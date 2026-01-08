@@ -211,7 +211,7 @@ export const GameType = {
   memory: "memory",
   logic: "logic",
   attention: "attention",
-  calculation: "calculation",
+  reaction: "reaction",
 } as const;
 
 export interface PuzzleWithDetails {
