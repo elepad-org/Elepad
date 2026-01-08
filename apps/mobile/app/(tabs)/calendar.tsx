@@ -54,6 +54,14 @@ export default function CalendarScreen() {
   const groupInfo = selectGroupInfo();
   const isOwnerOfGroup = groupInfo?.owner?.id === userElepad?.id;
 
+  // Preparar lista de miembros de la familia para menciones
+  const familyMembers =
+    groupInfo?.members?.map((member) => ({
+      id: member.id,
+      displayName: member.displayName || "Usuario",
+      avatarUrl: member.avatarUrl || null,
+    })) || [];
+
   const postActivity = usePostActivities({
     mutation: {
       retry: 2, // Reintentar 2 veces antes de fallar
@@ -211,6 +219,8 @@ export default function CalendarScreen() {
         }}
         onSave={handleSave}
         initial={editing ?? null}
+        familyMembers={familyMembers}
+        currentUserId={idUser}
       />
 
       <Dialog
