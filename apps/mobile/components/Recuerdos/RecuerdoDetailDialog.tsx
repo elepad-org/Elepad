@@ -36,7 +36,7 @@ interface RecuerdoDetailDialogProps {
   onDismiss: () => void;
   onUpdateRecuerdo: (
     id: string,
-    patch: { title?: string; caption?: string; mentions?: string[] }
+    patch: { title?: string; caption?: string }
   ) => Promise<void>;
   onDeleteRecuerdo: (id: string) => Promise<void>;
   isMutating?: boolean;

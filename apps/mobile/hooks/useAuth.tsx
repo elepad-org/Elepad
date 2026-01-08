@@ -70,10 +70,14 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     setData();
 
     const { data: listener } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
+          // If this is a new sign up, wait a bit for the database to sync
+          if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+            await new Promise(resolve => setTimeout(resolve, 300));
+          }
           await loadElepadUserById(session.user.id);
           router.replace("/home");
         } else {
@@ -141,4 +145,5 @@ export type ElepadUser = {
   displayName: string;
   avatarUrl?: string;
   groupId?: string;
+  elder: boolean;
 };

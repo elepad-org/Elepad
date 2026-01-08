@@ -50,7 +50,6 @@ export const MemorySchema = z
     caption: z.string().nullable(),
     mediaUrl: z.string().nullable(),
     mimeType: z.string().nullable(),
-    mentions: z.array(z.string()).nullable(),
     createdAt: z.string().datetime(), // timestamp with time zone como string ISO
   })
   .openapi("Memory");
@@ -67,7 +66,6 @@ export const NewMemorySchema = z
     caption: z.string().optional(),
     mediaUrl: z.string().optional(),
     mimeType: z.string().optional(),
-    mentions: z.array(z.string()).optional(),
   })
   .openapi("NewMemory");
 
@@ -78,7 +76,6 @@ export const UpdateMemorySchema = z
   .object({
     title: z.string().min(1).optional(),
     caption: z.string().optional(),
-    mentions: z.array(z.string()).optional(),
   })
   .strict()
   .openapi("UpdateMemory");
@@ -105,7 +102,6 @@ export const CreateMemoryWithImageSchema = z
     groupId: z.string().uuid(),
     title: z.string().min(1).optional(),
     caption: z.string().optional(),
-    mentions: z.array(z.string()).optional(),
     // La imagen se manejará como File en el handler
   })
   .openapi("CreateMemoryWithImage");
@@ -119,7 +115,6 @@ export const CreateNoteSchema = z
     groupId: z.string().uuid(),
     title: z.string().min(1),
     caption: z.string().optional(),
-    mentions: z.array(z.string()).optional(),
   })
   .openapi("CreateNote");
 
