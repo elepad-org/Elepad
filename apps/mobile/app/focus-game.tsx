@@ -4,8 +4,8 @@ import { StatusBar, View } from "react-native";
 import { COLORS, STYLES, LAYOUT } from "@/styles/base";
 import { AttentionGame } from "@/components/FocusGame";
 import { useFocusGame } from "@/hooks/useFocusGame";
-import { Button, Text } from "react-native-paper";
-import { router } from "expo-router";
+import { Text } from "react-native-paper";
+import { Stack } from "expo-router"; // <--- Importante: Importar Stack
 
 export default function AttentionGameScreen() {
   const ROUNDS = 10;
@@ -40,33 +40,33 @@ export default function AttentionGameScreen() {
   };
 
   return (
-    <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
-      <View
-        style={[
-          STYLES.contentContainer,
-          { paddingBottom: LAYOUT.bottomNavHeight },
-        ]}
-      >
-        <Text variant="titleLarge" style={{ marginBottom: 12 }}>
-          Focus
-        </Text>
-        <Text style={{ marginBottom: 12, color: COLORS.textSecondary }}>
-          Selecciona el color que indica la palabra (no el color del texto).
-        </Text>
+    <>
+      {/* Esto elimina la barra negra de navegación */}
+      <Stack.Screen options={{ headerShown: false }} />
+      
+      <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
+        <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+        <View
+          style={[
+            STYLES.contentContainer,
+            { paddingBottom: LAYOUT.bottomNavHeight },
+          ]}
+        >
+          <Text variant="titleLarge" style={{ marginBottom: 12 }}>
+            Focus
+          </Text>
+          <Text style={{ marginBottom: 12, color: COLORS.textSecondary }}>
+            Selecciona el color que indica la palabra (no el color del texto).
+          </Text>
 
-        <AttentionGame
-          rounds={ROUNDS}
-          onFinish={handleFinish}
-          onRestart={handleRestart}
-        />
-
-        <View style={{ marginTop: 12 }}>
-          <Button mode="outlined" onPress={() => router.back()}>
-            Volver
-          </Button>
+          {/* El componente del juego ya incluye los botones de control */}
+          <AttentionGame
+            rounds={ROUNDS}
+            onFinish={handleFinish}
+            onRestart={handleRestart}
+          />
         </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </>
   );
 }
