@@ -31,12 +31,14 @@ import { useMemo } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import StreakCounter from "@/components/StreakCounter";
 import HighlightedMentionText from "@/components/Recuerdos/HighlightedMentionText";
+import { useNotifications } from "@/hooks/useNotifications";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function HomeScreen() {
   const { userElepad, loading } = useAuth();
   const router = useRouter();
+  const { unreadCount } = useNotifications();
 
   // Fetch today's activities
   const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(
@@ -80,11 +82,6 @@ export default function HomeScreen() {
     },
   );
 
-  console.log('🔍 HOME - userElepad?.groupId:', userElepad?.groupId);
-  console.log('🔍 HOME - membersQuery.isLoading:', membersQuery.isLoading);
-  console.log('🔍 HOME - membersQuery.data:', membersQuery.data);
-  console.log('🔍 HOME - membersQuery.error:', membersQuery.error);
-
   const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
     const resp = membersQuery.data as
       | { data?: GetFamilyGroupIdGroupMembers200 }
@@ -107,9 +104,7 @@ export default function HomeScreen() {
       if (!m?.id) continue;
       byId.set(m.id, { id: m.id, displayName: m.displayName, avatarUrl: m.avatarUrl ?? null });
     }
-    const result = Array.from(byId.values());
-    console.log('🔍 HOME - groupMembers:', result);
-    return result;
+    return Array.from(byId.values());
   }, [groupInfo]);
 
   const upcomingActivities = useMemo(() => {
@@ -142,11 +137,7 @@ export default function HomeScreen() {
     const memories = Array.isArray(memoriesQuery.data)
       ? memoriesQuery.data
       : memoriesQuery.data.data || [];
-    const result = memories[0] || null;
-    if (result?.caption) {
-      console.log('📝 HOME - lastMemory.caption:', result.caption);
-    }
-    return result;
+    return memories[0] || null;
   }, [memoriesQuery.data]);
 
   if (loading) {
@@ -201,20 +192,48 @@ export default function HomeScreen() {
               </Text>
             </View>
           </View>
-          {userElepad?.avatarUrl ? (
-            <Avatar.Image
-              size={55}
-              source={{ uri: userElepad?.avatarUrl }}
-              style={styles.avatar}
-            />
-          ) : (
-            <Avatar.Text
-              size={55}
-              label={getInitials(displayName)}
-              style={[styles.avatar, { backgroundColor: COLORS.primary }]}
-              labelStyle={{ color: COLORS.white, fontSize: 22 }}
-            />
-          )}
+          <View style={styles.headerRight}>
+            {/* Notification Button */}
+            <Pressable 
+              style={({ pressed }) => [
+                styles.notificationContainer,
+                pressed && { opacity: 0.6 }
+              ]}
+              onPress={() => {
+                router.push("/notifications");
+              }}
+              android_ripple={{ color: COLORS.primary + "30", borderless: true, radius: 24 }}
+            >
+              <IconButton
+                icon="bell-outline"
+                size={26}
+                iconColor={COLORS.primary}
+                style={styles.notificationButton}
+              />
+              {unreadCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </Text>
+                </View>
+              )}
+            </Pressable>
+            {/* Avatar */}
+            {userElepad?.avatarUrl ? (
+              <Avatar.Image
+                size={55}
+                source={{ uri: userElepad?.avatarUrl }}
+                style={styles.avatar}
+              />
+            ) : (
+              <Avatar.Text
+                size={55}
+                label={getInitials(displayName)}
+                style={[styles.avatar, { backgroundColor: COLORS.primary }]}
+                labelStyle={{ color: COLORS.white, fontSize: 22 }}
+              />
+            )}
+          </View>
         </View>
 
         {/* Último Recuerdo - DESTACADO */}
@@ -245,14 +264,11 @@ export default function HomeScreen() {
                       {lastMemory.title || "Sin título"}
                     </Text>
                     {lastMemory.caption && (
-                      <>
-                        {console.log('🎨 HOME - Rendering HighlightedMentionText with groupMembers:', groupMembers)}
-                        <HighlightedMentionText
-                          text={lastMemory.caption}
-                          familyMembers={groupMembers}
-                          style={styles.memoryDescription}
-                        />
-                      </>
+                      <HighlightedMentionText
+                        text={lastMemory.caption}
+                        familyMembers={groupMembers}
+                        style={styles.memoryDescription}
+                      />
                     )}
                     <Text style={styles.memoryDate}>
                       {new Date(lastMemory.createdAt).toLocaleDateString("es", {
@@ -501,6 +517,40 @@ const styles = StyleSheet.create({
     letterSpacing: 0,
     marginTop: -2,
     opacity: 0.7,
+  },
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  notificationContainer: {
+    position: "relative",
+    minWidth: 48,
+    minHeight: 48,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  notificationButton: {
+    margin: 0,
+  },
+  badge: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    backgroundColor: COLORS.error,
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 5,
+    borderWidth: 2,
+    borderColor: COLORS.background,
+  },
+  badgeText: {
+    color: COLORS.white,
+    fontSize: 11,
+    fontWeight: "bold",
   },
   avatar: {
     ...SHADOWS.card,

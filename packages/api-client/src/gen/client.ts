@@ -649,6 +649,51 @@ export type GetStreaksHistory200 = {
   dates: string[];
 };
 
+export type GetNotificationsParams = {
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  limit?: number;
+  /**
+   * @minimum 0
+   * @nullable
+   */
+  offset?: number | null;
+};
+
+export type GetNotifications200Item = {
+  id: string;
+  user_id: string;
+  /** @nullable */
+  actor_id: string | null;
+  event_type: string;
+  entity_type: string;
+  entity_id: string;
+  /** @nullable */
+  title: string | null;
+  /** @nullable */
+  body: string | null;
+  read: boolean;
+  created_at: string;
+};
+
+export type GetNotificationsUnreadCount200 = {
+  count: number;
+};
+
+export type PatchNotificationsIdRead200 = {
+  success: boolean;
+};
+
+export type PatchNotificationsReadAll200 = {
+  success: boolean;
+};
+
+export type DeleteNotificationsId200 = {
+  success: boolean;
+};
+
 type AwaitedInput<T> = PromiseLike<T> | T;
 
 type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
@@ -8953,3 +8998,673 @@ export function useGetStreaksHistory<
 
   return query;
 }
+
+/**
+ * @summary Get user notifications
+ */
+export type getNotificationsResponse200 = {
+  data: GetNotifications200Item[];
+  status: 200;
+};
+
+export type getNotificationsResponseSuccess = getNotificationsResponse200 & {
+  headers: Headers;
+};
+export type getNotificationsResponse = getNotificationsResponseSuccess;
+
+export const getGetNotificationsUrl = (params?: GetNotificationsParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/notifications?${stringifiedParams}`
+    : `/notifications`;
+};
+
+export const getNotifications = async (
+  params?: GetNotificationsParams,
+  options?: RequestInit,
+): Promise<getNotificationsResponse> => {
+  return rnFetch<getNotificationsResponse>(getGetNotificationsUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetNotificationsQueryKey = (
+  params?: GetNotificationsParams,
+) => {
+  return [`/notifications`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetNotificationsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getNotifications>>,
+  TError = unknown,
+>(
+  params?: GetNotificationsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getNotifications>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetNotificationsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getNotifications>>
+  > = ({ signal }) => getNotifications(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getNotifications>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetNotificationsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getNotifications>>
+>;
+export type GetNotificationsQueryError = unknown;
+
+export function useGetNotifications<
+  TData = Awaited<ReturnType<typeof getNotifications>>,
+  TError = unknown,
+>(
+  params: undefined | GetNotificationsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getNotifications>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getNotifications>>,
+          TError,
+          Awaited<ReturnType<typeof getNotifications>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetNotifications<
+  TData = Awaited<ReturnType<typeof getNotifications>>,
+  TError = unknown,
+>(
+  params?: GetNotificationsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getNotifications>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getNotifications>>,
+          TError,
+          Awaited<ReturnType<typeof getNotifications>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetNotifications<
+  TData = Awaited<ReturnType<typeof getNotifications>>,
+  TError = unknown,
+>(
+  params?: GetNotificationsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getNotifications>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get user notifications
+ */
+
+export function useGetNotifications<
+  TData = Awaited<ReturnType<typeof getNotifications>>,
+  TError = unknown,
+>(
+  params?: GetNotificationsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getNotifications>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetNotificationsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
+ * @summary Get unread notifications count
+ */
+export type getNotificationsUnreadCountResponse200 = {
+  data: GetNotificationsUnreadCount200;
+  status: 200;
+};
+
+export type getNotificationsUnreadCountResponseSuccess =
+  getNotificationsUnreadCountResponse200 & {
+    headers: Headers;
+  };
+export type getNotificationsUnreadCountResponse =
+  getNotificationsUnreadCountResponseSuccess;
+
+export const getGetNotificationsUnreadCountUrl = () => {
+  return `/notifications/unread-count`;
+};
+
+export const getNotificationsUnreadCount = async (
+  options?: RequestInit,
+): Promise<getNotificationsUnreadCountResponse> => {
+  return rnFetch<getNotificationsUnreadCountResponse>(
+    getGetNotificationsUnreadCountUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetNotificationsUnreadCountQueryKey = () => {
+  return [`/notifications/unread-count`] as const;
+};
+
+export const getGetNotificationsUnreadCountQueryOptions = <
+  TData = Awaited<ReturnType<typeof getNotificationsUnreadCount>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getNotificationsUnreadCount>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetNotificationsUnreadCountQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getNotificationsUnreadCount>>
+  > = ({ signal }) =>
+    getNotificationsUnreadCount({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getNotificationsUnreadCount>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetNotificationsUnreadCountQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getNotificationsUnreadCount>>
+>;
+export type GetNotificationsUnreadCountQueryError = unknown;
+
+export function useGetNotificationsUnreadCount<
+  TData = Awaited<ReturnType<typeof getNotificationsUnreadCount>>,
+  TError = unknown,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getNotificationsUnreadCount>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getNotificationsUnreadCount>>,
+          TError,
+          Awaited<ReturnType<typeof getNotificationsUnreadCount>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetNotificationsUnreadCount<
+  TData = Awaited<ReturnType<typeof getNotificationsUnreadCount>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getNotificationsUnreadCount>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getNotificationsUnreadCount>>,
+          TError,
+          Awaited<ReturnType<typeof getNotificationsUnreadCount>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetNotificationsUnreadCount<
+  TData = Awaited<ReturnType<typeof getNotificationsUnreadCount>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getNotificationsUnreadCount>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get unread notifications count
+ */
+
+export function useGetNotificationsUnreadCount<
+  TData = Awaited<ReturnType<typeof getNotificationsUnreadCount>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getNotificationsUnreadCount>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetNotificationsUnreadCountQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
+ * @summary Mark notification as read
+ */
+export type patchNotificationsIdReadResponse200 = {
+  data: PatchNotificationsIdRead200;
+  status: 200;
+};
+
+export type patchNotificationsIdReadResponseSuccess =
+  patchNotificationsIdReadResponse200 & {
+    headers: Headers;
+  };
+export type patchNotificationsIdReadResponse =
+  patchNotificationsIdReadResponseSuccess;
+
+export const getPatchNotificationsIdReadUrl = (id: string) => {
+  return `/notifications/${id}/read`;
+};
+
+export const patchNotificationsIdRead = async (
+  id: string,
+  options?: RequestInit,
+): Promise<patchNotificationsIdReadResponse> => {
+  return rnFetch<patchNotificationsIdReadResponse>(
+    getPatchNotificationsIdReadUrl(id),
+    {
+      ...options,
+      method: "PATCH",
+    },
+  );
+};
+
+export const getPatchNotificationsIdReadMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof patchNotificationsIdRead>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof patchNotificationsIdRead>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationKey = ["patchNotificationsIdRead"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof patchNotificationsIdRead>>,
+    { id: string }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return patchNotificationsIdRead(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PatchNotificationsIdReadMutationResult = NonNullable<
+  Awaited<ReturnType<typeof patchNotificationsIdRead>>
+>;
+
+export type PatchNotificationsIdReadMutationError = unknown;
+
+/**
+ * @summary Mark notification as read
+ */
+export const usePatchNotificationsIdRead = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof patchNotificationsIdRead>>,
+      TError,
+      { id: string },
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof patchNotificationsIdRead>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationOptions = getPatchNotificationsIdReadMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+
+/**
+ * @summary Mark all notifications as read
+ */
+export type patchNotificationsReadAllResponse200 = {
+  data: PatchNotificationsReadAll200;
+  status: 200;
+};
+
+export type patchNotificationsReadAllResponseSuccess =
+  patchNotificationsReadAllResponse200 & {
+    headers: Headers;
+  };
+export type patchNotificationsReadAllResponse =
+  patchNotificationsReadAllResponseSuccess;
+
+export const getPatchNotificationsReadAllUrl = () => {
+  return `/notifications/read-all`;
+};
+
+export const patchNotificationsReadAll = async (
+  options?: RequestInit,
+): Promise<patchNotificationsReadAllResponse> => {
+  return rnFetch<patchNotificationsReadAllResponse>(
+    getPatchNotificationsReadAllUrl(),
+    {
+      ...options,
+      method: "PATCH",
+    },
+  );
+};
+
+export const getPatchNotificationsReadAllMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof patchNotificationsReadAll>>,
+    TError,
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof patchNotificationsReadAll>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["patchNotificationsReadAll"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof patchNotificationsReadAll>>,
+    void
+  > = () => {
+    return patchNotificationsReadAll(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PatchNotificationsReadAllMutationResult = NonNullable<
+  Awaited<ReturnType<typeof patchNotificationsReadAll>>
+>;
+
+export type PatchNotificationsReadAllMutationError = unknown;
+
+/**
+ * @summary Mark all notifications as read
+ */
+export const usePatchNotificationsReadAll = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof patchNotificationsReadAll>>,
+      TError,
+      void,
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof patchNotificationsReadAll>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationOptions = getPatchNotificationsReadAllMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+
+/**
+ * @summary Delete a notification
+ */
+export type deleteNotificationsIdResponse200 = {
+  data: DeleteNotificationsId200;
+  status: 200;
+};
+
+export type deleteNotificationsIdResponseSuccess =
+  deleteNotificationsIdResponse200 & {
+    headers: Headers;
+  };
+export type deleteNotificationsIdResponse =
+  deleteNotificationsIdResponseSuccess;
+
+export const getDeleteNotificationsIdUrl = (id: string) => {
+  return `/notifications/${id}`;
+};
+
+export const deleteNotificationsId = async (
+  id: string,
+  options?: RequestInit,
+): Promise<deleteNotificationsIdResponse> => {
+  return rnFetch<deleteNotificationsIdResponse>(
+    getDeleteNotificationsIdUrl(id),
+    {
+      ...options,
+      method: "DELETE",
+    },
+  );
+};
+
+export const getDeleteNotificationsIdMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteNotificationsId>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteNotificationsId>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationKey = ["deleteNotificationsId"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteNotificationsId>>,
+    { id: string }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return deleteNotificationsId(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteNotificationsIdMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteNotificationsId>>
+>;
+
+export type DeleteNotificationsIdMutationError = unknown;
+
+/**
+ * @summary Delete a notification
+ */
+export const useDeleteNotificationsId = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deleteNotificationsId>>,
+      TError,
+      { id: string },
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteNotificationsId>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationOptions = getDeleteNotificationsIdMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};

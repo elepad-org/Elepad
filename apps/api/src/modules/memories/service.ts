@@ -16,12 +16,15 @@ import {
   uploadMemoryImage,
 } from "@/services/storage";
 import { MentionsService } from "@/services/mentions";
+import { NotificationsService } from "@/modules/notifications/service";
 
 export class MemoriesService {
   private mentionsService: MentionsService;
+  private notificationsService: NotificationsService;
 
   constructor(private supabase: SupabaseClient<Database>) {
     this.mentionsService = new MentionsService(supabase);
+    this.notificationsService = new NotificationsService(supabase);
   }
 
   private async assertUserInGroup(userId: string, groupId: string) {
@@ -171,9 +174,35 @@ export class MemoriesService {
           memoryData.title,
           memoryData.caption
         );
+
+        // Extract mentioned user IDs and create notifications
+        const mentionedIds = [
+          ...this.mentionsService.extractMentionIds(memoryData.title),
+          ...this.mentionsService.extractMentionIds(memoryData.caption),
+        ];
+
+        if (mentionedIds.length > 0) {
+          // Get the actor's name
+          const { data: actor, error: actorError } = await this.supabase
+            .from("users")
+            .select("displayName")
+            .eq("id", userId)
+            .single();
+
+          if (!actorError && actor) {
+            await this.notificationsService.notifyMentionedUsers(
+              mentionedIds,
+              userId,
+              actor.displayName || "Un usuario",
+              "memory",
+              data.id,
+              memoryData.title || "Sin título"
+            );
+          }
+        }
       } catch (error) {
-        console.error("Error syncing mentions:", error);
-        // Don't throw - mentions are not critical
+        console.error("Error syncing mentions or creating notifications:", error);
+        // Don't throw - mentions and notifications are not critical
       }
 
       return data;
@@ -334,9 +363,35 @@ export class MemoriesService {
         noteData.title,
         noteData.caption
       );
+
+      // Extract mentioned user IDs and create notifications
+      const mentionedIds = [
+        ...this.mentionsService.extractMentionIds(noteData.title),
+        ...this.mentionsService.extractMentionIds(noteData.caption),
+      ];
+
+      if (mentionedIds.length > 0) {
+        // Get the actor's name
+        const { data: actor, error: actorError } = await this.supabase
+          .from("users")
+          .select("displayName")
+          .eq("id", userId)
+          .single();
+
+        if (!actorError && actor) {
+          await this.notificationsService.notifyMentionedUsers(
+            mentionedIds,
+            userId,
+            actor.displayName || "Un usuario",
+            "memory",
+            data.id,
+            noteData.title
+          );
+        }
+      }
     } catch (error) {
-      console.error("Error syncing mentions:", error);
-      // Don't throw - mentions are not critical
+      console.error("Error syncing mentions or creating notifications:", error);
+      // Don't throw - mentions and notifications are not critical
     }
 
     return data;
@@ -381,14 +436,51 @@ export class MemoriesService {
 
     // Sync mentions from title and caption
     try {
+      // Get previous mentions to know which are new
+      const oldMentionIds = await this.mentionsService.getMentionsForEntity(
+        "memory",
+        data.id
+      );
+
       await this.mentionsService.syncMentions(
         "memory",
         data.id,
         data.title,
         data.caption
       );
+
+      // Extract current mentioned user IDs
+      const currentMentionIds = [
+        ...this.mentionsService.extractMentionIds(data.title),
+        ...this.mentionsService.extractMentionIds(data.caption),
+      ];
+
+      // Find new mentions (not present in old mentions)
+      const newMentionIds = currentMentionIds.filter(
+        (id) => !oldMentionIds.includes(id)
+      );
+
+      if (newMentionIds.length > 0) {
+        // Get the actor's name
+        const { data: actor, error: actorError } = await this.supabase
+          .from("users")
+          .select("displayName")
+          .eq("id", userId)
+          .single();
+
+        if (!actorError && actor) {
+          await this.notificationsService.notifyMentionedUsers(
+            newMentionIds,
+            userId,
+            actor.displayName || "Un usuario",
+            "memory",
+            data.id,
+            data.title || "Sin título"
+          );
+        }
+      }
     } catch (error) {
-      console.error("Error syncing mentions:", error);
+      console.error("Error syncing mentions or creating notifications:", error);
       // Don't throw - mentions are not critical
     }
 
