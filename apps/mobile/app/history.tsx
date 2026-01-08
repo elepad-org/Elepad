@@ -29,6 +29,8 @@ interface Attempt {
   id: string;
   memoryPuzzleId?: string;
   logicPuzzleId?: string;
+  sudokuPuzzleId?: string;
+  isFocusGame: boolean; 
   success?: boolean;
   score?: number;
   startedAt?: string;
@@ -163,6 +165,8 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
   const gameTypesRender: Record<string, string> = {
     memory: "Memoria",
     logic: "Lógica",
+    attention: "Atención",
+    reaction: "Reacción"
   };
 
   const statsQueries = gameTypes.map((gt) =>
@@ -174,7 +178,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
 
   const detectGameType = (a: Attempt): string => {
     return (
-      (a.memoryPuzzleId && "Memoria") || (a.logicPuzzleId && "Lógica") || ""
+      (a.memoryPuzzleId && "Memoria") || (a.logicPuzzleId && "Lógica") || (a.sudokuPuzzleId && "Atención") || (a.isFocusGame && "Reacción") || ""
     );
   };
 
