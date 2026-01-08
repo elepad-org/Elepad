@@ -423,4 +423,52 @@ export class FamilyGroupService {
 
     return data;
   }
+
+  /**
+   * Verifica si un usuario puede acceder a los datos de otro usuario
+   * Esto es true si:
+   * 1. Es el mismo usuario
+   * 2. Ambos están en el mismo grupo familiar Y el usuario actual NO es elder
+   */
+  async canAccessUserData(currentUserId: string, targetUserId: string): Promise<boolean> {
+    // Si es el mismo usuario, siempre puede acceder
+    if (currentUserId === targetUserId) {
+      return true;
+    }
+
+    try {
+      // Obtener información de ambos usuarios
+      const { data: users, error } = await this.supabase
+        .from("users")
+        .select("id, groupId, elder")
+        .in("id", [currentUserId, targetUserId]);
+
+      if (error || !users || users.length !== 2) {
+        return false;
+      }
+
+      const currentUser = users.find(u => u.id === currentUserId);
+      const targetUser = users.find(u => u.id === targetUserId);
+
+      if (!currentUser || !targetUser) {
+        return false;
+      }
+
+      // Deben estar en el mismo grupo familiar
+      if (!currentUser.groupId || currentUser.groupId !== targetUser.groupId) {
+        return false;
+      }
+
+      // El usuario actual NO debe ser elder (los elders no pueden ver datos de otros)
+      // Solo los helpers/supervisores pueden ver datos de los elders
+      if (currentUser.elder === true) {
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error verificando permisos:", error);
+      return false;
+    }
+  }
 }

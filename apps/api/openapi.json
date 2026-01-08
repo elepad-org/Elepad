@@ -3914,6 +3914,15 @@
             "required": false,
             "name": "gameType",
             "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": false,
+            "name": "userId",
+            "in": "query"
           }
         ],
         "responses": {
@@ -3934,6 +3943,16 @@
                       "id"
                     ]
                   }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No tienes permisos para ver los datos de este usuario",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -3964,6 +3983,15 @@
             "required": true,
             "name": "gameType",
             "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": false,
+            "name": "userId",
+            "in": "query"
           }
         ],
         "responses": {
@@ -3973,6 +4001,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AttemptStats"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "No tienes permisos para ver los datos de este usuario",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
