@@ -650,7 +650,8 @@ export default function NotificationsScreen() {
                     onPress={() => {
                       setActivityDetailDialogVisible(false);
                       setSelectedActivityId(null);
-                      router.push("/(tabs)/calendar");
+                      // Navegar usando href con el parámetro del tab
+                      router.replace({ pathname: "/(tabs)/home", params: { tab: "calendar" } });
                     }}
                     buttonColor={COLORS.primary}
                     style={{ borderRadius: 12 }}
