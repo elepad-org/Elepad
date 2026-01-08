@@ -61,9 +61,21 @@ function GameCard({
 }
 
 export default function JuegosScreen() {
-  const { loading } = useAuth();
+  const { loading, userElepad } = useAuth();
 
   if (loading) {
+    return (
+      <View style={STYLES.center}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
+
+  const isElder = userElepad?.elder === true;
+
+  // Si es ayudante, redirigir directamente al historial
+  if (!isElder) {
+    router.replace("/history");
     return (
       <View style={STYLES.center}>
         <ActivityIndicator />

@@ -9,6 +9,7 @@ import { GameTypeEnum } from "../puzzles/schema";
 import { openApiErrorResponse } from "@/utils/api-error";
 import { AchievementService } from "../achievements/service";
 import { StreakService } from "../streaks/service";
+import { FamilyGroupService } from "../familyGroups/service";
 
 export const attemptsApp = new OpenAPIHono();
 
@@ -197,7 +198,7 @@ attemptsApp.openapi(
   },
 );
 
-// Listar intentos del usuario actual
+// Listar intentos del usuario actual O de un miembro del grupo (para supervisores)
 attemptsApp.openapi(
   {
     method: "get",
@@ -208,6 +209,7 @@ attemptsApp.openapi(
         limit: z.coerce.number().int().min(1).max(100).optional().default(20),
         offset: z.coerce.number().int().min(0).optional().default(0),
         gameType: GameTypeEnum.optional(),
+        userId: z.string().uuid().optional(),
       }),
     },
     responses: {
@@ -217,23 +219,40 @@ attemptsApp.openapi(
           "application/json": { schema: z.array(z.object({ id: z.string() })) },
         },
       },
+      403: openApiErrorResponse("No tienes permisos para ver los datos de este usuario"),
       500: openApiErrorResponse("Error interno del servidor"),
     },
   },
   async (c) => {
-    const { limit, offset, gameType } = c.req.valid("query");
-    const userId = c.var.user.id;
+    const { limit, offset, gameType, userId: requestedUserId } = c.req.valid("query");
+    const currentUserId = c.var.user.id;
+    
+    // Si no especifica userId, usa el usuario actual
+    let targetUserId = currentUserId;
+    
+    // Si especifica userId, verificar permisos
+    if (requestedUserId && requestedUserId !== currentUserId) {
+      const familyGroupService = new FamilyGroupService(c.var.supabase);
+      const canAccess = await familyGroupService.canAccessUserData(currentUserId, requestedUserId);
+      
+      if (!canAccess) {
+        return c.json({ error: "No tienes permisos para ver los datos de este usuario" }, 403);
+      }
+      
+      targetUserId = requestedUserId;
+    }
+    
     const attempts = await c.var.attemptService.listUserAttempts(
-      userId,
+      targetUserId,
       limit,
       offset,
-      gameType as "memory" | "logic" | undefined,
+      gameType as "memory" | "logic" | "attention" | "reaction" | undefined,
     );
     return c.json(attempts, 200);
   },
 );
 
-// Obtener estadísticas del usuario para un tipo de juego
+// Obtener estadísticas del usuario O de un miembro del grupo (para supervisores)
 attemptsApp.openapi(
   {
     method: "get",
@@ -241,19 +260,40 @@ attemptsApp.openapi(
     tags: ["attempts"],
     request: {
       params: z.object({ gameType: GameTypeEnum }),
+      query: z.object({
+        userId: z.string().uuid().optional(),
+      }),
     },
     responses: {
       200: {
         description: "Estadísticas del usuario para el tipo de juego",
         content: { "application/json": { schema: AttemptStatsSchema } },
       },
+      403: openApiErrorResponse("No tienes permisos para ver los datos de este usuario"),
       500: openApiErrorResponse("Error interno del servidor"),
     },
   },
   async (c) => {
     const { gameType } = c.req.valid("param");
-    const userId = c.var.user.id;
-    const stats = await c.var.attemptService.getUserStats(userId, gameType);
+    const { userId: requestedUserId } = c.req.valid("query");
+    const currentUserId = c.var.user.id;
+    
+    // Si no especifica userId, usa el usuario actual
+    let targetUserId = currentUserId;
+    
+    // Si especifica userId, verificar permisos
+    if (requestedUserId && requestedUserId !== currentUserId) {
+      const familyGroupService = new FamilyGroupService(c.var.supabase);
+      const canAccess = await familyGroupService.canAccessUserData(currentUserId, requestedUserId);
+      
+      if (!canAccess) {
+        return c.json({ error: "No tienes permisos para ver los datos de este usuario" }, 403);
+      }
+      
+      targetUserId = requestedUserId;
+    }
+    
+    const stats = await c.var.attemptService.getUserStats(targetUserId, gameType);
     return c.json(stats, 200);
   },
 );

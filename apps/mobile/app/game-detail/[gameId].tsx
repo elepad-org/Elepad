@@ -40,6 +40,8 @@ interface Attempt {
   id: string;
   memoryPuzzleId?: string;
   logicPuzzleId?: string;
+  sudokuPuzzleId?: string;
+  isFocusGame?: boolean;
   success?: boolean;
   score?: number;
   startedAt?: string;
@@ -60,6 +62,14 @@ const GAMES_CONFIG: Record<
   net: {
     gameType: GameType.logic,
     route: "/net-game",
+  },
+  sudoku: {
+    gameType: GameType.attention,
+    route: "/sudoku-game",
+  },
+  focus: {
+    gameType: GameType.reaction,
+    route: "/focus-game",
   },
 };
 
@@ -231,7 +241,7 @@ export default function GameDetailScreen() {
 
   const detectGameType = (a: Attempt): string => {
     return (
-      (a.memoryPuzzleId && "Memoria") || (a.logicPuzzleId && "Lógica") || ""
+      (a.memoryPuzzleId && "Memoria") || (a.logicPuzzleId && "Lógica") || (a.sudokuPuzzleId && "Atención") || (a.isFocusGame && "Reacción") || ""
     );
   };
 
@@ -283,7 +293,7 @@ export default function GameDetailScreen() {
             <Button
               mode="contained"
               onPress={() =>
-                router.push(gameConfig.route as "/memory-game" | "/net-game")
+                router.push(gameConfig.route as "/memory-game" | "/net-game" | "/sudoku-game" | "/focus-game")
               }
               icon="play"
               buttonColor={COLORS.primary}

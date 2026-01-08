@@ -153,6 +153,8 @@ export class AchievementService {
     let gameType: Database["public"]["Enums"]["game_type"] | null = null;
     if (attempt.memoryPuzzleId) gameType = "memory";
     else if (attempt.logicPuzzleId) gameType = "logic";
+    else if (attempt.sudokuPuzzleId) gameType = "attention";
+    else if (attempt.isFocusGame) gameType = "reaction";
 
     if (!gameType) {
       console.log(`⚠️ No se pudo determinar el tipo de juego`);

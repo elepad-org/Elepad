@@ -442,6 +442,92 @@ export type Database = {
           },
         ]
       }
+      mentions: {
+        Row: {
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          mentioned_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          mentioned_user_id: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          mentioned_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentions_mentioned_user_fkey"
+            columns: ["mentioned_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          body: string | null
+          created_at: string
+          entity_id: string
+          entity_type: string
+          event_type: string
+          id: string
+          read: boolean
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          body?: string | null
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          event_type: string
+          id?: string
+          read?: boolean
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          body?: string | null
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          event_type?: string
+          id?: string
+          read?: boolean
+          title?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       puzzles: {
         Row: {
           createdAt: string
@@ -468,6 +554,35 @@ export type Database = {
           title?: string | null
         }
         Relationships: []
+      }
+      streak_history: {
+        Row: {
+          createdAt: string
+          id: string
+          playedDate: string
+          userId: string
+        }
+        Insert: {
+          createdAt?: string
+          id?: string
+          playedDate: string
+          userId: string
+        }
+        Update: {
+          createdAt?: string
+          id?: string
+          playedDate?: string
+          userId?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "streak_history_userid_fkey"
+            columns: ["userId"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sudokuGames: {
         Row: {
@@ -570,6 +685,44 @@ export type Database = {
         }
         Relationships: []
       }
+      user_streaks: {
+        Row: {
+          createdAt: string
+          currentStreak: number
+          id: string
+          lastPlayedDate: string | null
+          longestStreak: number
+          updatedAt: string
+          userId: string
+        }
+        Insert: {
+          createdAt?: string
+          currentStreak?: number
+          id?: string
+          lastPlayedDate?: string | null
+          longestStreak?: number
+          updatedAt?: string
+          userId: string
+        }
+        Update: {
+          createdAt?: string
+          currentStreak?: number
+          id?: string
+          lastPlayedDate?: string | null
+          longestStreak?: number
+          updatedAt?: string
+          userId?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_streaks_userid_fkey"
+            columns: ["userId"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           avatarUrl: string | null
@@ -643,7 +796,7 @@ export type Database = {
       }
     }
     Enums: {
-      game_type: "memory" | "logic" | "attention" | "calculation"
+      game_type: "memory" | "logic" | "attention" | "reaction"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -771,7 +924,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      game_type: ["memory", "logic", "attention", "calculation"],
+      game_type: ["memory", "logic", "attention", "reaction"],
     },
   },
 } as const

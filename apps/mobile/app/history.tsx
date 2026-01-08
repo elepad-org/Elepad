@@ -7,18 +7,21 @@ import {
   Chip,
   Button,
   ProgressBar,
+  Menu,
 } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Stack } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import {
   useGetAttemptsStatsGameType,
   GameType,
   getAttempts,
+  useGetFamilyGroupIdGroupMembers,
 } from "@elepad/api-client";
 import { Divider } from "react-native-paper";
 import { COLORS, STYLES, SHADOWS, FONT } from "@/styles/base";
 import StatisticsChart from "@/components/Historial/StatisticsChart";
+import { useAuth } from "@/hooks/useAuth";
 
 const PAGE_SIZE = 50;
 
@@ -26,6 +29,8 @@ interface Attempt {
   id: string;
   memoryPuzzleId?: string;
   logicPuzzleId?: string;
+  sudokuPuzzleId?: string;
+  isFocusGame: boolean; 
   success?: boolean;
   score?: number;
   startedAt?: string;
@@ -105,8 +110,13 @@ function AttemptItem({
 }
 
 export default function HistoryScreen({ initialAttempts = [] }: Props) {
+  const { userElepad } = useAuth();
+  const { view } = useLocalSearchParams();
+  
   const [selectedGame, setSelectedGame] = useState("all");
   const [timeRange, setTimeRange] = useState<"week" | "month" | "year">("week");
+  const [selectedElderId, setSelectedElderId] = useState<string | null>(null);
+  const [elderMenuVisible, setElderMenuVisible] = useState(false);
 
   const [attempts, setAttempts] = useState<Attempt[]>(initialAttempts);
   const [offset, setOffset] = useState<number>(initialAttempts.length);
@@ -114,23 +124,103 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
+  const isHelper = !userElepad?.elder;
+  const groupId = userElepad?.groupId;
+  
+  // Determine the title based on view parameter
+  const getTitle = () => {
+    if (isHelper) {
+      return view === "estadisticas" ? "Estadísticas" : "Historial";
+    }
+    return "Historial";
+  };
+
+  // Fetch family members to get elders list
+  const membersQuery = useGetFamilyGroupIdGroupMembers(groupId || "", {
+    query: { enabled: !!groupId && isHelper },
+  });
+
+  // Get elders from family group
+  const elders = useMemo(() => {
+    if (!isHelper || !membersQuery.data) return [];
+    
+    const groupInfo = membersQuery.data as any;
+    const allMembers = [
+      ...(groupInfo.members || []),
+      ...(groupInfo.owner ? [groupInfo.owner] : [])
+    ];
+    
+    return allMembers.filter((member: any) => member.elder === true);
+  }, [membersQuery.data, isHelper]);
+
+  // Set default selected elder
+  useEffect(() => {
+    if (isHelper && elders.length > 0 && !selectedElderId) {
+      setSelectedElderId(elders[0].id);
+    }
+  }, [elders, selectedElderId, isHelper]);
+
   const gameTypes = Object.values(GameType);
 
   const gameTypesRender: Record<string, string> = {
     memory: "Memoria",
     logic: "Lógica",
+    attention: "Atención",
+    reaction: "Reacción"
   };
 
   const statsQueries = gameTypes.map((gt) =>
     useGetAttemptsStatsGameType(gt as GameType),
   );
 
+  // Calculate stats locally for helpers from filtered attempts
+  const getStatsFromAttempts = useCallback((gameType: GameType | "all") => {
+    if (!isHelper) {
+      // For non-helpers, use regular stats queries
+      if (gameType === "all") {
+        return statsQueries.reduce(
+          (acc, query) => {
+            const data = query.data as StatsData | undefined;
+            if (!data) return acc;
+            return {
+              totalAttempts: acc.totalAttempts + (data.totalAttempts || 0),
+              successfulAttempts: acc.successfulAttempts + (data.successfulAttempts || 0),
+              bestScore: Math.max(acc.bestScore, data.bestScore || 0),
+            };
+          },
+          { totalAttempts: 0, successfulAttempts: 0, bestScore: 0 }
+        );
+      } else {
+        const idx = gameTypes.indexOf(gameType);
+        const data = statsQueries[idx]?.data as StatsData | undefined;
+        return data || { totalAttempts: 0, successfulAttempts: 0, bestScore: 0 };
+      }
+    }
+
+    // For helpers, ALWAYS calculate stats from filtered attempts
+    const filteredAttempts = gameType === "all" 
+      ? attempts 
+      : attempts.filter(attempt => {
+          if (gameType === GameType.memory) return !!attempt.memoryPuzzleId;
+          if (gameType === GameType.net || gameType === GameType.sudoku || gameType === GameType.focus) {
+            return !!attempt.logicPuzzleId;
+          }
+          return false;
+        });
+
+    return {
+      totalAttempts: filteredAttempts.length,
+      successfulAttempts: filteredAttempts.filter(a => a.success === true).length,
+      bestScore: filteredAttempts.length > 0 ? Math.max(...filteredAttempts.map(a => a.score || 0)) : 0,
+    };
+  }, [attempts, isHelper, statsQueries, gameTypes]);
+
   const statsLoading = statsQueries.some((q) => q.isLoading);
   const globalLoading = loading || statsLoading;
 
   const detectGameType = (a: Attempt): string => {
     return (
-      (a.memoryPuzzleId && "Memoria") || (a.logicPuzzleId && "Lógica") || ""
+      (a.memoryPuzzleId && "Memoria") || (a.logicPuzzleId && "Lógica") || (a.sudokuPuzzleId && "Atención") || (a.isFocusGame && "Reacción") || ""
     );
   };
 
@@ -149,9 +239,18 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
           limit: number;
           offset: number;
           gameType?: GameType;
+          userId?: string;
         } = { limit: PAGE_SIZE, offset: pageOffset };
+        
         if (selectedGame !== "all") params.gameType = selectedGame as GameType;
+        
+        // If helper, filter by selected elder's attempts
+        if (isHelper && selectedElderId) {
+          params.userId = selectedElderId;
+          console.log('Fetching attempts for elder:', selectedElderId);
+        }
 
+        console.log('Fetch params:', params);
         const res = await getAttempts(params);
 
         let items: Attempt[] = [];
@@ -171,7 +270,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
         setLoadingMore(false);
       }
     },
-    [hasMore, selectedGame],
+    [hasMore, selectedGame, isHelper, selectedElderId],
   );
 
   useEffect(() => {
@@ -179,7 +278,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
     setOffset(0);
     setHasMore(true);
     fetchPage(0, false);
-  }, [selectedGame]);
+  }, [selectedGame, selectedElderId]);
 
   const loadMore = () => {
     if (!loadingMore && hasMore) fetchPage(offset);
@@ -193,32 +292,16 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
   };
 
   const statsToShow = useMemo(() => {
-    if (selectedGame === "all") {
-      return statsQueries.reduce(
-        (acc, query) => {
-          const data = query.data as StatsData | undefined;
-          if (!data) return acc;
-          return {
-            totalAttempts: acc.totalAttempts + (data.totalAttempts || 0),
-            successfulAttempts:
-              acc.successfulAttempts + (data.successfulAttempts || 0),
-            bestScore: Math.max(acc.bestScore, data.bestScore || 0),
-          };
-        },
-        { totalAttempts: 0, successfulAttempts: 0, bestScore: 0 },
-      );
-    } else {
-      const idx = gameTypes.indexOf(selectedGame as GameType);
-      const data = statsQueries[idx]?.data as StatsData | undefined;
-      return (
-        data || {
-          totalAttempts: 0,
-          successfulAttempts: 0,
-          bestScore: 0,
-        }
-      );
-    }
-  }, [selectedGame, statsQueries, gameTypes]);
+    const stats = getStatsFromAttempts(selectedGame);
+    console.log('Stats calculation:', {
+      isHelper,
+      selectedGame,
+      selectedElderId,
+      attemptsLength: attempts.length,
+      calculatedStats: stats
+    });
+    return stats;
+  }, [selectedGame, getStatsFromAttempts, isHelper, selectedElderId, attempts]);
 
   const total = statsToShow?.totalAttempts || 0;
   const success = statsToShow?.successfulAttempts || 0;
@@ -264,7 +347,64 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
 
         <View style={styles.container}>
           {/* Header */}
-          <Text style={[styles.title]}>Historial </Text>
+          <Text style={[styles.title]}>
+            {getTitle()}
+          </Text>
+
+          {/* Elder selector for helpers */}
+          {isHelper && (
+            <>
+              {elders.length === 0 ? (
+                <View style={styles.noEldersCard}>
+                  <MaterialCommunityIcons 
+                    name="account-alert" 
+                    size={48} 
+                    color={COLORS.textSecondary} 
+                  />
+                  <Text style={styles.noEldersTitle}>
+                    No hay adultos mayores
+                  </Text>
+                  <Text style={styles.noEldersDescription}>
+                    No se encontraron adultos mayores en tu grupo familiar para mostrar estadísticas.
+                  </Text>
+                </View>
+              ) : (
+                <View style={styles.elderSelectorContainer}>
+                  <Text style={styles.elderSelectorLabel}>Estadísticas de:</Text>
+                  <Menu
+                    visible={elderMenuVisible}
+                    onDismiss={() => setElderMenuVisible(false)}
+                    anchor={
+                      <Button
+                        mode="outlined"
+                        onPress={() => setElderMenuVisible(true)}
+                        style={styles.elderSelector}
+                        contentStyle={{ flexDirection: 'row-reverse' }}
+                        icon="chevron-down"
+                      >
+                        {elders.find(e => e.id === selectedElderId)?.displayName || "Seleccionar"}
+                      </Button>
+                    }
+                  >
+                    {elders.map((elder) => (
+                      <Menu.Item
+                        key={elder.id}
+                        onPress={() => {
+                          setSelectedElderId(elder.id);
+                          setElderMenuVisible(false);
+                        }}
+                        title={elder.displayName}
+                      />
+                    ))}
+                  </Menu>
+                </View>
+              )}
+            </>
+          )}
+
+          {/* Don't show anything else if helper and no elders */}
+          {isHelper && elders.length === 0 ? null : (
+            <>
 
           {/* Filter Chips */}
           <View style={styles.filterContainer}>
@@ -386,6 +526,8 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
               ListFooterComponent={renderFooter}
               contentContainerStyle={styles.listContent}
             />
+          )}
+          </>
           )}
         </View>
       </SafeAreaView>
@@ -513,5 +655,42 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.textLight,
     marginLeft: 4,
+  },
+  noEldersCard: {
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 16,
+    padding: 32,
+    alignItems: "center",
+    marginHorizontal: 24,
+    marginTop: 16,
+    ...SHADOWS.card,
+  },
+  noEldersTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: COLORS.text,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  noEldersDescription: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    textAlign: "center",
+    lineHeight: 20,
+  },
+  elderSelectorContainer: {
+    paddingHorizontal: 24,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  elderSelectorLabel: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: COLORS.textSecondary,
+    marginBottom: 8,
+  },
+  elderSelector: {
+    borderColor: COLORS.primary,
+    borderRadius: 8,
   },
 });

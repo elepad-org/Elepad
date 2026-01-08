@@ -91,7 +91,7 @@ export default function SudokuGameScreen() {
   );
 
   const handleGameOver = useCallback(() => {
-    // Cuando el jugador pierde por 3 errores (por definir algo)
+    // Cuando el jugador pierde por errores
     setShowResultsDialog(true);
     setGameResults({
       moves: 0,
@@ -125,18 +125,6 @@ export default function SudokuGameScreen() {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  // TODO: Unificar los estilos de los botones con los de los otros juegos
-  const getDifficultyColor = (diff: Difficulty) => {
-    switch (diff) {
-      case "easy":
-        return "#4CAF50";
-      case "medium":
-        return "#FF9800";
-      case "hard":
-        return "#F44336";
-    }
   };
 
   return (
@@ -196,46 +184,47 @@ export default function SudokuGameScreen() {
                 Selecciona la dificultad
               </Dialog.Title>
               <Dialog.Content style={{ paddingBottom: 8 }}>
-                <View style={styles.difficultyButtons}>
+                <Text
+                  style={{
+                    ...STYLES.subheading,
+                    marginTop: 0,
+                    marginBottom: 16,
+                  }}
+                >
+                  Elige el nivel de dificultad del juego
+                </Text>
+              </Dialog.Content>
+              <Dialog.Actions style={styles.modeActions}>
+                <View style={styles.modeButtonsContainer}>
                   <Button
                     mode="contained"
                     onPress={() => handleDifficultySelect("easy")}
-                    buttonColor={getDifficultyColor("easy")}
-                    style={styles.difficultyButton}
+                    style={styles.modeButton}
+                    buttonColor={COLORS.secondary}
+                    contentStyle={styles.buttonContent}
                   >
-                    🟢 Fácil
+                    Fácil
                   </Button>
                   <Button
                     mode="contained"
                     onPress={() => handleDifficultySelect("medium")}
-                    buttonColor={getDifficultyColor("medium")}
-                    style={styles.difficultyButton}
+                    style={styles.modeButton}
+                    buttonColor={COLORS.primary}
+                    contentStyle={styles.buttonContent}
                   >
-                    🟡 Medio
+                    Medio
                   </Button>
                   <Button
                     mode="contained"
                     onPress={() => handleDifficultySelect("hard")}
-                    buttonColor={getDifficultyColor("hard")}
-                    style={styles.difficultyButton}
+                    style={styles.modeButton}
+                    buttonColor="#F44336"
+                    contentStyle={styles.buttonContent}
                   >
-                    🔴 Difícil
+                    Difícil
                   </Button>
                 </View>
-              </Dialog.Content>
-              <Dialog.Actions
-                style={{
-                  paddingBottom: 12,
-                  paddingHorizontal: 20,
-                }}
-              >
-                <Button
-                  mode="outlined"
-                  onPress={confirmQuit}
-                  style={{ borderRadius: 12 }}
-                >
-                  Cancelar
-                </Button>
+             
               </Dialog.Actions>
             </Dialog>
           </Portal>
@@ -283,7 +272,6 @@ export default function SudokuGameScreen() {
           </Portal>
 
           {/* Diálogo de ayuda/instrucciones */}
-          {/* TODO: Crear las instrucciones y descripción del juego */}
           <Portal>
             <InstructionsDialog
               visible={showHelpDialog}
@@ -309,7 +297,7 @@ export default function SudokuGameScreen() {
             >
               <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
                 {gameResults?.hasWon === false
-                  ? "Game Over 😢"
+                  ? "Fin del juego 😢"
                   : "¡Felicitaciones! 🎉"}
               </Dialog.Title>
               <Dialog.Content>
@@ -386,6 +374,22 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "600",
+  },
+  modeActions: {
+    paddingBottom: 12,
+    paddingHorizontal: 20,
+  },
+  modeButtonsContainer: {
+    flexDirection: "row",
+    gap: 12,
+    width: "100%",
+  },
+  modeButton: {
+    flex: 1,
+    borderRadius: 12,
+  },
+  buttonContent: {
+    paddingVertical: 8,
   },
   difficultyButtons: {
     gap: 12,
