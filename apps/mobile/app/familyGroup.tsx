@@ -19,7 +19,7 @@ import {
   Card,
 } from "react-native-paper";
 import { router } from "expo-router";
-import Clipboard from '@react-native-clipboard/clipboard';
+import * as Clipboard from 'expo-clipboard';
 import {
   useGetFamilyGroupIdGroupInvite,
   getFamilyGroupIdGroupInviteResponse,
@@ -128,7 +128,7 @@ export default function FamilyGroup() {
 
   const copyInvitationCode = async () => {
     if (invitationCode) {
-      Clipboard.setString(String(invitationCode));
+      await Clipboard.setStringAsync(String(invitationCode));
       Alert.alert("¡Copiado!", "El código se ha copiado al portapapeles");
     }
   };

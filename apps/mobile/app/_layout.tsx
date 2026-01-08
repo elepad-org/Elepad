@@ -14,6 +14,7 @@ import { Provider as PaperProvider } from "react-native-paper";
 import { lightTheme, darkTheme } from "@/styles/theme";
 import { supabase } from "@/lib/supabase";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { StreakSnackbarProvider } from "@/hooks/useStreakSnackbar";
 
 const queryClient = new QueryClient();
 
@@ -57,16 +58,18 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <PaperProvider theme={paperTheme}>
             <NavigationThemeProvider value={navTheme}>
-              <Stack>
-                <Stack.Screen name="index" options={{ headerShown: false }} />
-                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen
-                  name="familyGroup"
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen name="+not-found" />
-              </Stack>
+              <StreakSnackbarProvider>
+                <Stack>
+                  <Stack.Screen name="index" options={{ headerShown: false }} />
+                  <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                  <Stack.Screen
+                    name="familyGroup"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen name="+not-found" />
+                </Stack>
+              </StreakSnackbarProvider>
             </NavigationThemeProvider>
           </PaperProvider>
         </QueryClientProvider>

@@ -1,17 +1,38 @@
 import { useQuery } from "@tanstack/react-query";
 import { useGetStreaksMe, useGetStreaksHistory } from "@elepad/api-client";
+import { useEffect, useRef } from "react";
+import { useStreakSnackbar } from "./useStreakSnackbar";
 
 /**
  * Hook para obtener la racha actual del usuario
  */
 export function useUserStreak() {
-  return useGetStreaksMe({
+  const { showStreakExtended } = useStreakSnackbar();
+  const previousStreakRef = useRef<number | null>(null);
+  
+  const query = useGetStreaksMe({
     query: {
       staleTime: 1000 * 60 * 5, // 5 minutos
       refetchOnMount: true,
       refetchOnWindowFocus: true,
     },
   });
+
+  // Detectar cuando se extiende la racha
+  useEffect(() => {
+    if (query.data?.currentStreak) {
+      const currentStreak = query.data.currentStreak;
+      
+      // Si había una racha previa y aumentó, mostrar toast
+      if (previousStreakRef.current !== null && currentStreak > previousStreakRef.current) {
+        showStreakExtended(currentStreak);
+      }
+      
+      previousStreakRef.current = currentStreak;
+    }
+  }, [query.data?.currentStreak, showStreakExtended]);
+
+  return query;
 }
 
 /**
@@ -26,6 +47,8 @@ export function useStreakHistory(startDate?: string, endDate?: string) {
       query: {
         enabled: !!startDate || !!endDate,
         staleTime: 1000 * 60 * 5, // 5 minutos
+        refetchOnMount: true,
+        refetchOnWindowFocus: true,
       },
     },
   );

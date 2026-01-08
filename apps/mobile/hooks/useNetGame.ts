@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   usePostPuzzlesNet,
   usePostAttemptsStart,
@@ -88,6 +89,8 @@ export const useNetGame = ({
   const startTimeRef = useRef<number | null>(null);
   const hasFinishedAttempt = useRef(false);
   const isStartingAttempt = useRef(false);
+
+  const queryClient = useQueryClient();
 
   const createPuzzle = usePostPuzzlesNet();
   const startAttempt = usePostAttemptsStart();
@@ -435,6 +438,12 @@ export const useNetGame = ({
         });
 
         console.log("✅ Intento finalizado exitosamente");
+
+        // Invalidar queries de rachas para refrescar datos (solo si no fue auto-resuelto)
+        if (!wasAutoSolved) {
+          queryClient.invalidateQueries({ queryKey: ['getStreaksMe'] });
+          queryClient.invalidateQueries({ queryKey: ['getStreaksHistory'] });
+        }
 
         // El backend automáticamente verifica logros y los devuelve en la respuesta
         if (
