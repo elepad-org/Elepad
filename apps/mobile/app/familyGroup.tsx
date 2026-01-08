@@ -55,6 +55,9 @@ export default function FamilyGroup() {
   const [isEditing, setIsEditing] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [advancedOptionsExpanded, setAdvancedOptionsExpanded] = useState(false);
+  const [avatarModalVisible, setAvatarModalVisible] = useState(false);
+  const [selectedAvatarUrl, setSelectedAvatarUrl] = useState<string | null>(null);
+  const [selectedMemberName, setSelectedMemberName] = useState<string>("");
 
   const patchFamilyGroup = usePatchFamilyGroupIdGroup(); // Este hook ya maneja la mutación
 
@@ -131,6 +134,18 @@ export default function FamilyGroup() {
       await Clipboard.setStringAsync(String(invitationCode));
       Alert.alert("¡Copiado!", "El código se ha copiado al portapapeles");
     }
+  };
+
+  const openAvatarModal = (avatarUrl: string, memberName: string) => {
+    setSelectedAvatarUrl(avatarUrl);
+    setSelectedMemberName(memberName);
+    setAvatarModalVisible(true);
+  };
+
+  const closeAvatarModal = () => {
+    setAvatarModalVisible(false);
+    setSelectedAvatarUrl(null);
+    setSelectedMemberName("");
   };
 
   const openConfirm = (member: {
@@ -412,14 +427,16 @@ export default function FamilyGroup() {
                           style={{ flexDirection: "row", alignItems: "center" }}
                         >
                           {o.avatarUrl ? (
-                            <Image
-                              source={{ uri: o.avatarUrl }}
-                              style={{
-                                width: 47,
-                                height: 47,
-                                borderRadius: 40,
-                              }}
-                            />
+                            <Pressable onPress={() => openAvatarModal(o.avatarUrl!, o.displayName)}>
+                              <Image
+                                source={{ uri: o.avatarUrl }}
+                                style={{
+                                  width: 47,
+                                  height: 47,
+                                  borderRadius: 40,
+                                }}
+                              />
+                            </Pressable>
                           ) : (
                             <View style={STYLES.memberAvatarPlaceholder}>
                               <Text style={STYLES.memberInitials}>
@@ -479,14 +496,16 @@ export default function FamilyGroup() {
                           style={{ flexDirection: "row", alignItems: "center" }}
                         >
                           {m.avatarUrl ? (
-                            <Image
-                              source={{ uri: m.avatarUrl }}
-                              style={{
-                                width: 47,
-                                height: 47,
-                                borderRadius: 40,
-                              }}
-                            />
+                            <Pressable onPress={() => openAvatarModal(m.avatarUrl!, m.displayName)}>
+                              <Image
+                                source={{ uri: m.avatarUrl }}
+                                style={{
+                                  width: 47,
+                                  height: 47,
+                                  borderRadius: 40,
+                                }}
+                              />
+                            </Pressable>
                           ) : (
                             <View style={STYLES.memberAvatarPlaceholder}>
                               <Text style={STYLES.memberInitials}>
@@ -900,15 +919,17 @@ export default function FamilyGroup() {
                         }}
                       >
                         {member.avatarUrl ? (
-                          <Image
-                            source={{ uri: member.avatarUrl }}
-                            style={{
-                              width: 40,
-                              height: 40,
-                              borderRadius: 20,
-                              marginRight: 12,
-                            }}
-                          />
+                          <Pressable onPress={() => openAvatarModal(member.avatarUrl!, member.displayName)}>
+                            <Image
+                              source={{ uri: member.avatarUrl }}
+                              style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 20,
+                                marginRight: 12,
+                              }}
+                            />
+                          </Pressable>
                         ) : (
                           <View style={STYLES.memberAvatarPlaceholder}>
                             <Text style={STYLES.memberInitials}>
@@ -1028,6 +1049,42 @@ export default function FamilyGroup() {
               </Button>
             </Dialog.Actions>
           </Dialog>
+
+          {/* Avatar Modal */}
+          <Dialog
+            visible={avatarModalVisible}
+            onDismiss={closeAvatarModal}
+            style={{
+              alignSelf: "center",
+              width: "90%",
+              backgroundColor: COLORS.background,
+            }}
+          >
+            <Dialog.Title>
+              <Text style={[STYLES.heading, { fontSize: 18, paddingTop: 15, textAlign: "center" }]}>
+                {selectedMemberName}
+              </Text>
+            </Dialog.Title>
+            <Dialog.Content>
+              <View style={styles.avatarModalContent}>
+                {selectedAvatarUrl && (
+                  <Image
+                    source={{ uri: selectedAvatarUrl }}
+                    style={styles.avatarModalImage}
+                  />
+                )}
+              </View>
+            </Dialog.Content>
+            <Dialog.Actions style={{ justifyContent: "center" }}>
+              <Button
+                mode="outlined"
+                onPress={closeAvatarModal}
+                style={styles.avatarModalButton}
+              >
+                Cerrar
+              </Button>
+            </Dialog.Actions>
+          </Dialog>
         </Portal>
       </ScrollView>
     </SafeAreaView>
@@ -1073,5 +1130,20 @@ const styles = {
     marginTop: 8,
     textAlign: 'center',
     fontStyle: 'italic',
+  },
+  avatarModalContent: {
+    alignItems: "center",
+    paddingVertical: 20,
+  },
+  avatarModalImage: {
+    width: 210,
+    height: 210,
+    borderRadius: 110,
+    backgroundColor: COLORS.backgroundSecondary,
+  },
+  avatarModalButton: {
+    borderColor: COLORS.primary,
+    borderRadius: 8,
+    minWidth: 100,
   },
 };

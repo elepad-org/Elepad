@@ -106,11 +106,12 @@ export class FamilyGroupService {
    */
   async getMembers(idGroup: string): Promise<{
     name: string;
-    owner: { id: string; displayName: string; avatarUrl: string | null };
+    owner: { id: string; displayName: string; avatarUrl: string | null; elder: boolean };
     members: Array<{
       id: string;
       displayName: string;
       avatarUrl: string | null;
+      elder: boolean;
     }>;
   }> {
     // Traer grupo (para obtener name y ownerUserId)
@@ -128,7 +129,7 @@ export class FamilyGroupService {
     // Traer miembros del grupo
     const { data: members, error: membersErr } = await this.supabase
       .from("users")
-      .select("id, displayName, avatarUrl")
+      .select("id, displayName, avatarUrl, elder")
       .eq("groupId", idGroup);
 
     if (membersErr) {
@@ -147,7 +148,7 @@ export class FamilyGroupService {
       // Si por algún motivo el owner no figura en la lista (inconsistencia), intentar consultarlo directo
       const { data: ownerUser, error: ownerErr } = await this.supabase
         .from("users")
-        .select("id, displayName, avatarUrl")
+        .select("id, displayName, avatarUrl, elder")
         .eq("id", group.ownerUserId)
         .single();
       if (ownerErr || !ownerUser) {
