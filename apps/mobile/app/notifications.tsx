@@ -24,20 +24,78 @@ import {
   useGetFamilyGroupIdGroupMembers,
   GetFamilyGroupIdGroupMembers200,
   Notification,
+  useGetMemoriesId,
+  Memory,
 } from "@elepad/api-client";
 import { COLORS, STYLES, SHADOWS } from "@/styles/base";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import HighlightedMentionText from "@/components/Recuerdos/HighlightedMentionText";
+import RecuerdoDetailDialog from "@/components/Recuerdos/RecuerdoDetailDialog";
+import { Portal } from "react-native-paper";
 
 const PAGE_SIZE = 20;
+
+// Tipos de recuerdos
+type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
+
+interface Recuerdo {
+  id: string;
+  tipo: RecuerdoTipo;
+  contenido: string;
+  miniatura?: string;
+  titulo?: string;
+  descripcion?: string;
+  autorId?: string;
+  autorNombre?: string;
+  fecha: Date;
+}
+
+// Función auxiliar para convertir Memory a Recuerdo
+const memoryToRecuerdo = (
+  memory: Memory,
+  memberNameById: Record<string, string>,
+): Recuerdo => {
+  let tipo: RecuerdoTipo = "texto";
+
+  if (memory.mimeType) {
+    if (memory.mimeType.startsWith("image/")) {
+      tipo = "imagen";
+    } else if (memory.mimeType.startsWith("audio/")) {
+      tipo = "audio";
+    } else if (memory.mimeType.startsWith("video/")) {
+      tipo = "video";
+    } else if (memory.mimeType === "text/note") {
+      tipo = "texto";
+    }
+  }
+
+  return {
+    id: memory.id,
+    tipo,
+    contenido: memory.mediaUrl || memory.caption || "",
+    miniatura:
+      (memory.mimeType?.startsWith("image/") ||
+        memory.mimeType?.startsWith("video/")) &&
+      memory.mediaUrl
+        ? memory.mediaUrl
+        : undefined,
+    titulo: memory.title || undefined,
+    descripcion: memory.caption || undefined,
+    autorId: memory.createdBy,
+    autorNombre: memberNameById[memory.createdBy] || undefined,
+    fecha: new Date(memory.createdAt),
+  };
+};
 
 export default function NotificationsScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { userElepad } = useAuth();
   const [page, setPage] = useState(0);
+  const [selectedMemoryId, setSelectedMemoryId] = useState<string | null>(null);
+  const [detailDialogVisible, setDetailDialogVisible] = useState(false);
 
   // Fetch family members for displaying names in mentions
   const membersQuery = useGetFamilyGroupIdGroupMembers(
@@ -63,6 +121,16 @@ export default function NotificationsScreen() {
 
   const groupInfo = selectGroupInfo();
   
+  // Query para obtener el recuerdo seleccionado
+  const memoryQuery = useGetMemoriesId(
+    selectedMemoryId || "",
+    {
+      query: {
+        enabled: !!selectedMemoryId,
+      },
+    },
+  );
+
   const groupMembers = useMemo(() => {
     if (!groupInfo) {
       return [] as Array<{ id: string; displayName: string; avatarUrl?: string | null }>;
@@ -87,7 +155,7 @@ export default function NotificationsScreen() {
     },
     {
       query: {
-        refetchOnWindowFocus: true,
+        refetchOnWindowFocus: false,
       },
     },
   );
@@ -162,16 +230,29 @@ export default function NotificationsScreen() {
 
   const handleNotificationPress = useCallback(
     async (notification: Notification) => {
-      // Mark as read if not already read
-      if (!notification.read) {
-        await handleMarkAsRead(notification.id);
+      console.log('🔔 Notification pressed:', {
+        id: notification.id,
+        entity_type: notification.entity_type,
+        entity_id: notification.entity_id,
+        event_type: notification.event_type,
+        read: notification.read,
+      });
+
+      // Navigate or show detail based on notification type
+      if (notification.entity_type === "memory" && notification.entity_id) {
+        console.log('📖 Opening memory detail:', notification.entity_id);
+        // Mostrar el detalle del recuerdo
+        setSelectedMemoryId(notification.entity_id);
+        setDetailDialogVisible(true);
+      } else if (notification.entity_type === "activity") {
+        router.push("/(tabs)/calendar");
+      } else {
+        console.log('⚠️ No action for this notification type');
       }
 
-      // Navigate based on notification type
-      if (notification.entityType === "memory") {
-        router.push("/(tabs)/recuerdos");
-      } else if (notification.entityType === "activity") {
-        router.push("/(tabs)/calendar");
+      // Mark as read in background (optimistic update)
+      if (!notification.read) {
+        handleMarkAsRead(notification.id);
       }
       // Add more navigation logic as needed
     },
@@ -228,7 +309,7 @@ export default function NotificationsScreen() {
     ({ item }: { item: Notification }) => {
       // Para menciones, detectar si el título contiene formato <@id>
       const hasMention = /<@([^>]+)>/.test(item.title);
-      const isMention = item.eventType === "mention" || hasMention;
+      const isMention = item.event_type === "mention" || hasMention;
 
       return (
         <Pressable
@@ -241,7 +322,7 @@ export default function NotificationsScreen() {
         >
           <View style={styles.notificationIconContainer}>
             <MaterialCommunityIcons
-              name={getNotificationIcon(item.eventType)}
+              name={getNotificationIcon(item.event_type)}
               size={24}
               color={item.read ? COLORS.textSecondary : COLORS.primary}
             />
@@ -338,7 +419,7 @@ export default function NotificationsScreen() {
           <Text style={styles.headerTitle}>Notificaciones</Text>
         </View>
         
-        {notifications.length > 0 && unreadCount > 0 && (
+        {notifications.length > 0 && (
           <View style={styles.headerActions}>
             <Chip
               icon="bell"
@@ -351,7 +432,7 @@ export default function NotificationsScreen() {
               mode="text"
               onPress={handleMarkAllAsRead}
               loading={markAllAsReadMutation.isPending}
-              disabled={markAllAsReadMutation.isPending}
+              disabled={markAllAsReadMutation.isPending || unreadCount === 0}
               textColor={COLORS.primary}
               compact
               style={styles.markAllButton}
@@ -371,7 +452,7 @@ export default function NotificationsScreen() {
         <FlatList
           data={notifications}
           renderItem={renderNotification}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => `${item.id}-${item.read}`}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl
@@ -387,6 +468,38 @@ export default function NotificationsScreen() {
           showsVerticalScrollIndicator={false}
         />
       )}
+
+      {/* Dialog para mostrar detalle del recuerdo */}
+      <RecuerdoDetailDialog
+        visible={detailDialogVisible}
+        recuerdo={
+          memoryQuery.data && groupMembers
+            ? memoryToRecuerdo(
+                memoryQuery.data as Memory,
+                groupMembers.reduce((acc, m) => {
+                  acc[m.id] = m.displayName;
+                  return acc;
+                }, {} as Record<string, string>),
+              )
+            : null
+        }
+        onDismiss={() => {
+          setDetailDialogVisible(false);
+          setSelectedMemoryId(null);
+        }}
+        onUpdateRecuerdo={async () => {
+          // Actualizar no está disponible desde notificaciones
+          // El usuario debe ir a recuerdos para editar
+        }}
+        onDeleteRecuerdo={async () => {
+          // Eliminar no está disponible desde notificaciones
+          // El usuario debe ir a recuerdos para eliminar
+        }}
+        isMutating={false}
+        familyMembers={groupMembers}
+        currentUserId={userElepad?.id}
+        showBackdrop={true}
+      />
     </SafeAreaView>
   );
 }
@@ -455,19 +568,20 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     padding: 16,
     borderRadius: 16,
-    borderWidth: 0,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 2,
     position: "relative",
   },
   unreadCard: {
     backgroundColor: COLORS.primary + "10",
     borderLeftWidth: 4,
     borderLeftColor: COLORS.primary,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 0.5 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
   },
   pressedCard: {
     opacity: 0.85,
