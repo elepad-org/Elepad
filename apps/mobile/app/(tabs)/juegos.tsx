@@ -5,11 +5,20 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
-import { ActivityIndicator, Text, Button, Icon } from "react-native-paper";
+import { ActivityIndicator, Text, Button, Icon, Card } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, STYLES, SHADOWS, LAYOUT } from "@/styles/base";
 import { router } from "expo-router";
+import React, { useState } from "react";
+
+// Import components from the history screen for statistics display
+import {
+  useGetAttemptsStatsGameType,
+  GameType,
+  useGetFamilyGroupIdGroupMembers,
+} from "@elepad/api-client";
+import ActivitiesList from "@/components/ActivitiesList";
 
 interface GameCardProps {
   emoji?: string;
@@ -60,6 +69,69 @@ function GameCard({
   );
 }
 
+interface GameStatsCardProps {
+  title: string;
+  emoji?: string;
+  iconName?: string;
+  stats: any;
+  loading: boolean;
+}
+
+function GameStatsCard({ title, emoji, iconName, stats, loading }: GameStatsCardProps) {
+  if (loading) {
+    return (
+      <Card style={styles.statsCard}>
+        <Card.Content>
+          <View style={styles.statsCardContent}>
+            <View style={styles.gameIconContainer}>
+              {iconName ? (
+                <Icon source={iconName} size={24} color={COLORS.primary} />
+              ) : (
+                <Text style={styles.statsEmoji}>{emoji}</Text>
+              )}
+            </View>
+            <View style={styles.statsInfo}>
+              <Text style={styles.statsTitle}>{title}</Text>
+              <ActivityIndicator size="small" />
+            </View>
+          </View>
+        </Card.Content>
+      </Card>
+    );
+  }
+
+  const totalGames = stats?.totalAttempts || 0;
+  const successRate = totalGames > 0 ? Math.round(((stats?.totalSuccessfulAttempts || 0) / totalGames) * 100) : 0;
+  const averageScore = stats?.averageScore || 0;
+
+  return (
+    <Card style={styles.statsCard}>
+      <Card.Content>
+        <View style={styles.statsCardContent}>
+          <View style={styles.gameIconContainer}>
+            {iconName ? (
+              <Icon source={iconName} size={24} color={COLORS.primary} />
+            ) : (
+              <Text style={styles.statsEmoji}>{emoji}</Text>
+            )}
+          </View>
+          <View style={styles.statsInfo}>
+            <Text style={styles.statsTitle}>{title}</Text>
+            <View style={styles.statsDetails}>
+              <Text style={styles.statItem}>
+                {totalGames} partidas • {successRate}% éxito
+              </Text>
+              <Text style={styles.statItem}>
+                Promedio: {Math.round(averageScore)} pts
+              </Text>
+            </View>
+          </View>
+        </View>
+      </Card.Content>
+    </Card>
+  );
+}
+
 export default function JuegosScreen() {
   const { loading, userElepad } = useAuth();
 
@@ -73,57 +145,82 @@ export default function JuegosScreen() {
 
   const isElder = userElepad?.elder === true;
 
-  // Si es ayudante, redirigir directamente al historial
+  // Si es ayudante, mostrar estadísticas e historial directamente
   if (!isElder) {
-    return (
-      <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
-        <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
-        <ScrollView
-          contentContainerStyle={[
-            STYLES.contentContainer,
-            { paddingBottom: LAYOUT.bottomNavHeight },
-          ]}
-        >
-          <View style={STYLES.container}>
-            {/* Header */}
-            <View style={styles.header}>
-              <Text style={STYLES.superHeading}>Juegos</Text>
-            </View>
-
-            {/* Mensaje para ayudantes */}
-            <View style={styles.helperMessage}>
-              <Text style={styles.helperTitle}>Vista de Ayudante</Text>
-              <Text style={styles.helperDescription}>
-                Como ayudante, puedes ver las estadísticas y el historial de partidas de los adultos mayores de tu grupo familiar.
-              </Text>
-              
-              <View style={styles.helperButtonsContainer}>
-                <Button
-                  mode="contained"
-                  onPress={() => router.push("/history?view=historial")}
-                  style={[styles.helperButton, { backgroundColor: COLORS.primary }]}
-                  icon="history"
-                >
-                  Ver Historial
-                </Button>
-                
-                <Button
-                  mode="outlined"
-                  onPress={() => router.push("/history?view=estadisticas")}
-                  style={[styles.helperButton, { borderColor: COLORS.primary }]}
-                  textColor={COLORS.primary}
-                  icon="chart-line"
-                >
-                  Ver Estadísticas
-                </Button>
-              </View>
-            </View>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    );
+    return <StatisticsView />;
   }
 
+  // Vista de elder (juegos) - mantenemos tal como está
+  return <GamesView />;
+}
+
+// Component for non-elder users showing statistics and history
+function StatisticsView() {
+  const { userElepad } = useAuth();
+  const [timeRange, setTimeRange] = useState<"week" | "month" | "year">("week");
+
+  // Get statistics data for each game type
+  const memoryStats = useGetAttemptsStatsGameType(GameType.memory);
+  const netStats = useGetAttemptsStatsGameType(GameType.net);
+  const sudokuStats = useGetAttemptsStatsGameType(GameType.sudoku);
+  const focusStats = useGetAttemptsStatsGameType(GameType.focus);
+
+  return (
+    <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+      <ScrollView
+        contentContainerStyle={[
+          STYLES.contentContainer,
+          { paddingBottom: LAYOUT.bottomNavHeight },
+        ]}
+      >
+        <View style={STYLES.container}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={STYLES.superHeading}>Estadísticas</Text>
+          </View>
+
+          {/* Statistics Cards */}
+          <View style={styles.statisticsContainer}>
+            <GameStatsCard
+              title="Memoria"
+              emoji="🧠"
+              stats={memoryStats.data}
+              loading={memoryStats.isLoading}
+            />
+            <GameStatsCard
+              title="NET"
+              iconName="lan"
+              stats={netStats.data}
+              loading={netStats.isLoading}
+            />
+            <GameStatsCard
+              title="Sudoku"
+              emoji="🔢"
+              stats={sudokuStats.data}
+              loading={sudokuStats.isLoading}
+            />
+            <GameStatsCard
+              title="Focus"
+              emoji="🎯"
+              stats={focusStats.data}
+              loading={focusStats.isLoading}
+            />
+          </View>
+
+          {/* Activities List (Historial) */}
+          <View style={styles.historySection}>
+            <Text style={styles.sectionTitle}>Historial Reciente</Text>
+            <ActivitiesList />
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+// Component for elder users showing games - keeping original functionality
+function GamesView() {
   return (
     <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
@@ -280,33 +377,48 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     textAlign: "center",
   },
-  helperMessage: {
-    marginTop: 24,
-    backgroundColor: COLORS.backgroundSecondary,
-    borderRadius: 16,
-    padding: 24,
-    alignItems: "center",
-    ...SHADOWS.card,
+  // New styles for statistics view
+  statisticsContainer: {
+    width: "100%",
+    gap: 16,
+    marginBottom: 32,
   },
-  helperTitle: {
-    fontSize: 20,
+  historySection: {
+    width: "100%",
+  },
+  sectionTitle: {
+    fontSize: 18,
     fontWeight: "600",
     color: COLORS.text,
-    marginBottom: 12,
+    marginBottom: 16,
   },
-  helperDescription: {
-    fontSize: 15,
+  statsCard: {
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 16,
+    ...SHADOWS.card,
+  },
+  statsCardContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  statsEmoji: {
+    fontSize: 20,
+  },
+  statsInfo: {
+    flex: 1,
+    marginLeft: 14,
+  },
+  statsTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  statsDetails: {
+    gap: 2,
+  },
+  statItem: {
+    fontSize: 12,
     color: COLORS.textSecondary,
-    textAlign: "center",
-    lineHeight: 22,
-    marginBottom: 20,
-  },
-  helperButtonsContainer: {
-    width: "100%",
-    gap: 12,
-  },
-  helperButton: {
-    borderRadius: 12,
-    width: "100%",
   },
 });
