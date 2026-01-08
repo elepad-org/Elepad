@@ -18,7 +18,7 @@ export class UserService {
   async getUserById(id: string) {
     const { data, error } = await this.supabase
       .from("users")
-      .select("id, email, displayName, avatarUrl, groupId")
+      .select("id, email, displayName, avatarUrl, groupId, elder")
       .eq("id", id)
       .maybeSingle();
 
@@ -50,7 +50,7 @@ export class UserService {
       .from("users")
       .update(updates)
       .eq("id", id)
-      .select("id, email, displayName, avatarUrl, groupId")
+      .select("id, email, displayName, avatarUrl, groupId, elder")
       .maybeSingle();
 
     if (error) {

@@ -7,6 +7,7 @@ export const UserSchema = z
     displayName: z.string().min(1),
     avatarUrl: z.url().nullable(),
     groupId: z.uuid().nullable(),
+    elder: z.boolean(),
   })
   .openapi("User");
 

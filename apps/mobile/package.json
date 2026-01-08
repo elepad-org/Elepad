@@ -29,6 +29,7 @@
     "expo": "~54.0.30",
     "expo-audio": "~1.1.1",
     "expo-auth-session": "~7.0.10",
+    "expo-clipboard": "~8.0.8",
     "expo-constants": "~18.0.8",
     "expo-crypto": "~15.0.8",
     "expo-dev-client": "~6.0.20",

@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   usePostPuzzlesFocus,
   usePostAttemptsStart,
@@ -25,6 +26,8 @@ interface UseFocusGameProps {
 
 export const useFocusGame = (props: UseFocusGameProps) => {
   const { onAchievementUnlocked } = props;
+
+  const queryClient = useQueryClient();
 
   // API Hooks
   const createPuzzle = usePostPuzzlesFocus();
@@ -178,6 +181,11 @@ export const useFocusGame = (props: UseFocusGameProps) => {
           throw new Error("Failed to create puzzle");
         }
 
+        // Invalidar queries de rachas para refrescar datos (solo si success es true)
+        if (success) {
+          queryClient.invalidateQueries({ queryKey: ['getStreaksMe'] });
+          queryClient.invalidateQueries({ queryKey: ['getStreaksHistory'] });
+        }
 
         // Manejo de Logros
         const resData = finishResponse.data;

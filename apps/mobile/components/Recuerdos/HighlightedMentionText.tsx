@@ -4,19 +4,27 @@ import { COLORS } from "@/styles/base";
 interface FamilyMember {
   id: string;
   displayName: string;
+  avatarUrl?: string | null;
 }
 
 interface HighlightedMentionTextProps {
   text: string;
   familyMembers?: FamilyMember[];
+  groupMembers?: FamilyMember[];
   style?: object;
+  numberOfLines?: number;
 }
 
 export default function HighlightedMentionText({ 
   text, 
   familyMembers = [],
-  style = {} 
+  groupMembers = [],
+  style = {},
+  numberOfLines
 }: HighlightedMentionTextProps) {
+  // Use groupMembers if provided, otherwise fallback to familyMembers
+  const members = groupMembers.length > 0 ? groupMembers : familyMembers;
+  
   if (!text) return null;
 
   // Detectar menciones en formato <@user_id> estilo Discord
@@ -30,7 +38,7 @@ export default function HighlightedMentionText({
 
   while ((match = mentionRegex.exec(text)) !== null) {
     const userId = match[1];
-    const member = familyMembers.find((m) => m.id === userId);
+    const member = members.find((m) => m.id === userId);
     const displayName = member?.displayName || "Usuario desconocido";
     
     // Texto antes de la mención
@@ -49,7 +57,7 @@ export default function HighlightedMentionText({
         style={[
           style,
           {
-            backgroundColor: COLORS.primary + "15",
+            backgroundColor: COLORS.primary + "20",
             color: COLORS.primary,
             fontWeight: "600",
             paddingHorizontal: 4,
@@ -73,7 +81,7 @@ export default function HighlightedMentionText({
   }
 
   return (
-    <RNText style={style}>
+    <RNText style={style} numberOfLines={numberOfLines}>
       {parts}
     </RNText>
   );

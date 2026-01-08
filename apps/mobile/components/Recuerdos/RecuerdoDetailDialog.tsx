@@ -40,7 +40,7 @@ interface RecuerdoDetailDialogProps {
   ) => Promise<void>;
   onDeleteRecuerdo: (id: string) => Promise<void>;
   isMutating?: boolean;
-  familyMembers?: Array<{ id: string; displayName: string }>;
+  familyMembers?: Array<{ id: string; displayName: string; avatarUrl?: string | null }>;
   currentUserId?: string;
 }
 
@@ -180,6 +180,7 @@ export default function RecuerdoDetailDialog({
     const title = editTitle.trim();
     const caption = editDescription.trim();
 
+    // El padre (recuerdos.tsx) se encargará de extraer los mentions
     await onUpdateRecuerdo(recuerdo.id, {
       title: title || undefined,
       caption: caption || undefined,
@@ -212,7 +213,7 @@ export default function RecuerdoDetailDialog({
         {recuerdo.titulo || "Sin título"}
       </Text>
 
-      {menuMounted && (
+      {menuMounted && recuerdo.autorId === currentUserId && (
         <Menu
           visible={menuVisible}
           onDismiss={closeMenu}
@@ -376,6 +377,11 @@ export default function RecuerdoDetailDialog({
             backgroundColor: "transparent",
             alignItems: "center",
             justifyContent: "center",
+            elevation: 0,
+            shadowColor: "transparent",
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 0,
+            shadowRadius: 0,
           }}
         >
           <View
@@ -384,6 +390,11 @@ export default function RecuerdoDetailDialog({
               borderRadius: 10,
               overflow: "hidden",
               width: screenWidth * 0.92,
+              elevation: 0,
+              shadowColor: "transparent",
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: 0,
+              shadowRadius: 0,
             }}
           >
             {/* Contenido principal según el tipo */}
@@ -439,12 +450,12 @@ export default function RecuerdoDetailDialog({
               <View>
                 <View
                   style={{
-                    backgroundColor: COLORS.accent,
+                    backgroundColor: COLORS.backgroundSecondary,
                     paddingTop: 50,
                     paddingBottom: 10,
                     paddingHorizontal: 20,
-                    borderTopLeftRadius: 16,
-                    borderTopRightRadius: 16,
+                    borderTopLeftRadius: 10,
+                    borderTopRightRadius: 10,
                     minHeight: 220,
                   }}
                 >

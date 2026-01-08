@@ -15,9 +15,17 @@ import {
   deleteMemoryMediaByPublicUrl,
   uploadMemoryImage,
 } from "@/services/storage";
+import { MentionsService } from "@/services/mentions";
+import { NotificationsService } from "@/modules/notifications/service";
 
 export class MemoriesService {
-  constructor(private supabase: SupabaseClient<Database>) {}
+  private mentionsService: MentionsService;
+  private notificationsService: NotificationsService;
+
+  constructor(private supabase: SupabaseClient<Database>) {
+    this.mentionsService = new MentionsService(supabase);
+    this.notificationsService = new NotificationsService(supabase);
+  }
 
   private async assertUserInGroup(userId: string, groupId: string) {
     const { data, error } = await this.supabase
@@ -156,6 +164,45 @@ export class MemoriesService {
 
       if (!data) {
         throw new ApiException(500, "Failed to create memory");
+      }
+
+      // Sync mentions from title and caption
+      try {
+        await this.mentionsService.syncMentions(
+          "memory",
+          data.id,
+          memoryData.title,
+          memoryData.caption
+        );
+
+        // Extract mentioned user IDs and create notifications
+        const mentionedIds = [
+          ...this.mentionsService.extractMentionIds(memoryData.title),
+          ...this.mentionsService.extractMentionIds(memoryData.caption),
+        ];
+
+        if (mentionedIds.length > 0) {
+          // Get the actor's name
+          const { data: actor, error: actorError } = await this.supabase
+            .from("users")
+            .select("displayName")
+            .eq("id", userId)
+            .single();
+
+          if (!actorError && actor) {
+            await this.notificationsService.notifyMentionedUsers(
+              mentionedIds,
+              userId,
+              actor.displayName || "Un usuario",
+              "memory",
+              data.id,
+              memoryData.title || "Sin título"
+            );
+          }
+        }
+      } catch (error) {
+        console.error("Error syncing mentions or creating notifications:", error);
+        // Don't throw - mentions and notifications are not critical
       }
 
       return data;
@@ -308,6 +355,45 @@ export class MemoriesService {
       throw new ApiException(500, "Failed to create note");
     }
 
+    // Sync mentions from title and caption
+    try {
+      await this.mentionsService.syncMentions(
+        "memory",
+        data.id,
+        noteData.title,
+        noteData.caption
+      );
+
+      // Extract mentioned user IDs and create notifications
+      const mentionedIds = [
+        ...this.mentionsService.extractMentionIds(noteData.title),
+        ...this.mentionsService.extractMentionIds(noteData.caption),
+      ];
+
+      if (mentionedIds.length > 0) {
+        // Get the actor's name
+        const { data: actor, error: actorError } = await this.supabase
+          .from("users")
+          .select("displayName")
+          .eq("id", userId)
+          .single();
+
+        if (!actorError && actor) {
+          await this.notificationsService.notifyMentionedUsers(
+            mentionedIds,
+            userId,
+            actor.displayName || "Un usuario",
+            "memory",
+            data.id,
+            noteData.title
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error syncing mentions or creating notifications:", error);
+      // Don't throw - mentions and notifications are not critical
+    }
+
     return data;
   }
 
@@ -348,6 +434,56 @@ export class MemoriesService {
       throw new ApiException(500, "Failed to update memory");
     }
 
+    // Sync mentions from title and caption
+    try {
+      // Get previous mentions to know which are new
+      const oldMentionIds = await this.mentionsService.getMentionsForEntity(
+        "memory",
+        data.id
+      );
+
+      await this.mentionsService.syncMentions(
+        "memory",
+        data.id,
+        data.title,
+        data.caption
+      );
+
+      // Extract current mentioned user IDs
+      const currentMentionIds = [
+        ...this.mentionsService.extractMentionIds(data.title),
+        ...this.mentionsService.extractMentionIds(data.caption),
+      ];
+
+      // Find new mentions (not present in old mentions)
+      const newMentionIds = currentMentionIds.filter(
+        (id) => !oldMentionIds.includes(id)
+      );
+
+      if (newMentionIds.length > 0) {
+        // Get the actor's name
+        const { data: actor, error: actorError } = await this.supabase
+          .from("users")
+          .select("displayName")
+          .eq("id", userId)
+          .single();
+
+        if (!actorError && actor) {
+          await this.notificationsService.notifyMentionedUsers(
+            newMentionIds,
+            userId,
+            actor.displayName || "Un usuario",
+            "memory",
+            data.id,
+            data.title || "Sin título"
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error syncing mentions or creating notifications:", error);
+      // Don't throw - mentions are not critical
+    }
+
     return data;
   }
 
@@ -375,6 +511,14 @@ export class MemoriesService {
         console.error("Error deleting memory media from storage:", error);
         throw new ApiException(500, "Error deleting memory media");
       }
+    }
+
+    // Delete mentions first
+    try {
+      await this.mentionsService.deleteMentionsForEntity("memory", memoryId);
+    } catch (error) {
+      console.error("Error deleting mentions:", error);
+      // Continue with memory deletion even if mentions fail
     }
 
     const { error } = await this.supabase

@@ -2,6 +2,7 @@ import { ApiException } from "@/utils/api-error";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/supabase-types";
 import type { StartAttempt, FinishAttempt } from "./schema";
+import { StreakService } from "../streaks/service";
 
 export class AttemptService {
   constructor(private supabase: SupabaseClient<Database>) {}
@@ -96,6 +97,17 @@ export class AttemptService {
 
     if (updateError) {
       throw new ApiException(500, "Error al finalizar el intento", updateError);
+    }
+
+    // Si el intento fue exitoso, actualizar la racha del usuario
+    if (success) {
+      try {
+        const streakService = new StreakService(this.supabase);
+        await streakService.updateStreakOnGameCompletion(userId);
+      } catch (error) {
+        // No fallar el intento si hay error al actualizar la racha
+        console.error("Error al actualizar racha:", error);
+      }
     }
 
     return attempt;

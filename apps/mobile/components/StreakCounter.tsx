@@ -1,17 +1,39 @@
 import { View, StyleSheet } from "react-native";
-import { Text } from "react-native-paper";
+import { Text, ActivityIndicator } from "react-native-paper";
 import { COLORS, FONT, SHADOWS } from "@/styles/base";
 import { LinearGradient } from "expo-linear-gradient";
+import { useUserStreak } from "@/hooks/useStreak";
+import { useGetStreaksHistory } from "@elepad/api-client";
 
-interface StreakCounterProps {
-  streak: number;
-}
+export default function StreakCounter() {
+  const { data: streak, isLoading } = useUserStreak();
+  
+  // Obtener el historial para verificar si hoy ya se jugó
+  const today = new Date().toISOString().slice(0, 10);
+  const { data: historyData } = useGetStreaksHistory(
+    { startDate: today, endDate: today },
+    { query: { enabled: true } }
+  );
+  
+  // Verificar si hoy ya se extendió la racha
+  const hasPlayedToday = historyData?.dates?.includes(today) || false;
 
-export default function StreakCounter({ streak }: StreakCounterProps) {
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="small" color={COLORS.primary} />
+        </View>
+      </View>
+    );
+  }
+
+  const currentStreak = streak?.currentStreak || 0;
+
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={["#FF6B35", "#FF8C42"]}
+        colors={["#7C3AED", "#A855F7"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.gradient}
@@ -22,8 +44,8 @@ export default function StreakCounter({ streak }: StreakCounterProps) {
             <Text style={styles.subtitle}>Juega al menos una vez al día</Text>
           </View>
           <View style={styles.streakContainer}>
-            <Text style={styles.fireEmoji}>🔥</Text>
-            <Text style={styles.streakNumber}>{streak}</Text>
+            <Text style={styles.fireEmoji}>{hasPlayedToday ? '🔥' : '🧊'}</Text>
+            <Text style={styles.streakNumber}>{currentStreak}</Text>
           </View>
         </View>
       </LinearGradient>
@@ -38,6 +60,13 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
     ...SHADOWS.card,
+  },
+  loadingContainer: {
+    backgroundColor: COLORS.backgroundSecondary,
+    paddingVertical: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 16,
   },
   gradient: {
     width: "100%",

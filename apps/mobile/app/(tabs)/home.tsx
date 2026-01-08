@@ -23,24 +23,29 @@ import {
   useGetActivitiesFamilyCodeIdFamilyGroup,
   useGetAttempts,
   useGetMemories,
+  useGetFamilyGroupIdGroupMembers,
+  GetFamilyGroupIdGroupMembers200,
 } from "@elepad/api-client";
 import { useRouter } from "expo-router";
 import { useMemo } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import StreakCounter from "@/components/StreakCounter";
+import HighlightedMentionText from "@/components/Recuerdos/HighlightedMentionText";
+import { useNotifications } from "@/hooks/useNotifications";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function HomeScreen() {
   const { userElepad, loading } = useAuth();
   const router = useRouter();
+  const { unreadCount } = useNotifications();
 
   // Fetch today's activities
   const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(
-    userElepad?.familyGroupId || "",
+    userElepad?.groupId || "",
     {
       query: {
-        enabled: !!userElepad?.familyGroupId,
+        enabled: !!userElepad?.groupId,
       },
     },
   );
@@ -57,8 +62,8 @@ export default function HomeScreen() {
 
   // Fetch recent memories
   const memoriesQuery = useGetMemories(
-    userElepad?.familyGroupId
-      ? { limit: 1, groupId: userElepad.familyGroupId }
+    userElepad?.groupId
+      ? { limit: 1, groupId: userElepad.groupId }
       : { limit: 1 },
     {
       query: {
@@ -66,6 +71,41 @@ export default function HomeScreen() {
       },
     },
   );
+
+  // Fetch family members
+  const membersQuery = useGetFamilyGroupIdGroupMembers(
+    userElepad?.groupId || "",
+    {
+      query: {
+        enabled: !!userElepad?.groupId,
+      },
+    },
+  );
+
+  const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
+    const resp = membersQuery.data as
+      | { data?: GetFamilyGroupIdGroupMembers200 }
+      | GetFamilyGroupIdGroupMembers200
+      | undefined;
+    if (!resp) return undefined;
+    return (
+      (resp as { data?: GetFamilyGroupIdGroupMembers200 }).data ??
+      (resp as GetFamilyGroupIdGroupMembers200)
+    );
+  };
+
+  const groupInfo = selectGroupInfo();
+  const groupMembers = useMemo(() => {
+    if (!groupInfo) return [] as Array<{ id: string; displayName: string; avatarUrl?: string | null }>;
+
+    const raw = [groupInfo.owner, ...groupInfo.members];
+    const byId = new Map<string, { id: string; displayName: string; avatarUrl?: string | null }>();
+    for (const m of raw) {
+      if (!m?.id) continue;
+      byId.set(m.id, { id: m.id, displayName: m.displayName, avatarUrl: m.avatarUrl ?? null });
+    }
+    return Array.from(byId.values());
+  }, [groupInfo]);
 
   const upcomingActivities = useMemo(() => {
     if (!activitiesQuery.data) return [];
@@ -110,6 +150,9 @@ export default function HomeScreen() {
 
   const displayName =
     (userElepad?.displayName as string) || userElepad?.email || "Usuario";
+  
+  const userRole = userElepad?.elder ? "Adulto mayor" : "Ayudante";
+  const displayNameWithRole = `${displayName} (${userRole})`;
 
   const getInitials = (name: string) =>
     name
@@ -140,24 +183,57 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View style={styles.greetingContainer}>
             <Text style={styles.greeting}>{getGreeting()}</Text>
-            <Text style={styles.userName} numberOfLines={1}>
-              {displayName}
-            </Text>
+            <View style={styles.userNameContainer}>
+              <Text style={styles.userName} numberOfLines={1}>
+                {displayName}
+              </Text>
+              <Text style={styles.userRole} numberOfLines={1}>
+                ({userRole})
+              </Text>
+            </View>
           </View>
-          {userElepad?.avatarUrl ? (
-            <Avatar.Image
-              size={55}
-              source={{ uri: userElepad?.avatarUrl }}
-              style={styles.avatar}
-            />
-          ) : (
-            <Avatar.Text
-              size={55}
-              label={getInitials(displayName)}
-              style={[styles.avatar, { backgroundColor: COLORS.primary }]}
-              labelStyle={{ color: COLORS.white, fontSize: 22 }}
-            />
-          )}
+          <View style={styles.headerRight}>
+            {/* Notification Button */}
+            <Pressable 
+              style={({ pressed }) => [
+                styles.notificationContainer,
+                pressed && { opacity: 0.6 }
+              ]}
+              onPress={() => {
+                router.push("/notifications");
+              }}
+              android_ripple={{ color: COLORS.primary + "30", borderless: true, radius: 24 }}
+            >
+              <IconButton
+                icon="bell-outline"
+                size={26}
+                iconColor={COLORS.primary}
+                style={styles.notificationButton}
+              />
+              {unreadCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </Text>
+                </View>
+              )}
+            </Pressable>
+            {/* Avatar */}
+            {userElepad?.avatarUrl ? (
+              <Avatar.Image
+                size={55}
+                source={{ uri: userElepad?.avatarUrl }}
+                style={styles.avatar}
+              />
+            ) : (
+              <Avatar.Text
+                size={55}
+                label={getInitials(displayName)}
+                style={[styles.avatar, { backgroundColor: COLORS.primary }]}
+                labelStyle={{ color: COLORS.white, fontSize: 22 }}
+              />
+            )}
+          </View>
         </View>
 
         {/* Último Recuerdo - DESTACADO */}
@@ -188,9 +264,11 @@ export default function HomeScreen() {
                       {lastMemory.title || "Sin título"}
                     </Text>
                     {lastMemory.caption && (
-                      <Text style={styles.memoryDescription} numberOfLines={2}>
-                        {lastMemory.caption}
-                      </Text>
+                      <HighlightedMentionText
+                        text={lastMemory.caption}
+                        familyMembers={groupMembers}
+                        style={styles.memoryDescription}
+                      />
                     )}
                     <Text style={styles.memoryDate}>
                       {new Date(lastMemory.createdAt).toLocaleDateString("es", {
@@ -212,10 +290,13 @@ export default function HomeScreen() {
                   <Text style={styles.memoryTitleDark} numberOfLines={2}>
                     {lastMemory.title || "Sin título"}
                   </Text>
+
                   {lastMemory.caption && (
-                    <Text style={styles.memoryDescriptionDark} numberOfLines={3}>
-                      {lastMemory.caption}
-                    </Text>
+                    <HighlightedMentionText
+                      text={lastMemory.caption}
+                      familyMembers={groupMembers}
+                      style={styles.memoryDescriptionDark}
+                    />
                   )}
                   <Text style={styles.memoryDateDark}>
                     {new Date(lastMemory.createdAt).toLocaleDateString("es", {
@@ -247,7 +328,7 @@ export default function HomeScreen() {
         )}
 
         {/* Contador de Racha */}
-        <StreakCounter streak={4} />
+        <StreakCounter />
 
         {/* Próximos Eventos */}
         <View style={styles.section}>
@@ -423,6 +504,53 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: COLORS.text,
     letterSpacing: -0.5,
+  },
+  userNameContainer: {
+    flexDirection: "column",
+    flex: 1,
+    alignItems: "flex-start",
+  },
+  userRole: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: COLORS.textLight,
+    letterSpacing: 0,
+    marginTop: -2,
+    opacity: 0.7,
+  },
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  notificationContainer: {
+    position: "relative",
+    minWidth: 48,
+    minHeight: 48,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  notificationButton: {
+    margin: 0,
+  },
+  badge: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    backgroundColor: COLORS.error,
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 5,
+    borderWidth: 2,
+    borderColor: COLORS.background,
+  },
+  badgeText: {
+    color: COLORS.white,
+    fontSize: 11,
+    fontWeight: "bold",
   },
   avatar: {
     ...SHADOWS.card,

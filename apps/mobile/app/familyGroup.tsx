@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   SafeAreaView,
   StatusBar,
@@ -19,6 +19,7 @@ import {
   Card,
 } from "react-native-paper";
 import { router } from "expo-router";
+import * as Clipboard from 'expo-clipboard';
 import {
   useGetFamilyGroupIdGroupInvite,
   getFamilyGroupIdGroupInviteResponse,
@@ -39,12 +40,24 @@ export default function FamilyGroup() {
 
   const groupId = userElepad?.groupId;
 
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarError, setSnackbarError] = useState(false);
+  // Debug: Log user data when component mounts or userElepad changes
+  useEffect(() => {
+    console.log("FamilyGroup - userElepad:", userElepad);
+    console.log("FamilyGroup - groupId:", groupId);
+    
+    // If we don't have a groupId but we have a user, try refreshing
+    if (userElepad && !groupId) {
+      console.log("FamilyGroup - No groupId found, refreshing user data...");
+      refreshUserElepad();
+    }
+  }, [userElepad, groupId, refreshUserElepad]);
+
   const [isEditing, setIsEditing] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [advancedOptionsExpanded, setAdvancedOptionsExpanded] = useState(false);
+  const [avatarModalVisible, setAvatarModalVisible] = useState(false);
+  const [selectedAvatarUrl, setSelectedAvatarUrl] = useState<string | null>(null);
+  const [selectedMemberName, setSelectedMemberName] = useState<string>("");
 
   const patchFamilyGroup = usePatchFamilyGroupIdGroup(); // Este hook ya maneja la mutación
 
@@ -106,21 +119,33 @@ export default function FamilyGroup() {
       const result = await inviteQuery.refetch();
       if (result.data) {
         setInvitationCode(result.data);
-        setSnackbarMessage(
-          `Enlace de invitación generado correctamente: http://elepad.com/invite/${result.data}`,
-        );
-        setSnackbarError(false);
-        setSnackbarVisible(true);
       }
     } catch (e: unknown) {
       const msg =
         e instanceof Error
           ? e.message
           : "Error al generar el enlace de invitación";
-      setSnackbarMessage(msg);
-      setSnackbarError(true);
-      setSnackbarVisible(true);
+      Alert.alert("Error", msg);
     }
+  };
+
+  const copyInvitationCode = async () => {
+    if (invitationCode) {
+      await Clipboard.setStringAsync(String(invitationCode));
+      Alert.alert("¡Copiado!", "El código se ha copiado al portapapeles");
+    }
+  };
+
+  const openAvatarModal = (avatarUrl: string, memberName: string) => {
+    setSelectedAvatarUrl(avatarUrl);
+    setSelectedMemberName(memberName);
+    setAvatarModalVisible(true);
+  };
+
+  const closeAvatarModal = () => {
+    setAvatarModalVisible(false);
+    setSelectedAvatarUrl(null);
+    setSelectedMemberName("");
   };
 
   const openConfirm = (member: {
@@ -402,14 +427,16 @@ export default function FamilyGroup() {
                           style={{ flexDirection: "row", alignItems: "center" }}
                         >
                           {o.avatarUrl ? (
-                            <Image
-                              source={{ uri: o.avatarUrl }}
-                              style={{
-                                width: 47,
-                                height: 47,
-                                borderRadius: 40,
-                              }}
-                            />
+                            <Pressable onPress={() => openAvatarModal(o.avatarUrl!, o.displayName)}>
+                              <Image
+                                source={{ uri: o.avatarUrl }}
+                                style={{
+                                  width: 47,
+                                  height: 47,
+                                  borderRadius: 40,
+                                }}
+                              />
+                            </Pressable>
                           ) : (
                             <View style={STYLES.memberAvatarPlaceholder}>
                               <Text style={STYLES.memberInitials}>
@@ -469,14 +496,16 @@ export default function FamilyGroup() {
                           style={{ flexDirection: "row", alignItems: "center" }}
                         >
                           {m.avatarUrl ? (
-                            <Image
-                              source={{ uri: m.avatarUrl }}
-                              style={{
-                                width: 47,
-                                height: 47,
-                                borderRadius: 40,
-                              }}
-                            />
+                            <Pressable onPress={() => openAvatarModal(m.avatarUrl!, m.displayName)}>
+                              <Image
+                                source={{ uri: m.avatarUrl }}
+                                style={{
+                                  width: 47,
+                                  height: 47,
+                                  borderRadius: 40,
+                                }}
+                              />
+                            </Pressable>
                           ) : (
                             <View style={STYLES.memberAvatarPlaceholder}>
                               <Text style={STYLES.memberInitials}>
@@ -735,30 +764,27 @@ export default function FamilyGroup() {
           </View>
 
           {invitationCode && (
-            <View style={STYLES.inviteCodeCard}>
-              <Text style={STYLES.inviteCodeTitle}>Código de invitación</Text>
-              <Text style={STYLES.inviteCodeText}>
-                {String(invitationCode)}
-              </Text>
-              <Text style={STYLES.inviteCodeExpiry}>
+            <View style={styles.inviteCodeContainer}>
+              <Text style={styles.inviteCodeLabel}>Código de invitación</Text>
+              <View style={styles.codeCard}>
+                <Text style={styles.codeText}>
+                  {String(invitationCode)}
+                </Text>
+                <IconButton
+                  icon="content-copy"
+                  size={20}
+                  iconColor={COLORS.primary}
+                  onPress={copyInvitationCode}
+                  style={styles.copyButton}
+                />
+              </View>
+              <Text style={styles.expiryText}>
                 Expira 10 minutos luego de su creación.
               </Text>
             </View>
           )}
         </View>
         <Portal>
-          <Snackbar
-            visible={snackbarVisible}
-            onDismiss={() => setSnackbarVisible(false)}
-            duration={2200}
-            style={{
-              backgroundColor: snackbarError ? COLORS.error : COLORS.success,
-              borderRadius: 8,
-            }}
-          >
-            {snackbarMessage}
-          </Snackbar>
-
           <Dialog
             visible={confirmVisible}
             onDismiss={closeConfirm}
@@ -893,15 +919,17 @@ export default function FamilyGroup() {
                         }}
                       >
                         {member.avatarUrl ? (
-                          <Image
-                            source={{ uri: member.avatarUrl }}
-                            style={{
-                              width: 40,
-                              height: 40,
-                              borderRadius: 20,
-                              marginRight: 12,
-                            }}
-                          />
+                          <Pressable onPress={() => openAvatarModal(member.avatarUrl!, member.displayName)}>
+                            <Image
+                              source={{ uri: member.avatarUrl }}
+                              style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 20,
+                                marginRight: 12,
+                              }}
+                            />
+                          </Pressable>
                         ) : (
                           <View style={STYLES.memberAvatarPlaceholder}>
                             <Text style={STYLES.memberInitials}>
@@ -1021,8 +1049,101 @@ export default function FamilyGroup() {
               </Button>
             </Dialog.Actions>
           </Dialog>
+
+          {/* Avatar Modal */}
+          <Dialog
+            visible={avatarModalVisible}
+            onDismiss={closeAvatarModal}
+            style={{
+              alignSelf: "center",
+              width: "90%",
+              backgroundColor: COLORS.background,
+            }}
+          >
+            <Dialog.Title>
+              <Text style={[STYLES.heading, { fontSize: 18, paddingTop: 15, textAlign: "center" }]}>
+                {selectedMemberName}
+              </Text>
+            </Dialog.Title>
+            <Dialog.Content>
+              <View style={styles.avatarModalContent}>
+                {selectedAvatarUrl && (
+                  <Image
+                    source={{ uri: selectedAvatarUrl }}
+                    style={styles.avatarModalImage}
+                  />
+                )}
+              </View>
+            </Dialog.Content>
+            <Dialog.Actions style={{ justifyContent: "center" }}>
+              <Button
+                mode="outlined"
+                onPress={closeAvatarModal}
+                style={styles.avatarModalButton}
+              >
+                Cerrar
+              </Button>
+            </Dialog.Actions>
+          </Dialog>
         </Portal>
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+const styles = {
+  inviteCodeContainer: {
+    marginTop: 16,
+    marginBottom: 16,
+  },
+  inviteCodeLabel: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    marginBottom: 8,
+    fontWeight: '500',
+  },
+  codeCard: {
+    backgroundColor: 'rgba(128, 128, 128, 0.15)',
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: 'rgba(128, 128, 128, 0.2)',
+  },
+  codeText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.text,
+    letterSpacing: 2,
+    flex: 1,
+  },
+  copyButton: {
+    margin: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderRadius: 8,
+  },
+  expiryText: {
+    fontSize: 12,
+    color: COLORS.textLight,
+    marginTop: 8,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  avatarModalContent: {
+    alignItems: "center",
+    paddingVertical: 20,
+  },
+  avatarModalImage: {
+    width: 210,
+    height: 210,
+    borderRadius: 110,
+    backgroundColor: COLORS.backgroundSecondary,
+  },
+  avatarModalButton: {
+    borderColor: COLORS.primary,
+    borderRadius: 8,
+    minWidth: 100,
+  },
+};

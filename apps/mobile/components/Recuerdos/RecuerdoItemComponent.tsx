@@ -141,10 +141,10 @@ export default function RecuerdoItemComponent({
         <View
           style={[
             STYLES.center,
-            { backgroundColor: COLORS.accent, flex: 1, padding: 12 },
+            { backgroundColor: COLORS.backgroundSecondary, flex: 1, padding: 12 },
           ]}
         >
-          <IconButton icon="text" size={32} iconColor={COLORS.textSecondary} />
+          <IconButton icon="text" size={32} iconColor={COLORS.primary} />
           <Text
             numberOfLines={3}
             style={[STYLES.footerText, { textAlign: "center", marginTop: 4 }]}
@@ -156,13 +156,13 @@ export default function RecuerdoItemComponent({
         <View
           style={[
             STYLES.center,
-            { backgroundColor: COLORS.accent, flex: 1, padding: 12 },
+            { backgroundColor: COLORS.backgroundSecondary, flex: 1, padding: 12 },
           ]}
         >
           <IconButton
             icon="microphone"
             size={32}
-            iconColor={COLORS.textSecondary}
+            iconColor={COLORS.primary}
           />
           <Text
             numberOfLines={2}

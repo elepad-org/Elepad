@@ -61,13 +61,66 @@ function GameCard({
 }
 
 export default function JuegosScreen() {
-  const { loading } = useAuth();
+  const { loading, userElepad } = useAuth();
 
   if (loading) {
     return (
       <View style={STYLES.center}>
         <ActivityIndicator />
       </View>
+    );
+  }
+
+  const isElder = userElepad?.elder === true;
+
+  // Si es ayudante, redirigir directamente al historial
+  if (!isElder) {
+    return (
+      <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
+        <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+        <ScrollView
+          contentContainerStyle={[
+            STYLES.contentContainer,
+            { paddingBottom: LAYOUT.bottomNavHeight },
+          ]}
+        >
+          <View style={STYLES.container}>
+            {/* Header */}
+            <View style={styles.header}>
+              <Text style={STYLES.superHeading}>Juegos</Text>
+            </View>
+
+            {/* Mensaje para ayudantes */}
+            <View style={styles.helperMessage}>
+              <Text style={styles.helperTitle}>Vista de Ayudante</Text>
+              <Text style={styles.helperDescription}>
+                Como ayudante, puedes ver las estadísticas y el historial de partidas de los adultos mayores de tu grupo familiar.
+              </Text>
+              
+              <View style={styles.helperButtonsContainer}>
+                <Button
+                  mode="contained"
+                  onPress={() => router.push("/history?view=historial")}
+                  style={[styles.helperButton, { backgroundColor: COLORS.primary }]}
+                  icon="history"
+                >
+                  Ver Historial
+                </Button>
+                
+                <Button
+                  mode="outlined"
+                  onPress={() => router.push("/history?view=estadisticas")}
+                  style={[styles.helperButton, { borderColor: COLORS.primary }]}
+                  textColor={COLORS.primary}
+                  icon="chart-line"
+                >
+                  Ver Estadísticas
+                </Button>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
     );
   }
 
@@ -226,5 +279,34 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.textSecondary,
     textAlign: "center",
+  },
+  helperMessage: {
+    marginTop: 24,
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 16,
+    padding: 24,
+    alignItems: "center",
+    ...SHADOWS.card,
+  },
+  helperTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: COLORS.text,
+    marginBottom: 12,
+  },
+  helperDescription: {
+    fontSize: 15,
+    color: COLORS.textSecondary,
+    textAlign: "center",
+    lineHeight: 22,
+    marginBottom: 20,
+  },
+  helperButtonsContainer: {
+    width: "100%",
+    gap: 12,
+  },
+  helperButton: {
+    borderRadius: 12,
+    width: "100%",
   },
 });

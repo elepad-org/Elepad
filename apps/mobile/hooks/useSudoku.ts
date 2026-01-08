@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   usePostPuzzlesSudoku,
   usePostAttemptsStart,
@@ -65,6 +66,8 @@ export const useSudoku = (props: UseSudokuProps) => {
   const startTimeRef = useRef<number | null>(null);
   const hasFinishedAttempt = useRef(false);
   const isStartingAttempt = useRef(false);
+
+  const queryClient = useQueryClient();
 
   // API Hooks
   const createPuzzle = usePostPuzzlesSudoku();
@@ -381,6 +384,10 @@ export const useSudoku = (props: UseSudokuProps) => {
               console.error("Error al finalizar el intento", response.data);
               return;
             }
+
+            // Invalidar queries de rachas para refrescar datos
+            queryClient.invalidateQueries({ queryKey: ['getStreaksMe'] });
+            queryClient.invalidateQueries({ queryKey: ['getStreaksHistory'] });
 
             if (response.data?.unlockedAchievements) {
               response.data.unlockedAchievements.forEach((a: any) =>

@@ -5,6 +5,7 @@ import {
   usePostAttemptsStart,
   usePostAttemptsAttemptIdFinish,
 } from "@elepad/api-client";
+import { useQueryClient } from "@tanstack/react-query";
 
 export interface Card {
   id: number;
@@ -65,6 +66,8 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
   const startTimeRef = useRef<number | null>(null);
   const hasFinishedAttempt = useRef(false);
   const isStartingAttempt = useRef(false);
+  
+  const queryClient = useQueryClient();
 
   // API Hooks
   const createPuzzle = usePostPuzzlesMemory();
@@ -359,6 +362,10 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
             });
 
             console.log("✅ Intento finalizado con score:", score);
+
+            // Invalidar queries de rachas para refrescar datos
+            queryClient.invalidateQueries({ queryKey: ['getStreaksMe'] });
+            queryClient.invalidateQueries({ queryKey: ['getStreaksHistory'] });
 
             // El backend automáticamente verifica logros y los devuelve en la respuesta
             if (
