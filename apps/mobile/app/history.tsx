@@ -169,6 +169,48 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
     useGetAttemptsStatsGameType(gt as GameType),
   );
 
+  // Calculate stats locally for helpers from filtered attempts
+  const getStatsFromAttempts = useCallback((gameType: GameType | "all") => {
+    if (!isHelper || !selectedElderId) {
+      // For non-helpers, use regular stats queries
+      if (gameType === "all") {
+        return statsQueries.reduce(
+          (acc, query) => {
+            const data = query.data as StatsData | undefined;
+            if (!data) return acc;
+            return {
+              totalAttempts: acc.totalAttempts + (data.totalAttempts || 0),
+              successfulAttempts: acc.successfulAttempts + (data.successfulAttempts || 0),
+              bestScore: Math.max(acc.bestScore, data.bestScore || 0),
+            };
+          },
+          { totalAttempts: 0, successfulAttempts: 0, bestScore: 0 }
+        );
+      } else {
+        const idx = gameTypes.indexOf(gameType);
+        const data = statsQueries[idx]?.data as StatsData | undefined;
+        return data || { totalAttempts: 0, successfulAttempts: 0, bestScore: 0 };
+      }
+    }
+
+    // For helpers, calculate stats from filtered attempts
+    const filteredAttempts = gameType === "all" 
+      ? attempts 
+      : attempts.filter(attempt => {
+          if (gameType === GameType.memory) return !!attempt.memoryPuzzleId;
+          if (gameType === GameType.net || gameType === GameType.sudoku || gameType === GameType.focus) {
+            return !!attempt.logicPuzzleId;
+          }
+          return false;
+        });
+
+    return {
+      totalAttempts: filteredAttempts.length,
+      successfulAttempts: filteredAttempts.filter(a => a.success === true).length,
+      bestScore: Math.max(...filteredAttempts.map(a => a.score || 0), 0),
+    };
+  }, [attempts, isHelper, selectedElderId, statsQueries, gameTypes]);
+
   const statsLoading = statsQueries.some((q) => q.isLoading);
   const globalLoading = loading || statsLoading;
 
@@ -244,32 +286,8 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
   };
 
   const statsToShow = useMemo(() => {
-    if (selectedGame === "all") {
-      return statsQueries.reduce(
-        (acc, query) => {
-          const data = query.data as StatsData | undefined;
-          if (!data) return acc;
-          return {
-            totalAttempts: acc.totalAttempts + (data.totalAttempts || 0),
-            successfulAttempts:
-              acc.successfulAttempts + (data.successfulAttempts || 0),
-            bestScore: Math.max(acc.bestScore, data.bestScore || 0),
-          };
-        },
-        { totalAttempts: 0, successfulAttempts: 0, bestScore: 0 },
-      );
-    } else {
-      const idx = gameTypes.indexOf(selectedGame as GameType);
-      const data = statsQueries[idx]?.data as StatsData | undefined;
-      return (
-        data || {
-          totalAttempts: 0,
-          successfulAttempts: 0,
-          bestScore: 0,
-        }
-      );
-    }
-  }, [selectedGame, statsQueries, gameTypes]);
+    return getStatsFromAttempts(selectedGame);
+  }, [selectedGame, getStatsFromAttempts]);
 
   const total = statsToShow?.totalAttempts || 0;
   const success = statsToShow?.successfulAttempts || 0;

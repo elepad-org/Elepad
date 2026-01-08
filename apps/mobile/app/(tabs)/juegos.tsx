@@ -60,69 +60,6 @@ function GameCard({
   );
 }
 
-interface GameStatsCardProps {
-  title: string;
-  emoji?: string;
-  iconName?: string;
-  stats: any;
-  loading: boolean;
-}
-
-function GameStatsCard({ title, emoji, iconName, stats, loading }: GameStatsCardProps) {
-  if (loading) {
-    return (
-      <Card style={styles.statsCard}>
-        <Card.Content>
-          <View style={styles.statsCardContent}>
-            <View style={styles.gameIconContainer}>
-              {iconName ? (
-                <Icon source={iconName} size={24} color={COLORS.primary} />
-              ) : (
-                <Text style={styles.statsEmoji}>{emoji}</Text>
-              )}
-            </View>
-            <View style={styles.statsInfo}>
-              <Text style={styles.statsTitle}>{title}</Text>
-              <ActivityIndicator size="small" />
-            </View>
-          </View>
-        </Card.Content>
-      </Card>
-    );
-  }
-
-  const totalGames = stats?.totalAttempts || 0;
-  const successRate = totalGames > 0 ? Math.round(((stats?.totalSuccessfulAttempts || 0) / totalGames) * 100) : 0;
-  const averageScore = stats?.averageScore || 0;
-
-  return (
-    <Card style={styles.statsCard}>
-      <Card.Content>
-        <View style={styles.statsCardContent}>
-          <View style={styles.gameIconContainer}>
-            {iconName ? (
-              <Icon source={iconName} size={24} color={COLORS.primary} />
-            ) : (
-              <Text style={styles.statsEmoji}>{emoji}</Text>
-            )}
-          </View>
-          <View style={styles.statsInfo}>
-            <Text style={styles.statsTitle}>{title}</Text>
-            <View style={styles.statsDetails}>
-              <Text style={styles.statItem}>
-                {totalGames} partidas • {successRate}% éxito
-              </Text>
-              <Text style={styles.statItem}>
-                Promedio: {Math.round(averageScore)} pts
-              </Text>
-            </View>
-          </View>
-        </View>
-      </Card.Content>
-    </Card>
-  );
-}
-
 export default function JuegosScreen() {
   const { loading, userElepad } = useAuth();
 
