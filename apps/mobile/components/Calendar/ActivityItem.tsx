@@ -120,6 +120,7 @@ export default function ActivityItem({
           </View>
         }
         onPress={hasDescription ? () => setShowModal(true) : undefined}
+        background={null}
         left={() => (
           <View style={styles.checkboxContainer}>
             <IconButton
@@ -265,19 +266,19 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderRadius: 16,
     backgroundColor: COLORS.white,
-    borderWidth: 0,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 0.5 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
   },
   completedCard: {
     backgroundColor: COLORS.primary + "10",
     opacity: 0.85,
-    shadowOpacity: 0.04,
-    borderLeftWidth: 3,
+    borderLeftWidth: 4,
     borderLeftColor: COLORS.primary,
   },
   listItem: {
