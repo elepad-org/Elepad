@@ -20,6 +20,7 @@ type AuthContext = {
   loading: boolean;
   signOut: () => Promise<void>;
   userElepad: ElepadUser | null;
+  userElepadLoading: boolean;
   refreshUserElepad: () => Promise<void>;
   // Estado de racha optimista
   streak: StreakState | null;
@@ -40,6 +41,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [userElepad, setUserElepad] = useState<ElepadUser | null>(null);
+  const [userElepadLoading, setUserElepadLoading] = useState(true); // Empezar con true
   const [loading, setLoading] = useState(true);
   const [streak, setStreak] = useState<StreakState | null>(null);
   const router = useRouter();
@@ -60,6 +62,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   });
 
   async function loadElepadUserById(userId: string) {
+    setUserElepadLoading(true);
     try {
       console.log("Cargando usuario de Elepad:", userId);
       const res = await getUsersId(userId);
@@ -75,6 +78,8 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     } catch (err) {
       console.warn("loadElepadUserById error", err);
       setUserElepad(null);
+    } finally {
+      setUserElepadLoading(false);
     }
   }
 
@@ -185,6 +190,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         await loadElepadUserById(session.user.id);
       } else {
         setUserElepad(null);
+        setUserElepadLoading(false);
       }
       setLoading(false);
       if (session) router.replace("/home");
@@ -205,6 +211,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
           router.replace("/home");
         } else {
           setUserElepad(null);
+          setUserElepadLoading(false);
           router.replace("/");
         }
         setLoading(false);
@@ -253,6 +260,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     loading,
     signOut,
     userElepad,
+    userElepadLoading,
     refreshUserElepad,
     streak,
     markGameCompleted,

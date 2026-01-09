@@ -19,6 +19,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, STYLES, SHADOWS } from "@/styles/base";
+import { LoadingProfile } from "@/components/shared";
 import {
   useGetActivitiesFamilyCodeIdFamilyGroup,
   useGetAttempts,
@@ -36,7 +37,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function HomeScreen() {
-  const { userElepad, loading } = useAuth();
+  const { userElepad, userElepadLoading } = useAuth();
   const router = useRouter();
   const { unreadCount } = useNotifications();
 
@@ -140,10 +141,11 @@ export default function HomeScreen() {
     return memories[0] || null;
   }, [memoriesQuery.data]);
 
-  if (loading) {
+  if (userElepadLoading || !userElepad) {
     return (
-      <SafeAreaView style={STYLES.center}>
-        <ActivityIndicator />
+      <SafeAreaView style={styles.safeArea} edges={["top"]}>
+        <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+        <LoadingProfile message="Cargando inicio..." />
       </SafeAreaView>
     );
   }
