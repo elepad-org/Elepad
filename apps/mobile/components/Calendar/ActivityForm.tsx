@@ -11,6 +11,7 @@ import type { Activity } from "@elepad/api-client";
 import { useGetFrequencies } from "@elepad/api-client";
 import { COLORS, STYLES } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
+import MentionInput from "../Recuerdos/MentionInput";
 
 type Frequency = {
   id: string;
@@ -18,11 +19,19 @@ type Frequency = {
   rrule: string | null;
 };
 
+type FamilyMember = {
+  id: string;
+  displayName: string;
+  avatarUrl?: string | null;
+};
+
 type Props = {
   visible: boolean;
   onClose: () => void;
   onSave: (payload: Partial<Activity>) => Promise<void>;
   initial?: Partial<Activity> | null;
+  familyMembers?: FamilyMember[];
+  currentUserId?: string;
 };
 
 export default function ActivityForm({
@@ -30,6 +39,8 @@ export default function ActivityForm({
   onClose,
   onSave,
   initial,
+  familyMembers = [],
+  currentUserId,
 }: Props) {
   const [title, setTitle] = useState(initial?.title || "");
   const [description, setDescription] = useState(initial?.description || "");
@@ -184,22 +195,19 @@ export default function ActivityForm({
       </View>
       <Dialog.Content style={{ paddingBottom: 15 }}>
         <View style={styles.inputWrapper}>
-          <TextInput
+          <MentionInput
+            label="Descripción"
             value={description}
             onChangeText={setDescription}
+            placeholder="Descripción (opcional)"
             multiline
             numberOfLines={3}
-            placeholder="Descripción (opcional)"
-            placeholderTextColor={COLORS.textSecondary}
-            style={styles.input}
+            familyMembers={familyMembers}
+            currentUserId={currentUserId}
             mode="flat"
-            underlineColor="transparent"
-            activeUnderlineColor="transparent"
-            theme={{
-              colors: {
-                background: "transparent",
-              },
-            }}
+            outlineColor="transparent"
+            activeOutlineColor="transparent"
+            style={{ backgroundColor: "transparent" }}
           />
         </View>
 

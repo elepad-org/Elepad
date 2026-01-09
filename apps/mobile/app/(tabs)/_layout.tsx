@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { View, Platform } from "react-native";
 import { BottomNavigation, useTheme } from "react-native-paper";
+import { useLocalSearchParams } from "expo-router";
 import HomeScreen from "./home";
 import JuegosScreen from "./juegos";
 import RecuerdosScreen from "./recuerdos";
@@ -14,9 +15,21 @@ const activeIndicatorColor = "rgba(91, 80, 122, 0.15)"; // #5b507a with opacity
 
 export default function TabLayout() {
   const theme = useTheme();
+  const params = useLocalSearchParams();
   const [index, setIndex] = useState(0);
   const { userElepad } = useAuth();
 
+  // Escuchar cambios en el parámetro 'tab' para cambiar de tab programáticamente
+  useEffect(() => {
+    if (params.tab) {
+      const tabIndex = routes.findIndex((route) => route.key === params.tab);
+      if (tabIndex !== -1) {
+        setIndex(tabIndex);
+      }
+    }
+  }, [params.tab]);
+
+  const [routes] = useState([
   const isElder = userElepad?.elder === true;
 
   // Different routes for elder vs non-elder users

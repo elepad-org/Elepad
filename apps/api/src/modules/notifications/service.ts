@@ -174,13 +174,23 @@ export class NotificationsService {
 
     if (usersToNotify.length === 0) return;
 
+    // Crear mensaje dinámico según el tipo de entidad
+    let titleMessage = "";
+    if (entityType === "memory") {
+      titleMessage = `<@${actorId}> te mencionó en un recuerdo`;
+    } else if (entityType === "activity") {
+      titleMessage = `<@${actorId}> te mencionó en una actividad`;
+    } else {
+      titleMessage = `<@${actorId}> te mencionó`;
+    }
+
     const notifications: CreateNotificationParams[] = usersToNotify.map((userId) => ({
       userId,
       actorId,
       eventType: "mention" as EventType,
       entityType,
       entityId,
-      title: `<@${actorId}> te mencionó en un recuerdo`,
+      title: titleMessage,
       body: entityTitle,
     }));
 

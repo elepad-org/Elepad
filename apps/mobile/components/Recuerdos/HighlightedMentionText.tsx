@@ -44,7 +44,7 @@ export default function HighlightedMentionText({
     // Texto antes de la mención
     if (match.index > lastIndex) {
       parts.push(
-        <RNText key={`text-${lastIndex}`} style={style}>
+        <RNText key={`text-${lastIndex}`}>
           {text.substring(lastIndex, match.index)}
         </RNText>
       );
@@ -54,15 +54,12 @@ export default function HighlightedMentionText({
     parts.push(
       <RNText
         key={`mention-${match.index}`}
-        style={[
-          style,
-          {
-            backgroundColor: COLORS.primary + "20",
-            color: COLORS.primary,
-            fontWeight: "600",
-            paddingHorizontal: 4,
-          },
-        ]}
+        style={{
+          backgroundColor: COLORS.primary + "20",
+          color: COLORS.primary,
+          fontWeight: "600",
+          paddingHorizontal: 4,
+        }}
       >
         {" " + displayName + " "}
       </RNText>
@@ -74,8 +71,17 @@ export default function HighlightedMentionText({
   // Texto después de la última mención
   if (lastIndex < text.length) {
     parts.push(
-      <RNText key={`text-${lastIndex}`} style={style}>
+      <RNText key={`text-${lastIndex}`}>
         {text.substring(lastIndex)}
+      </RNText>
+    );
+  }
+
+  // Si no hay partes (no hay menciones), retornar el texto simple
+  if (parts.length === 0) {
+    return (
+      <RNText style={style} numberOfLines={numberOfLines}>
+        {text}
       </RNText>
     );
   }

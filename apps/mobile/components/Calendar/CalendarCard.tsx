@@ -197,6 +197,16 @@ export default function CalendarCard(props: CalendarCardProps) {
   const [selectedDay, setSelectedDay] = useState<string>(today);
   const [filter, setFilter] = useState<"all" | "mine">("all");
 
+  // Preparar lista de miembros de la familia para menciones
+  const familyMembers = useMemo(() => {
+    if (!groupInfo) return [];
+    return groupInfo.members?.map((member) => ({
+      id: member.id,
+      displayName: member.displayName || "Usuario",
+      avatarUrl: member.avatarUrl || null,
+    })) || [];
+  }, [groupInfo]);
+
   // Estado optimista local para las completaciones
   const [optimisticCompletions, setOptimisticCompletions] = useState<
     Record<string, boolean>
@@ -572,6 +582,7 @@ export default function CalendarCard(props: CalendarCardProps) {
                 const key = `${item.id}_${selectedDay}`;
                 return completionsByDateMap[key] || false;
               })()}
+              familyMembers={familyMembers}
             />
           )}
           contentContainerStyle={styles.listContent}

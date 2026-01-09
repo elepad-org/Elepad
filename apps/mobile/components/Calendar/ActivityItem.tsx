@@ -12,6 +12,7 @@ import {
 } from "react-native-paper";
 import { Activity, GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 import { COLORS } from "@/styles/base";
+import HighlightedMentionText from "../Recuerdos/HighlightedMentionText";
 
 interface ActivityItemProps {
   item: Activity;
@@ -22,6 +23,7 @@ interface ActivityItemProps {
   isOwnerOfGroup: boolean;
   groupInfo?: GetFamilyGroupIdGroupMembers200;
   completed?: boolean; // Nueva prop para completado por día
+  familyMembers?: Array<{ id: string; displayName: string; avatarUrl?: string | null }>;
 }
 
 export default function ActivityItem({
@@ -33,6 +35,7 @@ export default function ActivityItem({
   isOwnerOfGroup,
   groupInfo,
   completed, // Usar esta prop en lugar de item.completed
+  familyMembers = [],
 }: ActivityItemProps) {
   const [showModal, setShowModal] = useState(false);
 
@@ -213,7 +216,7 @@ export default function ActivityItem({
 
             {/* Descripción */}
             {hasDescription && (
-              <>
+              <View>
                 <Divider
                   style={{ marginVertical: 12, backgroundColor: COLORS.border }}
                 />
@@ -227,13 +230,12 @@ export default function ActivityItem({
                 >
                   Descripción
                 </Text>
-                <Text
-                  variant="bodyMedium"
-                  style={{ color: COLORS.text, lineHeight: 22 }}
-                >
-                  {item.description}
-                </Text>
-              </>
+                <HighlightedMentionText
+                  text={item.description || ""}
+                  familyMembers={familyMembers}
+                  style={{ color: COLORS.text, lineHeight: 22, fontSize: 14 }}
+                />
+              </View>
             )}
           </Dialog.Content>
           <Dialog.Actions style={{ paddingHorizontal: 24, paddingBottom: 16 }}>
