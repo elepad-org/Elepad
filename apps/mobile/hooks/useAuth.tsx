@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { Session, User } from "@supabase/supabase-js";
 import { getUsersId } from "@elepad/api-client/src/gen/client";
+import { useGetStreaksMe } from "@elepad/api-client";
 import { useRouter } from "expo-router";
 import {
   PropsWithChildren,
@@ -8,7 +9,9 @@ import {
   useContext,
   useEffect,
   useState,
+  useRef,
 } from "react";
+import { useStreakSnackbar } from "./useStreakSnackbar";
 
 type AuthContext = {
   user: User | null;
@@ -17,6 +20,17 @@ type AuthContext = {
   signOut: () => Promise<void>;
   userElepad: ElepadUser | null;
   refreshUserElepad: () => Promise<void>;
+  // Estado de racha optimista
+  streak: StreakState | null;
+  markGameCompleted: () => Promise<void>;
+  syncStreak: () => Promise<void>;
+};
+
+type StreakState = {
+  currentStreak: number;
+  longestStreak: number;
+  lastPlayedDate: string | null;
+  hasPlayedToday: boolean;
 };
 
 const AuthContext = createContext<AuthContext>({} as AuthContext);
@@ -26,7 +40,23 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [user, setUser] = useState<User | null>(null);
   const [userElepad, setUserElepad] = useState<ElepadUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [streak, setStreak] = useState<StreakState | null>(null);
   const router = useRouter();
+  const { showStreakExtended } = useStreakSnackbar();
+  
+  // Ref para tracking de cambio de día
+  const lastCheckedDate = useRef<string | null>(null);
+  
+  // Query para obtener racha del backend
+  const streakQuery = useGetStreaksMe({
+    query: {
+      enabled: !!userElepad?.elder, // Solo si es elder
+      staleTime: 0,
+      gcTime: 1000 * 60, // gcTime reemplaza cacheTime en React Query v5
+      refetchOnMount: "always",
+      refetchOnWindowFocus: true,
+    },
+  });
 
   async function loadElepadUserById(userId: string) {
     try {
@@ -46,6 +76,92 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       setUserElepad(null);
     }
   }
+
+  // Sincronizar racha desde el backend
+  const syncStreak = async () => {
+    if (!userElepad?.elder) {
+      setStreak(null);
+      return;
+    }
+    
+    await streakQuery.refetch();
+  };
+
+  // Efecto para sincronizar racha cuando cambia el usuario o llegan datos del backend
+  useEffect(() => {
+    if (userElepad?.elder && streakQuery.data) {
+      const today = new Date().toISOString().slice(0, 10);
+      
+      // Extraer datos - la respuesta puede estar envuelta en {data: ...}
+      const streakData = 'data' in streakQuery.data ? streakQuery.data.data : streakQuery.data;
+      const hasPlayedToday = streakData.lastPlayedDate === today;
+      
+      setStreak({
+        currentStreak: streakData.currentStreak,
+        longestStreak: streakData.longestStreak,
+        lastPlayedDate: streakData.lastPlayedDate,
+        hasPlayedToday,
+      });
+      
+      lastCheckedDate.current = today;
+    } else if (!userElepad?.elder) {
+      setStreak(null);
+    }
+  }, [userElepad, streakQuery.data]);
+
+  // Detectar cambio de día y resetear hasPlayedToday
+  useEffect(() => {
+    if (!userElepad?.elder || !streak) return;
+    
+    const interval = setInterval(() => {
+      const today = new Date().toISOString().slice(0, 10);
+      
+      if (lastCheckedDate.current && lastCheckedDate.current !== today) {
+        console.log("🗓️ Cambio de día detectado, reseteando hasPlayedToday");
+        setStreak(prev => prev ? { ...prev, hasPlayedToday: false } : null);
+        lastCheckedDate.current = today;
+      }
+    }, 60000); // Check cada minuto
+    
+    return () => clearInterval(interval);
+  }, [userElepad, streak]);
+
+  // Actualización optimista cuando se completa un juego
+  const markGameCompleted = async () => {
+    if (!userElepad?.elder || !streak) {
+      console.warn("⚠️ Usuario no es elder o no tiene racha inicializada");
+      return;
+    }
+    
+    // Solo actualizar si NO ha jugado hoy
+    if (streak.hasPlayedToday) {
+      console.log("ℹ️ Ya jugó hoy, no se extiende la racha");
+      return;
+    }
+    
+    const today = new Date().toISOString().slice(0, 10);
+    const newStreakValue = streak.currentStreak + 1;
+    
+    // ✅ Actualización optimista inmediata
+    console.log(`🔥 Actualización optimista: ${streak.currentStreak} -> ${newStreakValue}`);
+    setStreak({
+      ...streak,
+      currentStreak: newStreakValue,
+      longestStreak: Math.max(newStreakValue, streak.longestStreak),
+      lastPlayedDate: today,
+      hasPlayedToday: true,
+    });
+    
+    // Mostrar toast inmediatamente
+    showStreakExtended(newStreakValue);
+    
+    // 🌐 Sincronizar con backend en background (sin await para no bloquear)
+    syncStreak().catch(err => {
+      console.error("❌ Error sincronizando racha:", err);
+      // Revertir en caso de error
+      streakQuery.refetch();
+    });
+  };
 
   useEffect(() => {
     const setData = async () => {
@@ -131,6 +247,9 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     signOut,
     userElepad,
     refreshUserElepad,
+    streak,
+    markGameCompleted,
+    syncStreak,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

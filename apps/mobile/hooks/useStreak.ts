@@ -12,19 +12,26 @@ export function useUserStreak() {
   
   const query = useGetStreaksMe({
     query: {
-      staleTime: 1000 * 60 * 5, // 5 minutos
-      refetchOnMount: true,
+      staleTime: 0, // Siempre considerar datos obsoletos para refetch inmediato
+      gcTime: 1000 * 60, // Mantener en caché 1 minuto para navegación rápida (gcTime reemplaza cacheTime en v5)
+      refetchOnMount: "always", // Siempre refetch al montar componente
       refetchOnWindowFocus: true,
     },
   });
 
   // Detectar cuando se extiende la racha
   useEffect(() => {
-    if (query.data?.currentStreak) {
+    if (query.data?.currentStreak !== undefined) {
       const currentStreak = query.data.currentStreak;
       
       // Si había una racha previa y aumentó, mostrar toast
-      if (previousStreakRef.current !== null && currentStreak > previousStreakRef.current) {
+      // Incluye el caso de 0 -> 1 (primera racha)
+      if (
+        previousStreakRef.current !== null && 
+        currentStreak > previousStreakRef.current &&
+        currentStreak > 0
+      ) {
+        console.log(`🔥 Racha extendida: ${previousStreakRef.current} -> ${currentStreak}`);
         showStreakExtended(currentStreak);
       }
       
@@ -46,8 +53,9 @@ export function useStreakHistory(startDate?: string, endDate?: string) {
     {
       query: {
         enabled: !!startDate || !!endDate,
-        staleTime: 1000 * 60 * 5, // 5 minutos
-        refetchOnMount: true,
+        staleTime: 0, // Siempre considerar datos obsoletos para refetch inmediato
+        gcTime: 1000 * 60, // Mantener en caché 1 minuto para navegación rápida (gcTime reemplaza cacheTime en v5)
+        refetchOnMount: "always", // Siempre refetch al montar componente
         refetchOnWindowFocus: true,
       },
     },

@@ -327,8 +327,8 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {/* Contador de Racha */}
-        <StreakCounter />
+        {/* Contador de Racha - Solo para usuarios elder */}
+        {userElepad?.elder && <StreakCounter />}
 
         {/* Próximos Eventos */}
         <View style={styles.section}>

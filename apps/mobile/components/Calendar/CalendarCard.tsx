@@ -12,6 +12,7 @@ import {
 } from "@elepad/api-client/src/gen/client";
 import ErrorSnackbar from "@/components/shared/ErrorSnackbar";
 import { useStreakHistory } from "@/hooks/useStreak";
+import { useAuth } from "@/hooks/useAuth";
 
 import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 
@@ -190,6 +191,7 @@ export default function CalendarCard(props: CalendarCardProps) {
     isOwnerOfGroup,
     groupInfo,
   } = props;
+  const { userElepad } = useAuth();
   const today = new Date().toISOString().slice(0, 10);
   const [selectedDay, setSelectedDay] = useState<string>(today);
   const [filter, setFilter] = useState<"all" | "mine">("all");
@@ -224,10 +226,10 @@ export default function CalendarCard(props: CalendarCardProps) {
     endDate: dateRange.endDate,
   });
 
-  // Cargar historial de rachas
+  // Cargar historial de rachas - Solo si el usuario es elder
   const streakHistoryQuery = useStreakHistory(
-    dateRange.startDate,
-    dateRange.endDate,
+    userElepad?.elder ? dateRange.startDate : undefined,
+    userElepad?.elder ? dateRange.endDate : undefined,
   );
 
   // Mutation para toggle de completaciones
@@ -347,32 +349,34 @@ export default function CalendarCard(props: CalendarCardProps) {
       }
     > = {};
     
-    // Obtener las fechas del historial de rachas
-    const streakDays = streakHistoryQuery.data?.dates || [];
+    // Obtener las fechas del historial de rachas - Solo si es elder
+    const streakDays = userElepad?.elder ? (streakHistoryQuery.data?.dates || []) : [];
     
     for (const d of Object.keys(eventsByDate)) {
       obj[d] = { marked: true, dotColor: COLORS.primary };
     }
     
-    // Agregar círculos naranjas para días con racha
-    for (const streakDay of streakDays) {
-      if (!obj[streakDay]) {
-        obj[streakDay] = {};
+    // Agregar círculos naranjas para días con racha - Solo para usuarios elder
+    if (userElepad?.elder) {
+      for (const streakDay of streakDays) {
+        if (!obj[streakDay]) {
+          obj[streakDay] = {};
+        }
+        obj[streakDay].customStyles = {
+          container: {
+            borderColor: '#FF6B35',
+            borderWidth: 2,
+            borderRadius: 18,
+          },
+        };
       }
-      obj[streakDay].customStyles = {
-        container: {
-          borderColor: '#FF6B35',
-          borderWidth: 2,
-          borderRadius: 18,
-        },
-      };
     }
     
     obj[selectedDay] = obj[selectedDay]
       ? { ...obj[selectedDay], selected: true }
       : { selected: true };
     return obj;
-  }, [eventsByDate, selectedDay, streakHistoryQuery.data]);
+  }, [eventsByDate, selectedDay, streakHistoryQuery.data, userElepad]);
 
   // Only user's activities only, ordenados: primero incompletos, luego completados
   const dayEvents = useMemo(() => {

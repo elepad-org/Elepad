@@ -54,11 +54,11 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <QueryClientProvider client={queryClient}>
-          <PaperProvider theme={paperTheme}>
-            <NavigationThemeProvider value={navTheme}>
-              <StreakSnackbarProvider>
+      <QueryClientProvider client={queryClient}>
+        <StreakSnackbarProvider>
+          <AuthProvider>
+            <PaperProvider theme={paperTheme}>
+              <NavigationThemeProvider value={navTheme}>
                 <Stack>
                   <Stack.Screen name="index" options={{ headerShown: false }} />
                   <Stack.Screen name="(auth)" options={{ headerShown: false }} />
@@ -69,11 +69,11 @@ export default function RootLayout() {
                   />
                   <Stack.Screen name="+not-found" />
                 </Stack>
-              </StreakSnackbarProvider>
-            </NavigationThemeProvider>
-          </PaperProvider>
-        </QueryClientProvider>
-      </AuthProvider>
+              </NavigationThemeProvider>
+            </PaperProvider>
+          </AuthProvider>
+        </StreakSnackbarProvider>
+      </QueryClientProvider>
     </SafeAreaProvider>
   );
 }
