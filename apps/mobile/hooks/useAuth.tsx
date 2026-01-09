@@ -12,7 +12,7 @@ import {
   useRef,
 } from "react";
 import { useStreakSnackbar } from "./useStreakSnackbar";
-import { getTodayLocal, isSameLocalDate, utcDateToLocal } from "@/utils/dateHelpers";
+import { getTodayLocal, isSameLocalDate, utcDateToLocal } from "@/lib/dateHelpers";
 
 type AuthContext = {
   user: User | null;

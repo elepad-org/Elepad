@@ -13,7 +13,7 @@ import {
 import ErrorSnackbar from "@/components/shared/ErrorSnackbar";
 import { useStreakHistory } from "@/hooks/useStreak";
 import { useAuth } from "@/hooks/useAuth";
-import { getTodayLocal, toLocalDateString } from "@/utils/dateHelpers";
+import { getTodayLocal, toLocalDateString } from "@/lib/dateHelpers";
 
 import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 
