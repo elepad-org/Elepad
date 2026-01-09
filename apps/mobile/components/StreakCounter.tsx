@@ -2,23 +2,12 @@ import { View, StyleSheet } from "react-native";
 import { Text, ActivityIndicator } from "react-native-paper";
 import { COLORS, FONT, SHADOWS } from "@/styles/base";
 import { LinearGradient } from "expo-linear-gradient";
-import { useUserStreak } from "@/hooks/useStreak";
-import { useGetStreaksHistory } from "@elepad/api-client";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function StreakCounter() {
-  const { data: streak, isLoading } = useUserStreak();
-  
-  // Obtener el historial para verificar si hoy ya se jugó
-  const today = new Date().toISOString().slice(0, 10);
-  const { data: historyData } = useGetStreaksHistory(
-    { startDate: today, endDate: today },
-    { query: { enabled: true } }
-  );
-  
-  // Verificar si hoy ya se extendió la racha
-  const hasPlayedToday = historyData?.dates?.includes(today) || false;
+  const { streak } = useAuth();
 
-  if (isLoading) {
+  if (!streak) {
     return (
       <View style={styles.container}>
         <View style={styles.loadingContainer}>
@@ -28,7 +17,8 @@ export default function StreakCounter() {
     );
   }
 
-  const currentStreak = streak?.currentStreak || 0;
+  const currentStreak = streak.currentStreak;
+  const hasPlayedToday = streak.hasPlayedToday;
 
   return (
     <View style={styles.container}>

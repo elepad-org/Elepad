@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "./useAuth";
 import {
   usePostPuzzlesFocus,
   usePostAttemptsStart,
@@ -26,6 +27,7 @@ interface UseFocusGameProps {
 
 export const useFocusGame = (props: UseFocusGameProps) => {
   const { onAchievementUnlocked } = props;
+  const { markGameCompleted } = useAuth();
 
   const queryClient = useQueryClient();
 
@@ -162,6 +164,11 @@ export const useFocusGame = (props: UseFocusGameProps) => {
         (startTimeRef.current ? Date.now() - startTimeRef.current : 0);
 
       try {
+        // 🔥 Actualización optimista de la racha si fue exitoso
+        if (success) {
+          await markGameCompleted();
+        }
+
         const finishResponse = await finishAttempt.mutateAsync({
           attemptId,
           data: {
