@@ -50,13 +50,29 @@ export default function StatisticsChart({
     const filteredAttempts = attempts.filter((attempt) => {
       if (!attempt.startedAt) return false;
       const attemptDate = new Date(attempt.startedAt);
-      const daysDiff = Math.floor(
-        (now.getTime() - attemptDate.getTime()) / (1000 * 60 * 60 * 24)
-      );
 
-      if (timeRange === "week") return daysDiff <= 7;
-      if (timeRange === "month") return daysDiff <= 30;
-      if (timeRange === "year") return daysDiff <= 365;
+      if (timeRange === "week") {
+        // Get Monday of current week
+        const currentDay = now.getDay();
+        const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1; // Sunday is 0, so it's 6 days from Monday
+        const monday = new Date(now);
+        monday.setDate(now.getDate() - daysFromMonday);
+        monday.setHours(0, 0, 0, 0);
+        
+        return attemptDate >= monday && attemptDate <= now;
+      } else if (timeRange === "month") {
+        // Get first day of current month
+        const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        firstDayOfMonth.setHours(0, 0, 0, 0);
+        
+        return attemptDate >= firstDayOfMonth && attemptDate <= now;
+      } else if (timeRange === "year") {
+        // Get first day of current year
+        const firstDayOfYear = new Date(now.getFullYear(), 0, 1);
+        firstDayOfYear.setHours(0, 0, 0, 0);
+        
+        return attemptDate >= firstDayOfYear && attemptDate <= now;
+      }
       return true;
     });
 
