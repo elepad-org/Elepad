@@ -159,7 +159,6 @@ export default function StatisticsChart({
   if (!chartData) {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Estadísticas</Text>
         <SegmentedButtons
           value={timeRange}
           onValueChange={(value) =>
@@ -183,8 +182,6 @@ export default function StatisticsChart({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Estadísticas</Text>
-
       <SegmentedButtons
         value={timeRange}
         onValueChange={(value) =>

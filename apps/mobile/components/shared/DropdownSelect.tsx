@@ -19,6 +19,7 @@ interface DropdownSelectProps {
   placeholder?: string;
   disabled?: boolean;
   style?: object;
+  showLabel?: boolean;
 }
 
 export default function DropdownSelect({
@@ -29,6 +30,7 @@ export default function DropdownSelect({
   placeholder = "Seleccionar...",
   disabled = false,
   style = {},
+  showLabel = true,
 }: DropdownSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [anchorPosition, setAnchorPosition] = useState<{ top: number; left: number; width: number } | undefined>();
@@ -57,16 +59,18 @@ export default function DropdownSelect({
   return (
     <View style={{ position: "relative", ...style }}>
       {/* Label */}
-      <Text
-        style={{
-          fontSize: 14,
-          fontWeight: "500",
-          color: COLORS.textSecondary,
-          marginBottom: 8,
-        }}
-      >
-        {label}
-      </Text>
+      {showLabel && (
+        <Text
+          style={{
+            fontSize: 14,
+            fontWeight: "500",
+            color: COLORS.textSecondary,
+            marginBottom: 8,
+          }}
+        >
+          {label}
+        </Text>
+      )}
 
       {/* Button Trigger */}
       <View ref={buttonRef} collapsable={false}>
