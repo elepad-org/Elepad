@@ -739,7 +739,7 @@ export default function NotificationsScreen() {
             alignSelf: "center",
           }}
         >
-          <Dialog.Icon icon="alert-circle-outline" size={48} color={COLORS.error || COLORS.primary} />
+          <Dialog.Icon icon="alert-circle-outline" size={48} color={COLORS.primary} />
           <Dialog.Title style={{ textAlign: "center", color: COLORS.text }}>
             Contenido no disponible
           </Dialog.Title>

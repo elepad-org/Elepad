@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
 import { Text, SegmentedButtons, IconButton } from "react-native-paper";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
@@ -138,6 +138,7 @@ interface CalendarCardProps {
   isOwnerOfGroup: boolean;
   groupInfo?: GetFamilyGroupIdGroupMembers200;
   activityToView?: string | null;
+  activityDateToView?: string | null;
   onActivityViewed?: () => void;
 }
 
@@ -194,12 +195,20 @@ export default function CalendarCard(props: CalendarCardProps) {
     isOwnerOfGroup,
     groupInfo,
     activityToView,
+    activityDateToView,
     onActivityViewed,
   } = props;
   const { userElepad } = useAuth();
   const today = getTodayLocal();
   const [selectedDay, setSelectedDay] = useState<string>(today);
   const [filter, setFilter] = useState<"all" | "mine">("all");
+
+  // Cambiar al día de la actividad cuando se recibe desde notificaciones
+  useEffect(() => {
+    if (activityDateToView) {
+      setSelectedDay(activityDateToView);
+    }
+  }, [activityDateToView]);
 
   // Preparar lista de miembros de la familia para menciones
   const familyMembers = useMemo(() => {

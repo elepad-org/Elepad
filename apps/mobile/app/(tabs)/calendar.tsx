@@ -146,20 +146,32 @@ export default function CalendarScreen() {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<string | null>(null);
   const [activityToView, setActivityToView] = useState<string | null>(null);
+  const [activityDateToView, setActivityDateToView] = useState<string | null>(null);
 
   // Detectar cuando se pasa un activityId desde notificaciones
   useEffect(() => {
-    if (params.activityId && typeof params.activityId === 'string') {
-      // Establecer la actividad a visualizar
-      setActivityToView(params.activityId);
+    if (params.activityId && typeof params.activityId === 'string' && activitiesQuery.data) {
+      const activities = Array.isArray(activitiesQuery.data)
+        ? activitiesQuery.data
+        : (activitiesQuery.data as any).data || [];
+      
+      const activity = activities.find((a: Activity) => a.id === params.activityId);
+      if (activity) {
+        // Establecer la actividad a visualizar
+        setActivityToView(params.activityId);
+        // Establecer la fecha de la actividad (formato YYYY-MM-DD)
+        const activityDate = activity.startsAt.slice(0, 10);
+        setActivityDateToView(activityDate);
+      }
       // Limpiar el parámetro de la URL inmediatamente para evitar que se vuelva a abrir
       router.setParams({ activityId: undefined });
     }
-  }, [params.activityId]);
+  }, [params.activityId, activitiesQuery.data]);
 
   const handleActivityViewed = () => {
     // Resetear el estado cuando se cierra el modal
     setActivityToView(null);
+    setActivityDateToView(null);
   };
 
   const handleSave = async (payload: Partial<Activity>) => {
@@ -236,6 +248,7 @@ export default function CalendarScreen() {
           isOwnerOfGroup={isOwnerOfGroup}
           groupInfo={groupInfo}
           activityToView={activityToView}
+          activityDateToView={activityDateToView}
           onActivityViewed={handleActivityViewed}
         />
       </View>
