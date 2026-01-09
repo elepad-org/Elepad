@@ -4,13 +4,48 @@ import { StatusBar, View } from "react-native";
 import { COLORS, STYLES, LAYOUT } from "@/styles/base";
 import { AttentionGame } from "@/components/FocusGame";
 import { useFocusGame } from "@/hooks/useFocusGame";
-import { Text } from "react-native-paper";
+import { Text, Snackbar } from "react-native-paper";
 import { Stack } from "expo-router";
 
 export default function AttentionGameScreen() {
   const ROUNDS = 10;
 
-  const focus = useFocusGame({ rounds: ROUNDS });
+  const [achievementQueue, setAchievementQueue] = React.useState<
+    Array<{
+      id: string;
+      title: string;
+      icon?: string | null;
+      description?: string;
+    }>
+  >([]);
+  const [snackbarVisible, setSnackbarVisible] = React.useState(false);
+  const [snackbarMessage, setSnackbarMessage] = React.useState("");
+
+  const handleAchievementUnlocked = React.useCallback(
+    (achievement: { id: string; title: string; icon?: string | null }) => {
+      console.log("🎉 Agregando logro a la cola:", achievement.title);
+      setAchievementQueue((prev) => [...prev, achievement]);
+    },
+    [],
+  );
+
+  // Procesar cola de logros (mostrar uno a la vez)
+  React.useEffect(() => {
+    if (achievementQueue.length > 0 && !snackbarVisible) {
+      const nextAchievement = achievementQueue[0];
+      const icon = nextAchievement.icon || "🏆";
+      const message = `${icon} ¡Logro desbloqueado! ${nextAchievement.title}`;
+
+      console.log("🎉 Mostrando snackbar:", message);
+      setSnackbarMessage(message);
+      setSnackbarVisible(true);
+
+      // Remover de la cola cuando el Snackbar se cierre (3 segundos)
+      setAchievementQueue((prev) => prev.slice(1));
+    }
+  }, [achievementQueue, snackbarVisible]);
+
+  const focus = useFocusGame({ rounds: ROUNDS, onAchievementUnlocked: handleAchievementUnlocked });
 
   const handleFinish = async (score: { correct: number; rounds: number }) => {
     const hasWon = score.rounds - score.correct < 3;
@@ -62,6 +97,23 @@ export default function AttentionGameScreen() {
             onFinish={handleFinish}
             onRestart={handleRestart}
           />
+
+          <Snackbar
+            visible={snackbarVisible}
+            onDismiss={() => setSnackbarVisible(false)}
+            duration={3000}
+            style={{ backgroundColor: "#7C3AED", marginBottom: 16, borderRadius: 12 }}
+            action={{
+              label: "Ver",
+              onPress: () => {
+                setSnackbarVisible(false);
+                console.log("Ver logros pressed");
+              },
+              labelStyle: { color: "#FFF" },
+            }}
+          >
+            <Text style={{ color: "#FFF", fontSize: 16, fontWeight: "600" }}>{snackbarMessage}</Text>
+          </Snackbar>
         </View>
       </SafeAreaView>
     </>

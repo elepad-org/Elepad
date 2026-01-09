@@ -230,10 +230,12 @@ export class AchievementService {
     memoryPuzzleId: string | null;
     logicPuzzleId: string | null;
     sudokuPuzzleId: string | null;
+    isFocusGame: boolean | null;
   }): Promise<string | null> {
-    const puzzleId = attempt.memoryPuzzleId || attempt.logicPuzzleId;
+    const puzzleId = attempt.memoryPuzzleId || attempt.logicPuzzleId || attempt.sudokuPuzzleId;
 
-    if (!puzzleId) return null;
+    if (!puzzleId && !attempt.isFocusGame) return null;
+    if (!puzzleId && attempt.isFocusGame) return "focus";
 
     const { data: puzzle } = await this.supabase
       .from("puzzles")
@@ -271,7 +273,7 @@ export class AchievementService {
           // Contar intentos previos exitosos del mismo juego específico
           const { data: prevAttempts } = await this.supabase
             .from("attempts")
-            .select("id, memoryPuzzleId, logicPuzzleId, sudokuPuzzleId")
+            .select("id, memoryPuzzleId, logicPuzzleId, sudokuPuzzleId, isFocusGame")
             .eq("userId", userId)
             .eq("success", true)
             .neq("id", attempt.id);
@@ -304,6 +306,10 @@ export class AchievementService {
           previousQuery = previousQuery.not("memoryPuzzleId", "is", null);
         } else if (gameType === "logic" && attempt.logicPuzzleId) {
           previousQuery = previousQuery.not("logicPuzzleId", "is", null);
+        } else if (gameType === "attention" && attempt.sudokuPuzzleId) {
+          previousQuery = previousQuery.not("sudokuPuzzleId", "is", null);
+        } else if (gameType === "reaction" && attempt.isFocusGame) {
+          previousQuery = previousQuery.is("isFocusGame", true);
         }
 
         const { data: previousAttempts } = await previousQuery;
@@ -340,7 +346,7 @@ export class AchievementService {
         let streakQuery = this.supabase
           .from("attempts")
           .select(
-            "id, success, memoryPuzzleId, logicPuzzleId, sudokuPuzzleId, finishedAt",
+            "id, success, memoryPuzzleId, logicPuzzleId, sudokuPuzzleId, isFocusGame, finishedAt",
           )
           .eq("userId", userId)
           .not("finishedAt", "is", null)
@@ -353,6 +359,10 @@ export class AchievementService {
             streakQuery = streakQuery.not("memoryPuzzleId", "is", null);
           } else if (gameType === "logic" && attempt.logicPuzzleId) {
             streakQuery = streakQuery.not("logicPuzzleId", "is", null);
+          } else if (gameType === "attention" && attempt.sudokuPuzzleId) {
+            streakQuery = streakQuery.not("sudokuPuzzleId", "is", null);
+          } else if (gameType === "reaction" && attempt.isFocusGame) {
+            streakQuery = streakQuery.is("isFocusGame", true);
           }
         }
 
