@@ -109,7 +109,7 @@ export default function DropdownSelect({
           icon: option.icon ? (
             <View style={{ marginRight: 12 }}>
               <MaterialCommunityIcons
-                name={option.icon as any}
+                name={option.icon as never}
                 size={24}
                 color={value === option.key ? COLORS.primary : COLORS.textSecondary}
               />

@@ -31,7 +31,7 @@ export default function PickerModal({
   if (!visible || options.length === 0) return null;
 
   // Position dropdown below anchor if provided, otherwise center it
-  const positionStyle = anchorPosition
+  const positionStyle: any = anchorPosition
     ? {
         position: "absolute" as const,
         top: anchorPosition.top + 4,

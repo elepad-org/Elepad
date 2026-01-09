@@ -4,14 +4,12 @@ import {
   Text,
   Card,
   ActivityIndicator,
-  Chip,
   Button,
   ProgressBar,
-  Menu,
 } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack } from "expo-router";
 import {
   useGetAttemptsStatsGameType,
   GameType,
@@ -112,7 +110,6 @@ function AttemptItem({
 
 export default function HistoryScreen({ initialAttempts = [] }: Props) {
   const { userElepad } = useAuth();
-  const { view } = useLocalSearchParams();
   
   const [selectedGame, setSelectedGame] = useState("all");
   const [timeRange, setTimeRange] = useState<"week" | "month" | "year">("week");
