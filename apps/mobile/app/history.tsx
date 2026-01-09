@@ -369,7 +369,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
                   </Text>
                 </View>
               ) : (
-                <View style={styles.elderSelectorContainer}>
+                <View style={{ paddingHorizontal: 16, marginBottom: 16 }}>
                   <DropdownSelect
                     label="Estadísticas de"
                     value={selectedElderId || ""}
@@ -392,21 +392,41 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
 
           {/* Filter Dropdown */}
           <View style={styles.filterContainer}>
-            <DropdownSelect
-              label="Tipo de juego"
-              value={selectedGame}
-              options={[
-                { key: "all", label: "Todos los juegos", icon: "gamepad-variant" },
-                ...gameTypes.map((gt) => ({
-                  key: gt,
-                  label: gameTypesRender[gt],
-                  icon: gt === GameType.memory ? "brain" : 
-                        gt === GameType.logic ? "puzzle" : 
-                        gt === GameType.attention ? "eye" : "lightning-bolt"
-                }))
-              ]}
-              onSelect={setSelectedGame}
-            />
+            {isHelper ? (
+              <View style={{ flex: 1 }}>
+                <DropdownSelect
+                  label="Tipo de juego"
+                  value={selectedGame}
+                  options={[
+                    { key: "all", label: "Todos los juegos", icon: "gamepad-variant" },
+                    ...gameTypes.map((gt) => ({
+                      key: gt,
+                      label: gameTypesRender[gt],
+                      icon: gt === GameType.memory ? "brain" : 
+                            gt === GameType.logic ? "puzzle" : 
+                            gt === GameType.attention ? "eye" : "lightning-bolt"
+                    }))
+                  ]}
+                  onSelect={setSelectedGame}
+                />
+              </View>
+            ) : (
+              <DropdownSelect
+                label="Tipo de juego"
+                value={selectedGame}
+                options={[
+                  { key: "all", label: "Todos los juegos", icon: "gamepad-variant" },
+                  ...gameTypes.map((gt) => ({
+                    key: gt,
+                    label: gameTypesRender[gt],
+                    icon: gt === GameType.memory ? "brain" : 
+                          gt === GameType.logic ? "puzzle" : 
+                          gt === GameType.attention ? "eye" : "lightning-bolt"
+                  }))
+                ]}
+                onSelect={setSelectedGame}
+              />
+            )}
           </View>
 
           {globalLoading && !loadingMore ? (
@@ -514,8 +534,8 @@ const styles = StyleSheet.create({
   },
   filterContainer: {
     flexDirection: "row",
-    gap: 8,
-    paddingHorizontal: 20,
+    gap: 12,
+    paddingHorizontal: 16,
     paddingVertical: 12,
   },
   chip: {

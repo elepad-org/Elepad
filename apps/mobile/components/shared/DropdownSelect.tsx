@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { View } from "react-native";
 import { Button, Text } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -31,9 +31,23 @@ export default function DropdownSelect({
   style = {},
 }: DropdownSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [anchorPosition, setAnchorPosition] = useState<{ top: number; left: number; width: number } | undefined>();
+  const buttonRef = useRef<View>(null);
 
   const selectedOption = options.find(option => option.key === value);
   const displayText = selectedOption ? selectedOption.label : placeholder;
+
+  const handleOpen = () => {
+    if (disabled) return;
+    buttonRef.current?.measure((x, y, width, height, pageX, pageY) => {
+      setAnchorPosition({
+        top: pageY + height,
+        left: pageX,
+        width: width,
+      });
+      setIsOpen(true);
+    });
+  };
 
   const handleSelect = (option: { id: string; label: string }) => {
     onSelect(option.id);
@@ -55,29 +69,31 @@ export default function DropdownSelect({
       </Text>
 
       {/* Button Trigger */}
-      <Button
-        mode="outlined"
-        onPress={() => !disabled && setIsOpen(true)}
-        style={{
-          borderColor: COLORS.border,
-          borderRadius: 8,
-          justifyContent: "flex-start",
-        }}
-        contentStyle={{ 
-          flexDirection: 'row-reverse',
-          justifyContent: 'space-between',
-          paddingVertical: 4,
-        }}
-        icon="chevron-down"
-        disabled={disabled}
-        labelStyle={{
-          color: selectedOption ? COLORS.text : COLORS.textSecondary,
-          fontSize: 16,
-          fontWeight: "500",
-        }}
-      >
-        {displayText}
-      </Button>
+      <View ref={buttonRef} collapsable={false}>
+        <Button
+          mode="outlined"
+          onPress={handleOpen}
+          style={{
+            borderColor: COLORS.border,
+            borderRadius: 8,
+            justifyContent: "flex-start",
+          }}
+          contentStyle={{ 
+            flexDirection: 'row-reverse',
+            justifyContent: 'space-between',
+            paddingVertical: 4,
+          }}
+          icon="chevron-down"
+          disabled={disabled}
+          labelStyle={{
+            color: selectedOption ? COLORS.text : COLORS.textSecondary,
+            fontSize: 16,
+            fontWeight: "500",
+          }}
+        >
+          {displayText}
+        </Button>
+      </View>
 
       {/* Picker Modal */}
       <PickerModal
@@ -98,6 +114,7 @@ export default function DropdownSelect({
         }))}
         onSelect={handleSelect}
         onDismiss={() => setIsOpen(false)}
+        anchorPosition={anchorPosition}
         maxHeight={300}
       />
     </View>

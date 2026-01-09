@@ -16,6 +16,7 @@ interface PickerModalProps {
   onSelect: (option: PickerOption) => void;
   onDismiss?: () => void;
   maxHeight?: number;
+  anchorPosition?: { top: number; left: number; width: number };
 }
 
 export default function PickerModal({
@@ -25,8 +26,27 @@ export default function PickerModal({
   onSelect,
   onDismiss,
   maxHeight = 200,
+  anchorPosition,
 }: PickerModalProps) {
   if (!visible || options.length === 0) return null;
+
+  // Position dropdown below anchor if provided, otherwise center it
+  const positionStyle = anchorPosition
+    ? {
+        position: "absolute" as const,
+        top: anchorPosition.top + 4,
+        left: anchorPosition.left,
+        width: anchorPosition.width,
+        zIndex: 9999,
+      }
+    : {
+        position: "absolute" as const,
+        top: "50%",
+        left: "10%",
+        right: "10%",
+        transform: [{ translateY: -100 }],
+        zIndex: 9999,
+      };
 
   return (
     <Portal>
@@ -44,16 +64,7 @@ export default function PickerModal({
           activeOpacity={1}
         />
       )}
-      <View
-        style={{
-          position: "absolute",
-          top: "50%",
-          left: "10%",
-          right: "10%",
-          transform: [{ translateY: -100 }],
-          zIndex: 9999,
-        }}
-      >
+      <View style={positionStyle}>
         <Surface
           style={{
             backgroundColor: COLORS.background,
