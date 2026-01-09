@@ -1,6 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { View, StatusBar } from "react-native";
 import { useAuth } from "@/hooks/useAuth";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import CalendarCard from "@/components/Calendar/CalendarCard";
 import ActivityForm from "@/components/Calendar/ActivityForm";
 import {
@@ -23,6 +24,8 @@ import ErrorSnackbar from "@/components/shared/ErrorSnackbar";
 
 export default function CalendarScreen() {
   const { userElepad } = useAuth();
+  const params = useLocalSearchParams();
+  const router = useRouter();
   const familyCode = userElepad?.groupId ?? "";
   const idUser = userElepad?.id ?? "";
 
@@ -35,6 +38,7 @@ export default function CalendarScreen() {
 
   const [formVisible, setFormVisible] = useState(false);
   const [editing, setEditing] = useState<Activity | null>(null);
+  const [activityIdToOpen, setActivityIdToOpen] = useState<string | null>(null);
   const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(familyCode);
   const membersQuery = useGetFamilyGroupIdGroupMembers(familyCode);
 
@@ -141,6 +145,22 @@ export default function CalendarScreen() {
 
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<string | null>(null);
+  const [activityToView, setActivityToView] = useState<string | null>(null);
+
+  // Detectar cuando se pasa un activityId desde notificaciones
+  useEffect(() => {
+    if (params.activityId && typeof params.activityId === 'string') {
+      // Establecer la actividad a visualizar
+      setActivityToView(params.activityId);
+      // Limpiar el parámetro de la URL inmediatamente para evitar que se vuelva a abrir
+      router.setParams({ activityId: undefined });
+    }
+  }, [params.activityId]);
+
+  const handleActivityViewed = () => {
+    // Resetear el estado cuando se cierra el modal
+    setActivityToView(null);
+  };
 
   const handleSave = async (payload: Partial<Activity>) => {
     // No usamos try-catch aquí, dejamos que el error se propague al formulario
@@ -215,6 +235,8 @@ export default function CalendarScreen() {
           onDelete={handleConfirmDelete}
           isOwnerOfGroup={isOwnerOfGroup}
           groupInfo={groupInfo}
+          activityToView={activityToView}
+          onActivityViewed={handleActivityViewed}
         />
       </View>
 

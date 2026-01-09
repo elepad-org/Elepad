@@ -137,6 +137,8 @@ interface CalendarCardProps {
   onDelete: (id: string) => void;
   isOwnerOfGroup: boolean;
   groupInfo?: GetFamilyGroupIdGroupMembers200;
+  activityToView?: string | null;
+  onActivityViewed?: () => void;
 }
 
 // Configuración de calendario en español
@@ -191,6 +193,8 @@ export default function CalendarCard(props: CalendarCardProps) {
     onDelete,
     isOwnerOfGroup,
     groupInfo,
+    activityToView,
+    onActivityViewed,
   } = props;
   const { userElepad } = useAuth();
   const today = getTodayLocal();
@@ -587,6 +591,8 @@ export default function CalendarCard(props: CalendarCardProps) {
                 return completionsByDateMap[key] || false;
               })()}
               familyMembers={familyMembers}
+              shouldOpen={activityToView === item.id}
+              onOpened={onActivityViewed}
             />
           )}
           contentContainerStyle={styles.listContent}

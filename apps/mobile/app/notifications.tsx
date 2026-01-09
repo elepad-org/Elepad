@@ -699,10 +699,11 @@ export default function NotificationsScreen() {
                   <Button
                     mode="contained"
                     onPress={() => {
+                      const activityId = selectedActivityId;
                       setActivityDetailDialogVisible(false);
                       setSelectedActivityId(null);
-                      // Navegar usando href con el parámetro del tab
-                      router.replace({ pathname: "/(tabs)/home", params: { tab: "calendar" } });
+                      // Navegar usando href con el parámetro del tab y el activityId
+                      router.replace({ pathname: "/(tabs)/home", params: { tab: "calendar", activityId: activityId || "" } });
                     }}
                     buttonColor={COLORS.primary}
                     style={{ borderRadius: 12 }}

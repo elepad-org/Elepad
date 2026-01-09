@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { View, StyleSheet } from "react-native";
 import {
   Text,
@@ -24,6 +24,8 @@ interface ActivityItemProps {
   groupInfo?: GetFamilyGroupIdGroupMembers200;
   completed?: boolean; // Nueva prop para completado por día
   familyMembers?: Array<{ id: string; displayName: string; avatarUrl?: string | null }>;
+  shouldOpen?: boolean;
+  onOpened?: () => void;
 }
 
 export default function ActivityItem({
@@ -36,8 +38,21 @@ export default function ActivityItem({
   groupInfo,
   completed, // Usar esta prop en lugar de item.completed
   familyMembers = [],
+  shouldOpen = false,
+  onOpened,
 }: ActivityItemProps) {
   const [showModal, setShowModal] = useState(false);
+
+  // Abrir el modal automáticamente si shouldOpen es true
+  useEffect(() => {
+    if (shouldOpen && !showModal) {
+      setShowModal(true);
+      // Notificar que se abrió
+      if (onOpened) {
+        onOpened();
+      }
+    }
+  }, [shouldOpen]);
 
   // Usar completed de la prop si está disponible, sino usar item.completed
   const isCompleted = completed !== undefined ? completed : item.completed;
