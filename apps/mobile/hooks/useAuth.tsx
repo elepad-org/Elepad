@@ -12,6 +12,7 @@ import {
   useRef,
 } from "react";
 import { useStreakSnackbar } from "./useStreakSnackbar";
+import { getTodayLocal, isSameLocalDate, utcDateToLocal } from "@/utils/dateHelpers";
 
 type AuthContext = {
   user: User | null;
@@ -90,16 +91,22 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   // Efecto para sincronizar racha cuando cambia el usuario o llegan datos del backend
   useEffect(() => {
     if (userElepad?.elder && streakQuery.data) {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = getTodayLocal();
       
       // Extraer datos - la respuesta puede estar envuelta en {data: ...}
       const streakData = 'data' in streakQuery.data ? streakQuery.data.data : streakQuery.data;
-      const hasPlayedToday = streakData.lastPlayedDate === today;
+      
+      // Convertir lastPlayedDate de UTC a local antes de comparar
+      const lastPlayedDateLocal = streakData.lastPlayedDate 
+        ? utcDateToLocal(streakData.lastPlayedDate)
+        : null;
+      
+      const hasPlayedToday = isSameLocalDate(lastPlayedDateLocal || '', today);
       
       setStreak({
         currentStreak: streakData.currentStreak,
         longestStreak: streakData.longestStreak,
-        lastPlayedDate: streakData.lastPlayedDate,
+        lastPlayedDate: lastPlayedDateLocal,
         hasPlayedToday,
       });
       
@@ -114,7 +121,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     if (!userElepad?.elder || !streak) return;
     
     const interval = setInterval(() => {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = getTodayLocal();
       
       if (lastCheckedDate.current && lastCheckedDate.current !== today) {
         console.log("🗓️ Cambio de día detectado, reseteando hasPlayedToday");
@@ -139,7 +146,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       return;
     }
     
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getTodayLocal();
     const newStreakValue = streak.currentStreak + 1;
     
     // ✅ Actualización optimista inmediata

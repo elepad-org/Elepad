@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useGetStreaksMe, useGetStreaksHistory } from "@elepad/api-client";
 import { useEffect, useRef } from "react";
 import { useStreakSnackbar } from "./useStreakSnackbar";
+import { isSameLocalDate, utcDateToLocal } from "@/utils/dateHelpers";
 
 /**
  * Hook para obtener la racha actual del usuario
@@ -48,7 +49,7 @@ export function useUserStreak() {
  * @param endDate - Fecha de fin (YYYY-MM-DD)
  */
 export function useStreakHistory(startDate?: string, endDate?: string) {
-  return useGetStreaksHistory(
+  const query = useGetStreaksHistory(
     { startDate, endDate },
     {
       query: {
@@ -60,6 +61,17 @@ export function useStreakHistory(startDate?: string, endDate?: string) {
       },
     },
   );
+
+  // Convertir fechas UTC del backend a fechas locales
+  const localData = query.data ? {
+    ...query.data,
+    dates: ('data' in query.data ? query.data.data?.dates : query.data.dates)?.map(utcDateToLocal) || []
+  } : undefined;
+
+  return {
+    ...query,
+    data: localData,
+  };
 }
 
 /**

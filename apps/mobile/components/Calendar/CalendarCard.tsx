@@ -13,6 +13,7 @@ import {
 import ErrorSnackbar from "@/components/shared/ErrorSnackbar";
 import { useStreakHistory } from "@/hooks/useStreak";
 import { useAuth } from "@/hooks/useAuth";
+import { getTodayLocal, toLocalDateString } from "@/utils/dateHelpers";
 
 import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 
@@ -96,7 +97,7 @@ function expandRecurringActivity(
     }
 
     if (shouldInclude && currentDate >= activityStart) {
-      const dateStr = currentDate.toISOString().slice(0, 10);
+      const dateStr = toLocalDateString(currentDate);
       dates.push(dateStr);
     }
 
@@ -192,7 +193,7 @@ export default function CalendarCard(props: CalendarCardProps) {
     groupInfo,
   } = props;
   const { userElepad } = useAuth();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = getTodayLocal();
   const [selectedDay, setSelectedDay] = useState<string>(today);
   const [filter, setFilter] = useState<"all" | "mine">("all");
 
@@ -215,8 +216,8 @@ export default function CalendarCard(props: CalendarCardProps) {
     const end = new Date(now);
     end.setMonth(now.getMonth() + 3);
     return {
-      startDate: start.toISOString().slice(0, 10),
-      endDate: end.toISOString().slice(0, 10),
+      startDate: toLocalDateString(start),
+      endDate: toLocalDateString(end),
     };
   }, []);
 
