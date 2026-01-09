@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "./useAuth";
 import {
   usePostPuzzlesNet,
   usePostAttemptsStart,
@@ -67,6 +68,7 @@ export const useNetGame = ({
   gridSize,
   onAchievementUnlocked,
 }: UseNetGameProps) => {
+  const { markGameCompleted } = useAuth();
   const [tiles, setTiles] = useState<Tile[]>([]);
   const [moves, setMoves] = useState(0);
   const [timeElapsed, setTimeElapsed] = useState(0);
@@ -422,6 +424,11 @@ export const useNetGame = ({
           success: true,
           autoSolved: wasAutoSolved,
         });
+
+        // 🔥 Actualización optimista de la racha si NO fue auto-resuelto
+        if (!wasAutoSolved) {
+          await markGameCompleted();
+        }
 
         const finishResponse = await finishAttempt.mutateAsync({
           attemptId,

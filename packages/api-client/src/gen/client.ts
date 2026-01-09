@@ -584,10 +584,15 @@ export type GetAttemptsParams = {
    */
   offset?: number | null;
   gameType?: GameType;
+  userId?: string;
 };
 
 export type GetAttempts200Item = {
   id: string;
+};
+
+export type GetAttemptsStatsGameTypeParams = {
+  userId?: string;
 };
 
 export type GetAttemptsLeaderboardGameTypeParams = {
@@ -7358,6 +7363,11 @@ export type getAttemptsResponse200 = {
   status: 200;
 };
 
+export type getAttemptsResponse403 = {
+  data: Error;
+  status: 403;
+};
+
 export type getAttemptsResponse500 = {
   data: Error;
   status: 500;
@@ -7366,7 +7376,10 @@ export type getAttemptsResponse500 = {
 export type getAttemptsResponseSuccess = getAttemptsResponse200 & {
   headers: Headers;
 };
-export type getAttemptsResponseError = getAttemptsResponse500 & {
+export type getAttemptsResponseError = (
+  | getAttemptsResponse403
+  | getAttemptsResponse500
+) & {
   headers: Headers;
 };
 
@@ -7530,6 +7543,11 @@ export type getAttemptsStatsGameTypeResponse200 = {
   status: 200;
 };
 
+export type getAttemptsStatsGameTypeResponse403 = {
+  data: Error;
+  status: 403;
+};
+
 export type getAttemptsStatsGameTypeResponse500 = {
   data: Error;
   status: 500;
@@ -7539,25 +7557,43 @@ export type getAttemptsStatsGameTypeResponseSuccess =
   getAttemptsStatsGameTypeResponse200 & {
     headers: Headers;
   };
-export type getAttemptsStatsGameTypeResponseError =
-  getAttemptsStatsGameTypeResponse500 & {
-    headers: Headers;
-  };
+export type getAttemptsStatsGameTypeResponseError = (
+  | getAttemptsStatsGameTypeResponse403
+  | getAttemptsStatsGameTypeResponse500
+) & {
+  headers: Headers;
+};
 
 export type getAttemptsStatsGameTypeResponse =
   | getAttemptsStatsGameTypeResponseSuccess
   | getAttemptsStatsGameTypeResponseError;
 
-export const getGetAttemptsStatsGameTypeUrl = (gameType: GameType) => {
-  return `/attempts/stats/${gameType}`;
+export const getGetAttemptsStatsGameTypeUrl = (
+  gameType: GameType,
+  params?: GetAttemptsStatsGameTypeParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/attempts/stats/${gameType}?${stringifiedParams}`
+    : `/attempts/stats/${gameType}`;
 };
 
 export const getAttemptsStatsGameType = async (
   gameType: GameType,
+  params?: GetAttemptsStatsGameTypeParams,
   options?: RequestInit,
 ): Promise<getAttemptsStatsGameTypeResponse> => {
   return rnFetch<getAttemptsStatsGameTypeResponse>(
-    getGetAttemptsStatsGameTypeUrl(gameType),
+    getGetAttemptsStatsGameTypeUrl(gameType, params),
     {
       ...options,
       method: "GET",
@@ -7565,8 +7601,11 @@ export const getAttemptsStatsGameType = async (
   );
 };
 
-export const getGetAttemptsStatsGameTypeQueryKey = (gameType?: GameType) => {
-  return [`/attempts/stats/${gameType}`] as const;
+export const getGetAttemptsStatsGameTypeQueryKey = (
+  gameType?: GameType,
+  params?: GetAttemptsStatsGameTypeParams,
+) => {
+  return [`/attempts/stats/${gameType}`, ...(params ? [params] : [])] as const;
 };
 
 export const getGetAttemptsStatsGameTypeQueryOptions = <
@@ -7574,6 +7613,7 @@ export const getGetAttemptsStatsGameTypeQueryOptions = <
   TError = Error,
 >(
   gameType: GameType,
+  params?: GetAttemptsStatsGameTypeParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -7588,12 +7628,13 @@ export const getGetAttemptsStatsGameTypeQueryOptions = <
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetAttemptsStatsGameTypeQueryKey(gameType);
+    queryOptions?.queryKey ??
+    getGetAttemptsStatsGameTypeQueryKey(gameType, params);
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getAttemptsStatsGameType>>
   > = ({ signal }) =>
-    getAttemptsStatsGameType(gameType, { signal, ...requestOptions });
+    getAttemptsStatsGameType(gameType, params, { signal, ...requestOptions });
 
   return {
     queryKey,
@@ -7617,6 +7658,7 @@ export function useGetAttemptsStatsGameType<
   TError = Error,
 >(
   gameType: GameType,
+  params: undefined | GetAttemptsStatsGameTypeParams,
   options: {
     query: Partial<
       UseQueryOptions<
@@ -7644,6 +7686,7 @@ export function useGetAttemptsStatsGameType<
   TError = Error,
 >(
   gameType: GameType,
+  params?: GetAttemptsStatsGameTypeParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -7671,6 +7714,7 @@ export function useGetAttemptsStatsGameType<
   TError = Error,
 >(
   gameType: GameType,
+  params?: GetAttemptsStatsGameTypeParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -7691,6 +7735,7 @@ export function useGetAttemptsStatsGameType<
   TError = Error,
 >(
   gameType: GameType,
+  params?: GetAttemptsStatsGameTypeParams,
   options?: {
     query?: Partial<
       UseQueryOptions<
@@ -7707,6 +7752,7 @@ export function useGetAttemptsStatsGameType<
 } {
   const queryOptions = getGetAttemptsStatsGameTypeQueryOptions(
     gameType,
+    params,
     options,
   );
 

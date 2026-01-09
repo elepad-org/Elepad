@@ -42,6 +42,11 @@ streaksApp.openapi(
   async (c) => {
     const userId = c.var.user.id;
     const streak = await c.var.streakService.getUserStreak(userId);
+    
+    // Evitar caché para datos en tiempo real
+    c.header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+    c.header("Pragma", "no-cache");
+    
     return c.json(streak);
   },
 );
@@ -75,6 +80,11 @@ streaksApp.openapi(
       startDate,
       endDate,
     );
+    
+    // Evitar caché para datos en tiempo real
+    c.header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+    c.header("Pragma", "no-cache");
+    
     return c.json(history);
   },
 );

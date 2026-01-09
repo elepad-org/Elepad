@@ -6,6 +6,7 @@ import {
   usePostAttemptsAttemptIdFinish,
 } from "@elepad/api-client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "./useAuth";
 
 export interface Card {
   id: number;
@@ -49,6 +50,7 @@ interface UseMemoryGameProps {
 
 export const useMemoryGame = (props: UseMemoryGameProps) => {
   const { mode, onAchievementUnlocked } = props;
+  const { markGameCompleted } = useAuth();
   const [cards, setCards] = useState<Card[]>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
@@ -351,6 +353,9 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
               Math.floor(1000 - durationSeconds * 5 - moves * 10),
             );
 
+            // 🔥 Actualización optimista de la racha ANTES de llamar al backend
+            await markGameCompleted();
+
             const finishResponse = await finishAttempt.mutateAsync({
               attemptId,
               data: {
@@ -362,13 +367,15 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
             });
 
             console.log("✅ Intento finalizado con score:", score);
+            console.log("📦 Respuesta del backend:", finishResponse);
 
-            // Invalidar queries de rachas para refrescar datos
+            // Invalidar queries de rachas para refrescar datos (sincronización final)
             queryClient.invalidateQueries({ queryKey: ['getStreaksMe'] });
             queryClient.invalidateQueries({ queryKey: ['getStreaksHistory'] });
 
             // El backend automáticamente verifica logros y los devuelve en la respuesta
             if (
+              finishResponse.data &&
               "unlockedAchievements" in finishResponse.data &&
               finishResponse.data.unlockedAchievements &&
               finishResponse.data.unlockedAchievements.length > 0

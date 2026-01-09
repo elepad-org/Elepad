@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "./useAuth";
 import {
   usePostPuzzlesSudoku,
   usePostAttemptsStart,
@@ -41,6 +42,7 @@ export const useSudoku = (props: UseSudokuProps) => {
     onAchievementUnlocked,
     onGameOver,
   } = props;
+  const { markGameCompleted } = useAuth();
 
   // Estados del juego
   const [board, setBoard] = useState<SudokuCell[][]>([]);
@@ -368,7 +370,10 @@ export const useSudoku = (props: UseSudokuProps) => {
           const score = 81 - mistakes;
 
           try {
-            const finishResponse = await finishAttempt.mutateAsync({
+            // 🔥 Actualización optimista de la racha ANTES de llamar al backend
+            await markGameCompleted();
+
+            const response = await finishAttempt.mutateAsync({
               attemptId,
               data: {
                 success: true,
