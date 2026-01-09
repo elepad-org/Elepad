@@ -130,7 +130,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
   // Determine the title based on view parameter
   const getTitle = () => {
     if (isHelper) {
-      return view === "estadisticas" ? "Estadísticas" : "Historial";
+      return "Estadísticas";
     }
     return "Historial";
   };
@@ -369,18 +369,39 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
                   </Text>
                 </View>
               ) : (
-                <View style={{ paddingHorizontal: 16, marginBottom: 16 }}>
-                  <DropdownSelect
-                    label="Estadísticas de"
-                    value={selectedElderId || ""}
-                    options={elders.map((elder) => ({
-                      key: elder.id,
-                      label: elder.displayName,
-                      icon: "account"
-                    }))}
-                    onSelect={setSelectedElderId}
-                    placeholder="Seleccionar adulto mayor"
-                  />
+                <View style={styles.filterContainer}>
+                  <View style={{ flex: 1 }}>
+                    <DropdownSelect
+                      label="Estadísticas de"
+                      value={selectedElderId || ""}
+                      showLabel={false}
+                      options={elders.map((elder) => ({
+                        key: elder.id,
+                        label: elder.displayName,
+                        icon: "account"
+                      }))}
+                      onSelect={setSelectedElderId}
+                      placeholder="Seleccionar adulto mayor"
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <DropdownSelect
+                      label="Tipo de juego"
+                      value={selectedGame}
+                      showLabel={false}
+                      options={[
+                        { key: "all", label: "Todos los juegos", icon: "gamepad-variant" },
+                        ...gameTypes.map((gt) => ({
+                          key: gt,
+                          label: gameTypesRender[gt],
+                          icon: gt === GameType.memory ? "brain" : 
+                                gt === GameType.logic ? "puzzle" : 
+                                gt === GameType.attention ? "eye" : "lightning-bolt"
+                        }))
+                      ]}
+                      onSelect={setSelectedGame}
+                    />
+                  </View>
                 </View>
               )}
             </>
@@ -390,44 +411,26 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
           {isHelper && elders.length === 0 ? null : (
             <>
 
-          {/* Filter Dropdown */}
+          {/* Filter Dropdown for elders only */}
+          {!isHelper && (
           <View style={styles.filterContainer}>
-            {isHelper ? (
-              <View style={{ flex: 1 }}>
-                <DropdownSelect
-                  label="Tipo de juego"
-                  value={selectedGame}
-                  options={[
-                    { key: "all", label: "Todos los juegos", icon: "gamepad-variant" },
-                    ...gameTypes.map((gt) => ({
-                      key: gt,
-                      label: gameTypesRender[gt],
-                      icon: gt === GameType.memory ? "brain" : 
-                            gt === GameType.logic ? "puzzle" : 
-                            gt === GameType.attention ? "eye" : "lightning-bolt"
-                    }))
-                  ]}
-                  onSelect={setSelectedGame}
-                />
-              </View>
-            ) : (
-              <DropdownSelect
-                label="Tipo de juego"
-                value={selectedGame}
-                options={[
-                  { key: "all", label: "Todos los juegos", icon: "gamepad-variant" },
-                  ...gameTypes.map((gt) => ({
-                    key: gt,
-                    label: gameTypesRender[gt],
-                    icon: gt === GameType.memory ? "brain" : 
-                          gt === GameType.logic ? "puzzle" : 
-                          gt === GameType.attention ? "eye" : "lightning-bolt"
-                  }))
-                ]}
-                onSelect={setSelectedGame}
-              />
-            )}
+            <DropdownSelect
+              label="Tipo de juego"
+              value={selectedGame}
+              options={[
+                { key: "all", label: "Todos los juegos", icon: "gamepad-variant" },
+                ...gameTypes.map((gt) => ({
+                  key: gt,
+                  label: gameTypesRender[gt],
+                  icon: gt === GameType.memory ? "brain" : 
+                        gt === GameType.logic ? "puzzle" : 
+                        gt === GameType.attention ? "eye" : "lightning-bolt"
+                }))
+              ]}
+              onSelect={setSelectedGame}
+            />
           </View>
+          )}
 
           {globalLoading && !loadingMore ? (
             <View style={STYLES.center}>
