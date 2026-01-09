@@ -101,6 +101,8 @@ export default function NotificationsScreen() {
   const [detailDialogVisible, setDetailDialogVisible] = useState(false);
   const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
   const [activityDetailDialogVisible, setActivityDetailDialogVisible] = useState(false);
+  const [notFoundDialogVisible, setNotFoundDialogVisible] = useState(false);
+  const [notFoundMessage, setNotFoundMessage] = useState("");
 
   // Fetch family members for displaying names in mentions
   const membersQuery = useGetFamilyGroupIdGroupMembers(
@@ -132,6 +134,7 @@ export default function NotificationsScreen() {
     {
       query: {
         enabled: !!selectedMemoryId,
+        retry: false,
       },
     },
   );
@@ -142,9 +145,30 @@ export default function NotificationsScreen() {
     {
       query: {
         enabled: !!selectedActivityId,
+        retry: false,
       },
     },
   );
+
+  // Verificar si el recuerdo existe
+  React.useEffect(() => {
+    if (memoryQuery.isError && selectedMemoryId) {
+      setDetailDialogVisible(false);
+      setSelectedMemoryId(null);
+      setNotFoundMessage("Este recuerdo ya no existe o ha sido eliminado.");
+      setNotFoundDialogVisible(true);
+    }
+  }, [memoryQuery.isError, selectedMemoryId]);
+
+  // Verificar si la actividad existe
+  React.useEffect(() => {
+    if (activityQuery.isError && selectedActivityId) {
+      setActivityDetailDialogVisible(false);
+      setSelectedActivityId(null);
+      setNotFoundMessage("Esta actividad ya no existe o ha sido eliminada.");
+      setNotFoundDialogVisible(true);
+    }
+  }, [activityQuery.isError, selectedActivityId]);
 
   const groupMembers = useMemo(() => {
     if (!groupInfo) {
@@ -257,12 +281,12 @@ export default function NotificationsScreen() {
       // Navigate or show detail based on notification type
       if (notification.entity_type === "memory" && notification.entity_id) {
         console.log('📖 Opening memory detail:', notification.entity_id);
-        // Mostrar el detalle del recuerdo
+        // Verificar si el recuerdo existe antes de abrirlo
         setSelectedMemoryId(notification.entity_id);
         setDetailDialogVisible(true);
       } else if (notification.entity_type === "activity" && notification.entity_id) {
         console.log('📅 Opening activity detail:', notification.entity_id);
-        // Mostrar el detalle de la actividad
+        // Verificar si la actividad existe antes de abrirla
         setSelectedActivityId(notification.entity_id);
         setActivityDetailDialogVisible(true);
       } else {
@@ -500,35 +524,62 @@ export default function NotificationsScreen() {
       )}
 
       {/* Dialog para mostrar detalle del recuerdo */}
-      <RecuerdoDetailDialog
-        visible={detailDialogVisible}
-        recuerdo={
-          memoryQuery.data && groupMembers
-            ? memoryToRecuerdo(
-                (memoryQuery.data as any) as Memory,
-                groupMembers.reduce((acc, m) => {
-                  acc[m.id] = m.displayName;
-                  return acc;
-                }, {} as Record<string, string>),
-              )
-            : null
-        }
-        onDismiss={() => {
-          setDetailDialogVisible(false);
-          setSelectedMemoryId(null);
-        }}
-        onUpdateRecuerdo={async () => {
-          // Actualizar no está disponible desde notificaciones
-          // El usuario debe ir a recuerdos para editar
-        }}
-        onDeleteRecuerdo={async () => {
-          // Eliminar no está disponible desde notificaciones
-          // El usuario debe ir a recuerdos para eliminar
-        }}
-        isMutating={false}
-        familyMembers={groupMembers}
-        currentUserId={userElepad?.id}
-      />
+      {memoryQuery.isLoading && detailDialogVisible ? (
+        <Portal>
+          <Dialog
+            visible={detailDialogVisible}
+            onDismiss={() => {
+              setDetailDialogVisible(false);
+              setSelectedMemoryId(null);
+            }}
+            style={{
+              backgroundColor: COLORS.background,
+              borderRadius: 16,
+              width: "90%",
+              alignSelf: "center",
+            }}
+          >
+            <Dialog.Content>
+              <View style={{ alignItems: "center", paddingVertical: 20 }}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+                <Text style={{ marginTop: 16, color: COLORS.textSecondary }}>
+                  Cargando recuerdo...
+                </Text>
+              </View>
+            </Dialog.Content>
+          </Dialog>
+        </Portal>
+      ) : (
+        <RecuerdoDetailDialog
+          visible={detailDialogVisible}
+          recuerdo={
+            memoryQuery.data && groupMembers
+              ? memoryToRecuerdo(
+                  (memoryQuery.data as any) as Memory,
+                  groupMembers.reduce((acc, m) => {
+                    acc[m.id] = m.displayName;
+                    return acc;
+                  }, {} as Record<string, string>),
+                )
+              : null
+          }
+          onDismiss={() => {
+            setDetailDialogVisible(false);
+            setSelectedMemoryId(null);
+          }}
+          onUpdateRecuerdo={async () => {
+            // Actualizar no está disponible desde notificaciones
+            // El usuario debe ir a recuerdos para editar
+          }}
+          onDeleteRecuerdo={async () => {
+            // Eliminar no está disponible desde notificaciones
+            // El usuario debe ir a recuerdos para eliminar
+          }}
+          isMutating={false}
+          familyMembers={groupMembers}
+          currentUserId={userElepad?.id}
+        />
+      )}
 
       {/* Dialog para mostrar detalle de la actividad */}
       <Portal>
@@ -666,9 +717,47 @@ export default function NotificationsScreen() {
             <Dialog.Content>
               <View style={{ alignItems: "center", paddingVertical: 20 }}>
                 <ActivityIndicator size="large" color={COLORS.primary} />
+                <Text style={{ marginTop: 16, color: COLORS.textSecondary }}>
+                  Cargando actividad...
+                </Text>
               </View>
             </Dialog.Content>
           )}
+        </Dialog>
+      </Portal>
+
+      {/* Dialog para mostrar cuando algo no existe */}
+      <Portal>
+        <Dialog
+          visible={notFoundDialogVisible}
+          onDismiss={() => setNotFoundDialogVisible(false)}
+          style={{
+            backgroundColor: COLORS.background,
+            borderRadius: 16,
+            width: "90%",
+            alignSelf: "center",
+          }}
+        >
+          <Dialog.Icon icon="alert-circle-outline" size={48} color={COLORS.error || COLORS.primary} />
+          <Dialog.Title style={{ textAlign: "center", color: COLORS.text }}>
+            Contenido no disponible
+          </Dialog.Title>
+          <Dialog.Content>
+            <Text variant="bodyMedium" style={{ textAlign: "center", color: COLORS.textSecondary }}>
+              {notFoundMessage}
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button
+              mode="contained"
+              onPress={() => setNotFoundDialogVisible(false)}
+              buttonColor={COLORS.primary}
+              style={{ borderRadius: 12 }}
+              contentStyle={{ paddingVertical: 8 }}
+            >
+              Entendido
+            </Button>
+          </Dialog.Actions>
         </Dialog>
       </Portal>
     </SafeAreaView>

@@ -58,7 +58,23 @@ export async function rnFetch<T>(
   if (!res.ok) {
     try {
       const errorBody = await res.json();
-      console.error(`❌ API Error ${res.status}:`, errorBody);
+      // Solo mostrar errores que no sean 404 o recursos no encontrados
+      const isNotFoundError = res.status === 404 || 
+        (res.status === 500 && 
+         typeof errorBody === 'object' && 
+         errorBody !== null &&
+         'error' in errorBody &&
+         typeof (errorBody as any).error === 'object' &&
+         (errorBody as any).error !== null &&
+         'cause' in (errorBody as any).error &&
+         typeof (errorBody as any).error.cause === 'object' &&
+         (errorBody as any).error.cause !== null &&
+         ((errorBody as any).error.cause.code === 'PGRST116' ||
+          (errorBody as any).error.cause.details?.includes('0 rows')));
+      
+      if (!isNotFoundError) {
+        console.error(`❌ API Error ${res.status}:`, errorBody);
+      }
       throw new ApiError(res.status, res.statusText, errorBody);
     } catch (e) {
       if (e instanceof ApiError) throw e;
