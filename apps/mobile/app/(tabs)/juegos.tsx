@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, STYLES, SHADOWS, LAYOUT } from "@/styles/base";
 import { router } from "expo-router";
-import { useEffect } from "react";
+import HistoryScreen from "../history";
 
 interface GameCardProps {
   emoji?: string;
@@ -74,19 +74,9 @@ export default function JuegosScreen() {
 
   const isElder = userElepad?.elder === true;
 
-  // Si es ayudante, redirigir directamente al historial
-  useEffect(() => {
-    if (!isElder) {
-      router.replace("/history");
-    }
-  }, [isElder]);
-
+  // Si es ayudante, mostrar las estadísticas dentro de las tabs
   if (!isElder) {
-    return (
-      <View style={STYLES.center}>
-        <ActivityIndicator />
-      </View>
-    );
+    return <HistoryScreen />;
   }
 
   return (
