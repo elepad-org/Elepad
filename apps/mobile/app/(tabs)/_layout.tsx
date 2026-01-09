@@ -19,17 +19,6 @@ export default function TabLayout() {
   const [index, setIndex] = useState(0);
   const { userElepad } = useAuth();
 
-  // Escuchar cambios en el parámetro 'tab' para cambiar de tab programáticamente
-  useEffect(() => {
-    if (params.tab) {
-      const tabIndex = routes.findIndex((route) => route.key === params.tab);
-      if (tabIndex !== -1) {
-        setIndex(tabIndex);
-      }
-    }
-  }, [params.tab]);
-
-  const [routes] = useState([
   const isElder = userElepad?.elder === true;
 
   // Different routes for elder vs non-elder users
@@ -100,6 +89,16 @@ export default function TabLayout() {
   ];
 
   const [routes, setRoutes] = useState(elderRoutes);
+
+  // Escuchar cambios en el parámetro 'tab' para cambiar de tab programáticamente
+  useEffect(() => {
+    if (params.tab) {
+      const tabIndex = routes.findIndex((route) => route.key === params.tab);
+      if (tabIndex !== -1) {
+        setIndex(tabIndex);
+      }
+    }
+  }, [params.tab]);
 
   // Update routes when user elder status changes
   useEffect(() => {
