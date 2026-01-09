@@ -8,6 +8,7 @@ import RecuerdosScreen from "./recuerdos";
 import ConfiguracionScreen from "./configuracion";
 import { COLORS } from "@/styles/base";
 import CalendarScreen from "./calendar";
+import { useAuth } from "@/hooks/useAuth";
 
 // ~15% opacity for the active tab indicator background using primary color
 const activeIndicatorColor = "rgba(91, 80, 122, 0.15)"; // #5b507a with opacity
@@ -16,6 +17,7 @@ export default function TabLayout() {
   const theme = useTheme();
   const params = useLocalSearchParams();
   const [index, setIndex] = useState(0);
+  const { userElepad } = useAuth();
 
   // Escuchar cambios en el parámetro 'tab' para cambiar de tab programáticamente
   useEffect(() => {
@@ -28,6 +30,10 @@ export default function TabLayout() {
   }, [params.tab]);
 
   const [routes] = useState([
+  const isElder = userElepad?.elder === true;
+
+  // Different routes for elder vs non-elder users
+  const elderRoutes = [
     {
       key: "home",
       title: "Inicio",
@@ -58,7 +64,51 @@ export default function TabLayout() {
       focusedIcon: "cog",
       unfocusedIcon: "cog-outline",
     },
-  ]);
+  ];
+
+  const nonElderRoutes = [
+    {
+      key: "home",
+      title: "Inicio",
+      focusedIcon: "home",
+      unfocusedIcon: "home-outline",
+    },
+    {
+      key: "calendar",
+      title: "Calendario",
+      focusedIcon: "calendar-month",
+      unfocusedIcon: "calendar-month-outline",
+    },
+    {
+      key: "juegos",
+      title: "Estadísticas",
+      focusedIcon: "chart-line",
+      unfocusedIcon: "chart-line-variant",
+    },
+    {
+      key: "recuerdos",
+      title: "Recuerdos",
+      focusedIcon: "image-multiple",
+      unfocusedIcon: "image-multiple-outline",
+    },
+    {
+      key: "configuracion",
+      title: "Config.",
+      focusedIcon: "cog",
+      unfocusedIcon: "cog-outline",
+    },
+  ];
+
+  const [routes, setRoutes] = useState(elderRoutes);
+
+  // Update routes when user elder status changes
+  useEffect(() => {
+    if (isElder) {
+      setRoutes(elderRoutes);
+    } else {
+      setRoutes(nonElderRoutes);
+    }
+  }, [isElder]);
 
   const renderScene = BottomNavigation.SceneMap({
     home: HomeScreen,

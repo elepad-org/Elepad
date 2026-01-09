@@ -26,4 +26,4 @@ export const withAuth: MiddlewareHandler = async (c, next) => {
   c.set("userId", user.id);
 
   await next();
-};
+}; 

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { Snackbar } from 'react-native-paper';
 import { Text, StyleSheet } from 'react-native';
+import StreakCelebrationModal from '@/components/StreakCelebrationModal';
 
 interface StreakSnackbarContextType {
   showStreakExtended: (days: number) => void;
@@ -9,20 +10,42 @@ interface StreakSnackbarContextType {
 const StreakSnackbarContext = createContext<StreakSnackbarContextType | undefined>(undefined);
 
 export function StreakSnackbarProvider({ children }: { children: React.ReactNode }) {
-  const [visible, setVisible] = useState(false);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const [message, setMessage] = useState('');
+  const [streakCount, setStreakCount] = useState(0);
 
   const showStreakExtended = useCallback((days: number) => {
+    setStreakCount(days);
     setMessage(`🔥 ¡Racha extendida! ${days} ${days === 1 ? 'día' : 'días'}`);
-    setVisible(true);
+    
+    // Mostrar modal de celebración
+    setModalVisible(true);
+  }, []);
+
+  const handleModalClose = useCallback(() => {
+    setModalVisible(false);
+    // Mostrar snackbar después de cerrar el modal
+    setTimeout(() => {
+      setSnackbarVisible(true);
+    }, 300);
   }, []);
 
   return (
     <StreakSnackbarContext.Provider value={{ showStreakExtended }}>
       {children}
+      
+      {/* Modal de celebración */}
+      <StreakCelebrationModal
+        visible={modalVisible}
+        streakCount={streakCount}
+        onClose={handleModalClose}
+      />
+      
+      {/* Snackbar que aparece después del modal */}
       <Snackbar
-        visible={visible}
-        onDismiss={() => setVisible(false)}
+        visible={snackbarVisible}
+        onDismiss={() => setSnackbarVisible(false)}
         duration={3000}
         style={styles.snackbar}
       >

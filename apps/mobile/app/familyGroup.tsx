@@ -720,7 +720,26 @@ export default function FamilyGroup() {
               )}
             </Card.Content>
           </Card>
-
+          {invitationCode && (
+            <View style={styles.inviteCodeContainer}>
+              <Text style={styles.inviteCodeLabel}>Código de invitación</Text>
+              <View style={styles.codeCard}>
+                <Text style={styles.codeText}>
+                  {String(invitationCode)}
+                </Text>
+                <IconButton
+                  icon="content-copy"
+                  size={20}
+                  iconColor={COLORS.primary}
+                  onPress={copyInvitationCode}
+                  style={styles.copyButton}
+                />
+              </View>
+              <Text style={styles.expiryText}>
+                Expira 10 minutos luego de su creación.
+              </Text>
+            </View>
+          )}    
           {/* Solo botón de salir del grupo */}
           <View style={[{ alignItems: "center", width: "100%", marginTop: 0 }]}>
             <Button
@@ -762,27 +781,6 @@ export default function FamilyGroup() {
               Volver
             </Text>
           </View>
-
-          {invitationCode && (
-            <View style={styles.inviteCodeContainer}>
-              <Text style={styles.inviteCodeLabel}>Código de invitación</Text>
-              <View style={styles.codeCard}>
-                <Text style={styles.codeText}>
-                  {String(invitationCode)}
-                </Text>
-                <IconButton
-                  icon="content-copy"
-                  size={20}
-                  iconColor={COLORS.primary}
-                  onPress={copyInvitationCode}
-                  style={styles.copyButton}
-                />
-              </View>
-              <Text style={styles.expiryText}>
-                Expira 10 minutos luego de su creación.
-              </Text>
-            </View>
-          )}
         </View>
         <Portal>
           <Dialog
