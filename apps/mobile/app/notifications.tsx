@@ -29,6 +29,7 @@ import {
   Memory,
   useGetActivitiesId,
   Activity,
+  useGetActivityCompletions,
 } from "@elepad/api-client";
 import { COLORS, STYLES, SHADOWS } from "@/styles/base";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -149,6 +150,54 @@ export default function NotificationsScreen() {
       },
     },
   );
+
+  // Obtener el rango de fechas para la actividad (solo el día de la actividad)
+  const activityDateRange = useMemo(() => {
+    if (!activityQuery.data) return { startDate: "", endDate: "" };
+    const activity = activityQuery.data as any as Activity;
+    const activityDate = activity.startsAt.slice(0, 10);
+    return {
+      startDate: activityDate,
+      endDate: activityDate,
+    };
+  }, [activityQuery.data]);
+
+  // Cargar completaciones solo para el día de la actividad
+  const activityCompletionsQuery = useGetActivityCompletions(
+    {
+      startDate: activityDateRange.startDate,
+      endDate: activityDateRange.endDate,
+    },
+    {
+      query: {
+        enabled: !!activityQuery.data && !!activityDateRange.startDate,
+      },
+    }
+  );
+
+  // Determinar si la actividad está completada para su día específico
+  const isActivityCompleted = useMemo(() => {
+    if (!activityQuery.data || !activityCompletionsQuery.data) return false;
+    
+    const activity = activityQuery.data as any as Activity;
+    const activityDate = activity.startsAt.slice(0, 10);
+    
+    // Extraer las completaciones correctamente
+    const completionsData = activityCompletionsQuery.data;
+    let completions: any[] = [];
+    
+    if (Array.isArray(completionsData)) {
+      completions = completionsData;
+    } else if (completionsData && "data" in completionsData && Array.isArray((completionsData as any).data)) {
+      completions = (completionsData as any).data;
+    }
+    
+    // Buscar si existe una completación para esta actividad en este día
+    return completions.some((c: any) => 
+      c.activityId === activity.id && 
+      c.completedDate === activityDate
+    );
+  }, [activityQuery.data, activityCompletionsQuery.data]);
 
   // Verificar si el recuerdo existe
   React.useEffect(() => {
@@ -646,20 +695,20 @@ export default function NotificationsScreen() {
                   <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
                     <MaterialCommunityIcons
                       name={
-                        activity.completed
+                        isActivityCompleted
                           ? "checkbox-marked-circle"
                           : "checkbox-blank-circle-outline"
                       }
                       size={20}
                       color={
-                        activity.completed
+                        isActivityCompleted
                           ? COLORS.primary
                           : COLORS.textLight
                       }
                       style={{ marginRight: 12 }}
                     />
                     <Text variant="bodyMedium" style={{ flex: 1, color: COLORS.textSecondary }}>
-                      {activity.completed ? "Completada" : "Pendiente"}
+                      {isActivityCompleted ? "Completada" : "Pendiente"}
                     </Text>
                   </View>
 
