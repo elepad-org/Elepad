@@ -42,13 +42,18 @@ export default function ActivityItem({
   // Usar completed de la prop si está disponible, sino usar item.completed
   const isCompleted = completed !== undefined ? completed : item.completed;
 
+  // Create a combined list of all group members (owner + members)
+  const allGroupMembers = (() => {
+    if (!groupInfo) return familyMembers;
+    return [
+      { id: groupInfo.owner.id, displayName: groupInfo.owner.displayName, avatarUrl: groupInfo.owner.avatarUrl },
+      ...groupInfo.members.map(m => ({ id: m.id, displayName: m.displayName, avatarUrl: m.avatarUrl }))
+    ];
+  })();
+
   // Find the owner of this activity
   const activityOwner = (() => {
-    if (!groupInfo) return null;
-    if (groupInfo.owner.id === item.createdBy) {
-      return groupInfo.owner.displayName;
-    }
-    const member = groupInfo.members.find((m) => m.id === item.createdBy);
+    const member = allGroupMembers.find((m) => m.id === item.createdBy);
     return member?.displayName || "Usuario desconocido";
   })();
 
@@ -232,7 +237,7 @@ export default function ActivityItem({
                 </Text>
                 <HighlightedMentionText
                   text={item.description || ""}
-                  familyMembers={familyMembers}
+                  familyMembers={allGroupMembers}
                   style={{ color: COLORS.text, lineHeight: 22, fontSize: 14 }}
                 />
               </View>
