@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
 import { UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import ProfileHeader from "@/components/ProfileHeader";
+import { LoadingProfile } from "@/components/shared";
 import SuccessSnackbar from "@/components/shared/SuccessSnackbar";
 import ErrorSnackbar from "@/components/shared/ErrorSnackbar";
 import { useRouter } from "expo-router";
@@ -22,7 +23,21 @@ import { COLORS, STYLES } from "@/styles/base";
 export default function ConfiguracionScreen() {
   const router = useRouter();
 
-  const { userElepad, refreshUserElepad, signOut } = useAuth();
+  const { userElepad, refreshUserElepad, signOut, userElepadLoading } = useAuth();
+  
+  // Mostrar loading si está cargando o si no hay usuario aún
+  const showLoading = userElepadLoading || !userElepad;
+  
+  // Si está cargando, mostrar solo el spinner centrado
+  if (showLoading) {
+    return (
+      <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
+        <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+        <LoadingProfile message="Cargando perfil..." />
+      </SafeAreaView>
+    );
+  }
+  
   const displayName = userElepad?.displayName?.trim() || "Usuario";
   const email = userElepad?.email || "-";
   const avatarUrl = userElepad?.avatarUrl || "";

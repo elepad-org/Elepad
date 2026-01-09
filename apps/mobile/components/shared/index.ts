@@ -2,6 +2,7 @@
 export { CustomHeader } from "./CustomHeader";
 export { GameHeader } from "./GameHeader";
 export { GameLoadingView } from "./GameLoadingView";
+export { LoadingProfile } from "./LoadingProfile";
 export { InstructionsDialog } from "./InstructionsDialog";
 export { default as CancelButton } from "./CancelButton";
 export { default as SuccessSnackbar } from "./SuccessSnackbar";
