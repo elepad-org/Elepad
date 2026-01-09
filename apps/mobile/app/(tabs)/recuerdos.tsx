@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import {
   StatusBar,
   View,
@@ -6,6 +6,7 @@ import {
   FlatList,
   RefreshControl,
   Pressable,
+  BackHandler,
 } from "react-native";
 import {
   Text,
@@ -589,6 +590,28 @@ export default function RecuerdosScreen() {
       setRefreshing(false);
     }
   }, [cargarRecuerdos, cargarBaules, selectedBook]);
+
+  // Handle Android back button when inside a book
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        if (selectedBook) {
+          setSelectedBook(null);
+          setMemberFilterId(null);
+          setMemberMenuVisible(false);
+          setBookMenuVisible(false);
+          setDialogVisible(false);
+          setDetailDialogVisible(false);
+          setSelectedRecuerdo(null);
+          return true; // Prevent default behavior
+        }
+        return false; // Let default behavior happen
+      }
+    );
+
+    return () => backHandler.remove();
+  }, [selectedBook]);
 
   const openCreateBookDialog = () => {
     setBookDialogMode("create");
