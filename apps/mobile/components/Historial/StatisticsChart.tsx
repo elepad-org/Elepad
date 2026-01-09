@@ -156,30 +156,6 @@ export default function StatisticsChart({
     },
   };
 
-  if (!chartData) {
-    return (
-      <View style={styles.container}>
-        <SegmentedButtons
-          value={timeRange}
-          onValueChange={(value) =>
-            onTimeRangeChange(value as "week" | "month" | "year")
-          }
-          buttons={[
-            { value: "week", label: "Semana" },
-            { value: "month", label: "Mes" },
-            { value: "year", label: "Año" },
-          ]}
-          style={styles.segmentedButtons}
-        />
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>
-            No hay datos suficientes para mostrar estadísticas
-          </Text>
-        </View>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
       <SegmentedButtons
@@ -195,40 +171,50 @@ export default function StatisticsChart({
         style={styles.segmentedButtons}
       />
 
-      <View style={styles.chartContainer}>
-        <LineChart
-          data={chartData}
-          width={screenWidth - 60}
-          height={220}
-          chartConfig={chartConfig}
-          bezier
-          style={styles.chart}
-          withVerticalLabels={true}
-          withHorizontalLabels={true}
-          withDots={true}
-          withShadow={false}
-          withInnerLines={true}
-          withOuterLines={true}
-          withVerticalLines={false}
-          withHorizontalLines={true}
-          fromZero={true}
-        />
-      </View>
+      {!chartData ? (
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>
+            No hay datos suficientes para mostrar estadísticas
+          </Text>
+        </View>
+      ) : (
+        <>
+          <View style={styles.chartContainer}>
+            <LineChart
+              data={chartData}
+              width={screenWidth - 60}
+              height={220}
+              chartConfig={chartConfig}
+              bezier
+              style={styles.chart}
+              withVerticalLabels={true}
+              withHorizontalLabels={true}
+              withDots={true}
+              withShadow={false}
+              withInnerLines={true}
+              withOuterLines={true}
+              withVerticalLines={false}
+              withHorizontalLines={true}
+              fromZero={true}
+            />
+          </View>
 
-      <View style={styles.legendContainer}>
-        <View style={styles.legendItem}>
-          <View
-            style={[styles.legendDot, { backgroundColor: COLORS.primary }]}
-          />
-          <Text style={styles.legendText}>Puntuación promedio</Text>
-        </View>
-        <View style={styles.legendItem}>
-          <View
-            style={[styles.legendDot, { backgroundColor: COLORS.success }]}
-          />
-          <Text style={styles.legendText}>Tasa de éxito (%)</Text>
-        </View>
-      </View>
+          <View style={styles.legendContainer}>
+            <View style={styles.legendItem}>
+              <View
+                style={[styles.legendDot, { backgroundColor: COLORS.primary }]}
+              />
+              <Text style={styles.legendText}>Puntuación promedio</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View
+                style={[styles.legendDot, { backgroundColor: COLORS.success }]}
+              />
+              <Text style={styles.legendText}>Tasa de éxito (%)</Text>
+            </View>
+          </View>
+        </>
+      )}
     </View>
   );
 }
