@@ -568,7 +568,11 @@ export default function CalendarCard(props: CalendarCardProps) {
       ) : (
         <FlatList
           data={dayEvents}
-          keyExtractor={(i) => i.id}
+          keyExtractor={(i) => {
+            const key = `${i.id}_${selectedDay}`;
+            const completed = completionsByDateMap[key] || false;
+            return `${i.id}-${completed}`;
+          }}
           renderItem={({ item }) => (
             <ActivityItem
               item={item}

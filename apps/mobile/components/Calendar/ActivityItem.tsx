@@ -107,7 +107,12 @@ export default function ActivityItem({
   const hasDescription = item.description && item.description.trim().length > 0;
 
   return (
-    <Card style={[styles.card, isCompleted && styles.completedCard]}>
+    <Card 
+      style={[
+        styles.card, 
+        isCompleted && styles.completedCard
+      ]}
+    >
       <List.Item
         style={styles.listItem}
         titleStyle={isCompleted && { textDecorationLine: "line-through" }}
@@ -277,7 +282,6 @@ const styles = StyleSheet.create({
   },
   completedCard: {
     backgroundColor: COLORS.primary + "10",
-    opacity: 0.85,
     borderLeftWidth: 4,
     borderLeftColor: COLORS.primary,
   },
