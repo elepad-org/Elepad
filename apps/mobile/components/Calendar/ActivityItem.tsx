@@ -130,9 +130,10 @@ export default function ActivityItem({
           <View style={styles.checkboxContainer}>
             <IconButton
               icon={isCompleted ? "checkbox-marked" : "checkbox-blank-outline"}
-              iconColor={isCompleted ? COLORS.primary : COLORS.textLight}
+              iconColor={COLORS.primary}
               size={24}
               onPress={() => onToggleComplete(item)}
+              style={{ margin: 0 }}
             />
           </View>
         )}
@@ -141,22 +142,24 @@ export default function ActivityItem({
             {canEdit && (
               <>
                 <IconButton
-                  icon="pencil"
+                  icon="pencil-outline"
                   iconColor={COLORS.primary}
-                  size={20}
+                  size={22}
                   onPress={(e) => {
                     e.stopPropagation();
                     onEdit(item);
                   }}
+                  style={{ margin: 0 }}
                 />
                 <IconButton
-                  icon="delete"
-                  iconColor={COLORS.error}
-                  size={20}
+                  icon="delete-outline"
+                  iconColor={COLORS.primary}
+                  size={22}
                   onPress={(e) => {
                     e.stopPropagation();
                     onDelete(item.id);
                   }}
+                  style={{ margin: 0 }}
                 />
               </>
             )}
