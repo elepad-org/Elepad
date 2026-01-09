@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
 import { Text, SegmentedButtons, IconButton } from "react-native-paper";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
@@ -137,6 +137,9 @@ interface CalendarCardProps {
   onDelete: (id: string) => void;
   isOwnerOfGroup: boolean;
   groupInfo?: GetFamilyGroupIdGroupMembers200;
+  activityToView?: string | null;
+  activityDateToView?: string | null;
+  onActivityViewed?: () => void;
 }
 
 // Configuración de calendario en español
@@ -191,11 +194,21 @@ export default function CalendarCard(props: CalendarCardProps) {
     onDelete,
     isOwnerOfGroup,
     groupInfo,
+    activityToView,
+    activityDateToView,
+    onActivityViewed,
   } = props;
   const { userElepad } = useAuth();
   const today = getTodayLocal();
   const [selectedDay, setSelectedDay] = useState<string>(today);
   const [filter, setFilter] = useState<"all" | "mine">("all");
+
+  // Cambiar al día de la actividad cuando se recibe desde notificaciones
+  useEffect(() => {
+    if (activityDateToView) {
+      setSelectedDay(activityDateToView);
+    }
+  }, [activityDateToView]);
 
   // Preparar lista de miembros de la familia para menciones
   const familyMembers = useMemo(() => {
@@ -568,7 +581,11 @@ export default function CalendarCard(props: CalendarCardProps) {
       ) : (
         <FlatList
           data={dayEvents}
-          keyExtractor={(i) => i.id}
+          keyExtractor={(i) => {
+            const key = `${i.id}_${selectedDay}`;
+            const completed = completionsByDateMap[key] || false;
+            return `${i.id}-${completed}`;
+          }}
           renderItem={({ item }) => (
             <ActivityItem
               item={item}
@@ -583,6 +600,8 @@ export default function CalendarCard(props: CalendarCardProps) {
                 return completionsByDateMap[key] || false;
               })()}
               familyMembers={familyMembers}
+              shouldOpen={activityToView === item.id}
+              onOpened={onActivityViewed}
             />
           )}
           contentContainerStyle={styles.listContent}

@@ -58,10 +58,6 @@ export default function ActivityForm({
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [showFrequencyMenu, setShowFrequencyMenu] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [titleSelection, setTitleSelection] = useState<
-    { start: number; end: number } | undefined
-  >(undefined);
-  const titleInputRef = useRef<RNTextInput>(null);
   const [showFrequencyModal, setShowFrequencyModal] = useState(false);
 
 
@@ -165,35 +161,21 @@ export default function ActivityForm({
         maxHeight: "100%",
       }}
     >
-      <View style={{ paddingHorizontal: 24, paddingBottom: 2, marginTop: 10 }}>
-        <TextInput
-          ref={titleInputRef}
-          value={title}
-          onChangeText={(text) => {
-            setTitle(text);
-            setTitleSelection(undefined);
-          }}
-          onFocus={() => {
-            setTitleSelection({ start: title.length, end: title.length });
-          }}
-          selection={titleSelection}
-          style={styles.titleInput}
-          contentStyle={{ fontWeight: "700" }}
-          underlineColor="transparent"
-          activeUnderlineColor="transparent"
-          textColor={COLORS.text}
-          placeholder={initial ? "Agregar evento" : "Nuevo evento"}
-          placeholderTextColor={COLORS.textSecondary}
-      
-          theme={{
-            colors: {
-              primary: "transparent",
-              background: "transparent",
-            },
-          }}
-        />
-      </View>
       <Dialog.Content style={{ paddingBottom: 15 }}>
+        <View style={styles.inputWrapper}>
+          <TextInput
+            label="Título"
+            value={title}
+            onChangeText={setTitle}
+            placeholder={initial ? "Agregar evento" : "Nuevo evento"}
+            mode="flat"
+            outlineColor="transparent"
+            activeOutlineColor="transparent"
+            style={{ backgroundColor: "transparent" }}
+            autoFocus={!initial}
+          />
+        </View>
+        
         <View style={styles.inputWrapper}>
           <MentionInput
             label="Descripción"
@@ -358,17 +340,12 @@ export default function ActivityForm({
       </Dialog.Content>
     </Dialog>
   </>
-  );
+  );"transparent"
 }
 
 const styles = StyleSheet.create({
   titleInput: {
-    fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "center",
-    backgroundColor: "transparent",
-    paddingHorizontal: 0,
-    marginBottom: 8,
+    backgroundColor: COLORS.backgroundSecondary,
   },
   inputWrapper: {
     backgroundColor: COLORS.backgroundSecondary,

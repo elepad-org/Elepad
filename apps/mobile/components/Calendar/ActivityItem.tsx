@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { View, StyleSheet } from "react-native";
 import {
   Text,
@@ -24,6 +24,8 @@ interface ActivityItemProps {
   groupInfo?: GetFamilyGroupIdGroupMembers200;
   completed?: boolean; // Nueva prop para completado por día
   familyMembers?: Array<{ id: string; displayName: string; avatarUrl?: string | null }>;
+  shouldOpen?: boolean;
+  onOpened?: () => void;
 }
 
 export default function ActivityItem({
@@ -36,19 +38,37 @@ export default function ActivityItem({
   groupInfo,
   completed, // Usar esta prop en lugar de item.completed
   familyMembers = [],
+  shouldOpen = false,
+  onOpened,
 }: ActivityItemProps) {
   const [showModal, setShowModal] = useState(false);
+
+  // Abrir el modal automáticamente si shouldOpen es true
+  useEffect(() => {
+    if (shouldOpen && !showModal) {
+      setShowModal(true);
+      // Notificar que se abrió
+      if (onOpened) {
+        onOpened();
+      }
+    }
+  }, [shouldOpen]);
 
   // Usar completed de la prop si está disponible, sino usar item.completed
   const isCompleted = completed !== undefined ? completed : item.completed;
 
+  // Create a combined list of all group members (owner + members)
+  const allGroupMembers = (() => {
+    if (!groupInfo) return familyMembers;
+    return [
+      { id: groupInfo.owner.id, displayName: groupInfo.owner.displayName, avatarUrl: groupInfo.owner.avatarUrl },
+      ...groupInfo.members.map(m => ({ id: m.id, displayName: m.displayName, avatarUrl: m.avatarUrl }))
+    ];
+  })();
+
   // Find the owner of this activity
   const activityOwner = (() => {
-    if (!groupInfo) return null;
-    if (groupInfo.owner.id === item.createdBy) {
-      return groupInfo.owner.displayName;
-    }
-    const member = groupInfo.members.find((m) => m.id === item.createdBy);
+    const member = allGroupMembers.find((m) => m.id === item.createdBy);
     return member?.displayName || "Usuario desconocido";
   })();
 
@@ -102,7 +122,12 @@ export default function ActivityItem({
   const hasDescription = item.description && item.description.trim().length > 0;
 
   return (
-    <Card style={[styles.card, isCompleted && styles.completedCard]}>
+    <Card 
+      style={[
+        styles.card, 
+        isCompleted && styles.completedCard
+      ]}
+    >
       <List.Item
         style={styles.listItem}
         titleStyle={isCompleted && { textDecorationLine: "line-through" }}
@@ -115,13 +140,15 @@ export default function ActivityItem({
           </View>
         }
         onPress={hasDescription ? () => setShowModal(true) : undefined}
+        background={null}
         left={() => (
           <View style={styles.checkboxContainer}>
             <IconButton
               icon={isCompleted ? "checkbox-marked" : "checkbox-blank-outline"}
-              iconColor={isCompleted ? COLORS.primary : COLORS.textLight}
+              iconColor={COLORS.primary}
               size={24}
               onPress={() => onToggleComplete(item)}
+              style={{ margin: 0 }}
             />
           </View>
         )}
@@ -130,22 +157,24 @@ export default function ActivityItem({
             {canEdit && (
               <>
                 <IconButton
-                  icon="pencil"
+                  icon="pencil-outline"
                   iconColor={COLORS.primary}
-                  size={20}
+                  size={22}
                   onPress={(e) => {
                     e.stopPropagation();
                     onEdit(item);
                   }}
+                  style={{ margin: 0 }}
                 />
                 <IconButton
-                  icon="delete"
-                  iconColor={COLORS.error}
-                  size={20}
+                  icon="delete-outline"
+                  iconColor={COLORS.primary}
+                  size={22}
                   onPress={(e) => {
                     e.stopPropagation();
                     onDelete(item.id);
                   }}
+                  style={{ margin: 0 }}
                 />
               </>
             )}
@@ -232,7 +261,7 @@ export default function ActivityItem({
                 </Text>
                 <HighlightedMentionText
                   text={item.description || ""}
-                  familyMembers={familyMembers}
+                  familyMembers={allGroupMembers}
                   style={{ color: COLORS.text, lineHeight: 22, fontSize: 14 }}
                 />
               </View>
@@ -260,20 +289,18 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderRadius: 16,
     backgroundColor: COLORS.white,
-    borderWidth: 0,
+    borderWidth: 1,
+    borderColor: COLORS.border,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 2,
+    elevation: 0,
   },
   completedCard: {
     backgroundColor: COLORS.primary + "10",
-    opacity: 0.85,
-    shadowOpacity: 0.04,
-    borderLeftWidth: 3,
+    borderLeftWidth: 4,
     borderLeftColor: COLORS.primary,
+    shadowColor: "transparent",
+    shadowOpacity: 0,
+    elevation: 0,
   },
   listItem: {
     paddingVertical: 4,
