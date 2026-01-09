@@ -1,0 +1,157 @@
+import { View, ScrollView, TouchableOpacity, Image } from "react-native";
+import { Portal, Surface, Text } from "react-native-paper";
+import { COLORS } from "@/styles/base";
+
+interface PickerOption {
+  id: string;
+  label: string;
+  avatarUrl?: string | null;
+  icon?: React.ReactNode;
+}
+
+interface PickerModalProps {
+  visible: boolean;
+  title: string;
+  options: PickerOption[];
+  onSelect: (option: PickerOption) => void;
+  onDismiss?: () => void;
+  maxHeight?: number;
+}
+
+export default function PickerModal({
+  visible,
+  title,
+  options,
+  onSelect,
+  onDismiss,
+  maxHeight = 200,
+}: PickerModalProps) {
+  if (!visible || options.length === 0) return null;
+
+  return (
+    <Portal>
+      {onDismiss && (
+        <TouchableOpacity
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.2)",
+          }}
+          onPress={onDismiss}
+          activeOpacity={1}
+        />
+      )}
+      <View
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "10%",
+          right: "10%",
+          transform: [{ translateY: -100 }],
+          zIndex: 9999,
+        }}
+      >
+        <Surface
+          style={{
+            backgroundColor: COLORS.background,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: COLORS.border,
+            maxHeight,
+            elevation: 8,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+          }}
+        >
+          <ScrollView style={{ maxHeight }}>
+            <View style={{ padding: 8 }}>
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: COLORS.textSecondary,
+                  paddingHorizontal: 12,
+                  paddingVertical: 8,
+                  fontWeight: "600",
+                }}
+              >
+                {title}
+              </Text>
+              {options.map((option, index) => (
+                <TouchableOpacity
+                  key={option.id}
+                  onPress={() => onSelect(option)}
+                  style={{
+                    paddingHorizontal: 16,
+                    paddingVertical: 12,
+                    borderRadius: 8,
+                    backgroundColor:
+                      index % 2 === 0
+                        ? "transparent"
+                        : COLORS.backgroundSecondary,
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}
+                  >
+                    {option.icon ? (
+                      option.icon
+                    ) : option.avatarUrl ? (
+                      <Image
+                        source={{ uri: option.avatarUrl }}
+                        style={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: 16,
+                          marginRight: 12,
+                        }}
+                      />
+                    ) : (
+                      <View
+                        style={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: 16,
+                          backgroundColor: COLORS.primary,
+                          alignItems: "center",
+                          justifyContent: "center",
+                          marginRight: 12,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color: COLORS.white,
+                            fontSize: 14,
+                            fontWeight: "600",
+                          }}
+                        >
+                          {option.label.charAt(0).toUpperCase()}
+                        </Text>
+                      </View>
+                    )}
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        color: COLORS.text,
+                        fontWeight: "500",
+                      }}
+                    >
+                      {option.label}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
+        </Surface>
+      </View>
+    </Portal>
+  );
+}

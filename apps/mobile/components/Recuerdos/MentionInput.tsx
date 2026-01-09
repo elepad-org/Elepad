@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
-import { View, ScrollView, TouchableOpacity, TextInput as RNTextInput, Image } from "react-native";
-import { TextInput, Text, Portal, Surface } from "react-native-paper";
+import { View, TextInput as RNTextInput } from "react-native";
+import { TextInput, Text } from "react-native-paper";
 import { COLORS } from "@/styles/base";
+import PickerModal from "@/components/shared/PickerModal";
 
 interface FamilyMember {
   id: string;
@@ -211,116 +212,19 @@ export default function MentionInput({
         selectionColor={COLORS.primary + "40"}
       />
 
-      {showMentionMenu && filteredMembers.length > 0 && (
-        <Portal>
-          <View
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "10%",
-              right: "10%",
-              transform: [{ translateY: -100 }],
-              zIndex: 9999,
-            }}
-          >
-            <Surface
-              style={{
-                backgroundColor: COLORS.background,
-                borderRadius: 12,
-                borderWidth: 1,
-                borderColor: COLORS.border,
-                maxHeight: 200,
-                elevation: 8,
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 8,
-              }}
-            >
-              <ScrollView style={{ maxHeight: 200 }}>
-                <View style={{ padding: 8 }}>
-                  <Text
-                    style={{
-                      fontSize: 12,
-                      color: COLORS.textSecondary,
-                      paddingHorizontal: 12,
-                      paddingVertical: 8,
-                      fontWeight: "600",
-                    }}
-                  >
-                    Mencionar a:
-                  </Text>
-                  {filteredMembers.map((member, index) => (
-                    <TouchableOpacity
-                      key={member.id}
-                      onPress={() => handleMentionSelect(member)}
-                      style={{
-                        paddingHorizontal: 16,
-                        paddingVertical: 12,
-                        borderRadius: 8,
-                        backgroundColor:
-                          index % 2 === 0
-                            ? "transparent"
-                            : COLORS.backgroundSecondary,
-                      }}
-                    >
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                        }}
-                      >
-                        {member.avatarUrl ? (
-                          <Image
-                            source={{ uri: member.avatarUrl }}
-                            style={{
-                              width: 32,
-                              height: 32,
-                              borderRadius: 16,
-                              marginRight: 12,
-                            }}
-                          />
-                        ) : (
-                          <View
-                            style={{
-                              width: 32,
-                              height: 32,
-                              borderRadius: 16,
-                              backgroundColor: COLORS.primary,
-                              alignItems: "center",
-                              justifyContent: "center",
-                              marginRight: 12,
-                            }}
-                          >
-                            <Text
-                              style={{
-                                color: COLORS.white,
-                                fontSize: 14,
-                                fontWeight: "600",
-                              }}
-                            >
-                              {member.displayName.charAt(0).toUpperCase()}
-                            </Text>
-                          </View>
-                        )}
-                        <Text
-                          style={{
-                            fontSize: 16,
-                            color: COLORS.text,
-                            fontWeight: "500",
-                          }}
-                        >
-                          {member.displayName}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </ScrollView>
-            </Surface>
-          </View>
-        </Portal>
-      )}
+      <PickerModal
+        visible={showMentionMenu}
+        title="Mencionar a:"
+        options={filteredMembers.map(member => ({
+          id: member.id,
+          label: member.displayName,
+          avatarUrl: member.avatarUrl
+        }))}
+        onSelect={(option) => {
+          const member = filteredMembers.find(m => m.id === option.id);
+          if (member) handleMentionSelect(member);
+        }}
+      />
     </View>
   );
 }
