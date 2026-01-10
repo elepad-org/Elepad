@@ -383,10 +383,11 @@ export default function CalendarCard(props: CalendarCardProps) {
     // Agregar círculos naranjas para días con racha - Solo para usuarios elder
     if (userElepad?.elder) {
       for (const streakDay of streakDays) {
-        if (!obj[streakDay]) {
-          obj[streakDay] = {};
+        const day = streakDay as string;
+        if (!obj[day]) {
+          obj[day] = {};
         }
-        obj[streakDay].customStyles = {
+        obj[day].customStyles = {
           container: {
             borderColor: '#FF6B35',
             borderWidth: 2,
