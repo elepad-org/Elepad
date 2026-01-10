@@ -1,4 +1,4 @@
-import { View, ScrollView, TouchableOpacity, Image } from "react-native";
+import { View, ScrollView, TouchableOpacity, Image, ViewStyle } from "react-native";
 import { Portal, Surface, Text } from "react-native-paper";
 import { COLORS } from "@/styles/base";
 
@@ -31,7 +31,7 @@ export default function PickerModal({
   if (!visible || options.length === 0) return null;
 
   // Position dropdown below anchor if provided, otherwise center it
-  const positionStyle: any = anchorPosition
+  const positionStyle: ViewStyle = anchorPosition
     ? {
         position: "absolute" as const,
         top: anchorPosition.top + 4,
@@ -41,8 +41,12 @@ export default function PickerModal({
       }
     : {
         position: "absolute" as const,
-        top: "50%",
-        left: "10%",
+        top: "50%" as any,
+        left: "10%" as any,
+        right: "10%" as any,
+        transform: [{ translateY: -100 }],
+        zIndex: 9999,
+      };
         right: "10%",
         transform: [{ translateY: -100 }],
         zIndex: 9999,

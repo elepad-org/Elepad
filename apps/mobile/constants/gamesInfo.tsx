@@ -306,7 +306,7 @@ export const GAMES_INFO: Record<string, GameInfo> = {
             bullet: "4.",
             text: (
               <>
-                Por ejemplo: si ves la palabra "ROJO" pintada en azul, debes
+                Por ejemplo: si ves la palabra &quot;ROJO&quot; pintada en azul, debes
                 seleccionar <HelpBold>ROJO</HelpBold>
               </>
             ),

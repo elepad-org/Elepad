@@ -4,7 +4,6 @@ import {
   View,
   StyleSheet,
   Pressable,
-  Image,
   ImageBackground,
   Dimensions,
 } from "react-native";
@@ -18,7 +17,7 @@ import {
 } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { COLORS, STYLES, SHADOWS } from "@/styles/base";
+import { COLORS, SHADOWS } from "@/styles/base";
 import { LoadingProfile } from "@/components/shared";
 import {
   useGetActivitiesFamilyCodeIdFamilyGroup,
@@ -116,10 +115,15 @@ export default function HomeScreen() {
       ? activitiesQuery.data
       : activitiesQuery.data.data || [];
 
+    interface Activity {
+      id: string;
+      startsAt: string;
+    }
+
     return activities
-      .filter((activity: any) => new Date(activity.startsAt) >= now)
+      .filter((activity: Activity) => new Date(activity.startsAt) >= now)
       .sort(
-        (a: any, b: any) =>
+        (a: Activity, b: Activity) =>
           new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime(),
       )
       .slice(0, 3);
@@ -153,9 +157,6 @@ export default function HomeScreen() {
   const displayName =
     (userElepad?.displayName as string) || userElepad?.email || "Usuario";
   
-  const userRole = userElepad?.elder ? "Adulto mayor" : "Ayudante";
-  const displayNameWithRole = `${displayName} (${userRole})`;
-
   const getInitials = (name: string) =>
     name
       .split(/\s+/)
@@ -354,7 +355,7 @@ export default function HomeScreen() {
             </View>
           ) : upcomingActivities.length > 0 ? (
             <View style={styles.eventsContainer}>
-              {upcomingActivities.map((activity: any) => {
+              {upcomingActivities.map((activity: { id: string; startsAt: string; title: string; description?: string }) => {
                 const activityDate = new Date(activity.startsAt);
                 const isToday =
                   activityDate.toDateString() === new Date().toDateString();
