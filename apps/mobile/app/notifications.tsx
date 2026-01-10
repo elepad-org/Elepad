@@ -155,8 +155,8 @@ export default function NotificationsScreen() {
 
   // Obtener el rango de fechas para la actividad (solo el día de la actividad)
   const activityDateRange = useMemo(() => {
-    if (!activityQuery.data) return { startDate: "", endDate: "" };
-    const activity = activityQuery.data as Activity;
+    if (!activityQuery.data || !('startsAt' in activityQuery.data)) return { startDate: "", endDate: "" };
+    const activity = activityQuery.data as unknown as Activity;
     const activityDate = activity.startsAt.slice(0, 10);
     return {
       startDate: activityDate,
@@ -179,9 +179,9 @@ export default function NotificationsScreen() {
 
   // Determinar si la actividad está completada para su día específico
   const isActivityCompleted = useMemo(() => {
-    if (!activityQuery.data || !activityCompletionsQuery.data) return false;
+    if (!activityQuery.data || !activityCompletionsQuery.data || !('startsAt' in activityQuery.data)) return false;
     
-    const activity = activityQuery.data as Activity;
+    const activity = activityQuery.data as unknown as Activity;
     const activityDate = activity.startsAt.slice(0, 10);
     
     // Extraer las completaciones correctamente
@@ -190,8 +190,11 @@ export default function NotificationsScreen() {
     
     if (Array.isArray(completionsData)) {
       completions = completionsData;
-    } else if (completionsData && "data" in completionsData && Array.isArray((completionsData as { data: GetActivityCompletions200DataItem[] }).data)) {
-      completions = (completionsData as { data: GetActivityCompletions200DataItem[] }).data;
+    } else if (completionsData && "data" in completionsData) {
+      const data = completionsData.data;
+      if (Array.isArray(data)) {
+        completions = data;
+      }
     }
     
     // Buscar si existe una completación para esta actividad en este día
@@ -408,7 +411,7 @@ export default function NotificationsScreen() {
   const renderNotification = useCallback(
     ({ item }: { item: GetNotifications200Item }) => {
       // Para menciones, detectar si el título contiene formato <@id>
-      const hasMention = /<@([^>]+)>/.test(item.title);
+      const hasMention = item.title ? /<@([^>]+)>/.test(item.title) : false;
       const isMention = item.event_type === "mention" || hasMention;
 
       return (
@@ -431,7 +434,7 @@ export default function NotificationsScreen() {
           <View style={styles.notificationContent}>
             {isMention ? (
               <HighlightedMentionText
-                text={item.title}
+                text={item.title || ""}
                 groupMembers={groupMembers}
                 style={
                   item.read
@@ -604,9 +607,9 @@ export default function NotificationsScreen() {
         <RecuerdoDetailDialog
           visible={detailDialogVisible}
           recuerdo={
-            memoryQuery.data && groupMembers
+            memoryQuery.data && groupMembers && 'status' in memoryQuery.data && memoryQuery.data.status === 200 && 'data' in memoryQuery.data
               ? memoryToRecuerdo(
-                  memoryQuery.data as Memory,
+                  memoryQuery.data.data as Memory,
                   groupMembers.reduce((acc, m) => {
                     acc[m.id] = m.displayName;
                     return acc;
@@ -647,8 +650,8 @@ export default function NotificationsScreen() {
             alignSelf: "center",
           }}
         >
-          {activityQuery.data && (() => {
-            const activity = activityQuery.data as Activity;
+          {activityQuery.data && 'status' in activityQuery.data && activityQuery.data.status === 200 && 'data' in activityQuery.data && (() => {
+            const activity = activityQuery.data.data as Activity;
             return [
               <Dialog.Title key="title" style={{ fontWeight: "bold", color: COLORS.text }}>
                 {activity.title}

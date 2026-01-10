@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { Session, User } from "@supabase/supabase-js";
 import { getUsersId } from "@elepad/api-client/src/gen/client";
-import { useGetStreaksMe } from "@elepad/api-client";
+import { useGetStreaksMe, GetStreaksMe200 } from "@elepad/api-client";
 import { useRouter } from "expo-router";
 import {
   PropsWithChildren,
@@ -99,7 +99,14 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       const today = getTodayLocal();
       
       // Extraer datos - la respuesta puede estar envuelta en {data: ...}
-      const streakData = 'data' in streakQuery.data ? streakQuery.data.data : streakQuery.data;
+      const responseData = 'data' in streakQuery.data ? streakQuery.data.data : streakQuery.data;
+      
+      // Validar que sea del tipo correcto
+      if (!responseData || typeof responseData !== 'object' || 'message' in responseData) {
+        return; // Es un error, no procesar
+      }
+      
+      const streakData = responseData as GetStreaksMe200;
       
       // Las fechas ya vienen en formato local del cliente desde el backend
       const hasPlayedToday = isSameLocalDate(streakData.lastPlayedDate || '', today);

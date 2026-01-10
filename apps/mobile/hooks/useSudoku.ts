@@ -6,6 +6,8 @@ import {
   usePostPuzzlesSudoku,
   usePostAttemptsStart,
   usePostAttemptsAttemptIdFinish,
+  PostAttemptsStart201,
+  PostAttemptsAttemptIdFinish200UnlockedAchievementsItem,
 } from "@elepad/api-client";
 
 export type Difficulty = "easy" | "medium" | "hard";
@@ -31,7 +33,7 @@ export interface UseSudokuProps {
   difficulty: Difficulty;
   maxMistakes?: number;
   onGameOver?: () => void; // Callback si pierde por errores
-  onAchievementUnlocked?: (achievement: { id: string; name: string; description: string }) => void;
+  onAchievementUnlocked?: (achievement: PostAttemptsAttemptIdFinish200UnlockedAchievementsItem) => void;
 }
 
 // --- Hook Principal ---
@@ -284,10 +286,16 @@ export const useSudoku = (props: UseSudokuProps) => {
             .mutateAsync({
               data: { puzzleId, gameType: "attention" },
             })
-            .then((res: { data?: { id: string }; id?: string }) => {
-              const id = res.data?.id || res.id;
-              setAttemptId(id);
-              console.log("✅ Attempt iniciado:", id);
+            .then((res) => {
+              // Manejar respuesta exitosa (status 201)
+              if ('status' in res && res.status === 201 && 'data' in res) {
+                const data = res.data as PostAttemptsStart201;
+                setAttemptId(data.id);
+                console.log("✅ Attempt iniciado:", data.id);
+              }
+            })
+            .catch((err) => {
+              console.error("❌ Error iniciando attempt:", err);
             });
         }
       }
@@ -376,7 +384,7 @@ export const useSudoku = (props: UseSudokuProps) => {
             // 🔥 Actualización optimista de la racha ANTES de llamar al backend
             await markGameCompleted();
 
-            await finishAttempt.mutateAsync({
+            const finishResponse = await finishAttempt.mutateAsync({
               attemptId,
               data: {
                 success: true,
@@ -392,7 +400,7 @@ export const useSudoku = (props: UseSudokuProps) => {
                 "❌ Status de respuesta inválido:",
                 finishResponse.status
               );
-              throw new Error("Failed to create puzzle");
+              throw new Error("Failed to finish attempt");
             }
 
             // Invalidar queries de rachas para refrescar datos
@@ -400,14 +408,16 @@ export const useSudoku = (props: UseSudokuProps) => {
             queryClient.invalidateQueries({ queryKey: ["getStreaksHistory"] });
 
             // Manejo de Logros
-            const resData = finishResponse.data;
-            if (
-              resData?.unlockedAchievements &&
-              resData.unlockedAchievements.length > 0
-            ) {
-              resData.unlockedAchievements.forEach((achievement) => {
-                onAchievementUnlocked?.(achievement);
-              });
+            if ('data' in finishResponse) {
+              const resData = finishResponse.data;
+              if (
+                resData?.unlockedAchievements &&
+                resData.unlockedAchievements.length > 0
+              ) {
+                resData.unlockedAchievements.forEach((achievement: PostAttemptsAttemptIdFinish200UnlockedAchievementsItem) => {
+                  onAchievementUnlocked?.(achievement);
+                });
+              }
             }
           } catch (e) {
             console.error("Error finalizando attempt", e);

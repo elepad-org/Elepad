@@ -1,4 +1,4 @@
-import { useGetStreaksMe, useGetStreaksHistory } from "@elepad/api-client";
+import { useGetStreaksMe, useGetStreaksHistory, GetStreaksMe200, GetStreaksHistory200 } from "@elepad/api-client";
 import { useEffect, useRef } from "react";
 import { useStreakSnackbar } from "./useStreakSnackbar";
 
@@ -20,23 +20,27 @@ export function useUserStreak() {
 
   // Detectar cuando se extiende la racha
   useEffect(() => {
-    if (query.data?.currentStreak !== undefined) {
-      const currentStreak = query.data.currentStreak;
-      
-      // Si había una racha previa y aumentó, mostrar toast
-      // Incluye el caso de 0 -> 1 (primera racha)
-      if (
-        previousStreakRef.current !== null && 
-        currentStreak > previousStreakRef.current &&
-        currentStreak > 0
-      ) {
-        console.log(`🔥 Racha extendida: ${previousStreakRef.current} -> ${currentStreak}`);
-        showStreakExtended(currentStreak);
+    if (query.data) {
+      const responseData = 'data' in query.data ? query.data.data : query.data;
+      if (responseData && typeof responseData === 'object' && 'currentStreak' in responseData) {
+        const streakData = responseData as GetStreaksMe200;
+        const currentStreak = streakData.currentStreak;
+        
+        // Si había una racha previa y aumentó, mostrar toast
+        // Incluye el caso de 0 -> 1 (primera racha)
+        if (
+          previousStreakRef.current !== null && 
+          currentStreak > previousStreakRef.current &&
+          currentStreak > 0
+        ) {
+          console.log(`🔥 Racha extendida: ${previousStreakRef.current} -> ${currentStreak}`);
+          showStreakExtended(currentStreak);
+        }
+        
+        previousStreakRef.current = currentStreak;
       }
-      
-      previousStreakRef.current = currentStreak;
     }
-  }, [query.data?.currentStreak, showStreakExtended]);
+  }, [query.data, showStreakExtended]);
 
   return query;
 }
@@ -60,8 +64,23 @@ export function useStreakHistory(startDate?: string, endDate?: string) {
     },
   );
 
-  // Las fechas ya vienen en formato local del cliente, no es necesario convertir
-  return query;
+  // Convertir fechas UTC del backend a fechas locales
+  const localData = query.data ? (() => {
+    const responseData = 'data' in query.data ? query.data.data : query.data;
+    if (responseData && typeof responseData === 'object' && 'dates' in responseData) {
+      const historyData = responseData as GetStreaksHistory200;
+      return {
+        ...historyData,
+        dates: historyData.dates?.map(utcDateToLocal) || []
+      };
+    }
+    return undefined;
+  })() : undefined;
+
+  return {
+    ...query,
+    data: localData,
+  };
 }
 
 /**

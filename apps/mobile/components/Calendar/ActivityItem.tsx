@@ -147,7 +147,7 @@ export default function ActivityItem({
           </View>
         }
         onPress={hasDescription ? () => setShowModal(true) : undefined}
-        background={null}
+        background={undefined}
         left={() => (
           <View style={styles.checkboxContainer}>
             <IconButton
