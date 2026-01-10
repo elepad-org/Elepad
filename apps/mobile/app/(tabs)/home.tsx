@@ -12,7 +12,6 @@ import {
   Text,
   Avatar,
   Button,
-  Chip,
   IconButton,
 } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
@@ -111,9 +110,12 @@ export default function HomeScreen() {
     if (!activitiesQuery.data) return [];
     const now = new Date();
 
-    const activities = Array.isArray(activitiesQuery.data)
-      ? activitiesQuery.data
-      : activitiesQuery.data.data || [];
+    const data = activitiesQuery.data;
+    const activities = Array.isArray(data)
+      ? data
+      : (data as { data?: unknown }).data || [];
+
+    if (!Array.isArray(activities)) return [];
 
     interface Activity {
       id: string;
@@ -131,17 +133,21 @@ export default function HomeScreen() {
 
   const lastAttempt = useMemo(() => {
     if (!attemptsQuery.data) return null;
-    const attempts = Array.isArray(attemptsQuery.data)
-      ? attemptsQuery.data
-      : attemptsQuery.data.data || [];
+    const data = attemptsQuery.data;
+    const attempts = Array.isArray(data)
+      ? data
+      : (data as { data?: unknown }).data || [];
+    if (!Array.isArray(attempts)) return null;
     return attempts[0] || null;
   }, [attemptsQuery.data]);
 
   const lastMemory = useMemo(() => {
     if (!memoriesQuery.data) return null;
-    const memories = Array.isArray(memoriesQuery.data)
-      ? memoriesQuery.data
-      : memoriesQuery.data.data || [];
+    const data = memoriesQuery.data;
+    const memories = Array.isArray(data)
+      ? data
+      : (data as { data?: unknown }).data || [];
+    if (!Array.isArray(memories)) return null;
     return memories[0] || null;
   }, [memoriesQuery.data]);
 
@@ -395,11 +401,6 @@ export default function HomeScreen() {
                         </Text>
                       )}
                     </View>
-                    {activity.completed && (
-                      <Chip mode="flat" style={styles.eventChip} textStyle={styles.eventChipText}>
-                        ✓
-                      </Chip>
-                    )}
                   </View>
                 );
               })}
@@ -457,7 +458,7 @@ export default function HomeScreen() {
               <Text style={styles.emptyText}>Aún no has jugado</Text>
               <Button
                 mode="outlined"
-                onPress={() => router.push("/games")}
+                onPress={() => router.push("/juegos")}
                 style={styles.emptyButtonOutline}
                 labelStyle={{ color: COLORS.primary }}
               >

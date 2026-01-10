@@ -30,6 +30,8 @@ import {
   useGetActivitiesId,
   Activity,
   useGetActivityCompletions,
+  GetNotifications200Item,
+  GetActivityCompletions200DataItem,
 } from "@elepad/api-client";
 import { COLORS } from "@/styles/base";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -154,7 +156,7 @@ export default function NotificationsScreen() {
   // Obtener el rango de fechas para la actividad (solo el día de la actividad)
   const activityDateRange = useMemo(() => {
     if (!activityQuery.data) return { startDate: "", endDate: "" };
-    const activity = activityQuery.data as any as Activity;
+    const activity = activityQuery.data as Activity;
     const activityDate = activity.startsAt.slice(0, 10);
     return {
       startDate: activityDate,
@@ -179,21 +181,21 @@ export default function NotificationsScreen() {
   const isActivityCompleted = useMemo(() => {
     if (!activityQuery.data || !activityCompletionsQuery.data) return false;
     
-    const activity = activityQuery.data as any as Activity;
+    const activity = activityQuery.data as Activity;
     const activityDate = activity.startsAt.slice(0, 10);
     
     // Extraer las completaciones correctamente
     const completionsData = activityCompletionsQuery.data;
-    let completions: any[] = [];
+    let completions: GetActivityCompletions200DataItem[] = [];
     
     if (Array.isArray(completionsData)) {
       completions = completionsData;
-    } else if (completionsData && "data" in completionsData && Array.isArray((completionsData as any).data)) {
-      completions = (completionsData as any).data;
+    } else if (completionsData && "data" in completionsData && Array.isArray((completionsData as { data: GetActivityCompletions200DataItem[] }).data)) {
+      completions = (completionsData as { data: GetActivityCompletions200DataItem[] }).data;
     }
     
     // Buscar si existe una completación para esta actividad en este día
-    return completions.some((c: any) => 
+    return completions.some((c: GetActivityCompletions200DataItem) => 
       c.activityId === activity.id && 
       c.completedDate === activityDate
     );
@@ -259,14 +261,14 @@ export default function NotificationsScreen() {
 
   const notifications = useMemo(() => {
     if (!notificationsQuery.data) return [];
-    const data = notificationsQuery.data as any;
+    const data = notificationsQuery.data as { data: GetNotifications200Item[] } | GetNotifications200Item[];
     return Array.isArray(data)
       ? data
-      : data.notifications || [];
+      : data.data || [];
   }, [notificationsQuery.data]);
 
   const unreadCount = useMemo(() => {
-    return notifications.filter((n: any) => !n.read).length;
+    return notifications.filter((n: GetNotifications200Item) => !n.read).length;
   }, [notifications]);
 
   const handleRefresh = useCallback(() => {
@@ -318,7 +320,7 @@ export default function NotificationsScreen() {
   );
 
   const handleNotificationPress = useCallback(
-    async (notification: any) => {
+    async (notification: GetNotifications200Item) => {
       console.log('🔔 Notification pressed:', {
         id: notification.id,
         entity_type: notification.entity_type,
@@ -404,7 +406,7 @@ export default function NotificationsScreen() {
   };
 
   const renderNotification = useCallback(
-    ({ item }: { item: any }) => {
+    ({ item }: { item: GetNotifications200Item }) => {
       // Para menciones, detectar si el título contiene formato <@id>
       const hasMention = /<@([^>]+)>/.test(item.title);
       const isMention = item.event_type === "mention" || hasMention;
@@ -604,7 +606,7 @@ export default function NotificationsScreen() {
           recuerdo={
             memoryQuery.data && groupMembers
               ? memoryToRecuerdo(
-                  (memoryQuery.data as any) as Memory,
+                  memoryQuery.data as Memory,
                   groupMembers.reduce((acc, m) => {
                     acc[m.id] = m.displayName;
                     return acc;
@@ -646,7 +648,7 @@ export default function NotificationsScreen() {
           }}
         >
           {activityQuery.data && (() => {
-            const activity = (activityQuery.data as any) as Activity;
+            const activity = activityQuery.data as Activity;
             return [
               <Dialog.Title key="title" style={{ fontWeight: "bold", color: COLORS.text }}>
                 {activity.title}
