@@ -545,6 +545,15 @@
         "properties": {
           "puzzle": {
             "$ref": "#/components/schemas/Puzzle"
+          },
+          "memoryGame": {
+            "$ref": "#/components/schemas/MemoryGame"
+          },
+          "logicGame": {
+            "$ref": "#/components/schemas/LogicGame"
+          },
+          "sudokuGame": {
+            "$ref": "#/components/schemas/SudokuGame"
           }
         },
         "required": [
@@ -585,6 +594,128 @@
           "title",
           "difficulty",
           "createdAt"
+        ]
+      },
+      "MemoryGame": {
+        "type": "object",
+        "properties": {
+          "puzzleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rows": {
+            "type": "integer"
+          },
+          "cols": {
+            "type": "integer"
+          },
+          "symbols": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "layout": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        "required": [
+          "puzzleId",
+          "rows",
+          "cols",
+          "symbols",
+          "layout"
+        ]
+      },
+      "LogicGame": {
+        "type": "object",
+        "properties": {
+          "puzzleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rows": {
+            "type": "integer"
+          },
+          "cols": {
+            "type": "integer"
+          },
+          "startState": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            }
+          },
+          "solution": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "puzzleId",
+          "rows",
+          "cols",
+          "startState"
+        ]
+      },
+      "SudokuGame": {
+        "type": "object",
+        "properties": {
+          "puzzleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rows": {
+            "type": "integer"
+          },
+          "cols": {
+            "type": "integer"
+          },
+          "given": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          },
+          "solution": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "required": [
+          "puzzleId",
+          "rows",
+          "cols",
+          "given",
+          "solution"
         ]
       },
       "NewMemoryPuzzle": {

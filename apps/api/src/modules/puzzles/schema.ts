@@ -62,13 +62,6 @@ export const SudokuGameSchema = z
 
 export type SudokuGame = z.infer<typeof SudokuGameSchema>;
 
-// Schema simple para respuestas de creación de puzzles (para OpenAPI)
-export const PuzzleCreatedResponseSchema = z
-  .object({
-    puzzle: PuzzleSchema,
-  })
-  .openapi("PuzzleCreatedResponse");
-
 // Schemas individuales sin .openapi() para evitar recursión
 const PuzzleBaseSchema = z.object({
   id: z.string().uuid(),
@@ -99,9 +92,46 @@ const SudokuGameBaseSchema = z.object({
   puzzleId: z.string().uuid(),
   rows: z.number().int(),
   cols: z.number().int(),
-  given: z.array(z.array(z.number().int())),
-  solution: z.array(z.array(z.number().int())),
+  given: z.any(), // Simplificar para OpenAPI
+  solution: z.any(), // Simplificar para OpenAPI
 });
+
+// Schema simple para respuestas de creación de puzzles (para OpenAPI)
+export const PuzzleCreatedResponseSchema = z
+  .object({
+    puzzle: PuzzleBaseSchema,
+    memoryGame: MemoryGameBaseSchema.optional(),
+    logicGame: LogicGameBaseSchema.optional(),
+    sudokuGame: SudokuGameBaseSchema.optional(),
+  })
+  .openapi("PuzzleCreatedResponse");
+
+// Schemas específicos para cada tipo de juego
+export const MemoryPuzzleCreatedSchema = z
+  .object({
+    puzzle: PuzzleBaseSchema,
+    memoryGame: MemoryGameBaseSchema,
+  })
+  .openapi("MemoryPuzzleCreated");
+
+export const LogicPuzzleCreatedSchema = z
+  .object({
+    puzzle: PuzzleBaseSchema,
+    logicGame: LogicGameBaseSchema,
+  })
+  .openapi("LogicPuzzleCreated");
+
+// Sin .openapi() para evitar "Type instantiation is excessively deep"  
+export const SudokuPuzzleCreatedSchema = z.object({
+  puzzle: PuzzleBaseSchema,
+  sudokuGame: SudokuGameBaseSchema,
+});
+
+export const FocusPuzzleCreatedSchema = z
+  .object({
+    puzzle: PuzzleBaseSchema,
+  })
+  .openapi("FocusPuzzleCreated");
 
 // Schema combinado simple sin .openapi() para evitar "Type instantiation is excessively deep"
 export const PuzzleWithDetailsSchema = z.object({
