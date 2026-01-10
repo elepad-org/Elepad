@@ -4,9 +4,11 @@ import { useAuth } from "./useAuth";
 import { getTodayLocal } from "@/lib/dateHelpers";
 import {
   usePostPuzzlesSudoku,
+  PostPuzzlesSudoku201,
+  PostPuzzlesSudoku201SudokuGame,
+  PostPuzzlesSudoku201Puzzle,
   usePostAttemptsStart,
   usePostAttemptsAttemptIdFinish,
-  PostAttemptsStart201,
   PostAttemptsAttemptIdFinish200UnlockedAchievementsItem,
 } from "@elepad/api-client";
 
@@ -33,7 +35,9 @@ export interface UseSudokuProps {
   difficulty: Difficulty;
   maxMistakes?: number;
   onGameOver?: () => void; // Callback si pierde por errores
-  onAchievementUnlocked?: (achievement: PostAttemptsAttemptIdFinish200UnlockedAchievementsItem) => void;
+  onAchievementUnlocked?: (
+    achievement: PostAttemptsAttemptIdFinish200UnlockedAchievementsItem
+  ) => void;
 }
 
 // --- Hook Principal ---
@@ -123,11 +127,12 @@ export const useSudoku = (props: UseSudokuProps) => {
       }
 
       // Validaciones de respuesta (similar a tu ejemplo)
-      const responseData =
+      const responseData: PostPuzzlesSudoku201 =
         "data" in puzzleResponse ? puzzleResponse.data : puzzleResponse;
 
-      const { puzzle, sudokuGame } = responseData;
-
+      const puzzle: PostPuzzlesSudoku201Puzzle = responseData.puzzle;
+      const sudokuGame: PostPuzzlesSudoku201SudokuGame =
+        responseData.sudokuGame;
       setPuzzleId(puzzle.id);
 
       if (!sudokuGame) {
@@ -135,13 +140,15 @@ export const useSudoku = (props: UseSudokuProps) => {
       }
 
       // Construir el tablero local
-      const newBoard: SudokuCell[][] = sudokuGame.given.map(
+      const newBoard: SudokuCell[][] = (sudokuGame.given as number[][]).map(
         (row: number[], rowIndex: number) =>
           row.map((val: number, colIndex: number) => ({
             row: rowIndex,
             col: colIndex,
             value: val !== 0 ? val : null,
-            solutionValue: sudokuGame.solution[rowIndex][colIndex],
+            solutionValue: (sudokuGame.solution as number[][])[rowIndex][
+              colIndex
+            ],
             isReadOnly: val !== 0, // Si viene con valor, es fijo
             isError: false,
             notes: [],
@@ -236,6 +243,7 @@ export const useSudoku = (props: UseSudokuProps) => {
   }, [attemptId, filledCells]);
 
   const loseGame = useCallback(async () => {
+    console.log("Has perdido........")
     // Detener el temporizador
     if (timerRef.current) clearInterval(timerRef.current);
 
@@ -287,17 +295,19 @@ export const useSudoku = (props: UseSudokuProps) => {
               data: { puzzleId, gameType: "attention" },
             })
             .then((res) => {
-              // Manejar respuesta exitosa (status 201)
-              if ('status' in res && res.status === 201 && 'data' in res) {
-                const data = res.data as PostAttemptsStart201;
-                setAttemptId(data.id);
-                console.log("✅ Attempt iniciado:", data.id);
+              if("status" in res && res.status !== 201){
+                console.error("Error iniciando el intento de sudoku");
+                throw new Error("Failed to start attempt");
               }
+                const id = "id" in res ? res.id : res.data.id;
+                setAttemptId(id as string);
+                console.log("✅ Attempt iniciado:", id);
+              
             })
             .catch((err) => {
               console.error("❌ Error iniciando attempt:", err);
             });
-        }
+          }
       }
 
       // 2. Lógica de validación
@@ -370,7 +380,6 @@ export const useSudoku = (props: UseSudokuProps) => {
       !isComplete &&
       !hasFinishedAttempt.current
     ) {
-      setIsComplete(true);
       if (timerRef.current) clearInterval(timerRef.current);
 
       const finishGame = async () => {
@@ -408,22 +417,26 @@ export const useSudoku = (props: UseSudokuProps) => {
             queryClient.invalidateQueries({ queryKey: ["getStreaksHistory"] });
 
             // Manejo de Logros
-            if ('data' in finishResponse) {
-              const resData = finishResponse.data;
-              if (
-                resData?.unlockedAchievements &&
-                resData.unlockedAchievements.length > 0
-              ) {
-                resData.unlockedAchievements.forEach((achievement: PostAttemptsAttemptIdFinish200UnlockedAchievementsItem) => {
+            const resData =
+              "data" in finishResponse ? finishResponse.data : finishResponse;
+            if (
+              resData?.unlockedAchievements &&
+              resData.unlockedAchievements.length > 0
+            ) {
+              resData.unlockedAchievements.forEach(
+                (
+                  achievement: PostAttemptsAttemptIdFinish200UnlockedAchievementsItem
+                ) => {
                   onAchievementUnlocked?.(achievement);
-                });
-              }
+                }
+              );
             }
           } catch (e) {
             console.error("Error finalizando attempt", e);
           }
         }
       };
+      setIsComplete(true);
       finishGame();
     }
   }, [filledCells, isGameStarted, isComplete, attemptId, mistakes]);

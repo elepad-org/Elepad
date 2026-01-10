@@ -7,9 +7,11 @@ import {
   MemoryPuzzleCreatedSchema,
   LogicPuzzleCreatedSchema,
   FocusPuzzleCreatedSchema,
+  SudokuPuzzleCreatedSchema,
   NewMemoryPuzzleSchema,
   NewNetPuzzleSchema,
   NewFocusPuzzleSchema,
+  NewSudokuPuzzleSchema,
 } from "./schema";
 import { openApiErrorResponse } from "@/utils/api-error";
 
@@ -174,6 +176,48 @@ puzzlesApp.openapi(
   },
 );
 
+// Crear un nuevo puzzle de Sudoku
+puzzlesApp.openapi(
+  {
+    method: "post",
+    path: "/puzzles/sudoku",
+    tags: ["puzzles"],
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: NewSudokuPuzzleSchema,
+          },
+        },
+        required: true,
+      },
+    },
+    responses: {
+      201: {
+        description: "Puzzle de Sudoku creado",
+        content: { "application/json": { schema: SudokuPuzzleCreatedSchema } },
+      },
+      400: openApiErrorResponse("Datos inválidos"),
+      500: openApiErrorResponse("Error interno del servidor"),
+    },
+  },
+  async (c) => {
+    try {
+      console.log("🔢 POST /puzzles/sudoku - Request received");
+      const body = c.req.valid("json");
+      console.log("📦 Request body:", body);
+
+      const puzzle = await c.var.puzzleService.createSudokuPuzzle(body);
+      console.log("✅ Sudoku Puzzle created successfully:", puzzle.puzzle.id);
+
+      return c.json(puzzle, 201);
+    } catch (error) {
+      console.error("❌ Error creating sudoku puzzle:", error);
+      throw error;
+    }
+  },
+);
+
 // Crear un nuevo puzzle de focus
 puzzlesApp.openapi(
   {
@@ -216,7 +260,6 @@ puzzlesApp.openapi(
   },
 );
 
-// TODO: Crear un nuevo puzzle de Sudoku - Temporalmente removido para resolver error de TypeScript
 
 // Listar puzzles recientes de un tipo
 puzzlesApp.openapi(
