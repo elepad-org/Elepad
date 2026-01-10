@@ -275,6 +275,7 @@ export class FamilyGroupService {
     groupId: string,
     userId: string,
     adminUserId: string,
+    createNewGroup: boolean = true,
   ): Promise<{
     removedFromGroupId: string;
     userId: string;
@@ -348,7 +349,18 @@ export class FamilyGroupService {
       `[FamilyGroups] User ${userId} removed from group ${groupId} at ${new Date().toISOString()}`,
     );
 
-    // 7) Validate if the user has another group assigned
+    // 7) Solo crear un nuevo grupo si se solicita
+    if (!createNewGroup) {
+      console.info(
+        `[FamilyGroups] User ${userId} left group without creating a new one at ${new Date().toISOString()}`,
+      );
+      return {
+        removedFromGroupId: groupId,
+        userId,
+      };
+    }
+
+    // 8) Validate if the user has another group assigned
     // Given the current schema (users.groupId), if it's null, they have no group.
     const created = await this.createPersonalGroupForUser(
       userId,

@@ -1479,6 +1479,15 @@
             "required": true,
             "name": "idUser",
             "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "default": "true"
+            },
+            "required": false,
+            "name": "createNewGroup",
+            "in": "query"
           }
         ],
         "responses": {

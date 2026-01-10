@@ -27,6 +27,8 @@ import {
   useRemoveUserFromFamilyGroup,
   usePatchFamilyGroupIdGroup,
   useTransferFamilyGroupOwnership,
+  usePostFamilyGroupCreate,
+  usePostFamilyGroupLink,
 } from "@elepad/api-client";
 import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 import { useAuth } from "@/hooks/useAuth";
@@ -74,6 +76,11 @@ export default function FamilyGroup() {
     avatarUrl: string | null;
   } | null>(null);
 
+  // Estados para el modal de opciones después de salir
+  const [exitOptionsVisible, setExitOptionsVisible] = useState(false);
+  const [joinCodeInput, setJoinCodeInput] = useState("");
+  const [showJoinCodeInput, setShowJoinCodeInput] = useState(false);
+
   // Transferir ownership
   const [transferDialogVisible, setTransferDialogVisible] = useState(false);
   const [selectedNewOwner, setSelectedNewOwner] = useState<{
@@ -90,6 +97,8 @@ export default function FamilyGroup() {
   const membersQuery = useGetFamilyGroupIdGroupMembers(groupId ?? "");
   const removeMember = useRemoveUserFromFamilyGroup();
   const transferOwnership = useTransferFamilyGroupOwnership();
+  const createGroup = usePostFamilyGroupCreate();
+  const joinGroup = usePostFamilyGroupLink();
 
   // Normaliza la respuesta del hook (envuelta en {data} o directa)
   const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
@@ -175,25 +184,20 @@ export default function FamilyGroup() {
       await removeMember.mutateAsync({
         idGroup: groupId,
         idUser: memberToRemove.id,
+        params: isSelfRemoval ? { createNewGroup: "false" } : undefined,
       });
 
-      // Si el usuario se está saliendo del grupo, necesitamos refrescar su información
+      // Si el usuario se está saliendo del grupo, mostrar modal de opciones
       if (isSelfRemoval) {
+        closeConfirm();
         await refreshUserElepad();
-        // Pequeña pausa para asegurar que el backend haya procesado todo
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        setExitOptionsVisible(true);
+        return;
       }
 
       await membersQuery.refetch();
 
-      const message = isSelfRemoval
-        ? "Has salido del grupo correctamente. Se ha creado un nuevo grupo familiar para ti."
-        : "El miembro fue eliminado correctamente.";
-
-      Alert.alert(
-        isSelfRemoval ? "Saliste del grupo" : "Miembro eliminado",
-        message,
-      );
+      Alert.alert("Miembro eliminado", "El miembro fue eliminado correctamente.");
     } catch (e: unknown) {
       type MaybeApiError = {
         data?: { error?: { message?: string } };
@@ -266,6 +270,88 @@ export default function FamilyGroup() {
       Alert.alert("Error", msg);
     } finally {
       closeConfirmTransfer();
+    }
+  };
+
+  // Funciones para manejar las opciones después de salir del grupo
+  const handleCreateNewGroup = async () => {
+    try {
+      if (!userElepad?.id || !userElepad?.displayName) {
+        Alert.alert("Error", "No se pudo obtener la información del usuario");
+        return;
+      }
+
+      const groupName = `Grupo Familiar de ${userElepad.displayName}`;
+      
+      const result = await createGroup.mutateAsync({
+        data: {
+          name: groupName,
+          ownerUserId: userElepad.id,
+        },
+      });
+
+      // Refrescar datos del usuario
+      await refreshUserElepad();
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      setExitOptionsVisible(false);
+      Alert.alert(
+        "Grupo creado",
+        "Se ha creado tu nuevo grupo familiar exitosamente.",
+      );
+      
+    } catch (e: unknown) {
+      type MaybeApiError = {
+        data?: { error?: { message?: string } };
+        message?: string;
+      };
+      const err = e as MaybeApiError;
+      const msg =
+        err?.data?.error?.message ?? err?.message ?? "Error creando el grupo";
+      Alert.alert("Error", msg);
+    }
+  };
+
+  const handleJoinWithCode = async () => {
+    try {
+      if (!userElepad?.id) {
+        Alert.alert("Error", "No se pudo obtener la información del usuario");
+        return;
+      }
+
+      if (!joinCodeInput.trim()) {
+        Alert.alert("Error", "Debes ingresar un código de invitación");
+        return;
+      }
+
+      await joinGroup.mutateAsync({
+        data: {
+          userId: userElepad.id,
+          invitationCode: joinCodeInput.trim(),
+        },
+      });
+
+      // Refrescar datos del usuario
+      await refreshUserElepad();
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      setExitOptionsVisible(false);
+      setShowJoinCodeInput(false);
+      setJoinCodeInput("");
+      Alert.alert(
+        "¡Bienvenido!",
+        "Te has unido al grupo familiar exitosamente.",
+      );
+      
+    } catch (e: unknown) {
+      type MaybeApiError = {
+        data?: { error?: { message?: string } };
+        message?: string;
+      };
+      const err = e as MaybeApiError;
+      const msg =
+        err?.data?.error?.message ?? err?.message ?? "Error uniéndote al grupo";
+      Alert.alert("Error", msg);
     }
   };
 
@@ -1085,6 +1171,104 @@ export default function FamilyGroup() {
                 Cerrar
               </Button>
             </Dialog.Actions>
+          </Dialog>
+
+          {/* Modal de opciones después de salir del grupo */}
+          <Dialog
+            visible={exitOptionsVisible}
+            onDismiss={() => {}}
+            dismissable={false}
+            style={{
+              alignSelf: "center",
+              width: "90%",
+              backgroundColor: COLORS.background,
+            }}
+          >
+            <Dialog.Title>
+              <Text style={[STYLES.heading, { fontSize: 18, paddingTop: 15 }]}>
+                ¿Qué deseas hacer ahora?
+              </Text>
+            </Dialog.Title>
+            <Dialog.Content>
+              {!showJoinCodeInput ? (
+                <>
+                  <Text style={[STYLES.subheading, { marginBottom: 16 }]}>
+                    Has salido del grupo familiar. Elige una opción para continuar:
+                  </Text>
+                  <Button
+                    mode="contained"
+                    onPress={handleCreateNewGroup}
+                    style={[STYLES.buttonPrimary, { marginBottom: 12 }]}
+                    contentStyle={STYLES.buttonContent}
+                    loading={createGroup.isPending}
+                    disabled={createGroup.isPending || joinGroup.isPending}
+                  >
+                    Crear un nuevo grupo familiar
+                  </Button>
+                  <Button
+                    mode="contained"
+                    onPress={() => setShowJoinCodeInput(true)}
+                    style={[
+                      STYLES.buttonPrimary,
+                      { backgroundColor: COLORS.secondary },
+                    ]}
+                    contentStyle={STYLES.buttonContent}
+                    disabled={createGroup.isPending || joinGroup.isPending}
+                  >
+                    Unirme con un código
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Text style={[STYLES.subheading, { marginBottom: 16 }]}>
+                    Ingresa el código de invitación del grupo al que deseas unirte:
+                  </Text>
+                  <TextInput
+                    style={[STYLES.input, { marginBottom: 16 }]}
+                    value={joinCodeInput}
+                    onChangeText={setJoinCodeInput}
+                    placeholder="Código de invitación"
+                    autoCapitalize="characters"
+                    underlineColor="transparent"
+                    activeUnderlineColor={COLORS.primary}
+                  />
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      width: "100%",
+                    }}
+                  >
+                    <Button
+                      mode="contained"
+                      onPress={() => {
+                        setShowJoinCodeInput(false);
+                        setJoinCodeInput("");
+                      }}
+                      disabled={joinGroup.isPending}
+                      style={[
+                        STYLES.buttonPrimary,
+                        { width: "48%", backgroundColor: COLORS.white },
+                      ]}
+                      labelStyle={{ color: COLORS.text }}
+                      contentStyle={STYLES.buttonContent}
+                    >
+                      Atrás
+                    </Button>
+                    <Button
+                      mode="contained"
+                      onPress={handleJoinWithCode}
+                      style={[STYLES.buttonPrimary, { width: "48%" }]}
+                      contentStyle={STYLES.buttonContent}
+                      loading={joinGroup.isPending}
+                      disabled={!joinCodeInput.trim() || joinGroup.isPending}
+                    >
+                      Unirme
+                    </Button>
+                  </View>
+                </>
+              )}
+            </Dialog.Content>
           </Dialog>
         </Portal>
         
