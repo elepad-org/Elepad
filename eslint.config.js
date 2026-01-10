@@ -8,6 +8,9 @@ import gitignore from "eslint-config-flat-gitignore";
 export default defineConfig([
   gitignore(),
   {
+    ignores: ["**/.expo/**", "**/node_modules/**", "**/dist/**", "**/.turbo/**"],
+  },
+  {
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
       ecmaVersion: "latest",
