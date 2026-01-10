@@ -32,7 +32,7 @@ function expandRecurringActivity(
 ): string[] {
   // Si no tiene frecuencia, solo retorna el día de inicio
   if (!activity.frequencyId || !frequencies[activity.frequencyId]) {
-    return [activity.startsAt.slice(0, 10)];
+    return [toLocalDateString(new Date(activity.startsAt))];
   }
 
   const frequency = frequencies[activity.frequencyId];
@@ -40,7 +40,7 @@ function expandRecurringActivity(
 
   // Si no hay RRULE (Una vez), solo el día de inicio
   if (!rrule) {
-    return [activity.startsAt.slice(0, 10)];
+    return [toLocalDateString(new Date(activity.startsAt))];
   }
 
   const dates: string[] = [];
@@ -117,11 +117,11 @@ function expandRecurringActivity(
         break;
       default:
         // Si no hay frecuencia válida, solo agregar el primer día
-        return [activity.startsAt.slice(0, 10)];
+        return [toLocalDateString(new Date(activity.startsAt))];
     }
   }
 
-  return dates.length > 0 ? dates : [activity.startsAt.slice(0, 10)];
+  return dates.length > 0 ? dates : [toLocalDateString(new Date(activity.startsAt))];
 }
 
 interface CalendarCardProps {

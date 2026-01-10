@@ -52,6 +52,7 @@ export type Database = {
       }
       activities: {
         Row: {
+          assignedTo: string | null
           completed: boolean
           createdAt: string
           createdBy: string
@@ -66,6 +67,7 @@ export type Database = {
           updatedAt: string
         }
         Insert: {
+          assignedTo?: string | null
           completed?: boolean
           createdAt?: string
           createdBy: string
@@ -80,6 +82,7 @@ export type Database = {
           updatedAt?: string
         }
         Update: {
+          assignedTo?: string | null
           completed?: boolean
           createdAt?: string
           createdBy?: string
@@ -94,6 +97,13 @@ export type Database = {
           updatedAt?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "activities_assignedTo_fkey"
+            columns: ["assignedTo"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "activities_createdBy_fkey"
             columns: ["createdBy"]

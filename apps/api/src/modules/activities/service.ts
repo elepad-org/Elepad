@@ -58,11 +58,11 @@ export class ActivityService {
     // Pasar ids del obj a un array
     const userIdsArray = usersIds.map((u) => u.id);
 
-    // Obtener todas las actividades
+    // Obtener todas las actividades donde los usuarios son creadores O destinatarios
     const { data: activities, error: activitiesError } = await this.supabase
       .from("activities")
       .select("*")
-      .in("createdBy", userIdsArray);
+      .or(`createdBy.in.(${userIdsArray.join(",")}),assignedTo.in.(${userIdsArray.join(",")})`);
 
     if (activitiesError) {
       throw new ApiException(
@@ -124,6 +124,27 @@ export class ActivityService {
             data.id,
             payload.title || "Sin título"
           );
+        }
+      }
+
+      // Send notification to assignedTo user if different from creator
+      if (payload.assignedTo && payload.assignedTo !== payload.createdBy) {
+        const { data: creator, error: creatorError } = await this.supabase
+          .from("users")
+          .select("displayName")
+          .eq("id", payload.createdBy)
+          .single();
+
+        if (!creatorError && creator) {
+          await this.notificationsService.createNotification({
+            userId: payload.assignedTo,
+            actorId: payload.createdBy,
+            eventType: "activity_assigned",
+            entityType: "activity",
+            entityId: data.id,
+            title: "Nueva actividad asignada",
+            body: `${creator.displayName} te agendó una nueva actividad: ${payload.title}`,
+          });
         }
       }
     } catch (mentionError) {

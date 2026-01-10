@@ -91,6 +91,8 @@ export interface Activity {
   endsAt?: string | null;
   completed: boolean;
   createdBy: string;
+  /** @nullable */
+  assignedTo: string | null;
   createdAt: string;
   updatedAt: string;
   /** @nullable */
@@ -105,6 +107,7 @@ export interface NewActivity {
   endsAt?: string;
   completed?: boolean;
   createdBy: string;
+  assignedTo: string;
   /** @nullable */
   frequencyId?: string | null;
 }
@@ -116,6 +119,7 @@ export interface UpdateActivity {
   startsAt: string;
   endsAt?: string;
   completed?: boolean;
+  assignedTo?: string;
   /** @nullable */
   frequencyId?: string | null;
 }
@@ -344,6 +348,8 @@ export interface FinishAttempt {
   score?: number;
   meta?: FinishAttemptMeta;
   isFocusGame?: boolean;
+  /** @pattern ^\d{4}-\d{2}-\d{2}$ */
+  clientDate?: string;
 }
 
 export interface AttemptStats {
@@ -378,6 +384,7 @@ export type GetFamilyGroupIdGroupMembers200Owner = {
   displayName: string;
   /** @nullable */
   avatarUrl: string | null;
+  elder: boolean;
 };
 
 export type GetFamilyGroupIdGroupMembers200MembersItem = {
@@ -385,6 +392,7 @@ export type GetFamilyGroupIdGroupMembers200MembersItem = {
   displayName: string;
   /** @nullable */
   avatarUrl: string | null;
+  elder: boolean;
 };
 
 export type GetFamilyGroupIdGroupMembers200 = {

@@ -185,6 +185,11 @@
             "type": "string",
             "format": "uuid"
           },
+          "assignedTo": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -205,6 +210,7 @@
           "startsAt",
           "completed",
           "createdBy",
+          "assignedTo",
           "createdAt",
           "updatedAt"
         ]
@@ -233,6 +239,10 @@
             "type": "string",
             "format": "uuid"
           },
+          "assignedTo": {
+            "type": "string",
+            "format": "uuid"
+          },
           "frequencyId": {
             "type": "string",
             "nullable": true,
@@ -242,7 +252,8 @@
         "required": [
           "title",
           "startsAt",
-          "createdBy"
+          "createdBy",
+          "assignedTo"
         ]
       },
       "UpdateActivity": {
@@ -263,6 +274,10 @@
           },
           "completed": {
             "type": "boolean"
+          },
+          "assignedTo": {
+            "type": "string",
+            "format": "uuid"
           },
           "frequencyId": {
             "type": "string",
@@ -823,6 +838,10 @@
           },
           "isFocusGame": {
             "type": "boolean"
+          },
+          "clientDate": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
           }
         },
         "required": [
@@ -1285,12 +1304,16 @@
                         "avatarUrl": {
                           "type": "string",
                           "nullable": true
+                        },
+                        "elder": {
+                          "type": "boolean"
                         }
                       },
                       "required": [
                         "id",
                         "displayName",
-                        "avatarUrl"
+                        "avatarUrl",
+                        "elder"
                       ]
                     },
                     "members": {
@@ -1308,12 +1331,16 @@
                           "avatarUrl": {
                             "type": "string",
                             "nullable": true
+                          },
+                          "elder": {
+                            "type": "boolean"
                           }
                         },
                         "required": [
                           "id",
                           "displayName",
-                          "avatarUrl"
+                          "avatarUrl",
+                          "elder"
                         ]
                       }
                     }

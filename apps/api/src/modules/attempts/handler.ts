@@ -132,7 +132,7 @@ attemptsApp.openapi(
         // Actualizar racha del usuario
         try {
           const streakService = new StreakService(c.var.supabase);
-          await streakService.updateStreakOnGameCompletion(userId);
+          await streakService.updateStreakOnGameCompletion(userId, body.clientDate);
           console.log("🔥 Racha actualizada");
         } catch (streakError) {
           console.error("❌ Error al actualizar racha:", streakError);

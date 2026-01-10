@@ -70,24 +70,43 @@ export class StreakService {
 
   /**
    * Actualiza la racha cuando el usuario completa un juego
+   * @param userId - ID del usuario
+   * @param clientDate - Fecha local del cliente en formato YYYY-MM-DD (opcional, se calcula en UTC si no se provee)
    */
-  async updateStreakOnGameCompletion(userId: string) {
-    const today = this.getTodayDate();
+  async updateStreakOnGameCompletion(userId: string, clientDate?: string) {
+    const today = clientDate || this.getTodayDate();
+
+    console.log("📅 [STREAK] updateStreakOnGameCompletion");
+    console.log("📅 [STREAK] userId:", userId);
+    console.log("📅 [STREAK] clientDate recibido:", clientDate);
+    console.log("📅 [STREAK] today usado:", today);
 
     // Verificar si ya jugó hoy
-    const { data: alreadyPlayed } = await this.supabase
+    const { data: alreadyPlayed, error: historyError } = await this.supabase
       .from("streak_history")
-      .select("id")
+      .select("id, playedDate")
       .eq("userId", userId)
       .eq("playedDate", today)
       .single();
 
+    console.log("📅 [STREAK] Query streak_history:");
+    console.log("📅 [STREAK]   - userId:", userId);
+    console.log("📅 [STREAK]   - playedDate buscado:", today);
+    console.log("📅 [STREAK]   - alreadyPlayed:", alreadyPlayed);
+    console.log("📅 [STREAK]   - error:", historyError?.message || "none");
+
     // Si ya jugó hoy, no hacer nada
     if (alreadyPlayed) {
+      console.log(`ℹ️ [STREAK] Usuario ${userId} ya jugó hoy (${today})`);
       return;
     }
 
+    console.log("✅ [STREAK] No hay registro previo para hoy, continuando...");
+
+    console.log("✅ [STREAK] No hay registro previo para hoy, continuando...");
+
     // Insertar en historial
+    console.log("📅 [STREAK] Insertando en streak_history:", { userId, playedDate: today });
     await this.supabase.from("streak_history").insert({
       userId,
       playedDate: today,
@@ -100,14 +119,22 @@ export class StreakService {
       .eq("userId", userId)
       .single();
 
+    console.log("📅 [STREAK] currentStreak en DB:", currentStreak);
+
     let newCurrentStreak = 1;
     let newLongestStreak = 1;
 
     if (currentStreak) {
       const lastPlayed = currentStreak.lastPlayedDate;
 
+      console.log("📅 [STREAK] Comparando fechas:");
+      console.log("📅 [STREAK]   - lastPlayedDate (DB):", lastPlayed);
+      console.log("📅 [STREAK]   - today (cliente):", today);
+
       if (lastPlayed) {
         const daysDiff = this.getDaysDifference(lastPlayed, today);
+
+        console.log("📅 [STREAK]   - daysDiff:", daysDiff);
 
         if (daysDiff === 1) {
           // Continúa la racha
@@ -116,17 +143,25 @@ export class StreakService {
             newCurrentStreak,
             currentStreak.longestStreak,
           );
+          console.log("🔥 [STREAK] Racha continúa:", newCurrentStreak);
         } else if (daysDiff === 0) {
           // Ya jugó hoy (no debería pasar por el check anterior)
+          console.log("⚠️ [STREAK] daysDiff === 0 pero no encontró en history!");
           return;
         } else {
           // Racha rota
           newCurrentStreak = 1;
           newLongestStreak = currentStreak.longestStreak;
+          console.log("💔 [STREAK] Racha rota, reiniciando a 1");
         }
       }
 
       // Actualizar racha existente
+      console.log("📅 [STREAK] Actualizando user_streaks:", {
+        currentStreak: newCurrentStreak,
+        longestStreak: newLongestStreak,
+        lastPlayedDate: today,
+      });
       await this.supabase
         .from("user_streaks")
         .update({
@@ -137,6 +172,7 @@ export class StreakService {
         .eq("userId", userId);
     } else {
       // Crear nueva racha
+      console.log("📅 [STREAK] Creando nueva racha");
       await this.supabase.from("user_streaks").insert({
         userId,
         currentStreak: newCurrentStreak,
@@ -144,6 +180,8 @@ export class StreakService {
         lastPlayedDate: today,
       });
     }
+
+    console.log("✅ [STREAK] Racha actualizada exitosamente");
   }
 
   /**
