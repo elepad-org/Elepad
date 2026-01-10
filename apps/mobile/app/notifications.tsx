@@ -155,8 +155,9 @@ export default function NotificationsScreen() {
 
   // Obtener el rango de fechas para la actividad (solo el día de la actividad)
   const activityDateRange = useMemo(() => {
-    if (!activityQuery.data || !('startsAt' in activityQuery.data)) return { startDate: "", endDate: "" };
-    const activity = activityQuery.data as unknown as Activity;
+    if (!activityQuery.data) return { startDate: "", endDate: "" };
+    const activity = activityQuery.data as Activity;
+    if (!activity.startsAt) return { startDate: "", endDate: "" };
     const activityDate = activity.startsAt.slice(0, 10);
     return {
       startDate: activityDate,
@@ -179,9 +180,10 @@ export default function NotificationsScreen() {
 
   // Determinar si la actividad está completada para su día específico
   const isActivityCompleted = useMemo(() => {
-    if (!activityQuery.data || !activityCompletionsQuery.data || !('startsAt' in activityQuery.data)) return false;
+    if (!activityQuery.data || !activityCompletionsQuery.data) return false;
     
-    const activity = activityQuery.data as unknown as Activity;
+    const activity = activityQuery.data as Activity;
+    if (!activity.startsAt) return false;
     const activityDate = activity.startsAt.slice(0, 10);
     
     // Extraer las completaciones correctamente
@@ -394,15 +396,17 @@ export default function NotificationsScreen() {
       case "mention":
         // Diferentes iconos según el tipo de entidad
         if (entityType === "memory") {
-          return "image-text";
+          return "message-image";
         } else if (entityType === "activity") {
-          return "calendar-text";
+          return "message-badge";
         }
         return "at";
       case "activity_created":
         return "calendar-plus";
       case "activity_reminder":
         return "bell-ring";
+      case "activity_assigned":
+        return "account-arrow-right";
       default:
         return "bell";
     }
@@ -410,9 +414,9 @@ export default function NotificationsScreen() {
 
   const renderNotification = useCallback(
     ({ item }: { item: GetNotifications200Item }) => {
-      // Para menciones, detectar si el título contiene formato <@id>
-      const hasMention = item.title ? /<@([^>]+)>/.test(item.title) : false;
-      const isMention = item.event_type === "mention" || hasMention;
+      // Para menciones, detectar si el título o body contiene formato <@id>
+      const hasMention = (item.title && /<@([^>]+)>/.test(item.title)) || (item.body && /<@([^>]+)>/.test(item.body));
+      const isMention = item.event_type === "mention" || item.event_type === "activity_assigned" || hasMention;
 
       return (
         <Pressable
@@ -458,11 +462,20 @@ export default function NotificationsScreen() {
                 {item.title}
               </Text>
             )}
-            {item.body && typeof item.body === 'string' && item.body.trim() !== '' && (
-              <Text style={styles.notificationBody} numberOfLines={2}>
-                {item.body}
-              </Text>
-            )}
+            {item.body && typeof item.body === 'string' && item.body.trim() !== '' ? (
+              isMention ? (
+                <HighlightedMentionText
+                  text={item.body}
+                  groupMembers={groupMembers}
+                  style={styles.notificationBody}
+                  numberOfLines={2}
+                />
+              ) : (
+                <Text style={styles.notificationBody} numberOfLines={2}>
+                  {item.body}
+                </Text>
+              )
+            ) : null}
             <Text style={styles.notificationDate}>
               {formatDate(item.created_at)}
             </Text>
@@ -607,9 +620,9 @@ export default function NotificationsScreen() {
         <RecuerdoDetailDialog
           visible={detailDialogVisible}
           recuerdo={
-            memoryQuery.data && groupMembers && 'status' in memoryQuery.data && memoryQuery.data.status === 200 && 'data' in memoryQuery.data
+            memoryQuery.data && groupMembers
               ? memoryToRecuerdo(
-                  memoryQuery.data.data as Memory,
+                  memoryQuery.data as Memory,
                   groupMembers.reduce((acc, m) => {
                     acc[m.id] = m.displayName;
                     return acc;
@@ -650,8 +663,8 @@ export default function NotificationsScreen() {
             alignSelf: "center",
           }}
         >
-          {activityQuery.data && 'status' in activityQuery.data && activityQuery.data.status === 200 && 'data' in activityQuery.data && (() => {
-            const activity = activityQuery.data.data as Activity;
+          {activityQuery.data && (() => {
+            const activity = activityQuery.data as Activity;
             return [
               <Dialog.Title key="title" style={{ fontWeight: "bold", color: COLORS.text }}>
                 {activity.title}
