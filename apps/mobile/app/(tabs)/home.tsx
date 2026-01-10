@@ -157,6 +157,8 @@ export default function HomeScreen() {
   const displayName =
     (userElepad?.displayName as string) || userElepad?.email || "Usuario";
   
+  const userRole = userElepad?.elder ? "Adulto Mayor" : "Familiar";
+  
   const getInitials = (name: string) =>
     name
       .split(/\s+/)

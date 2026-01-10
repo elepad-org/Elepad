@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { postFamilyGroupCreate, postFamilyGroupLink } from "@elepad/api-client";
-import { Link, useRouter } from "expo-router";
+import { Link } from "expo-router";
 import { useState } from "react";
 import { View, Alert, StyleSheet } from "react-native";
 import { TextInput, Button, Text, Switch } from "react-native-paper";
@@ -59,11 +59,12 @@ export default function NewAccount() {
             // Refresh user data to get the new groupId
             await refreshUserElepad();
           }
-        } catch (err: any) {
+        } catch (err: unknown) {
           console.error("Error creating family group:", err);
+          const errorMessage = err instanceof Error ? err.message : "Error desconocido";
           Alert.alert(
             "Advertencia",
-            `La cuenta se creó pero hubo un problema al crear el grupo familiar: ${err.message || "Error desconocido"}`
+            `La cuenta se creó pero hubo un problema al crear el grupo familiar: ${errorMessage}`
           );
         }
       } else {
@@ -84,17 +85,19 @@ export default function NewAccount() {
             // Refresh user data to get the new groupId
             await refreshUserElepad();
           }
-        } catch (err: any) {
+        } catch (err: unknown) {
           console.error("Error linking to family group:", err);
+          const errorMessage = err instanceof Error ? err.message : "Código inválido o expirado";
           Alert.alert(
             "Advertencia",
-            `La cuenta se creó pero no se pudo vincular al grupo familiar: ${err.message || "Código inválido o expirado"}`
+            `La cuenta se creó pero no se pudo vincular al grupo familiar: ${errorMessage}`
           );
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Signup error:", err);
-      Alert.alert("Error", err.message || "Error al crear la cuenta");
+      const errorMessage = err instanceof Error ? err.message : "Error al crear la cuenta";
+      Alert.alert("Error", errorMessage);
     } finally {
       setLoading(false);
     }

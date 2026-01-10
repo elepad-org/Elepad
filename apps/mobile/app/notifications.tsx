@@ -31,7 +31,7 @@ import {
   Activity,
   useGetActivityCompletions,
 } from "@elepad/api-client";
-import { COLORS, STYLES, SHADOWS } from "@/styles/base";
+import { COLORS } from "@/styles/base";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";

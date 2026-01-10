@@ -141,13 +141,19 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
   const elders = useMemo(() => {
     if (!isHelper || !membersQuery.data) return [];
     
-    const groupInfo = membersQuery.data as any;
+    interface GroupMember {
+      id: string;
+      displayName: string;
+      elder: boolean;
+    }
+    
+    const groupInfo = membersQuery.data as { members?: GroupMember[]; owner?: GroupMember };
     const allMembers = [
       ...(groupInfo.members || []),
       ...(groupInfo.owner ? [groupInfo.owner] : [])
     ];
     
-    return allMembers.filter((member: any) => member.elder === true);
+    return allMembers.filter((member: GroupMember) => member.elder === true);
   }, [membersQuery.data, isHelper]);
 
   // Set default selected elder

@@ -25,7 +25,6 @@ export default function AudioRecorderComponent({
 }: AudioRecorderProps) {
   const [audioUri, setAudioUri] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);

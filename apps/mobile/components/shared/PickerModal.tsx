@@ -41,12 +41,8 @@ export default function PickerModal({
       }
     : {
         position: "absolute" as const,
-        top: "50%" as any,
-        left: "10%" as any,
-        right: "10%" as any,
-        transform: [{ translateY: -100 }],
-        zIndex: 9999,
-      };
+        top: "50%",
+        left: "10%",
         right: "10%",
         transform: [{ translateY: -100 }],
         zIndex: 9999,

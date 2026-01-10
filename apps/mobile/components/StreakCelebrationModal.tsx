@@ -11,7 +11,6 @@ import Animated, {
   withDelay,
   withTiming,
   Easing,
-  runOnJS,
 } from "react-native-reanimated";
 import { useEffect } from "react";
 
