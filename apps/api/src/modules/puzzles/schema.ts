@@ -62,15 +62,54 @@ export const SudokuGameSchema = z
 
 export type SudokuGame = z.infer<typeof SudokuGameSchema>;
 
-// Schema combinado: Puzzle + detalles del juego
-export const PuzzleWithDetailsSchema = z
+// Schema simple para respuestas de creación de puzzles (para OpenAPI)
+export const PuzzleCreatedResponseSchema = z
   .object({
     puzzle: PuzzleSchema,
-    memoryGame: MemoryGameSchema.nullable(),
-    logicGame: LogicGameSchema.nullable(),
-    sudokuGame: SudokuGameSchema.nullable(),
   })
-  .openapi("PuzzleWithDetails");
+  .openapi("PuzzleCreatedResponse");
+
+// Schemas individuales sin .openapi() para evitar recursión
+const PuzzleBaseSchema = z.object({
+  id: z.string().uuid(),
+  gameType: GameTypeEnum,
+  gameName: z.string().nullable(),
+  title: z.string().nullable(),
+  difficulty: z.number().int().nullable(),
+  createdAt: z.string().datetime(),
+});
+
+const MemoryGameBaseSchema = z.object({
+  puzzleId: z.string().uuid(),
+  rows: z.number().int(),
+  cols: z.number().int(),
+  symbols: z.array(z.string()),
+  layout: z.array(z.number().int()),
+});
+
+const LogicGameBaseSchema = z.object({
+  puzzleId: z.string().uuid(),
+  rows: z.number().int(),
+  cols: z.number().int(),
+  startState: z.array(z.union([z.number().int(), z.boolean()])),
+  solution: z.array(z.union([z.number().int(), z.boolean()])).nullable().optional(),
+});
+
+const SudokuGameBaseSchema = z.object({
+  puzzleId: z.string().uuid(),
+  rows: z.number().int(),
+  cols: z.number().int(),
+  given: z.array(z.array(z.number().int())),
+  solution: z.array(z.array(z.number().int())),
+});
+
+// Schema combinado simple sin .openapi() para evitar "Type instantiation is excessively deep"
+export const PuzzleWithDetailsSchema = z.object({
+  puzzle: PuzzleBaseSchema,
+  memoryGame: MemoryGameBaseSchema.nullable(),
+  logicGame: LogicGameBaseSchema.nullable(),
+  sudokuGame: SudokuGameBaseSchema.nullable(),
+});
 
 export type PuzzleWithDetails = z.infer<typeof PuzzleWithDetailsSchema>;
 

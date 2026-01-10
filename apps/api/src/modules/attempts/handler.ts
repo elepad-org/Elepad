@@ -236,7 +236,7 @@ attemptsApp.openapi(
       const canAccess = await familyGroupService.canAccessUserData(currentUserId, requestedUserId);
       
       if (!canAccess) {
-        return c.json({ error: "No tienes permisos para ver los datos de este usuario" }, 403);
+        return c.json({ error: { message: "No tienes permisos para ver los datos de este usuario" } }, 403);
       }
       
       targetUserId = requestedUserId;
@@ -287,7 +287,7 @@ attemptsApp.openapi(
       const canAccess = await familyGroupService.canAccessUserData(currentUserId, requestedUserId);
       
       if (!canAccess) {
-        return c.json({ error: "No tienes permisos para ver los datos de este usuario" }, 403);
+        return c.json({ error: { message: "No tienes permisos para ver los datos de este usuario" } }, 403);
       }
       
       targetUserId = requestedUserId;

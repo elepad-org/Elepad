@@ -18,7 +18,7 @@ const isValidMove = (
 ) => {
   // Verificar fila y columna
   for (let x = 0; x < 9; x++) {
-    if (grid[row][x] === num || grid[x][col] === num) return false;
+    if (grid[row]![x] === num || grid[x]![col] === num) return false;
   }
 
   // Verificar cuadrante 3x3
@@ -26,7 +26,7 @@ const isValidMove = (
   const startCol = col - (col % 3);
   for (let i = 0; i < 3; i++) {
     for (let j = 0; j < 3; j++) {
-      if (grid[i + startRow][j + startCol] === num) return false;
+      if (grid[i + startRow]![j + startCol] === num) return false;
     }
   }
   return true;
@@ -35,7 +35,7 @@ const isValidMove = (
 const solveSudoku = (grid: number[][]): boolean => {
   for (let row = 0; row < 9; row++) {
     for (let col = 0; col < 9; col++) {
-      if (grid[row][col] === 0) {
+      if (grid[row]![col] === 0) {
         // Intentar números del 1 al 9 en orden aleatorio para generar tableros distintos
         const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(
           () => Math.random() - 0.5,
@@ -43,9 +43,9 @@ const solveSudoku = (grid: number[][]): boolean => {
 
         for (const num of nums) {
           if (isValidMove(grid, row, col, num)) {
-            grid[row][col] = num;
+            grid[row]![col] = num;
             if (solveSudoku(grid)) return true;
-            grid[row][col] = 0; // Backtracking
+            grid[row]![col] = 0; // Backtracking
           }
         }
         return false;
@@ -63,7 +63,7 @@ const fillBox = (grid: number[][], row: number, col: number) => {
       do {
         num = Math.floor(Math.random() * 9) + 1;
       } while (!isSafeInBox(grid, row, col, num));
-      grid[row + i][col + j] = num;
+      grid[row + i]![col + j] = num;
     }
   }
 };
@@ -104,11 +104,11 @@ const generateSudoku = (difficulty: "easy" | "medium" | "hard") => {
   while (attempts > 0) {
     let row = Math.floor(Math.random() * 9);
     let col = Math.floor(Math.random() * 9);
-    while (initialGrid[row][col] === 0) {
+    while (initialGrid[row]![col] === 0) {
       row = Math.floor(Math.random() * 9);
       col = Math.floor(Math.random() * 9);
     }
-    initialGrid[row][col] = 0; // 0 representa celda vacía
+    initialGrid[row]![col] = 0; // 0 representa celda vacía
     attempts--;
   }
 
@@ -123,7 +123,7 @@ const isSafeInBox = (
 ) => {
   for (let i = 0; i < 3; i++) {
     for (let j = 0; j < 3; j++) {
-      if (grid[rowStart + i][colStart + j] === num) return false;
+      if (grid[rowStart + i]![colStart + j] === num) return false;
     }
   }
   return true;

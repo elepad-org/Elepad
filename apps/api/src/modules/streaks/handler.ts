@@ -47,7 +47,7 @@ streaksApp.openapi(
     c.header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
     c.header("Pragma", "no-cache");
     
-    return c.json(streak);
+    return c.json(streak, 200);
   },
 );
 
@@ -85,6 +85,6 @@ streaksApp.openapi(
     c.header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
     c.header("Pragma", "no-cache");
     
-    return c.json(history);
+    return c.json(history, 200);
   },
 );

@@ -226,7 +226,7 @@ export class StreakService {
    */
   private getTodayDate(): string {
     const now = new Date();
-    return now.toISOString().split("T")[0];
+    return now.toISOString().split("T")[0]!;
   }
 
   /**

@@ -2,11 +2,11 @@ import { OpenAPIHono, z } from "@hono/zod-openapi";
 import { PuzzleService } from "./service";
 import {
   PuzzleSchema,
-  PuzzleWithDetailsSchema,
-  NewMemoryPuzzleSchema,
-  NewNetPuzzleSchema,
   GameListItemSchema,
   GameTypeEnum,
+  PuzzleCreatedResponseSchema,
+  NewMemoryPuzzleSchema,
+  NewNetPuzzleSchema,
   NewFocusPuzzleSchema,
   NewSudokuPuzzleSchema,
 } from "./schema";
@@ -80,25 +80,10 @@ puzzlesApp.openapi(
 );
 
 // Obtener un puzzle por ID con detalles
-puzzlesApp.openapi(
-  {
-    method: "get",
-    path: "/puzzles/{puzzleId}",
-    tags: ["puzzles"],
-    request: {
-      params: z.object({ puzzleId: z.string().uuid() }),
-    },
-    responses: {
-      200: {
-        description: "Detalles del puzzle",
-        content: { "application/json": { schema: PuzzleWithDetailsSchema } },
-      },
-      404: openApiErrorResponse("Puzzle no encontrado"),
-      500: openApiErrorResponse("Error interno del servidor"),
-    },
-  },
+puzzlesApp.get(
+  "/puzzles/:puzzleId",
   async (c) => {
-    const { puzzleId } = c.req.valid("param");
+    const puzzleId = c.req.param("puzzleId");
     const puzzle = await c.var.puzzleService.getPuzzleById(puzzleId);
     return c.json(puzzle, 200);
   },
@@ -123,7 +108,7 @@ puzzlesApp.openapi(
     responses: {
       201: {
         description: "Puzzle de memoria creado",
-        content: { "application/json": { schema: PuzzleWithDetailsSchema } },
+        content: { "application/json": { schema: PuzzleCreatedResponseSchema } },
       },
       400: openApiErrorResponse("Datos inválidos"),
       500: openApiErrorResponse("Error interno del servidor"),
@@ -165,7 +150,7 @@ puzzlesApp.openapi(
     responses: {
       201: {
         description: "Puzzle de NET creado",
-        content: { "application/json": { schema: PuzzleWithDetailsSchema } },
+        content: { "application/json": { schema: PuzzleCreatedResponseSchema } },
       },
       400: openApiErrorResponse("Datos inválidos"),
       500: openApiErrorResponse("Error interno del servidor"),
@@ -207,7 +192,7 @@ puzzlesApp.openapi(
     responses: {
       201: {
         description: "Puzzle de atención creado",
-        content: { "application/json": { schema: PuzzleWithDetailsSchema } },
+        content: { "application/json": { schema: PuzzleCreatedResponseSchema } },
       },
       400: openApiErrorResponse("Datos inválidos"),
       500: openApiErrorResponse("Error interno del servidor"),
@@ -249,7 +234,7 @@ puzzlesApp.openapi(
     responses: {
       201: {
         description: "Puzzle de Sudoku creado",
-        content: { "application/json": { schema: PuzzleWithDetailsSchema } },
+        content: { "application/json": { schema: PuzzleCreatedResponseSchema } },
       },
       400: openApiErrorResponse("Datos inválidos"),
       500: openApiErrorResponse("Error interno del servidor"),

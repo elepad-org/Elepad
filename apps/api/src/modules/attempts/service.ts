@@ -2,7 +2,6 @@ import { ApiException } from "@/utils/api-error";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/supabase-types";
 import type { StartAttempt, FinishAttempt } from "./schema";
-import { StreakService } from "../streaks/service";
 
 export class AttemptService {
   constructor(private supabase: SupabaseClient<Database>) {}

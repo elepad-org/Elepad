@@ -236,6 +236,9 @@ export class AchievementService {
 
     if (!puzzleId && !attempt.isFocusGame) return null;
     if (!puzzleId && attempt.isFocusGame) return "focus";
+    
+    // puzzleId no puede ser null aquí porque ya verificamos arriba
+    if (!puzzleId) return null;
 
     const { data: puzzle } = await this.supabase
       .from("puzzles")

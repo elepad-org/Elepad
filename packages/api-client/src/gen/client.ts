@@ -218,11 +218,8 @@ export const GameType = {
   reaction: "reaction",
 } as const;
 
-export interface PuzzleWithDetails {
+export interface PuzzleCreatedResponse {
   puzzle: Puzzle;
-  memoryGame: MemoryGame;
-  logicGame: LogicGame;
-  sudokuGame: SudokuGame;
 }
 
 export interface Puzzle {
@@ -236,44 +233,6 @@ export interface Puzzle {
   difficulty: number | null;
   createdAt: string;
 }
-
-/**
- * @nullable
- */
-export type MemoryGame = {
-  puzzleId: string;
-  rows: number;
-  cols: number;
-  symbols: string[];
-  layout: number[];
-} | null;
-
-export type LogicGameStartStateItem = number | boolean;
-
-export type LogicGameSolutionItem = number | boolean;
-
-/**
- * @nullable
- */
-export type LogicGame = {
-  puzzleId: string;
-  rows: number;
-  cols: number;
-  startState: LogicGameStartStateItem[];
-  /** @nullable */
-  solution?: LogicGameSolutionItem[] | null;
-} | null;
-
-/**
- * @nullable
- */
-export type SudokuGame = {
-  puzzleId: string;
-  rows: number;
-  cols: number;
-  given: number[][];
-  solution: number[][];
-} | null;
 
 export interface NewMemoryPuzzle {
   title?: string;
@@ -6060,207 +6019,8 @@ export function useGetGamesGameName<
   return query;
 }
 
-export type getPuzzlesPuzzleIdResponse200 = {
-  data: PuzzleWithDetails;
-  status: 200;
-};
-
-export type getPuzzlesPuzzleIdResponse404 = {
-  data: Error;
-  status: 404;
-};
-
-export type getPuzzlesPuzzleIdResponse500 = {
-  data: Error;
-  status: 500;
-};
-
-export type getPuzzlesPuzzleIdResponseSuccess =
-  getPuzzlesPuzzleIdResponse200 & {
-    headers: Headers;
-  };
-export type getPuzzlesPuzzleIdResponseError = (
-  | getPuzzlesPuzzleIdResponse404
-  | getPuzzlesPuzzleIdResponse500
-) & {
-  headers: Headers;
-};
-
-export type getPuzzlesPuzzleIdResponse =
-  | getPuzzlesPuzzleIdResponseSuccess
-  | getPuzzlesPuzzleIdResponseError;
-
-export const getGetPuzzlesPuzzleIdUrl = (puzzleId: string) => {
-  return `/puzzles/${puzzleId}`;
-};
-
-export const getPuzzlesPuzzleId = async (
-  puzzleId: string,
-  options?: RequestInit
-): Promise<getPuzzlesPuzzleIdResponse> => {
-  return rnFetch<getPuzzlesPuzzleIdResponse>(
-    getGetPuzzlesPuzzleIdUrl(puzzleId),
-    {
-      ...options,
-      method: "GET",
-    }
-  );
-};
-
-export const getGetPuzzlesPuzzleIdQueryKey = (puzzleId?: string) => {
-  return [`/puzzles/${puzzleId}`] as const;
-};
-
-export const getGetPuzzlesPuzzleIdQueryOptions = <
-  TData = Awaited<ReturnType<typeof getPuzzlesPuzzleId>>,
-  TError = Error
->(
-  puzzleId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getPuzzlesPuzzleId>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof rnFetch>;
-  }
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey =
-    queryOptions?.queryKey ?? getGetPuzzlesPuzzleIdQueryKey(puzzleId);
-
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof getPuzzlesPuzzleId>>
-  > = ({ signal }) =>
-    getPuzzlesPuzzleId(puzzleId, { signal, ...requestOptions });
-
-  return {
-    queryKey,
-    queryFn,
-    enabled: !!puzzleId,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof getPuzzlesPuzzleId>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
-
-export type GetPuzzlesPuzzleIdQueryResult = NonNullable<
-  Awaited<ReturnType<typeof getPuzzlesPuzzleId>>
->;
-export type GetPuzzlesPuzzleIdQueryError = Error;
-
-export function useGetPuzzlesPuzzleId<
-  TData = Awaited<ReturnType<typeof getPuzzlesPuzzleId>>,
-  TError = Error
->(
-  puzzleId: string,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getPuzzlesPuzzleId>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getPuzzlesPuzzleId>>,
-          TError,
-          Awaited<ReturnType<typeof getPuzzlesPuzzleId>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof rnFetch>;
-  },
-  queryClient?: QueryClient
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetPuzzlesPuzzleId<
-  TData = Awaited<ReturnType<typeof getPuzzlesPuzzleId>>,
-  TError = Error
->(
-  puzzleId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getPuzzlesPuzzleId>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getPuzzlesPuzzleId>>,
-          TError,
-          Awaited<ReturnType<typeof getPuzzlesPuzzleId>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof rnFetch>;
-  },
-  queryClient?: QueryClient
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetPuzzlesPuzzleId<
-  TData = Awaited<ReturnType<typeof getPuzzlesPuzzleId>>,
-  TError = Error
->(
-  puzzleId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getPuzzlesPuzzleId>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof rnFetch>;
-  },
-  queryClient?: QueryClient
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-
-export function useGetPuzzlesPuzzleId<
-  TData = Awaited<ReturnType<typeof getPuzzlesPuzzleId>>,
-  TError = Error
->(
-  puzzleId: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof getPuzzlesPuzzleId>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof rnFetch>;
-  },
-  queryClient?: QueryClient
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getGetPuzzlesPuzzleIdQueryOptions(puzzleId, options);
-
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  query.queryKey = queryOptions.queryKey;
-
-  return query;
-}
-
 export type postPuzzlesMemoryResponse201 = {
-  data: PuzzleWithDetails;
+  data: PuzzleCreatedResponse;
   status: 201;
 };
 
@@ -6371,7 +6131,7 @@ export const usePostPuzzlesMemory = <TError = Error, TContext = unknown>(
 };
 
 export type postPuzzlesNetResponse201 = {
-  data: PuzzleWithDetails;
+  data: PuzzleCreatedResponse;
   status: 201;
 };
 
@@ -6482,7 +6242,7 @@ export const usePostPuzzlesNet = <TError = Error, TContext = unknown>(
 };
 
 export type postPuzzlesFocusResponse201 = {
-  data: PuzzleWithDetails;
+  data: PuzzleCreatedResponse;
   status: 201;
 };
 
@@ -6593,7 +6353,7 @@ export const usePostPuzzlesFocus = <TError = Error, TContext = unknown>(
 };
 
 export type postPuzzlesSudokuResponse201 = {
-  data: PuzzleWithDetails;
+  data: PuzzleCreatedResponse;
   status: 201;
 };
 

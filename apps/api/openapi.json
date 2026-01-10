@@ -540,27 +540,15 @@
           "reaction"
         ]
       },
-      "PuzzleWithDetails": {
+      "PuzzleCreatedResponse": {
         "type": "object",
         "properties": {
           "puzzle": {
             "$ref": "#/components/schemas/Puzzle"
-          },
-          "memoryGame": {
-            "$ref": "#/components/schemas/MemoryGame"
-          },
-          "logicGame": {
-            "$ref": "#/components/schemas/LogicGame"
-          },
-          "sudokuGame": {
-            "$ref": "#/components/schemas/SudokuGame"
           }
         },
         "required": [
-          "puzzle",
-          "memoryGame",
-          "logicGame",
-          "sudokuGame"
+          "puzzle"
         ]
       },
       "Puzzle": {
@@ -597,131 +585,6 @@
           "title",
           "difficulty",
           "createdAt"
-        ]
-      },
-      "MemoryGame": {
-        "type": "object",
-        "nullable": true,
-        "properties": {
-          "puzzleId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "rows": {
-            "type": "integer"
-          },
-          "cols": {
-            "type": "integer"
-          },
-          "symbols": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "layout": {
-            "type": "array",
-            "items": {
-              "type": "integer"
-            }
-          }
-        },
-        "required": [
-          "puzzleId",
-          "rows",
-          "cols",
-          "symbols",
-          "layout"
-        ]
-      },
-      "LogicGame": {
-        "type": "object",
-        "nullable": true,
-        "properties": {
-          "puzzleId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "rows": {
-            "type": "integer"
-          },
-          "cols": {
-            "type": "integer"
-          },
-          "startState": {
-            "type": "array",
-            "items": {
-              "anyOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "boolean"
-                }
-              ]
-            }
-          },
-          "solution": {
-            "type": "array",
-            "nullable": true,
-            "items": {
-              "anyOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "boolean"
-                }
-              ]
-            }
-          }
-        },
-        "required": [
-          "puzzleId",
-          "rows",
-          "cols",
-          "startState"
-        ]
-      },
-      "SudokuGame": {
-        "type": "object",
-        "nullable": true,
-        "properties": {
-          "puzzleId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "rows": {
-            "type": "integer"
-          },
-          "cols": {
-            "type": "integer"
-          },
-          "given": {
-            "type": "array",
-            "items": {
-              "type": "array",
-              "items": {
-                "type": "integer"
-              }
-            }
-          },
-          "solution": {
-            "type": "array",
-            "items": {
-              "type": "array",
-              "items": {
-                "type": "integer"
-              }
-            }
-          }
-        },
-        "required": [
-          "puzzleId",
-          "rows",
-          "cols",
-          "given",
-          "solution"
         ]
       },
       "NewMemoryPuzzle": {
@@ -3367,56 +3230,6 @@
         }
       }
     },
-    "/puzzles/{puzzleId}": {
-      "get": {
-        "tags": [
-          "puzzles"
-        ],
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "required": true,
-            "name": "puzzleId",
-            "in": "path"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Detalles del puzzle",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PuzzleWithDetails"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Puzzle no encontrado",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Error interno del servidor",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/puzzles/memory": {
       "post": {
         "tags": [
@@ -3438,7 +3251,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PuzzleWithDetails"
+                  "$ref": "#/components/schemas/PuzzleCreatedResponse"
                 }
               }
             }
@@ -3487,7 +3300,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PuzzleWithDetails"
+                  "$ref": "#/components/schemas/PuzzleCreatedResponse"
                 }
               }
             }
@@ -3536,7 +3349,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PuzzleWithDetails"
+                  "$ref": "#/components/schemas/PuzzleCreatedResponse"
                 }
               }
             }
@@ -3585,7 +3398,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PuzzleWithDetails"
+                  "$ref": "#/components/schemas/PuzzleCreatedResponse"
                 }
               }
             }
