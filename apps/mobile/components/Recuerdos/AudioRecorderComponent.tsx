@@ -104,11 +104,11 @@ export default function AudioRecorderComponent({
       const result = await recorder.stop();
       console.log("Recording stopped, result:", result);
 
-      // El resultado puede ser un string (URI) o un objeto con {url}
+      // El resultado puede ser un string (URI), un objeto con {url}, o void
       let uri: string | null = null;
       if (typeof result === "string") {
         uri = result;
-      } else if (result && typeof result === "object" && "url" in result) {
+      } else if (result !== undefined && result !== null && typeof result === "object" && "url" in result) {
         uri = (result as { url: string }).url;
       }
 
