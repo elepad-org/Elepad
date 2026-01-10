@@ -218,14 +218,7 @@ export const GameType = {
   reaction: "reaction",
 } as const;
 
-export interface PuzzleCreatedResponse {
-  puzzle: Puzzle;
-  memoryGame?: MemoryGame;
-  logicGame?: LogicGame;
-  sudokuGame?: SudokuGame;
-}
-
-export interface Puzzle {
+export type MemoryPuzzleCreatedPuzzle = {
   id: string;
   gameType: GameType;
   /** @nullable */
@@ -235,35 +228,19 @@ export interface Puzzle {
   /** @nullable */
   difficulty: number | null;
   createdAt: string;
-}
+};
 
-export interface MemoryGame {
+export type MemoryPuzzleCreatedMemoryGame = {
   puzzleId: string;
   rows: number;
   cols: number;
   symbols: string[];
   layout: number[];
-}
+};
 
-export type LogicGameStartStateItem = number | boolean;
-
-export type LogicGameSolutionItem = number | boolean;
-
-export interface LogicGame {
-  puzzleId: string;
-  rows: number;
-  cols: number;
-  startState: LogicGameStartStateItem[];
-  /** @nullable */
-  solution?: LogicGameSolutionItem[] | null;
-}
-
-export interface SudokuGame {
-  puzzleId: string;
-  rows: number;
-  cols: number;
-  given: number[][];
-  solution: number[][];
+export interface MemoryPuzzleCreated {
+  puzzle: MemoryPuzzleCreatedPuzzle;
+  memoryGame: MemoryPuzzleCreatedMemoryGame;
 }
 
 export interface NewMemoryPuzzle {
@@ -285,6 +262,36 @@ export interface NewMemoryPuzzle {
   cols?: number;
 }
 
+export type LogicPuzzleCreatedPuzzle = {
+  id: string;
+  gameType: GameType;
+  /** @nullable */
+  gameName: string | null;
+  /** @nullable */
+  title: string | null;
+  /** @nullable */
+  difficulty: number | null;
+  createdAt: string;
+};
+
+export type LogicPuzzleCreatedLogicGameStartStateItem = number | boolean;
+
+export type LogicPuzzleCreatedLogicGameSolutionItem = number | boolean;
+
+export type LogicPuzzleCreatedLogicGame = {
+  puzzleId: string;
+  rows: number;
+  cols: number;
+  startState: LogicPuzzleCreatedLogicGameStartStateItem[];
+  /** @nullable */
+  solution?: LogicPuzzleCreatedLogicGameSolutionItem[] | null;
+};
+
+export interface LogicPuzzleCreated {
+  puzzle: LogicPuzzleCreatedPuzzle;
+  logicGame: LogicPuzzleCreatedLogicGame;
+}
+
 export interface NewNetPuzzle {
   title?: string;
   /**
@@ -299,6 +306,22 @@ export interface NewNetPuzzle {
   gridSize?: number;
 }
 
+export type FocusPuzzleCreatedPuzzle = {
+  id: string;
+  gameType: GameType;
+  /** @nullable */
+  gameName: string | null;
+  /** @nullable */
+  title: string | null;
+  /** @nullable */
+  difficulty: number | null;
+  createdAt: string;
+};
+
+export interface FocusPuzzleCreated {
+  puzzle: FocusPuzzleCreatedPuzzle;
+}
+
 export interface NewFocusPuzzle {
   /**
    * @minimum 1
@@ -307,19 +330,16 @@ export interface NewFocusPuzzle {
   rounds?: number;
 }
 
-export type NewSudokuPuzzleDifficulty =
-  (typeof NewSudokuPuzzleDifficulty)[keyof typeof NewSudokuPuzzleDifficulty];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const NewSudokuPuzzleDifficulty = {
-  easy: "easy",
-  medium: "medium",
-  hard: "hard",
-} as const;
-
-export interface NewSudokuPuzzle {
-  title?: string;
-  difficulty?: NewSudokuPuzzleDifficulty;
+export interface Puzzle {
+  id: string;
+  gameType: GameType;
+  /** @nullable */
+  gameName: string | null;
+  /** @nullable */
+  title: string | null;
+  /** @nullable */
+  difficulty: number | null;
+  createdAt: string;
 }
 
 export interface StartAttempt {
@@ -6052,7 +6072,7 @@ export function useGetGamesGameName<
 }
 
 export type postPuzzlesMemoryResponse201 = {
-  data: PuzzleCreatedResponse;
+  data: MemoryPuzzleCreated;
   status: 201;
 };
 
@@ -6163,7 +6183,7 @@ export const usePostPuzzlesMemory = <TError = Error, TContext = unknown>(
 };
 
 export type postPuzzlesNetResponse201 = {
-  data: PuzzleCreatedResponse;
+  data: LogicPuzzleCreated;
   status: 201;
 };
 
@@ -6274,7 +6294,7 @@ export const usePostPuzzlesNet = <TError = Error, TContext = unknown>(
 };
 
 export type postPuzzlesFocusResponse201 = {
-  data: PuzzleCreatedResponse;
+  data: FocusPuzzleCreated;
   status: 201;
 };
 
@@ -6380,117 +6400,6 @@ export const usePostPuzzlesFocus = <TError = Error, TContext = unknown>(
   TContext
 > => {
   const mutationOptions = getPostPuzzlesFocusMutationOptions(options);
-
-  return useMutation(mutationOptions, queryClient);
-};
-
-export type postPuzzlesSudokuResponse201 = {
-  data: PuzzleCreatedResponse;
-  status: 201;
-};
-
-export type postPuzzlesSudokuResponse400 = {
-  data: Error;
-  status: 400;
-};
-
-export type postPuzzlesSudokuResponse500 = {
-  data: Error;
-  status: 500;
-};
-
-export type postPuzzlesSudokuResponseSuccess = postPuzzlesSudokuResponse201 & {
-  headers: Headers;
-};
-export type postPuzzlesSudokuResponseError = (
-  | postPuzzlesSudokuResponse400
-  | postPuzzlesSudokuResponse500
-) & {
-  headers: Headers;
-};
-
-export type postPuzzlesSudokuResponse =
-  | postPuzzlesSudokuResponseSuccess
-  | postPuzzlesSudokuResponseError;
-
-export const getPostPuzzlesSudokuUrl = () => {
-  return `/puzzles/sudoku`;
-};
-
-export const postPuzzlesSudoku = async (
-  newSudokuPuzzle: NewSudokuPuzzle,
-  options?: RequestInit,
-): Promise<postPuzzlesSudokuResponse> => {
-  return rnFetch<postPuzzlesSudokuResponse>(getPostPuzzlesSudokuUrl(), {
-    ...options,
-    method: "POST",
-    headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(newSudokuPuzzle),
-  });
-};
-
-export const getPostPuzzlesSudokuMutationOptions = <
-  TError = Error,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postPuzzlesSudoku>>,
-    TError,
-    { data: NewSudokuPuzzle },
-    TContext
-  >;
-  request?: SecondParameter<typeof rnFetch>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof postPuzzlesSudoku>>,
-  TError,
-  { data: NewSudokuPuzzle },
-  TContext
-> => {
-  const mutationKey = ["postPuzzlesSudoku"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postPuzzlesSudoku>>,
-    { data: NewSudokuPuzzle }
-  > = (props) => {
-    const { data } = props ?? {};
-
-    return postPuzzlesSudoku(data, requestOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type PostPuzzlesSudokuMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postPuzzlesSudoku>>
->;
-export type PostPuzzlesSudokuMutationBody = NewSudokuPuzzle;
-export type PostPuzzlesSudokuMutationError = Error;
-
-export const usePostPuzzlesSudoku = <TError = Error, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof postPuzzlesSudoku>>,
-      TError,
-      { data: NewSudokuPuzzle },
-      TContext
-    >;
-    request?: SecondParameter<typeof rnFetch>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof postPuzzlesSudoku>>,
-  TError,
-  { data: NewSudokuPuzzle },
-  TContext
-> => {
-  const mutationOptions = getPostPuzzlesSudokuMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
 };

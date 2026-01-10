@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import {
   StatusBar,
   View,
@@ -21,6 +21,7 @@ import {
   TextInput,
 } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   useGetMemoriesBooks,
   useGetMemories,
@@ -144,13 +145,25 @@ export default function RecuerdosScreen() {
 
   const groupInfo = selectGroupInfo();
   const groupMembers = useMemo(() => {
-    if (!groupInfo) return [] as Array<{ id: string; displayName: string; avatarUrl?: string | null }>;
+    if (!groupInfo)
+      return [] as Array<{
+        id: string;
+        displayName: string;
+        avatarUrl?: string | null;
+      }>;
 
     const raw = [groupInfo.owner, ...groupInfo.members];
-    const byId = new Map<string, { id: string; displayName: string; avatarUrl?: string | null }>();
+    const byId = new Map<
+      string,
+      { id: string; displayName: string; avatarUrl?: string | null }
+    >();
     for (const m of raw) {
       if (!m?.id) continue;
-      byId.set(m.id, { id: m.id, displayName: m.displayName, avatarUrl: m.avatarUrl ?? null });
+      byId.set(m.id, {
+        id: m.id,
+        displayName: m.displayName,
+        avatarUrl: m.avatarUrl ?? null,
+      });
     }
     return Array.from(byId.values());
   }, [groupInfo]);
@@ -164,6 +177,7 @@ export default function RecuerdosScreen() {
   }, [groupMembers]);
 
   // Estados locales
+
   const [refreshing, setRefreshing] = useState(false);
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const [numColumns, setNumColumns] = useState(2);
@@ -398,8 +412,8 @@ export default function RecuerdosScreen() {
           data.image instanceof Blob
             ? "Blob"
             : typeof data.image === "object"
-            ? "File object"
-            : typeof data.image,
+              ? "File object"
+              : typeof data.image,
       });
       try {
         const result = await createMemoryWithMedia(data);
@@ -521,34 +535,80 @@ export default function RecuerdosScreen() {
     }
   }, [refetchBooks]);
 
-  // Extraer los datos de la respuesta (GET /memories devuelve { data: Memory[], total, ... })
-  const memoriesPayload =
-    memoriesResponse && "data" in memoriesResponse
-      ? (memoriesResponse as unknown as { data: unknown }).data
-      : undefined;
+  // Stabilize memories derivation to prevent re-renders
+  const recuerdos = useMemo(() => {
+    // Extraer los datos de la respuesta
+    const memoriesPayload =
+      memoriesResponse && "data" in memoriesResponse
+        ? (memoriesResponse as unknown as { data: unknown }).data
+        : undefined;
 
-  const memoriesData = Array.isArray(memoriesPayload)
-    ? memoriesPayload
-    : memoriesPayload &&
-      typeof memoriesPayload === "object" &&
-      "data" in (memoriesPayload as Record<string, unknown>)
-    ? (memoriesPayload as { data: unknown }).data
-    : [];
+    const memoriesData = Array.isArray(memoriesPayload)
+      ? memoriesPayload
+      : memoriesPayload &&
+          typeof memoriesPayload === "object" &&
+          "data" in (memoriesPayload as Record<string, unknown>)
+        ? (memoriesPayload as { data: unknown }).data
+        : [];
 
-  const memories = Array.isArray(memoriesData)
-    ? (memoriesData as Memory[])
-    : [];
+    const memories = Array.isArray(memoriesData)
+      ? (memoriesData as Memory[])
+      : [];
 
-  // Convertir memories a recuerdos para compatibilidad con componentes existentes
-  const recuerdos = memories
-    .map((memory) => memoryToRecuerdo(memory, memberNameById))
-    .sort((a, b) => {
-      if (sortOrder === "desc") {
-        return b.fecha.getTime() - a.fecha.getTime();
-      } else {
-        return a.fecha.getTime() - b.fecha.getTime();
+    return memories
+      .map((memory) => memoryToRecuerdo(memory, memberNameById))
+      .sort((a, b) => {
+        if (sortOrder === "desc") {
+          return b.fecha.getTime() - a.fecha.getTime();
+        } else {
+          return a.fecha.getTime() - b.fecha.getTime();
+        }
+      });
+  }, [memoriesResponse, memberNameById, sortOrder]);
+
+  const params = useLocalSearchParams();
+  const { memoryId, bookId } = params;
+
+  const router = useRouter();
+
+  // Effect for deep linking from Home
+  useEffect(() => {
+    if (bookId && typeof bookId === "string" && booksResponse) {
+      const booksPayload = booksResponse.data || booksResponse;
+
+      const books = Array.isArray(booksPayload) ? booksPayload : [];
+      const targetBook = books.find((b: { id: string }) => b.id === bookId);
+
+      if (targetBook && (!selectedBook || selectedBook.id !== targetBook.id)) {
+        setSelectedBook(targetBook);
       }
-    });
+    }
+  }, [bookId, booksResponse, selectedBook]);
+
+  const handledMemoryIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    // If no memoryId or invalid, reset handled ref so we can handle it again if it comes back
+    if (!memoryId || typeof memoryId !== "string") {
+      handledMemoryIdRef.current = null;
+      return;
+    }
+
+    // If we already handled this memoryId, stop.
+    if (handledMemoryIdRef.current === memoryId) {
+      return;
+    }
+
+    if (selectedBook && memoriesResponse) {
+      const targetMemory = recuerdos.find((r) => r.id === memoryId);
+
+      if (targetMemory) {
+        setSelectedRecuerdo(targetMemory);
+        setDetailDialogVisible(true);
+        handledMemoryIdRef.current = memoryId;
+      }
+    }
+  }, [memoryId, selectedBook, memoriesResponse, recuerdos]);
 
   // Estados de carga y error (patrón original restaurado)
   const isLoading =
@@ -711,15 +771,15 @@ export default function RecuerdosScreen() {
           selectedTipo === "imagen"
             ? "memory.jpg"
             : selectedTipo === "video"
-            ? "memory.mp4"
-            : "memory.m4a";
+              ? "memory.mp4"
+              : "memory.m4a";
         const mimeType =
           data.mimeType ||
           (selectedTipo === "imagen"
             ? "image/jpeg"
             : selectedTipo === "video"
-            ? "video/mp4"
-            : "audio/m4a");
+              ? "video/mp4"
+              : "audio/m4a");
 
         if (Platform.OS === "web") {
           // Para web, convertir URI a blob
@@ -988,10 +1048,10 @@ export default function RecuerdosScreen() {
   const booksData = Array.isArray(booksPayload)
     ? booksPayload
     : booksPayload &&
-      typeof booksPayload === "object" &&
-      "data" in (booksPayload as Record<string, unknown>)
-    ? (booksPayload as { data: unknown }).data
-    : [];
+        typeof booksPayload === "object" &&
+        "data" in (booksPayload as Record<string, unknown>)
+      ? (booksPayload as { data: unknown }).data
+      : [];
 
   const books = Array.isArray(booksData) ? (booksData as MemoriesBook[]) : [];
   const isBooksLoading =
@@ -1105,7 +1165,11 @@ export default function RecuerdosScreen() {
                         overflow: "hidden",
                       }}
                     >
-                      <BookCover bookId={item.id} groupId={groupId} color={color} />
+                      <BookCover
+                        bookId={item.id}
+                        groupId={groupId}
+                        color={color}
+                      />
                       <View
                         style={{
                           position: "absolute",
@@ -1619,7 +1683,10 @@ export default function RecuerdosScreen() {
       <RecuerdoDetailDialog
         visible={detailDialogVisible}
         recuerdo={selectedRecuerdo}
-        onDismiss={handleCloseDetail}
+        onDismiss={() => {
+          handleCloseDetail();
+          router.setParams({ memoryId: "", bookId: "" });
+        }}
         onUpdateRecuerdo={async (id, patch) => {
           await updateMemoryMutation.mutateAsync({ id, patch });
         }}
