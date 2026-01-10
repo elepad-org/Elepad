@@ -4,15 +4,30 @@ import { useAuth } from "./useAuth";
 import { getTodayLocal } from "@/lib/dateHelpers";
 import {
   usePostPuzzlesSudoku,
-  PostPuzzlesSudoku201,
-  PostPuzzlesSudoku201SudokuGame,
-  PostPuzzlesSudoku201Puzzle,
+  //PostPuzzlesSudoku201,
+  //PostPuzzlesSudoku201SudokuGame,
+  //PostPuzzlesSudoku201Puzzle,
   usePostAttemptsStart,
   usePostAttemptsAttemptIdFinish,
   PostAttemptsAttemptIdFinish200UnlockedAchievementsItem,
 } from "@elepad/api-client";
 
 export type Difficulty = "easy" | "medium" | "hard";
+
+export type PuzzleSudokuGame = {
+  puzzle: {
+    id: string,
+    gameType: "memory" | "logic" | "attention" | "reaction",
+    gameName: string | null,
+    title: string | null,
+    difficulty: number | null,
+    createdAt: string,
+  },
+  sudokuGame: {
+    given: number[][],
+    solution: number[][]
+  }
+}
 
 export interface SudokuCell {
   row: number;
@@ -127,12 +142,10 @@ export const useSudoku = (props: UseSudokuProps) => {
       }
 
       // Validaciones de respuesta (similar a tu ejemplo)
-      const responseData: PostPuzzlesSudoku201 =
-        "data" in puzzleResponse ? puzzleResponse.data : puzzleResponse;
+      const responseData =
+        "data" in puzzleResponse ? puzzleResponse.data as PuzzleSudokuGame : puzzleResponse as PuzzleSudokuGame;
 
-      const puzzle: PostPuzzlesSudoku201Puzzle = responseData.puzzle;
-      const sudokuGame: PostPuzzlesSudoku201SudokuGame =
-        responseData.sudokuGame;
+      const {puzzle, sudokuGame} = responseData;
       setPuzzleId(puzzle.id);
 
       if (!sudokuGame) {
