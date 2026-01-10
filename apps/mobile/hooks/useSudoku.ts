@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "./useAuth";
+import { getTodayLocal } from "@/lib/dateHelpers";
 import {
   usePostPuzzlesSudoku,
   usePostAttemptsStart,
@@ -224,6 +225,7 @@ export const useSudoku = (props: UseSudokuProps) => {
             moves: 0,
             durationMs,
             score: 0,
+            clientDate: getTodayLocal(),
           },
         });
         console.log("❌ Intento abandonado:", response);
@@ -252,6 +254,7 @@ export const useSudoku = (props: UseSudokuProps) => {
             moves: filledCells,
             durationMs,
             score: 81 - maxMistakes,
+            clientDate: getTodayLocal(),
           },
         });
         console.log("❌ Intento abandonado:", response);
@@ -388,6 +391,7 @@ export const useSudoku = (props: UseSudokuProps) => {
                 moves: filledCells,
                 durationMs,
                 score: score,
+                clientDate: getTodayLocal(),
               },
             });
 

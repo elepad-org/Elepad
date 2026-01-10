@@ -41,6 +41,7 @@ export const FinishAttemptSchema = z
     score: z.number().int().min(0).optional(),
     meta: z.record(z.string(), z.any()).optional(),
     isFocusGame: z.boolean().optional(), // TODO: revisar
+    clientDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), // Fecha local del cliente YYYY-MM-DD
   })
   .openapi("FinishAttempt");
 

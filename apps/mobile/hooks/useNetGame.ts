@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "./useAuth";
+import { getTodayLocal } from "@/lib/dateHelpers";
 import {
   usePostPuzzlesNet,
   usePostAttemptsStart,
@@ -441,6 +442,7 @@ export const useNetGame = ({
             meta: wasAutoSolved
               ? { autoSolved: true, solvedAt: new Date().toISOString() }
               : undefined,
+            clientDate: getTodayLocal(),
           },
         });
 

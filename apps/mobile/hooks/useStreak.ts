@@ -1,7 +1,6 @@
 import { useGetStreaksMe, useGetStreaksHistory, GetStreaksMe200, GetStreaksHistory200 } from "@elepad/api-client";
 import { useEffect, useRef } from "react";
 import { useStreakSnackbar } from "./useStreakSnackbar";
-import { utcDateToLocal } from "@/lib/dateHelpers";
 
 /**
  * Hook para obtener la racha actual del usuario

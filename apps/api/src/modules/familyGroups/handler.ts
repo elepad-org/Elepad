@@ -143,12 +143,14 @@ familyGroupApp.openapi(
                 id: z.string().uuid(),
                 displayName: z.string(),
                 avatarUrl: z.string().nullable(),
+                elder: z.boolean(),
               }),
               members: z.array(
                 z.object({
                   id: z.string().uuid(),
                   displayName: z.string(),
                   avatarUrl: z.string().nullable(),
+                  elder: z.boolean(),
                 }),
               ),
             }),

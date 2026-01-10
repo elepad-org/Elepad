@@ -57,17 +57,22 @@ export default function CalendarScreen() {
   const groupInfo = selectGroupInfo();
   const isOwnerOfGroup = groupInfo?.owner?.id === userElepad?.id;
 
-  // Preparar lista de miembros de la familia para menciones
+  // Preparar lista de miembros de la familia para menciones y selector de destinatarios
   const familyMembers = useMemo(() => {
     if (!groupInfo) {
-      return [] as Array<{ id: string; displayName: string; avatarUrl: string | null }>;
+      return [] as Array<{ id: string; displayName: string; avatarUrl: string | null; elder: boolean }>;
     }
 
     const raw = [groupInfo.owner, ...groupInfo.members];
-    const byId = new Map<string, { id: string; displayName: string; avatarUrl: string | null }>();
+    const byId = new Map<string, { id: string; displayName: string; avatarUrl: string | null; elder: boolean }>();
     for (const m of raw) {
       if (!m?.id) continue;
-      byId.set(m.id, { id: m.id, displayName: m.displayName, avatarUrl: m.avatarUrl ?? null });
+      byId.set(m.id, { 
+        id: m.id, 
+        displayName: m.displayName, 
+        avatarUrl: m.avatarUrl ?? null,
+        elder: m.elder ?? false
+      });
     }
     return Array.from(byId.values());
   }, [groupInfo]);
@@ -185,6 +190,7 @@ export default function CalendarScreen() {
         data: {
           ...payload,
           createdBy: idUser,
+          assignedTo: payload.assignedTo || idUser, // Fallback por seguridad
           startsAt: payload.startsAt!,
         } as NewActivity,
       });

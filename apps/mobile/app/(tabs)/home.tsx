@@ -396,9 +396,12 @@ export default function HomeScreen() {
                         {activity.title}
                       </Text>
                       {activity.description && (
-                        <Text style={styles.eventDesc} numberOfLines={1}>
-                          {activity.description}
-                        </Text>
+                        <HighlightedMentionText
+                          text={activity.description}
+                          groupMembers={groupMembers}
+                          style={styles.eventDesc}
+                          numberOfLines={1}
+                        />
                       )}
                     </View>
                   </View>

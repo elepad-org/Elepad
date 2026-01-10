@@ -12,7 +12,7 @@ import {
   useRef,
 } from "react";
 import { useStreakSnackbar } from "./useStreakSnackbar";
-import { getTodayLocal, isSameLocalDate, utcDateToLocal } from "@/lib/dateHelpers";
+import { getTodayLocal, isSameLocalDate } from "@/lib/dateHelpers";
 
 type AuthContext = {
   user: User | null;
@@ -108,17 +108,13 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       
       const streakData = responseData as GetStreaksMe200;
       
-      // Convertir lastPlayedDate de UTC a local antes de comparar
-      const lastPlayedDateLocal = streakData.lastPlayedDate 
-        ? utcDateToLocal(streakData.lastPlayedDate)
-        : null;
-      
-      const hasPlayedToday = isSameLocalDate(lastPlayedDateLocal || '', today);
+      // Las fechas ya vienen en formato local del cliente desde el backend
+      const hasPlayedToday = isSameLocalDate(streakData.lastPlayedDate || '', today);
       
       setStreak({
         currentStreak: streakData.currentStreak,
         longestStreak: streakData.longestStreak,
-        lastPlayedDate: lastPlayedDateLocal,
+        lastPlayedDate: streakData.lastPlayedDate,
         hasPlayedToday,
       });
       

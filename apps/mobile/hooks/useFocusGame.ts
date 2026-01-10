@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "./useAuth";
+import { getTodayLocal } from "@/lib/dateHelpers";
 import {
   usePostPuzzlesFocus,
   usePostAttemptsStart,
@@ -175,6 +176,7 @@ export const useFocusGame = (props: UseFocusGameProps) => {
             success,
             durationMs,
             moves: stats.rounds - stats.correct, // Es para calcular el puntaje en backend
+            clientDate: getTodayLocal(),
           },
         });
 
