@@ -369,8 +369,6 @@ export class PuzzleService {
     return {
       puzzle,
       memoryGame,
-      logicGame: null,
-      sudokuGame: null,
     };
   }
 
@@ -434,8 +432,6 @@ export class PuzzleService {
     return {
       puzzle,
       sudokuGame,
-      memoryGame: null,
-      logicGame: null,
     };
   }
 
@@ -690,9 +686,7 @@ export class PuzzleService {
 
     return {
       puzzle,
-      memoryGame: null,
       logicGame,
-      sudokuGame: null,
     };
   }
 
@@ -720,9 +714,6 @@ export class PuzzleService {
 
     return {
       puzzle,
-      memoryGame: null,
-      logicGame: null,
-      sudokuGame: null,
     };
   }
 }

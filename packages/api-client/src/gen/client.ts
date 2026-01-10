@@ -220,6 +220,9 @@ export const GameType = {
 
 export interface PuzzleCreatedResponse {
   puzzle: Puzzle;
+  memoryGame?: MemoryGame;
+  logicGame?: LogicGame;
+  sudokuGame?: SudokuGame;
 }
 
 export interface Puzzle {
@@ -232,6 +235,35 @@ export interface Puzzle {
   /** @nullable */
   difficulty: number | null;
   createdAt: string;
+}
+
+export interface MemoryGame {
+  puzzleId: string;
+  rows: number;
+  cols: number;
+  symbols: string[];
+  layout: number[];
+}
+
+export type LogicGameStartStateItem = number | boolean;
+
+export type LogicGameSolutionItem = number | boolean;
+
+export interface LogicGame {
+  puzzleId: string;
+  rows: number;
+  cols: number;
+  startState: LogicGameStartStateItem[];
+  /** @nullable */
+  solution?: LogicGameSolutionItem[] | null;
+}
+
+export interface SudokuGame {
+  puzzleId: string;
+  rows: number;
+  cols: number;
+  given: number[][];
+  solution: number[][];
 }
 
 export interface NewMemoryPuzzle {
