@@ -219,7 +219,7 @@ puzzlesApp.openapi(
       const body = c.req.valid("json");
       console.log("📦 Request body:", body);
 
-      const puzzle = await c.var.puzzleService.createFocusPuzzle(body as any);
+      const puzzle = await c.var.puzzleService.createFocusPuzzle(body);
       console.log("✅ Focus Puzzle created successfully:", puzzle.puzzle.id);
 
       return c.json(puzzle, 201);

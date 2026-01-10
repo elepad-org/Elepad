@@ -4,14 +4,12 @@ import {
   Text,
   Card,
   ActivityIndicator,
-  Chip,
   Button,
   ProgressBar,
-  Menu,
 } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack } from "expo-router";
 import {
   useGetAttemptsStatsGameType,
   GameType,
@@ -112,7 +110,6 @@ function AttemptItem({
 
 export default function HistoryScreen({ initialAttempts = [] }: Props) {
   const { userElepad } = useAuth();
-  const { view } = useLocalSearchParams();
   
   const [selectedGame, setSelectedGame] = useState("all");
   const [timeRange, setTimeRange] = useState<"week" | "month" | "year">("week");
@@ -144,13 +141,19 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
   const elders = useMemo(() => {
     if (!isHelper || !membersQuery.data) return [];
     
-    const groupInfo = membersQuery.data as any;
+    interface GroupMember {
+      id: string;
+      displayName: string;
+      elder: boolean;
+    }
+    
+    const groupInfo = membersQuery.data as { members?: GroupMember[]; owner?: GroupMember };
     const allMembers = [
       ...(groupInfo.members || []),
       ...(groupInfo.owner ? [groupInfo.owner] : [])
     ];
     
-    return allMembers.filter((member: any) => member.elder === true);
+    return allMembers.filter((member: GroupMember) => member.elder === true);
   }, [membersQuery.data, isHelper]);
 
   // Set default selected elder

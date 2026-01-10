@@ -38,7 +38,6 @@ export default function CalendarScreen() {
 
   const [formVisible, setFormVisible] = useState(false);
   const [editing, setEditing] = useState<Activity | null>(null);
-  const [activityIdToOpen, setActivityIdToOpen] = useState<string | null>(null);
   const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(familyCode);
   const membersQuery = useGetFamilyGroupIdGroupMembers(familyCode);
 
@@ -153,7 +152,7 @@ export default function CalendarScreen() {
     if (params.activityId && typeof params.activityId === 'string' && activitiesQuery.data) {
       const activities = Array.isArray(activitiesQuery.data)
         ? activitiesQuery.data
-        : (activitiesQuery.data as any).data || [];
+        : (activitiesQuery.data as { data?: Activity[] }).data || [];
       
       const activity = activities.find((a: Activity) => a.id === params.activityId);
       if (activity) {

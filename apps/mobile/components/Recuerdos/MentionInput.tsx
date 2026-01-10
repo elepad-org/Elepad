@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { View, TextInput as RNTextInput } from "react-native";
-import { TextInput, Text } from "react-native-paper";
+import { TextInput } from "react-native-paper";
 import { COLORS } from "@/styles/base";
 import PickerModal from "@/components/shared/PickerModal";
 
@@ -44,7 +44,6 @@ export default function MentionInput({
   const [showMentionMenu, setShowMentionMenu] = useState(false);
   const [mentionSearch, setMentionSearch] = useState("");
   const [mentionStartPos, setMentionStartPos] = useState(0);
-  const [selection, setSelection] = useState<{ start: number; end: number }>({ start: 0, end: 0 });
   const inputRef = useRef<RNTextInput>(null);
 
   // Filtrar al usuario actual de las opciones
@@ -129,10 +128,6 @@ export default function MentionInput({
     setShowMentionMenu(false);
     setMentionSearch("");
 
-    // Posicionar el cursor después de la mención
-    const cursorPosition = mentionStartPos + `@${displayName} `.length;
-    setSelection({ start: cursorPosition, end: cursorPosition });
-
     // Devolver el foco al input
     setTimeout(() => {
       if (inputRef.current) {
@@ -146,52 +141,6 @@ export default function MentionInput({
     return searchName.includes(mentionSearch.toLowerCase());
   });
 
-  // Renderizar menciones resaltadas
-  const renderHighlightedText = () => {
-    const parts: React.ReactElement[] = [];
-    let lastIndex = 0;
-    
-    availableMembers.forEach((member) => {
-      const mentionPattern = `@${member.displayName}`;
-      let index = displayValue.indexOf(mentionPattern, lastIndex);
-      
-      while (index !== -1 && index >= lastIndex) {
-        if (index > lastIndex) {
-          parts.push(
-            <Text key={`text-${lastIndex}`} style={{ color: COLORS.text }}>
-              {displayValue.substring(lastIndex, index)}
-            </Text>
-          );
-        }
-        
-        parts.push(
-          <Text
-            key={`mention-${index}`}
-            style={{
-              color: COLORS.primary,
-              fontWeight: "700",
-            }}
-          >
-            {mentionPattern}
-          </Text>
-        );
-        
-        lastIndex = index + mentionPattern.length;
-        index = displayValue.indexOf(mentionPattern, lastIndex);
-      }
-    });
-    
-    if (lastIndex < displayValue.length) {
-      parts.push(
-        <Text key={`text-${lastIndex}`} style={{ color: COLORS.text }}>
-          {displayValue.substring(lastIndex)}
-        </Text>
-      );
-    }
-    
-    return parts.length > 0 ? parts : <Text style={{ color: COLORS.text }}>{displayValue}</Text>;
-  };
-
   return (
     <View style={{ position: "relative", ...style }}>
       <TextInput
@@ -199,9 +148,6 @@ export default function MentionInput({
         label={label}
         value={displayValue}
         onChangeText={handleTextChange}
-        onSelectionChange={(e) => {
-          setSelection(e.nativeEvent.selection);
-        }}
         mode={mode}
         outlineColor={outlineColor}
         activeOutlineColor={activeOutlineColor}
