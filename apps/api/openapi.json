@@ -275,6 +275,10 @@
           "completed": {
             "type": "boolean"
           },
+          "assignedTo": {
+            "type": "string",
+            "format": "uuid"
+          },
           "frequencyId": {
             "type": "string",
             "nullable": true,

@@ -119,6 +119,7 @@ export interface UpdateActivity {
   startsAt: string;
   endsAt?: string;
   completed?: boolean;
+  assignedTo?: string;
   /** @nullable */
   frequencyId?: string | null;
 }

@@ -40,6 +40,7 @@ export const UpdateActivitySchema = z
     startsAt: z.string(),
     endsAt: z.string().optional(),
     completed: z.boolean().optional(),
+    assignedTo: z.uuid().optional(),
     frequencyId: z.uuid().optional().nullable(),
   })
   .strict()
