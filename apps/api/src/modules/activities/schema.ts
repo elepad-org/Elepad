@@ -9,6 +9,7 @@ export const ActivitySchema = z
     endsAt: z.date().optional().nullable(),
     completed: z.boolean(),
     createdBy: z.uuid(),
+    assignedTo: z.uuid().nullable(),
     createdAt: z.date(),
     updatedAt: z.date(),
     frequencyId: z.uuid().optional().nullable(),
@@ -25,6 +26,7 @@ export const NewActivitySchema = z
     endsAt: z.string().optional(),
     completed: z.boolean().optional().default(false),
     createdBy: z.uuid(),
+    assignedTo: z.uuid(),
     frequencyId: z.uuid().optional().nullable(),
   })
   .openapi("NewActivity");

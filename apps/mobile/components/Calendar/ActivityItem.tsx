@@ -72,6 +72,13 @@ export default function ActivityItem({
     return member?.displayName || "Usuario desconocido";
   })();
 
+  // Find the assigned user (recipient) of this activity
+  const activityAssignedTo = (() => {
+    if (!item.assignedTo) return null;
+    const member = allGroupMembers.find((m) => m.id === item.assignedTo);
+    return member?.displayName || "Usuario desconocido";
+  })();
+
   // Check if current user can edit this activity
   const canEdit = item.createdBy === idUser || isOwnerOfGroup;
 
@@ -211,17 +218,33 @@ export default function ActivityItem({
               </Text>
             </View>
 
-            {/* Creador */}
-            {activityOwner && (
+            {/* Creador y Destinatario */}
+            {/* Si creador y destinatario son diferentes, mostrar ambos */}
+            {item.createdBy !== item.assignedTo && activityOwner && (
               <View style={styles.modalRow}>
                 <IconButton
-                  icon="account"
+                  icon="account-edit"
                   size={20}
                   iconColor={COLORS.primary}
                   style={{ margin: 0 }}
                 />
                 <Text variant="bodyMedium" style={styles.modalText}>
-                  Por: {activityOwner}
+                  Creado por: {activityOwner}
+                </Text>
+              </View>
+            )}
+
+            {/* Siempre mostrar el destinatario si existe */}
+            {activityAssignedTo && (
+              <View style={styles.modalRow}>
+                <IconButton
+                  icon="account-arrow-right"
+                  size={20}
+                  iconColor={COLORS.secondary}
+                  style={{ margin: 0 }}
+                />
+                <Text variant="bodyMedium" style={styles.modalText}>
+                  Para: {activityAssignedTo}
                 </Text>
               </View>
             )}

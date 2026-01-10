@@ -12,6 +12,8 @@ import { useGetFrequencies } from "@elepad/api-client";
 import { COLORS, STYLES } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
 import MentionInput from "../Recuerdos/MentionInput";
+import ElderSelector from "./ElderSelector";
+import { useAuth } from "@/hooks/useAuth";
 
 type Frequency = {
   id: string;
@@ -23,6 +25,7 @@ type FamilyMember = {
   id: string;
   displayName: string;
   avatarUrl?: string | null;
+  elder?: boolean;
 };
 
 type Props = {
@@ -42,8 +45,14 @@ export default function ActivityForm({
   familyMembers = [],
   currentUserId,
 }: Props) {
+  const { userElepad } = useAuth();
+  const isElder = userElepad?.elder ?? false;
+
   const [title, setTitle] = useState(initial?.title || "");
   const [description, setDescription] = useState(initial?.description || "");
+  const [assignedTo, setAssignedTo] = useState<string | null>(
+    initial?.assignedTo || null,
+  );
   const [startsAtDate, setStartsAtDate] = useState<Date>(
     initial?.startsAt ? new Date(initial.startsAt) : new Date(),
   );
@@ -59,6 +68,9 @@ export default function ActivityForm({
   const [showFrequencyMenu, setShowFrequencyMenu] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showFrequencyModal, setShowFrequencyModal] = useState(false);
+
+  // Filtrar solo adultos mayores (elders) para el selector
+  const elders = familyMembers.filter((member) => member.elder === true);
 
 
   // Fetch available frequencies
@@ -87,9 +99,19 @@ export default function ActivityForm({
       );
       setEndsAtDate(initial?.endsAt ? new Date(initial.endsAt) : undefined);
       setFrequencyId(initial?.frequencyId || undefined);
+      
+      // Si es un elder, assignedTo siempre es él mismo
+      // Si es familiar y está editando, mantener el assignedTo existente
+      // Si es familiar y está creando, requiere seleccionar destinatario
+      if (isElder) {
+        setAssignedTo(currentUserId || null);
+      } else {
+        setAssignedTo(initial?.assignedTo || null);
+      }
+      
       setError(null);
     }
-  }, [visible, initial]);
+  }, [visible, initial, isElder, currentUserId]);
 
   const handleSave = async () => {
     setError(null);
@@ -100,6 +122,13 @@ export default function ActivityForm({
       setError("La fecha de inicio es obligatoria.");
       return;
     }
+
+    // Validar que se haya seleccionado un destinatario
+    if (!assignedTo) {
+      setError(isElder ? "Error: No se pudo determinar el destinatario." : "Debes seleccionar un destinatario para la actividad.");
+      return;
+    }
+
     setSaving(true);
     try {
       // Timeout de 10 segundos para la petición
@@ -118,6 +147,7 @@ export default function ActivityForm({
           endsAt: endsAtDate ? endsAtDate.toISOString() : undefined,
           completed: initial?.completed ?? false,
           frequencyId: frequencyId || null,
+          assignedTo: assignedTo,
         }),
         timeoutPromise,
       ]);
@@ -175,6 +205,16 @@ export default function ActivityForm({
             autoFocus={!initial}
           />
         </View>
+
+        {/* Selector de destinatario - solo visible para familiares (no elders) */}
+        {!isElder && elders.length > 0 && (
+          <ElderSelector
+            elders={elders}
+            selectedElderId={assignedTo}
+            onSelectElder={setAssignedTo}
+            label="Para (destinatario)"
+          />
+        )}
         
         <View style={styles.inputWrapper}>
           <MentionInput

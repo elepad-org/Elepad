@@ -91,6 +91,8 @@ export interface Activity {
   endsAt?: string | null;
   completed: boolean;
   createdBy: string;
+  /** @nullable */
+  assignedTo: string | null;
   createdAt: string;
   updatedAt: string;
   /** @nullable */
@@ -105,6 +107,7 @@ export interface NewActivity {
   endsAt?: string;
   completed?: boolean;
   createdBy: string;
+  assignedTo: string;
   /** @nullable */
   frequencyId?: string | null;
 }
@@ -380,6 +383,7 @@ export type GetFamilyGroupIdGroupMembers200Owner = {
   displayName: string;
   /** @nullable */
   avatarUrl: string | null;
+  elder: boolean;
 };
 
 export type GetFamilyGroupIdGroupMembers200MembersItem = {
@@ -387,6 +391,7 @@ export type GetFamilyGroupIdGroupMembers200MembersItem = {
   displayName: string;
   /** @nullable */
   avatarUrl: string | null;
+  elder: boolean;
 };
 
 export type GetFamilyGroupIdGroupMembers200 = {
