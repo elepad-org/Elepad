@@ -50,7 +50,6 @@ export default function AudioRecorderComponent({
 
     const interval = setInterval(() => {
       setIsPlaying(player.playing);
-      setCurrentTime(player.currentTime);
       setDuration(player.duration);
     }, 100);
 
@@ -87,7 +86,6 @@ export default function AudioRecorderComponent({
       if (audioUri) {
         setAudioUri(null);
         setIsPlaying(false);
-        setCurrentTime(0);
         setDuration(0);
       }
 
@@ -111,7 +109,7 @@ export default function AudioRecorderComponent({
       if (typeof result === "string") {
         uri = result;
       } else if (result && typeof result === "object" && "url" in result) {
-        uri = result.url;
+        uri = (result as { url: string }).url;
       }
 
       console.log("Extracted URI:", uri);
