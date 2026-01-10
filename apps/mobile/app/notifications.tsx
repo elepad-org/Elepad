@@ -1,3 +1,27 @@
+// Validadores de tipo para evitar castings inseguros
+function isActivity(obj: unknown): obj is Activity {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'id' in obj &&
+    'title' in obj &&
+    'startsAt' in obj &&
+    'completed' in obj &&
+    'createdBy' in obj
+  );
+}
+
+function isMemory(obj: unknown): obj is Memory {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'id' in obj &&
+    'bookId' in obj &&
+    'groupId' in obj &&
+    'createdBy' in obj &&
+    'title' in obj
+  );
+}
 import React, { useState, useCallback, useMemo } from "react";
 import {
   View,
@@ -155,9 +179,16 @@ export default function NotificationsScreen() {
 
   // Obtener el rango de fechas para la actividad (solo el día de la actividad)
   const activityDateRange = useMemo(() => {
-    if (!activityQuery.data) return { startDate: "", endDate: "" };
-    const activity = activityQuery.data as Activity;
-    if (!activity.startsAt) return { startDate: "", endDate: "" };
+    // Extraer el objeto Activity solo si la respuesta es exitosa
+    let activity: Activity | undefined;
+    if (activityQuery.data && typeof activityQuery.data === 'object') {
+      if ('data' in activityQuery.data && isActivity(activityQuery.data.data)) {
+        activity = activityQuery.data.data;
+      } else if (isActivity(activityQuery.data)) {
+        activity = activityQuery.data;
+      }
+    }
+    if (!activity || !activity.startsAt) return { startDate: "", endDate: "" };
     const activityDate = activity.startsAt.slice(0, 10);
     return {
       startDate: activityDate,
@@ -180,10 +211,16 @@ export default function NotificationsScreen() {
 
   // Determinar si la actividad está completada para su día específico
   const isActivityCompleted = useMemo(() => {
-    if (!activityQuery.data || !activityCompletionsQuery.data) return false;
-    
-    const activity = activityQuery.data as Activity;
-    if (!activity.startsAt) return false;
+    // Extraer el objeto Activity solo si la respuesta es exitosa
+    let activity: Activity | undefined;
+    if (activityQuery.data && typeof activityQuery.data === 'object') {
+      if ('data' in activityQuery.data && isActivity(activityQuery.data.data)) {
+        activity = activityQuery.data.data;
+      } else if (isActivity(activityQuery.data)) {
+        activity = activityQuery.data;
+      }
+    }
+    if (!activity || !activity.startsAt || !activityCompletionsQuery.data) return false;
     const activityDate = activity.startsAt.slice(0, 10);
     
     // Extraer las completaciones correctamente
@@ -620,15 +657,25 @@ export default function NotificationsScreen() {
         <RecuerdoDetailDialog
           visible={detailDialogVisible}
           recuerdo={
-            memoryQuery.data && groupMembers
-              ? memoryToRecuerdo(
-                  memoryQuery.data as Memory,
-                  groupMembers.reduce((acc, m) => {
-                    acc[m.id] = m.displayName;
-                    return acc;
-                  }, {} as Record<string, string>),
-                )
-              : null
+            (() => {
+              let memory: Memory | undefined;
+              if (memoryQuery.data && typeof memoryQuery.data === 'object') {
+                if ('data' in memoryQuery.data && isMemory(memoryQuery.data.data)) {
+                  memory = memoryQuery.data.data;
+                } else if (isMemory(memoryQuery.data)) {
+                  memory = memoryQuery.data;
+                }
+              }
+              return memory && groupMembers
+                ? memoryToRecuerdo(
+                    memory,
+                    groupMembers.reduce((acc, m) => {
+                      acc[m.id] = m.displayName;
+                      return acc;
+                    }, {} as Record<string, string>),
+                  )
+                : null;
+            })()
           }
           onDismiss={() => {
             setDetailDialogVisible(false);
@@ -664,7 +711,15 @@ export default function NotificationsScreen() {
           }}
         >
           {activityQuery.data && (() => {
-            const activity = activityQuery.data as Activity;
+            let activity: Activity | undefined;
+            if (activityQuery.data && typeof activityQuery.data === 'object') {
+              if ('data' in activityQuery.data && isActivity(activityQuery.data.data)) {
+                activity = activityQuery.data.data;
+              } else if (isActivity(activityQuery.data)) {
+                activity = activityQuery.data;
+              }
+            }
+            if (!activity) return null;
             return [
               <Dialog.Title key="title" style={{ fontWeight: "bold", color: COLORS.text }}>
                 {activity.title}
