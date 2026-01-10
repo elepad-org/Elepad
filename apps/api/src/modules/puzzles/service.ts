@@ -429,9 +429,13 @@ export class PuzzleService {
       );
     }
 
+    //const {given, solution} = sudokuGame;
+
     return {
       puzzle,
       sudokuGame,
+      //given,
+      //solution,
     };
   }
 

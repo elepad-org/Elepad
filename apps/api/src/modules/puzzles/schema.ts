@@ -89,9 +89,9 @@ const LogicGameBaseSchema = z.object({
 });
 
 const SudokuGameBaseSchema = z.object({
-  puzzleId: z.string().uuid(),
-  rows: z.number().int(),
-  cols: z.number().int(),
+  //puzzleId: z.string().uuid(),
+  //rows: z.number().int(),
+  //cols: z.number().int(),
   given: z.any(), // Simplificar para OpenAPI
   solution: z.any(), // Simplificar para OpenAPI
 });
@@ -125,6 +125,8 @@ export const LogicPuzzleCreatedSchema = z
 export const SudokuPuzzleCreatedSchema = z.object({
   puzzle: PuzzleBaseSchema,
   sudokuGame: SudokuGameBaseSchema,
+  //given: z.any().nullable(),
+  //solution: z.any().nullable(),
 });
 
 export const FocusPuzzleCreatedSchema = z

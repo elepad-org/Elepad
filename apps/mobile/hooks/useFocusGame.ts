@@ -99,7 +99,6 @@ export const useFocusGame = (props: UseFocusGameProps) => {
   // 2. Iniciar el Intento
   const startGame = useCallback(
     async (manualPuzzleId?: string) => {
-
       const currentPuzzleId = manualPuzzleId || puzzleId;
 
       console.log("Puzzle ID a usar:", currentPuzzleId);
@@ -133,7 +132,7 @@ export const useFocusGame = (props: UseFocusGameProps) => {
         });
       console.log("Respuesta de Inicio de Intento:", res);
     },
-    [puzzleId, startAttempt],
+    [puzzleId, startAttempt]
   );
 
   useEffect(() => {
@@ -180,45 +179,46 @@ export const useFocusGame = (props: UseFocusGameProps) => {
           },
         });
 
-        setIsRunning(false);
-
+        
         if ("status" in finishResponse && finishResponse.status !== 200) {
           console.error(
             "❌ Status de respuesta inválido:",
-            finishResponse.status,
+            finishResponse.status
           );
           throw new Error("Failed to create puzzle");
         }
 
-        // Invalidar queries de rachas para refrescar datos (solo si success es true)
-        if (success) {
-          queryClient.invalidateQueries({ queryKey: ['getStreaksMe'] });
-          queryClient.invalidateQueries({ queryKey: ['getStreaksHistory'] });
-        }
+        setIsRunning(false);
 
         // Manejo de Logros
-        const resData = finishResponse.data;
+        const resData = "data" in finishResponse ? finishResponse.data : finishResponse;
         if (
           resData?.unlockedAchievements &&
           resData.unlockedAchievements.length > 0
         ) {
-          const newAchievements =
-            resData.unlockedAchievements as UnlockedAchievement[];
+          const newAchievements = resData.unlockedAchievements as UnlockedAchievement[];
           setUnlockedAchievements(newAchievements);
 
           newAchievements.forEach((achievement) => {
             onAchievementUnlocked?.(achievement);
           });
         }
+        
+        // Invalidar queries de rachas para refrescar datos (solo si success es true)
+        if (success) {
+          queryClient.invalidateQueries({ queryKey: ["getStreaksMe"] });
+          queryClient.invalidateQueries({ queryKey: ["getStreaksHistory"] });
+        }
 
-        return finishResponse;
+
+        return resData.unlockedAchievements;
       } catch (error) {
         console.error("❌ Error finishing focus attempt", error);
         hasFinishedAttempt.current = false;
         throw error;
       }
     },
-    [attemptId, finishAttempt, onAchievementUnlocked],
+    [attemptId, finishAttempt, onAchievementUnlocked]
   );
 
   const resetGame = useCallback(() => {
