@@ -4,7 +4,6 @@ import {
   View,
   StyleSheet,
   Pressable,
-  Image,
   ImageBackground,
   Dimensions,
 } from "react-native";
@@ -13,12 +12,11 @@ import {
   Text,
   Avatar,
   Button,
-  Chip,
   IconButton,
 } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { COLORS, STYLES, SHADOWS } from "@/styles/base";
+import { COLORS, SHADOWS } from "@/styles/base";
 import { LoadingProfile } from "@/components/shared";
 import {
   useGetActivitiesFamilyCodeIdFamilyGroup,
@@ -112,14 +110,22 @@ export default function HomeScreen() {
     if (!activitiesQuery.data) return [];
     const now = new Date();
 
-    const activities = Array.isArray(activitiesQuery.data)
-      ? activitiesQuery.data
-      : activitiesQuery.data.data || [];
+    const data = activitiesQuery.data;
+    const activities = Array.isArray(data)
+      ? data
+      : (data as { data?: unknown }).data || [];
+
+    if (!Array.isArray(activities)) return [];
+
+    interface Activity {
+      id: string;
+      startsAt: string;
+    }
 
     return activities
-      .filter((activity: any) => new Date(activity.startsAt) >= now)
+      .filter((activity: Activity) => new Date(activity.startsAt) >= now)
       .sort(
-        (a: any, b: any) =>
+        (a: Activity, b: Activity) =>
           new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime(),
       )
       .slice(0, 3);
@@ -127,17 +133,21 @@ export default function HomeScreen() {
 
   const lastAttempt = useMemo(() => {
     if (!attemptsQuery.data) return null;
-    const attempts = Array.isArray(attemptsQuery.data)
-      ? attemptsQuery.data
-      : attemptsQuery.data.data || [];
+    const data = attemptsQuery.data;
+    const attempts = Array.isArray(data)
+      ? data
+      : (data as { data?: unknown }).data || [];
+    if (!Array.isArray(attempts)) return null;
     return attempts[0] || null;
   }, [attemptsQuery.data]);
 
   const lastMemory = useMemo(() => {
     if (!memoriesQuery.data) return null;
-    const memories = Array.isArray(memoriesQuery.data)
-      ? memoriesQuery.data
-      : memoriesQuery.data.data || [];
+    const data = memoriesQuery.data;
+    const memories = Array.isArray(data)
+      ? data
+      : (data as { data?: unknown }).data || [];
+    if (!Array.isArray(memories)) return null;
     return memories[0] || null;
   }, [memoriesQuery.data]);
 
@@ -153,9 +163,8 @@ export default function HomeScreen() {
   const displayName =
     (userElepad?.displayName as string) || userElepad?.email || "Usuario";
   
-  const userRole = userElepad?.elder ? "Adulto mayor" : "Ayudante";
-  const displayNameWithRole = `${displayName} (${userRole})`;
-
+  const userRole = userElepad?.elder ? "Adulto Mayor" : "Familiar";
+  
   const getInitials = (name: string) =>
     name
       .split(/\s+/)
@@ -354,7 +363,7 @@ export default function HomeScreen() {
             </View>
           ) : upcomingActivities.length > 0 ? (
             <View style={styles.eventsContainer}>
-              {upcomingActivities.map((activity: any) => {
+              {upcomingActivities.map((activity: { id: string; startsAt: string; title: string; description?: string }) => {
                 const activityDate = new Date(activity.startsAt);
                 const isToday =
                   activityDate.toDateString() === new Date().toDateString();
@@ -387,16 +396,14 @@ export default function HomeScreen() {
                         {activity.title}
                       </Text>
                       {activity.description && (
-                        <Text style={styles.eventDesc} numberOfLines={1}>
-                          {activity.description}
-                        </Text>
+                        <HighlightedMentionText
+                          text={activity.description}
+                          groupMembers={groupMembers}
+                          style={styles.eventDesc}
+                          numberOfLines={1}
+                        />
                       )}
                     </View>
-                    {activity.completed && (
-                      <Chip mode="flat" style={styles.eventChip} textStyle={styles.eventChipText}>
-                        ✓
-                      </Chip>
-                    )}
                   </View>
                 );
               })}
@@ -454,7 +461,7 @@ export default function HomeScreen() {
               <Text style={styles.emptyText}>Aún no has jugado</Text>
               <Button
                 mode="outlined"
-                onPress={() => router.push("/games")}
+                onPress={() => router.push("/juegos")}
                 style={styles.emptyButtonOutline}
                 labelStyle={{ color: COLORS.primary }}
               >

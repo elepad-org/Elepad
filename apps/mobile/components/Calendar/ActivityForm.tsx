@@ -1,15 +1,14 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
   ScrollView,
-  TextInput as RNTextInput,
 } from "react-native";
 import { TextInput, Button, Text, Menu, Dialog } from "react-native-paper";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import type { Activity } from "@elepad/api-client";
 import { useGetFrequencies } from "@elepad/api-client";
-import { COLORS, STYLES } from "@/styles/base";
+import { COLORS } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
 import MentionInput from "../Recuerdos/MentionInput";
 import ElderSelector from "./ElderSelector";
@@ -380,7 +379,7 @@ export default function ActivityForm({
       </Dialog.Content>
     </Dialog>
   </>
-  );"transparent"
+  );
 }
 
 const styles = StyleSheet.create({

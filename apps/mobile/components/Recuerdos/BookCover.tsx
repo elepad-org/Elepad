@@ -45,7 +45,7 @@ export default function BookCover({ bookId, groupId, color }: BookCoverProps) {
 
   // Filtrar solo las memorias con imágenes
   const imageMemories = memories.filter(
-    (m: any) =>
+    (m: { mimeType?: string; mediaUrl?: string }) =>
       m.mimeType?.startsWith("image/") && m.mediaUrl
   ).slice(0, 20); // Traer hasta 20 para el carrusel
 
@@ -164,7 +164,7 @@ export default function BookCover({ bookId, groupId, color }: BookCoverProps) {
       flexWrap: "wrap", 
       opacity: fadeAnim
     }}>
-      {displayImages.slice(0, 4).map((memory: any) => (
+      {displayImages.slice(0, 4).map((memory: { id: string; mediaUrl: string }) => (
         <Image
           key={memory.id}
           source={{ uri: memory.mediaUrl }}

@@ -31,7 +31,7 @@ export interface UseSudokuProps {
   difficulty: Difficulty;
   maxMistakes?: number;
   onGameOver?: () => void; // Callback si pierde por errores
-  onAchievementUnlocked?: (achievement: any) => void;
+  onAchievementUnlocked?: (achievement: { id: string; name: string; description: string }) => void;
 }
 
 // --- Hook Principal ---
@@ -284,7 +284,7 @@ export const useSudoku = (props: UseSudokuProps) => {
             .mutateAsync({
               data: { puzzleId, gameType: "attention" },
             })
-            .then((res: any) => {
+            .then((res: { data?: { id: string }; id?: string }) => {
               const id = res.data?.id || res.id;
               setAttemptId(id);
               console.log("✅ Attempt iniciado:", id);
@@ -376,7 +376,7 @@ export const useSudoku = (props: UseSudokuProps) => {
             // 🔥 Actualización optimista de la racha ANTES de llamar al backend
             await markGameCompleted();
 
-            const response = await finishAttempt.mutateAsync({
+            await finishAttempt.mutateAsync({
               attemptId,
               data: {
                 success: true,

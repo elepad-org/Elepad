@@ -4,14 +4,12 @@ import {
   Text,
   Card,
   ActivityIndicator,
-  Chip,
   Button,
   ProgressBar,
-  Menu,
 } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack } from "expo-router";
 import {
   useGetAttemptsStatsGameType,
   GameType,
@@ -22,6 +20,7 @@ import { Divider } from "react-native-paper";
 import { COLORS, STYLES, SHADOWS, FONT } from "@/styles/base";
 import StatisticsChart from "@/components/Historial/StatisticsChart";
 import { useAuth } from "@/hooks/useAuth";
+import DropdownSelect from "@/components/shared/DropdownSelect";
 
 const PAGE_SIZE = 50;
 
@@ -111,12 +110,10 @@ function AttemptItem({
 
 export default function HistoryScreen({ initialAttempts = [] }: Props) {
   const { userElepad } = useAuth();
-  const { view } = useLocalSearchParams();
   
   const [selectedGame, setSelectedGame] = useState("all");
   const [timeRange, setTimeRange] = useState<"week" | "month" | "year">("week");
   const [selectedElderId, setSelectedElderId] = useState<string | null>(null);
-  const [elderMenuVisible, setElderMenuVisible] = useState(false);
 
   const [attempts, setAttempts] = useState<Attempt[]>(initialAttempts);
   const [offset, setOffset] = useState<number>(initialAttempts.length);
@@ -130,7 +127,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
   // Determine the title based on view parameter
   const getTitle = () => {
     if (isHelper) {
-      return view === "estadisticas" ? "Estadísticas" : "Historial";
+      return "Estadísticas";
     }
     return "Historial";
   };
@@ -144,13 +141,19 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
   const elders = useMemo(() => {
     if (!isHelper || !membersQuery.data) return [];
     
-    const groupInfo = membersQuery.data as any;
+    interface GroupMember {
+      id: string;
+      displayName: string;
+      elder: boolean;
+    }
+    
+    const groupInfo = membersQuery.data as { members?: GroupMember[]; owner?: GroupMember };
     const allMembers = [
       ...(groupInfo.members || []),
       ...(groupInfo.owner ? [groupInfo.owner] : [])
     ];
     
-    return allMembers.filter((member: any) => member.elder === true);
+    return allMembers.filter((member: GroupMember) => member.elder === true);
   }, [membersQuery.data, isHelper]);
 
   // Set default selected elder
@@ -202,9 +205,9 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
       ? attempts 
       : attempts.filter(attempt => {
           if (gameType === GameType.memory) return !!attempt.memoryPuzzleId;
-          if (gameType === GameType.net || gameType === GameType.sudoku || gameType === GameType.focus) {
-            return !!attempt.logicPuzzleId;
-          }
+          if (gameType === GameType.logic) return !!attempt.logicPuzzleId;
+          if (gameType === GameType.attention) return !!attempt.sudokuPuzzleId;
+          if (gameType === GameType.reaction) return !!attempt.isFocusGame;
           return false;
         });
 
@@ -292,7 +295,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
   };
 
   const statsToShow = useMemo(() => {
-    const stats = getStatsFromAttempts(selectedGame);
+    const stats = getStatsFromAttempts(selectedGame as GameType | "all");
     console.log('Stats calculation:', {
       isHelper,
       selectedGame,
@@ -369,34 +372,39 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
                   </Text>
                 </View>
               ) : (
-                <View style={styles.elderSelectorContainer}>
-                  <Text style={styles.elderSelectorLabel}>Estadísticas de:</Text>
-                  <Menu
-                    visible={elderMenuVisible}
-                    onDismiss={() => setElderMenuVisible(false)}
-                    anchor={
-                      <Button
-                        mode="outlined"
-                        onPress={() => setElderMenuVisible(true)}
-                        style={styles.elderSelector}
-                        contentStyle={{ flexDirection: 'row-reverse' }}
-                        icon="chevron-down"
-                      >
-                        {elders.find(e => e.id === selectedElderId)?.displayName || "Seleccionar"}
-                      </Button>
-                    }
-                  >
-                    {elders.map((elder) => (
-                      <Menu.Item
-                        key={elder.id}
-                        onPress={() => {
-                          setSelectedElderId(elder.id);
-                          setElderMenuVisible(false);
-                        }}
-                        title={elder.displayName}
-                      />
-                    ))}
-                  </Menu>
+                <View style={styles.filterContainer}>
+                  <View style={{ flex: 1 }}>
+                    <DropdownSelect
+                      label="Estadísticas de"
+                      value={selectedElderId || ""}
+                      showLabel={false}
+                      options={elders.map((elder) => ({
+                        key: elder.id,
+                        label: elder.displayName,
+                        icon: "account"
+                      }))}
+                      onSelect={setSelectedElderId}
+                      placeholder="Seleccionar adulto mayor"
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <DropdownSelect
+                      label="Tipo de juego"
+                      value={selectedGame}
+                      showLabel={false}
+                      options={[
+                        { key: "all", label: "Todos los juegos", icon: "gamepad-variant" },
+                        ...gameTypes.map((gt) => ({
+                          key: gt,
+                          label: gameTypesRender[gt],
+                          icon: gt === GameType.memory ? "brain" : 
+                                gt === GameType.logic ? "puzzle" : 
+                                gt === GameType.attention ? "eye" : "lightning-bolt"
+                        }))
+                      ]}
+                      onSelect={setSelectedGame}
+                    />
+                  </View>
                 </View>
               )}
             </>
@@ -406,42 +414,26 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
           {isHelper && elders.length === 0 ? null : (
             <>
 
-          {/* Filter Chips */}
+          {/* Filter Dropdown for elders only */}
+          {!isHelper && (
           <View style={styles.filterContainer}>
-            <Chip
-              selected={selectedGame === "all"}
-              onPress={() => setSelectedGame("all")}
-              style={[
-                styles.chip,
-                selectedGame === "all" && styles.chipSelected,
+            <DropdownSelect
+              label="Tipo de juego"
+              value={selectedGame}
+              options={[
+                { key: "all", label: "Todos los juegos", icon: "gamepad-variant" },
+                ...gameTypes.map((gt) => ({
+                  key: gt,
+                  label: gameTypesRender[gt],
+                  icon: gt === GameType.memory ? "brain" : 
+                        gt === GameType.logic ? "puzzle" : 
+                        gt === GameType.attention ? "eye" : "lightning-bolt"
+                }))
               ]}
-              textStyle={
-                selectedGame === "all"
-                  ? { color: COLORS.white }
-                  : { color: COLORS.text }
-              }
-            >
-              Todos
-            </Chip>
-            {gameTypes.map((gt) => (
-              <Chip
-                key={gt}
-                selected={selectedGame === gt}
-                onPress={() => setSelectedGame(gt)}
-                style={[
-                  styles.chip,
-                  selectedGame === gt && styles.chipSelected,
-                ]}
-                textStyle={
-                  selectedGame === gt
-                    ? { color: COLORS.white }
-                    : { color: COLORS.text }
-                }
-              >
-                {gameTypesRender[gt]}
-              </Chip>
-            ))}
+              onSelect={setSelectedGame}
+            />
           </View>
+          )}
 
           {globalLoading && !loadingMore ? (
             <View style={STYLES.center}>
@@ -548,8 +540,8 @@ const styles = StyleSheet.create({
   },
   filterContainer: {
     flexDirection: "row",
-    gap: 8,
-    paddingHorizontal: 20,
+    gap: 12,
+    paddingHorizontal: 16,
     paddingVertical: 12,
   },
   chip: {

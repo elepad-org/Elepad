@@ -31,6 +31,7 @@ export default defineConfig([
       ...reactPlugin.configs.recommended.rules,
       ...(reactPlugin.configs["jsx-runtime"]?.rules ?? {}),
       "react/react-in-jsx-scope": "off",
+      "react/prop-types": "off", // TypeScript ya provee validación de tipos
     },
     settings: {
       react: { version: "detect" },

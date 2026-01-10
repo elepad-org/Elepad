@@ -18,7 +18,7 @@ export default function AttentionGame({
   onRestart,
 }: Props) {
   const core = useMemo(() => new AttentionGameCore(), []);
-  const [tick, setTick] = useState(0);
+  const [, setTick] = useState(0);
   const [score, setScore] = useState({ correct: 0, rounds: rounds });
   const [lives, setLives] = useState(3);
   const [lastResult, setLastResult] = useState<boolean | null>(null);  
@@ -41,7 +41,7 @@ export default function AttentionGame({
   const restartGame = useCallback(() => {
     try {
       onRestart?.(score);
-    } catch (e) {}
+    } catch {}
     
     core.reset();
     core.startRound();

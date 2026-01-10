@@ -1,8 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
 import { useGetStreaksMe, useGetStreaksHistory } from "@elepad/api-client";
 import { useEffect, useRef } from "react";
 import { useStreakSnackbar } from "./useStreakSnackbar";
-import { isSameLocalDate } from "@/lib/dateHelpers";
 
 /**
  * Hook para obtener la racha actual del usuario

@@ -11,12 +11,12 @@ import {
 import {
   Button,
   Portal,
-  Snackbar,
   Text,
   TextInput,
   IconButton,
   Dialog,
   Card,
+  Snackbar,
 } from "react-native-paper";
 import { router } from "expo-router";
 import * as Clipboard from 'expo-clipboard';
@@ -82,6 +82,9 @@ export default function FamilyGroup() {
     avatarUrl: string | null;
   } | null>(null);
   const [confirmTransferVisible, setConfirmTransferVisible] = useState(false);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarError, setSnackbarError] = useState(false);
 
   // Fetch group members via the generated React Query hook
   const membersQuery = useGetFamilyGroupIdGroupMembers(groupId ?? "");
@@ -1084,6 +1087,17 @@ export default function FamilyGroup() {
             </Dialog.Actions>
           </Dialog>
         </Portal>
+        
+        <Snackbar
+          visible={snackbarVisible}
+          onDismiss={() => setSnackbarVisible(false)}
+          duration={3000}
+          style={{
+            backgroundColor: snackbarError ? COLORS.error : COLORS.success,
+          }}
+        >
+          {snackbarMessage}
+        </Snackbar>
       </ScrollView>
     </SafeAreaView>
   );
