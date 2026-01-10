@@ -7,6 +7,7 @@ import {
 } from "@elepad/api-client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "./useAuth";
+import { getTodayLocal } from "@/lib/dateHelpers";
 
 export interface Card {
   id: number;
@@ -363,6 +364,7 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
                 moves,
                 durationMs,
                 score,
+                clientDate: getTodayLocal(),
               },
             });
 

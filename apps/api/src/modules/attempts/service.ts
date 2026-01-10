@@ -99,16 +99,8 @@ export class AttemptService {
       throw new ApiException(500, "Error al finalizar el intento", updateError);
     }
 
-    // Si el intento fue exitoso, actualizar la racha del usuario
-    if (success) {
-      try {
-        const streakService = new StreakService(this.supabase);
-        await streakService.updateStreakOnGameCompletion(userId);
-      } catch (error) {
-        // No fallar el intento si hay error al actualizar la racha
-        console.error("Error al actualizar racha:", error);
-      }
-    }
+    // Nota: La actualización de racha se hace en el handler con clientDate del cliente
+    // No hacerlo aquí para evitar duplicados
 
     return attempt;
   }
