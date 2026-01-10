@@ -540,25 +540,276 @@
           "reaction"
         ]
       },
-      "PuzzleCreatedResponse": {
+      "MemoryPuzzleCreated": {
         "type": "object",
         "properties": {
           "puzzle": {
-            "$ref": "#/components/schemas/Puzzle"
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "gameType": {
+                "$ref": "#/components/schemas/GameType"
+              },
+              "gameName": {
+                "type": "string",
+                "nullable": true
+              },
+              "title": {
+                "type": "string",
+                "nullable": true
+              },
+              "difficulty": {
+                "type": "integer",
+                "nullable": true
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "id",
+              "gameType",
+              "gameName",
+              "title",
+              "difficulty",
+              "createdAt"
+            ]
           },
           "memoryGame": {
-            "$ref": "#/components/schemas/MemoryGame"
+            "type": "object",
+            "properties": {
+              "puzzleId": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "rows": {
+                "type": "integer"
+              },
+              "cols": {
+                "type": "integer"
+              },
+              "symbols": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "layout": {
+                "type": "array",
+                "items": {
+                  "type": "integer"
+                }
+              }
+            },
+            "required": [
+              "puzzleId",
+              "rows",
+              "cols",
+              "symbols",
+              "layout"
+            ]
+          }
+        },
+        "required": [
+          "puzzle",
+          "memoryGame"
+        ]
+      },
+      "NewMemoryPuzzle": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "difficulty": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "rows": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 6,
+            "default": 4
+          },
+          "cols": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 6,
+            "default": 6
+          }
+        }
+      },
+      "LogicPuzzleCreated": {
+        "type": "object",
+        "properties": {
+          "puzzle": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "gameType": {
+                "$ref": "#/components/schemas/GameType"
+              },
+              "gameName": {
+                "type": "string",
+                "nullable": true
+              },
+              "title": {
+                "type": "string",
+                "nullable": true
+              },
+              "difficulty": {
+                "type": "integer",
+                "nullable": true
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "id",
+              "gameType",
+              "gameName",
+              "title",
+              "difficulty",
+              "createdAt"
+            ]
           },
           "logicGame": {
-            "$ref": "#/components/schemas/LogicGame"
+            "type": "object",
+            "properties": {
+              "puzzleId": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "rows": {
+                "type": "integer"
+              },
+              "cols": {
+                "type": "integer"
+              },
+              "startState": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "boolean"
+                    }
+                  ]
+                }
+              },
+              "solution": {
+                "type": "array",
+                "nullable": true,
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "boolean"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "puzzleId",
+              "rows",
+              "cols",
+              "startState"
+            ]
+          }
+        },
+        "required": [
+          "puzzle",
+          "logicGame"
+        ]
+      },
+      "NewNetPuzzle": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
           },
-          "sudokuGame": {
-            "$ref": "#/components/schemas/SudokuGame"
+          "difficulty": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "gridSize": {
+            "type": "integer",
+            "minimum": 3,
+            "maximum": 7,
+            "default": 5
+          }
+        }
+      },
+      "FocusPuzzleCreated": {
+        "type": "object",
+        "properties": {
+          "puzzle": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "gameType": {
+                "$ref": "#/components/schemas/GameType"
+              },
+              "gameName": {
+                "type": "string",
+                "nullable": true
+              },
+              "title": {
+                "type": "string",
+                "nullable": true
+              },
+              "difficulty": {
+                "type": "integer",
+                "nullable": true
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "id",
+              "gameType",
+              "gameName",
+              "title",
+              "difficulty",
+              "createdAt"
+            ]
           }
         },
         "required": [
           "puzzle"
         ]
+      },
+      "NewFocusPuzzle": {
+        "type": "object",
+        "properties": {
+          "rounds": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 10
+          }
+        }
       },
       "Puzzle": {
         "type": "object",
@@ -595,200 +846,6 @@
           "difficulty",
           "createdAt"
         ]
-      },
-      "MemoryGame": {
-        "type": "object",
-        "properties": {
-          "puzzleId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "rows": {
-            "type": "integer"
-          },
-          "cols": {
-            "type": "integer"
-          },
-          "symbols": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "layout": {
-            "type": "array",
-            "items": {
-              "type": "integer"
-            }
-          }
-        },
-        "required": [
-          "puzzleId",
-          "rows",
-          "cols",
-          "symbols",
-          "layout"
-        ]
-      },
-      "LogicGame": {
-        "type": "object",
-        "properties": {
-          "puzzleId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "rows": {
-            "type": "integer"
-          },
-          "cols": {
-            "type": "integer"
-          },
-          "startState": {
-            "type": "array",
-            "items": {
-              "anyOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "boolean"
-                }
-              ]
-            }
-          },
-          "solution": {
-            "type": "array",
-            "nullable": true,
-            "items": {
-              "anyOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "boolean"
-                }
-              ]
-            }
-          }
-        },
-        "required": [
-          "puzzleId",
-          "rows",
-          "cols",
-          "startState"
-        ]
-      },
-      "SudokuGame": {
-        "type": "object",
-        "properties": {
-          "puzzleId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "rows": {
-            "type": "integer"
-          },
-          "cols": {
-            "type": "integer"
-          },
-          "given": {
-            "type": "array",
-            "items": {
-              "type": "array",
-              "items": {
-                "type": "integer"
-              }
-            }
-          },
-          "solution": {
-            "type": "array",
-            "items": {
-              "type": "array",
-              "items": {
-                "type": "integer"
-              }
-            }
-          }
-        },
-        "required": [
-          "puzzleId",
-          "rows",
-          "cols",
-          "given",
-          "solution"
-        ]
-      },
-      "NewMemoryPuzzle": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string"
-          },
-          "difficulty": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 5
-          },
-          "rows": {
-            "type": "integer",
-            "minimum": 2,
-            "maximum": 6,
-            "default": 4
-          },
-          "cols": {
-            "type": "integer",
-            "minimum": 2,
-            "maximum": 6,
-            "default": 6
-          }
-        }
-      },
-      "NewNetPuzzle": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string"
-          },
-          "difficulty": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 5
-          },
-          "gridSize": {
-            "type": "integer",
-            "minimum": 3,
-            "maximum": 7,
-            "default": 5
-          }
-        }
-      },
-      "NewFocusPuzzle": {
-        "type": "object",
-        "properties": {
-          "rounds": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 100,
-            "default": 10
-          }
-        }
-      },
-      "NewSudokuPuzzle": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string"
-          },
-          "difficulty": {
-            "type": "string",
-            "enum": [
-              "easy",
-              "medium",
-              "hard"
-            ],
-            "default": "easy"
-          }
-        }
       },
       "StartAttempt": {
         "type": "object",
@@ -3382,7 +3439,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PuzzleCreatedResponse"
+                  "$ref": "#/components/schemas/MemoryPuzzleCreated"
                 }
               }
             }
@@ -3431,7 +3488,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PuzzleCreatedResponse"
+                  "$ref": "#/components/schemas/LogicPuzzleCreated"
                 }
               }
             }
@@ -3480,56 +3537,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PuzzleCreatedResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Datos inválidos",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Error interno del servidor",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/puzzles/sudoku": {
-      "post": {
-        "tags": [
-          "puzzles"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewSudokuPuzzle"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Puzzle de Sudoku creado",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PuzzleCreatedResponse"
+                  "$ref": "#/components/schemas/FocusPuzzleCreated"
                 }
               }
             }
