@@ -1,7 +1,6 @@
 import { useGetStreaksMe, useGetStreaksHistory, GetStreaksMe200, GetStreaksHistory200 } from "@elepad/api-client";
 import { useEffect, useRef } from "react";
 import { useStreakSnackbar } from "./useStreakSnackbar";
-import { utcDateToLocal } from "@/lib/dateHelpers";
 
 /**
  * Hook para obtener la racha actual del usuario
@@ -70,10 +69,9 @@ export function useStreakHistory(startDate?: string, endDate?: string) {
     const responseData = 'data' in query.data ? query.data.data : query.data;
     if (responseData && typeof responseData === 'object' && 'dates' in responseData) {
       const historyData = responseData as GetStreaksHistory200;
-      return {
-        ...historyData,
-        dates: historyData.dates?.map(utcDateToLocal) || []
-      };
+      // Las fechas ya vienen en formato local (YYYY-MM-DD) del backend
+      // NO necesitan conversión porque el cliente envía clientDate en hora local
+      return historyData;
     }
     return undefined;
   })() : undefined;
