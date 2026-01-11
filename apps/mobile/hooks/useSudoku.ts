@@ -4,9 +4,6 @@ import { useAuth } from "./useAuth";
 import { getTodayLocal } from "@/lib/dateHelpers";
 import {
   usePostPuzzlesSudoku,
-  //PostPuzzlesSudoku201,
-  //PostPuzzlesSudoku201SudokuGame,
-  //PostPuzzlesSudoku201Puzzle,
   usePostAttemptsStart,
   usePostAttemptsAttemptIdFinish,
   PostAttemptsAttemptIdFinish200UnlockedAchievementsItem,
@@ -386,12 +383,32 @@ export const useSudoku = (props: UseSudokuProps) => {
 
   // --- Verificación de Victoria ---
 
+  // --- Validación del Tablero ---
+  const isBoardSolved = useCallback((): boolean => {
+    // Verificar que no haya celdas vacías
+    if (filledCells < 81) return false;
+
+    // Comparar cada celda del tablero actual con la solución
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+        const cell = board[row][col];
+        // Si el valor no coincide con la solución, el tablero no está resuelto
+        if (cell.value !== cell.solutionValue) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }, [board, filledCells]);
+
+
   useEffect(() => {
     if (
-      filledCells === 81 &&
       isGameStarted &&
       !isComplete &&
-      !hasFinishedAttempt.current
+      !hasFinishedAttempt.current &&
+      isBoardSolved()
     ) {
       if (timerRef.current) clearInterval(timerRef.current);
 
@@ -452,7 +469,7 @@ export const useSudoku = (props: UseSudokuProps) => {
       setIsComplete(true);
       finishGame();
     }
-  }, [filledCells, isGameStarted, isComplete, attemptId, mistakes]);
+  }, [isGameStarted, isComplete, attemptId, mistakes, isBoardSolved]);
 
   // --- Helpers ---
   // TODO: Todavia no se usa
@@ -465,6 +482,8 @@ export const useSudoku = (props: UseSudokuProps) => {
     newBoard[row][col] = { ...newBoard[row][col], value: null, isError: false };
     setBoard(newBoard);
   }, [board, selectedCell, isComplete]);
+
+  
 
   const resetGame = useCallback(() => {
     hasInitialized.current = false;
