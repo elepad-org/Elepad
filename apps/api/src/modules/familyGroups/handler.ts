@@ -183,6 +183,9 @@ familyGroupApp.openapi(
         idGroup: z.uuid(),
         idUser: z.uuid(),
       }),
+      query: z.object({
+        createNewGroup: z.string().optional().default("true"),
+      }),
     },
     responses: {
       200: {
@@ -200,12 +203,14 @@ familyGroupApp.openapi(
   },
   async (c) => {
     const { idGroup, idUser } = c.req.valid("param");
+    const { createNewGroup } = c.req.valid("query");
     const adminUser = c.var.user;
 
     const result = await c.var.familyGroupService.removeUserFromFamilyGroup(
       idGroup,
       idUser,
       adminUser.id,
+      createNewGroup === "true",
     );
 
     if (!result) {

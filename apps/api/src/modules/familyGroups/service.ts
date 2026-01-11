@@ -275,6 +275,7 @@ export class FamilyGroupService {
     groupId: string,
     userId: string,
     adminUserId: string,
+    createNewGroup: boolean = true,
   ): Promise<{
     removedFromGroupId: string;
     userId: string;
@@ -326,12 +327,27 @@ export class FamilyGroupService {
       throw new ApiException(404, "User is not a member of this group");
     }
 
-    // 5) Prevent the owner from removing themselves (owners cannot leave their own group)
+    // 5) Prevent the owner from removing themselves if there are other members in the group
     if (userId === group.ownerUserId && isSelfRemoval) {
-      throw new ApiException(
-        400,
-        "Group owner cannot remove themselves from the group",
-      );
+      // Check if there are other members in the group
+      const { data: otherMembers, error: membersErr } = await this.supabase
+        .from("users")
+        .select("id")
+        .eq("groupId", groupId)
+        .neq("id", userId);
+
+      if (membersErr) {
+        console.error("Error checking other members: ", membersErr);
+        throw new ApiException(500, "Error checking group members");
+      }
+
+      // If there are other members, the owner cannot leave
+      if (otherMembers && otherMembers.length > 0) {
+        throw new ApiException(
+          400,
+          "Group owner cannot leave the group while there are other members. Transfer ownership first.",
+        );
+      }
     }
 
     // 6) Unlink the user from the group (set groupId = null)
@@ -348,7 +364,18 @@ export class FamilyGroupService {
       `[FamilyGroups] User ${userId} removed from group ${groupId} at ${new Date().toISOString()}`,
     );
 
-    // 7) Validate if the user has another group assigned
+    // 7) Solo crear un nuevo grupo si se solicita
+    if (!createNewGroup) {
+      console.info(
+        `[FamilyGroups] User ${userId} left group without creating a new one at ${new Date().toISOString()}`,
+      );
+      return {
+        removedFromGroupId: groupId,
+        userId,
+      };
+    }
+
+    // 8) Validate if the user has another group assigned
     // Given the current schema (users.groupId), if it's null, they have no group.
     const created = await this.createPersonalGroupForUser(
       userId,

@@ -72,14 +72,8 @@ export class ActivityService {
       );
     }
 
-    if (!activities || activities.length === 0) {
-      throw new ApiException(
-        404,
-        "No se encontraron actividades para este grupo familiar",
-      );
-    }
-
-    return activities;
+    // Devolver array vacío si no hay actividades en lugar de lanzar error
+    return activities || [];
   }
 
   async create(payload: NewActivity) {
