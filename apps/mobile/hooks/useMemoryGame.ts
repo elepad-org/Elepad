@@ -376,36 +376,37 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
             queryClient.invalidateQueries({ queryKey: ['getStreaksHistory'] });
 
             // El backend automáticamente verifica logros y los devuelve en la respuesta
+            const responseData = "data" in finishResponse ? finishResponse.data : finishResponse;
             if (
-              finishResponse.data &&
-              "unlockedAchievements" in finishResponse.data &&
-              finishResponse.data.unlockedAchievements &&
-              finishResponse.data.unlockedAchievements.length > 0
+              responseData &&
+              "unlockedAchievements" in responseData &&
+              responseData.unlockedAchievements &&
+              responseData.unlockedAchievements.length > 0
             ) {
               setUnlockedAchievements(
-                finishResponse.data
+                responseData
                   .unlockedAchievements as UnlockedAchievement[],
               );
               console.log(
                 "🏆 Logros desbloqueados:",
-                finishResponse.data.unlockedAchievements.length,
-                finishResponse.data.unlockedAchievements,
+                responseData.unlockedAchievements.length,
+                responseData.unlockedAchievements,
               );
 
               // Notificar cada logro desbloqueado
-              finishResponse.data.unlockedAchievements.forEach(
+              responseData.unlockedAchievements.forEach(
                 (achievement: UnlockedAchievement) => {
                   onAchievementUnlocked?.(achievement);
                 },
               );
               console.log(
                 "🏆 Logros desbloqueados:",
-                finishResponse.data.unlockedAchievements.length,
-                finishResponse.data.unlockedAchievements,
+                responseData.unlockedAchievements.length,
+                responseData.unlockedAchievements,
               );
 
               // Notificar cada logro desbloqueado
-              finishResponse.data.unlockedAchievements.forEach(
+              responseData.unlockedAchievements.forEach(
                 (achievement: UnlockedAchievement) => {
                   onAchievementUnlocked?.(achievement);
                 },

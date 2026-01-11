@@ -3514,7 +3514,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LogicPuzzleCreated"
                   "nullable": true
                 }
               }
