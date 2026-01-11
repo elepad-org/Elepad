@@ -294,9 +294,13 @@ export default function FamilyGroup() {
       // 3. Refrescar datos del usuario
       await refreshUserElepad();
 
+      // 4. Limpiar estados del grupo anterior
+      setInvitationCode(undefined);
+      setAdvancedOptionsExpanded(false);
       setExitOptionsVisible(false);
       setShowJoinCodeInput(false);
       setJoinCodeInput("");
+      
       Alert.alert(
         "Grupo creado",
         "Has salido del grupo anterior y se ha creado tu nuevo grupo familiar exitosamente.",
@@ -351,9 +355,13 @@ export default function FamilyGroup() {
       // 3. Refrescar datos del usuario
       await refreshUserElepad();
 
+      // 4. Limpiar estados del grupo anterior
+      setInvitationCode(undefined);
+      setAdvancedOptionsExpanded(false);
       setExitOptionsVisible(false);
       setShowJoinCodeInput(false);
       setJoinCodeInput("");
+      
       Alert.alert(
         "¡Bienvenido!",
         "Has salido del grupo anterior y te has unido al nuevo grupo familiar exitosamente.",
