@@ -1,21 +1,28 @@
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { AttentionGameCore, COLORS_MAP, ColorName } from "./game";
 import { Button, Portal, Dialog } from "react-native-paper";
 import { router } from "expo-router";
 import { COLORS, STYLES } from "@/styles/base";
 import CancelButton from "@/components/shared/CancelButton";
+import { useFocusGame } from "@/hooks/useFocusGame";
+import { GameLoadingView } from "@/components/shared";
+import { Achievement } from "@/app/focus-game";
 
 type Props = {
   rounds?: number;
-  onFinish?: (score: { correct: number; rounds: number }) => void;
-  onRestart?: (score: { correct: number; rounds: number }) => void;
+  onComplete?: (stats: {
+    correct: number;
+    rounds: number;
+    achievements: Achievement[];
+  }) => void;
+  onAchievementUnlocked?: (achievement: Achievement) => void;
 };
 
 export default function AttentionGame({
   rounds = 10,
-  onFinish,
-  onRestart,
+  onComplete,
+  onAchievementUnlocked,
 }: Props) {
   const core = useMemo(() => new AttentionGameCore(), []);
   const [, setTick] = useState(0);
@@ -23,13 +30,99 @@ export default function AttentionGame({
   const [lives, setLives] = useState(3);
   const [lastResult, setLastResult] = useState<boolean | null>(null);  
 
-  const [showResultsDialog, setShowResultsDialog] = useState(false);
   const [showQuitDialog, setShowQuitDialog] = useState(false);
-  const [modalTitle, setModalTitle] = useState("");
-  const [modalMessage, setModalMessage] = useState("");
-  const [gameWon, setGameWon] = useState(false);
 
   const [currentRound, setCurrentRound] = useState(1);
+  const [gameId, setGameId] = useState<string>(Date.now().toString());
+  const [isGameComplete, setIsGameComplete] = useState(false);
+  const [achievementsSection, setAchievementsSection] = useState<Achievement[]>([])
+  
+  const hasCalledOnComplete = useRef(false);
+  const isCheckingAchievements = useRef(false);
+  const lastCompletedGameId = useRef<string | null>(null);
+  const prevGameId = useRef<string>(gameId);
+
+  // Hook de Focus Game para manejar API
+  const focus = useFocusGame({
+    rounds,
+    onAchievementUnlocked,
+  });
+
+  // Detectar cuando cambia el gameId INMEDIATAMENTE
+  if (prevGameId.current !== gameId) {
+    console.log(
+      "🔄 GameId cambió de",
+      prevGameId.current,
+      "a",
+      gameId,
+      "- Reseteando flags INMEDIATAMENTE",
+    );
+    prevGameId.current = gameId;
+    hasCalledOnComplete.current = false;
+    isCheckingAchievements.current = false;
+  }
+
+  // Cuando el juego se completa, marcar que estamos verificando logros
+  useEffect(() => {
+    if (isGameComplete && !hasCalledOnComplete.current) {
+      isCheckingAchievements.current = true;
+      console.log(
+        "🎮 Juego completado (gameId:",
+        gameId,
+        "), esperando verificación de logros...",
+      );
+    }
+  }, [isGameComplete, gameId]);
+
+  // Cuando se completa el juego Y se han verificado los logros, notificar al padre
+  useEffect(() => {
+    if (
+      isGameComplete &&
+      isCheckingAchievements.current &&
+      !hasCalledOnComplete.current
+    ) {
+      // Verificar que no sea el mismo juego completado anteriormente
+      if (lastCompletedGameId.current === gameId) {
+        console.log("⚠️ Ignorando completion duplicado del juego:", gameId);
+        return;
+      }
+
+      // Esperar un poco para dar tiempo a que los logros se procesen
+      const timer = setTimeout(() => {
+        hasCalledOnComplete.current = true;
+        isCheckingAchievements.current = false;
+        lastCompletedGameId.current = gameId;
+        console.log(
+          "🎊 Notificando juego completado (gameId:",
+          gameId,
+          ") con logros:",
+          achievementsSection,
+        );
+        onComplete?.({
+          correct: score.correct,
+          rounds,
+          achievements: achievementsSection,
+        });
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [
+    isGameComplete,
+    score.correct,
+    rounds,
+    achievementsSection,
+    onComplete,
+    gameId,
+  ]);
+
+  // Resetear el flag cuando se reinicia el juego
+  useEffect(() => {
+    if (!isGameComplete) {
+      hasCalledOnComplete.current = false;
+      isCheckingAchievements.current = false;
+    }
+  }, [isGameComplete]);
 
   useEffect(() => {
     core.startRound();
@@ -39,20 +132,24 @@ export default function AttentionGame({
   const prompt = core.currentPrompt;
 
   const restartGame = useCallback(() => {
-    try {
-      onRestart?.(score);
-    } catch {}
+    // Generar nuevo ID de juego
+    const newGameId = Date.now().toString();
+    setGameId(newGameId);
+    console.log("🆕 Nuevo juego iniciado con ID:", newGameId);
     
     core.reset();
     core.startRound();
-    setScore({ ...score, correct: 0 });
+    setScore({ correct: 0, rounds });
     setLives(3);
     setLastResult(null);
-    setShowResultsDialog(false);
     setShowQuitDialog(false);
     setCurrentRound(1);
+    setIsGameComplete(false);
     setTick((t) => t + 1);
-  }, [core, onRestart, score]);
+    
+    // Resetear el juego en el hook
+    focus.resetGame();
+  }, [core, rounds, focus]);
 
   const handleQuit = useCallback(() => {
     setShowQuitDialog(true);
@@ -64,12 +161,12 @@ export default function AttentionGame({
   }, []);
 
   const handleSelection = (selection: ColorName) => {
-    if (!prompt || showResultsDialog || showQuitDialog) return;
+    if (!prompt || showQuitDialog) return;
     const correct = core.handleSelection(selection);
     setLastResult(correct);
     
     const newCorrectScore = score.correct + (correct ? 1 : 0);
-    setScore({ ...score, correct: newCorrectScore });
+    setScore({ correct: newCorrectScore, rounds });
     setCurrentRound((prev) => prev + 1);
     setTick((t) => t + 1);
 
@@ -79,15 +176,16 @@ export default function AttentionGame({
         const remaining = prev - 1;
         if (remaining <= 0) {
           // PERDIÓ
-          setTimeout(() => {
-            setGameWon(false);
-            setModalTitle("Game Over 😢");
-            setModalMessage("Te quedaste sin vidas. ¡Inténtalo de nuevo!");
-            setShowResultsDialog(true);
-            onFinish?.(score);
+          setTimeout(async () => {
+            // Finalizar el intento en el backend
+            setAchievementsSection(await focus.finishGame(
+              { correct: newCorrectScore, rounds },
+              false // perdió
+            ) as Achievement[]);
+            setIsGameComplete(true);
           }, 350);
         } else {
-            // Sigue jugando tras error
+          // Sigue jugando tras error
           setTimeout(() => {
             core.next();
             core.startRound();
@@ -101,12 +199,13 @@ export default function AttentionGame({
       // Acierto
       if (currentRound === rounds) {
         // GANÓ
-        setTimeout(() => {
-          setGameWon(true);
-          setModalTitle("¡Felicitaciones! 🎉");
-          setModalMessage("¡Has completado todas las rondas!");
-          setShowResultsDialog(true);
-          onFinish?.(score);
+        setTimeout(async () => {
+          // Finalizar el intento en el backend
+          setAchievementsSection( await focus.finishGame(
+            { correct: newCorrectScore, rounds },
+            true // ganó
+          ) as Achievement[]);
+          setIsGameComplete(true);
         }, 350);
       } else {
         // Sigue jugando tras acierto
@@ -119,6 +218,11 @@ export default function AttentionGame({
       }
     }
   };
+
+  // Mostrar loading a pantalla completa
+  if (focus.isLoading) {
+    return <GameLoadingView message="Preparando el juego..." />;
+  }
 
   return (
     <View style={styles.container}>
@@ -242,61 +346,6 @@ export default function AttentionGame({
               style={{ borderRadius: 12 }}
             >
               Salir
-            </Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
-
-      <Portal>
-        <Dialog
-          visible={showResultsDialog}
-          onDismiss={() => setShowResultsDialog(false)}
-          style={styles.dialogContainer}
-        >
-          <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
-            {modalTitle}
-          </Dialog.Title>
-          <Dialog.Content>
-            <View style={styles.resultsContainer}>
-              <Text style={styles.resultsText}>
-                {modalMessage}
-              </Text>
-
-              <View style={styles.resultStats}>
-                {/* Estadística: Aciertos */}
-                <View style={styles.resultStat}>
-                    <Text style={styles.resultIcon}>🎯</Text>
-                    <Text style={styles.resultLabel}>Aciertos</Text>
-                    <Text style={styles.resultValue}>{score.correct}</Text>
-                </View>
-                 {/* Estadística: Resultado final */}
-                 <View style={styles.resultStat}>
-                    <Text style={styles.resultIcon}>{gameWon ? "🏆" : "💀"}</Text>
-                    <Text style={styles.resultLabel}>Resultado</Text>
-                    <Text style={styles.resultValue}>{gameWon ? "Ganaste" : "Perdiste"}</Text>
-                </View>
-              </View>
-
-            </View>
-          </Dialog.Content>
-          <Dialog.Actions style={styles.dialogActions}>
-            <Button
-              mode="outlined"
-              onPress={() => {
-                setShowResultsDialog(false);
-                router.back();
-              }}
-              style={styles.dialogButton}
-            >
-              Volver a Juegos
-            </Button>
-            <Button
-              mode="contained"
-              onPress={restartGame}
-              style={styles.dialogButton}
-              buttonColor={COLORS.primary}
-            >
-              Jugar de Nuevo
             </Button>
           </Dialog.Actions>
         </Dialog>

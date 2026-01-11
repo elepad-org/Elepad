@@ -20,6 +20,7 @@ export default function SudokuGameScreen() {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
   const [gameStarted, setGameStarted] = useState(false);
+  const [showAchievementsDialog, setShowAchievementsDialog] = useState(false);
   const [achievementQueue, setAchievementQueue] = useState<
     Array<{
       id: string;
@@ -49,6 +50,11 @@ export default function SudokuGameScreen() {
     router.back();
   }, []);
 
+  const handleAchievementsDialogClose = useCallback(() => {
+    setShowAchievementsDialog(false);
+    setShowResultsDialog(true);
+  }, []);
+
   const handleAchievementUnlocked = useCallback(
     (achievement: {
       id: string;
@@ -59,7 +65,7 @@ export default function SudokuGameScreen() {
       console.log("🎉 Agregando logro a la cola:", achievement.title);
       setAchievementQueue((prev) => [...prev, achievement]);
     },
-    [],
+    []
   );
 
   // TODO: Definir los logros y probar
@@ -87,7 +93,7 @@ export default function SudokuGameScreen() {
         setShowResultsDialog(true);
       }, 500);
     },
-    [],
+    []
   );
 
   const handleGameOver = useCallback(() => {
@@ -118,7 +124,7 @@ export default function SudokuGameScreen() {
       setShowDifficultyDialog(false);
       setGameStarted(true);
     },
-    [],
+    []
   );
 
   const formatTime = (seconds: number) => {
@@ -224,7 +230,6 @@ export default function SudokuGameScreen() {
                     Difícil
                   </Button>
                 </View>
-             
               </Dialog.Actions>
             </Dialog>
           </Portal>
@@ -349,6 +354,53 @@ export default function SudokuGameScreen() {
               </Dialog.Actions>
             </Dialog>
           </Portal>
+
+          <Portal>
+            <Dialog
+              visible={showAchievementsDialog}
+              onDismiss={handleAchievementsDialogClose}
+              style={{
+                backgroundColor: COLORS.background,
+                width: "90%",
+                alignSelf: "center",
+                borderRadius: 16,
+                paddingVertical: 14,
+              }}
+            >
+              <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
+                ¡Logros Desbloqueados! 🎉
+              </Dialog.Title>
+              <Dialog.Content>
+                <View style={styles.achievementsContainer}>
+                  {gameResults?.achievements?.map((achievement) => (
+                    <View key={achievement.id} style={styles.achievementItem}>
+                      <Text
+                        variant="titleMedium"
+                        style={styles.achievementIcon}
+                      >
+                        🏅
+                      </Text>
+                      <Text variant="bodyLarge" style={styles.achievementTitle}>
+                        {achievement.title}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </Dialog.Content>
+              <Dialog.Actions
+                style={{ paddingBottom: 12, paddingHorizontal: 20 }}
+              >
+                <Button
+                  mode="contained"
+                  onPress={handleAchievementsDialogClose}
+                  buttonColor={COLORS.primary}
+                  style={{ borderRadius: 12 }}
+                >
+                  Continuar
+                </Button>
+              </Dialog.Actions>
+            </Dialog>
+          </Portal>
         </View>
       </SafeAreaView>
     </>
@@ -363,6 +415,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 0,
+  },
+  achievementsContainer: {
+    gap: 16,
+  },
+  achievementItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: COLORS.primary + "10",
+    padding: 16,
+    borderRadius: 12,
+    gap: 12,
+  },
+  achievementIcon: {
+    fontSize: 32,
+  },
+  achievementTitle: {
+    flex: 1,
+    color: COLORS.text,
+    fontWeight: "600",
   },
   achievementSnackbar: {
     backgroundColor: "#7C3AED",
