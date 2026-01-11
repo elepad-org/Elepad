@@ -46,7 +46,7 @@ export default function HomeScreen() {
       query: {
         enabled: !!userElepad?.groupId,
       },
-    },
+    }
   );
 
   // Fetch recent attempts
@@ -56,7 +56,7 @@ export default function HomeScreen() {
       query: {
         enabled: !!userElepad,
       },
-    },
+    }
   );
 
   // Fetch recent memories
@@ -68,7 +68,7 @@ export default function HomeScreen() {
       query: {
         enabled: !!userElepad,
       },
-    },
+    }
   );
 
   // Fetch family members
@@ -78,7 +78,7 @@ export default function HomeScreen() {
       query: {
         enabled: !!userElepad?.groupId,
       },
-    },
+    }
   );
 
   const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
@@ -95,13 +95,25 @@ export default function HomeScreen() {
 
   const groupInfo = selectGroupInfo();
   const groupMembers = useMemo(() => {
-    if (!groupInfo) return [] as Array<{ id: string; displayName: string; avatarUrl?: string | null }>;
+    if (!groupInfo)
+      return [] as Array<{
+        id: string;
+        displayName: string;
+        avatarUrl?: string | null;
+      }>;
 
     const raw = [groupInfo.owner, ...groupInfo.members];
-    const byId = new Map<string, { id: string; displayName: string; avatarUrl?: string | null }>();
+    const byId = new Map<
+      string,
+      { id: string; displayName: string; avatarUrl?: string | null }
+    >();
     for (const m of raw) {
       if (!m?.id) continue;
-      byId.set(m.id, { id: m.id, displayName: m.displayName, avatarUrl: m.avatarUrl ?? null });
+      byId.set(m.id, {
+        id: m.id,
+        displayName: m.displayName,
+        avatarUrl: m.avatarUrl ?? null,
+      });
     }
     return Array.from(byId.values());
   }, [groupInfo]);
@@ -126,7 +138,7 @@ export default function HomeScreen() {
       .filter((activity: Activity) => new Date(activity.startsAt) >= now)
       .sort(
         (a: Activity, b: Activity) =>
-          new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime(),
+          new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime()
       )
       .slice(0, 3);
   }, [activitiesQuery.data]);
@@ -154,7 +166,10 @@ export default function HomeScreen() {
   if (userElepadLoading || !userElepad) {
     return (
       <SafeAreaView style={styles.safeArea} edges={["top"]}>
-        <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor={COLORS.background}
+        />
         <LoadingProfile message="Cargando inicio..." />
       </SafeAreaView>
     );
@@ -162,9 +177,9 @@ export default function HomeScreen() {
 
   const displayName =
     (userElepad?.displayName as string) || userElepad?.email || "Usuario";
-  
+
   const userRole = userElepad?.elder ? "Adulto Mayor" : "Familiar";
-  
+
   const getInitials = (name: string) =>
     name
       .split(/\s+/)
@@ -205,15 +220,19 @@ export default function HomeScreen() {
           </View>
           <View style={styles.headerRight}>
             {/* Notification Button */}
-            <Pressable 
+            <Pressable
               style={({ pressed }) => [
                 styles.notificationContainer,
-                pressed && { opacity: 0.6 }
+                pressed && { opacity: 0.6 },
               ]}
               onPress={() => {
                 router.push("/notifications");
               }}
-              android_ripple={{ color: COLORS.primary + "30", borderless: true, radius: 24 }}
+              android_ripple={{
+                color: COLORS.primary + "30",
+                borderless: true,
+                radius: 24,
+              }}
             >
               <IconButton
                 icon="bell-outline"
@@ -255,11 +274,21 @@ export default function HomeScreen() {
         ) : lastMemory ? (
           <Pressable
             style={styles.memoryCard}
-            onPress={() => router.push("/(tabs)/recuerdos")}
+            onPress={() =>
+              router.push({
+                pathname: "/(tabs)/recuerdos",
+                params: {
+                  tab: "recuerdos",
+                  memoryId: lastMemory.id,
+                  bookId: lastMemory.bookId,
+                },
+              })
+            }
           >
-            {lastMemory.mediaUrl && 
-             lastMemory.mimeType && 
-             (lastMemory.mimeType.startsWith("image/") || lastMemory.mimeType.startsWith("video/")) ? (
+            {lastMemory.mediaUrl &&
+            lastMemory.mimeType &&
+            (lastMemory.mimeType.startsWith("image/") ||
+              lastMemory.mimeType.startsWith("video/")) ? (
               <ImageBackground
                 source={{ uri: lastMemory.mediaUrl }}
                 style={styles.memoryImage}
@@ -294,7 +323,11 @@ export default function HomeScreen() {
             ) : (
               <View style={styles.memoryNoImage}>
                 <View style={styles.memoryNoImageIcon}>
-                  <IconButton icon="heart" size={40} iconColor={COLORS.primary} />
+                  <IconButton
+                    icon="heart"
+                    size={40}
+                    iconColor={COLORS.primary}
+                  />
                 </View>
                 <View style={styles.memoryContent}>
                   <Text style={styles.memoryLabelDark}>ÚLTIMO RECUERDO</Text>
@@ -322,7 +355,11 @@ export default function HomeScreen() {
           </Pressable>
         ) : (
           <View style={styles.memoryCardEmpty}>
-            <IconButton icon="heart-outline" size={48} iconColor={COLORS.textSecondary} />
+            <IconButton
+              icon="heart-outline"
+              size={48}
+              iconColor={COLORS.textSecondary}
+            />
             <Text style={styles.emptyTitle}>No hay recuerdos guardados</Text>
             <Text style={styles.emptySubtitle}>
               Comienza a crear tus momentos especiales
@@ -363,50 +400,57 @@ export default function HomeScreen() {
             </View>
           ) : upcomingActivities.length > 0 ? (
             <View style={styles.eventsContainer}>
-              {upcomingActivities.map((activity: { id: string; startsAt: string; title: string; description?: string }) => {
-                const activityDate = new Date(activity.startsAt);
-                const isToday =
-                  activityDate.toDateString() === new Date().toDateString();
-                const isTomorrow =
-                  activityDate.toDateString() ===
-                  new Date(Date.now() + 86400000).toDateString();
+              {upcomingActivities.map(
+                (activity: {
+                  id: string;
+                  startsAt: string;
+                  title: string;
+                  description?: string;
+                }) => {
+                  const activityDate = new Date(activity.startsAt);
+                  const isToday =
+                    activityDate.toDateString() === new Date().toDateString();
+                  const isTomorrow =
+                    activityDate.toDateString() ===
+                    new Date(Date.now() + 86400000).toDateString();
 
-                let dateLabel = activityDate.toLocaleDateString("es", {
-                  day: "numeric",
-                  month: "short",
-                });
+                  let dateLabel = activityDate.toLocaleDateString("es", {
+                    day: "numeric",
+                    month: "short",
+                  });
 
-                if (isToday) dateLabel = "Hoy";
-                if (isTomorrow) dateLabel = "Mañana";
+                  if (isToday) dateLabel = "Hoy";
+                  if (isTomorrow) dateLabel = "Mañana";
 
-                return (
-                  <View key={activity.id} style={styles.eventItem}>
-                    <View style={styles.eventTime}>
-                      <Text style={styles.eventDate}>{dateLabel}</Text>
-                      <Text style={styles.eventHour}>
-                        {activityDate.toLocaleTimeString("es", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </Text>
+                  return (
+                    <View key={activity.id} style={styles.eventItem}>
+                      <View style={styles.eventTime}>
+                        <Text style={styles.eventDate}>{dateLabel}</Text>
+                        <Text style={styles.eventHour}>
+                          {activityDate.toLocaleTimeString("es", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </Text>
+                      </View>
+                      <View style={styles.eventDivider} />
+                      <View style={styles.eventContent}>
+                        <Text style={styles.eventTitle} numberOfLines={1}>
+                          {activity.title}
+                        </Text>
+                        {activity.description && (
+                          <HighlightedMentionText
+                            text={activity.description}
+                            groupMembers={groupMembers}
+                            style={styles.eventDesc}
+                            numberOfLines={1}
+                          />
+                        )}
+                      </View>
                     </View>
-                    <View style={styles.eventDivider} />
-                    <View style={styles.eventContent}>
-                      <Text style={styles.eventTitle} numberOfLines={1}>
-                        {activity.title}
-                      </Text>
-                      {activity.description && (
-                        <HighlightedMentionText
-                          text={activity.description}
-                          groupMembers={groupMembers}
-                          style={styles.eventDesc}
-                          numberOfLines={1}
-                        />
-                      )}
-                    </View>
-                  </View>
-                );
-              })}
+                  );
+                }
+              )}
             </View>
           ) : (
             <View style={styles.emptySection}>
@@ -432,7 +476,10 @@ export default function HomeScreen() {
               <ActivityIndicator />
             </View>
           ) : lastAttempt ? (
-            <Pressable style={styles.gameCard} onPress={() => router.push("/history")}>
+            <Pressable
+              style={styles.gameCard}
+              onPress={() => router.push("/history")}
+            >
               <View style={styles.gameIcon}>
                 <Text style={styles.gameEmoji}>
                   {lastAttempt.gameType === "memory" ? "🧠" : "🧩"}
@@ -440,7 +487,9 @@ export default function HomeScreen() {
               </View>
               <View style={styles.gameInfo}>
                 <Text style={styles.gameName}>
-                  {lastAttempt.gameType === "memory" ? "Juego de Memoria" : "Juego NET"}
+                  {lastAttempt.gameType === "memory"
+                    ? "Juego de Memoria"
+                    : "Juego NET"}
                 </Text>
                 <Text style={styles.gameTime}>
                   {new Date(lastAttempt.createdAt).toLocaleDateString("es", {
@@ -477,7 +526,6 @@ export default function HomeScreen() {
     </SafeAreaView>
   );
 }
-
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -564,7 +612,7 @@ const styles = StyleSheet.create({
   avatar: {
     ...SHADOWS.card,
   },
-  
+
   // Memory Card - DESTACADO
   memoryCard: {
     width: SCREEN_WIDTH,
