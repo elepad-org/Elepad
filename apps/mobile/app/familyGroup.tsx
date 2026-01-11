@@ -272,7 +272,6 @@ export default function FamilyGroup() {
         return;
       }
 
-      const groupName = `Grupo Familiar de ${userElepad.displayName}`;
       const oldGroupId = groupId; // Guardar el ID del grupo actual
       
       // Hacer todo en secuencia rápida
@@ -284,9 +283,10 @@ export default function FamilyGroup() {
       });
 
       // 2. Inmediatamente crear el nuevo grupo (asigna automáticamente al usuario)
+      // El backend ya agrega "Grupo Familiar de" al nombre
       await createGroup.mutateAsync({
         data: {
-          name: groupName,
+          name: userElepad.displayName,
           ownerUserId: userElepad.id,
         },
       });
@@ -1202,31 +1202,38 @@ export default function FamilyGroup() {
             <Dialog.Content>
               {!showJoinCodeInput ? (
                 <>
-                  <Text style={[STYLES.subheading, { marginBottom: 16 }]}>
+                  <Text style={[STYLES.subheading, { marginBottom: 16, textAlign: "center" }]}>
                     Antes de salir, elige a dónde quieres ir:
                   </Text>
-                  <Button
-                    mode="contained"
-                    onPress={handleCreateNewGroup}
-                    style={[STYLES.buttonPrimary, { marginBottom: 12 }]}
-                    contentStyle={STYLES.buttonContent}
-                    loading={createGroup.isPending}
-                    disabled={createGroup.isPending || joinGroup.isPending}
-                  >
-                    Crear un nuevo grupo familiar
-                  </Button>
-                  <Button
-                    mode="contained"
-                    onPress={() => setShowJoinCodeInput(true)}
-                    style={[
-                      STYLES.buttonPrimary,
-                      { backgroundColor: COLORS.secondary },
-                    ]}
-                    contentStyle={STYLES.buttonContent}
-                    disabled={createGroup.isPending || joinGroup.isPending}
-                  >
-                    Unirme con un código
-                  </Button>
+                  <View style={{ alignItems: "center", width: "100%" }}>
+                    <Button
+                      mode="contained"
+                      onPress={handleCreateNewGroup}
+                      style={[STYLES.buttonPrimary, { marginBottom: 12 }]}
+                      contentStyle={STYLES.buttonContent}
+                      loading={createGroup.isPending}
+                      disabled={createGroup.isPending || joinGroup.isPending}
+                    >
+                      Crear un nuevo grupo familiar
+                    </Button>
+                    <Button
+                      mode="outlined"
+                      onPress={() => setShowJoinCodeInput(true)}
+                      style={[
+                        STYLES.buttonPrimary,
+                        { 
+                          borderColor: COLORS.primary,
+                          borderWidth: 2,
+                          backgroundColor: "transparent",
+                        },
+                      ]}
+                      labelStyle={{ color: COLORS.primary }}
+                      contentStyle={STYLES.buttonContent}
+                      disabled={createGroup.isPending || joinGroup.isPending}
+                    >
+                      Unirme con un código
+                    </Button>
+                  </View>
                 </>
               ) : (
                 <>
