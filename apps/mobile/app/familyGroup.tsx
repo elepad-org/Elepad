@@ -179,21 +179,12 @@ export default function FamilyGroup() {
         return;
       }
 
-      const isSelfRemoval = memberToRemove.id === userElepad?.id;
-
+      // Solo eliminar otros miembros (no self-removal)
+      // El self-removal ahora se maneja directamente con el modal de opciones
       await removeMember.mutateAsync({
         idGroup: groupId,
         idUser: memberToRemove.id,
-        params: isSelfRemoval ? { createNewGroup: "false" } : undefined,
       });
-
-      // Si el usuario se está saliendo del grupo, mostrar modal de opciones
-      if (isSelfRemoval) {
-        closeConfirm();
-        await refreshUserElepad();
-        setExitOptionsVisible(true);
-        return;
-      }
 
       await membersQuery.refetch();
 
@@ -273,31 +264,42 @@ export default function FamilyGroup() {
     }
   };
 
-  // Funciones para manejar las opciones después de salir del grupo
+  // Funciones para manejar las opciones antes de salir del grupo
   const handleCreateNewGroup = async () => {
     try {
-      if (!userElepad?.id || !userElepad?.displayName) {
+      if (!userElepad?.id || !userElepad?.displayName || !groupId) {
         Alert.alert("Error", "No se pudo obtener la información del usuario");
         return;
       }
 
       const groupName = `Grupo Familiar de ${userElepad.displayName}`;
+      const oldGroupId = groupId; // Guardar el ID del grupo actual
       
-      const result = await createGroup.mutateAsync({
+      // Hacer todo en secuencia rápida
+      // 1. Salir del grupo actual SIN crear uno nuevo
+      await removeMember.mutateAsync({
+        idGroup: oldGroupId,
+        idUser: userElepad.id,
+        params: { createNewGroup: "false" },
+      });
+
+      // 2. Inmediatamente crear el nuevo grupo (asigna automáticamente al usuario)
+      await createGroup.mutateAsync({
         data: {
           name: groupName,
           ownerUserId: userElepad.id,
         },
       });
 
-      // Refrescar datos del usuario
+      // 3. Refrescar datos del usuario
       await refreshUserElepad();
-      await new Promise((resolve) => setTimeout(resolve, 500));
 
       setExitOptionsVisible(false);
+      setShowJoinCodeInput(false);
+      setJoinCodeInput("");
       Alert.alert(
         "Grupo creado",
-        "Se ha creado tu nuevo grupo familiar exitosamente.",
+        "Has salido del grupo anterior y se ha creado tu nuevo grupo familiar exitosamente.",
       );
       
     } catch (e: unknown) {
@@ -307,14 +309,17 @@ export default function FamilyGroup() {
       };
       const err = e as MaybeApiError;
       const msg =
-        err?.data?.error?.message ?? err?.message ?? "Error creando el grupo";
+        err?.data?.error?.message ?? err?.message ?? "Error en el proceso";
       Alert.alert("Error", msg);
+      
+      // Intentar refrescar de todos modos para ver el estado actual
+      await refreshUserElepad();
     }
   };
 
   const handleJoinWithCode = async () => {
     try {
-      if (!userElepad?.id) {
+      if (!userElepad?.id || !groupId) {
         Alert.alert("Error", "No se pudo obtener la información del usuario");
         return;
       }
@@ -324,23 +329,34 @@ export default function FamilyGroup() {
         return;
       }
 
+      const oldGroupId = groupId; // Guardar el ID del grupo actual
+      const code = joinCodeInput.trim();
+
+      // Hacer todo en secuencia rápida
+      // 1. Salir del grupo actual SIN crear uno nuevo
+      await removeMember.mutateAsync({
+        idGroup: oldGroupId,
+        idUser: userElepad.id,
+        params: { createNewGroup: "false" },
+      });
+
+      // 2. Inmediatamente unirse al nuevo grupo con el código
       await joinGroup.mutateAsync({
         data: {
           userId: userElepad.id,
-          invitationCode: joinCodeInput.trim(),
+          invitationCode: code,
         },
       });
 
-      // Refrescar datos del usuario
+      // 3. Refrescar datos del usuario
       await refreshUserElepad();
-      await new Promise((resolve) => setTimeout(resolve, 500));
 
       setExitOptionsVisible(false);
       setShowJoinCodeInput(false);
       setJoinCodeInput("");
       Alert.alert(
         "¡Bienvenido!",
-        "Te has unido al grupo familiar exitosamente.",
+        "Has salido del grupo anterior y te has unido al nuevo grupo familiar exitosamente.",
       );
       
     } catch (e: unknown) {
@@ -350,8 +366,11 @@ export default function FamilyGroup() {
       };
       const err = e as MaybeApiError;
       const msg =
-        err?.data?.error?.message ?? err?.message ?? "Error uniéndote al grupo";
+        err?.data?.error?.message ?? err?.message ?? "Error en el proceso";
       Alert.alert("Error", msg);
+      
+      // Intentar refrescar de todos modos para ver el estado actual
+      await refreshUserElepad();
     }
   };
 
@@ -835,7 +854,12 @@ export default function FamilyGroup() {
               mode="contained"
               icon="exit-to-app"
               onPress={() => {
-                if (isOwnerOfGroup) {
+                // Verificar si es owner y hay otros miembros
+                const groupInfo = selectGroupInfo();
+                const membersArray = groupInfo?.members || [];
+                const hasOtherMembers = membersArray.length > 0;
+
+                if (isOwnerOfGroup && hasOtherMembers) {
                   Alert.alert(
                     "No puedes salir del grupo",
                     "Como administrador del grupo, primero debes transferir la administración a otro miembro antes de poder salir.",
@@ -844,14 +868,8 @@ export default function FamilyGroup() {
                   return;
                 }
 
-                // Si no es owner, proceder con la auto-eliminación
-                if (userElepad?.id) {
-                  openConfirm({
-                    id: userElepad.id,
-                    displayName: userElepad.displayName,
-                    avatarUrl: userElepad.avatarUrl || null,
-                  });
-                }
+                // Mostrar directamente el modal de opciones
+                setExitOptionsVisible(true);
               }}
               contentStyle={STYLES.buttonContent}
               style={[
@@ -883,24 +901,16 @@ export default function FamilyGroup() {
           >
             <Dialog.Title>
               <Text style={[STYLES.heading, { fontSize: 18, paddingTop: 15 }]}>
-                {memberToRemove?.id === userElepad?.id
-                  ? "Salir del grupo"
-                  : "Eliminar miembro"}
+                Eliminar miembro
               </Text>
             </Dialog.Title>
             <Dialog.Content>
               <Text style={[STYLES.subheading]}>
-                {memberToRemove?.id === userElepad?.id ? (
-                  <>¿Está seguro que desea salir del grupo familiar?</>
-                ) : (
-                  <>
-                    ¿Está seguro que desea eliminar a {""}
-                    <Text style={[STYLES.paragraphText, { fontWeight: "700" }]}>
-                      {memberToRemove?.displayName}
-                    </Text>{" "}
-                    del grupo?
-                  </>
-                )}
+                ¿Está seguro que desea eliminar a {""}
+                <Text style={[STYLES.paragraphText, { fontWeight: "700" }]}>
+                  {memberToRemove?.displayName}
+                </Text>{" "}
+                del grupo?
               </Text>
             </Dialog.Content>
             <Dialog.Actions
@@ -941,7 +951,7 @@ export default function FamilyGroup() {
                 contentStyle={STYLES.buttonContent}
                 disabled={removeMember.isPending}
               >
-                {memberToRemove?.id === userElepad?.id ? "Salir" : "Si"}
+                Si
               </Button>
             </Dialog.Actions>
           </Dialog>
@@ -1173,11 +1183,11 @@ export default function FamilyGroup() {
             </Dialog.Actions>
           </Dialog>
 
-          {/* Modal de opciones después de salir del grupo */}
+          {/* Modal de opciones para salir del grupo */}
           <Dialog
             visible={exitOptionsVisible}
-            onDismiss={() => {}}
-            dismissable={false}
+            onDismiss={() => setExitOptionsVisible(false)}
+            dismissable={true}
             style={{
               alignSelf: "center",
               width: "90%",
@@ -1186,14 +1196,14 @@ export default function FamilyGroup() {
           >
             <Dialog.Title>
               <Text style={[STYLES.heading, { fontSize: 18, paddingTop: 15 }]}>
-                ¿Qué deseas hacer ahora?
+                Salir del grupo familiar
               </Text>
             </Dialog.Title>
             <Dialog.Content>
               {!showJoinCodeInput ? (
                 <>
                   <Text style={[STYLES.subheading, { marginBottom: 16 }]}>
-                    Has salido del grupo familiar. Elige una opción para continuar:
+                    Antes de salir, elige a dónde quieres ir:
                   </Text>
                   <Button
                     mode="contained"
