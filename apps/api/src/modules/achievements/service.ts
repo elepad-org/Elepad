@@ -330,6 +330,11 @@ export class AchievementService {
           typeof condition.value === "number" ? condition.value : 0;
         return attempt.moves !== null && attempt.moves < movesValue;
 
+      case "score":
+        // Verifica que el puntaje del intento sea mayor o igual al requerido
+        const scoreValue = typeof condition.value === "number" ? condition.value : 0;
+        return attempt.score !== null && attempt.score >= scoreValue;
+        
       case "combined":
         const timeLimit =
           typeof condition.time === "number" ? condition.time : 0;
