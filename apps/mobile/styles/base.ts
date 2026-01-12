@@ -34,6 +34,7 @@ export const COLORS = {
   background: "#FFFFFF",
   backgroundSecondary: "#F2F2F7", // Light gray
   backgroundTertiary: "#9eadc8", // Light blue from palette
+  card: "#F2F2F7", // Light gray for cards
   white: "#FFFFFF",
   success: "#6B8DD6", // Azul violáceo que combina con el tema principal
 

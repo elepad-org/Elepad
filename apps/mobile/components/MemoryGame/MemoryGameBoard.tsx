@@ -16,14 +16,9 @@ interface MemoryGameBoardProps {
       id: string;
       title: string;
       icon?: string | null;
-      description?: string;
+      description?: string | null;
+      points: number;
     }>;
-  }) => void;
-  onAchievementUnlocked?: (achievement: {
-    id: string;
-    title: string;
-    icon?: string | null;
-    description?: string;
   }) => void;
 }
 
@@ -31,7 +26,6 @@ export const MemoryGameBoard: React.FC<MemoryGameBoardProps> = ({
   mode,
   onQuit,
   onComplete,
-  onAchievementUnlocked,
 }) => {
   const {
     cards,
@@ -44,7 +38,6 @@ export const MemoryGameBoard: React.FC<MemoryGameBoardProps> = ({
     gameId,
   } = useMemoryGame({
     mode,
-    onAchievementUnlocked,
   });
   const hasCalledOnComplete = React.useRef(false);
   const isCheckingAchievements = React.useRef(false);
@@ -89,16 +82,6 @@ export const MemoryGameBoard: React.FC<MemoryGameBoardProps> = ({
 
   // Cuando se completa el juego Y se han verificado los logros, notificar al padre (solo una vez)
   React.useEffect(() => {
-    console.log("📊 useEffect completación:", {
-      isComplete: stats.isComplete,
-      isCheckingAchievements: isCheckingAchievements.current,
-      hasCalledOnComplete: hasCalledOnComplete.current,
-      gameId,
-      lastCompletedGameId: lastCompletedGameId.current,
-      moves: stats.moves,
-      time: stats.timeElapsed,
-    });
-
     if (
       stats.isComplete &&
       isCheckingAchievements.current &&
@@ -133,7 +116,6 @@ export const MemoryGameBoard: React.FC<MemoryGameBoardProps> = ({
   }, [
     stats.isComplete,
     stats.moves,
-    stats.timeElapsed,
     unlockedAchievements,
     onComplete,
     gameId,

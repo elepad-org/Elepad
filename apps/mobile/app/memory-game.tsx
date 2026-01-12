@@ -1,10 +1,11 @@
 import React, { useState, useCallback } from "react";
 import { View, StyleSheet, StatusBar } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text, Portal, Dialog, Button, Snackbar } from "react-native-paper";
+import { Text, Portal, Dialog, Button } from "react-native-paper";
 import { router, Stack } from "expo-router";
 import { MemoryGameBoard } from "@/components/MemoryGame/MemoryGameBoard";
 import { InstructionsDialog } from "@/components/shared/InstructionsDialog";
+import { GameCompletedModal } from "@/components/GameCompletedModal";
 import { COLORS, STYLES } from "@/styles/base";
 import { GAMES_INFO } from "@/constants/gamesInfo";
 import { GameInstructions } from "@/components/shared/GameInstructions";
@@ -19,16 +20,6 @@ export default function MemoryGameScreen() {
   const [showModeSelectionDialog, setShowModeSelectionDialog] = useState(true);
   const [showHelpDialog, setShowHelpDialog] = useState(false);
   const [selectedMode, setSelectedMode] = useState<GameMode | null>(null);
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [achievementQueue, setAchievementQueue] = useState<
-    Array<{
-      id: string;
-      title: string;
-      icon?: string | null;
-      description?: string;
-    }>
-  >([]);
   const [gameResults, setGameResults] = useState<{
     moves: number;
     timeElapsed: number;
@@ -37,7 +28,8 @@ export default function MemoryGameScreen() {
       id: string;
       title: string;
       icon?: string | null;
-      description?: string;
+      description?: string | null;
+      points: number;
     }>;
   } | null>(null);
 
@@ -68,34 +60,7 @@ export default function MemoryGameScreen() {
     [],
   );
 
-  const handleAchievementUnlocked = useCallback(
-    (achievement: {
-      id: string;
-      title: string;
-      icon?: string | null;
-      description?: string;
-    }) => {
-      console.log("🎉 Agregando logro a la cola:", achievement.title);
-      setAchievementQueue((prev) => [...prev, achievement]);
-    },
-    [],
-  );
 
-  // Procesar cola de logros (mostrar uno a la vez)
-  React.useEffect(() => {
-    if (achievementQueue.length > 0 && !snackbarVisible) {
-      const nextAchievement = achievementQueue[0];
-      const icon = nextAchievement.icon || "🏆";
-      const message = `${icon} ¡Logro desbloqueado! ${nextAchievement.title}`;
-
-      console.log("🎉 Mostrando snackbar:", message);
-      setSnackbarMessage(message);
-      setSnackbarVisible(true);
-
-      // Remover de la cola cuando el Snackbar se cierre (3 segundos)
-      setAchievementQueue((prev) => prev.slice(1));
-    }
-  }, [achievementQueue, snackbarVisible]);
 
   const handleComplete = useCallback(
     (stats: {
@@ -105,19 +70,15 @@ export default function MemoryGameScreen() {
         id: string;
         title: string;
         icon?: string | null;
-        description?: string;
+        points: number;
+        description?: string | null;
       }>;
     }) => {
       const score = calculateScore(stats.timeElapsed, stats.moves);
       setGameResults({ ...stats, score });
 
-      // Mostrar el diálogo de resultados después de un pequeño delay
-      // (para dar tiempo a ver el toast si hay logros)
-      const delay =
-        stats.achievements && stats.achievements.length > 0 ? 3000 : 0;
-      setTimeout(() => {
-        setShowResultsDialog(true);
-      }, delay);
+      // Mostrar el modal inmediatamente con los logros predichos
+      setShowResultsDialog(true);
     },
     [calculateScore],
   );
@@ -145,12 +106,6 @@ export default function MemoryGameScreen() {
     setShowModeSelectionDialog(false);
   }, []);
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-  };
-
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
@@ -167,27 +122,8 @@ export default function MemoryGameScreen() {
               mode={selectedMode}
               onQuit={handleQuit}
               onComplete={handleComplete}
-              onAchievementUnlocked={handleAchievementUnlocked}
             />
           )}
-
-          {/* Toast de logro desbloqueado */}
-          <Snackbar
-            visible={snackbarVisible}
-            onDismiss={() => setSnackbarVisible(false)}
-            duration={3000}
-            style={styles.achievementSnackbar}
-            action={{
-              label: "Ver",
-              onPress: () => {
-                setSnackbarVisible(false);
-                setShowResultsDialog(true);
-              },
-              labelStyle: { color: "#FFF" },
-            }}
-          >
-            <Text style={styles.snackbarText}>{snackbarMessage}</Text>
-          </Snackbar>
 
           {/* Diálogo de confirmación para salir */}
           <Portal>
@@ -346,96 +282,18 @@ export default function MemoryGameScreen() {
             </Dialog>
           </Portal>
 
-          {/* Diálogo de resultados */}
-          <Portal>
-            <Dialog
-              visible={showResultsDialog}
-              onDismiss={() => setShowResultsDialog(false)}
-              style={{
-                backgroundColor: COLORS.background,
-                width: "90%",
-                alignSelf: "center",
-                borderRadius: 16,
-                paddingVertical: 14,
-              }}
-            >
-              <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
-                ¡Felicitaciones! 🎉
-              </Dialog.Title>
-              <Dialog.Content>
-                <View style={styles.resultsContainer}>
-                  <Text
-                    style={{
-                      ...STYLES.subheading,
-                      marginTop: 0,
-                      marginBottom: 16,
-                    }}
-                  >
-                    ¡Has completado el juego!
-                  </Text>
-
-                  {/* Puntaje destacado */}
-                  {gameResults?.score !== undefined && (
-                    <View style={styles.scoreHighlight}>
-                      <Text variant="titleLarge" style={styles.scoreIcon}>
-                        🏆
-                      </Text>
-                      <Text variant="displaySmall" style={styles.scoreValue}>
-                        {gameResults.score}
-                      </Text>
-                      <Text variant="bodyMedium" style={styles.scoreLabel}>
-                        puntos
-                      </Text>
-                    </View>
-                  )}
-
-                  <View style={styles.resultStats}>
-                    <View style={styles.resultStat}>
-                      <Text variant="titleLarge" style={styles.resultIcon}>
-                        ⏱️
-                      </Text>
-                      <Text variant="bodyMedium" style={styles.resultLabel}>
-                        Tiempo
-                      </Text>
-                      <Text variant="headlineSmall" style={styles.resultValue}>
-                        {gameResults
-                          ? formatTime(gameResults.timeElapsed)
-                          : "--:--"}
-                      </Text>
-                    </View>
-                    <View style={styles.resultStat}>
-                      <Text variant="titleLarge" style={styles.resultIcon}>
-                        🎯
-                      </Text>
-                      <Text variant="bodyMedium" style={styles.resultLabel}>
-                        Movimientos
-                      </Text>
-                      <Text variant="headlineSmall" style={styles.resultValue}>
-                        {gameResults?.moves || 0}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              </Dialog.Content>
-              <Dialog.Actions style={styles.dialogActions}>
-                <Button
-                  mode="outlined"
-                  onPress={handleBackToGames}
-                  style={styles.dialogButton}
-                >
-                  Volver a Juegos
-                </Button>
-                <Button
-                  mode="contained"
-                  onPress={handlePlayAgain}
-                  style={styles.dialogButton}
-                  buttonColor={COLORS.primary}
-                >
-                  Jugar de Nuevo
-                </Button>
-              </Dialog.Actions>
-            </Dialog>
-          </Portal>
+          {/* Modal de resultados con logros */}
+          <GameCompletedModal
+            visible={showResultsDialog}
+            onDismiss={() => setShowResultsDialog(false)}
+            onPlayAgain={handlePlayAgain}
+            onBackToGames={handleBackToGames}
+            success={true}
+            score={gameResults?.score}
+            moves={gameResults?.moves}
+            time={gameResults ? gameResults.timeElapsed * 1000 : undefined}
+            achievements={gameResults?.achievements}
+          />
         </View>
       </SafeAreaView>
     </>
@@ -555,17 +413,6 @@ const styles = StyleSheet.create({
   achievementTitle: {
     flex: 1,
     color: COLORS.text,
-    fontWeight: "600",
-  },
-  achievementSnackbar: {
-    backgroundColor: "#7C3AED", // Violeta hermoso
-    marginBottom: 16,
-    borderRadius: 12,
-    elevation: 8,
-  },
-  snackbarText: {
-    color: "#FFFFFF",
-    fontSize: 16,
     fontWeight: "600",
   },
 });
