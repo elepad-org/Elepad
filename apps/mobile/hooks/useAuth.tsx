@@ -50,8 +50,19 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   // Ref para tracking de cambio de día
   const lastCheckedDate = useRef<string | null>(null);
   
+  // Obtener la fecha local del cliente en formato YYYY-MM-DD
+  const getClientDate = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  
   // Query para obtener racha del backend
   const streakQuery = useGetStreaksMe({
+    clientDate: getClientDate(),
+  }, {
     query: {
       enabled: !!userElepad?.elder, // Solo si es elder
       staleTime: 0,

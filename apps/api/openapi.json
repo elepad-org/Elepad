@@ -4402,6 +4402,17 @@
         "tags": [
           "streaks"
         ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "required": false,
+            "name": "clientDate",
+            "in": "query"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Racha del usuario",

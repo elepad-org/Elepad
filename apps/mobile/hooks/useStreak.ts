@@ -9,7 +9,18 @@ export function useUserStreak() {
   const { showStreakExtended } = useStreakSnackbar();
   const previousStreakRef = useRef<number | null>(null);
   
+  // Obtener la fecha local del cliente en formato YYYY-MM-DD
+  const getClientDate = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  
   const query = useGetStreaksMe({
+    clientDate: getClientDate(),
+  }, {
     query: {
       staleTime: 0, // Siempre considerar datos obsoletos para refetch inmediato
       gcTime: 1000 * 60, // Mantener en caché 1 minuto para navegación rápida (gcTime reemplaza cacheTime en v5)
