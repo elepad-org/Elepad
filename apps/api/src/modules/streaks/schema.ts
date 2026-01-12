@@ -23,3 +23,10 @@ export const StreakHistoryQuerySchema = z.object({
 });
 
 export type StreakHistoryQuery = z.infer<typeof StreakHistoryQuerySchema>;
+
+// Schema para query params de obtener racha con fecha del cliente
+export const GetStreakQuerySchema = z.object({
+  clientDate: z.string().date().optional(),
+});
+
+export type GetStreakQuery = z.infer<typeof GetStreakQuerySchema>;
