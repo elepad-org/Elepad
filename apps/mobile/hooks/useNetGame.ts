@@ -447,6 +447,9 @@ export const useNetGame = ({
         });
 
         console.log("✅ Intento finalizado exitosamente");
+        console.log("🔍 [NET] finishResponse completo:", JSON.stringify(finishResponse, null, 2));
+        console.log("🔍 [NET] typeof finishResponse:", typeof finishResponse);
+        console.log("🔍 [NET] 'data' in finishResponse:", "data" in finishResponse);
 
         // Invalidar queries de rachas para refrescar datos (solo si no fue auto-resuelto)
         if (!wasAutoSolved) {
@@ -455,27 +458,43 @@ export const useNetGame = ({
         }
 
         // El backend automáticamente verifica logros y los devuelve en la respuesta
+        const responseData = "data" in finishResponse ? finishResponse.data : finishResponse;
+        console.log("🔍 [NET] responseData:", JSON.stringify(responseData, null, 2));
+        console.log("🔍 [NET] typeof responseData:", typeof responseData);
+        console.log("🔍 [NET] responseData keys:", responseData ? Object.keys(responseData) : 'null');
+        console.log("🔍 [NET] 'unlockedAchievements' in responseData:", responseData ? "unlockedAchievements" in responseData : false);
+        console.log("🔍 [NET] responseData.unlockedAchievements:", responseData?.unlockedAchievements);
+        console.log("🔍 [NET] Array.isArray(responseData.unlockedAchievements):", responseData?.unlockedAchievements ? Array.isArray(responseData.unlockedAchievements) : false);
+        console.log("🔍 [NET] responseData.unlockedAchievements.length:", responseData?.unlockedAchievements?.length);
+        
         if (
           !wasAutoSolved &&
-          "unlockedAchievements" in finishResponse.data &&
-          finishResponse.data.unlockedAchievements &&
-          finishResponse.data.unlockedAchievements.length > 0
+          responseData &&
+          "unlockedAchievements" in responseData &&
+          responseData.unlockedAchievements &&
+          responseData.unlockedAchievements.length > 0
         ) {
           console.log(
             "🎉 Logros desbloqueados:",
-            finishResponse.data.unlockedAchievements,
+            responseData.unlockedAchievements,
           );
           setUnlockedAchievements(
-            finishResponse.data.unlockedAchievements as UnlockedAchievement[],
+            responseData.unlockedAchievements as UnlockedAchievement[],
           );
 
-          finishResponse.data.unlockedAchievements.forEach(
+          responseData.unlockedAchievements.forEach(
             (achievement: UnlockedAchievement) => {
               onAchievementUnlocked?.(achievement);
             },
           );
         } else if (!wasAutoSolved) {
           console.log("ℹ️ No se desbloquearon nuevos logros");
+          console.log("🔍 [NET] Razón del no desbloqueo:");
+          console.log("  - wasAutoSolved:", wasAutoSolved);
+          console.log("  - responseData existe:", !!responseData);
+          console.log("  - tiene unlockedAchievements:", responseData ? "unlockedAchievements" in responseData : false);
+          console.log("  - unlockedAchievements truthy:", !!responseData?.unlockedAchievements);
+          console.log("  - length > 0:", (responseData?.unlockedAchievements?.length || 0) > 0);
         }
       } catch (error) {
         console.error("❌ Error al finalizar intento:", error);
