@@ -319,21 +319,25 @@ export default function ActivityForm({
       <Dialog.Actions
         style={{
           paddingBottom: 30,
-          paddingHorizontal: 20,
-          justifyContent: "space-between",
+          paddingHorizontal: 24,
+          gap: 12,
         }}
       >
-        <CancelButton onPress={onClose} />
-        <Button
-          mode="contained"
-          onPress={handleSave}
-          loading={saving}
-          disabled={saving || !startsAtDate}
-          style={styles.saveButton}
-          buttonColor={COLORS.primary}
-        >
-          Guardar
-        </Button>
+        <View style={{ flex: 1 }}>
+          <CancelButton onPress={onClose} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Button
+            mode="contained"
+            onPress={handleSave}
+            loading={saving}
+            disabled={saving || !startsAtDate}
+            style={styles.saveButton}
+            buttonColor={COLORS.primary}
+          >
+            Guardar
+          </Button>
+        </View>
       </Dialog.Actions>
     </Dialog>
     <Dialog
@@ -425,7 +429,6 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     borderRadius: 12,
-    paddingHorizontal: 24,
-    elevation: 0,
+    flex: 1,
   },
 });

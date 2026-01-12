@@ -16,6 +16,7 @@ const CancelButton = ({
       style={{
         borderRadius: 12,
         borderColor: COLORS.secondary,
+        flex: 1,
       }}
       textColor={COLORS.secondary}
       onPress={onPress}
