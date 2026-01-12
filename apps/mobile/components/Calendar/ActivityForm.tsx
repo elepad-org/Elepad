@@ -320,13 +320,14 @@ export default function ActivityForm({
         style={{
           paddingBottom: 30,
           paddingHorizontal: 24,
-          gap: 12,
+          paddingTop: 10,
+          justifyContent: 'space-between',
         }}
       >
-        <View style={{ flex: 1 }}>
+        <View style={{ width: 120 }}>
           <CancelButton onPress={onClose} />
         </View>
-        <View style={{ flex: 1 }}>
+        <View style={{ width: 120 }}>
           <Button
             mode="contained"
             onPress={handleSave}
