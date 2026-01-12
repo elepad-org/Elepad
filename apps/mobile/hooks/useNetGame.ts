@@ -463,9 +463,11 @@ export const useNetGame = ({
         console.log("🔍 [NET] typeof responseData:", typeof responseData);
         console.log("🔍 [NET] responseData keys:", responseData ? Object.keys(responseData) : 'null');
         console.log("🔍 [NET] 'unlockedAchievements' in responseData:", responseData ? "unlockedAchievements" in responseData : false);
-        console.log("🔍 [NET] responseData.unlockedAchievements:", responseData?.unlockedAchievements);
-        console.log("🔍 [NET] Array.isArray(responseData.unlockedAchievements):", responseData?.unlockedAchievements ? Array.isArray(responseData.unlockedAchievements) : false);
-        console.log("🔍 [NET] responseData.unlockedAchievements.length:", responseData?.unlockedAchievements?.length);
+        if (responseData && "unlockedAchievements" in responseData) {
+          console.log("🔍 [NET] responseData.unlockedAchievements:", responseData.unlockedAchievements);
+          console.log("🔍 [NET] Array.isArray(responseData.unlockedAchievements):", Array.isArray(responseData.unlockedAchievements));
+          console.log("🔍 [NET] responseData.unlockedAchievements.length:", responseData.unlockedAchievements?.length);
+        }
         
         if (
           !wasAutoSolved &&
@@ -493,8 +495,10 @@ export const useNetGame = ({
           console.log("  - wasAutoSolved:", wasAutoSolved);
           console.log("  - responseData existe:", !!responseData);
           console.log("  - tiene unlockedAchievements:", responseData ? "unlockedAchievements" in responseData : false);
-          console.log("  - unlockedAchievements truthy:", !!responseData?.unlockedAchievements);
-          console.log("  - length > 0:", (responseData?.unlockedAchievements?.length || 0) > 0);
+          if (responseData && "unlockedAchievements" in responseData) {
+            console.log("  - unlockedAchievements truthy:", !!responseData.unlockedAchievements);
+            console.log("  - length > 0:", (responseData.unlockedAchievements?.length || 0) > 0);
+          }
         }
       } catch (error) {
         console.error("❌ Error al finalizar intento:", error);
