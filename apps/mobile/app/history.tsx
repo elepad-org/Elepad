@@ -145,6 +145,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
       id: string;
       displayName: string;
       elder: boolean;
+      avatarUrl?: string | null;
     }
     
     const groupInfo = membersQuery.data as { members?: GroupMember[]; owner?: GroupMember };
@@ -381,7 +382,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
                       options={elders.map((elder) => ({
                         key: elder.id,
                         label: elder.displayName,
-                        icon: "account"
+                        avatarUrl: elder.avatarUrl,
                       }))}
                       onSelect={setSelectedElderId}
                       placeholder="Seleccionar adulto mayor"

@@ -9,6 +9,7 @@ interface DropdownOption {
   key: string;
   label: string;
   icon?: string;
+  avatarUrl?: string | null;
 }
 
 interface DropdownSelectProps {
@@ -106,6 +107,7 @@ export default function DropdownSelect({
         options={options.map(option => ({
           id: option.key,
           label: option.label,
+          avatarUrl: option.avatarUrl,
           icon: option.icon ? (
             <View style={{ marginRight: 12 }}>
               <MaterialCommunityIcons

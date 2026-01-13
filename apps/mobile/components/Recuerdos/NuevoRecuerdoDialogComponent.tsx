@@ -63,7 +63,7 @@ export default function NuevoRecuerdoDialogComponent({
     return (
       <Dialog
         visible={visible}
-        onDismiss={hideDialog}
+        onDismiss={onCancel}
         style={{
           backgroundColor: COLORS.background,
           width: "90%",
@@ -94,7 +94,7 @@ export default function NuevoRecuerdoDialogComponent({
     return (
       <Dialog
         visible={visible}
-        onDismiss={hideDialog}
+        onDismiss={onCancel}
         style={{
           backgroundColor: COLORS.background,
           width: "90%",
