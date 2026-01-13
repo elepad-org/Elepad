@@ -82,6 +82,7 @@ export default function DropdownSelect({
             borderColor: COLORS.border,
             borderRadius: 8,
             justifyContent: "flex-start",
+            width: "100%",
           }}
           contentStyle={{ 
             flexDirection: 'row-reverse',
