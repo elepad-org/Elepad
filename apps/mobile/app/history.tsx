@@ -168,9 +168,9 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
 
   const gameTypesRender: Record<string, string> = {
     memory: "Memoria",
-    logic: "Lógica",
-    attention: "Atención",
-    reaction: "Reacción"
+    logic: "NET",
+    attention: "Sudoku",
+    reaction: "Focus"
   };
 
   const statsQueries = gameTypes.map((gt) =>
@@ -224,7 +224,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
 
   const detectGameType = (a: Attempt): string => {
     return (
-      (a.memoryPuzzleId && "Memoria") || (a.logicPuzzleId && "Lógica") || (a.sudokuPuzzleId && "Atención") || (a.isFocusGame && "Reacción") || ""
+      (a.memoryPuzzleId && "Memoria") || (a.logicPuzzleId && "NET") || (a.sudokuPuzzleId && "Sudoku") || (a.isFocusGame && "Focus") || ""
     );
   };
 
@@ -421,6 +421,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
             <DropdownSelect
               label="Tipo de juego"
               value={selectedGame}
+              showLabel={false}
               options={[
                 { key: "all", label: "Todos los juegos", icon: "gamepad-variant" },
                 ...gameTypes.map((gt) => ({
@@ -428,7 +429,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
                   label: gameTypesRender[gt],
                   icon: gt === GameType.memory ? "brain" : 
                         gt === GameType.logic ? "puzzle" : 
-                        gt === GameType.attention ? "eye" : "lightning-bolt"
+                        gt === GameType.attention ? "eye" : "lightning-bolt"       
                 }))
               ]}
               onSelect={setSelectedGame}
