@@ -10,22 +10,25 @@ interface NetGameBoardProps {
   gridSize: number;
   onQuit: () => void;
   onComplete: (
-    stats: { moves: number; timeElapsed: number },
+    stats: {
+      moves: number;
+      timeElapsed: number;
+      achievements?: Array<{
+        id: string;
+        title: string;
+        icon?: string | null;
+        description?: string | null;
+        points: number;
+      }>;
+    },
     isSolvedAutomatically: boolean,
   ) => void;
-  onAchievementUnlocked?: (achievement: {
-    id: string;
-    title: string;
-    icon?: string | null;
-    description?: string;
-  }) => void;
 }
 
 export const NetGameBoard: React.FC<NetGameBoardProps> = ({
   gridSize,
   onQuit,
   onComplete,
-  onAchievementUnlocked,
 }) => {
   const {
     tiles,
@@ -37,9 +40,9 @@ export const NetGameBoard: React.FC<NetGameBoardProps> = ({
     centerTile,
     isSolvedAutomatically,
     isLoading,
+    unlockedAchievements,
   } = useNetGame({
     gridSize,
-    onAchievementUnlocked,
   });
 
   const hasCalledOnComplete = React.useRef(false);
@@ -60,6 +63,7 @@ export const NetGameBoard: React.FC<NetGameBoardProps> = ({
         {
           moves: stats.moves,
           timeElapsed: stats.timeElapsed,
+          achievements: unlockedAchievements,
         },
         isSolvedAutomatically,
       );
@@ -68,6 +72,7 @@ export const NetGameBoard: React.FC<NetGameBoardProps> = ({
     stats.isComplete,
     stats.moves,
     stats.timeElapsed,
+    unlockedAchievements,
     onComplete,
     isSolvedAutomatically,
   ]);

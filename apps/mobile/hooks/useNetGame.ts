@@ -7,6 +7,7 @@ import {
   usePostAttemptsStart,
   usePostAttemptsAttemptIdFinish,
 } from "@elepad/api-client";
+import { useNetAchievementPrediction, type PredictedAchievement } from "./useNetAchievementPrediction";
 
 export type TileType =
   | "empty"
@@ -35,16 +36,12 @@ export interface GameStats {
   totalTiles: number;
 }
 
-export interface UnlockedAchievement {
-  id: string;
-  title: string;
-  icon?: string | null;
-  description?: string;
-}
+// Se importa desde useNetAchievementPrediction
+// export interface UnlockedAchievement {...}
 
 interface UseNetGameProps {
   gridSize: number;
-  onAchievementUnlocked?: (achievement: UnlockedAchievement) => void;
+  onAchievementUnlocked?: (achievement: PredictedAchievement) => void;
 }
 
 type Direction = 0 | 1 | 2 | 3;
@@ -69,7 +66,7 @@ export const useNetGame = ({
   gridSize,
   onAchievementUnlocked,
 }: UseNetGameProps) => {
-  const { markGameCompleted } = useAuth();
+  const { markGameCompleted, user } = useAuth();
   const [tiles, setTiles] = useState<Tile[]>([]);
   const [moves, setMoves] = useState(0);
   const [timeElapsed, setTimeElapsed] = useState(0);
@@ -78,7 +75,7 @@ export const useNetGame = ({
   const [puzzleId, setPuzzleId] = useState<string | null>(null);
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [unlockedAchievements, setUnlockedAchievements] = useState<
-    UnlockedAchievement[]
+    PredictedAchievement[]
   >([]);
   const [isLoading, setIsLoading] = useState(true);
   const [gameId, setGameId] = useState<string>(Date.now().toString());
@@ -94,6 +91,9 @@ export const useNetGame = ({
   const isStartingAttempt = useRef(false);
 
   const queryClient = useQueryClient();
+  
+  // Hook para predicción optimista de logros
+  const { predictAchievements, validatePrediction, loadRecentAttempts } = useNetAchievementPrediction();
 
   const createPuzzle = usePostPuzzlesNet();
   const startAttempt = usePostAttemptsStart();
@@ -165,6 +165,11 @@ export const useNetGame = ({
 
       console.log("✅ Puzzle NET creado exitosamente:", puzzle.id);
       setPuzzleId(puzzle.id);
+      
+      // 📊 Cargar historial de intentos para evaluar streaks
+      loadRecentAttempts().catch((error) => {
+        console.error("⚠️ Error cargando historial, continuando sin datos de streak:", error);
+      });
 
       const { startState, solution: solutionData, rows, cols } = logicGame;
 
@@ -425,6 +430,38 @@ export const useNetGame = ({
           success: true,
           autoSolved: wasAutoSolved,
         });
+        
+        const score = Math.max(0, Math.floor(1000 - (durationMs / 1000) * 5 - moves * 10));
+
+        // Variable para guardar los logros predichos (para validación posterior)
+        let predictedAchievements: PredictedAchievement[] = [];
+
+        // 🔮 PREDICCIÓN OPTIMISTA: Predecir logros ANTES de llamar al backend (solo si NO fue auto-resuelto)
+        if (!wasAutoSolved && user) {
+          predictedAchievements = predictAchievements({
+            gameType: "logic",
+            gameName: "net",
+            success: true,
+            score,
+            moves,
+            durationMs,
+            userId: user.id,
+          });
+
+          console.log(`🔮 Logros predichos: ${predictedAchievements.length}`);
+
+          // Mostrar logros predichos INMEDIATAMENTE
+          if (predictedAchievements.length > 0) {
+            setUnlockedAchievements(predictedAchievements);
+            
+            // Notificar logros predichos
+            predictedAchievements.forEach((achievement) => {
+              if (onAchievementUnlocked) {
+                onAchievementUnlocked(achievement);
+              }
+            });
+          }
+        }
 
         // 🔥 Actualización optimista de la racha si NO fue auto-resuelto
         if (!wasAutoSolved) {
@@ -457,47 +494,33 @@ export const useNetGame = ({
           queryClient.invalidateQueries({ queryKey: ['getStreaksHistory'] });
         }
 
-        // El backend automáticamente verifica logros y los devuelve en la respuesta
+        // Validar predicción con respuesta real del backend
         const responseData = "data" in finishResponse ? finishResponse.data : finishResponse;
-        console.log("🔍 [NET] responseData:", JSON.stringify(responseData, null, 2));
-        console.log("🔍 [NET] typeof responseData:", typeof responseData);
-        console.log("🔍 [NET] responseData keys:", responseData ? Object.keys(responseData) : 'null');
-        console.log("🔍 [NET] 'unlockedAchievements' in responseData:", responseData ? "unlockedAchievements" in responseData : false);
-        if (responseData && "unlockedAchievements" in responseData) {
-          console.log("🔍 [NET] responseData.unlockedAchievements:", responseData.unlockedAchievements);
-          console.log("🔍 [NET] Array.isArray(responseData.unlockedAchievements):", Array.isArray(responseData.unlockedAchievements));
-          console.log("🔍 [NET] responseData.unlockedAchievements.length:", responseData.unlockedAchievements?.length);
-        }
         
-        if (
-          !wasAutoSolved &&
-          responseData &&
-          "unlockedAchievements" in responseData &&
-          responseData.unlockedAchievements &&
-          responseData.unlockedAchievements.length > 0
-        ) {
-          console.log(
-            "🎉 Logros desbloqueados:",
-            responseData.unlockedAchievements,
-          );
-          setUnlockedAchievements(
-            responseData.unlockedAchievements as UnlockedAchievement[],
-          );
-
-          responseData.unlockedAchievements.forEach(
-            (achievement: UnlockedAchievement) => {
-              onAchievementUnlocked?.(achievement);
-            },
-          );
-        } else if (!wasAutoSolved) {
-          console.log("ℹ️ No se desbloquearon nuevos logros");
-          console.log("🔍 [NET] Razón del no desbloqueo:");
-          console.log("  - wasAutoSolved:", wasAutoSolved);
-          console.log("  - responseData existe:", !!responseData);
-          console.log("  - tiene unlockedAchievements:", responseData ? "unlockedAchievements" in responseData : false);
-          if (responseData && "unlockedAchievements" in responseData) {
-            console.log("  - unlockedAchievements truthy:", !!responseData.unlockedAchievements);
-            console.log("  - length > 0:", (responseData.unlockedAchievements?.length || 0) > 0);
+        if (!wasAutoSolved && responseData && "unlockedAchievements" in responseData) {
+          const realAchievements = (responseData.unlockedAchievements || []) as PredictedAchievement[];
+          
+          console.log(`🎯 Logros reales del backend: ${realAchievements.length}`);
+          
+          // Validar si la predicción fue correcta (usar la variable local, no el estado)
+          const isCorrect = validatePrediction(predictedAchievements, realAchievements);
+          
+          if (!isCorrect) {
+            console.warn("⚠️ Discrepancia entre predicción y backend, corrigiendo...");
+            // Actualizar con los logros reales
+            setUnlockedAchievements(realAchievements);
+            
+            // Notificar logros que no fueron predichos
+            realAchievements.forEach((achievement) => {
+              if (!predictedAchievements.some((p) => p.id === achievement.id)) {
+                console.log(`🆕 Logro no predicho: ${achievement.title}`);
+                if (onAchievementUnlocked) {
+                  onAchievementUnlocked(achievement);
+                }
+              }
+            });
+          } else {
+            console.log("✅ Predicción correcta, sin cambios");
           }
         }
       } catch (error) {
@@ -505,7 +528,18 @@ export const useNetGame = ({
         hasFinishedAttempt.current = false;
       }
     },
-    [attemptId, moves, finishAttempt, onAchievementUnlocked],
+    [
+      attemptId,
+      moves,
+      finishAttempt,
+      onAchievementUnlocked,
+      user,
+      predictAchievements,
+      validatePrediction,
+      unlockedAchievements,
+      markGameCompleted,
+      queryClient,
+    ],
   );
 
   useEffect(() => {
