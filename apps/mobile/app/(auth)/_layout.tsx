@@ -1,6 +1,20 @@
 import { Stack } from "expo-router";
 
 export default function AuthGroupLayout() {
-  // TODO: find out if this layout is useful at all
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen
+        name="login/index"
+        options={{
+          animation: "fade",
+        }}
+      />
+      <Stack.Screen
+        name="signup/index"
+        options={{
+          animation: "slide_from_right",
+        }}
+      />
+    </Stack>
+  );
 }
