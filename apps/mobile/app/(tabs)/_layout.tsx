@@ -117,83 +117,72 @@ export default function TabLayout() {
     configuracion: ConfiguracionScreen,
   });
 
+  const renderTabBar = (props: any) => (
+    <View
+      style={{
+        position: "absolute",
+        bottom: 24,
+        left: 20,
+        right: 20,
+        borderRadius: 24,
+        overflow: "hidden",
+        backgroundColor: COLORS.white,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+        ...Platform.select({
+          ios: {
+            shadowColor: "#18020c",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.08,
+            shadowRadius: 16,
+          },
+          android: {
+            elevation: 8,
+          },
+        }),
+        zIndex: 1000,
+      }}
+    >
+      <BottomNavigation.Bar
+        {...props}
+        safeAreaInsets={{ bottom: 0 }}
+        style={{
+          backgroundColor: "transparent",
+          borderTopWidth: 0,
+          elevation: 0,
+          height: 72,
+          justifyContent: "center",
+        }}
+        activeColor={COLORS.primary}
+        inactiveColor={COLORS.textLight}
+        activeIndicatorStyle={{
+          backgroundColor: activeIndicatorColor,
+          borderRadius: 12,
+        }}
+        theme={theme}
+        labelMaxFontSizeMultiplier={1.2}
+      />
+    </View>
+  );
+
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.background }}>
-      {/* Content that occupies entire screen */}
-      <View
-        style={{
-          flex: 1,
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-        }}
-      >
-        {renderScene({
-          route: routes[index],
-          jumpTo: (key: string) => {
-            const routeIndex = routes.findIndex((route) => route.key === key);
-            if (routeIndex !== -1) {
-              setIndex(routeIndex);
-            }
-          },
-        })}
-      </View>
-
-      {/* Floating navigation bar */}
-      <View
-        style={{
-          position: "absolute",
-          bottom: 24,
-          left: 20,
-          right: 20,
-          borderRadius: 24,
-          overflow: "hidden",
-          backgroundColor: COLORS.white,
-          borderWidth: 1,
-          borderColor: COLORS.border,
-          ...Platform.select({
-            ios: {
-              shadowColor: "#18020c",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.08,
-              shadowRadius: 16,
-            },
-            android: {
-              elevation: 8,
-            },
-          }),
-          zIndex: 1000,
-        }}
-      >
-        <BottomNavigation.Bar
-          navigationState={{ index, routes }}
-          onTabPress={({ route }) => {
-            const routeIndex = routes.findIndex((r) => r.key === route.key);
-            if (routeIndex !== -1) {
-              setIndex(routeIndex);
-            }
-          }}
-          activeColor={COLORS.primary}
-          inactiveColor={COLORS.textLight}
-          activeIndicatorStyle={{
-            backgroundColor: activeIndicatorColor,
-            borderRadius: 12,
-          }}
-          style={{
-            backgroundColor: "transparent",
-            borderTopWidth: 0,
-            elevation: 0,
-            height: 72,
-            justifyContent: "center",
-          }}
-          labeled={true}
-          labelMaxFontSizeMultiplier={1.2}
-          theme={theme}
-          safeAreaInsets={{ bottom: 0 }}
-        />
-      </View>
+      <BottomNavigation
+        navigationState={{ index, routes }}
+        onIndexChange={setIndex}
+        renderScene={renderScene}
+        barStyle={{ display: "none" }}
+        sceneAnimationEnabled={true}
+        sceneAnimationType="shifting"
+      />
+      {renderTabBar({
+        navigationState: { index, routes },
+        onTabPress: ({ route }: { route: any }) => {
+          const newIndex = routes.findIndex((r) => r.key === route.key);
+          setIndex(newIndex);
+        },
+        getLabelText: ({ route }: { route: any }) => route.title,
+      })}
     </View>
   );
 }
