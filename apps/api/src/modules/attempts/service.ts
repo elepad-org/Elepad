@@ -75,6 +75,13 @@ export class AttemptService {
       throw new ApiException(400, "Este intento ya fue finalizado");
     }
 
+    console.log("[BACKEND FINISH ATTEMPT]");
+    console.log(`  Attempt ID: ${attemptId}`);
+    console.log(`  Success: ${success}`);
+    console.log(`  Duration: ${durationMs}ms`);
+    console.log(`  Moves: ${moves}`);
+    console.log(`  Score from payload: ${score ?? 'null (will calculate)'}`);
+
     // Calcular el score si no viene en el payload
     const calculatedScore =
       score ?? this.calculateScore(durationMs, moves, success);
@@ -126,6 +133,13 @@ export class AttemptService {
       0,
       Math.floor(baseScore - timepenalty - movesPenalty),
     );
+
+    console.log("[BACKEND SCORE CALCULATION]");
+    console.log(`  Duration: ${durationMs}ms (${durationSeconds.toFixed(2)}s)`);
+    console.log(`  Moves (errores): ${moves}`);
+    console.log(`  Time penalty: ${durationSeconds.toFixed(2)} * 5 = ${timepenalty.toFixed(2)}`);
+    console.log(`  Moves penalty: ${moves} * 10 = ${movesPenalty}`);
+    console.log(`  Final score: ${baseScore} - ${timepenalty.toFixed(2)} - ${movesPenalty} = ${finalScore}`);
 
     return finalScore;
   }
