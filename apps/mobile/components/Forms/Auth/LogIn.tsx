@@ -1,26 +1,52 @@
 import { supabase } from "@/lib/supabase";
 import {
   View,
-  Alert,
   Image,
   TouchableOpacity,
   StyleSheet,
   Platform,
 } from "react-native";
-import { Text, TextInput, Button } from "react-native-paper";
+import {
+  Text,
+  TextInput,
+  Button,
+  Portal,
+  Dialog,
+  Paragraph,
+} from "react-native-paper";
 import { makeRedirectUri } from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import googleLogo from "@/assets/images/google.png";
 import { Link } from "expo-router";
-import { COLORS } from "@/styles/base";
+import { COLORS, STYLES } from "@/styles/base";
 
 export default function LogIn() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorVisible, setErrorVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const getFriendlyErrorMessage = (errorMsg: string) => {
+    if (errorMsg.includes("Invalid login credentials"))
+      return "Credenciales inválidas. Verifica tu correo y contraseña.";
+    if (errorMsg.includes("Email not confirmed"))
+      return "Tu correo no ha sido confirmado. Revisa tu bandeja de entrada.";
+    if (
+      errorMsg.toLowerCase().includes("missing email") ||
+      errorMsg === "Email is required"
+    )
+      return "Por favor ingresa tu correo electrónico.";
+    return errorMsg;
+  };
+
+  const showError = (message: string) => {
+    setErrorMessage(getFriendlyErrorMessage(message));
+    setErrorVisible(true);
+  };
 
   const handleLogin = async () => {
     setLoading(true);
@@ -29,7 +55,7 @@ export default function LogIn() {
       password,
     });
     if (error) {
-      Alert.alert(error.message);
+      showError(error.message);
     } else {
       console.log("Inicio de sesión:", email);
     }
@@ -47,7 +73,7 @@ export default function LogIn() {
           },
         });
 
-        if (error) Alert.alert(error.message);
+        if (error) showError(error.message);
         return;
       }
 
@@ -63,7 +89,7 @@ export default function LogIn() {
       });
 
       if (error) {
-        Alert.alert(error.message);
+        showError(error.message);
         return;
       }
 
@@ -75,7 +101,7 @@ export default function LogIn() {
         // Abre el browser del telefono
         const result = await WebBrowser.openAuthSessionAsync(
           authUrl,
-          redirectTo,
+          redirectTo
         );
         console.log(result);
         if (result.type === "success" && result.url) {
@@ -221,6 +247,44 @@ export default function LogIn() {
           <Text style={styles.backText}>Volver</Text>
         </Link>
       </View>
+
+      <Portal>
+        <Dialog
+          visible={errorVisible}
+          onDismiss={() => setErrorVisible(false)}
+          style={{
+            backgroundColor: COLORS.background,
+            borderRadius: 20,
+            width: "90%",
+            alignSelf: "center",
+          }}
+        >
+          <Dialog.Icon
+            icon="alert-circle-outline"
+            size={48}
+            color={COLORS.primary}
+          />
+
+          <Dialog.Content>
+            <Paragraph style={{ ...STYLES.subheading, marginTop: 12 }}>
+              {errorMessage}
+            </Paragraph>
+          </Dialog.Content>
+          <Dialog.Actions
+            style={{ justifyContent: "center", paddingBottom: 16 }}
+          >
+            <Button
+              mode="contained"
+              onPress={() => setErrorVisible(false)}
+              buttonColor={COLORS.primary}
+              textColor={COLORS.white}
+              style={{ paddingHorizontal: 24, borderRadius: 12 }}
+            >
+              Entendido
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </View>
   );
 }
