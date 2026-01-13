@@ -8,6 +8,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "./useAuth";
 import { getTodayLocal } from "@/lib/dateHelpers";
+import { useAchievementPrediction, type PredictedAchievement } from "./useAchievementPrediction";
 
 export interface Card {
   id: number;
@@ -26,7 +27,8 @@ export interface UnlockedAchievement {
   id: string;
   title: string;
   icon?: string | null;
-  description?: string;
+  description?: string | null;
+  points: number;
 }
 
 const SYMBOLS = [
@@ -46,12 +48,11 @@ const SYMBOLS = [
 
 interface UseMemoryGameProps {
   mode: "4x4" | "4x6";
-  onAchievementUnlocked?: (achievement: UnlockedAchievement) => void;
 }
 
 export const useMemoryGame = (props: UseMemoryGameProps) => {
-  const { mode, onAchievementUnlocked } = props;
-  const { markGameCompleted } = useAuth();
+  const { mode } = props;
+  const { markGameCompleted, user } = useAuth();
   const [cards, setCards] = useState<Card[]>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
@@ -61,7 +62,7 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
   const [puzzleId, setPuzzleId] = useState<string | null>(null);
   const [attemptId, setAttemptId] = useState<string | null>(null);
   const [unlockedAchievements, setUnlockedAchievements] = useState<
-    UnlockedAchievement[]
+    PredictedAchievement[]
   >([]);
   const [isLoading, setIsLoading] = useState(true);
   const [gameId, setGameId] = useState<string>(Date.now().toString());
@@ -71,6 +72,9 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
   const isStartingAttempt = useRef(false);
   
   const queryClient = useQueryClient();
+  
+  // Hook para predicción de logros
+  const { predictAchievements, validatePrediction } = useAchievementPrediction("memory");
 
   // API Hooks
   const createPuzzle = usePostPuzzlesMemory();
@@ -343,7 +347,7 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
 
       // Finalizar el intento en el backend (solo una vez)
       const finishGameAttempt = async () => {
-        if (attemptId && startTimeRef.current && !hasFinishedAttempt.current) {
+        if (attemptId && startTimeRef.current && !hasFinishedAttempt.current && user) {
           hasFinishedAttempt.current = true;
 
           try {
@@ -354,9 +358,28 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
               Math.floor(1000 - durationSeconds * 5 - moves * 10),
             );
 
+            // 🔮 PREDICCIÓN OPTIMISTA: Predecir logros ANTES de llamar al backend
+            const predicted = predictAchievements({
+              gameType: "memory",
+              gameName: "memory", // Memoria solo tiene un tipo
+              success: true,
+              score,
+              moves,
+              durationMs,
+              userId: user.id,
+            });
+
+            console.log(`🔮 Logros predichos: ${predicted.length}`);
+
+            // Mostrar logros predichos INMEDIATAMENTE
+            if (predicted.length > 0) {
+              setUnlockedAchievements(predicted);
+            }
+
             // 🔥 Actualización optimista de la racha ANTES de llamar al backend
             await markGameCompleted();
 
+            // Llamar al backend en segundo plano
             const finishResponse = await finishAttempt.mutateAsync({
               attemptId,
               data: {
@@ -369,50 +392,35 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
             });
 
             console.log("✅ Intento finalizado con score:", score);
-            console.log("📦 Respuesta del backend:", finishResponse);
 
             // Invalidar queries de rachas para refrescar datos (sincronización final)
             queryClient.invalidateQueries({ queryKey: ['getStreaksMe'] });
             queryClient.invalidateQueries({ queryKey: ['getStreaksHistory'] });
 
-            // El backend automáticamente verifica logros y los devuelve en la respuesta
+            // Validar predicción con respuesta real del backend
             const responseData = "data" in finishResponse ? finishResponse.data : finishResponse;
-            if (
-              responseData &&
-              "unlockedAchievements" in responseData &&
-              responseData.unlockedAchievements &&
-              responseData.unlockedAchievements.length > 0
-            ) {
-              setUnlockedAchievements(
-                responseData
-                  .unlockedAchievements as UnlockedAchievement[],
-              );
-              console.log(
-                "🏆 Logros desbloqueados:",
-                responseData.unlockedAchievements.length,
-                responseData.unlockedAchievements,
-              );
-
-              // Notificar cada logro desbloqueado
-              responseData.unlockedAchievements.forEach(
-                (achievement: UnlockedAchievement) => {
-                  onAchievementUnlocked?.(achievement);
-                },
-              );
-              console.log(
-                "🏆 Logros desbloqueados:",
-                responseData.unlockedAchievements.length,
-                responseData.unlockedAchievements,
-              );
-
-              // Notificar cada logro desbloqueado
-              responseData.unlockedAchievements.forEach(
-                (achievement: UnlockedAchievement) => {
-                  onAchievementUnlocked?.(achievement);
-                },
-              );
-            } else {
-              console.log("ℹ️ No se desbloquearon logros nuevos");
+            if (responseData && "unlockedAchievements" in responseData) {
+              const realAchievements = (responseData.unlockedAchievements || []) as PredictedAchievement[];
+              
+              console.log(`🎯 Logros reales del backend: ${realAchievements.length}`);
+              
+              // Validar si la predicción fue correcta
+              const isCorrect = validatePrediction(predicted, realAchievements);
+              
+              if (!isCorrect) {
+                console.warn("⚠️ Discrepancia entre predicción y backend, corrigiendo...");
+                // Actualizar con los logros reales
+                setUnlockedAchievements(realAchievements);
+                
+                // Notificar logros que no fueron predichos
+                realAchievements.forEach((achievement) => {
+                  if (!predicted.some((p) => p.id === achievement.id)) {
+                    console.log(`🆕 Logro no predicho: ${achievement.title}`);
+                  }
+                });
+              } else {
+                console.log("✅ Predicción correcta, sin cambios");
+              }
             }
           } catch (error) {
             console.error("❌ Error finishing attempt:", error);
@@ -429,7 +437,6 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
     finishAttempt,
     isGameStarted,
     gameId,
-    onAchievementUnlocked,
   ]);
 
   const resetGame = useCallback(() => {

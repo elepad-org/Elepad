@@ -4,6 +4,7 @@ import {
   UserStreakSchema,
   StreakHistorySchema,
   StreakHistoryQuerySchema,
+  GetStreakQuerySchema,
 } from "./schema";
 import { openApiErrorResponse } from "@/utils/api-error";
 
@@ -27,6 +28,9 @@ streaksApp.openapi(
     method: "get",
     path: "/streaks/me",
     tags: ["streaks"],
+    request: {
+      query: GetStreakQuerySchema,
+    },
     responses: {
       200: {
         description: "Racha del usuario",
@@ -41,7 +45,8 @@ streaksApp.openapi(
   },
   async (c) => {
     const userId = c.var.user.id;
-    const streak = await c.var.streakService.getUserStreak(userId);
+    const { clientDate } = c.req.valid("query");
+    const streak = await c.var.streakService.getUserStreak(userId, clientDate);
     
     // Evitar caché para datos en tiempo real
     c.header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");

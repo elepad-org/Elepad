@@ -7,8 +7,10 @@ export class StreakService {
 
   /**
    * Obtiene la racha actual del usuario
+   * @param userId - ID del usuario
+   * @param clientDate - Fecha local del cliente en formato YYYY-MM-DD (opcional)
    */
-  async getUserStreak(userId: string) {
+  async getUserStreak(userId: string, clientDate?: string) {
     const { data: streak, error } = await this.supabase
       .from("user_streaks")
       .select("currentStreak, longestStreak, lastPlayedDate")
@@ -30,7 +32,7 @@ export class StreakService {
     }
 
     // Validar si la racha debe resetearse
-    const validated = await this.validateStreak(userId, streak);
+    const validated = await this.validateStreak(userId, streak, clientDate);
 
     return validated;
   }
@@ -186,6 +188,9 @@ export class StreakService {
 
   /**
    * Valida si la racha debe resetearse (si pasó más de un día sin jugar)
+   * @param userId - ID del usuario
+   * @param streak - Datos de la racha actual
+   * @param clientDate - Fecha local del cliente en formato YYYY-MM-DD (opcional, se calcula en UTC si no se provee)
    */
   private async validateStreak(
     userId: string,
@@ -194,16 +199,27 @@ export class StreakService {
       longestStreak: number;
       lastPlayedDate: string | null;
     },
+    clientDate?: string,
   ) {
     if (!streak.lastPlayedDate) {
       return streak;
     }
 
-    const today = this.getTodayDate();
+    const today = clientDate || this.getTodayDate();
     const daysDiff = this.getDaysDifference(streak.lastPlayedDate, today);
+
+    console.log("🔍 [VALIDATE STREAK] ==================");
+    console.log("🔍 [VALIDATE STREAK] userId:", userId);
+    console.log("🔍 [VALIDATE STREAK] lastPlayedDate (DB):", streak.lastPlayedDate);
+    console.log("🔍 [VALIDATE STREAK] clientDate recibido:", clientDate || "no enviado");
+    console.log("🔍 [VALIDATE STREAK] today usado:", today, clientDate ? "(cliente)" : "(UTC)");
+    console.log("🔍 [VALIDATE STREAK] daysDiff:", daysDiff);
+    console.log("🔍 [VALIDATE STREAK] currentStreak actual:", streak.currentStreak);
+    console.log("🔍 [VALIDATE STREAK] ¿Se va a resetear? (daysDiff > 1):", daysDiff > 1);
 
     // Si pasó más de 1 día, resetear la racha
     if (daysDiff > 1) {
+      console.log("💔 [VALIDATE STREAK] RESETEANDO RACHA A 0");
       await this.supabase
         .from("user_streaks")
         .update({
@@ -218,6 +234,7 @@ export class StreakService {
       };
     }
 
+    console.log("✅ [VALIDATE STREAK] Racha válida, no se resetea");
     return streak;
   }
 
