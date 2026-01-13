@@ -10,6 +10,7 @@ import type { Activity } from "@elepad/api-client";
 import { useGetFrequencies } from "@elepad/api-client";
 import { COLORS } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
+import SaveButton from "../shared/SaveButton";
 import MentionInput from "../Recuerdos/MentionInput";
 import ElderSelector from "./ElderSelector";
 import { useAuth } from "@/hooks/useAuth";
@@ -328,16 +329,11 @@ export default function ActivityForm({
           <CancelButton onPress={onClose} />
         </View>
         <View style={{ width: 120 }}>
-          <Button
-            mode="contained"
+          <SaveButton 
             onPress={handleSave}
-            loading={saving}
             disabled={saving || !startsAtDate}
-            style={styles.saveButton}
-            buttonColor={COLORS.primary}
-          >
-            Guardar
-          </Button>
+            loading={saving}
+          />
         </View>
       </Dialog.Actions>
     </Dialog>
