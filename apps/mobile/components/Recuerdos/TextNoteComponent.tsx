@@ -3,6 +3,7 @@ import { View } from "react-native";
 import { TextInput, Text } from "react-native-paper";
 import { STYLES, COLORS } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
+import SaveButton from "../shared/SaveButton";
 import MentionInput from "./MentionInput";
 
 interface FamilyMember {
@@ -79,12 +80,17 @@ export default function TextNoteComponent({
           alignItems: "center",
         }}
       >
-        <CancelButton onPress={onCancel} disabled={isUploading} />
-        <CancelButton
-          onPress={handleSubmit}
-          text={isUploading ? "Guardando..." : "Guardar"}
-          disabled={!title.trim() || !content.trim() || isUploading}
-        />
+        <View style={{ width: 120 }}>
+          <CancelButton onPress={onCancel} disabled={isUploading} />
+        </View>
+        <View style={{ width: 120 }}>
+          <SaveButton
+            onPress={handleSubmit}
+            text={isUploading ? "Guardando..." : "Guardar"}
+            disabled={!title.trim() || !content.trim() || isUploading}
+            loading={isUploading}
+          />
+        </View>
       </View>
     </View>
   );

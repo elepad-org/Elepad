@@ -138,15 +138,6 @@ export default function JuegosScreen() {
               onDetails={() => router.push("/game-detail/focus")}
             />
           </View>
-
-          {/* Coming Soon */}
-          <View style={styles.comingSoonCard}>
-            <Text style={styles.comingSoonEmoji}>🎮</Text>
-            <Text style={styles.comingSoonTitle}>Próximamente</Text>
-            <Text style={styles.comingSoonText}>
-              Nuevos juegos: rompecabezas y más
-            </Text>
-          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

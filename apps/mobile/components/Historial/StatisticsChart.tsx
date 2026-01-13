@@ -185,6 +185,12 @@ export default function StatisticsChart({
           { value: "year", label: "Año" },
         ]}
         style={styles.segmentedButtons}
+        theme={{
+          colors: {
+            secondaryContainer: COLORS.primary,
+            onSecondaryContainer: COLORS.white,
+          },
+        }}
       />
 
       {!chartData ? (

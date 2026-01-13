@@ -48,6 +48,8 @@ import RecuerdoItemComponent from "@/components/Recuerdos/RecuerdoItemComponent"
 import NuevoRecuerdoDialogComponent from "@/components/Recuerdos/NuevoRecuerdoDialogComponent";
 import RecuerdoDetailDialog from "@/components/Recuerdos/RecuerdoDetailDialog";
 import ChestIcon from "@/components/Recuerdos/ChestIcon";
+import SaveButton from "@/components/shared/SaveButton";
+import CancelButton from "@/components/shared/CancelButton";
 import BookCover from "@/components/Recuerdos/BookCover";
 import eleEmpthy from "@/assets/images/ele-idea.jpeg";
 
@@ -959,35 +961,39 @@ export default function RecuerdosScreen() {
               </View>
             </View>
           </Dialog.Content>
-          <Dialog.Actions style={{ paddingBottom: 12, paddingRight: 16 }}>
-            <Button
-              onPress={() => {
-                setBookDialogVisible(false);
-                setEditingBook(null);
-              }}
-              disabled={
-                createBookMutation.isPending || updateBookMutation.isPending
-              }
-            >
-              Cancelar
-            </Button>
-            <Button
-              mode="contained"
-              onPress={submitBookDialog}
-              buttonColor={COLORS.primary}
-              textColor={COLORS.white}
-              loading={
-                createBookMutation.isPending || updateBookMutation.isPending
-              }
-              disabled={
-                !groupId ||
-                createBookMutation.isPending ||
-                updateBookMutation.isPending ||
-                deleteBookMutation.isPending
-              }
-            >
-              Guardar
-            </Button>
+          <Dialog.Actions
+            style={{
+              paddingBottom: 30,
+              paddingHorizontal: 24,
+              paddingTop: 10,
+              justifyContent: 'space-between',
+            }}
+          >
+            <View style={{ width: 120 }}>
+              <CancelButton
+                onPress={() => {
+                  setBookDialogVisible(false);
+                  setEditingBook(null);
+                }}
+                disabled={
+                  createBookMutation.isPending || updateBookMutation.isPending
+                }
+              />
+            </View>
+            <View style={{ width: 120 }}>
+              <SaveButton
+                onPress={submitBookDialog}
+                loading={
+                  createBookMutation.isPending || updateBookMutation.isPending
+                }
+                disabled={
+                  !groupId ||
+                  createBookMutation.isPending ||
+                  updateBookMutation.isPending ||
+                  deleteBookMutation.isPending
+                }
+              />
+            </View>
           </Dialog.Actions>
         </Dialog>
 

@@ -149,7 +149,11 @@ export default function ImagePickerComponent({
           >
             Tomar foto
           </Button>
-          <CancelButton onPress={onCancel} disabled={isUploading} />
+          <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 8 }}>
+            <View style={{ width: 120 }}>
+              <CancelButton onPress={onCancel} disabled={isUploading} />
+            </View>
+          </View>
         </View>
       )}
     </View>
