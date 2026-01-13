@@ -35,6 +35,10 @@ export default function LogIn() {
       return "Credenciales inválidas. Verifica tu correo y contraseña.";
     if (errorMsg.includes("Email not confirmed"))
       return "Tu correo no ha sido confirmado. Revisa tu bandeja de entrada.";
+    if (errorMsg.includes("Password should be at least 6 characters"))
+      return "La contraseña debe tener al menos 6 caracteres.";
+    if (errorMsg.includes("Anonymous sign-ins are disabled"))
+      return "Debe completar con los datos necesarios.";
     if (
       errorMsg.toLowerCase().includes("missing email") ||
       errorMsg === "Email is required"
@@ -280,7 +284,7 @@ export default function LogIn() {
               textColor={COLORS.white}
               style={{ paddingHorizontal: 24, borderRadius: 12 }}
             >
-              Entendido
+              Aceptar
             </Button>
           </Dialog.Actions>
         </Dialog>
