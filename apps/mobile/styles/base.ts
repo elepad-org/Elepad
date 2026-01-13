@@ -131,7 +131,6 @@ export const STYLES = StyleSheet.create({
     width: "85%",
     borderRadius: 12,
     backgroundColor: COLORS.primary,
-    alignItems: "center",
   },
   buttonSecondary: {
     marginTop: 14,
