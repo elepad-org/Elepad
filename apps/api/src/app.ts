@@ -20,6 +20,7 @@ import { achievementsApp } from "./modules/achievements/handler.js";
 import { streaksApp } from "./modules/streaks/handler.js";
 import { withAuth } from "./middleware/auth.js";
 import { notificationsApp } from "./modules/notifications/handler.js";
+import { albumApp } from "./modules/memoriesAlbum/handler.js";
 
 // Configurar fetch personalizado para Node.js en desarrollo
 let customFetch: typeof fetch | undefined;
@@ -112,6 +113,7 @@ app.route("/", usersApp);
 app.route("/", familyGroupApp);
 app.route("/", activitiesApp);
 app.route("/", memoriesApp);
+app.route("/", albumApp);
 app.route("/", frequenciesApp);
 app.route("/activity-completions", activityCompletionsHandler);
 
@@ -138,6 +140,7 @@ app.doc("/openapi.json", {
   tags: [
     { name: "users" },
     { name: "memories" },
+    { name: "album" },
     { name: "familyGroups" },
     { name: "frequencies" },
     { name: "ActivityCompletions" },

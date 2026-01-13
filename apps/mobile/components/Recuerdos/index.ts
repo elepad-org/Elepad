@@ -2,3 +2,4 @@ export { default as ImagePickerComponent } from "./ImagePickerComponent";
 export { default as TextNoteComponent } from "./TextNoteComponent";
 export { default as AudioRecorderComponent } from "./AudioRecorderComponent";
 export { default as RecuerdoDetailDialog } from "./RecuerdoDetailDialog";
+export { default as CreateAlbumDialog } from "./CreateAlbumDialog";

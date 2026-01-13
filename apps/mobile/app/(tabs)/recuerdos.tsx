@@ -47,6 +47,7 @@ import { uriToBlob } from "@/lib/uriToBlob";
 import RecuerdoItemComponent from "@/components/Recuerdos/RecuerdoItemComponent";
 import NuevoRecuerdoDialogComponent from "@/components/Recuerdos/NuevoRecuerdoDialogComponent";
 import RecuerdoDetailDialog from "@/components/Recuerdos/RecuerdoDetailDialog";
+import CreateAlbumDialog from "@/components/Recuerdos/CreateAlbumDialog";
 import ChestIcon from "@/components/Recuerdos/ChestIcon";
 import BookCover from "@/components/Recuerdos/BookCover";
 import eleEmpthy from "@/assets/images/ele-idea.jpeg";
@@ -226,6 +227,7 @@ export default function RecuerdosScreen() {
   const [memberFilterId, setMemberFilterId] = useState<string | null>(null);
   const [memberMenuVisible, setMemberMenuVisible] = useState(false);
   const [memberMenuMounted, setMemberMenuMounted] = useState(true);
+  const [albumDialogVisible, setAlbumDialogVisible] = useState(false);
 
   const closeMemberMenu = useCallback(() => {
     setMemberMenuVisible(false);
@@ -565,6 +567,24 @@ export default function RecuerdosScreen() {
         }
       });
   }, [memoriesResponse, memberNameById, sortOrder]);
+
+  // Extraer memories para pasar al CreateAlbumDialog
+  const memories = useMemo(() => {
+    const memoriesPayload =
+      memoriesResponse && "data" in memoriesResponse
+        ? (memoriesResponse as unknown as { data: unknown }).data
+        : undefined;
+
+    const memoriesData = Array.isArray(memoriesPayload)
+      ? memoriesPayload
+      : memoriesPayload &&
+          typeof memoriesPayload === "object" &&
+          "data" in (memoriesPayload as Record<string, unknown>)
+        ? (memoriesPayload as { data: unknown }).data
+        : [];
+
+    return Array.isArray(memoriesData) ? (memoriesData as Memory[]) : [];
+  }, [memoriesResponse]);
 
   const params = useLocalSearchParams();
   const { memoryId, bookId } = params;
@@ -1091,6 +1111,17 @@ export default function RecuerdosScreen() {
           </Button>
         </View>
 
+        <Button
+                mode="contained"
+                onPress={() => setAlbumDialogVisible(true)}
+                buttonColor={COLORS.primary}
+                textColor={COLORS.white}
+                style={{ borderRadius: 12 }}
+                icon="book-multiple"
+              >
+                Crear Album
+              </Button>
+
         {isBooksLoading && books.length === 0 ? (
           <View style={{ ...STYLES.center, paddingHorizontal: 24 }}>
             <ActivityIndicator size="large" color={COLORS.primary} />
@@ -1268,7 +1299,8 @@ export default function RecuerdosScreen() {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                justifyContent: "flex-end",
+                //justifyContent: "flex-start",
+                gap: 8,
               }}
             >
               <Button
@@ -1280,6 +1312,16 @@ export default function RecuerdosScreen() {
                 icon="plus"
               >
                 Agregar
+              </Button>
+              <Button
+                mode="contained"
+                onPress={() => setAlbumDialogVisible(true)}
+                buttonColor={COLORS.primary}
+                textColor={COLORS.white}
+                style={{ borderRadius: 12 }}
+                icon="book-multiple"
+              >
+                Crear Album
               </Button>
               {menuMounted && (
                 <Menu
@@ -1678,6 +1720,13 @@ export default function RecuerdosScreen() {
       </Portal>
 
       {renderBookDialogs()}
+
+      {/* Diálogo para crear álbum con IA */}
+      <CreateAlbumDialog
+        visible={albumDialogVisible}
+        onDismiss={() => setAlbumDialogVisible(false)}
+        memories={memories}
+      />
 
       {/* Diálogo de detalle del recuerdo */}
       <RecuerdoDetailDialog
