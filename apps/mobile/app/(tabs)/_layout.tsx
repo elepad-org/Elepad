@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { View, Platform } from "react-native";
-import { BottomNavigation, useTheme } from "react-native-paper";
+import { View, Platform, useWindowDimensions } from "react-native";
+import { BottomNavigation, useTheme, Icon } from "react-native-paper";
 import { useLocalSearchParams } from "expo-router";
+import { TabView, SceneMap } from "react-native-tab-view";
 import HomeScreen from "./home";
 import JuegosScreen from "./juegos";
 import RecuerdosScreen from "./recuerdos";
@@ -15,6 +16,7 @@ const activeIndicatorColor = "rgba(91, 80, 122, 0.15)"; // #5b507a with opacity
 
 export default function TabLayout() {
   const theme = useTheme();
+  const layout = useWindowDimensions();
   const params = useLocalSearchParams();
   const [index, setIndex] = useState(0);
   const { userElepad } = useAuth();
@@ -109,7 +111,7 @@ export default function TabLayout() {
     }
   }, [isElder]);
 
-  const renderScene = BottomNavigation.SceneMap({
+  const renderScene = SceneMap({
     home: HomeScreen,
     calendar: CalendarScreen,
     juegos: JuegosScreen,
@@ -144,14 +146,33 @@ export default function TabLayout() {
       }}
     >
       <BottomNavigation.Bar
-        {...props}
+        navigationState={props.navigationState}
         safeAreaInsets={{ bottom: 0 }}
+        onTabPress={({ route }: { route: any }) => {
+          const index = routes.findIndex((r) => r.key === route.key);
+          setIndex(index);
+        }}
+        renderIcon={({
+          route,
+          focused,
+          color,
+        }: {
+          route: any;
+          focused: boolean;
+          color: string;
+        }) => (
+          <Icon
+            source={focused ? route.focusedIcon : route.unfocusedIcon}
+            size={24}
+            color={color}
+          />
+        )}
+        getLabelText={({ route }: { route: any }) => route.title}
         style={{
           backgroundColor: "transparent",
           borderTopWidth: 0,
           elevation: 0,
           height: 72,
-          justifyContent: "center",
         }}
         activeColor={COLORS.primary}
         inactiveColor={COLORS.textLight}
@@ -161,28 +182,25 @@ export default function TabLayout() {
         }}
         theme={theme}
         labelMaxFontSizeMultiplier={1.2}
+        shifting={true}
       />
     </View>
   );
 
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.background }}>
-      <BottomNavigation
+      <TabView
         navigationState={{ index, routes }}
-        onIndexChange={setIndex}
         renderScene={renderScene}
-        barStyle={{ display: "none" }}
-        sceneAnimationEnabled={true}
-        sceneAnimationType="shifting"
+        onIndexChange={setIndex}
+        initialLayout={{ width: layout.width }}
+        renderTabBar={renderTabBar}
+        tabBarPosition="bottom"
+        swipeEnabled={true}
+        animationEnabled={true}
+        lazy={true}
+        lazyPreloadDistance={1}
       />
-      {renderTabBar({
-        navigationState: { index, routes },
-        onTabPress: ({ route }: { route: any }) => {
-          const newIndex = routes.findIndex((r) => r.key === route.key);
-          setIndex(newIndex);
-        },
-        getLabelText: ({ route }: { route: any }) => route.title,
-      })}
     </View>
   );
 }
