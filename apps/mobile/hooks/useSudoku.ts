@@ -6,8 +6,8 @@ import {
   usePostPuzzlesSudoku,
   usePostAttemptsStart,
   usePostAttemptsAttemptIdFinish,
-  PostAttemptsAttemptIdFinish200UnlockedAchievementsItem,
 } from "@elepad/api-client";
+import { useSudokuAchievementPrediction, type PredictedAchievement } from "./useSudokuAchievementPrediction";
 
 export type Difficulty = "easy" | "medium" | "hard";
 
@@ -47,9 +47,6 @@ export interface UseSudokuProps {
   difficulty: Difficulty;
   maxMistakes?: number;
   onGameOver?: () => void; // Callback si pierde por errores
-  onAchievementUnlocked?: (
-    achievement: PostAttemptsAttemptIdFinish200UnlockedAchievementsItem
-  ) => void;
 }
 
 // --- Hook Principal ---
@@ -58,10 +55,9 @@ export const useSudoku = (props: UseSudokuProps) => {
   const {
     difficulty,
     maxMistakes = 3,
-    onAchievementUnlocked,
     onGameOver,
   } = props;
-  const { markGameCompleted } = useAuth();
+  const { markGameCompleted, user } = useAuth();
 
   // Estados del juego
   const [board, setBoard] = useState<SudokuCell[][]>([]);
@@ -71,6 +67,7 @@ export const useSudoku = (props: UseSudokuProps) => {
   } | null>(null);
   const [mistakes, setMistakes] = useState(0);
   const [filledCells, setFilledCells] = useState(0);
+  const [userMoves, setUserMoves] = useState(0); // Contador de movimientos del usuario (sin contar celdas iniciales)
 
   // Estados de control (Timer, API, Loading)
   const [timeElapsed, setTimeElapsed] = useState(0);
@@ -82,6 +79,9 @@ export const useSudoku = (props: UseSudokuProps) => {
   const [puzzleId, setPuzzleId] = useState<string | null>(null);
   const [attemptId, setAttemptId] = useState<string | null>(null);
 
+  // Estado de logros desbloqueados
+  const [unlockedAchievements, setUnlockedAchievements] = useState<PredictedAchievement[]>([]);
+
   // Refs para lógica interna
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<number | null>(null);
@@ -89,6 +89,9 @@ export const useSudoku = (props: UseSudokuProps) => {
   const isStartingAttempt = useRef(false);
 
   const queryClient = useQueryClient();
+  
+  // Hook para predicción optimista de logros
+  const { predictAchievements, validatePrediction, loadRecentAttempts } = useSudokuAchievementPrediction();
 
   // API Hooks
   const createPuzzle = usePostPuzzlesSudoku();
@@ -102,6 +105,7 @@ export const useSudoku = (props: UseSudokuProps) => {
     setBoard([]);
     setMistakes(0);
     setFilledCells(0);
+    setUserMoves(0);
     setTimeElapsed(0);
     setIsComplete(false);
     setIsGameStarted(false);
@@ -144,6 +148,11 @@ export const useSudoku = (props: UseSudokuProps) => {
 
       const {puzzle, sudokuGame} = responseData;
       setPuzzleId(puzzle.id);
+      
+      // 📊 Cargar historial de intentos para evaluar streaks
+      loadRecentAttempts().catch((error) => {
+        console.error("⚠️ Error cargando historial, continuando sin datos de streak:", error);
+      });
 
       if (!sudokuGame) {
         throw new Error("Error recibiendo el puzzle de Sudoku");
@@ -336,6 +345,7 @@ export const useSudoku = (props: UseSudokuProps) => {
         newBoard[row] = newRow;
         setBoard(newBoard);
         setFilledCells((prev) => prev + 1);
+        setUserMoves((prev) => prev + 1); // Contar movimiento del usuario
       } else {
         // MOVIMIENTO INCORRECTO
         const newMistakes = mistakes + 1;
@@ -413,13 +423,34 @@ export const useSudoku = (props: UseSudokuProps) => {
       if (timerRef.current) clearInterval(timerRef.current);
 
       const finishGame = async () => {
-        if (attemptId && startTimeRef.current) {
+        if (attemptId && startTimeRef.current && user) {
           hasFinishedAttempt.current = true;
           const durationMs = Date.now() - startTimeRef.current;
 
           const score = 81 - mistakes;
 
           try {
+            // Variable para guardar los logros predichos (para validación posterior)
+            let predictedAchievements: PredictedAchievement[] = [];
+
+            // 🔮 PREDICCIÓN OPTIMISTA: Predecir logros ANTES de llamar al backend
+            predictedAchievements = predictAchievements({
+              gameType: "attention",
+              gameName: "sudoku",
+              success: true,
+              score,
+              moves: userMoves,
+              durationMs,
+              userId: user.id,
+            });
+
+            console.log(`🔮 Logros predichos: ${predictedAchievements.length}`);
+
+            // Mostrar logros predichos INMEDIATAMENTE
+            if (predictedAchievements.length > 0) {
+              setUnlockedAchievements(predictedAchievements);
+            }
+
             // 🔥 Actualización optimista de la racha ANTES de llamar al backend
             await markGameCompleted();
 
@@ -427,7 +458,7 @@ export const useSudoku = (props: UseSudokuProps) => {
               attemptId,
               data: {
                 success: true,
-                moves: filledCells,
+                moves: userMoves,
                 durationMs,
                 score: score,
                 clientDate: getTodayLocal(),
@@ -446,20 +477,24 @@ export const useSudoku = (props: UseSudokuProps) => {
             queryClient.invalidateQueries({ queryKey: ["getStreaksMe"] });
             queryClient.invalidateQueries({ queryKey: ["getStreaksHistory"] });
 
-            // Manejo de Logros
-            const resData =
-              "data" in finishResponse ? finishResponse.data : finishResponse;
-            if (
-              resData?.unlockedAchievements &&
-              resData.unlockedAchievements.length > 0
-            ) {
-              resData.unlockedAchievements.forEach(
-                (
-                  achievement: PostAttemptsAttemptIdFinish200UnlockedAchievementsItem
-                ) => {
-                  onAchievementUnlocked?.(achievement);
-                }
-              );
+            // Validar predicción con respuesta real del backend
+            const resData = "data" in finishResponse ? finishResponse.data : finishResponse;
+            
+            if (resData && "unlockedAchievements" in resData) {
+              const realAchievements = (resData.unlockedAchievements || []) as PredictedAchievement[];
+              
+              console.log(`🎯 Logros reales del backend: ${realAchievements.length}`);
+              
+              // Validar si la predicción fue correcta (usar la variable local, no el estado)
+              const isCorrect = validatePrediction(predictedAchievements, realAchievements);
+              
+              if (!isCorrect) {
+                console.warn("⚠️ Discrepancia entre predicción y backend, corrigiendo...");
+                // Actualizar con los logros reales
+                setUnlockedAchievements(realAchievements);
+              } else {
+                console.log("✅ Predicción correcta, sin cambios");
+              }
             }
           } catch (e) {
             console.error("Error finalizando attempt", e);
@@ -495,9 +530,11 @@ export const useSudoku = (props: UseSudokuProps) => {
     selectedCell,
     mistakes,
     timeElapsed,
+    userMoves,
     isComplete,
     isLoading,
     difficulty,
+    unlockedAchievements,
     actions: {
       selectCell: handleCellPress,
       inputNumber: handleNumberInput,

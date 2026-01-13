@@ -12,7 +12,7 @@ interface SudokuCellProps {
   disabled: boolean;
 }
 
-export const SudokuCell: React.FC<SudokuCellProps> = ({
+const SudokuCellComponent: React.FC<SudokuCellProps> = ({
   value,
   isReadOnly,
   isError,
@@ -25,6 +25,7 @@ export const SudokuCell: React.FC<SudokuCellProps> = ({
       onPress={onPress}
       disabled={disabled}
       activeOpacity={0.7}
+      delayPressIn={0}
       style={[
         styles.cell,
         isSelected && styles.cellSelected,
@@ -82,4 +83,15 @@ const styles = StyleSheet.create({
   cellTextError: {
     color: COLORS.error,
   },
+});
+
+// Memoizar el componente para evitar re-renders innecesarios
+export const SudokuCell = React.memo(SudokuCellComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.value === nextProps.value &&
+    prevProps.isReadOnly === nextProps.isReadOnly &&
+    prevProps.isError === nextProps.isError &&
+    prevProps.isSelected === nextProps.isSelected &&
+    prevProps.disabled === nextProps.disabled
+  );
 });
