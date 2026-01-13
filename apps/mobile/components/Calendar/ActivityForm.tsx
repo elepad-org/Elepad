@@ -10,6 +10,7 @@ import type { Activity } from "@elepad/api-client";
 import { useGetFrequencies } from "@elepad/api-client";
 import { COLORS } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
+import SaveButton from "../shared/SaveButton";
 import MentionInput from "../Recuerdos/MentionInput";
 import ElderSelector from "./ElderSelector";
 import { useAuth } from "@/hooks/useAuth";
@@ -319,21 +320,21 @@ export default function ActivityForm({
       <Dialog.Actions
         style={{
           paddingBottom: 30,
-          paddingHorizontal: 20,
-          justifyContent: "space-between",
+          paddingHorizontal: 24,
+          paddingTop: 10,
+          justifyContent: 'space-between',
         }}
       >
-        <CancelButton onPress={onClose} />
-        <Button
-          mode="contained"
-          onPress={handleSave}
-          loading={saving}
-          disabled={saving || !startsAtDate}
-          style={styles.saveButton}
-          buttonColor={COLORS.primary}
-        >
-          Guardar
-        </Button>
+        <View style={{ width: 120 }}>
+          <CancelButton onPress={onClose} />
+        </View>
+        <View style={{ width: 120 }}>
+          <SaveButton 
+            onPress={handleSave}
+            disabled={saving || !startsAtDate}
+            loading={saving}
+          />
+        </View>
       </Dialog.Actions>
     </Dialog>
     <Dialog
@@ -425,7 +426,6 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     borderRadius: 12,
-    paddingHorizontal: 24,
-    elevation: 0,
+    flex: 1,
   },
 });
