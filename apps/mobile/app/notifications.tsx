@@ -1,25 +1,25 @@
 // Validadores de tipo para evitar castings inseguros
 function isActivity(obj: unknown): obj is Activity {
   return (
-    typeof obj === 'object' &&
+    typeof obj === "object" &&
     obj !== null &&
-    'id' in obj &&
-    'title' in obj &&
-    'startsAt' in obj &&
-    'completed' in obj &&
-    'createdBy' in obj
+    "id" in obj &&
+    "title" in obj &&
+    "startsAt" in obj &&
+    "completed" in obj &&
+    "createdBy" in obj
   );
 }
 
 function isMemory(obj: unknown): obj is Memory {
   return (
-    typeof obj === 'object' &&
+    typeof obj === "object" &&
     obj !== null &&
-    'id' in obj &&
-    'bookId' in obj &&
-    'groupId' in obj &&
-    'createdBy' in obj &&
-    'title' in obj
+    "id" in obj &&
+    "bookId" in obj &&
+    "groupId" in obj &&
+    "createdBy" in obj &&
+    "title" in obj
   );
 }
 import React, { useState, useCallback, useMemo } from "react";
@@ -85,7 +85,7 @@ interface Recuerdo {
 // Función auxiliar para convertir Memory a Recuerdo
 const memoryToRecuerdo = (
   memory: Memory,
-  memberNameById: Record<string, string>,
+  memberNameById: Record<string, string>
 ): Recuerdo => {
   let tipo: RecuerdoTipo = "texto";
 
@@ -126,8 +126,11 @@ export default function NotificationsScreen() {
   const [page, setPage] = useState(0);
   const [selectedMemoryId, setSelectedMemoryId] = useState<string | null>(null);
   const [detailDialogVisible, setDetailDialogVisible] = useState(false);
-  const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
-  const [activityDetailDialogVisible, setActivityDetailDialogVisible] = useState(false);
+  const [selectedActivityId, setSelectedActivityId] = useState<string | null>(
+    null
+  );
+  const [activityDetailDialogVisible, setActivityDetailDialogVisible] =
+    useState(false);
   const [notFoundDialogVisible, setNotFoundDialogVisible] = useState(false);
   const [notFoundMessage, setNotFoundMessage] = useState("");
 
@@ -138,7 +141,7 @@ export default function NotificationsScreen() {
       query: {
         enabled: !!userElepad?.groupId,
       },
-    },
+    }
   );
 
   const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
@@ -154,35 +157,29 @@ export default function NotificationsScreen() {
   };
 
   const groupInfo = selectGroupInfo();
-  
+
   // Query para obtener el recuerdo seleccionado
-  const memoryQuery = useGetMemoriesId(
-    selectedMemoryId || "",
-    {
-      query: {
-        enabled: !!selectedMemoryId,
-        retry: false,
-      },
+  const memoryQuery = useGetMemoriesId(selectedMemoryId || "", {
+    query: {
+      enabled: !!selectedMemoryId,
+      retry: false,
     },
-  );
+  });
 
   // Query para obtener la actividad seleccionada
-  const activityQuery = useGetActivitiesId(
-    selectedActivityId || "",
-    {
-      query: {
-        enabled: !!selectedActivityId,
-        retry: false,
-      },
+  const activityQuery = useGetActivitiesId(selectedActivityId || "", {
+    query: {
+      enabled: !!selectedActivityId,
+      retry: false,
     },
-  );
+  });
 
   // Obtener el rango de fechas para la actividad (solo el día de la actividad)
   const activityDateRange = useMemo(() => {
     // Extraer el objeto Activity solo si la respuesta es exitosa
     let activity: Activity | undefined;
-    if (activityQuery.data && typeof activityQuery.data === 'object') {
-      if ('data' in activityQuery.data && isActivity(activityQuery.data.data)) {
+    if (activityQuery.data && typeof activityQuery.data === "object") {
+      if ("data" in activityQuery.data && isActivity(activityQuery.data.data)) {
         activity = activityQuery.data.data;
       } else if (isActivity(activityQuery.data)) {
         activity = activityQuery.data;
@@ -213,20 +210,21 @@ export default function NotificationsScreen() {
   const isActivityCompleted = useMemo(() => {
     // Extraer el objeto Activity solo si la respuesta es exitosa
     let activity: Activity | undefined;
-    if (activityQuery.data && typeof activityQuery.data === 'object') {
-      if ('data' in activityQuery.data && isActivity(activityQuery.data.data)) {
+    if (activityQuery.data && typeof activityQuery.data === "object") {
+      if ("data" in activityQuery.data && isActivity(activityQuery.data.data)) {
         activity = activityQuery.data.data;
       } else if (isActivity(activityQuery.data)) {
         activity = activityQuery.data;
       }
     }
-    if (!activity || !activity.startsAt || !activityCompletionsQuery.data) return false;
+    if (!activity || !activity.startsAt || !activityCompletionsQuery.data)
+      return false;
     const activityDate = activity.startsAt.slice(0, 10);
-    
+
     // Extraer las completaciones correctamente
     const completionsData = activityCompletionsQuery.data;
     let completions: GetActivityCompletions200DataItem[] = [];
-    
+
     if (Array.isArray(completionsData)) {
       completions = completionsData;
     } else if (completionsData && "data" in completionsData) {
@@ -235,11 +233,11 @@ export default function NotificationsScreen() {
         completions = data;
       }
     }
-    
+
     // Buscar si existe una completación para esta actividad en este día
-    return completions.some((c: GetActivityCompletions200DataItem) => 
-      c.activityId === activity.id && 
-      c.completedDate === activityDate
+    return completions.some(
+      (c: GetActivityCompletions200DataItem) =>
+        c.activityId === activity.id && c.completedDate === activityDate
     );
   }, [activityQuery.data, activityCompletionsQuery.data]);
 
@@ -265,17 +263,28 @@ export default function NotificationsScreen() {
 
   const groupMembers = useMemo(() => {
     if (!groupInfo) {
-      return [] as Array<{ id: string; displayName: string; avatarUrl?: string | null }>;
+      return [] as Array<{
+        id: string;
+        displayName: string;
+        avatarUrl?: string | null;
+      }>;
     }
 
     const raw = [groupInfo.owner, ...groupInfo.members];
-    const byId = new Map<string, { id: string; displayName: string; avatarUrl?: string | null }>();
-    
+    const byId = new Map<
+      string,
+      { id: string; displayName: string; avatarUrl?: string | null }
+    >();
+
     for (const m of raw) {
       if (!m?.id) continue;
-      byId.set(m.id, { id: m.id, displayName: m.displayName, avatarUrl: m.avatarUrl ?? null });
+      byId.set(m.id, {
+        id: m.id,
+        displayName: m.displayName,
+        avatarUrl: m.avatarUrl ?? null,
+      });
     }
-    
+
     return Array.from(byId.values());
   }, [groupInfo]);
 
@@ -289,7 +298,7 @@ export default function NotificationsScreen() {
       query: {
         refetchOnWindowFocus: false,
       },
-    },
+    }
   );
 
   // Mark as read mutation
@@ -303,10 +312,10 @@ export default function NotificationsScreen() {
 
   const notifications = useMemo(() => {
     if (!notificationsQuery.data) return [];
-    const data = notificationsQuery.data as { data: GetNotifications200Item[] } | GetNotifications200Item[];
-    return Array.isArray(data)
-      ? data
-      : data.data || [];
+    const data = notificationsQuery.data as
+      | { data: GetNotifications200Item[] }
+      | GetNotifications200Item[];
+    return Array.isArray(data) ? data : data.data || [];
   }, [notificationsQuery.data]);
 
   const unreadCount = useMemo(() => {
@@ -331,7 +340,7 @@ export default function NotificationsScreen() {
         console.error("Error marking notification as read:", error);
       }
     },
-    [markAsReadMutation, queryClient],
+    [markAsReadMutation, queryClient]
   );
 
   const handleMarkAllAsRead = useCallback(async () => {
@@ -358,12 +367,12 @@ export default function NotificationsScreen() {
         console.error("Error deleting notification:", error);
       }
     },
-    [deleteNotificationMutation, queryClient],
+    [deleteNotificationMutation, queryClient]
   );
 
   const handleNotificationPress = useCallback(
     async (notification: GetNotifications200Item) => {
-      console.log('🔔 Notification pressed:', {
+      console.log("🔔 Notification pressed:", {
         id: notification.id,
         entity_type: notification.entity_type,
         entity_id: notification.entity_id,
@@ -373,17 +382,20 @@ export default function NotificationsScreen() {
 
       // Navigate or show detail based on notification type
       if (notification.entity_type === "memory" && notification.entity_id) {
-        console.log('📖 Opening memory detail:', notification.entity_id);
+        console.log("📖 Opening memory detail:", notification.entity_id);
         // Verificar si el recuerdo existe antes de abrirlo
         setSelectedMemoryId(notification.entity_id);
         setDetailDialogVisible(true);
-      } else if (notification.entity_type === "activity" && notification.entity_id) {
-        console.log('📅 Opening activity detail:', notification.entity_id);
+      } else if (
+        notification.entity_type === "activity" &&
+        notification.entity_id
+      ) {
+        console.log("📅 Opening activity detail:", notification.entity_id);
         // Verificar si la actividad existe antes de abrirla
         setSelectedActivityId(notification.entity_id);
         setActivityDetailDialogVisible(true);
       } else {
-        console.log('⚠️ No action for this notification type');
+        console.log("⚠️ No action for this notification type");
       }
 
       // Mark as read in background (optimistic update)
@@ -392,7 +404,7 @@ export default function NotificationsScreen() {
       }
       // Add more navigation logic as needed
     },
-    [handleMarkAsRead, router],
+    [handleMarkAsRead, router]
   );
 
   const handleLoadMore = useCallback(() => {
@@ -406,12 +418,12 @@ export default function NotificationsScreen() {
 
   const formatDate = (dateString: string) => {
     if (!dateString) return "";
-    
+
     const date = new Date(dateString);
-    
+
     // Validar que la fecha sea válida
     if (isNaN(date.getTime())) return "";
-    
+
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
@@ -452,8 +464,13 @@ export default function NotificationsScreen() {
   const renderNotification = useCallback(
     ({ item }: { item: GetNotifications200Item }) => {
       // Para menciones, detectar si el título o body contiene formato <@id>
-      const hasMention = (item.title && /<@([^>]+)>/.test(item.title)) || (item.body && /<@([^>]+)>/.test(item.body));
-      const isMention = item.event_type === "mention" || item.event_type === "activity_assigned" || hasMention;
+      const hasMention =
+        (item.title && /<@([^>]+)>/.test(item.title)) ||
+        (item.body && /<@([^>]+)>/.test(item.body));
+      const isMention =
+        item.event_type === "mention" ||
+        item.event_type === "activity_assigned" ||
+        hasMention;
 
       return (
         <Pressable
@@ -499,7 +516,9 @@ export default function NotificationsScreen() {
                 {item.title}
               </Text>
             )}
-            {item.body && typeof item.body === 'string' && item.body.trim() !== '' ? (
+            {item.body &&
+            typeof item.body === "string" &&
+            item.body.trim() !== "" ? (
               isMention ? (
                 <HighlightedMentionText
                   text={item.body}
@@ -533,7 +552,7 @@ export default function NotificationsScreen() {
         </Pressable>
       );
     },
-    [handleNotificationPress, handleDeleteNotification, groupMembers],
+    [handleNotificationPress, handleDeleteNotification, groupMembers]
   );
 
   const renderEmpty = () => (
@@ -552,7 +571,8 @@ export default function NotificationsScreen() {
   );
 
   const renderFooter = () => {
-    if (!notificationsQuery.isFetching) return null;
+    if (!notificationsQuery.isFetching || notificationsQuery.isRefetching)
+      return null;
     return (
       <View style={styles.footerLoader}>
         <ActivityIndicator size="small" color={COLORS.primary} />
@@ -576,14 +596,10 @@ export default function NotificationsScreen() {
           />
           <Text style={styles.headerTitle}>Notificaciones</Text>
         </View>
-        
+
         {notifications.length > 0 && (
           <View style={styles.headerActions}>
-            <Chip
-              icon="bell"
-              style={styles.chip}
-              textStyle={styles.chipText}
-            >
+            <Chip icon="bell" style={styles.chip} textStyle={styles.chipText}>
               {unreadCount} sin leer
             </Chip>
             <Button
@@ -656,27 +672,31 @@ export default function NotificationsScreen() {
       ) : (
         <RecuerdoDetailDialog
           visible={detailDialogVisible}
-          recuerdo={
-            (() => {
-              let memory: Memory | undefined;
-              if (memoryQuery.data && typeof memoryQuery.data === 'object') {
-                if ('data' in memoryQuery.data && isMemory(memoryQuery.data.data)) {
-                  memory = memoryQuery.data.data;
-                } else if (isMemory(memoryQuery.data)) {
-                  memory = memoryQuery.data;
-                }
+          recuerdo={(() => {
+            let memory: Memory | undefined;
+            if (memoryQuery.data && typeof memoryQuery.data === "object") {
+              if (
+                "data" in memoryQuery.data &&
+                isMemory(memoryQuery.data.data)
+              ) {
+                memory = memoryQuery.data.data;
+              } else if (isMemory(memoryQuery.data)) {
+                memory = memoryQuery.data;
               }
-              return memory && groupMembers
-                ? memoryToRecuerdo(
-                    memory,
-                    groupMembers.reduce((acc, m) => {
+            }
+            return memory && groupMembers
+              ? memoryToRecuerdo(
+                  memory,
+                  groupMembers.reduce(
+                    (acc, m) => {
                       acc[m.id] = m.displayName;
                       return acc;
-                    }, {} as Record<string, string>),
+                    },
+                    {} as Record<string, string>
                   )
-                : null;
-            })()
-          }
+                )
+              : null;
+          })()}
           onDismiss={() => {
             setDetailDialogVisible(false);
             setSelectedMemoryId(null);
@@ -710,30 +730,49 @@ export default function NotificationsScreen() {
             alignSelf: "center",
           }}
         >
-          {activityQuery.data && (() => {
-            let activity: Activity | undefined;
-            if (activityQuery.data && typeof activityQuery.data === 'object') {
-              if ('data' in activityQuery.data && isActivity(activityQuery.data.data)) {
-                activity = activityQuery.data.data;
-              } else if (isActivity(activityQuery.data)) {
-                activity = activityQuery.data;
+          {activityQuery.data &&
+            (() => {
+              let activity: Activity | undefined;
+              if (
+                activityQuery.data &&
+                typeof activityQuery.data === "object"
+              ) {
+                if (
+                  "data" in activityQuery.data &&
+                  isActivity(activityQuery.data.data)
+                ) {
+                  activity = activityQuery.data.data;
+                } else if (isActivity(activityQuery.data)) {
+                  activity = activityQuery.data;
+                }
               }
-            }
-            if (!activity) return null;
-            return [
-              <Dialog.Title key="title" style={{ fontWeight: "bold", color: COLORS.text }}>
-                {activity.title}
-              </Dialog.Title>,
-              <Dialog.Content key="content">
+              if (!activity) return null;
+              return [
+                <Dialog.Title
+                  key="title"
+                  style={{ fontWeight: "bold", color: COLORS.text }}
+                >
+                  {activity.title}
+                </Dialog.Title>,
+                <Dialog.Content key="content">
                   {/* Fecha y hora */}
-                  <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginBottom: 8,
+                    }}
+                  >
                     <MaterialCommunityIcons
                       name="clock-outline"
                       size={20}
                       color={COLORS.primary}
                       style={{ marginRight: 12 }}
                     />
-                    <Text variant="bodyMedium" style={{ flex: 1, color: COLORS.textSecondary }}>
+                    <Text
+                      variant="bodyMedium"
+                      style={{ flex: 1, color: COLORS.textSecondary }}
+                    >
                       {new Date(activity.startsAt).toLocaleDateString([], {
                         day: "numeric",
                         month: "short",
@@ -748,16 +787,27 @@ export default function NotificationsScreen() {
 
                   {/* Creador */}
                   {(() => {
-                    const creator = groupMembers.find((m) => m.id === activity.createdBy);
+                    const creator = groupMembers.find(
+                      (m) => m.id === activity.createdBy
+                    );
                     return creator ? (
-                      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          marginBottom: 8,
+                        }}
+                      >
                         <MaterialCommunityIcons
                           name="account"
                           size={20}
                           color={COLORS.primary}
                           style={{ marginRight: 12 }}
                         />
-                        <Text variant="bodyMedium" style={{ flex: 1, color: COLORS.textSecondary }}>
+                        <Text
+                          variant="bodyMedium"
+                          style={{ flex: 1, color: COLORS.textSecondary }}
+                        >
                           Por: {creator.displayName}
                         </Text>
                       </View>
@@ -765,7 +815,13 @@ export default function NotificationsScreen() {
                   })()}
 
                   {/* Estado */}
-                  <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginBottom: 8,
+                    }}
+                  >
                     <MaterialCommunityIcons
                       name={
                         isActivityCompleted
@@ -774,13 +830,14 @@ export default function NotificationsScreen() {
                       }
                       size={20}
                       color={
-                        isActivityCompleted
-                          ? COLORS.primary
-                          : COLORS.textLight
+                        isActivityCompleted ? COLORS.primary : COLORS.textLight
                       }
                       style={{ marginRight: 12 }}
                     />
-                    <Text variant="bodyMedium" style={{ flex: 1, color: COLORS.textSecondary }}>
+                    <Text
+                      variant="bodyMedium"
+                      style={{ flex: 1, color: COLORS.textSecondary }}
+                    >
                       {isActivityCompleted ? "Completada" : "Pendiente"}
                     </Text>
                   </View>
@@ -788,7 +845,12 @@ export default function NotificationsScreen() {
                   {/* Descripción */}
                   {activity.description && (
                     <View>
-                      <Divider style={{ marginVertical: 12, backgroundColor: COLORS.border }} />
+                      <Divider
+                        style={{
+                          marginVertical: 12,
+                          backgroundColor: COLORS.border,
+                        }}
+                      />
                       <Text
                         variant="labelMedium"
                         style={{
@@ -802,13 +864,20 @@ export default function NotificationsScreen() {
                       <HighlightedMentionText
                         text={activity.description || ""}
                         groupMembers={groupMembers}
-                        style={{ color: COLORS.text, lineHeight: 22, fontSize: 14 }}
+                        style={{
+                          color: COLORS.text,
+                          lineHeight: 22,
+                          fontSize: 14,
+                        }}
                       />
                     </View>
                   )}
                 </Dialog.Content>,
-              <Dialog.Actions key="actions" style={{ paddingHorizontal: 24, paddingBottom: 16 }}>
-                <Button
+                <Dialog.Actions
+                  key="actions"
+                  style={{ paddingHorizontal: 24, paddingBottom: 16 }}
+                >
+                  <Button
                     mode="text"
                     onPress={() => {
                       setActivityDetailDialogVisible(false);
@@ -825,7 +894,13 @@ export default function NotificationsScreen() {
                       setActivityDetailDialogVisible(false);
                       setSelectedActivityId(null);
                       // Navegar usando href con el parámetro del tab y el activityId
-                      router.replace({ pathname: "/(tabs)/home", params: { tab: "calendar", activityId: activityId || "" } });
+                      router.replace({
+                        pathname: "/(tabs)/home",
+                        params: {
+                          tab: "calendar",
+                          activityId: activityId || "",
+                        },
+                      });
                     }}
                     buttonColor={COLORS.primary}
                     style={{ borderRadius: 12 }}
@@ -833,9 +908,9 @@ export default function NotificationsScreen() {
                   >
                     Ir al Calendario
                   </Button>
-                </Dialog.Actions>
-            ];
-          })()}
+                </Dialog.Actions>,
+              ];
+            })()}
           {!activityQuery.data && (
             <Dialog.Content>
               <View style={{ alignItems: "center", paddingVertical: 20 }}>
@@ -861,12 +936,19 @@ export default function NotificationsScreen() {
             alignSelf: "center",
           }}
         >
-          <Dialog.Icon icon="alert-circle-outline" size={48} color={COLORS.primary} />
+          <Dialog.Icon
+            icon="alert-circle-outline"
+            size={48}
+            color={COLORS.primary}
+          />
           <Dialog.Title style={{ textAlign: "center", color: COLORS.text }}>
             Contenido no disponible
           </Dialog.Title>
           <Dialog.Content>
-            <Text variant="bodyMedium" style={{ textAlign: "center", color: COLORS.textSecondary }}>
+            <Text
+              variant="bodyMedium"
+              style={{ textAlign: "center", color: COLORS.textSecondary }}
+            >
               {notFoundMessage}
             </Text>
           </Dialog.Content>
@@ -1035,7 +1117,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.textSecondary,
     textAlign: "center",
-    lineHeight: 24,
+  },
+  sectionLink: {
+    fontSize: 14,
+    color: COLORS.primary,
   },
   footerLoader: {
     paddingVertical: 20,
