@@ -60,14 +60,17 @@ export default function RootLayout() {
             <PaperProvider theme={paperTheme}>
               <NavigationThemeProvider value={navTheme}>
                 <Stack>
-                  <Stack.Screen name="index" options={{ headerShown: false }} />
+                  <Stack.Screen
+                    name="index"
+                    options={{ headerShown: false, animation: "fade" }}
+                  />
                   <Stack.Screen
                     name="(auth)"
-                    options={{ headerShown: false }}
+                    options={{ headerShown: false, animation: "fade" }}
                   />
                   <Stack.Screen
                     name="(tabs)"
-                    options={{ headerShown: false }}
+                    options={{ headerShown: false, animation: "fade" }}
                   />
                   <Stack.Screen
                     name="familyGroup"
