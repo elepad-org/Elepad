@@ -33,7 +33,7 @@ export default function RootLayout() {
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         AUTH_TOKEN = session?.access_token ?? undefined;
-      },
+      }
     );
     return () => listener?.subscription?.unsubscribe?.();
   }, []);
@@ -61,11 +61,25 @@ export default function RootLayout() {
               <NavigationThemeProvider value={navTheme}>
                 <Stack>
                   <Stack.Screen name="index" options={{ headerShown: false }} />
-                  <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                  <Stack.Screen
+                    name="(auth)"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="(tabs)"
+                    options={{ headerShown: false }}
+                  />
                   <Stack.Screen
                     name="familyGroup"
                     options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="notifications"
+                    options={{
+                      headerShown: false,
+                      presentation: "card",
+                      animation: "slide_from_right",
+                    }}
                   />
                   <Stack.Screen name="+not-found" />
                 </Stack>
