@@ -623,8 +623,10 @@ export const useNetGame = ({
   }, []);
 
   const resetGame = useCallback(() => {
+    // Invalidar achievements para recargar los logros actuales del usuario
+    queryClient.invalidateQueries({ queryKey: ["/achievements/user/logic"] });
     initializeGame();
-  }, [initializeGame]);
+  }, [initializeGame, queryClient]);
 
   const solveGame = useCallback(() => {
     if (!solution || solution.length === 0) {

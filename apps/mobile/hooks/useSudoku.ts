@@ -522,8 +522,10 @@ export const useSudoku = (props: UseSudokuProps) => {
 
   const resetGame = useCallback(() => {
     hasInitialized.current = false;
+    // Invalidar achievements para recargar los logros actuales del usuario
+    queryClient.invalidateQueries({ queryKey: ["/achievements/user/attention"] });
     initializeGame();
-  }, [initializeGame]);
+  }, [initializeGame, queryClient]);
 
   return {
     board,

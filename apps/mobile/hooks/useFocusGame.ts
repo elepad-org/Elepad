@@ -277,8 +277,10 @@ export const useFocusGame = (props: UseFocusGameProps) => {
 
   const resetGame = useCallback(() => {
     hasInitialized.current = false;
+    // Invalidar achievements para recargar los logros actuales del usuario
+    queryClient.invalidateQueries({ queryKey: ["/achievements/user/reaction"] });
     initializeGame();
-  }, [initializeGame]);
+  }, [initializeGame, queryClient]);
 
   /**
    * Inicia el cronómetro manualmente (llamado en la primera interacción)
