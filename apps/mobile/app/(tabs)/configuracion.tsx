@@ -23,21 +23,25 @@ import { COLORS, STYLES } from "@/styles/base";
 export default function ConfiguracionScreen() {
   const router = useRouter();
 
-  const { userElepad, refreshUserElepad, signOut, userElepadLoading } = useAuth();
-  
+  const { userElepad, refreshUserElepad, signOut, userElepadLoading } =
+    useAuth();
+
   // Mostrar loading si está cargando o si no hay usuario aún
   const showLoading = userElepadLoading || !userElepad;
-  
+
   // Si está cargando, mostrar solo el spinner centrado
   if (showLoading) {
     return (
       <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
-        <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor={COLORS.background}
+        />
         <LoadingProfile message="Cargando perfil..." />
       </SafeAreaView>
     );
   }
-  
+
   const displayName = userElepad?.displayName?.trim() || "Usuario";
   const email = userElepad?.email || "-";
   const avatarUrl = userElepad?.avatarUrl || "";
@@ -48,7 +52,7 @@ export default function ConfiguracionScreen() {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarType, setSnackbarType] = useState<"success" | "error">(
-    "success",
+    "success"
   );
   const [photoOpen, setPhotoOpen] = useState(false);
   const [googleCalendarEnabled, setGoogleCalendarEnabled] = useState(false);
@@ -73,7 +77,7 @@ export default function ConfiguracionScreen() {
       // For now, just toggle the state
       setGoogleCalendarEnabled(newValue);
       setSnackbarMessage(
-        `Google Calendar ${newValue ? "habilitado" : "deshabilitado"}`,
+        `Google Calendar ${newValue ? "habilitado" : "deshabilitado"}`
       );
       setSnackbarType("success");
       setSnackbarVisible(true);
@@ -226,10 +230,7 @@ export default function ConfiguracionScreen() {
               router.replace("/");
             }}
             contentStyle={STYLES.buttonContent}
-            style={[
-              STYLES.buttonPrimary,
-              { backgroundColor: COLORS.secondary },
-            ]}
+            style={STYLES.buttonPrimary}
           >
             Cerrar sesión
           </Button>
