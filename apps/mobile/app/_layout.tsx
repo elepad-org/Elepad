@@ -74,7 +74,53 @@ export default function RootLayout() {
                   />
                   <Stack.Screen
                     name="familyGroup"
-                    options={{ headerShown: false }}
+                    options={{
+                      headerShown: false,
+                      animation: "slide_from_right",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="history"
+                    options={{
+                      headerShown: false,
+                      animation: "slide_from_right",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="focus-game"
+                    options={{
+                      headerShown: false,
+                      animation: "slide_from_right",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="memory-game"
+                    options={{
+                      headerShown: false,
+                      animation: "slide_from_right",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="net-game"
+                    options={{
+                      headerShown: false,
+                      animation: "slide_from_right",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="sudoku-game"
+                    options={{
+                      headerShown: false,
+                      animation: "slide_from_right",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="game-detail/[gameId]"
+                    options={{
+                      headerShown: false,
+                      animation: "slide_from_right",
+                      presentation: "card",
+                    }}
                   />
                   <Stack.Screen
                     name="notifications"

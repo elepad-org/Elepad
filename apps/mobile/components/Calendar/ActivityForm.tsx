@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-} from "react-native";
+import { View, StyleSheet, ScrollView, Animated } from "react-native";
+import { useRef } from "react";
 import { TextInput, Button, Text, Menu, Dialog } from "react-native-paper";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import type { Activity } from "@elepad/api-client";
@@ -51,16 +48,16 @@ export default function ActivityForm({
   const [title, setTitle] = useState(initial?.title || "");
   const [description, setDescription] = useState(initial?.description || "");
   const [assignedTo, setAssignedTo] = useState<string | null>(
-    initial?.assignedTo || null,
+    initial?.assignedTo || null
   );
   const [startsAtDate, setStartsAtDate] = useState<Date>(
-    initial?.startsAt ? new Date(initial.startsAt) : new Date(),
+    initial?.startsAt ? new Date(initial.startsAt) : new Date()
   );
   const [endsAtDate, setEndsAtDate] = useState<Date | undefined>(
-    initial?.endsAt ? new Date(initial.endsAt) : undefined,
+    initial?.endsAt ? new Date(initial.endsAt) : undefined
   );
   const [frequencyId, setFrequencyId] = useState<string | undefined>(
-    initial?.frequencyId || undefined,
+    initial?.frequencyId || undefined
   );
   const [saving, setSaving] = useState(false);
   const [showStartPicker, setShowStartPicker] = useState(false);
@@ -71,7 +68,6 @@ export default function ActivityForm({
 
   // Filtrar solo adultos mayores (elders) para el selector
   const elders = familyMembers.filter((member) => member.elder === true);
-
 
   // Fetch available frequencies
   const frequenciesQuery = useGetFrequencies();
@@ -86,7 +82,7 @@ export default function ActivityForm({
   })();
 
   const selectedFrequency = frequencies.find(
-    (f: Frequency) => f.id === frequencyId,
+    (f: Frequency) => f.id === frequencyId
   );
   const frequencyLabel = selectedFrequency?.label || "Una vez";
 
@@ -95,11 +91,11 @@ export default function ActivityForm({
       setTitle(initial?.title || "");
       setDescription(initial?.description || "");
       setStartsAtDate(
-        initial?.startsAt ? new Date(initial.startsAt) : new Date(),
+        initial?.startsAt ? new Date(initial.startsAt) : new Date()
       );
       setEndsAtDate(initial?.endsAt ? new Date(initial.endsAt) : undefined);
       setFrequencyId(initial?.frequencyId || undefined);
-      
+
       // Si es un elder, assignedTo siempre es él mismo
       // Si es familiar y está editando, mantener el assignedTo existente
       // Si es familiar y está creando, requiere seleccionar destinatario
@@ -108,10 +104,25 @@ export default function ActivityForm({
       } else {
         setAssignedTo(initial?.assignedTo || null);
       }
-      
+
       setError(null);
     }
   }, [visible, initial, isElder, currentUserId]);
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (visible) {
+      fadeAnim.setValue(0);
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      fadeAnim.setValue(0);
+    }
+  }, [visible]);
 
   const handleSave = async () => {
     setError(null);
@@ -125,7 +136,11 @@ export default function ActivityForm({
 
     // Validar que se haya seleccionado un destinatario
     if (!assignedTo) {
-      setError(isElder ? "Error: No se pudo determinar el destinatario." : "Debes seleccionar un destinatario para la actividad.");
+      setError(
+        isElder
+          ? "Error: No se pudo determinar el destinatario."
+          : "Debes seleccionar un destinatario para la actividad."
+      );
       return;
     }
 
@@ -135,8 +150,8 @@ export default function ActivityForm({
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(
           () => reject(new Error("Timeout: La petición tardó demasiado")),
-          10000,
-        ),
+          10000
+        )
       );
 
       await Promise.race([
@@ -180,206 +195,219 @@ export default function ActivityForm({
 
   return (
     <>
-    <Dialog
-      visible={visible}
-      onDismiss={onClose}
-      style={{
-        backgroundColor: COLORS.background,
-        width: "92%",
-        alignSelf: "center",
-        borderRadius: 20,
-        maxHeight: "100%",
-      }}
-    >
-      <Dialog.Content style={{ paddingBottom: 15 }}>
-        <View style={styles.inputWrapper}>
-          <TextInput
-            label="Título"
-            value={title}
-            onChangeText={setTitle}
-            placeholder={initial ? "Agregar evento" : "Nuevo evento"}
-            mode="flat"
-            outlineColor="transparent"
-            activeOutlineColor="transparent"
-            style={{ backgroundColor: "transparent" }}
-            autoFocus={!initial}
-          />
-        </View>
-
-        {/* Selector de destinatario - solo visible para familiares (no elders) */}
-        {!isElder && elders.length > 0 && (
-          <ElderSelector
-            elders={elders}
-            selectedElderId={assignedTo}
-            onSelectElder={setAssignedTo}
-            label="Para (destinatario)"
-          />
-        )}
-        
-        <View style={styles.inputWrapper}>
-          <MentionInput
-            label="Descripción"
-            value={description}
-            onChangeText={setDescription}
-            placeholder="Descripción (opcional)"
-            multiline
-            numberOfLines={3}
-            familyMembers={familyMembers}
-            currentUserId={currentUserId}
-            mode="flat"
-            outlineColor="transparent"
-            activeOutlineColor="transparent"
-            style={{ backgroundColor: "transparent" }}
-          />
-        </View>
-
-        <View style={styles.dateRow}>
-          <View style={styles.dateColumn}>
-            <Button
-              mode="outlined"
-              onPress={() => setShowStartPicker(true)}
-              style={styles.pickerButton}
-              icon="calendar"
-              contentStyle={{ paddingVertical: 4 }}
-            >
-              Inicio 
-            </Button>
-            <Text style={styles.dateText}>{formatDateTime(startsAtDate)}</Text>
-          </View>
-
-          <View style={styles.dateColumn}>
-            <Button
-              mode="outlined"
-              onPress={() => setShowEndPicker(true)}
-              style={styles.pickerButton}
-              icon="calendar"
-              contentStyle={{ paddingVertical: 4 }}
-            >
-              Fin
-            </Button>
-            <Text style={styles.dateText}>
-              {endsAtDate ? formatDateTime(endsAtDate) : "No definido"}
-            </Text>
-          </View>
-        </View>
-
-       <Menu
-          visible={showFrequencyMenu}
-          onDismiss={() => setShowFrequencyMenu((prev) => !prev)}
-          contentStyle={{
-            backgroundColor: COLORS.background,
-            borderRadius: 12,
-            maxHeight: 300,
-          }}
-          anchor={
-           <Button
-  mode="outlined"
-  onPress={() => setShowFrequencyModal(true)}
-  icon="repeat"
->
-  Frecuencia: {frequencyLabel}
-</Button>
-          }
-        >
-          {frequencies.map((freq: Frequency) => (
-            <Menu.Item
-              key={freq.id}
-              onPress={() => {
-                setFrequencyId(freq.id);
-                setShowFrequencyMenu((prev) => !prev)
-              }}
-              title={freq.label}
-            />
-          ))}
-        </Menu>
-
-
-        <DateTimePickerModal
-          isVisible={showStartPicker}
-          date={startsAtDate}
-          mode="datetime"
-          onConfirm={(date) => {
-            setShowStartPicker(false);
-            setStartsAtDate(date);
-          }}
-          onCancel={() => setShowStartPicker(false)}
-        />
-        <DateTimePickerModal
-          isVisible={showEndPicker}
-          date={endsAtDate ?? new Date()}
-          mode="datetime"
-          onConfirm={(date) => {
-            setShowEndPicker(false);
-            setEndsAtDate(date);
-          }}
-          onCancel={() => setShowEndPicker(false)}
-        />
-
-        {error && <Text style={styles.error}>{error}</Text>}
-      </Dialog.Content>
-      <Dialog.Actions
+      <Dialog
+        visible={visible}
+        onDismiss={onClose}
         style={{
-          paddingBottom: 30,
-          paddingHorizontal: 24,
-          paddingTop: 10,
-          justifyContent: 'space-between',
+          backgroundColor: COLORS.background,
+          width: "92%",
+          alignSelf: "center",
+          borderRadius: 20,
+          maxHeight: "100%",
         }}
       >
-        <View style={{ width: 120 }}>
-          <CancelButton onPress={onClose} />
-        </View>
-        <View style={{ width: 120 }}>
-          <SaveButton 
-            onPress={handleSave}
-            disabled={saving || !startsAtDate}
-            loading={saving}
-          />
-        </View>
-      </Dialog.Actions>
-    </Dialog>
-    <Dialog
-      visible={showFrequencyModal}
-      onDismiss={() => setShowFrequencyModal(false)}
-      style={{
-        backgroundColor: COLORS.background,
-        width: "92%",
-        alignSelf: "center",
-        borderRadius: 20,
-      }}
-    >
-      <Dialog.Title style={{ 
-        textAlign: "center", 
-        color: COLORS.primary,
-        fontWeight: "bold",
-        fontSize: 20,
-      }}>
-        Seleccionar frecuencia
-      </Dialog.Title>
-      <Dialog.Content>
-        <ScrollView style={{ maxHeight: 310 }}>
-          {frequencies.map((freq) => (
-            <Button
-              key={freq.id}
-              mode="outlined"
-              onPress={() => {
-                setFrequencyId(freq.id);
-                setShowFrequencyModal(false);
-              }}
-              style={{
-                marginBottom: 8,
+        <Animated.View style={{ opacity: fadeAnim }}>
+          <Dialog.Content style={{ paddingBottom: 15 }}>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                label="Título"
+                value={title}
+                onChangeText={setTitle}
+                placeholder={initial ? "Agregar evento" : "Nuevo evento"}
+                mode="flat"
+                outlineColor="transparent"
+                activeOutlineColor="transparent"
+                style={{ backgroundColor: "transparent" }}
+                autoFocus={!initial}
+              />
+            </View>
+
+            {/* Selector de destinatario - solo visible para familiares (no elders) */}
+            {!isElder && elders.length > 0 && (
+              <ElderSelector
+                elders={elders}
+                selectedElderId={assignedTo}
+                onSelectElder={setAssignedTo}
+                label="Para (destinatario)"
+              />
+            )}
+
+            <View style={styles.inputWrapper}>
+              <MentionInput
+                label="Descripción"
+                value={description}
+                onChangeText={setDescription}
+                placeholder="Descripción (opcional)"
+                multiline
+                numberOfLines={3}
+                familyMembers={familyMembers}
+                currentUserId={currentUserId}
+                mode="flat"
+                outlineColor="transparent"
+                activeOutlineColor="transparent"
+                style={{ backgroundColor: "transparent" }}
+              />
+            </View>
+
+            <View style={styles.dateRow}>
+              <View style={styles.dateColumn}>
+                <Button
+                  mode="outlined"
+                  onPress={() => setShowStartPicker(true)}
+                  style={styles.pickerButton}
+                  icon="calendar"
+                  contentStyle={{ paddingVertical: 4 }}
+                >
+                  Inicio
+                </Button>
+                <Text style={styles.dateText}>
+                  {formatDateTime(startsAtDate)}
+                </Text>
+              </View>
+
+              <View style={styles.dateColumn}>
+                <Button
+                  mode="outlined"
+                  onPress={() => setShowEndPicker(true)}
+                  style={styles.pickerButton}
+                  icon="calendar"
+                  contentStyle={{ paddingVertical: 4 }}
+                >
+                  Fin
+                </Button>
+                <Text style={styles.dateText}>
+                  {endsAtDate ? formatDateTime(endsAtDate) : "No definido"}
+                </Text>
+              </View>
+            </View>
+
+            <Menu
+              visible={showFrequencyMenu}
+              onDismiss={() => setShowFrequencyMenu((prev) => !prev)}
+              contentStyle={{
+                backgroundColor: COLORS.background,
                 borderRadius: 12,
-                borderColor: frequencyId === freq.id ? COLORS.primary : COLORS.border,
-                backgroundColor: frequencyId === freq.id ? `${COLORS.primary}15` : COLORS.backgroundSecondary,
+                maxHeight: 300,
               }}
-              textColor={frequencyId === freq.id ? COLORS.primary : COLORS.textSecondary}
+              anchor={
+                <Button
+                  mode="outlined"
+                  onPress={() => setShowFrequencyModal(true)}
+                  icon="repeat"
+                >
+                  Frecuencia: {frequencyLabel}
+                </Button>
+              }
             >
-              {freq.label}
-            </Button>
-          ))}
-        </ScrollView>
-      </Dialog.Content>
-    </Dialog>
-  </>
+              {frequencies.map((freq: Frequency) => (
+                <Menu.Item
+                  key={freq.id}
+                  onPress={() => {
+                    setFrequencyId(freq.id);
+                    setShowFrequencyMenu((prev) => !prev);
+                  }}
+                  title={freq.label}
+                />
+              ))}
+            </Menu>
+
+            <DateTimePickerModal
+              isVisible={showStartPicker}
+              date={startsAtDate}
+              mode="datetime"
+              onConfirm={(date) => {
+                setShowStartPicker(false);
+                setStartsAtDate(date);
+              }}
+              onCancel={() => setShowStartPicker(false)}
+            />
+            <DateTimePickerModal
+              isVisible={showEndPicker}
+              date={endsAtDate ?? new Date()}
+              mode="datetime"
+              onConfirm={(date) => {
+                setShowEndPicker(false);
+                setEndsAtDate(date);
+              }}
+              onCancel={() => setShowEndPicker(false)}
+            />
+
+            {error && <Text style={styles.error}>{error}</Text>}
+          </Dialog.Content>
+          <Dialog.Actions
+            style={{
+              paddingBottom: 30,
+              paddingHorizontal: 24,
+              paddingTop: 10,
+              justifyContent: "space-between",
+            }}
+          >
+            <View style={{ width: 120 }}>
+              <CancelButton onPress={onClose} />
+            </View>
+            <View style={{ width: 120 }}>
+              <SaveButton
+                onPress={handleSave}
+                disabled={saving || !startsAtDate}
+                loading={saving}
+              />
+            </View>
+          </Dialog.Actions>
+        </Animated.View>
+      </Dialog>
+      <Dialog
+        visible={showFrequencyModal}
+        onDismiss={() => setShowFrequencyModal(false)}
+        style={{
+          backgroundColor: COLORS.background,
+          width: "92%",
+          alignSelf: "center",
+          borderRadius: 20,
+        }}
+      >
+        <Dialog.Title
+          style={{
+            textAlign: "center",
+            color: COLORS.primary,
+            fontWeight: "bold",
+            fontSize: 20,
+          }}
+        >
+          Seleccionar frecuencia
+        </Dialog.Title>
+        <Dialog.Content>
+          <ScrollView style={{ maxHeight: 310 }}>
+            {frequencies.map((freq) => (
+              <Button
+                key={freq.id}
+                mode="outlined"
+                onPress={() => {
+                  setFrequencyId(freq.id);
+                  setShowFrequencyModal(false);
+                }}
+                style={{
+                  marginBottom: 8,
+                  borderRadius: 12,
+                  borderColor:
+                    frequencyId === freq.id ? COLORS.primary : COLORS.border,
+                  backgroundColor:
+                    frequencyId === freq.id
+                      ? `${COLORS.primary}15`
+                      : COLORS.backgroundSecondary,
+                }}
+                textColor={
+                  frequencyId === freq.id
+                    ? COLORS.primary
+                    : COLORS.textSecondary
+                }
+              >
+                {freq.label}
+              </Button>
+            ))}
+          </ScrollView>
+        </Dialog.Content>
+      </Dialog>
+    </>
   );
 }
 

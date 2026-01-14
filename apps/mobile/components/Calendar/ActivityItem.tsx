@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { View, StyleSheet } from "react-native";
+import { useState, useEffect, useRef } from "react";
+import { View, StyleSheet, Animated } from "react-native";
 import {
   Text,
   Card,
@@ -23,7 +23,11 @@ interface ActivityItemProps {
   isOwnerOfGroup: boolean;
   groupInfo?: GetFamilyGroupIdGroupMembers200;
   completed?: boolean; // Nueva prop para completado por día
-  familyMembers?: Array<{ id: string; displayName: string; avatarUrl?: string | null }>;
+  familyMembers?: Array<{
+    id: string;
+    displayName: string;
+    avatarUrl?: string | null;
+  }>;
   shouldOpen?: boolean;
   onOpened?: () => void;
 }
@@ -57,12 +61,35 @@ export default function ActivityItem({
   // Usar completed de la prop si está disponible, sino usar item.completed
   const isCompleted = completed !== undefined ? completed : item.completed;
 
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (showModal) {
+      fadeAnim.setValue(0);
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      fadeAnim.setValue(0);
+    }
+  }, [showModal]);
+
   // Create a combined list of all group members (owner + members)
   const allGroupMembers = (() => {
     if (!groupInfo) return familyMembers;
     return [
-      { id: groupInfo.owner.id, displayName: groupInfo.owner.displayName, avatarUrl: groupInfo.owner.avatarUrl },
-      ...groupInfo.members.map(m => ({ id: m.id, displayName: m.displayName, avatarUrl: m.avatarUrl }))
+      {
+        id: groupInfo.owner.id,
+        displayName: groupInfo.owner.displayName,
+        avatarUrl: groupInfo.owner.avatarUrl,
+      },
+      ...groupInfo.members.map((m) => ({
+        id: m.id,
+        displayName: m.displayName,
+        avatarUrl: m.avatarUrl,
+      })),
     ];
   })();
 
@@ -129,12 +156,7 @@ export default function ActivityItem({
   const hasDescription = item.description && item.description.trim().length > 0;
 
   return (
-    <Card 
-      style={[
-        styles.card, 
-        isCompleted && styles.completedCard
-      ]}
-    >
+    <Card style={[styles.card, isCompleted && styles.completedCard]}>
       <List.Item
         style={styles.listItem}
         titleStyle={isCompleted && { textDecorationLine: "line-through" }}
@@ -201,106 +223,113 @@ export default function ActivityItem({
             alignSelf: "center",
           }}
         >
-          <Dialog.Title style={{ fontWeight: "bold", color: COLORS.text }}>
-            {item.title}
-          </Dialog.Title>
-          <Dialog.Content>
-            {/* Fecha y hora */}
-            <View style={styles.modalRow}>
-              <IconButton
-                icon="clock-outline"
-                size={20}
-                iconColor={COLORS.primary}
-                style={{ margin: 0 }}
-              />
-              <Text variant="bodyMedium" style={styles.modalText}>
-                {timeDescription}
-              </Text>
-            </View>
-
-            {/* Creador y Destinatario */}
-            {/* Si creador y destinatario son diferentes, mostrar ambos */}
-            {item.createdBy !== item.assignedTo && activityOwner && (
+          <Animated.View style={{ opacity: fadeAnim }}>
+            <Dialog.Title style={{ fontWeight: "bold", color: COLORS.text }}>
+              {item.title}
+            </Dialog.Title>
+            <Dialog.Content>
+              {/* Fecha y hora */}
               <View style={styles.modalRow}>
                 <IconButton
-                  icon="account-edit"
+                  icon="clock-outline"
                   size={20}
                   iconColor={COLORS.primary}
                   style={{ margin: 0 }}
                 />
                 <Text variant="bodyMedium" style={styles.modalText}>
-                  Creado por: {activityOwner}
+                  {timeDescription}
                 </Text>
               </View>
-            )}
 
-            {/* Siempre mostrar el destinatario si existe */}
-            {activityAssignedTo && (
+              {/* Creador y Destinatario */}
+              {/* Si creador y destinatario son diferentes, mostrar ambos */}
+              {item.createdBy !== item.assignedTo && activityOwner && (
+                <View style={styles.modalRow}>
+                  <IconButton
+                    icon="account-edit"
+                    size={20}
+                    iconColor={COLORS.primary}
+                    style={{ margin: 0 }}
+                  />
+                  <Text variant="bodyMedium" style={styles.modalText}>
+                    Creado por: {activityOwner}
+                  </Text>
+                </View>
+              )}
+
+              {/* Siempre mostrar el destinatario si existe */}
+              {activityAssignedTo && (
+                <View style={styles.modalRow}>
+                  <IconButton
+                    icon="account-arrow-right"
+                    size={20}
+                    iconColor={COLORS.secondary}
+                    style={{ margin: 0 }}
+                  />
+                  <Text variant="bodyMedium" style={styles.modalText}>
+                    Para: {activityAssignedTo}
+                  </Text>
+                </View>
+              )}
+
+              {/* Estado */}
               <View style={styles.modalRow}>
                 <IconButton
-                  icon="account-arrow-right"
+                  icon={
+                    isCompleted
+                      ? "checkbox-marked-circle"
+                      : "checkbox-blank-circle-outline"
+                  }
                   size={20}
-                  iconColor={COLORS.secondary}
+                  iconColor={isCompleted ? COLORS.primary : COLORS.textLight}
                   style={{ margin: 0 }}
                 />
                 <Text variant="bodyMedium" style={styles.modalText}>
-                  Para: {activityAssignedTo}
+                  {isCompleted ? "Completada" : "Pendiente"}
                 </Text>
               </View>
-            )}
 
-            {/* Estado */}
-            <View style={styles.modalRow}>
-              <IconButton
-                icon={
-                  isCompleted
-                    ? "checkbox-marked-circle"
-                    : "checkbox-blank-circle-outline"
-                }
-                size={20}
-                iconColor={isCompleted ? COLORS.primary : COLORS.textLight}
-                style={{ margin: 0 }}
-              />
-              <Text variant="bodyMedium" style={styles.modalText}>
-                {isCompleted ? "Completada" : "Pendiente"}
-              </Text>
-            </View>
-
-            {/* Descripción */}
-            {hasDescription && (
-              <View>
-                <Divider
-                  style={{ marginVertical: 12, backgroundColor: COLORS.border }}
-                />
-                <Text
-                  variant="labelMedium"
-                  style={{
-                    color: COLORS.primary,
-                    marginBottom: 8,
-                    fontWeight: "bold",
-                  }}
-                >
-                  Descripción
-                </Text>
-                <HighlightedMentionText
-                  text={item.description || ""}
-                  familyMembers={allGroupMembers}
-                  style={{ color: COLORS.text, lineHeight: 22, fontSize: 14 }}
-                />
-              </View>
-            )}
-          </Dialog.Content>
-          <Dialog.Actions style={{ paddingHorizontal: 24, paddingBottom: 16 }}>
-            <Button
-              mode="contained"
-              onPress={() => setShowModal(false)}
-              buttonColor={COLORS.primary}
-              style={{ borderRadius: 12, flex: 1 }}
-              contentStyle={{ paddingVertical: 8 }}
+              {/* Descripción */}
+              {hasDescription && (
+                <View>
+                  <Divider
+                    style={{
+                      marginVertical: 12,
+                      backgroundColor: COLORS.border,
+                    }}
+                  />
+                  <Text
+                    variant="labelMedium"
+                    style={{
+                      color: COLORS.primary,
+                      marginBottom: 8,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Descripción
+                  </Text>
+                  <HighlightedMentionText
+                    text={item.description || ""}
+                    familyMembers={allGroupMembers}
+                    style={{ color: COLORS.text, lineHeight: 22, fontSize: 14 }}
+                  />
+                </View>
+              )}
+            </Dialog.Content>
+            <Dialog.Actions
+              style={{ paddingHorizontal: 24, paddingBottom: 16 }}
             >
-              Cerrar
-            </Button>
-          </Dialog.Actions>
+              <Button
+                mode="contained"
+                onPress={() => setShowModal(false)}
+                buttonColor={COLORS.primary}
+                style={{ borderRadius: 12, flex: 1 }}
+                contentStyle={{ paddingVertical: 8 }}
+              >
+                Cerrar
+              </Button>
+            </Dialog.Actions>
+          </Animated.View>
         </Dialog>
       </Portal>
     </Card>

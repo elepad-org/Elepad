@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { View, Image, Dimensions } from "react-native";
+import { useState, useEffect, useRef } from "react";
+import { View, Image, Dimensions, Animated } from "react-native";
 import {
   Dialog,
   Portal,
@@ -40,7 +40,11 @@ interface RecuerdoDetailDialogProps {
   ) => Promise<void>;
   onDeleteRecuerdo: (id: string) => Promise<void>;
   isMutating?: boolean;
-  familyMembers?: Array<{ id: string; displayName: string; avatarUrl?: string | null }>;
+  familyMembers?: Array<{
+    id: string;
+    displayName: string;
+    avatarUrl?: string | null;
+  }>;
   currentUserId?: string;
 }
 
@@ -135,6 +139,21 @@ export default function RecuerdoDetailDialog({
       }
     };
   }, [shouldUseAudio, player]);
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (visible) {
+      fadeAnim.setValue(0);
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      fadeAnim.setValue(0);
+    }
+  }, [visible]);
 
   if (!recuerdo) return null;
 
@@ -384,7 +403,7 @@ export default function RecuerdoDetailDialog({
             shadowRadius: 0,
           }}
         >
-          <View
+          <Animated.View
             style={{
               backgroundColor: COLORS.white,
               borderRadius: 10,
@@ -395,6 +414,7 @@ export default function RecuerdoDetailDialog({
               shadowOffset: { width: 0, height: 0 },
               shadowOpacity: 0,
               shadowRadius: 0,
+              opacity: fadeAnim,
             }}
           >
             {/* Contenido principal según el tipo */}
@@ -518,7 +538,7 @@ export default function RecuerdoDetailDialog({
                 <InfoBlock />
               </View>
             )}
-          </View>
+          </Animated.View>
         </Dialog>
 
         <Dialog

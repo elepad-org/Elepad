@@ -22,7 +22,13 @@ function isMemory(obj: unknown): obj is Memory {
     "title" in obj
   );
 }
-import React, { useState, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+  useEffect,
+} from "react";
 import {
   View,
   FlatList,
@@ -30,6 +36,7 @@ import {
   StatusBar,
   RefreshControl,
   Pressable,
+  Animated,
 } from "react-native";
 import {
   Text,
@@ -133,6 +140,43 @@ export default function NotificationsScreen() {
     useState(false);
   const [notFoundDialogVisible, setNotFoundDialogVisible] = useState(false);
   const [notFoundMessage, setNotFoundMessage] = useState("");
+
+  const activityFadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (activityDetailDialogVisible) {
+      activityFadeAnim.setValue(0);
+      Animated.timing(activityFadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      activityFadeAnim.setValue(0);
+    }
+  }, [activityDetailDialogVisible]);
+
+  const notFoundFadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (notFoundDialogVisible) {
+      // Reset values immediately
+      notFoundFadeAnim.setValue(0);
+
+      // Add a small delay to ensure Dialog is rendered before animating
+      const timer = setTimeout(() => {
+        Animated.timing(notFoundFadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }).start();
+      }, 100);
+
+      return () => clearTimeout(timer);
+    } else {
+      notFoundFadeAnim.setValue(0);
+    }
+  }, [notFoundDialogVisible]);
 
   // Fetch family members for displaying names in mentions
   const membersQuery = useGetFamilyGroupIdGroupMembers(
@@ -643,48 +687,39 @@ export default function NotificationsScreen() {
         />
       )}
 
-      {/* Dialog para mostrar detalle del recuerdo */}
-      {memoryQuery.isLoading && detailDialogVisible ? (
-        <Portal>
-          <Dialog
-            visible={detailDialogVisible}
-            onDismiss={() => {
-              setDetailDialogVisible(false);
-              setSelectedMemoryId(null);
-            }}
-            style={{
-              backgroundColor: COLORS.background,
-              borderRadius: 16,
-              width: "90%",
-              alignSelf: "center",
-            }}
-          >
-            <Dialog.Content>
-              <View style={{ alignItems: "center", paddingVertical: 20 }}>
-                <ActivityIndicator size="large" color={COLORS.primary} />
-                <Text style={{ marginTop: 16, color: COLORS.textSecondary }}>
-                  Cargando recuerdo...
-                </Text>
-              </View>
-            </Dialog.Content>
-          </Dialog>
-        </Portal>
-      ) : (
-        <RecuerdoDetailDialog
-          visible={detailDialogVisible}
-          recuerdo={(() => {
-            let memory: Memory | undefined;
-            if (memoryQuery.data && typeof memoryQuery.data === "object") {
-              if (
-                "data" in memoryQuery.data &&
-                isMemory(memoryQuery.data.data)
-              ) {
-                memory = memoryQuery.data.data;
-              } else if (isMemory(memoryQuery.data)) {
-                memory = memoryQuery.data;
-              }
+      {/* Loading Overlay - Global spinner instead of modal */}
+      {(memoryQuery.isLoading && selectedMemoryId) ||
+      (activityQuery.isLoading && selectedActivityId) ? (
+        <View
+          style={[
+            StyleSheet.absoluteFill,
+            {
+              backgroundColor: "rgba(0,0,0,0.3)",
+              zIndex: 9999,
+              alignItems: "center",
+              justifyContent: "center",
+            },
+          ]}
+        >
+          <ActivityIndicator size="large" color={COLORS.primary} />
+        </View>
+      ) : null}
+
+      {/* Dialog para mostrar detalle del recuerdo - Solo si data está lista */}
+      {!memoryQuery.isLoading &&
+        (detailDialogVisible || selectedMemoryId) &&
+        (() => {
+          // Calcular recuerdo
+          let memory: Memory | undefined;
+          if (memoryQuery.data && typeof memoryQuery.data === "object") {
+            if ("data" in memoryQuery.data && isMemory(memoryQuery.data.data)) {
+              memory = memoryQuery.data.data;
+            } else if (isMemory(memoryQuery.data)) {
+              memory = memoryQuery.data;
             }
-            return memory && groupMembers
+          }
+          const recuerdo =
+            memory && groupMembers
               ? memoryToRecuerdo(
                   memory,
                   groupMembers.reduce(
@@ -696,24 +731,33 @@ export default function NotificationsScreen() {
                   )
                 )
               : null;
-          })()}
-          onDismiss={() => {
-            setDetailDialogVisible(false);
-            setSelectedMemoryId(null);
-          }}
-          onUpdateRecuerdo={async () => {
-            // Actualizar no está disponible desde notificaciones
-            // El usuario debe ir a recuerdos para editar
-          }}
-          onDeleteRecuerdo={async () => {
-            // Eliminar no está disponible desde notificaciones
-            // El usuario debe ir a recuerdos para eliminar
-          }}
-          isMutating={false}
-          familyMembers={groupMembers}
-          currentUserId={userElepad?.id}
-        />
-      )}
+
+          if (!recuerdo) return null;
+
+          return (
+            <RecuerdoDetailDialog
+              visible={detailDialogVisible}
+              recuerdo={recuerdo}
+              onDismiss={() => {
+                setDetailDialogVisible(false);
+                setTimeout(() => {
+                  setSelectedMemoryId(null);
+                }, 300);
+              }}
+              onUpdateRecuerdo={async () => {
+                // Actualizar no está disponible desde notificaciones
+                // El usuario debe ir a recuerdos para editar
+              }}
+              onDeleteRecuerdo={async () => {
+                // Eliminar no está disponible desde notificaciones
+                // El usuario debe ir a recuerdos para eliminar
+              }}
+              isMutating={false}
+              familyMembers={groupMembers}
+              currentUserId={userElepad?.id}
+            />
+          );
+        })()}
 
       {/* Dialog para mostrar detalle de la actividad */}
       <Portal>
@@ -724,203 +768,215 @@ export default function NotificationsScreen() {
             setSelectedActivityId(null);
           }}
           style={{
-            backgroundColor: COLORS.background,
-            borderRadius: 16,
+            backgroundColor: "transparent",
             width: "90%",
             alignSelf: "center",
+            elevation: 0,
+            shadowColor: "transparent",
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 0,
+            shadowRadius: 0,
           }}
         >
-          {activityQuery.data &&
-            (() => {
-              let activity: Activity | undefined;
-              if (
-                activityQuery.data &&
-                typeof activityQuery.data === "object"
-              ) {
-                if (
-                  "data" in activityQuery.data &&
-                  isActivity(activityQuery.data.data)
-                ) {
-                  activity = activityQuery.data.data;
-                } else if (isActivity(activityQuery.data)) {
-                  activity = activityQuery.data;
-                }
-              }
-              if (!activity) return null;
-              return [
-                <Dialog.Title
-                  key="title"
-                  style={{ fontWeight: "bold", color: COLORS.text }}
-                >
-                  {activity.title}
-                </Dialog.Title>,
-                <Dialog.Content key="content">
-                  {/* Fecha y hora */}
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      marginBottom: 8,
-                    }}
-                  >
-                    <MaterialCommunityIcons
-                      name="clock-outline"
-                      size={20}
-                      color={COLORS.primary}
-                      style={{ marginRight: 12 }}
-                    />
-                    <Text
-                      variant="bodyMedium"
-                      style={{ flex: 1, color: COLORS.textSecondary }}
-                    >
-                      {new Date(activity.startsAt).toLocaleDateString([], {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}{" "}
-                      {new Date(activity.startsAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </Text>
-                  </View>
-
-                  {/* Creador */}
-                  {(() => {
-                    const creator = groupMembers.find(
-                      (m) => m.id === activity.createdBy
-                    );
-                    return creator ? (
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          marginBottom: 8,
-                        }}
-                      >
-                        <MaterialCommunityIcons
-                          name="account"
-                          size={20}
-                          color={COLORS.primary}
-                          style={{ marginRight: 12 }}
-                        />
-                        <Text
-                          variant="bodyMedium"
-                          style={{ flex: 1, color: COLORS.textSecondary }}
-                        >
-                          Por: {creator.displayName}
-                        </Text>
-                      </View>
-                    ) : null;
-                  })()}
-
-                  {/* Estado */}
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      marginBottom: 8,
-                    }}
-                  >
-                    <MaterialCommunityIcons
-                      name={
-                        isActivityCompleted
-                          ? "checkbox-marked-circle"
-                          : "checkbox-blank-circle-outline"
-                      }
-                      size={20}
-                      color={
-                        isActivityCompleted ? COLORS.primary : COLORS.textLight
-                      }
-                      style={{ marginRight: 12 }}
-                    />
-                    <Text
-                      variant="bodyMedium"
-                      style={{ flex: 1, color: COLORS.textSecondary }}
-                    >
-                      {isActivityCompleted ? "Completada" : "Pendiente"}
-                    </Text>
-                  </View>
-
-                  {/* Descripción */}
-                  {activity.description && (
+          <Animated.View
+            style={{
+              backgroundColor: COLORS.background,
+              borderRadius: 16,
+              opacity: activityFadeAnim,
+              overflow: "hidden",
+            }}
+          >
+            {activityQuery.data
+              ? (() => {
+                  let activity: Activity | undefined;
+                  if (
+                    activityQuery.data &&
+                    typeof activityQuery.data === "object"
+                  ) {
+                    if (
+                      "data" in activityQuery.data &&
+                      isActivity(activityQuery.data.data)
+                    ) {
+                      activity = activityQuery.data.data;
+                    } else if (isActivity(activityQuery.data)) {
+                      activity = activityQuery.data;
+                    }
+                  }
+                  if (!activity) return null;
+                  return (
                     <View>
-                      <Divider
-                        style={{
-                          marginVertical: 12,
-                          backgroundColor: COLORS.border,
-                        }}
-                      />
-                      <Text
-                        variant="labelMedium"
-                        style={{
-                          color: COLORS.primary,
-                          marginBottom: 8,
-                          fontWeight: "bold",
-                        }}
+                      <Dialog.Title
+                        style={{ fontWeight: "bold", color: COLORS.text }}
                       >
-                        Descripción
-                      </Text>
-                      <HighlightedMentionText
-                        text={activity.description || ""}
-                        groupMembers={groupMembers}
-                        style={{
-                          color: COLORS.text,
-                          lineHeight: 22,
-                          fontSize: 14,
-                        }}
-                      />
+                        {activity.title}
+                      </Dialog.Title>
+                      <Dialog.Content>
+                        {/* Fecha y hora */}
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            marginBottom: 8,
+                          }}
+                        >
+                          <MaterialCommunityIcons
+                            name="clock-outline"
+                            size={20}
+                            color={COLORS.primary}
+                            style={{ marginRight: 12 }}
+                          />
+                          <Text
+                            variant="bodyMedium"
+                            style={{ flex: 1, color: COLORS.textSecondary }}
+                          >
+                            {new Date(activity.startsAt).toLocaleDateString(
+                              [],
+                              {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              }
+                            )}{" "}
+                            {new Date(activity.startsAt).toLocaleTimeString(
+                              [],
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )}
+                          </Text>
+                        </View>
+
+                        {/* Creador */}
+                        {(() => {
+                          const creator = groupMembers.find(
+                            (m) => m.id === activity.createdBy
+                          );
+                          return creator ? (
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                marginBottom: 8,
+                              }}
+                            >
+                              <MaterialCommunityIcons
+                                name="account"
+                                size={20}
+                                color={COLORS.primary}
+                                style={{ marginRight: 12 }}
+                              />
+                              <Text
+                                variant="bodyMedium"
+                                style={{ flex: 1, color: COLORS.textSecondary }}
+                              >
+                                Por: {creator.displayName}
+                              </Text>
+                            </View>
+                          ) : null;
+                        })()}
+
+                        {/* Estado */}
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            marginBottom: 8,
+                          }}
+                        >
+                          <MaterialCommunityIcons
+                            name={
+                              isActivityCompleted
+                                ? "checkbox-marked-circle"
+                                : "checkbox-blank-circle-outline"
+                            }
+                            size={20}
+                            color={
+                              isActivityCompleted
+                                ? COLORS.primary
+                                : COLORS.textLight
+                            }
+                            style={{ marginRight: 12 }}
+                          />
+                          <Text
+                            variant="bodyMedium"
+                            style={{ flex: 1, color: COLORS.textSecondary }}
+                          >
+                            {isActivityCompleted ? "Completada" : "Pendiente"}
+                          </Text>
+                        </View>
+
+                        {/* Descripción */}
+                        {activity.description && (
+                          <View>
+                            <Divider
+                              style={{
+                                marginVertical: 12,
+                                backgroundColor: COLORS.border,
+                              }}
+                            />
+                            <Text
+                              variant="labelMedium"
+                              style={{
+                                color: COLORS.primary,
+                                marginBottom: 8,
+                                fontWeight: "bold",
+                              }}
+                            >
+                              Descripción
+                            </Text>
+                            <HighlightedMentionText
+                              text={activity.description || ""}
+                              groupMembers={groupMembers}
+                              style={{
+                                color: COLORS.text,
+                                lineHeight: 22,
+                                fontSize: 14,
+                              }}
+                            />
+                          </View>
+                        )}
+                      </Dialog.Content>
+                      <Dialog.Actions
+                        style={{ paddingHorizontal: 24, paddingBottom: 16 }}
+                      >
+                        <Button
+                          mode="text"
+                          onPress={() => {
+                            setActivityDetailDialogVisible(false);
+                            setSelectedActivityId(null);
+                          }}
+                          style={{ marginRight: 8 }}
+                        >
+                          Cerrar
+                        </Button>
+                        <Button
+                          mode="contained"
+                          onPress={() => {
+                            const activityId = selectedActivityId;
+                            setActivityDetailDialogVisible(false);
+                            setSelectedActivityId(null);
+                            // Navegar usando href con el parámetro del tab y el activityId
+                            router.replace({
+                              pathname: "/(tabs)/home",
+                              params: {
+                                tab: "calendar",
+                                activityId: activityId || "",
+                              },
+                            });
+                          }}
+                          buttonColor={COLORS.primary}
+                          style={{ borderRadius: 12 }}
+                          contentStyle={{ paddingVertical: 8 }}
+                        >
+                          Ir al Calendario
+                        </Button>
+                      </Dialog.Actions>
                     </View>
-                  )}
-                </Dialog.Content>,
-                <Dialog.Actions
-                  key="actions"
-                  style={{ paddingHorizontal: 24, paddingBottom: 16 }}
-                >
-                  <Button
-                    mode="text"
-                    onPress={() => {
-                      setActivityDetailDialogVisible(false);
-                      setSelectedActivityId(null);
-                    }}
-                    style={{ marginRight: 8 }}
-                  >
-                    Cerrar
-                  </Button>
-                  <Button
-                    mode="contained"
-                    onPress={() => {
-                      const activityId = selectedActivityId;
-                      setActivityDetailDialogVisible(false);
-                      setSelectedActivityId(null);
-                      // Navegar usando href con el parámetro del tab y el activityId
-                      router.replace({
-                        pathname: "/(tabs)/home",
-                        params: {
-                          tab: "calendar",
-                          activityId: activityId || "",
-                        },
-                      });
-                    }}
-                    buttonColor={COLORS.primary}
-                    style={{ borderRadius: 12 }}
-                    contentStyle={{ paddingVertical: 8 }}
-                  >
-                    Ir al Calendario
-                  </Button>
-                </Dialog.Actions>,
-              ];
-            })()}
-          {!activityQuery.data && (
-            <Dialog.Content>
-              <View style={{ alignItems: "center", paddingVertical: 20 }}>
-                <ActivityIndicator size="large" color={COLORS.primary} />
-                <Text style={{ marginTop: 16, color: COLORS.textSecondary }}>
-                  Cargando actividad...
-                </Text>
-              </View>
-            </Dialog.Content>
-          )}
+                  );
+                })()
+              : null}
+          </Animated.View>
         </Dialog>
       </Portal>
 
@@ -930,39 +986,54 @@ export default function NotificationsScreen() {
           visible={notFoundDialogVisible}
           onDismiss={() => setNotFoundDialogVisible(false)}
           style={{
-            backgroundColor: COLORS.background,
-            borderRadius: 16,
+            backgroundColor: "transparent",
             width: "90%",
             alignSelf: "center",
+            elevation: 0,
+            shadowColor: "transparent",
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 0,
+            shadowRadius: 0,
           }}
         >
-          <Dialog.Icon
-            icon="alert-circle-outline"
-            size={48}
-            color={COLORS.primary}
-          />
-          <Dialog.Title style={{ textAlign: "center", color: COLORS.text }}>
-            Contenido no disponible
-          </Dialog.Title>
-          <Dialog.Content>
-            <Text
-              variant="bodyMedium"
-              style={{ textAlign: "center", color: COLORS.textSecondary }}
-            >
-              {notFoundMessage}
-            </Text>
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button
-              mode="contained"
-              onPress={() => setNotFoundDialogVisible(false)}
-              buttonColor={COLORS.primary}
-              style={{ borderRadius: 12 }}
-              contentStyle={{ paddingVertical: 8 }}
-            >
-              Entendido
-            </Button>
-          </Dialog.Actions>
+          <Animated.View
+            style={{
+              backgroundColor: COLORS.background,
+              borderRadius: 16,
+              opacity: notFoundFadeAnim,
+              overflow: "hidden",
+            }}
+          >
+            <View style={{ alignItems: "center", paddingTop: 24 }}>
+              <MaterialCommunityIcons
+                name="alert-circle-outline"
+                size={48}
+                color={COLORS.primary}
+              />
+            </View>
+            <Dialog.Title style={{ textAlign: "center", color: COLORS.text }}>
+              Contenido no disponible
+            </Dialog.Title>
+            <Dialog.Content>
+              <Text
+                variant="bodyMedium"
+                style={{ textAlign: "center", color: COLORS.textSecondary }}
+              >
+                {notFoundMessage}
+              </Text>
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Button
+                mode="contained"
+                onPress={() => setNotFoundDialogVisible(false)}
+                buttonColor={COLORS.primary}
+                style={{ borderRadius: 12 }}
+                contentStyle={{ paddingVertical: 8 }}
+              >
+                Entendido
+              </Button>
+            </Dialog.Actions>
+          </Animated.View>
         </Dialog>
       </Portal>
     </SafeAreaView>

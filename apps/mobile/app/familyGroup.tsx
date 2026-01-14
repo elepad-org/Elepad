@@ -19,7 +19,7 @@ import {
   Snackbar,
 } from "react-native-paper";
 import { router } from "expo-router";
-import * as Clipboard from 'expo-clipboard';
+import * as Clipboard from "expo-clipboard";
 import {
   useGetFamilyGroupIdGroupInvite,
   getFamilyGroupIdGroupInviteResponse,
@@ -46,7 +46,7 @@ export default function FamilyGroup() {
   useEffect(() => {
     console.log("FamilyGroup - userElepad:", userElepad);
     console.log("FamilyGroup - groupId:", groupId);
-    
+
     // If we don't have a groupId but we have a user, try refreshing
     if (userElepad && !groupId) {
       console.log("FamilyGroup - No groupId found, refreshing user data...");
@@ -58,7 +58,9 @@ export default function FamilyGroup() {
   const [newGroupName, setNewGroupName] = useState("");
   const [advancedOptionsExpanded, setAdvancedOptionsExpanded] = useState(false);
   const [avatarModalVisible, setAvatarModalVisible] = useState(false);
-  const [selectedAvatarUrl, setSelectedAvatarUrl] = useState<string | null>(null);
+  const [selectedAvatarUrl, setSelectedAvatarUrl] = useState<string | null>(
+    null
+  );
   const [selectedMemberName, setSelectedMemberName] = useState<string>("");
 
   const patchFamilyGroup = usePatchFamilyGroupIdGroup(); // Este hook ya maneja la mutación
@@ -188,7 +190,10 @@ export default function FamilyGroup() {
 
       await membersQuery.refetch();
 
-      Alert.alert("Miembro eliminado", "El miembro fue eliminado correctamente.");
+      Alert.alert(
+        "Miembro eliminado",
+        "El miembro fue eliminado correctamente."
+      );
     } catch (e: unknown) {
       type MaybeApiError = {
         data?: { error?: { message?: string } };
@@ -246,7 +251,7 @@ export default function FamilyGroup() {
 
       Alert.alert(
         "Transferencia exitosa",
-        `${selectedNewOwner.displayName} es ahora el nuevo administrador del grupo.`,
+        `${selectedNewOwner.displayName} es ahora el nuevo administrador del grupo.`
       );
     } catch (e: unknown) {
       type MaybeApiError = {
@@ -273,7 +278,7 @@ export default function FamilyGroup() {
       }
 
       const oldGroupId = groupId; // Guardar el ID del grupo actual
-      
+
       // Hacer todo en secuencia rápida
       // 1. Salir del grupo actual SIN crear uno nuevo
       await removeMember.mutateAsync({
@@ -300,12 +305,11 @@ export default function FamilyGroup() {
       setExitOptionsVisible(false);
       setShowJoinCodeInput(false);
       setJoinCodeInput("");
-      
+
       Alert.alert(
         "Grupo creado",
-        "Has salido del grupo anterior y se ha creado tu nuevo grupo familiar exitosamente.",
+        "Has salido del grupo anterior y se ha creado tu nuevo grupo familiar exitosamente."
       );
-      
     } catch (e: unknown) {
       type MaybeApiError = {
         data?: { error?: { message?: string } };
@@ -315,7 +319,7 @@ export default function FamilyGroup() {
       const msg =
         err?.data?.error?.message ?? err?.message ?? "Error en el proceso";
       Alert.alert("Error", msg);
-      
+
       // Intentar refrescar de todos modos para ver el estado actual
       await refreshUserElepad();
     }
@@ -361,12 +365,11 @@ export default function FamilyGroup() {
       setExitOptionsVisible(false);
       setShowJoinCodeInput(false);
       setJoinCodeInput("");
-      
+
       Alert.alert(
         "¡Bienvenido!",
-        "Has salido del grupo anterior y te has unido al nuevo grupo familiar exitosamente.",
+        "Has salido del grupo anterior y te has unido al nuevo grupo familiar exitosamente."
       );
-      
     } catch (e: unknown) {
       type MaybeApiError = {
         data?: { error?: { message?: string } };
@@ -376,7 +379,7 @@ export default function FamilyGroup() {
       const msg =
         err?.data?.error?.message ?? err?.message ?? "Error en el proceso";
       Alert.alert("Error", msg);
-      
+
       // Intentar refrescar de todos modos para ver el estado actual
       await refreshUserElepad();
     }
@@ -445,7 +448,7 @@ export default function FamilyGroup() {
                                 });
                                 setIsEditing(false);
                                 setSnackbarMessage(
-                                  "Nombre del grupo familiar actualizado correctamente",
+                                  "Nombre del grupo familiar actualizado correctamente"
                                 );
                                 setSnackbarError(false);
                                 setSnackbarVisible(true);
@@ -543,7 +546,11 @@ export default function FamilyGroup() {
                           style={{ flexDirection: "row", alignItems: "center" }}
                         >
                           {o.avatarUrl ? (
-                            <Pressable onPress={() => openAvatarModal(o.avatarUrl!, o.displayName)}>
+                            <Pressable
+                              onPress={() =>
+                                openAvatarModal(o.avatarUrl!, o.displayName)
+                              }
+                            >
                               <Image
                                 source={{ uri: o.avatarUrl }}
                                 style={{
@@ -612,7 +619,11 @@ export default function FamilyGroup() {
                           style={{ flexDirection: "row", alignItems: "center" }}
                         >
                           {m.avatarUrl ? (
-                            <Pressable onPress={() => openAvatarModal(m.avatarUrl!, m.displayName)}>
+                            <Pressable
+                              onPress={() =>
+                                openAvatarModal(m.avatarUrl!, m.displayName)
+                              }
+                            >
                               <Image
                                 source={{ uri: m.avatarUrl }}
                                 style={{
@@ -781,7 +792,7 @@ export default function FamilyGroup() {
                                   ) {
                                     Alert.alert(
                                       "Sin miembros",
-                                      "No hay otros miembros en el grupo para transferir la administración.",
+                                      "No hay otros miembros en el grupo para transferir la administración."
                                     );
                                     return;
                                   }
@@ -840,9 +851,7 @@ export default function FamilyGroup() {
             <View style={styles.inviteCodeContainer}>
               <Text style={styles.inviteCodeLabel}>Código de invitación</Text>
               <View style={styles.codeCard}>
-                <Text style={styles.codeText}>
-                  {String(invitationCode)}
-                </Text>
+                <Text style={styles.codeText}>{String(invitationCode)}</Text>
                 <IconButton
                   icon="content-copy"
                   size={20}
@@ -855,7 +864,7 @@ export default function FamilyGroup() {
                 Expira 10 minutos luego de su creación.
               </Text>
             </View>
-          )}    
+          )}
           {/* Solo botón de salir del grupo */}
           <View style={[{ alignItems: "center", width: "100%", marginTop: 0 }]}>
             <Button
@@ -871,7 +880,7 @@ export default function FamilyGroup() {
                   Alert.alert(
                     "No puedes salir del grupo",
                     "Como administrador del grupo, primero debes transferir la administración a otro miembro antes de poder salir.",
-                    [{ text: "Entendido", style: "default" }],
+                    [{ text: "Entendido", style: "default" }]
                   );
                   return;
                 }
@@ -1024,7 +1033,14 @@ export default function FamilyGroup() {
                         }}
                       >
                         {member.avatarUrl ? (
-                          <Pressable onPress={() => openAvatarModal(member.avatarUrl!, member.displayName)}>
+                          <Pressable
+                            onPress={() =>
+                              openAvatarModal(
+                                member.avatarUrl!,
+                                member.displayName
+                              )
+                            }
+                          >
                             <Image
                               source={{ uri: member.avatarUrl }}
                               style={{
@@ -1166,7 +1182,12 @@ export default function FamilyGroup() {
             }}
           >
             <Dialog.Title>
-              <Text style={[STYLES.heading, { fontSize: 18, paddingTop: 15, textAlign: "center" }]}>
+              <Text
+                style={[
+                  STYLES.heading,
+                  { fontSize: 18, paddingTop: 15, textAlign: "center" },
+                ]}
+              >
                 {selectedMemberName}
               </Text>
             </Dialog.Title>
@@ -1210,7 +1231,12 @@ export default function FamilyGroup() {
             <Dialog.Content>
               {!showJoinCodeInput ? (
                 <>
-                  <Text style={[STYLES.subheading, { marginBottom: 16, textAlign: "center" }]}>
+                  <Text
+                    style={[
+                      STYLES.subheading,
+                      { marginBottom: 16, textAlign: "center" },
+                    ]}
+                  >
                     Antes de salir, elige a dónde quieres ir:
                   </Text>
                   <View style={{ alignItems: "center", width: "100%" }}>
@@ -1229,7 +1255,7 @@ export default function FamilyGroup() {
                       onPress={() => setShowJoinCodeInput(true)}
                       style={[
                         STYLES.buttonPrimary,
-                        { 
+                        {
                           borderColor: COLORS.primary,
                           borderWidth: 2,
                           backgroundColor: "transparent",
@@ -1246,7 +1272,8 @@ export default function FamilyGroup() {
               ) : (
                 <>
                   <Text style={[STYLES.subheading, { marginBottom: 16 }]}>
-                    Ingresa el código de invitación del grupo al que deseas unirte:
+                    Ingresa el código de invitación del grupo al que deseas
+                    unirte:
                   </Text>
                   <TextInput
                     style={[STYLES.input, { marginBottom: 16 }]}
@@ -1296,7 +1323,7 @@ export default function FamilyGroup() {
             </Dialog.Content>
           </Dialog>
         </Portal>
-        
+
         <Snackbar
           visible={snackbarVisible}
           onDismiss={() => setSnackbarVisible(false)}
@@ -1321,36 +1348,36 @@ const styles = {
     fontSize: 14,
     color: COLORS.textSecondary,
     marginBottom: 8,
-    fontWeight: '500' as const,
+    fontWeight: "500" as const,
   },
   codeCard: {
-    backgroundColor: 'rgba(128, 128, 128, 0.15)',
+    backgroundColor: "rgba(128, 128, 128, 0.15)",
     borderRadius: 12,
     padding: 16,
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'space-between' as const,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
     borderWidth: 1,
-    borderColor: 'rgba(128, 128, 128, 0.2)',
+    borderColor: "rgba(128, 128, 128, 0.2)",
   },
   codeText: {
     fontSize: 18,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
     color: COLORS.text,
     letterSpacing: 2,
     flex: 1,
   },
   copyButton: {
     margin: 0,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
     borderRadius: 8,
   },
   expiryText: {
     fontSize: 12,
     color: COLORS.textLight,
     marginTop: 8,
-    textAlign: 'center' as const,
-    fontStyle: 'italic' as const,
+    textAlign: "center" as const,
+    fontStyle: "italic" as const,
   },
   avatarModalContent: {
     alignItems: "center" as const,
