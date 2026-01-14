@@ -141,31 +141,42 @@ export default function NotificationsScreen() {
   const [notFoundDialogVisible, setNotFoundDialogVisible] = useState(false);
   const [notFoundMessage, setNotFoundMessage] = useState("");
 
-  const activitySlideAnim = useRef(new Animated.Value(50)).current;
   const activityFadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (activityDetailDialogVisible) {
-      activitySlideAnim.setValue(50);
       activityFadeAnim.setValue(0);
-      Animated.parallel([
-        Animated.spring(activitySlideAnim, {
-          toValue: 0,
-          useNativeDriver: true,
-          friction: 8,
-          tension: 40,
-        }),
-        Animated.timing(activityFadeAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      Animated.timing(activityFadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
     } else {
-      activitySlideAnim.setValue(50);
       activityFadeAnim.setValue(0);
     }
   }, [activityDetailDialogVisible]);
+
+  const notFoundFadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (notFoundDialogVisible) {
+      // Reset values immediately
+      notFoundFadeAnim.setValue(0);
+
+      // Add a small delay to ensure Dialog is rendered before animating
+      const timer = setTimeout(() => {
+        Animated.timing(notFoundFadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }).start();
+      }, 100);
+
+      return () => clearTimeout(timer);
+    } else {
+      notFoundFadeAnim.setValue(0);
+    }
+  }, [notFoundDialogVisible]);
 
   // Fetch family members for displaying names in mentions
   const membersQuery = useGetFamilyGroupIdGroupMembers(
@@ -754,14 +765,16 @@ export default function NotificationsScreen() {
             width: "90%",
             alignSelf: "center",
             elevation: 0,
+            shadowColor: "transparent",
+            shadowOffset: { width: 0, height: 0 },
             shadowOpacity: 0,
+            shadowRadius: 0,
           }}
         >
           <Animated.View
             style={{
               backgroundColor: COLORS.background,
               borderRadius: 16,
-              transform: [{ translateY: activitySlideAnim }],
               opacity: activityFadeAnim,
               overflow: "hidden",
             }}
@@ -966,39 +979,54 @@ export default function NotificationsScreen() {
           visible={notFoundDialogVisible}
           onDismiss={() => setNotFoundDialogVisible(false)}
           style={{
-            backgroundColor: COLORS.background,
-            borderRadius: 16,
+            backgroundColor: "transparent",
             width: "90%",
             alignSelf: "center",
+            elevation: 0,
+            shadowColor: "transparent",
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 0,
+            shadowRadius: 0,
           }}
         >
-          <Dialog.Icon
-            icon="alert-circle-outline"
-            size={48}
-            color={COLORS.primary}
-          />
-          <Dialog.Title style={{ textAlign: "center", color: COLORS.text }}>
-            Contenido no disponible
-          </Dialog.Title>
-          <Dialog.Content>
-            <Text
-              variant="bodyMedium"
-              style={{ textAlign: "center", color: COLORS.textSecondary }}
-            >
-              {notFoundMessage}
-            </Text>
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button
-              mode="contained"
-              onPress={() => setNotFoundDialogVisible(false)}
-              buttonColor={COLORS.primary}
-              style={{ borderRadius: 12 }}
-              contentStyle={{ paddingVertical: 8 }}
-            >
-              Entendido
-            </Button>
-          </Dialog.Actions>
+          <Animated.View
+            style={{
+              backgroundColor: COLORS.background,
+              borderRadius: 16,
+              opacity: notFoundFadeAnim,
+              overflow: "hidden",
+            }}
+          >
+            <View style={{ alignItems: "center", paddingTop: 24 }}>
+              <MaterialCommunityIcons
+                name="alert-circle-outline"
+                size={48}
+                color={COLORS.primary}
+              />
+            </View>
+            <Dialog.Title style={{ textAlign: "center", color: COLORS.text }}>
+              Contenido no disponible
+            </Dialog.Title>
+            <Dialog.Content>
+              <Text
+                variant="bodyMedium"
+                style={{ textAlign: "center", color: COLORS.textSecondary }}
+              >
+                {notFoundMessage}
+              </Text>
+            </Dialog.Content>
+            <Dialog.Actions>
+              <Button
+                mode="contained"
+                onPress={() => setNotFoundDialogVisible(false)}
+                buttonColor={COLORS.primary}
+                style={{ borderRadius: 12 }}
+                contentStyle={{ paddingVertical: 8 }}
+              >
+                Entendido
+              </Button>
+            </Dialog.Actions>
+          </Animated.View>
         </Dialog>
       </Portal>
     </SafeAreaView>
