@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
-import { View, Platform, useWindowDimensions } from "react-native";
-import { BottomNavigation, useTheme, Icon } from "react-native-paper";
+import {
+  View,
+  Platform,
+  useWindowDimensions,
+  Animated,
+  Pressable,
+} from "react-native";
+import { Icon, Text } from "react-native-paper";
 import { useLocalSearchParams } from "expo-router";
 import { TabView, SceneMap } from "react-native-tab-view";
 import HomeScreen from "./home";
@@ -22,7 +28,6 @@ type TabRoute = {
 };
 
 export default function TabLayout() {
-  const theme = useTheme();
   const layout = useWindowDimensions();
   const params = useLocalSearchParams();
   const [index, setIndex] = useState(0);
@@ -126,75 +131,116 @@ export default function TabLayout() {
     configuracion: ConfiguracionScreen,
   });
 
-  const renderTabBar = (props: {
-    navigationState: { index: number; routes: TabRoute[] };
-  }) => (
-    <View
-      style={{
-        position: "absolute",
-        bottom: 24,
-        left: 20,
-        right: 20,
-        borderRadius: 24,
-        overflow: "hidden",
-        backgroundColor: COLORS.white,
-        borderWidth: 1,
-        borderColor: COLORS.border,
-        ...Platform.select({
-          ios: {
-            shadowColor: "#18020c",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.08,
-            shadowRadius: 16,
-          },
-          android: {
-            elevation: 8,
-          },
-        }),
-        zIndex: 1000,
-      }}
-    >
-      <BottomNavigation.Bar
-        navigationState={props.navigationState}
-        safeAreaInsets={{ bottom: 0 }}
-        onTabPress={({ route }: { route: TabRoute }) => {
-          const index = routes.findIndex((r) => r.key === route.key);
-          setIndex(index);
-        }}
-        renderIcon={({
-          route,
-          focused,
-          color,
-        }: {
-          route: TabRoute;
-          focused: boolean;
-          color: string;
-        }) => (
-          <Icon
-            source={focused ? route.focusedIcon : route.unfocusedIcon}
-            size={24}
-            color={color}
-          />
-        )}
-        getLabelText={({ route }: { route: TabRoute }) => route.title}
+  const renderTabBar = (props: any) => {
+    const { navigationState, position } = props;
+
+    return (
+      <View
         style={{
-          backgroundColor: "transparent",
-          borderTopWidth: 0,
-          elevation: 0,
+          position: "absolute",
+          bottom: 24,
+          left: 20,
+          right: 20,
+          borderRadius: 24,
+          overflow: "hidden",
+          backgroundColor: COLORS.white,
+          borderWidth: 1,
+          borderColor: COLORS.border,
+          ...Platform.select({
+            ios: {
+              shadowColor: "#18020c",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.08,
+              shadowRadius: 16,
+            },
+            android: {
+              elevation: 8,
+            },
+          }),
+          zIndex: 1000,
           height: 72,
         }}
-        activeColor={COLORS.primary}
-        inactiveColor={COLORS.textLight}
-        activeIndicatorStyle={{
-          backgroundColor: activeIndicatorColor,
-          borderRadius: 12,
-        }}
-        theme={theme}
-        labelMaxFontSizeMultiplier={1.2}
-        shifting={false}
-      />
-    </View>
-  );
+      >
+        <View style={{ flexDirection: "row", flex: 1 }}>
+          {navigationState.routes.map((route: TabRoute, index: number) => {
+            const isFocused = navigationState.index === index;
+
+            const onPress = () => {
+              props.jumpTo(route.key);
+            };
+
+            const inputRange = navigationState.routes.map(
+              (_: any, i: number) => i
+            );
+
+            // Scale interpolation: 0 -> 1 -> 0
+            const activeOpacity = position.interpolate({
+              inputRange,
+              outputRange: inputRange.map((i: number) => (i === index ? 1 : 0)),
+            });
+
+            const activeScale = position.interpolate({
+              inputRange,
+              outputRange: inputRange.map((i: number) => (i === index ? 1 : 0)),
+              extrapolate: "clamp",
+            });
+
+            // Specific interpolation for local scale behavior (shrink/grow) per tab center
+            // We use the simpler [i-1, i, i+1] logic for per-item animation usually, but
+            // the full map above works correctly for the "whole array" input range too.
+
+            return (
+              <Pressable
+                key={route.key}
+                onPress={onPress}
+                style={{
+                  flex: 1,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <View
+                  style={{ alignItems: "center", justifyContent: "center" }}
+                >
+                  {/* Animated Indicator */}
+                  <Animated.View
+                    style={{
+                      position: "absolute",
+                      width: 64, // Approximate pill width
+                      height: 32,
+                      top: -4, // Adjust to center behind icon. Icon is ~24. Pill 32.
+                      backgroundColor: activeIndicatorColor,
+                      borderRadius: 16,
+                      opacity: activeOpacity,
+                      transform: [{ scale: activeScale }],
+                    }}
+                  />
+
+                  <Icon
+                    source={isFocused ? route.focusedIcon : route.unfocusedIcon}
+                    size={24}
+                    color={isFocused ? COLORS.primary : COLORS.textLight}
+                  />
+                </View>
+
+                <Text
+                  variant="labelSmall"
+                  style={{
+                    marginTop: 4,
+                    color: isFocused ? COLORS.primary : COLORS.textLight,
+                    textAlign: "center",
+                  }}
+                  numberOfLines={1}
+                >
+                  {route.title}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
+    );
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.background }}>
