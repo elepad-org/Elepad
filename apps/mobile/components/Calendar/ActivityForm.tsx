@@ -9,7 +9,7 @@ import { COLORS } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
 import SaveButton from "../shared/SaveButton";
 import MentionInput from "../Recuerdos/MentionInput";
-import ElderSelector from "./ElderSelector";
+import DropdownSelect from "../shared/DropdownSelect";
 import { useAuth } from "@/hooks/useAuth";
 
 type Frequency = {
@@ -228,12 +228,26 @@ export default function ActivityForm({
 
             {/* Selector de destinatario - solo visible para familiares (no elders) */}
             {!isElder && elders.length > 0 && (
-              <ElderSelector
-                elders={elders}
-                selectedElderId={assignedTo}
-                onSelectElder={setAssignedTo}
-                label="Para (destinatario)"
-              />
+              <View style={styles.destinatarioWrapper}>
+                <Text style={styles.destinatarioLabel}>Para (destinatario)</Text>
+                <DropdownSelect
+                  label="Para (destinatario)"
+                  value={assignedTo || ""}
+                  options={elders.map((elder) => ({
+                    key: elder.id,
+                    label: elder.displayName,
+                    avatarUrl: elder.avatarUrl || null,
+                  }))}
+                  onSelect={(value) => setAssignedTo(value)}
+                  placeholder="Seleccionar adulto mayor"
+                  showLabel={false}
+                  buttonStyle={{
+                    backgroundColor: 'transparent',
+                    borderColor: 'transparent',
+                    borderRadius: 0,
+                  }}
+                />
+              </View>
             )}
 
             <View style={styles.inputWrapper}>
@@ -424,6 +438,19 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
     marginBottom: 16,
+  },
+  destinatarioWrapper: {
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 8,
+    marginBottom: 16,
+  },
+  destinatarioLabel: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    marginBottom: 8,
   },
   input: {
     backgroundColor: "transparent",
