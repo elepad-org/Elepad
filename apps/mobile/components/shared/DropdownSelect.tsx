@@ -110,13 +110,11 @@ export default function DropdownSelect({
           label: option.label,
           avatarUrl: option.avatarUrl,
           icon: option.icon ? (
-            <View style={{ marginRight: 12 }}>
-              <MaterialCommunityIcons
-                name={option.icon as never}
-                size={24}
-                color={value === option.key ? COLORS.primary : COLORS.textSecondary}
-              />
-            </View>
+            <MaterialCommunityIcons
+              name={option.icon as never}
+              size={20}
+              color={COLORS.primary}
+            />
           ) : undefined
         }))}
         onSelect={handleSelect}

@@ -32,6 +32,7 @@ type Props = {
   initial?: Partial<Activity> | null;
   familyMembers?: FamilyMember[];
   currentUserId?: string;
+  preSelectedElderId?: string | null;
 };
 
 export default function ActivityForm({
@@ -41,6 +42,7 @@ export default function ActivityForm({
   initial,
   familyMembers = [],
   currentUserId,
+  preSelectedElderId,
 }: Props) {
   const { userElepad } = useAuth();
   const isElder = userElepad?.elder ?? false;
@@ -98,16 +100,18 @@ export default function ActivityForm({
 
       // Si es un elder, assignedTo siempre es él mismo
       // Si es familiar y está editando, mantener el assignedTo existente
-      // Si es familiar y está creando, requiere seleccionar destinatario
+      // Si es familiar y está creando nueva actividad:
+      //   - Si hay un elder pre-seleccionado desde el filtro, usarlo
+      //   - Si no, requiere seleccionar destinatario manualmente
       if (isElder) {
         setAssignedTo(currentUserId || null);
       } else {
-        setAssignedTo(initial?.assignedTo || null);
+        setAssignedTo(initial?.assignedTo || preSelectedElderId || null);
       }
 
       setError(null);
     }
-  }, [visible, initial, isElder, currentUserId]);
+  }, [visible, initial, isElder, currentUserId, preSelectedElderId]);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
