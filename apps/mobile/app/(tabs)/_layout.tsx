@@ -191,7 +191,7 @@ export default function TabLayout() {
         }}
         theme={theme}
         labelMaxFontSizeMultiplier={1.2}
-        shifting={true}
+        shifting={false}
       />
     </View>
   );
