@@ -8,7 +8,12 @@ import {
 } from "react-native";
 import { Icon, Text } from "react-native-paper";
 import { useLocalSearchParams } from "expo-router";
-import { TabView, SceneMap } from "react-native-tab-view";
+import {
+  TabView,
+  SceneMap,
+  SceneRendererProps,
+  NavigationState,
+} from "react-native-tab-view";
 import HomeScreen from "./home";
 import JuegosScreen from "./juegos";
 import RecuerdosScreen from "./recuerdos";
@@ -131,7 +136,16 @@ export default function TabLayout() {
     configuracion: ConfiguracionScreen,
   });
 
-  const renderTabBar = (props: any) => {
+  const renderTabBar = (
+    props: SceneRendererProps & {
+      navigationState: NavigationState<{
+        key: string;
+        title: string;
+        focusedIcon: string;
+        unfocusedIcon: string;
+      }>;
+    }
+  ) => {
     const { navigationState, position } = props;
 
     return (
