@@ -706,22 +706,20 @@ export default function NotificationsScreen() {
       ) : null}
 
       {/* Dialog para mostrar detalle del recuerdo - Solo si data está lista */}
-      {!memoryQuery.isLoading && detailDialogVisible && (
-        <RecuerdoDetailDialog
-          visible={detailDialogVisible}
-          recuerdo={(() => {
-            let memory: Memory | undefined;
-            if (memoryQuery.data && typeof memoryQuery.data === "object") {
-              if (
-                "data" in memoryQuery.data &&
-                isMemory(memoryQuery.data.data)
-              ) {
-                memory = memoryQuery.data.data;
-              } else if (isMemory(memoryQuery.data)) {
-                memory = memoryQuery.data;
-              }
+      {!memoryQuery.isLoading &&
+        (detailDialogVisible || selectedMemoryId) &&
+        (() => {
+          // Calcular recuerdo
+          let memory: Memory | undefined;
+          if (memoryQuery.data && typeof memoryQuery.data === "object") {
+            if ("data" in memoryQuery.data && isMemory(memoryQuery.data.data)) {
+              memory = memoryQuery.data.data;
+            } else if (isMemory(memoryQuery.data)) {
+              memory = memoryQuery.data;
             }
-            return memory && groupMembers
+          }
+          const recuerdo =
+            memory && groupMembers
               ? memoryToRecuerdo(
                   memory,
                   groupMembers.reduce(
@@ -733,24 +731,33 @@ export default function NotificationsScreen() {
                   )
                 )
               : null;
-          })()}
-          onDismiss={() => {
-            setDetailDialogVisible(false);
-            setSelectedMemoryId(null);
-          }}
-          onUpdateRecuerdo={async () => {
-            // Actualizar no está disponible desde notificaciones
-            // El usuario debe ir a recuerdos para editar
-          }}
-          onDeleteRecuerdo={async () => {
-            // Eliminar no está disponible desde notificaciones
-            // El usuario debe ir a recuerdos para eliminar
-          }}
-          isMutating={false}
-          familyMembers={groupMembers}
-          currentUserId={userElepad?.id}
-        />
-      )}
+
+          if (!recuerdo) return null;
+
+          return (
+            <RecuerdoDetailDialog
+              visible={detailDialogVisible}
+              recuerdo={recuerdo}
+              onDismiss={() => {
+                setDetailDialogVisible(false);
+                setTimeout(() => {
+                  setSelectedMemoryId(null);
+                }, 300);
+              }}
+              onUpdateRecuerdo={async () => {
+                // Actualizar no está disponible desde notificaciones
+                // El usuario debe ir a recuerdos para editar
+              }}
+              onDeleteRecuerdo={async () => {
+                // Eliminar no está disponible desde notificaciones
+                // El usuario debe ir a recuerdos para eliminar
+              }}
+              isMutating={false}
+              familyMembers={groupMembers}
+              currentUserId={userElepad?.id}
+            />
+          );
+        })()}
 
       {/* Dialog para mostrar detalle de la actividad */}
       <Portal>
