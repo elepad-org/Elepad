@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { View, Platform } from "react-native";
-import { BottomNavigation, useTheme } from "react-native-paper";
+import { View, Platform, useWindowDimensions } from "react-native";
+import { BottomNavigation, useTheme, Icon } from "react-native-paper";
 import { useLocalSearchParams } from "expo-router";
+import { TabView, SceneMap } from "react-native-tab-view";
 import HomeScreen from "./home";
 import JuegosScreen from "./juegos";
 import RecuerdosScreen from "./recuerdos";
@@ -15,6 +16,7 @@ const activeIndicatorColor = "rgba(91, 80, 122, 0.15)"; // #5b507a with opacity
 
 export default function TabLayout() {
   const theme = useTheme();
+  const layout = useWindowDimensions();
   const params = useLocalSearchParams();
   const [index, setIndex] = useState(0);
   const { userElepad } = useAuth();
@@ -109,7 +111,7 @@ export default function TabLayout() {
     }
   }, [isElder]);
 
-  const renderScene = BottomNavigation.SceneMap({
+  const renderScene = SceneMap({
     home: HomeScreen,
     calendar: CalendarScreen,
     juegos: JuegosScreen,
@@ -117,83 +119,88 @@ export default function TabLayout() {
     configuracion: ConfiguracionScreen,
   });
 
+  const renderTabBar = (props: any) => (
+    <View
+      style={{
+        position: "absolute",
+        bottom: 24,
+        left: 20,
+        right: 20,
+        borderRadius: 24,
+        overflow: "hidden",
+        backgroundColor: COLORS.white,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+        ...Platform.select({
+          ios: {
+            shadowColor: "#18020c",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.08,
+            shadowRadius: 16,
+          },
+          android: {
+            elevation: 8,
+          },
+        }),
+        zIndex: 1000,
+      }}
+    >
+      <BottomNavigation.Bar
+        navigationState={props.navigationState}
+        safeAreaInsets={{ bottom: 0 }}
+        onTabPress={({ route }: { route: any }) => {
+          const index = routes.findIndex((r) => r.key === route.key);
+          setIndex(index);
+        }}
+        renderIcon={({
+          route,
+          focused,
+          color,
+        }: {
+          route: any;
+          focused: boolean;
+          color: string;
+        }) => (
+          <Icon
+            source={focused ? route.focusedIcon : route.unfocusedIcon}
+            size={24}
+            color={color}
+          />
+        )}
+        getLabelText={({ route }: { route: any }) => route.title}
+        style={{
+          backgroundColor: "transparent",
+          borderTopWidth: 0,
+          elevation: 0,
+          height: 72,
+        }}
+        activeColor={COLORS.primary}
+        inactiveColor={COLORS.textLight}
+        activeIndicatorStyle={{
+          backgroundColor: activeIndicatorColor,
+          borderRadius: 12,
+        }}
+        theme={theme}
+        labelMaxFontSizeMultiplier={1.2}
+        shifting={true}
+      />
+    </View>
+  );
+
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.background }}>
-      {/* Content that occupies entire screen */}
-      <View
-        style={{
-          flex: 1,
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-        }}
-      >
-        {renderScene({
-          route: routes[index],
-          jumpTo: (key: string) => {
-            const routeIndex = routes.findIndex((route) => route.key === key);
-            if (routeIndex !== -1) {
-              setIndex(routeIndex);
-            }
-          },
-        })}
-      </View>
-
-      {/* Floating navigation bar */}
-      <View
-        style={{
-          position: "absolute",
-          bottom: 24,
-          left: 20,
-          right: 20,
-          borderRadius: 24,
-          overflow: "hidden",
-          backgroundColor: COLORS.white,
-          borderWidth: 1,
-          borderColor: COLORS.border,
-          ...Platform.select({
-            ios: {
-              shadowColor: "#18020c",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.08,
-              shadowRadius: 16,
-            },
-            android: {
-              elevation: 8,
-            },
-          }),
-          zIndex: 1000,
-        }}
-      >
-        <BottomNavigation.Bar
-          navigationState={{ index, routes }}
-          onTabPress={({ route }) => {
-            const routeIndex = routes.findIndex((r) => r.key === route.key);
-            if (routeIndex !== -1) {
-              setIndex(routeIndex);
-            }
-          }}
-          activeColor={COLORS.primary}
-          inactiveColor={COLORS.textLight}
-          activeIndicatorStyle={{
-            backgroundColor: activeIndicatorColor,
-            borderRadius: 12,
-          }}
-          style={{
-            backgroundColor: "transparent",
-            borderTopWidth: 0,
-            elevation: 0,
-            height: 72,
-            justifyContent: "center",
-          }}
-          labeled={true}
-          labelMaxFontSizeMultiplier={1.2}
-          theme={theme}
-          safeAreaInsets={{ bottom: 0 }}
-        />
-      </View>
+      <TabView
+        navigationState={{ index, routes }}
+        renderScene={renderScene}
+        onIndexChange={setIndex}
+        initialLayout={{ width: layout.width }}
+        renderTabBar={renderTabBar}
+        tabBarPosition="bottom"
+        swipeEnabled={true}
+        animationEnabled={true}
+        lazy={true}
+        lazyPreloadDistance={1}
+      />
     </View>
   );
 }
