@@ -169,21 +169,14 @@ export default function TabLayout() {
               props.jumpTo(route.key);
             };
 
-            const inputRange = navigationState.routes.map(
-              (_: any, i: number) => i
-            );
-
-            // Scale interpolation: 0 -> 1 -> 0
+            // Smooth transition over full swipe distance to clearly show shrink/grow effect
             const activeOpacity = position.interpolate({
-              inputRange,
-              outputRange: inputRange.map((i: number) => (i === index ? 1 : 0)),
-            });
-
-            const activeScale = position.interpolate({
-              inputRange,
-              outputRange: inputRange.map((i: number) => (i === index ? 1 : 0)),
+              inputRange: [index - 1, index, index + 1],
+              outputRange: [0, 1, 0],
               extrapolate: "clamp",
             });
+
+            const activeScale = activeOpacity;
 
             // Specific interpolation for local scale behavior (shrink/grow) per tab center
             // We use the simpler [i-1, i, i+1] logic for per-item animation usually, but
@@ -216,11 +209,46 @@ export default function TabLayout() {
                     }}
                   />
 
-                  <Icon
-                    source={isFocused ? route.focusedIcon : route.unfocusedIcon}
-                    size={24}
-                    color={isFocused ? COLORS.primary : COLORS.textLight}
-                  />
+                  {/* Icons Container */}
+                  <View
+                    style={{
+                      width: 24,
+                      height: 24,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {/* Inactive Icon - Fades Out */}
+                    <Animated.View
+                      style={{
+                        position: "absolute",
+                        opacity: activeOpacity.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [1, 0],
+                        }),
+                      }}
+                    >
+                      <Icon
+                        source={route.unfocusedIcon}
+                        size={24}
+                        color={COLORS.textLight}
+                      />
+                    </Animated.View>
+
+                    {/* Active Icon - Fades In */}
+                    <Animated.View
+                      style={{
+                        position: "absolute",
+                        opacity: activeOpacity,
+                      }}
+                    >
+                      <Icon
+                        source={route.focusedIcon}
+                        size={24}
+                        color={COLORS.primary}
+                      />
+                    </Animated.View>
+                  </View>
                 </View>
 
                 <Text
