@@ -252,13 +252,13 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   controls: {
-    flexDirection: "row",
-    justifyContent: "space-around",
+    flexDirection: "column",
     gap: 12,
     paddingVertical: 12,
     paddingHorizontal: 16,
   },
   button: {
-    flex: 1,
+    width: "100%",
+    borderRadius: 12,
   },
 });

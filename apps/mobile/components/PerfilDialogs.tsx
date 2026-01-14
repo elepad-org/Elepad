@@ -60,8 +60,19 @@ export function EditNameDialog({
           }}
         />
       </Dialog.Content>
-      <Dialog.Actions>
-        <Button onPress={onCancel} textColor={theme.colors.onSurface}>
+      <Dialog.Actions
+        style={{
+          flexDirection: "column",
+          gap: 12,
+          paddingHorizontal: 20,
+          paddingBottom: 12,
+        }}
+      >
+        <Button
+          onPress={onCancel}
+          textColor={theme.colors.onSurface}
+          style={{ width: "100%", borderRadius: 12 }}
+        >
           Cancelar
         </Button>
         <Button
@@ -71,6 +82,7 @@ export function EditNameDialog({
           onPress={onSubmit}
           buttonColor={theme.colors.primary}
           textColor={theme.colors.onPrimary}
+          style={{ width: "100%", borderRadius: 12 }}
         >
           Guardar
         </Button>
@@ -232,12 +244,20 @@ export function UpdatePhotoDialog({
           hasta confirmar.
         </Text>
       </Dialog.Content>
-      <Dialog.Actions>
+      <Dialog.Actions
+        style={{
+          flexDirection: "column",
+          gap: 12,
+          paddingHorizontal: 20,
+          paddingBottom: 12,
+        }}
+      >
         <Button
           onPress={() => {
             setSelectedPhoto(null);
             onClose();
           }}
+          style={{ width: "100%", borderRadius: 12 }}
         >
           Cancelar
         </Button>
@@ -247,6 +267,7 @@ export function UpdatePhotoDialog({
           disabled={!selectedPhoto || !userId || saving}
           buttonColor={theme.colors.primary}
           textColor={theme.colors.onPrimary}
+          style={{ width: "100%", borderRadius: 12 }}
           onPress={async () => {
             if (!selectedPhoto || !userId) return;
             try {

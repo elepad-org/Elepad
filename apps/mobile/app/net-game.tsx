@@ -144,7 +144,8 @@ export default function NetGameScreen() {
                 style={{
                   paddingBottom: 12,
                   paddingHorizontal: 20,
-                  justifyContent: "space-between",
+                  flexDirection: "column",
+                  gap: 12,
                 }}
               >
                 <CancelButton onPress={() => setShowQuitDialog(false)} />
@@ -152,7 +153,7 @@ export default function NetGameScreen() {
                   mode="contained"
                   onPress={confirmQuit}
                   buttonColor={COLORS.secondary}
-                  style={{ borderRadius: 12 }}
+                  style={{ borderRadius: 12, width: "100%" }}
                 >
                   Salir
                 </Button>

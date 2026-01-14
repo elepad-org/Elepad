@@ -17,7 +17,7 @@ const SaveButton = ({
       mode="contained"
       style={{
         borderRadius: 12,
-        flex: 1,
+        width: "100%",
       }}
       buttonColor={COLORS.primary}
       onPress={onPress}

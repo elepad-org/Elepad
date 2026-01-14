@@ -194,11 +194,13 @@ const styles = StyleSheet.create({
   },
   resultStats: {
     flexDirection: "row",
+    flexWrap: "wrap",
     justifyContent: "space-around",
     gap: 12,
   },
   resultStat: {
     flex: 1,
+    minWidth: 90,
     backgroundColor: COLORS.card,
     padding: 16,
     borderRadius: 12,
@@ -261,9 +263,11 @@ const styles = StyleSheet.create({
   dialogActions: {
     paddingHorizontal: 16,
     paddingTop: 16,
-    gap: 8,
+    gap: 12,
+    flexDirection: "column",
   },
   dialogButton: {
-    flex: 1,
+    width: "100%",
+    borderRadius: 12,
   },
 });

@@ -201,7 +201,8 @@ export default function SudokuGameScreen() {
                 style={{
                   paddingBottom: 12,
                   paddingHorizontal: 20,
-                  justifyContent: "space-between",
+                  flexDirection: "column",
+                  gap: 12,
                 }}
               >
                 <CancelButton onPress={() => setShowQuitDialog(false)} />
@@ -209,7 +210,7 @@ export default function SudokuGameScreen() {
                   mode="contained"
                   onPress={confirmQuit}
                   buttonColor={COLORS.secondary}
-                  style={{ borderRadius: 12 }}
+                  style={{ borderRadius: 12, width: "100%" }}
                 >
                   Salir
                 </Button>
@@ -259,16 +260,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   modeButtonsContainer: {
-    flexDirection: "row",
+    flexDirection: "column",
     gap: 12,
     width: "100%",
   },
   modeButton: {
-    flex: 1,
+    width: "100%",
     borderRadius: 12,
   },
   buttonContent: {
-    paddingVertical: 8,
+    paddingVertical: 12,
   },
   difficultyButtons: {
     gap: 12,
