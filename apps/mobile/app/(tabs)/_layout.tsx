@@ -14,6 +14,13 @@ import { useAuth } from "@/hooks/useAuth";
 // ~15% opacity for the active tab indicator background using primary color
 const activeIndicatorColor = "rgba(91, 80, 122, 0.15)"; // #5b507a with opacity
 
+type TabRoute = {
+  key: string;
+  title: string;
+  focusedIcon: string;
+  unfocusedIcon: string;
+};
+
 export default function TabLayout() {
   const theme = useTheme();
   const layout = useWindowDimensions();
@@ -119,7 +126,9 @@ export default function TabLayout() {
     configuracion: ConfiguracionScreen,
   });
 
-  const renderTabBar = (props: any) => (
+  const renderTabBar = (props: {
+    navigationState: { index: number; routes: TabRoute[] };
+  }) => (
     <View
       style={{
         position: "absolute",
@@ -148,7 +157,7 @@ export default function TabLayout() {
       <BottomNavigation.Bar
         navigationState={props.navigationState}
         safeAreaInsets={{ bottom: 0 }}
-        onTabPress={({ route }: { route: any }) => {
+        onTabPress={({ route }: { route: TabRoute }) => {
           const index = routes.findIndex((r) => r.key === route.key);
           setIndex(index);
         }}
@@ -157,7 +166,7 @@ export default function TabLayout() {
           focused,
           color,
         }: {
-          route: any;
+          route: TabRoute;
           focused: boolean;
           color: string;
         }) => (
@@ -167,7 +176,7 @@ export default function TabLayout() {
             color={color}
           />
         )}
-        getLabelText={({ route }: { route: any }) => route.title}
+        getLabelText={({ route }: { route: TabRoute }) => route.title}
         style={{
           backgroundColor: "transparent",
           borderTopWidth: 0,
