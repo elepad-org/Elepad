@@ -184,6 +184,84 @@ export interface CreateNote {
   caption?: string;
 }
 
+export interface Transcription {
+  text: string;
+}
+
+export type AlbumWithPagesStatus =
+  (typeof AlbumWithPagesStatus)[keyof typeof AlbumWithPagesStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const AlbumWithPagesStatus = {
+  processing: "processing",
+  ready: "ready",
+  error: "error",
+} as const;
+
+export interface AlbumWithPages {
+  id: string;
+  groupId: string;
+  createdBy: string;
+  title: string;
+  description: string;
+  status: AlbumWithPagesStatus;
+  createdAt: string;
+  /** @nullable */
+  updatedAt: string | null;
+  pages: AlbumPage[];
+}
+
+export interface AlbumPage {
+  id: string;
+  albumId: string;
+  memoryId: string;
+  /** @nullable */
+  title: string | null;
+  /** @nullable */
+  description: string | null;
+  order: number;
+  createdAt: string;
+  /** @nullable */
+  updatedAt: string | null;
+}
+
+export interface CreateAlbumRequest {
+  /**
+   * @minLength 1
+   * @maxLength 200
+   */
+  title: string;
+  /** @maxLength 1000 */
+  description: string;
+  /**
+   * @minItems 1
+   * @maxItems 50
+   */
+  memoryIds: string[];
+}
+
+export type AlbumStatus = (typeof AlbumStatus)[keyof typeof AlbumStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const AlbumStatus = {
+  processing: "processing",
+  ready: "ready",
+  error: "error",
+} as const;
+
+export interface Album {
+  id: string;
+  groupId: string;
+  createdBy: string;
+  title: string;
+  /** @nullable */
+  description: string | null;
+  status: AlbumStatus;
+  createdAt: string;
+  /** @nullable */
+  updatedAt: string | null;
+}
+
 export interface Frequency {
   id: string;
   /** @minLength 1 */
@@ -515,6 +593,25 @@ export type CreateMemoryWithMediaBody = {
   caption?: string;
   /** Media file to upload (image, video, or audio) */
   image: Blob;
+};
+
+export type PostAlbumTranscribeBody = {
+  /** Audio file to transcribe (only audio/* allowed) */
+  audio: Blob;
+};
+
+export type GetAlbumParams = {
+  /**
+   * @minimum 0
+   * @maximum 100
+   * @exclusiveMinimum
+   */
+  limit?: number;
+  /**
+   * @minimum 0
+   * @nullable
+   */
+  offset?: number | null;
 };
 
 export type GetActivityCompletionsParams = {
@@ -4995,6 +5092,606 @@ export const useCreateNote = <TError = Error, TContext = unknown>(
 
   return useMutation(mutationOptions, queryClient);
 };
+
+export type postAlbumTranscribeResponse200 = {
+  data: Transcription;
+  status: 200;
+};
+
+export type postAlbumTranscribeResponse400 = {
+  data: Error;
+  status: 400;
+};
+
+export type postAlbumTranscribeResponse401 = {
+  data: Error;
+  status: 401;
+};
+
+export type postAlbumTranscribeResponse415 = {
+  data: Error;
+  status: 415;
+};
+
+export type postAlbumTranscribeResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type postAlbumTranscribeResponseSuccess =
+  postAlbumTranscribeResponse200 & {
+    headers: Headers;
+  };
+export type postAlbumTranscribeResponseError = (
+  | postAlbumTranscribeResponse400
+  | postAlbumTranscribeResponse401
+  | postAlbumTranscribeResponse415
+  | postAlbumTranscribeResponse500
+) & {
+  headers: Headers;
+};
+
+export type postAlbumTranscribeResponse =
+  | postAlbumTranscribeResponseSuccess
+  | postAlbumTranscribeResponseError;
+
+export const getPostAlbumTranscribeUrl = () => {
+  return `/album/transcribe`;
+};
+
+export const postAlbumTranscribe = async (
+  postAlbumTranscribeBody: PostAlbumTranscribeBody,
+  options?: RequestInit,
+): Promise<postAlbumTranscribeResponse> => {
+  const formData = new FormData();
+  formData.append(`audio`, postAlbumTranscribeBody.audio);
+
+  return rnFetch<postAlbumTranscribeResponse>(getPostAlbumTranscribeUrl(), {
+    ...options,
+    method: "POST",
+    body: formData,
+  });
+};
+
+export const getPostAlbumTranscribeMutationOptions = <
+  TError = Error,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postAlbumTranscribe>>,
+    TError,
+    { data: PostAlbumTranscribeBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postAlbumTranscribe>>,
+  TError,
+  { data: PostAlbumTranscribeBody },
+  TContext
+> => {
+  const mutationKey = ["postAlbumTranscribe"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postAlbumTranscribe>>,
+    { data: PostAlbumTranscribeBody }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postAlbumTranscribe(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostAlbumTranscribeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postAlbumTranscribe>>
+>;
+export type PostAlbumTranscribeMutationBody = PostAlbumTranscribeBody;
+export type PostAlbumTranscribeMutationError = Error;
+
+export const usePostAlbumTranscribe = <TError = Error, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postAlbumTranscribe>>,
+      TError,
+      { data: PostAlbumTranscribeBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postAlbumTranscribe>>,
+  TError,
+  { data: PostAlbumTranscribeBody },
+  TContext
+> => {
+  const mutationOptions = getPostAlbumTranscribeMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+
+export type postAlbumCreateResponse201 = {
+  data: AlbumWithPages;
+  status: 201;
+};
+
+export type postAlbumCreateResponse400 = {
+  data: Error;
+  status: 400;
+};
+
+export type postAlbumCreateResponse401 = {
+  data: Error;
+  status: 401;
+};
+
+export type postAlbumCreateResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type postAlbumCreateResponseSuccess = postAlbumCreateResponse201 & {
+  headers: Headers;
+};
+export type postAlbumCreateResponseError = (
+  | postAlbumCreateResponse400
+  | postAlbumCreateResponse401
+  | postAlbumCreateResponse500
+) & {
+  headers: Headers;
+};
+
+export type postAlbumCreateResponse =
+  | postAlbumCreateResponseSuccess
+  | postAlbumCreateResponseError;
+
+export const getPostAlbumCreateUrl = () => {
+  return `/album/create`;
+};
+
+export const postAlbumCreate = async (
+  createAlbumRequest: CreateAlbumRequest,
+  options?: RequestInit,
+): Promise<postAlbumCreateResponse> => {
+  return rnFetch<postAlbumCreateResponse>(getPostAlbumCreateUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createAlbumRequest),
+  });
+};
+
+export const getPostAlbumCreateMutationOptions = <
+  TError = Error,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postAlbumCreate>>,
+    TError,
+    { data: CreateAlbumRequest },
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postAlbumCreate>>,
+  TError,
+  { data: CreateAlbumRequest },
+  TContext
+> => {
+  const mutationKey = ["postAlbumCreate"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postAlbumCreate>>,
+    { data: CreateAlbumRequest }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postAlbumCreate(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostAlbumCreateMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postAlbumCreate>>
+>;
+export type PostAlbumCreateMutationBody = CreateAlbumRequest;
+export type PostAlbumCreateMutationError = Error;
+
+export const usePostAlbumCreate = <TError = Error, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postAlbumCreate>>,
+      TError,
+      { data: CreateAlbumRequest },
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postAlbumCreate>>,
+  TError,
+  { data: CreateAlbumRequest },
+  TContext
+> => {
+  const mutationOptions = getPostAlbumCreateMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+
+export type getAlbumResponse200 = {
+  data: Album[];
+  status: 200;
+};
+
+export type getAlbumResponse401 = {
+  data: Error;
+  status: 401;
+};
+
+export type getAlbumResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type getAlbumResponseSuccess = getAlbumResponse200 & {
+  headers: Headers;
+};
+export type getAlbumResponseError = (
+  | getAlbumResponse401
+  | getAlbumResponse500
+) & {
+  headers: Headers;
+};
+
+export type getAlbumResponse = getAlbumResponseSuccess | getAlbumResponseError;
+
+export const getGetAlbumUrl = (params?: GetAlbumParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/album?${stringifiedParams}`
+    : `/album`;
+};
+
+export const getAlbum = async (
+  params?: GetAlbumParams,
+  options?: RequestInit,
+): Promise<getAlbumResponse> => {
+  return rnFetch<getAlbumResponse>(getGetAlbumUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetAlbumQueryKey = (params?: GetAlbumParams) => {
+  return [`/album`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetAlbumQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAlbum>>,
+  TError = Error,
+>(
+  params?: GetAlbumParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getAlbum>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetAlbumQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getAlbum>>> = ({
+    signal,
+  }) => getAlbum(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAlbum>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetAlbumQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAlbum>>
+>;
+export type GetAlbumQueryError = Error;
+
+export function useGetAlbum<
+  TData = Awaited<ReturnType<typeof getAlbum>>,
+  TError = Error,
+>(
+  params: undefined | GetAlbumParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getAlbum>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAlbum>>,
+          TError,
+          Awaited<ReturnType<typeof getAlbum>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetAlbum<
+  TData = Awaited<ReturnType<typeof getAlbum>>,
+  TError = Error,
+>(
+  params?: GetAlbumParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getAlbum>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAlbum>>,
+          TError,
+          Awaited<ReturnType<typeof getAlbum>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetAlbum<
+  TData = Awaited<ReturnType<typeof getAlbum>>,
+  TError = Error,
+>(
+  params?: GetAlbumParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getAlbum>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetAlbum<
+  TData = Awaited<ReturnType<typeof getAlbum>>,
+  TError = Error,
+>(
+  params?: GetAlbumParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getAlbum>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetAlbumQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+export type getAlbumIdResponse200 = {
+  data: AlbumWithPages;
+  status: 200;
+};
+
+export type getAlbumIdResponse401 = {
+  data: Error;
+  status: 401;
+};
+
+export type getAlbumIdResponse404 = {
+  data: Error;
+  status: 404;
+};
+
+export type getAlbumIdResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type getAlbumIdResponseSuccess = getAlbumIdResponse200 & {
+  headers: Headers;
+};
+export type getAlbumIdResponseError = (
+  | getAlbumIdResponse401
+  | getAlbumIdResponse404
+  | getAlbumIdResponse500
+) & {
+  headers: Headers;
+};
+
+export type getAlbumIdResponse =
+  | getAlbumIdResponseSuccess
+  | getAlbumIdResponseError;
+
+export const getGetAlbumIdUrl = (id: string) => {
+  return `/album/${id}`;
+};
+
+export const getAlbumId = async (
+  id: string,
+  options?: RequestInit,
+): Promise<getAlbumIdResponse> => {
+  return rnFetch<getAlbumIdResponse>(getGetAlbumIdUrl(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetAlbumIdQueryKey = (id?: string) => {
+  return [`/album/${id}`] as const;
+};
+
+export const getGetAlbumIdQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAlbumId>>,
+  TError = Error,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getAlbumId>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetAlbumIdQueryKey(id);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getAlbumId>>> = ({
+    signal,
+  }) => getAlbumId(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAlbumId>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetAlbumIdQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAlbumId>>
+>;
+export type GetAlbumIdQueryError = Error;
+
+export function useGetAlbumId<
+  TData = Awaited<ReturnType<typeof getAlbumId>>,
+  TError = Error,
+>(
+  id: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getAlbumId>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAlbumId>>,
+          TError,
+          Awaited<ReturnType<typeof getAlbumId>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetAlbumId<
+  TData = Awaited<ReturnType<typeof getAlbumId>>,
+  TError = Error,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getAlbumId>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAlbumId>>,
+          TError,
+          Awaited<ReturnType<typeof getAlbumId>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetAlbumId<
+  TData = Awaited<ReturnType<typeof getAlbumId>>,
+  TError = Error,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getAlbumId>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetAlbumId<
+  TData = Awaited<ReturnType<typeof getAlbumId>>,
+  TError = Error,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getAlbumId>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetAlbumIdQueryOptions(id, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
 
 export type getFrequenciesResponse200 = {
   data: Frequency[];

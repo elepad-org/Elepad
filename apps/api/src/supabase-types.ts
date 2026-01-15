@@ -382,6 +382,102 @@ export type Database = {
           },
         ]
       }
+      memoriesAlbumPages: {
+        Row: {
+          albumId: string
+          createdAt: string
+          description: string | null
+          id: string
+          memoryId: string
+          order: number
+          title: string | null
+          updatedAt: string | null
+        }
+        Insert: {
+          albumId: string
+          createdAt?: string
+          description?: string | null
+          id?: string
+          memoryId: string
+          order: number
+          title?: string | null
+          updatedAt?: string | null
+        }
+        Update: {
+          albumId?: string
+          createdAt?: string
+          description?: string | null
+          id?: string
+          memoryId?: string
+          order?: number
+          title?: string | null
+          updatedAt?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memoriesAlbumPage_albumId_fkey"
+            columns: ["albumId"]
+            isOneToOne: false
+            referencedRelation: "memoriesAlbums"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "memoriesAlbumPage_memoryId_fkey"
+            columns: ["memoryId"]
+            isOneToOne: false
+            referencedRelation: "memories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      memoriesAlbums: {
+        Row: {
+          createdAt: string
+          createdBy: string
+          description: string
+          groupId: string
+          id: string
+          status: Database["public"]["Enums"]["album_status"]
+          title: string
+          updatedAt: string | null
+        }
+        Insert: {
+          createdAt?: string
+          createdBy: string
+          description: string
+          groupId: string
+          id?: string
+          status: Database["public"]["Enums"]["album_status"]
+          title: string
+          updatedAt?: string | null
+        }
+        Update: {
+          createdAt?: string
+          createdBy?: string
+          description?: string
+          groupId?: string
+          id?: string
+          status?: Database["public"]["Enums"]["album_status"]
+          title?: string
+          updatedAt?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memoriesAlbum_createdBy_fkey"
+            columns: ["createdBy"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "memoriesAlbum_groupId_fkey"
+            columns: ["groupId"]
+            isOneToOne: false
+            referencedRelation: "familyGroups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memoriesBooks: {
         Row: {
           color: string | null
@@ -806,6 +902,7 @@ export type Database = {
       }
     }
     Enums: {
+      album_status: "processing" | "ready" | "error"
       game_type: "memory" | "logic" | "attention" | "reaction"
     }
     CompositeTypes: {
@@ -934,6 +1031,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      album_status: ["processing", "ready", "error"],
       game_type: ["memory", "logic", "attention", "reaction"],
     },
   },
