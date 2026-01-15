@@ -4,6 +4,7 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
+  StyleSheet,
 } from "react-native";
 import {
   Portal,
@@ -15,17 +16,18 @@ import {
   ActivityIndicator,
   Snackbar,
   Divider,
+  IconButton,
 } from "react-native-paper";
 import { Memory } from "@elepad/api-client";
 import { COLORS, STYLES } from "@/styles/base";
 import { useAlbumCreation } from "@/hooks/useAlbumCreation";
 import SaveButton from "../shared/SaveButton";
 import CancelButton from "../shared/CancelButton";
-// import DraggableFlatList, {
-//   RenderItemParams,
-//   ScaleDecorator,
-// } from "react-native-draggable-flatlist";
-// import { GestureHandlerRootView } from "react-native-gesture-handler";
+import DraggableFlatList, {
+  RenderItemParams,
+  ScaleDecorator,
+} from "react-native-draggable-flatlist";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 interface CreateAlbumDialogProps {
   visible: boolean;
@@ -45,7 +47,13 @@ export default function CreateAlbumDialog({
   onDismiss,
   memories,
 }: CreateAlbumDialogProps) {
-  const { createAlbum, isCreating, error, dismissProcessingDialog, processingAlbumTitle } = useAlbumCreation();
+  const {
+    createAlbum,
+    isCreating,
+    error,
+    dismissProcessingDialog,
+    processingAlbumTitle,
+  } = useAlbumCreation();
 
   const [step, setStep] = useState<"form" | "select" | "reorder">("form");
   const [title, setTitle] = useState("");
@@ -78,7 +86,9 @@ export default function CreateAlbumDialog({
 
     if (isSelected) {
       setSelectedMemories((prev) =>
-        prev.filter((m) => m.id !== memory.id).map((m, idx) => ({ ...m, order: idx }))
+        prev
+          .filter((m) => m.id !== memory.id)
+          .map((m, idx) => ({ ...m, order: idx }))
       );
     } else {
       setSelectedMemories((prev) => [
@@ -119,7 +129,7 @@ export default function CreateAlbumDialog({
     }
   };
 
-  /* const renderDraggableItem = ({
+  const renderDraggableItem = ({
     item,
     drag,
     isActive,
@@ -129,10 +139,7 @@ export default function CreateAlbumDialog({
         <TouchableOpacity
           onLongPress={drag}
           disabled={isActive}
-          style={[
-            styles.draggableItem,
-            isActive && styles.draggableItemActive,
-          ]}
+          style={[styles.draggableItem, isActive && styles.draggableItemActive]}
         >
           {item.mediaUrl && (
             <Image source={{ uri: item.mediaUrl }} style={styles.thumbnail} />
@@ -147,7 +154,7 @@ export default function CreateAlbumDialog({
         </TouchableOpacity>
       </ScaleDecorator>
     );
-  }; */
+  };
 
   // Mostrar snackbar si hay error, falta implementar
   /* const showError = () => {
@@ -203,7 +210,13 @@ export default function CreateAlbumDialog({
                   activeOutlineColor={COLORS.primary}
                   style={{ marginBottom: 12 }}
                 />
-                <Text style={{ ...STYLES.subheading, textAlign: "left", marginTop: 8 }}>
+                <Text
+                  style={{
+                    ...STYLES.subheading,
+                    textAlign: "left",
+                    marginTop: 8,
+                  }}
+                >
                   Selecciona fotos para crear un álbum con narrativas generadas
                   por IA
                 </Text>
@@ -213,13 +226,25 @@ export default function CreateAlbumDialog({
             {step === "select" && (
               <View style={{ flex: 1 }}>
                 <View style={{ marginBottom: 12 }}>
-                  <Text style={{ ...STYLES.subheading, textAlign: "left", marginTop: 0 }}>
+                  <Text
+                    style={{
+                      ...STYLES.subheading,
+                      textAlign: "left",
+                      marginTop: 0,
+                    }}
+                  >
                     {selectedMemories.length} foto(s) seleccionada(s)
                   </Text>
                 </View>
                 <ScrollView style={{ flex: 1 }}>
                   {imageMemories.length === 0 ? (
-                    <Text style={{ ...STYLES.subheading, textAlign: "center", marginTop: 20 }}>
+                    <Text
+                      style={{
+                        ...STYLES.subheading,
+                        textAlign: "center",
+                        marginTop: 20,
+                      }}
+                    >
                       No hay fotos disponibles. Crea algunos recuerdos primero.
                     </Text>
                   ) : (
@@ -260,7 +285,9 @@ export default function CreateAlbumDialog({
                             </Text>
                           </TouchableOpacity>
                           {idx < imageMemories.length - 1 && (
-                            <Divider style={{ backgroundColor: COLORS.border }} />
+                            <Divider
+                              style={{ backgroundColor: COLORS.border }}
+                            />
                           )}
                         </View>
                       );
@@ -271,14 +298,30 @@ export default function CreateAlbumDialog({
             )}
 
             {step === "reorder" && (
-              <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-                <Text style={{ ...STYLES.subheading, textAlign: "center", marginBottom: 12 }}>
-                  Función de reordenamiento temporalmente deshabilitada
+              <GestureHandlerRootView style={{ flex: 1 }}>
+                <Text
+                  style={{
+                    ...STYLES.subheading,
+                    textAlign: "center",
+                    marginBottom: 12,
+                  }}
+                >
+                  Mantén presionado y arrastra para reordenar
                 </Text>
-                <Text style={{ fontSize: 14, color: COLORS.textSecondary, textAlign: "center" }}>
-                  Las fotos se ordenarán en el orden en que fueron seleccionadas
-                </Text>
-              </View>
+                <DraggableFlatList
+                  data={selectedMemories}
+                  onDragEnd={({ data }) => {
+                    const reordered = data.map((item, idx) => ({
+                      ...item,
+                      order: idx,
+                    }));
+                    setSelectedMemories(reordered);
+                  }}
+                  keyExtractor={(item) => item.id}
+                  renderItem={renderDraggableItem}
+                  containerStyle={{ flex: 1 }}
+                />
+              </GestureHandlerRootView>
             )}
 
             {isCreating && (
@@ -295,7 +338,9 @@ export default function CreateAlbumDialog({
                 }}
               >
                 <ActivityIndicator size="large" color={COLORS.primary} />
-                <Text style={{ ...STYLES.subheading, marginTop: 12 }}>Creando álbum...</Text>
+                <Text style={{ ...STYLES.subheading, marginTop: 12 }}>
+                  Creando álbum...
+                </Text>
               </View>
             )}
           </Dialog.Content>
@@ -392,7 +437,7 @@ export default function CreateAlbumDialog({
         style={{ backgroundColor: COLORS.secondary }}
       >
         <Text style={{ color: COLORS.white }}>
-        {error || "Error al crear el álbum"}
+          {error || "Error al crear el álbum"}
         </Text>
       </Snackbar>
 
@@ -404,14 +449,14 @@ export default function CreateAlbumDialog({
         style={{ backgroundColor: COLORS.primary }}
       >
         <Text style={{ color: COLORS.white }}>
-        ✅ Álbum {processingAlbumTitle} creado. Estamos generando las narrativas...
+          ✅ Álbum {processingAlbumTitle} creado. Estamos generando las
+          narrativas...
         </Text>
       </Snackbar>
     </>
   );
 }
 
-/* Estilos temporalmente deshabilitados
 const styles = StyleSheet.create({
   draggableItem: {
     flexDirection: "row",
@@ -447,4 +492,3 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 });
-*/

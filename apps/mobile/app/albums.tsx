@@ -83,10 +83,7 @@ export default function AlbumsScreen() {
 
   const handleAlbumPress = useCallback(
     (albumId: string) => {
-      router.push({
-        pathname: "/album-viewer",
-        params: { id: albumId },
-      } as never);
+      router.push(`/album-viewer?id=${albumId}`);
     },
     [router]
   );
