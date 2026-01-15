@@ -132,7 +132,7 @@ export default function RootLayout() {
                     options={{
                       headerShown: false,
                       presentation: "card",
-                      animation: "slide_from_right",
+                      animation: "fade",
                     }}
                   />
                   <Stack.Screen name="+not-found" />

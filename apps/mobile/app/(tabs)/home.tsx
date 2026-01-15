@@ -1,4 +1,4 @@
-import Animated, { FadeInUp } from "react-native-reanimated";
+import Animated, { FadeIn, FadeInUp } from "react-native-reanimated";
 import {
   StatusBar,
   ScrollView,
@@ -303,43 +303,78 @@ export default function HomeScreen() {
           <Animated.View entering={FadeIn.duration(800)}>
             <Pressable
               style={styles.memoryCard}
-            onPress={() =>
-              router.navigate({
-                pathname: "/(tabs)/recuerdos",
-                params: {
-                  tab: "recuerdos",
-                  memoryId: lastMemory.id,
-                  bookId: lastMemory.bookId,
-                },
-              })
-            }
-          >
-            {lastMemory.mediaUrl &&
-            lastMemory.mimeType &&
-            (lastMemory.mimeType.startsWith("image/") ||
-              lastMemory.mimeType.startsWith("video/")) ? (
-              <ImageBackground
-                source={{ uri: lastMemory.mediaUrl }}
-                style={styles.memoryImage}
-                imageStyle={styles.memoryImageStyle}
-              >
-                <LinearGradient
-                  colors={["transparent", "rgba(0,0,0,0.7)"]}
-                  style={styles.memoryGradient}
+              onPress={() =>
+                router.navigate({
+                  pathname: "/(tabs)/recuerdos",
+                  params: {
+                    tab: "recuerdos",
+                    memoryId: lastMemory.id,
+                    bookId: lastMemory.bookId,
+                  },
+                })
+              }
+            >
+              {lastMemory.mediaUrl &&
+              lastMemory.mimeType &&
+              (lastMemory.mimeType.startsWith("image/") ||
+                lastMemory.mimeType.startsWith("video/")) ? (
+                <ImageBackground
+                  source={{ uri: lastMemory.mediaUrl }}
+                  style={styles.memoryImage}
+                  imageStyle={styles.memoryImageStyle}
                 >
+                  <LinearGradient
+                    colors={["transparent", "rgba(0,0,0,0.7)"]}
+                    style={styles.memoryGradient}
+                  >
+                    <View style={styles.memoryContent}>
+                      <Text style={styles.memoryLabel}>ÚLTIMO RECUERDO</Text>
+                      <Text style={styles.memoryTitle} numberOfLines={2}>
+                        {lastMemory.title || "Sin título"}
+                      </Text>
+                      {lastMemory.caption && (
+                        <HighlightedMentionText
+                          text={lastMemory.caption}
+                          familyMembers={groupMembers}
+                          style={styles.memoryDescription}
+                        />
+                      )}
+                      <Text style={styles.memoryDate}>
+                        {new Date(lastMemory.createdAt).toLocaleDateString(
+                          "es",
+                          {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          }
+                        )}
+                      </Text>
+                    </View>
+                  </LinearGradient>
+                </ImageBackground>
+              ) : (
+                <View style={styles.memoryNoImage}>
+                  <View style={styles.memoryNoImageIcon}>
+                    <IconButton
+                      icon="heart"
+                      size={40}
+                      iconColor={COLORS.primary}
+                    />
+                  </View>
                   <View style={styles.memoryContent}>
-                    <Text style={styles.memoryLabel}>ÚLTIMO RECUERDO</Text>
-                    <Text style={styles.memoryTitle} numberOfLines={2}>
+                    <Text style={styles.memoryLabelDark}>ÚLTIMO RECUERDO</Text>
+                    <Text style={styles.memoryTitleDark} numberOfLines={2}>
                       {lastMemory.title || "Sin título"}
                     </Text>
+
                     {lastMemory.caption && (
                       <HighlightedMentionText
                         text={lastMemory.caption}
                         familyMembers={groupMembers}
-                        style={styles.memoryDescription}
+                        style={styles.memoryDescriptionDark}
                       />
                     )}
-                    <Text style={styles.memoryDate}>
+                    <Text style={styles.memoryDateDark}>
                       {new Date(lastMemory.createdAt).toLocaleDateString("es", {
                         day: "numeric",
                         month: "long",
@@ -347,41 +382,10 @@ export default function HomeScreen() {
                       })}
                     </Text>
                   </View>
-                </LinearGradient>
-              </ImageBackground>
-            ) : (
-              <View style={styles.memoryNoImage}>
-                <View style={styles.memoryNoImageIcon}>
-                  <IconButton
-                    icon="heart"
-                    size={40}
-                    iconColor={COLORS.primary}
-                  />
                 </View>
-                <View style={styles.memoryContent}>
-                  <Text style={styles.memoryLabelDark}>ÚLTIMO RECUERDO</Text>
-                  <Text style={styles.memoryTitleDark} numberOfLines={2}>
-                    {lastMemory.title || "Sin título"}
-                  </Text>
-
-                  {lastMemory.caption && (
-                    <HighlightedMentionText
-                      text={lastMemory.caption}
-                      familyMembers={groupMembers}
-                      style={styles.memoryDescriptionDark}
-                    />
-                  )}
-                  <Text style={styles.memoryDateDark}>
-                    {new Date(lastMemory.createdAt).toLocaleDateString("es", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </Text>
-                </View>
-              </View>
-            )}
-          </Pressable>
+              )}
+            </Pressable>
+          </Animated.View>
         ) : (
           <Pressable
             style={styles.memoryCardEmpty}
@@ -433,12 +437,15 @@ export default function HomeScreen() {
           ) : upcomingActivities.length > 0 ? (
             <View style={styles.eventsContainer}>
               {upcomingActivities.map(
-                (activity: {
-                  id: string;
-                  startsAt: string;
-                  title: string;
-                  description?: string;
-                }, index) => {
+                (
+                  activity: {
+                    id: string;
+                    startsAt: string;
+                    title: string;
+                    description?: string;
+                  },
+                  index
+                ) => {
                   const activityDate = new Date(activity.startsAt);
                   const isToday =
                     activityDate.toDateString() === new Date().toDateString();
@@ -455,8 +462,8 @@ export default function HomeScreen() {
                   if (isTomorrow) dateLabel = "Mañana";
 
                   return (
-                    <Animated.View 
-                      key={activity.id} 
+                    <Animated.View
+                      key={activity.id}
                       entering={FadeInUp.delay(index * 100).springify()}
                       style={styles.eventItem}
                     >

@@ -155,7 +155,7 @@ export default function AlbumsScreen() {
             renderItem={({ item, index }) => {
               return (
                 <Animated.View
-                  entering={FadeInUp.delay(index * 50).springify()}
+                  entering={FadeInUp.delay(index * 100).springify()}
                 >
                   <AlbumCard
                     id={item.id}
