@@ -36,10 +36,12 @@ export default function DropdownSelect({
   buttonStyle = {},
 }: DropdownSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [anchorPosition, setAnchorPosition] = useState<{ top: number; left: number; width: number } | undefined>();
+  const [anchorPosition, setAnchorPosition] = useState<
+    { top: number; left: number; width: number } | undefined
+  >();
   const buttonRef = useRef<View>(null);
 
-  const selectedOption = options.find(option => option.key === value);
+  const selectedOption = options.find((option) => option.key === value);
   const displayText = selectedOption ? selectedOption.label : placeholder;
 
   const handleOpen = () => {
@@ -80,10 +82,7 @@ export default function DropdownSelect({
         <TouchableOpacity
           onPress={handleOpen}
           disabled={disabled}
-          style={[
-            localStyles.button,
-            buttonStyle,
-          ]}
+          style={[localStyles.button, buttonStyle]}
         >
           <View style={localStyles.buttonContent}>
             {selectedOption?.avatarUrl && (
@@ -124,7 +123,7 @@ export default function DropdownSelect({
       <PickerModal
         visible={isOpen}
         title={`${label}:`}
-        options={options.map(option => ({
+        options={options.map((option) => ({
           id: option.key,
           label: option.label,
           avatarUrl: option.avatarUrl,
@@ -134,7 +133,12 @@ export default function DropdownSelect({
               size={20}
               color={COLORS.primary}
             />
-          ) : undefined
+          ) : undefined,
+          // We can't easily wrap the PickerModal items here without modifying PickerModal
+          // But if PickerModal renders a FlatList or Map, we should animate there.
+          // Since I cannot see PickerModal, I will try to animate the content if I can.
+          // Wait, DropdownSelect just passes options to PickerModal.
+          // I need to View PickerModal to animate the items.
         }))}
         onSelect={handleSelect}
         onDismiss={() => setIsOpen(false)}
