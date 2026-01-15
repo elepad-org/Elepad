@@ -1,3 +1,4 @@
+import Animated, { FadeInUp } from "react-native-reanimated";
 import {
   StatusBar,
   ScrollView,
@@ -179,9 +180,13 @@ export default function HomeScreen() {
   useEffect(() => {
     if (userElepad?.groupId) {
       // Invalidar las queries relacionadas con el grupo para forzar refetch
-      queryClient.invalidateQueries({ queryKey: ['getMemories'] });
-      queryClient.invalidateQueries({ queryKey: ['getActivitiesFamilyCodeIdFamilyGroup'] });
-      queryClient.invalidateQueries({ queryKey: ['getFamilyGroupIdGroupMembers'] });
+      queryClient.invalidateQueries({ queryKey: ["getMemories"] });
+      queryClient.invalidateQueries({
+        queryKey: ["getActivitiesFamilyCodeIdFamilyGroup"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["getFamilyGroupIdGroupMembers"],
+      });
     }
   }, [userElepad?.groupId, queryClient]);
 
@@ -270,6 +275,7 @@ export default function HomeScreen() {
                 </View>
               )}
             </Pressable>
+
             {/* Avatar */}
             {userElepad?.avatarUrl ? (
               <Avatar.Image
@@ -294,10 +300,11 @@ export default function HomeScreen() {
             <ActivityIndicator size="large" />
           </View>
         ) : lastMemory ? (
-          <Pressable
-            style={styles.memoryCard}
+          <Animated.View entering={FadeIn.duration(800)}>
+            <Pressable
+              style={styles.memoryCard}
             onPress={() =>
-              router.push({
+              router.navigate({
                 pathname: "/(tabs)/recuerdos",
                 params: {
                   tab: "recuerdos",
@@ -431,7 +438,7 @@ export default function HomeScreen() {
                   startsAt: string;
                   title: string;
                   description?: string;
-                }) => {
+                }, index) => {
                   const activityDate = new Date(activity.startsAt);
                   const isToday =
                     activityDate.toDateString() === new Date().toDateString();
@@ -448,7 +455,11 @@ export default function HomeScreen() {
                   if (isTomorrow) dateLabel = "Mañana";
 
                   return (
-                    <View key={activity.id} style={styles.eventItem}>
+                    <Animated.View 
+                      key={activity.id} 
+                      entering={FadeInUp.delay(index * 100).springify()}
+                      style={styles.eventItem}
+                    >
                       <View style={styles.eventTime}>
                         <Text style={styles.eventDate}>{dateLabel}</Text>
                         <Text style={styles.eventHour}>
@@ -472,7 +483,7 @@ export default function HomeScreen() {
                           />
                         )}
                       </View>
-                    </View>
+                    </Animated.View>
                   );
                 }
               )}
@@ -483,8 +494,7 @@ export default function HomeScreen() {
               <Button
                 mode="outlined"
                 onPress={() => {
-                  // Navegar usando el mismo patrón que notificaciones
-                  router.replace({
+                  router.navigate({
                     pathname: "/(tabs)/home",
                     params: {
                       tab: "calendar",
@@ -543,7 +553,9 @@ export default function HomeScreen() {
                     ) : (
                       <Avatar.Text
                         size={20}
-                        label={lastAttempt.user.displayName.substring(0, 2).toUpperCase()}
+                        label={lastAttempt.user.displayName
+                          .substring(0, 2)
+                          .toUpperCase()}
                         style={styles.playerAvatar}
                       />
                     )}
