@@ -16,10 +16,13 @@ import {
   Checkbox,
   ActivityIndicator,
   Snackbar,
+  Divider,
 } from "react-native-paper";
 import { Memory } from "@elepad/api-client";
-import { COLORS } from "@/styles/base";
+import { COLORS, STYLES } from "@/styles/base";
 import { useAlbumCreation } from "@/hooks/useAlbumCreation";
+import SaveButton from "../shared/SaveButton";
+import CancelButton from "../shared/CancelButton";
 import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,
@@ -161,9 +164,15 @@ export default function CreateAlbumDialog({
         <Dialog
           visible={visible}
           onDismiss={handleDismiss}
-          style={styles.dialog}
+          style={{
+            backgroundColor: COLORS.background,
+            width: "92%",
+            alignSelf: "center",
+            borderRadius: 16,
+            maxHeight: "85%",
+          }}
         >
-          <Dialog.Title>
+          <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
             {step === "form"
               ? "Crear Nuevo Álbum"
               : step === "select"
@@ -171,7 +180,7 @@ export default function CreateAlbumDialog({
                 : "Ordenar Fotos"}
           </Dialog.Title>
 
-          <Dialog.Content style={styles.dialogContent}>
+          <Dialog.Content style={{ minHeight: 300, maxHeight: 500 }}>
             {step === "form" && (
               <View>
                 <TextInput
@@ -180,7 +189,9 @@ export default function CreateAlbumDialog({
                   onChangeText={setTitle}
                   mode="outlined"
                   maxLength={200}
-                  style={styles.input}
+                  outlineColor={COLORS.border}
+                  activeOutlineColor={COLORS.primary}
+                  style={{ marginBottom: 12 }}
                 />
                 <TextInput
                   label="Descripción"
@@ -190,9 +201,11 @@ export default function CreateAlbumDialog({
                   multiline
                   numberOfLines={3}
                   maxLength={1000}
-                  style={styles.input}
+                  outlineColor={COLORS.border}
+                  activeOutlineColor={COLORS.primary}
+                  style={{ marginBottom: 12 }}
                 />
-                <Text style={styles.helperText}>
+                <Text style={{ ...STYLES.subheading, textAlign: "left", marginTop: 8 }}>
                   Selecciona fotos para crear un álbum con narrativas generadas
                   por IA
                 </Text>
@@ -200,43 +213,58 @@ export default function CreateAlbumDialog({
             )}
 
             {step === "select" && (
-              <View style={styles.selectContainer}>
-                <Text style={styles.selectedCount}>
-                  {selectedMemories.length} foto(s) seleccionada(s)
-                </Text>
-                <ScrollView style={styles.memoryList}>
+              <View style={{ flex: 1 }}>
+                <View style={{ marginBottom: 12 }}>
+                  <Text style={{ ...STYLES.subheading, textAlign: "left", marginTop: 0 }}>
+                    {selectedMemories.length} foto(s) seleccionada(s)
+                  </Text>
+                </View>
+                <ScrollView style={{ flex: 1 }}>
                   {imageMemories.length === 0 ? (
-                    <Text style={styles.emptyText}>
+                    <Text style={{ ...STYLES.subheading, textAlign: "center", marginTop: 20 }}>
                       No hay fotos disponibles. Crea algunos recuerdos primero.
                     </Text>
                   ) : (
-                    imageMemories.map((memory) => {
+                    imageMemories.map((memory, idx) => {
                       const isSelected = selectedMemories.some(
                         (m) => m.id === memory.id
                       );
 
                       return (
-                        <TouchableOpacity
-                          key={memory.id}
-                          onPress={() => handleToggleMemory(memory)}
-                          style={styles.memoryItem}
-                        >
-                          <Checkbox
-                            status={isSelected ? "checked" : "unchecked"}
-                          />
-                          {memory.mediaUrl && (
-                            <Image
-                              source={{ uri: memory.mediaUrl }}
-                              style={styles.memoryThumbnail}
-                            />
-                          )}
-                          <Text
-                            numberOfLines={2}
-                            style={styles.memoryItemTitle}
+                        <View key={memory.id}>
+                          <TouchableOpacity
+                            onPress={() => handleToggleMemory(memory)}
+                            style={{
+                              flexDirection: "row",
+                              alignItems: "center",
+                              paddingVertical: 8,
+                            }}
                           >
-                            {memory.title || "Sin título"}
-                          </Text>
-                        </TouchableOpacity>
+                            <Checkbox
+                              status={isSelected ? "checked" : "unchecked"}
+                            />
+                            {memory.mediaUrl && (
+                              <Image
+                                source={{ uri: memory.mediaUrl }}
+                                style={{
+                                  width: 50,
+                                  height: 50,
+                                  borderRadius: 4,
+                                  marginHorizontal: 12,
+                                }}
+                              />
+                            )}
+                            <Text
+                              numberOfLines={2}
+                              style={{ flex: 1, fontSize: 14 }}
+                            >
+                              {memory.title || "Sin título"}
+                            </Text>
+                          </TouchableOpacity>
+                          {idx < imageMemories.length - 1 && (
+                            <Divider style={{ backgroundColor: COLORS.border }} />
+                          )}
+                        </View>
                       );
                     })
                   )}
@@ -245,8 +273,8 @@ export default function CreateAlbumDialog({
             )}
 
             {step === "reorder" && (
-              <GestureHandlerRootView style={styles.reorderContainer}>
-                <Text style={styles.reorderHelp}>
+              <GestureHandlerRootView style={{ flex: 1 }}>
+                <Text style={{ ...STYLES.subheading, textAlign: "center", marginBottom: 12 }}>
                   Mantén presionado y arrastra para reordenar
                 </Text>
                 <DraggableFlatList
@@ -260,51 +288,109 @@ export default function CreateAlbumDialog({
                   }}
                   keyExtractor={(item) => item.id}
                   renderItem={renderDraggableItem}
-                  containerStyle={styles.draggableList}
+                  containerStyle={{ flex: 1 }}
                 />
               </GestureHandlerRootView>
             )}
 
             {isCreating && (
-              <View style={styles.loadingOverlay}>
+              <View
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: "rgba(255, 255, 255, 0.9)",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
                 <ActivityIndicator size="large" color={COLORS.primary} />
-                <Text style={styles.loadingText}>Creando álbum...</Text>
+                <Text style={{ ...STYLES.subheading, marginTop: 12 }}>Creando álbum...</Text>
               </View>
             )}
           </Dialog.Content>
 
-          <Dialog.Actions>
+          <Dialog.Actions
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              paddingHorizontal: 20,
+              paddingBottom: 12,
+              gap: 8,
+            }}
+          >
             {step === "form" && (
-              <>
-                <Button onPress={handleDismiss}>Cancelar</Button>
+              <View style={{ flex: 1 }}>
+                <CancelButton onPress={handleDismiss} disabled={isCreating} />
+              </View>
+            )}
+            {step === "form" && (
+              <View style={{ flex: 1 }}>
                 <Button
+                  mode="contained"
                   onPress={() => setStep("select")}
                   disabled={!title.trim() || isCreating}
+                  buttonColor={COLORS.primary}
+                  textColor={COLORS.white}
+                  style={{ borderRadius: 12 }}
                 >
                   Siguiente
                 </Button>
-              </>
+              </View>
             )}
 
             {step === "select" && (
-              <>
-                <Button onPress={() => setStep("form")}>Atrás</Button>
+              <View style={{ flex: 1 }}>
                 <Button
+                  mode="outlined"
+                  onPress={() => setStep("form")}
+                  disabled={isCreating}
+                  style={{ borderRadius: 12, borderColor: COLORS.border }}
+                  textColor={COLORS.primary}
+                >
+                  Atrás
+                </Button>
+              </View>
+            )}
+            {step === "select" && (
+              <View style={{ flex: 1 }}>
+                <Button
+                  mode="contained"
                   onPress={() => setStep("reorder")}
-                  disabled={selectedMemories.length === 0}
+                  disabled={selectedMemories.length === 0 || isCreating}
+                  buttonColor={COLORS.primary}
+                  textColor={COLORS.white}
+                  style={{ borderRadius: 12 }}
                 >
                   Siguiente
                 </Button>
-              </>
+              </View>
             )}
 
             {step === "reorder" && (
-              <>
-                <Button onPress={() => setStep("select")}>Atrás</Button>
-                <Button onPress={handleCreateAlbum} disabled={isCreating}>
-                  Crear Álbum
+              <View style={{ flex: 1 }}>
+                <Button
+                  mode="outlined"
+                  onPress={() => setStep("select")}
+                  disabled={isCreating}
+                  style={{ borderRadius: 12, borderColor: COLORS.border }}
+                  textColor={COLORS.primary}
+                >
+                  Atrás
                 </Button>
-              </>
+              </View>
+            )}
+            {step === "reorder" && (
+              <View style={{ flex: 1 }}>
+                <SaveButton
+                  onPress={handleCreateAlbum}
+                  text="Crear"
+                  disabled={isCreating}
+                  loading={isCreating}
+                />
+              </View>
             )}
           </Dialog.Actions>
         </Dialog>
@@ -315,9 +401,11 @@ export default function CreateAlbumDialog({
         visible={snackbarVisible && !!error}
         onDismiss={() => setSnackbarVisible(false)}
         duration={5000}
-        style={{ backgroundColor: "#FF3B30" }}
+        style={{ backgroundColor: COLORS.secondary }}
       >
+        <Text style={{ color: COLORS.white }}>
         {error || "Error al crear el álbum"}
+        </Text>
       </Snackbar>
 
       {/* Snackbar para mostrar estado de procesamiento */}
@@ -325,85 +413,30 @@ export default function CreateAlbumDialog({
         visible={!!processingAlbumTitle}
         onDismiss={dismissProcessingDialog}
         duration={3000}
+        style={{ backgroundColor: COLORS.primary }}
       >
-        ✅ Álbum {processingAlbumTitle} creado. Generando narrativas...
+        <Text style={{ color: COLORS.white }}>
+        ✅ Álbum {processingAlbumTitle} creado. Estamos generando las narrativas...
+        </Text>
       </Snackbar>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  dialog: {
-    maxHeight: "80%",
-  },
-  dialogContent: {
-    minHeight: 300,
-    maxHeight: 500,
-  },
-  input: {
-    marginBottom: 12,
-  },
-  helperText: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    marginTop: 8,
-  },
-  selectContainer: {
-    flex: 1,
-  },
-  selectedCount: {
-    fontSize: 14,
-    fontWeight: "600",
-    marginBottom: 12,
-    color: COLORS.primary,
-  },
-  memoryList: {
-    flex: 1,
-  },
-  emptyText: {
-    textAlign: "center",
-    color: COLORS.textSecondary,
-    marginTop: 20,
-  },
-  memoryItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
-  },
-  memoryThumbnail: {
-    width: 50,
-    height: 50,
-    borderRadius: 4,
-    marginRight: 12,
-  },
-  memoryItemTitle: {
-    flex: 1,
-    fontSize: 14,
-  },
-  reorderContainer: {
-    flex: 1,
-  },
-  reorderHelp: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    marginBottom: 12,
-    textAlign: "center",
-  },
-  draggableList: {
-    flex: 1,
-  },
   draggableItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F5F5F5",
+    backgroundColor: COLORS.card,
     padding: 12,
     marginBottom: 8,
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   draggableItemActive: {
-    backgroundColor: "#E0E0E0",
+    backgroundColor: `${COLORS.primary}15`,
+    borderColor: COLORS.primary,
   },
   thumbnail: {
     width: 50,
@@ -423,20 +456,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.primary,
     fontWeight: "600",
-  },
-  loadingOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: COLORS.primary,
   },
 });

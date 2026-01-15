@@ -24,6 +24,25 @@ import { useAlbumCreation } from "@/hooks/useAlbumCreation";
 import eleEmpthy from "@/assets/images/ele-idea.jpeg";
 import { Image } from "react-native";
 
+const unwrapAlbums = (response: unknown): Album[] => {
+  let cursor: unknown = response;
+
+  while (cursor !== undefined && cursor !== null) {
+    if (Array.isArray(cursor)) {
+      return cursor as Album[];
+    }
+
+    if (typeof cursor === "object" && cursor !== null && "data" in cursor) {
+      cursor = (cursor as { data?: unknown }).data;
+      continue;
+    }
+
+    break;
+  }
+
+  return [];
+};
+
 export default function AlbumsScreen() {
   const { userElepad } = useAuth();
   const router = useRouter();
@@ -55,23 +74,7 @@ export default function AlbumsScreen() {
     : [];
 
   // Extract albums from the query
-  const albums: Album[] = (() => {
-    const data = albumsQuery.data;
-    if (!data) return [];
-
-    // Handle wrapped response
-    if (typeof data === "object" && data !== null && "data" in data) {
-      const unwrapped = (data as any).data;
-      if (Array.isArray(unwrapped)) return unwrapped;
-      if (unwrapped?.data && Array.isArray(unwrapped.data))
-        return unwrapped.data;
-    }
-
-    // Handle direct array
-    if (Array.isArray(data)) return data;
-
-    return [];
-  })();
+  const albums: Album[] = unwrapAlbums(albumsQuery.data);
 
   const handleBack = useCallback(() => {
     router.back();

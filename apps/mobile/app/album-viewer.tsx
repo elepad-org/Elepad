@@ -4,7 +4,9 @@ import { ActivityIndicator, IconButton, Text } from "react-native-paper";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { COLORS } from "@/styles/base";
 import * as ScreenOrientation from "expo-screen-orientation";
-import PagerView from "react-native-pager-view";
+import PagerView, {
+  PagerViewOnPageSelectedEvent,
+} from "react-native-pager-view";
 import { useGetAlbumId, AlbumWithPages } from "@elepad/api-client";
 import AlbumPageView from "@/components/shared/AlbumPageView";
 
@@ -76,9 +78,12 @@ export default function AlbumViewerScreen() {
     router.back();
   }, [router]);
 
-  const handlePageChange = useCallback((event: any) => {
-    setCurrentPage(event.nativeEvent.position);
-  }, []);
+  const handlePageChange = useCallback(
+    (event: PagerViewOnPageSelectedEvent) => {
+      setCurrentPage(event.nativeEvent.position);
+    },
+    []
+  );
 
   if (isLoading) {
     return (

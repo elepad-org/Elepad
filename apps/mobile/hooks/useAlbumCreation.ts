@@ -148,11 +148,8 @@ export function useAlbumCreation(): UseAlbumCreationReturn {
       try {
         console.log("🎙️ Transcribiendo audio...");
 
-        const formData = new FormData();
-        formData.append("audio", data.audio);
-
         const response = await transcribeAudioApi.mutateAsync({
-          data: formData as any, // Hono/orval maneja multipart/form-data
+          data: { audio: data.audio },
         });
 
         console.log("📦 Respuesta de transcripción:", response);

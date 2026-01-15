@@ -1091,7 +1091,7 @@ export default function RecuerdosScreen() {
             </Button>
             <Button
               mode="outlined"
-              onPress={() => router.push("../albums" as any)}
+              onPress={() => router.push("../albums")}
               style={{ borderRadius: 12 }}
               icon="book-multiple"
               disabled={!groupId}
