@@ -70,6 +70,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import HighlightedMentionText from "@/components/Recuerdos/HighlightedMentionText";
 import RecuerdoDetailDialog from "@/components/Recuerdos/RecuerdoDetailDialog";
+import { BackButton } from "@/components/shared/BackButton";
 import { Portal } from "react-native-paper";
 
 const PAGE_SIZE = 20;
@@ -632,12 +633,7 @@ export default function NotificationsScreen() {
       {/* Manual Header */}
       <View style={styles.headerContainer}>
         <View style={styles.headerTop}>
-          <IconButton
-            icon="chevron-left"
-            size={24}
-            onPress={() => router.back()}
-            style={styles.backButton}
-          />
+          <BackButton size={24} />
           <Text style={styles.headerTitle}>Notificaciones</Text>
         </View>
 
