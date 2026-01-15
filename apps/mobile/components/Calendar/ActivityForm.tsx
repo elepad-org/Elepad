@@ -9,7 +9,7 @@ import { COLORS } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
 import SaveButton from "../shared/SaveButton";
 import MentionInput from "../Recuerdos/MentionInput";
-import ElderSelector from "./ElderSelector";
+import DropdownSelect from "../shared/DropdownSelect";
 import { useAuth } from "@/hooks/useAuth";
 
 type Frequency = {
@@ -32,6 +32,7 @@ type Props = {
   initial?: Partial<Activity> | null;
   familyMembers?: FamilyMember[];
   currentUserId?: string;
+  preSelectedElderId?: string | null;
 };
 
 export default function ActivityForm({
@@ -41,6 +42,7 @@ export default function ActivityForm({
   initial,
   familyMembers = [],
   currentUserId,
+  preSelectedElderId,
 }: Props) {
   const { userElepad } = useAuth();
   const isElder = userElepad?.elder ?? false;
@@ -98,16 +100,18 @@ export default function ActivityForm({
 
       // Si es un elder, assignedTo siempre es él mismo
       // Si es familiar y está editando, mantener el assignedTo existente
-      // Si es familiar y está creando, requiere seleccionar destinatario
+      // Si es familiar y está creando nueva actividad:
+      //   - Si hay un elder pre-seleccionado desde el filtro, usarlo
+      //   - Si no, requiere seleccionar destinatario manualmente
       if (isElder) {
         setAssignedTo(currentUserId || null);
       } else {
-        setAssignedTo(initial?.assignedTo || null);
+        setAssignedTo(initial?.assignedTo || preSelectedElderId || null);
       }
 
       setError(null);
     }
-  }, [visible, initial, isElder, currentUserId]);
+  }, [visible, initial, isElder, currentUserId, preSelectedElderId]);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -224,12 +228,26 @@ export default function ActivityForm({
 
             {/* Selector de destinatario - solo visible para familiares (no elders) */}
             {!isElder && elders.length > 0 && (
-              <ElderSelector
-                elders={elders}
-                selectedElderId={assignedTo}
-                onSelectElder={setAssignedTo}
-                label="Para (destinatario)"
-              />
+              <View style={styles.destinatarioWrapper}>
+                <Text style={styles.destinatarioLabel}>Para (destinatario)</Text>
+                <DropdownSelect
+                  label="Para (destinatario)"
+                  value={assignedTo || ""}
+                  options={elders.map((elder) => ({
+                    key: elder.id,
+                    label: elder.displayName,
+                    avatarUrl: elder.avatarUrl || null,
+                  }))}
+                  onSelect={(value) => setAssignedTo(value)}
+                  placeholder="Seleccionar adulto mayor"
+                  showLabel={false}
+                  buttonStyle={{
+                    backgroundColor: 'transparent',
+                    borderColor: 'transparent',
+                    borderRadius: 0,
+                  }}
+                />
+              </View>
             )}
 
             <View style={styles.inputWrapper}>
@@ -420,6 +438,19 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
     marginBottom: 16,
+  },
+  destinatarioWrapper: {
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 8,
+    marginBottom: 16,
+  },
+  destinatarioLabel: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    marginBottom: 8,
   },
   input: {
     backgroundColor: "transparent",

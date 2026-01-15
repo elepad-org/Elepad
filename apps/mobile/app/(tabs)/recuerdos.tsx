@@ -20,6 +20,7 @@ import {
   SegmentedButtons,
   TextInput,
 } from "react-native-paper";
+import DropdownSelect from "@/components/shared/DropdownSelect";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -226,14 +227,7 @@ export default function RecuerdosScreen() {
   const [snackbarError, setSnackbarError] = useState(false);
 
   const [memberFilterId, setMemberFilterId] = useState<string | null>(null);
-  const [memberMenuVisible, setMemberMenuVisible] = useState(false);
-  const [memberMenuMounted, setMemberMenuMounted] = useState(true);
-
-  const closeMemberMenu = useCallback(() => {
-    setMemberMenuVisible(false);
-    setMemberMenuMounted(false);
-    setTimeout(() => setMemberMenuMounted(true), 50);
-  }, []);
+  const [memberMenuMounted] = useState(true);
 
   const {
     data: booksResponse,
@@ -621,10 +615,6 @@ export default function RecuerdosScreen() {
     updateMemoryMutation.isPending ||
     deleteMemoryMutation.isPending;
 
-  const memberFilterLabel = memberFilterId
-    ? memberNameById[memberFilterId] || "Miembro"
-    : "Todos";
-
   const emptyTitle = memberFilterId
     ? `${
         memberNameById[memberFilterId] || "Este miembro"
@@ -661,7 +651,6 @@ export default function RecuerdosScreen() {
         if (selectedBook) {
           setSelectedBook(null);
           setMemberFilterId(null);
-          setMemberMenuVisible(false);
           setBookMenuVisible(false);
           setDialogVisible(false);
           setDetailDialogVisible(false);
@@ -1262,7 +1251,6 @@ export default function RecuerdosScreen() {
               onPress={() => {
                 setSelectedBook(null);
                 setMemberFilterId(null);
-                setMemberMenuVisible(false);
                 setBookMenuVisible(false);
                 setDialogVisible(false);
                 setDetailDialogVisible(false);
@@ -1435,7 +1423,6 @@ export default function RecuerdosScreen() {
             onPress={() => {
               setSelectedBook(null);
               setMemberFilterId(null);
-              setMemberMenuVisible(false);
               setBookMenuVisible(false);
               setDialogVisible(false);
               setDetailDialogVisible(false);
@@ -1520,84 +1507,60 @@ export default function RecuerdosScreen() {
       {/* Controles de ordenamiento y vista */}
       <View
         style={{
-          paddingHorizontal: 24,
-          paddingVertical: 12,
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
+          paddingHorizontal: 16,
+          paddingVertical: 8,
         }}
       >
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Text
-            style={{
-              fontSize: 14,
-              color: COLORS.textSecondary,
-              marginRight: 8,
-            }}
-          >
-            Ordenar:
-          </Text>
+        {/* Primera fila: Filtro de Persona */}
+        <View style={{ marginBottom: 8 }}>
+          {memberMenuMounted && (
+            <DropdownSelect
+              label="Filtrar"
+              value={memberFilterId || "all"}
+              options={[
+                { key: "all", label: "Todos", icon: "account-group" },
+                ...groupMembers.map((m) => ({
+                  key: m.id,
+                  label: m.displayName,
+                  avatarUrl: m.avatarUrl || null,
+                })),
+              ]}
+              onSelect={(value) => {
+                setMemberFilterId(value === "all" ? null : value);
+              }}
+              placeholder="Todos"
+              showLabel={false}
+            />
+          )}
+        </View>
+
+        {/* Segunda fila: Ordenar y Vista */}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
+          {/* Botón de Ordenar */}
           <IconButton
             icon={sortOrder === "desc" ? "arrow-down" : "arrow-up"}
             size={20}
             onPress={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
             mode="contained-tonal"
+            style={{ margin: 0 }}
           />
-        </View>
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          {memberMenuMounted && (
-            <Menu
-              visible={memberMenuVisible}
-              onDismiss={closeMemberMenu}
-              contentStyle={{
-                backgroundColor: COLORS.background,
-                borderRadius: 12,
-              }}
-              anchor={
-                <Button
-                  mode="outlined"
-                  onPress={() => setMemberMenuVisible(true)}
-                  style={{ borderRadius: 12, marginRight: 10 }}
-                >
-                  {memberFilterLabel}
-                </Button>
-              }
-            >
-              <Menu.Item
-                title="Todos"
-                onPress={() => {
-                  setMemberFilterId(null);
-                  closeMemberMenu();
-                }}
-              />
-              {groupMembers.map((m) => (
-                <Menu.Item
-                  key={m.id}
-                  title={m.displayName}
-                  onPress={() => {
-                    setMemberFilterId(m.id);
-                    closeMemberMenu();
-                  }}
-                />
-              ))}
-            </Menu>
-          )}
 
+          {/* Toggle de Vistas */}
           <SegmentedButtons
             value={numColumns.toString()}
             onValueChange={(value) => setNumColumns(parseInt(value))}
             buttons={[
-              {
-                value: "2",
-
-                icon: "view-grid",
-              },
-              {
-                value: "3",
-                icon: "view-comfy",
-              },
+              { value: "2", icon: "view-grid" },
+              { value: "3", icon: "view-comfy" },
             ]}
-            style={{ width: 140 }}
+            density="small"
+            style={{ maxWidth: 80 }}
             theme={{
               colors: {
                 secondaryContainer: COLORS.primary,
