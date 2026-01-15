@@ -526,7 +526,7 @@ export default function FamilyGroup() {
                     gap: 12,
                   }}
                 >
-                  <View style={{ width: "45%", maxWidth: 170 }}>
+                  <View style={{ width: 120 }}>
                     <CancelButton
                       onPress={() => {
                         setIsEditing(false);
@@ -535,7 +535,7 @@ export default function FamilyGroup() {
                       disabled={patchFamilyGroup.isPending}
                     />
                   </View>
-                  <View style={{ width: "45%", maxWidth: 170 }}>
+                  <View style={{ width: 120 }}>
                     <SaveButton
                       onPress={handleSaveGroupName}
                       loading={patchFamilyGroup.isPending}
