@@ -175,7 +175,7 @@ export default function CreateAlbumDialog({
             {step === "form" && (
               <View>
                 <TextInput
-                  label="Título del álbum *"
+                  label="Título del álbum"
                   value={title}
                   onChangeText={setTitle}
                   mode="outlined"
@@ -183,7 +183,7 @@ export default function CreateAlbumDialog({
                   style={styles.input}
                 />
                 <TextInput
-                  label="Descripción (opcional)"
+                  label="Descripción"
                   value={description}
                   onChangeText={setDescription}
                   mode="outlined"
@@ -324,7 +324,7 @@ export default function CreateAlbumDialog({
       <Snackbar
         visible={!!processingAlbumTitle}
         onDismiss={dismissProcessingDialog}
-        duration={5000}
+        duration={3000}
       >
         ✅ Álbum "{processingAlbumTitle}" creado. Generando narrativas...
       </Snackbar>

@@ -47,7 +47,6 @@ import { uriToBlob } from "@/lib/uriToBlob";
 import RecuerdoItemComponent from "@/components/Recuerdos/RecuerdoItemComponent";
 import NuevoRecuerdoDialogComponent from "@/components/Recuerdos/NuevoRecuerdoDialogComponent";
 import RecuerdoDetailDialog from "@/components/Recuerdos/RecuerdoDetailDialog";
-import CreateAlbumDialog from "@/components/Recuerdos/CreateAlbumDialog";
 import ChestIcon from "@/components/Recuerdos/ChestIcon";
 import BookCover from "@/components/Recuerdos/BookCover";
 import eleEmpthy from "@/assets/images/ele-idea.jpeg";
@@ -227,7 +226,6 @@ export default function RecuerdosScreen() {
   const [memberFilterId, setMemberFilterId] = useState<string | null>(null);
   const [memberMenuVisible, setMemberMenuVisible] = useState(false);
   const [memberMenuMounted, setMemberMenuMounted] = useState(true);
-  const [albumDialogVisible, setAlbumDialogVisible] = useState(false);
 
   const closeMemberMenu = useCallback(() => {
     setMemberMenuVisible(false);
@@ -1096,31 +1094,35 @@ export default function RecuerdosScreen() {
             borderBottomColor: COLORS.border,
             flexDirection: "row",
             justifyContent: "space-between",
-            alignItems: "center",
+            alignItems: "stretch",
           }}
         >
           <Text style={STYLES.superHeading}>Recuerdos</Text>
-          <Button
-            mode="contained"
-            onPress={openCreateBookDialog}
-            style={{ ...STYLES.miniButton }}
-            icon="plus"
-            disabled={!groupId}
-          >
-            Nuevo
-          </Button>
+          <View style={{ flexDirection: "column", gap: 4 }}>
+            <Button
+              mode="contained"
+              onPress={openCreateBookDialog}
+              style={{
+                borderRadius: 12,
+                backgroundColor: "#5b507a",
+                alignItems: "center",
+              }}
+              icon="plus"
+              disabled={!groupId}
+            >
+              Nuevo
+            </Button>
+            <Button
+              mode="outlined"
+              onPress={() => router.push("../albums" as any)}
+              style={{ borderRadius: 12 }}
+              icon="book-multiple"
+              disabled={!groupId}
+            >
+              Álbumes
+            </Button>
+          </View>
         </View>
-
-        <Button
-                mode="contained"
-                onPress={() => setAlbumDialogVisible(true)}
-                buttonColor={COLORS.primary}
-                textColor={COLORS.white}
-                style={{ borderRadius: 12 }}
-                icon="book-multiple"
-              >
-                Crear Album
-              </Button>
 
         {isBooksLoading && books.length === 0 ? (
           <View style={{ ...STYLES.center, paddingHorizontal: 24 }}>
@@ -1299,8 +1301,7 @@ export default function RecuerdosScreen() {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                //justifyContent: "flex-start",
-                gap: 8,
+                justifyContent: "flex-end",
               }}
             >
               <Button
@@ -1312,16 +1313,6 @@ export default function RecuerdosScreen() {
                 icon="plus"
               >
                 Agregar
-              </Button>
-              <Button
-                mode="contained"
-                onPress={() => setAlbumDialogVisible(true)}
-                buttonColor={COLORS.primary}
-                textColor={COLORS.white}
-                style={{ borderRadius: 12 }}
-                icon="book-multiple"
-              >
-                Crear Album
               </Button>
               {menuMounted && (
                 <Menu
@@ -1720,13 +1711,6 @@ export default function RecuerdosScreen() {
       </Portal>
 
       {renderBookDialogs()}
-
-      {/* Diálogo para crear álbum con IA */}
-      <CreateAlbumDialog
-        visible={albumDialogVisible}
-        onDismiss={() => setAlbumDialogVisible(false)}
-        memories={memories}
-      />
 
       {/* Diálogo de detalle del recuerdo */}
       <RecuerdoDetailDialog
