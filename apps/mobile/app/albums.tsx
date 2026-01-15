@@ -21,7 +21,7 @@ import { useGetMemories, Album } from "@elepad/api-client";
 import CreateAlbumDialog from "@/components/Recuerdos/CreateAlbumDialog";
 import AlbumCard from "@/components/shared/AlbumCard";
 import { useAlbumCreation } from "@/hooks/useAlbumCreation";
-import eleEmpthy from "@/assets/images/ele-idea.jpeg";
+import eleEmpthy from "@/assets/images/ele-idea.png";
 import { Image } from "react-native";
 
 const unwrapAlbums = (response: unknown): Album[] => {

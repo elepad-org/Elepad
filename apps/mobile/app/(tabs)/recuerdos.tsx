@@ -53,7 +53,7 @@ import ChestIcon from "@/components/Recuerdos/ChestIcon";
 import SaveButton from "@/components/shared/SaveButton";
 import CancelButton from "@/components/shared/CancelButton";
 import BookCover from "@/components/Recuerdos/BookCover";
-import eleEmpthy from "@/assets/images/ele-idea.jpeg";
+import eleEmpthy from "@/assets/images/ele-fotografiando.png";
 
 // Tipos de recuerdos
 type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
@@ -956,7 +956,7 @@ export default function RecuerdosScreen() {
               paddingBottom: 30,
               paddingHorizontal: 24,
               paddingTop: 10,
-              justifyContent: 'space-between',
+              justifyContent: "space-between",
             }}
           >
             <View style={{ width: 120 }}>
