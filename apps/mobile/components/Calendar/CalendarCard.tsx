@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
 import { Text, IconButton } from "react-native-paper";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
+import Animated, { FadeInUp } from "react-native-reanimated";
 import DropdownSelect from "../shared/DropdownSelect";
 import { Activity, useGetFrequencies } from "@elepad/api-client";
 import { COLORS } from "@/styles/base";
@@ -29,7 +30,7 @@ function expandRecurringActivity(
   activity: Activity,
   startDate: Date,
   endDate: Date,
-  frequencies: Record<string, { label: string; rrule: string | null }>,
+  frequencies: Record<string, { label: string; rrule: string | null }>
 ): string[] {
   // Si no tiene frecuencia, solo retorna el día de inicio
   if (!activity.frequencyId || !frequencies[activity.frequencyId]) {
@@ -122,7 +123,9 @@ function expandRecurringActivity(
     }
   }
 
-  return dates.length > 0 ? dates : [toLocalDateString(new Date(activity.startsAt))];
+  return dates.length > 0
+    ? dates
+    : [toLocalDateString(new Date(activity.startsAt))];
 }
 
 interface CalendarCardProps {
@@ -217,11 +220,13 @@ export default function CalendarCard(props: CalendarCardProps) {
   // Preparar lista de miembros de la familia para menciones
   const familyMembers = useMemo(() => {
     if (!groupInfo) return [];
-    return groupInfo.members?.map((member) => ({
-      id: member.id,
-      displayName: member.displayName || "Usuario",
-      avatarUrl: member.avatarUrl || null,
-    })) || [];
+    return (
+      groupInfo.members?.map((member) => ({
+        id: member.id,
+        displayName: member.displayName || "Usuario",
+        avatarUrl: member.avatarUrl || null,
+      })) || []
+    );
   }, [groupInfo]);
 
   // Preparar lista de adultos mayores para el filtro
@@ -241,7 +246,7 @@ export default function CalendarCard(props: CalendarCardProps) {
     visible: boolean;
     message: string;
   }>({ visible: false, message: "" });
-  
+
   // Calcular rango de fechas para cargar completaciones (3 meses antes y después)
   const dateRange = useMemo(() => {
     const now = new Date();
@@ -264,7 +269,7 @@ export default function CalendarCard(props: CalendarCardProps) {
   // Cargar historial de rachas - Solo si el usuario es elder
   const streakHistoryQuery = useStreakHistory(
     userElepad?.elder ? dateRange.startDate : undefined,
-    userElepad?.elder ? dateRange.endDate : undefined,
+    userElepad?.elder ? dateRange.endDate : undefined
   );
 
   // Mutation para toggle de completaciones
@@ -330,7 +335,7 @@ export default function CalendarCard(props: CalendarCardProps) {
         ev,
         startRange,
         endRange,
-        frequenciesMap,
+        frequenciesMap
       );
 
       // Agregar la actividad a cada fecha expandida
@@ -370,9 +375,9 @@ export default function CalendarCard(props: CalendarCardProps) {
   const marked = useMemo(() => {
     const obj: Record<
       string,
-      { 
-        marked?: boolean; 
-        dotColor?: string; 
+      {
+        marked?: boolean;
+        dotColor?: string;
         selected?: boolean;
         customStyles?: {
           container?: {
@@ -383,14 +388,16 @@ export default function CalendarCard(props: CalendarCardProps) {
         };
       }
     > = {};
-    
+
     // Obtener las fechas del historial de rachas - Solo si es elder
-    const streakDays = userElepad?.elder ? (streakHistoryQuery.data?.dates || []) : [];
-    
+    const streakDays = userElepad?.elder
+      ? streakHistoryQuery.data?.dates || []
+      : [];
+
     for (const d of Object.keys(eventsByDate)) {
       obj[d] = { marked: true, dotColor: COLORS.primary };
     }
-    
+
     // Agregar círculos naranjas para días con racha - Solo para usuarios elder
     if (userElepad?.elder) {
       for (const streakDay of streakDays) {
@@ -400,14 +407,14 @@ export default function CalendarCard(props: CalendarCardProps) {
         }
         obj[day].customStyles = {
           container: {
-            borderColor: '#FF6B35',
+            borderColor: "#FF6B35",
             borderWidth: 2,
             borderRadius: 18,
           },
         };
       }
     }
-    
+
     obj[selectedDay] = obj[selectedDay]
       ? { ...obj[selectedDay], selected: true }
       : { selected: true };
@@ -508,7 +515,7 @@ export default function CalendarCard(props: CalendarCardProps) {
         <Calendar
           onDayPress={(d: DateData) => setSelectedDay(d.dateString)}
           markedDates={marked}
-          markingType={'custom'}
+          markingType={"custom"}
           enableSwipeMonths
           style={styles.calendar}
           theme={{
@@ -582,8 +589,8 @@ export default function CalendarCard(props: CalendarCardProps) {
             {selectedElderId
               ? `No hay actividades programadas para ${elders.find((e) => e.id === selectedElderId)?.displayName || "este usuario"} ${selectedDay === today ? "hoy" : "en este día"}.`
               : selectedDay === today
-              ? "No hay eventos para hoy."
-              : "No hay eventos para este día."}
+                ? "No hay eventos para hoy."
+                : "No hay eventos para este día."}
           </Text>
         </View>
       ) : (
@@ -594,23 +601,25 @@ export default function CalendarCard(props: CalendarCardProps) {
             const completed = completionsByDateMap[key] || false;
             return `${i.id}-${completed}`;
           }}
-          renderItem={({ item }) => (
-            <ActivityItem
-              item={item}
-              idUser={idUser}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              onToggleComplete={() => handleToggleCompletion(item)}
-              isOwnerOfGroup={isOwnerOfGroup}
-              groupInfo={groupInfo}
-              completed={(() => {
-                const key = `${item.id}_${selectedDay}`;
-                return completionsByDateMap[key] || false;
-              })()}
-              familyMembers={familyMembers}
-              shouldOpen={activityToView === item.id}
-              onOpened={onActivityViewed}
-            />
+          renderItem={({ item, index }) => (
+            <Animated.View entering={FadeInUp.delay(index * 50).springify()}>
+              <ActivityItem
+                item={item}
+                idUser={idUser}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onToggleComplete={() => handleToggleCompletion(item)}
+                isOwnerOfGroup={isOwnerOfGroup}
+                groupInfo={groupInfo}
+                completed={(() => {
+                  const key = `${item.id}_${selectedDay}`;
+                  return completionsByDateMap[key] || false;
+                })()}
+                familyMembers={familyMembers}
+                shouldOpen={activityToView === item.id}
+                onOpened={onActivityViewed}
+              />
+            </Animated.View>
           )}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
