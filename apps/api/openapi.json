@@ -1171,7 +1171,8 @@
             }
           },
           "isFocusGame": {
-            "type": "boolean"
+            "type": "boolean",
+            "nullable": true
           },
           "gameType": {
             "type": "string"
@@ -1205,7 +1206,8 @@
           "score",
           "success",
           "moves",
-          "meta"
+          "meta",
+          "isFocusGame"
         ]
       },
       "AttemptStats": {

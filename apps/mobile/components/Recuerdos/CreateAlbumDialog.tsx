@@ -4,7 +4,6 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
-  StyleSheet,
 } from "react-native";
 import {
   Portal,
@@ -12,7 +11,6 @@ import {
   TextInput,
   Button,
   Text,
-  IconButton,
   Checkbox,
   ActivityIndicator,
   Snackbar,
@@ -23,11 +21,11 @@ import { COLORS, STYLES } from "@/styles/base";
 import { useAlbumCreation } from "@/hooks/useAlbumCreation";
 import SaveButton from "../shared/SaveButton";
 import CancelButton from "../shared/CancelButton";
-import DraggableFlatList, {
-  RenderItemParams,
-  ScaleDecorator,
-} from "react-native-draggable-flatlist";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+// import DraggableFlatList, {
+//   RenderItemParams,
+//   ScaleDecorator,
+// } from "react-native-draggable-flatlist";
+// import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 interface CreateAlbumDialogProps {
   visible: boolean;
@@ -121,7 +119,7 @@ export default function CreateAlbumDialog({
     }
   };
 
-  const renderDraggableItem = ({
+  /* const renderDraggableItem = ({
     item,
     drag,
     isActive,
@@ -149,7 +147,7 @@ export default function CreateAlbumDialog({
         </TouchableOpacity>
       </ScaleDecorator>
     );
-  };
+  }; */
 
   // Mostrar snackbar si hay error, falta implementar
   /* const showError = () => {
@@ -273,24 +271,14 @@ export default function CreateAlbumDialog({
             )}
 
             {step === "reorder" && (
-              <GestureHandlerRootView style={{ flex: 1 }}>
+              <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
                 <Text style={{ ...STYLES.subheading, textAlign: "center", marginBottom: 12 }}>
-                  Mantén presionado y arrastra para reordenar
+                  Función de reordenamiento temporalmente deshabilitada
                 </Text>
-                <DraggableFlatList
-                  data={selectedMemories}
-                  onDragEnd={({ data }) => {
-                    const reordered = data.map((item, idx) => ({
-                      ...item,
-                      order: idx,
-                    }));
-                    setSelectedMemories(reordered);
-                  }}
-                  keyExtractor={(item) => item.id}
-                  renderItem={renderDraggableItem}
-                  containerStyle={{ flex: 1 }}
-                />
-              </GestureHandlerRootView>
+                <Text style={{ fontSize: 14, color: COLORS.textSecondary, textAlign: "center" }}>
+                  Las fotos se ordenarán en el orden en que fueron seleccionadas
+                </Text>
+              </View>
             )}
 
             {isCreating && (
@@ -423,6 +411,7 @@ export default function CreateAlbumDialog({
   );
 }
 
+/* Estilos temporalmente deshabilitados
 const styles = StyleSheet.create({
   draggableItem: {
     flexDirection: "row",
@@ -458,3 +447,4 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 });
+*/

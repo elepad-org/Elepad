@@ -489,7 +489,8 @@ export interface AttemptWithUser {
   moves: number | null;
   /** @nullable */
   meta: AttemptWithUserMeta;
-  isFocusGame?: boolean;
+  /** @nullable */
+  isFocusGame: boolean | null;
   gameType?: string;
   user?: AttemptWithUserUser;
 }
@@ -5175,7 +5176,7 @@ export const getPostAlbumTranscribeUrl = () => {
 
 export const postAlbumTranscribe = async (
   postAlbumTranscribeBody: PostAlbumTranscribeBody,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postAlbumTranscribeResponse> => {
   const formData = new FormData();
   formData.append(`audio`, postAlbumTranscribeBody.audio);
@@ -5189,7 +5190,7 @@ export const postAlbumTranscribe = async (
 
 export const getPostAlbumTranscribeMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postAlbumTranscribe>>,
@@ -5241,7 +5242,7 @@ export const usePostAlbumTranscribe = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postAlbumTranscribe>>,
   TError,
@@ -5294,7 +5295,7 @@ export const getPostAlbumCreateUrl = () => {
 
 export const postAlbumCreate = async (
   createAlbumRequest: CreateAlbumRequest,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postAlbumCreateResponse> => {
   return rnFetch<postAlbumCreateResponse>(getPostAlbumCreateUrl(), {
     ...options,
@@ -5306,7 +5307,7 @@ export const postAlbumCreate = async (
 
 export const getPostAlbumCreateMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postAlbumCreate>>,
@@ -5358,7 +5359,7 @@ export const usePostAlbumCreate = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postAlbumCreate>>,
   TError,
@@ -5415,7 +5416,7 @@ export const getGetAlbumUrl = (params?: GetAlbumParams) => {
 
 export const getAlbum = async (
   params?: GetAlbumParams,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getAlbumResponse> => {
   return rnFetch<getAlbumResponse>(getGetAlbumUrl(params), {
     ...options,
@@ -5429,7 +5430,7 @@ export const getGetAlbumQueryKey = (params?: GetAlbumParams) => {
 
 export const getGetAlbumQueryOptions = <
   TData = Awaited<ReturnType<typeof getAlbum>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetAlbumParams,
   options?: {
@@ -5437,7 +5438,7 @@ export const getGetAlbumQueryOptions = <
       UseQueryOptions<Awaited<ReturnType<typeof getAlbum>>, TError, TData>
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -5461,7 +5462,7 @@ export type GetAlbumQueryError = Error;
 
 export function useGetAlbum<
   TData = Awaited<ReturnType<typeof getAlbum>>,
-  TError = Error,
+  TError = Error
 >(
   params: undefined | GetAlbumParams,
   options: {
@@ -5478,13 +5479,13 @@ export function useGetAlbum<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetAlbum<
   TData = Awaited<ReturnType<typeof getAlbum>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetAlbumParams,
   options?: {
@@ -5501,13 +5502,13 @@ export function useGetAlbum<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetAlbum<
   TData = Awaited<ReturnType<typeof getAlbum>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetAlbumParams,
   options?: {
@@ -5516,14 +5517,14 @@ export function useGetAlbum<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetAlbum<
   TData = Awaited<ReturnType<typeof getAlbum>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetAlbumParams,
   options?: {
@@ -5532,7 +5533,7 @@ export function useGetAlbum<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -5589,7 +5590,7 @@ export const getGetAlbumIdUrl = (id: string) => {
 
 export const getAlbumId = async (
   id: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getAlbumIdResponse> => {
   return rnFetch<getAlbumIdResponse>(getGetAlbumIdUrl(id), {
     ...options,
@@ -5603,7 +5604,7 @@ export const getGetAlbumIdQueryKey = (id?: string) => {
 
 export const getGetAlbumIdQueryOptions = <
   TData = Awaited<ReturnType<typeof getAlbumId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options?: {
@@ -5611,7 +5612,7 @@ export const getGetAlbumIdQueryOptions = <
       UseQueryOptions<Awaited<ReturnType<typeof getAlbumId>>, TError, TData>
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -5640,7 +5641,7 @@ export type GetAlbumIdQueryError = Error;
 
 export function useGetAlbumId<
   TData = Awaited<ReturnType<typeof getAlbumId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options: {
@@ -5657,13 +5658,13 @@ export function useGetAlbumId<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetAlbumId<
   TData = Awaited<ReturnType<typeof getAlbumId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options?: {
@@ -5680,13 +5681,13 @@ export function useGetAlbumId<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetAlbumId<
   TData = Awaited<ReturnType<typeof getAlbumId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options?: {
@@ -5695,14 +5696,14 @@ export function useGetAlbumId<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetAlbumId<
   TData = Awaited<ReturnType<typeof getAlbumId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options?: {
@@ -5711,7 +5712,7 @@ export function useGetAlbumId<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {

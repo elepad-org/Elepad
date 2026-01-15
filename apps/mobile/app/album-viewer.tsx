@@ -1,9 +1,9 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import { View, StyleSheet, StatusBar } from "react-native";
 import { ActivityIndicator, IconButton, Text } from "react-native-paper";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { COLORS } from "@/styles/base";
-import * as ScreenOrientation from "expo-screen-orientation";
+// import * as ScreenOrientation from "expo-screen-orientation";
 import PagerView, {
   PagerViewOnPageSelectedEvent,
 } from "react-native-pager-view";
@@ -42,7 +42,7 @@ export default function AlbumViewerScreen() {
   const pages = album?.pages || [];
 
   // Lock orientation to landscape on mount
-  useEffect(() => {
+  /* useEffect(() => {
     //let isMounted = true;
 
     const lockOrientation = async () => {
@@ -64,17 +64,17 @@ export default function AlbumViewerScreen() {
         console.error("Error unlocking orientation:", err);
       });
     };
-  }, []);
+  }, []); */
 
   const handleClose = useCallback(async () => {
     // Unlock orientation before navigating back
-    try {
+    /* try {
       await ScreenOrientation.lockAsync(
         ScreenOrientation.OrientationLock.PORTRAIT
       );
     } catch (err) {
       console.error("Error restoring orientation:", err);
-    }
+    } */
     router.back();
   }, [router]);
 

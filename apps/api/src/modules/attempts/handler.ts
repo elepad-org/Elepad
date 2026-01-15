@@ -200,6 +200,7 @@ attemptsApp.openapi(
 );
 
 // Listar intentos del usuario actual O de un miembro del grupo (para supervisores)
+// @ts-expect-error - Complex type inference with Hono + Zod
 attemptsApp.openapi(
   {
     method: "get",

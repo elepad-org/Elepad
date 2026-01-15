@@ -16,7 +16,7 @@ export const AttemptSchema = z
     success: z.boolean().nullable(),
     moves: z.number().int().nullable(),
     meta: z.record(z.string(), z.any()).nullable(),
-    isFocusGame: z.boolean().optional(), // TODO: revisar
+    isFocusGame: z.boolean().nullable(),
   })
   .openapi("Attempt");
 
@@ -37,7 +37,7 @@ export const AttemptWithUserSchema = z
     success: z.boolean().nullable(),
     moves: z.number().int().nullable(),
     meta: z.record(z.string(), z.any()).nullable(),
-    isFocusGame: z.boolean().optional(),
+    isFocusGame: z.boolean().nullable(),
     gameType: z.string().optional(), // Tipo de juego determinado dinámicamente
     user: z.object({
       displayName: z.string(),
