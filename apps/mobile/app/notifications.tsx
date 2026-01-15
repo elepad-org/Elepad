@@ -633,7 +633,7 @@ export default function NotificationsScreen() {
       {/* Manual Header */}
       <View style={styles.headerContainer}>
         <View style={styles.headerTop}>
-          <BackButton size={24} />
+          <BackButton size={28} />
           <Text style={styles.headerTitle}>Notificaciones</Text>
         </View>
 
@@ -1043,7 +1043,7 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     paddingHorizontal: 16,
-    paddingTop: 8,
+    paddingTop: 16,
     paddingBottom: 8,
     backgroundColor: COLORS.background,
   },
@@ -1058,7 +1058,7 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "bold",
     color: COLORS.text,
     letterSpacing: -0.5,
