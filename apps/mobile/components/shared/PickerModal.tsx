@@ -1,4 +1,11 @@
-import { View, ScrollView, TouchableOpacity, Image, ViewStyle } from "react-native";
+import {
+  View,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  ViewStyle,
+} from "react-native";
+import Animated, { FadeInLeft } from "react-native-reanimated";
 import { Portal, Surface, Text } from "react-native-paper";
 import { COLORS } from "@/styles/base";
 
@@ -93,83 +100,87 @@ export default function PickerModal({
                 {title}
               </Text>
               {options.map((option, index) => (
-                <TouchableOpacity
+                <Animated.View
+                  entering={FadeInLeft.delay(index * 30).springify()}
                   key={option.id}
-                  onPress={() => onSelect(option)}
-                  style={{
-                    paddingHorizontal: 16,
-                    paddingVertical: 12,
-                    borderRadius: 8,
-                    backgroundColor:
-                      index % 2 === 0
-                        ? "transparent"
-                        : COLORS.backgroundSecondary,
-                  }}
                 >
-                  <View
+                  <TouchableOpacity
+                    onPress={() => onSelect(option)}
                     style={{
-                      flexDirection: "row",
-                      alignItems: "center",
+                      paddingHorizontal: 16,
+                      paddingVertical: 12,
+                      borderRadius: 8,
+                      backgroundColor:
+                        index % 2 === 0
+                          ? "transparent"
+                          : COLORS.backgroundSecondary,
                     }}
                   >
-                    {option.icon ? (
-                      <View
-                        style={{
-                          width: 32,
-                          height: 32,
-                          borderRadius: 16,
-                          backgroundColor: COLORS.backgroundSecondary,
-                          alignItems: "center",
-                          justifyContent: "center",
-                          marginRight: 12,
-                        }}
-                      >
-                        {option.icon}
-                      </View>
-                    ) : option.avatarUrl ? (
-                      <Image
-                        source={{ uri: option.avatarUrl }}
-                        style={{
-                          width: 32,
-                          height: 32,
-                          borderRadius: 16,
-                          marginRight: 12,
-                        }}
-                      />
-                    ) : (
-                      <View
-                        style={{
-                          width: 32,
-                          height: 32,
-                          borderRadius: 16,
-                          backgroundColor: COLORS.primary,
-                          alignItems: "center",
-                          justifyContent: "center",
-                          marginRight: 12,
-                        }}
-                      >
-                        <Text
-                          style={{
-                            color: COLORS.white,
-                            fontSize: 14,
-                            fontWeight: "600",
-                          }}
-                        >
-                          {option.label.charAt(0).toUpperCase()}
-                        </Text>
-                      </View>
-                    )}
-                    <Text
+                    <View
                       style={{
-                        fontSize: 16,
-                        color: COLORS.text,
-                        fontWeight: "500",
+                        flexDirection: "row",
+                        alignItems: "center",
                       }}
                     >
-                      {option.label}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
+                      {option.icon ? (
+                        <View
+                          style={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: 16,
+                            backgroundColor: COLORS.backgroundSecondary,
+                            alignItems: "center",
+                            justifyContent: "center",
+                            marginRight: 12,
+                          }}
+                        >
+                          {option.icon}
+                        </View>
+                      ) : option.avatarUrl ? (
+                        <Image
+                          source={{ uri: option.avatarUrl }}
+                          style={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: 16,
+                            marginRight: 12,
+                          }}
+                        />
+                      ) : (
+                        <View
+                          style={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: 16,
+                            backgroundColor: COLORS.primary,
+                            alignItems: "center",
+                            justifyContent: "center",
+                            marginRight: 12,
+                          }}
+                        >
+                          <Text
+                            style={{
+                              color: COLORS.white,
+                              fontSize: 14,
+                              fontWeight: "600",
+                            }}
+                          >
+                            {option.label.charAt(0).toUpperCase()}
+                          </Text>
+                        </View>
+                      )}
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          color: COLORS.text,
+                          fontWeight: "500",
+                        }}
+                      >
+                        {option.label}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                </Animated.View>
               ))}
             </View>
           </ScrollView>
