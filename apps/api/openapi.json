@@ -1112,6 +1112,102 @@
           "durationMs"
         ]
       },
+      "AttemptWithUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sudokuPuzzleId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "memoryPuzzleId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "logicPuzzleId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "durationMs": {
+            "type": "integer",
+            "nullable": true
+          },
+          "score": {
+            "type": "integer",
+            "nullable": true
+          },
+          "success": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "moves": {
+            "type": "integer",
+            "nullable": true
+          },
+          "meta": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": {
+              "nullable": true
+            }
+          },
+          "isFocusGame": {
+            "type": "boolean"
+          },
+          "gameType": {
+            "type": "string"
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "displayName": {
+                "type": "string"
+              },
+              "avatarUrl": {
+                "type": "string",
+                "nullable": true
+              }
+            },
+            "required": [
+              "displayName",
+              "avatarUrl"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "sudokuPuzzleId",
+          "memoryPuzzleId",
+          "logicPuzzleId",
+          "startedAt",
+          "finishedAt",
+          "durationMs",
+          "score",
+          "success",
+          "moves",
+          "meta"
+        ]
+      },
       "AttemptStats": {
         "type": "object",
         "properties": {
@@ -4446,15 +4542,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "id"
-                    ]
+                    "$ref": "#/components/schemas/AttemptWithUser"
                   }
                 }
               }

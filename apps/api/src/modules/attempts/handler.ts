@@ -4,6 +4,7 @@ import {
   StartAttemptSchema,
   FinishAttemptSchema,
   AttemptStatsSchema,
+  AttemptWithUserSchema,
 } from "./schema";
 import { GameTypeEnum } from "../puzzles/schema";
 import { openApiErrorResponse } from "@/utils/api-error";
@@ -216,7 +217,7 @@ attemptsApp.openapi(
       200: {
         description: "Lista de intentos del usuario",
         content: {
-          "application/json": { schema: z.array(z.object({ id: z.string() })) },
+          "application/json": { schema: z.array(AttemptWithUserSchema) },
         },
       },
       403: openApiErrorResponse("No tienes permisos para ver los datos de este usuario"),

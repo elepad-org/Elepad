@@ -22,6 +22,32 @@ export const AttemptSchema = z
 
 export type Attempt = z.infer<typeof AttemptSchema>;
 
+// Schema para un intento con información del usuario
+export const AttemptWithUserSchema = z
+  .object({
+    id: z.uuid(),
+    userId: z.uuid(),
+    sudokuPuzzleId: z.uuid().nullable(),
+    memoryPuzzleId: z.uuid().nullable(),
+    logicPuzzleId: z.uuid().nullable(),
+    startedAt: z.string().datetime(),
+    finishedAt: z.string().datetime().nullable(),
+    durationMs: z.number().int().nullable(),
+    score: z.number().int().nullable(),
+    success: z.boolean().nullable(),
+    moves: z.number().int().nullable(),
+    meta: z.record(z.string(), z.any()).nullable(),
+    isFocusGame: z.boolean().optional(),
+    gameType: z.string().optional(), // Tipo de juego determinado dinámicamente
+    user: z.object({
+      displayName: z.string(),
+      avatarUrl: z.string().nullable(),
+    }).optional(), // Información del usuario que jugó
+  })
+  .openapi("AttemptWithUser");
+
+export type AttemptWithUser = z.infer<typeof AttemptWithUserSchema>;
+
 // Schema para crear un nuevo intento
 export const StartAttemptSchema = z
   .object({

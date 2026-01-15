@@ -26,18 +26,32 @@ import {
   GetFamilyGroupIdGroupMembers200,
 } from "@elepad/api-client";
 import { useRouter } from "expo-router";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import StreakCounter from "@/components/StreakCounter";
 import HighlightedMentionText from "@/components/Recuerdos/HighlightedMentionText";
 import { useNotifications } from "@/hooks/useNotifications";
+import { GAMES_INFO } from "@/constants/gamesInfo";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+// Helper para obtener info del juego
+const getGameInfo = (gameType: string) => {
+  const gameMap: Record<string, { name: string; emoji: string }> = {
+    memory: { name: GAMES_INFO.memory?.title || "Memoria", emoji: "🧠" },
+    logic: { name: GAMES_INFO.net?.title || "NET", emoji: "🧩" },
+    sudoku: { name: GAMES_INFO.sudoku?.title || "Sudoku", emoji: "🔢" },
+    focus: { name: GAMES_INFO.focus?.title || "Focus", emoji: "🎯" },
+  };
+  return gameMap[gameType] || { name: "Juego", emoji: "🎮" };
+};
 
 export default function HomeScreen() {
   const { userElepad, userElepadLoading } = useAuth();
   const router = useRouter();
   const { unreadCount } = useNotifications();
+  const queryClient = useQueryClient();
 
   // Fetch today's activities
   const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(
@@ -61,12 +75,10 @@ export default function HomeScreen() {
 
   // Fetch recent memories
   const memoriesQuery = useGetMemories(
-    userElepad?.groupId
-      ? { limit: 1, groupId: userElepad.groupId }
-      : { limit: 1 },
+    { limit: 1, groupId: userElepad?.groupId || "" },
     {
       query: {
-        enabled: !!userElepad,
+        enabled: !!userElepad?.groupId,
       },
     }
   );
@@ -162,6 +174,16 @@ export default function HomeScreen() {
     if (!Array.isArray(memories)) return null;
     return memories[0] || null;
   }, [memoriesQuery.data]);
+
+  // Invalidar queries cuando cambia el groupId
+  useEffect(() => {
+    if (userElepad?.groupId) {
+      // Invalidar las queries relacionadas con el grupo para forzar refetch
+      queryClient.invalidateQueries({ queryKey: ['getMemories'] });
+      queryClient.invalidateQueries({ queryKey: ['getActivitiesFamilyCodeIdFamilyGroup'] });
+      queryClient.invalidateQueries({ queryKey: ['getFamilyGroupIdGroupMembers'] });
+    }
+  }, [userElepad?.groupId, queryClient]);
 
   if (userElepadLoading || !userElepad) {
     return (
@@ -354,7 +376,10 @@ export default function HomeScreen() {
             )}
           </Pressable>
         ) : (
-          <View style={styles.memoryCardEmpty}>
+          <Pressable
+            style={styles.memoryCardEmpty}
+            onPress={() => router.push("/(tabs)/recuerdos")}
+          >
             <IconButton
               icon="heart-outline"
               size={48}
@@ -372,7 +397,7 @@ export default function HomeScreen() {
             >
               Crear recuerdo
             </Button>
-          </View>
+          </Pressable>
         )}
 
         {/* Contador de Racha - Solo para usuarios elder */}
@@ -457,7 +482,16 @@ export default function HomeScreen() {
               <Text style={styles.emptyText}>No hay eventos próximos</Text>
               <Button
                 mode="outlined"
-                onPress={() => router.push("/calendar")}
+                onPress={() => {
+                  // Navegar usando el mismo patrón que notificaciones
+                  router.replace({
+                    pathname: "/(tabs)/home",
+                    params: {
+                      tab: "calendar",
+                      openForm: "true",
+                    },
+                  });
+                }}
                 style={styles.emptyButtonOutline}
                 labelStyle={{ color: COLORS.primary }}
               >
@@ -482,23 +516,42 @@ export default function HomeScreen() {
             >
               <View style={styles.gameIcon}>
                 <Text style={styles.gameEmoji}>
-                  {lastAttempt.gameType === "memory" ? "🧠" : "🧩"}
+                  {getGameInfo(lastAttempt.gameType || "").emoji}
                 </Text>
               </View>
               <View style={styles.gameInfo}>
                 <Text style={styles.gameName}>
-                  {lastAttempt.gameType === "memory"
-                    ? "Juego de Memoria"
-                    : "Juego NET"}
+                  {getGameInfo(lastAttempt.gameType || "").name}
                 </Text>
                 <Text style={styles.gameTime}>
-                  {new Date(lastAttempt.createdAt).toLocaleDateString("es", {
+                  {new Date(lastAttempt.startedAt).toLocaleDateString("es", {
                     day: "numeric",
                     month: "long",
                     hour: "2-digit",
                     minute: "2-digit",
                   })}
                 </Text>
+                {/* Mostrar quién jugó solo si el usuario actual NO es elder (es ayudante) */}
+                {!userElepad?.elder && lastAttempt.user && (
+                  <View style={styles.playerInfo}>
+                    {lastAttempt.user.avatarUrl ? (
+                      <Avatar.Image
+                        size={20}
+                        source={{ uri: lastAttempt.user.avatarUrl }}
+                        style={styles.playerAvatar}
+                      />
+                    ) : (
+                      <Avatar.Text
+                        size={20}
+                        label={lastAttempt.user.displayName.substring(0, 2).toUpperCase()}
+                        style={styles.playerAvatar}
+                      />
+                    )}
+                    <Text style={styles.playerName}>
+                      {lastAttempt.user.displayName}
+                    </Text>
+                  </View>
+                )}
               </View>
               <View style={styles.gameScore}>
                 <Text style={styles.scoreLabel}>PUNTOS</Text>
@@ -737,12 +790,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 12,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: "bold",
     color: COLORS.text,
+    marginBottom: 0,
   },
   sectionLink: {
     fontSize: 14,
@@ -817,6 +871,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderRadius: 16,
     padding: 18,
+    marginTop: 10,
     gap: 16,
     ...SHADOWS.card,
   },
@@ -844,6 +899,20 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: COLORS.textSecondary,
   },
+  playerInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 6,
+    gap: 6,
+  },
+  playerAvatar: {
+    marginRight: 0,
+  },
+  playerName: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    fontWeight: "600",
+  },
   gameScore: {
     alignItems: "center",
     backgroundColor: COLORS.primary,
@@ -868,7 +937,7 @@ const styles = StyleSheet.create({
   // Empty States
   emptySection: {
     alignItems: "center",
-    paddingVertical: 32,
+    paddingVertical: 20,
     backgroundColor: COLORS.backgroundSecondary,
     borderRadius: 16,
   },

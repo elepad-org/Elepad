@@ -7,7 +7,7 @@ import {
   Pressable,
 } from "react-native";
 import { Icon, Text } from "react-native-paper";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   TabView,
   SceneMap,
@@ -35,6 +35,7 @@ type TabRoute = {
 export default function TabLayout() {
   const layout = useWindowDimensions();
   const params = useLocalSearchParams();
+  const router = useRouter();
   const [index, setIndex] = useState(0);
   const { userElepad } = useAuth();
 
@@ -115,9 +116,11 @@ export default function TabLayout() {
       const tabIndex = routes.findIndex((route) => route.key === params.tab);
       if (tabIndex !== -1) {
         setIndex(tabIndex);
+        // Limpiar el parámetro después de cambiar el tab
+        router.setParams({ tab: undefined });
       }
     }
-  }, [params.tab]);
+  }, [params.tab, routes]);
 
   // Update routes when user elder status changes
   useEffect(() => {

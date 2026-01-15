@@ -447,7 +447,7 @@ export default function FamilyGroup() {
                     }}
                   >
                     <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
-                      <BackButton size={28} onPress={() => router.push("/(tabs)/configuracion")} />
+                      <BackButton size={28} onPress={() => router.back()} />
                       <View style={{ marginLeft: 8, flex: 1 }}>
                         <Text
                           style={[

@@ -179,7 +179,8 @@ export class AttemptService {
         *,
         memoryPuzzle:memoryPuzzleId(puzzleId),
         logicPuzzle:logicPuzzleId(puzzleId),
-        sudokuPuzzle:sudokuPuzzleId(puzzleId)
+        sudokuPuzzle:sudokuPuzzleId(puzzleId),
+        user:userId(displayName, avatarUrl)
       `,
       )
       .eq("userId", userId)
@@ -207,7 +208,27 @@ export class AttemptService {
       throw new ApiException(500, "Error al listar intentos", error);
     }
 
-    return data;
+    // Agregar gameType a cada attempt basado en qué puzzle tiene
+    const attemptsWithGameType = (data || []).map(attempt => {
+      let determinedGameType = 'unknown';
+      
+      if (attempt.isFocusGame) {
+        determinedGameType = 'focus';
+      } else if (attempt.memoryPuzzleId) {
+        determinedGameType = 'memory';
+      } else if (attempt.logicPuzzleId) {
+        determinedGameType = 'logic';
+      } else if (attempt.sudokuPuzzleId) {
+        determinedGameType = 'sudoku';
+      }
+      
+      return {
+        ...attempt,
+        gameType: determinedGameType,
+      };
+    });
+
+    return attemptsWithGameType;
   }
 
   /**
