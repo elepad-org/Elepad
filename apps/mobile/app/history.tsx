@@ -21,6 +21,7 @@ import { COLORS, STYLES, SHADOWS, FONT } from "@/styles/base";
 import StatisticsChart from "@/components/Historial/StatisticsChart";
 import { useAuth } from "@/hooks/useAuth";
 import DropdownSelect from "@/components/shared/DropdownSelect";
+import { BackButton } from "@/components/shared/BackButton";
 
 const PAGE_SIZE = 50;
 
@@ -360,9 +361,16 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
 
         <View style={styles.container}>
           {/* Header */}
-          <Text style={[styles.title]}>
-            {getTitle()}
-          </Text>
+          {!isHelper ? (
+            <View style={styles.headerRow}>
+              <BackButton size={28} />
+              <Text style={[styles.title, styles.titleWithBack]}>{getTitle()}</Text>
+            </View>
+          ) : (
+            <Text style={[styles.title]}>
+              {getTitle()}
+            </Text>
+          )}
 
           {/* Elder selector for helpers */}
           {isHelper && (
@@ -544,12 +552,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 12,
+  },
   title: {
     paddingHorizontal: 24,
     paddingTop: 20,
     paddingBottom: 16,
     fontSize: 26,
     fontFamily: FONT.bold,
+  },
+  titleWithBack: {
+    paddingHorizontal: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
+    marginLeft: 8,
   },
   filterContainer: {
     flexDirection: "row",

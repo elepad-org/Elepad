@@ -48,6 +48,7 @@ import { uriToBlob } from "@/lib/uriToBlob";
 import RecuerdoItemComponent from "@/components/Recuerdos/RecuerdoItemComponent";
 import NuevoRecuerdoDialogComponent from "@/components/Recuerdos/NuevoRecuerdoDialogComponent";
 import RecuerdoDetailDialog from "@/components/Recuerdos/RecuerdoDetailDialog";
+import { BackButton } from "@/components/shared/BackButton";
 import ChestIcon from "@/components/Recuerdos/ChestIcon";
 import SaveButton from "@/components/shared/SaveButton";
 import CancelButton from "@/components/shared/CancelButton";
@@ -1244,10 +1245,8 @@ export default function RecuerdosScreen() {
               alignItems: "center",
             }}
           >
-            <IconButton
-              icon="chevron-left"
-              size={24}
-              style={{ margin: 0 }}
+            <BackButton
+              size={28}
               onPress={() => {
                 setSelectedBook(null);
                 setMemberFilterId(null);
@@ -1416,10 +1415,8 @@ export default function RecuerdosScreen() {
             alignItems: "center",
           }}
         >
-          <IconButton
-            icon="chevron-left"
-            size={24}
-            style={{ margin: 0 }}
+          <BackButton
+            size={28}
             onPress={() => {
               setSelectedBook(null);
               setMemberFilterId(null);
