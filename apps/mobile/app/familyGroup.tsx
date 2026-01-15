@@ -34,6 +34,7 @@ import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 import { useAuth } from "@/hooks/useAuth";
 import { COLORS, STYLES } from "@/styles/base";
 import { Pressable } from "react-native";
+import { BackButton } from "@/components/shared/BackButton";
 
 export default function FamilyGroup() {
   const { userElepad, refreshUserElepad } = useAuth();
@@ -401,90 +402,94 @@ export default function FamilyGroup() {
 
             return (
               <>
-                <Card style={[STYLES.titleCard]}>
-                  <Card.Content>
-                    <Text style={STYLES.subheading}>Grupo Familiar</Text>
-                    {isEditing ? (
-                      <>
-                        <TextInput
-                          style={[STYLES.input]}
-                          value={newGroupName}
-                          underlineColor="transparent"
-                          activeUnderlineColor={COLORS.primary}
-                          onChangeText={setNewGroupName}
-                          autoFocus
-                        />
-                        <View
-                          style={{
-                            flexDirection: "row",
-                            justifyContent: "space-between",
-                            width: "100%",
-                          }}
-                        >
-                          <Button
-                            mode="contained"
-                            onPress={() => setIsEditing(false)}
-                            disabled={patchFamilyGroup.isPending}
-                            style={[
-                              STYLES.buttonPrimary,
-                              { width: "40%", backgroundColor: COLORS.white },
-                            ]}
-                            labelStyle={{ color: COLORS.text }}
-                          >
-                            Cancelar
-                          </Button>
-                          <Button
-                            mode="contained"
-                            onPress={async () => {
-                              if (!newGroupName.trim() || !groupId) return;
-                              if (newGroupName === groupName) {
-                                setIsEditing(false);
-                                return;
-                              }
-                              try {
-                                await patchFamilyGroup.mutateAsync({
-                                  idGroup: groupId,
-                                  data: { name: newGroupName },
-                                });
-                                setIsEditing(false);
-                                setSnackbarMessage(
-                                  "Nombre del grupo familiar actualizado correctamente"
-                                );
-                                setSnackbarError(false);
-                                setSnackbarVisible(true);
-                                // Refrescar los datos manualmente
-                                if (membersQuery.refetch) {
-                                  await membersQuery.refetch();
-                                }
-                              } catch (e: unknown) {
-                                const msg =
-                                  e instanceof Error
-                                    ? e.message
-                                    : "Error al actualizar el nombre del grupo";
-                                setSnackbarMessage(msg);
-                                setSnackbarError(true);
-                                setSnackbarVisible(true);
-                              }
-                            }}
-                            loading={patchFamilyGroup.isPending}
-                            style={[STYLES.buttonPrimary, { width: "40%" }]}
-                            disabled={
-                              !newGroupName.trim() || patchFamilyGroup.isPending
-                            }
-                          >
-                            Guardar
-                          </Button>
-                        </View>
-                      </>
-                    ) : (
+                <View style={{ paddingHorizontal: 16, marginBottom: 24, paddingTop: 8 }}>
+                  {isEditing ? (
+                    <>
+                      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
+                        <BackButton size={28} onPress={() => router.push("/(tabs)/configuracion")} />
+                      </View>
+                      <TextInput
+                        style={[STYLES.input]}
+                        value={newGroupName}
+                        underlineColor="transparent"
+                        activeUnderlineColor={COLORS.primary}
+                        onChangeText={setNewGroupName}
+                        autoFocus
+                      />
                       <View
                         style={{
-                          position: "relative",
+                          flexDirection: "row",
+                          justifyContent: "space-between",
                           width: "100%",
-                          alignItems: "center",
                         }}
                       >
-                        <Text style={[STYLES.heading]}>{groupName}</Text>
+                        <Button
+                          mode="contained"
+                          onPress={() => setIsEditing(false)}
+                          disabled={patchFamilyGroup.isPending}
+                          style={[
+                            STYLES.buttonPrimary,
+                            { width: "40%", backgroundColor: COLORS.white },
+                          ]}
+                          labelStyle={{ color: COLORS.text }}
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          mode="contained"
+                          onPress={async () => {
+                            if (!newGroupName.trim() || !groupId) return;
+                            if (newGroupName === groupName) {
+                              setIsEditing(false);
+                              return;
+                            }
+                            try {
+                              await patchFamilyGroup.mutateAsync({
+                                idGroup: groupId,
+                                data: { name: newGroupName },
+                              });
+                              setIsEditing(false);
+                              setSnackbarMessage(
+                                "Nombre del grupo familiar actualizado correctamente"
+                              );
+                              setSnackbarError(false);
+                              setSnackbarVisible(true);
+                              // Refrescar los datos manualmente
+                              if (membersQuery.refetch) {
+                                await membersQuery.refetch();
+                              }
+                            } catch (e: unknown) {
+                              const msg =
+                                e instanceof Error
+                                  ? e.message
+                                  : "Error al actualizar el nombre del grupo";
+                              setSnackbarMessage(msg);
+                              setSnackbarError(true);
+                              setSnackbarVisible(true);
+                            }
+                          }}
+                          loading={patchFamilyGroup.isPending}
+                          style={[STYLES.buttonPrimary, { width: "40%" }]}
+                          disabled={
+                            !newGroupName.trim() || patchFamilyGroup.isPending
+                          }
+                        >
+                          Guardar
+                        </Button>
+                      </View>
+                    </>
+                  ) : (
+                    <>
+                      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                        <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+                          <BackButton size={28} onPress={() => router.push("/(tabs)/configuracion")} />
+                          <View style={{ marginLeft: 8, flex: 1 }}>
+                            <Text style={[STYLES.heading, { fontSize: 28, marginBottom: 0 }]}>{groupName}</Text>
+                            <Text style={[STYLES.subheading, { fontSize: 14, color: COLORS.textSecondary, marginTop: 4 }]}>
+                              (Grupo Familiar)
+                            </Text>
+                          </View>
+                        </View>
                         <Pressable
                           onPress={() => {
                             setNewGroupName(groupName || "");
@@ -498,9 +503,9 @@ export default function FamilyGroup() {
                           />
                         </Pressable>
                       </View>
-                    )}
-                  </Card.Content>
-                </Card>
+                    </>
+                  )}
+                </View>
               </>
             );
           })()}
@@ -896,14 +901,6 @@ export default function FamilyGroup() {
             >
               Salir del grupo familiar
             </Button>
-
-            {/* Link para volver, sin botón */}
-            <Text
-              onPress={() => router.push("/(tabs)/configuracion")}
-              style={[STYLES.subheading, { marginTop: 23 }]}
-            >
-              Volver
-            </Text>
           </View>
         </View>
         <Portal>
