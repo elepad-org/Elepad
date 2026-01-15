@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Animated, { FadeInRight } from "react-native-reanimated";
 import {
   SafeAreaView,
   StatusBar,
@@ -429,7 +430,7 @@ export default function FamilyGroup() {
         contentContainerStyle={STYLES.contentContainer}
         keyboardShouldPersistTaps="handled"
       >
-        <View >
+        <View>
           {(() => {
             const groupInfo = selectGroupInfo();
             const groupName = groupInfo?.name;
@@ -437,7 +438,13 @@ export default function FamilyGroup() {
 
             return (
               <>
-                <View style={{ paddingHorizontal: 16, marginBottom: 24, paddingTop: 8 }}>
+                <View
+                  style={{
+                    paddingHorizontal: 16,
+                    marginBottom: 24,
+                    paddingTop: 8,
+                  }}
+                >
                   <View
                     style={{
                       flexDirection: "row",
@@ -446,13 +453,23 @@ export default function FamilyGroup() {
                       marginBottom: 8,
                     }}
                   >
-                    <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        flex: 1,
+                      }}
+                    >
                       <BackButton size={28} onPress={() => router.back()} />
                       <View style={{ marginLeft: 8, flex: 1 }}>
                         <Text
                           style={[
                             STYLES.heading,
-                            { fontSize: 28, marginBottom: 0, textAlign: "left" },
+                            {
+                              fontSize: 28,
+                              marginBottom: 0,
+                              textAlign: "left",
+                            },
                           ]}
                         >
                           {groupName}
@@ -539,7 +556,9 @@ export default function FamilyGroup() {
                     <SaveButton
                       onPress={handleSaveGroupName}
                       loading={patchFamilyGroup.isPending}
-                      disabled={!newGroupName.trim() || patchFamilyGroup.isPending}
+                      disabled={
+                        !newGroupName.trim() || patchFamilyGroup.isPending
+                      }
                     />
                   </View>
                 </View>
@@ -645,8 +664,9 @@ export default function FamilyGroup() {
                       return null;
                     }
 
-                    return membersArray.map((m) => (
-                      <View
+                    return membersArray.map((m, index) => (
+                      <Animated.View
+                        entering={FadeInRight.delay(index * 100).springify()}
                         key={m.id}
                         style={[
                           STYLES.memberInfoRow,
@@ -700,7 +720,7 @@ export default function FamilyGroup() {
                             style={{ alignSelf: "center" }}
                           />
                         )}
-                      </View>
+                      </Animated.View>
                     ));
                   })()}
 
