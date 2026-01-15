@@ -7,6 +7,7 @@ import {
   Image,
   ActivityIndicator,
   Alert,
+  Pressable,
 } from "react-native";
 import {
   Button,
@@ -33,7 +34,6 @@ import {
 import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 import { useAuth } from "@/hooks/useAuth";
 import { COLORS, STYLES } from "@/styles/base";
-import { Pressable } from "react-native";
 import { BackButton } from "@/components/shared/BackButton";
 
 export default function FamilyGroup() {
@@ -394,7 +394,7 @@ export default function FamilyGroup() {
         contentContainerStyle={STYLES.contentContainer}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={STYLES.container}>
+        <View >
           {(() => {
             const groupInfo = selectGroupInfo();
             const groupName = groupInfo?.name;
@@ -479,31 +479,55 @@ export default function FamilyGroup() {
                       </View>
                     </>
                   ) : (
-                    <>
-                      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                        <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
-                          <BackButton size={28} onPress={() => router.push("/(tabs)/configuracion")} />
-                          <View style={{ marginLeft: 8, flex: 1 }}>
-                            <Text style={[STYLES.heading, { fontSize: 28, marginBottom: 0 }]}>{groupName}</Text>
-                            <Text style={[STYLES.subheading, { fontSize: 14, color: COLORS.textSecondary, marginTop: 4 }]}>
-                              (Grupo Familiar)
-                            </Text>
-                          </View>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        marginBottom: 8,
+                      }}
+                    >
+                      <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+                        <BackButton size={28} onPress={() => router.push("/(tabs)/configuracion")} />
+                        <View style={{ marginLeft: 0, flex: 1 }}>
+                          <Text
+                            style={[
+                              STYLES.heading,
+                              { fontSize: 28, marginBottom: -6, textAlign: "left" },
+                            ]}
+                          >
+                            {groupName}
+                          </Text>
+                          <Text
+                            style={[
+                              STYLES.subheading,
+                              {
+                                fontSize: 14,
+                                color: COLORS.textSecondary,
+                                marginTop: 4,
+                                textAlign: "left",
+                              },
+                            ]}
+                          >
+                            (Grupo Familiar)
+                          </Text>
                         </View>
-                        <Pressable
-                          onPress={() => {
-                            setNewGroupName(groupName || "");
-                            setIsEditing(true);
-                          }}
-                        >
-                          <IconButton
-                            icon="pencil"
-                            iconColor={COLORS.textLight}
-                            style={{ margin: 0 }}
-                          />
-                        </Pressable>
                       </View>
-                    </>
+                      <Pressable
+                        onPress={() => {
+                          setNewGroupName(groupName || "");
+                          setIsEditing(true);
+                        }}
+                        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                      >
+                        <IconButton
+                          icon="pencil"
+                          iconColor={COLORS.textLight}
+                          size={24}
+                          style={{ margin: 0 }}
+                        />
+                      </Pressable>
+                    </View>
                   )}
                 </View>
               </>

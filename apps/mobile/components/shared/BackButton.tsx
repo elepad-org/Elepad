@@ -39,7 +39,7 @@ export const BackButton: React.FC<BackButtonProps> = ({
     <TouchableOpacity
       onPress={handlePress}
       style={styles.container}
-      hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+      hitSlop={{ top: 12, bottom: 12, left: 0, right: 12 }}
       activeOpacity={0.7}
     >
       <IconButton
@@ -54,8 +54,9 @@ export const BackButton: React.FC<BackButtonProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "center",
+    marginLeft: -12,
   },
   icon: {
     margin: 0,
