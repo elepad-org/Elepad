@@ -29,6 +29,7 @@ import React, {
   useRef,
   useEffect,
 } from "react";
+import Reanimated, { FadeInRight } from "react-native-reanimated";
 import {
   View,
   FlatList,
@@ -507,7 +508,7 @@ export default function NotificationsScreen() {
   };
 
   const renderNotification = useCallback(
-    ({ item }: { item: GetNotifications200Item }) => {
+    ({ item, index }: { item: GetNotifications200Item; index: number }) => {
       // Para menciones, detectar si el título o body contiene formato <@id>
       const hasMention =
         (item.title && /<@([^>]+)>/.test(item.title)) ||
@@ -518,83 +519,85 @@ export default function NotificationsScreen() {
         hasMention;
 
       return (
-        <Pressable
-          style={({ pressed }) => [
-            styles.notificationCard,
-            !item.read && styles.unreadCard,
-            pressed && styles.pressedCard,
-          ]}
-          onPress={() => handleNotificationPress(item)}
-        >
-          <View style={styles.notificationIconContainer}>
-            <MaterialCommunityIcons
-              name={getNotificationIcon(item.event_type, item.entity_type)}
-              size={24}
-              color={item.read ? COLORS.textSecondary : COLORS.primary}
-            />
-          </View>
-
-          <View style={styles.notificationContent}>
-            {isMention ? (
-              <HighlightedMentionText
-                text={item.title || ""}
-                groupMembers={groupMembers}
-                style={
-                  item.read
-                    ? styles.notificationTitle
-                    : {
-                        fontSize: 14,
-                        color: COLORS.text,
-                        fontWeight: "700" as const,
-                      }
-                }
-                numberOfLines={2}
+        <Reanimated.View entering={FadeInRight.delay(index * 50).springify()}>
+          <Pressable
+            style={({ pressed }) => [
+              styles.notificationCard,
+              !item.read && styles.unreadCard,
+              pressed && styles.pressedCard,
+            ]}
+            onPress={() => handleNotificationPress(item)}
+          >
+            <View style={styles.notificationIconContainer}>
+              <MaterialCommunityIcons
+                name={getNotificationIcon(item.event_type, item.entity_type)}
+                size={24}
+                color={item.read ? COLORS.textSecondary : COLORS.primary}
               />
-            ) : (
-              <Text
-                style={[
-                  styles.notificationTitle,
-                  !item.read && styles.unreadTitle,
-                ]}
-                numberOfLines={2}
-              >
-                {item.title}
-              </Text>
-            )}
-            {item.body &&
-            typeof item.body === "string" &&
-            item.body.trim() !== "" ? (
-              isMention ? (
+            </View>
+
+            <View style={styles.notificationContent}>
+              {isMention ? (
                 <HighlightedMentionText
-                  text={item.body}
+                  text={item.title || ""}
                   groupMembers={groupMembers}
-                  style={styles.notificationBody}
+                  style={
+                    item.read
+                      ? styles.notificationTitle
+                      : {
+                          fontSize: 14,
+                          color: COLORS.text,
+                          fontWeight: "700" as const,
+                        }
+                  }
                   numberOfLines={2}
                 />
               ) : (
-                <Text style={styles.notificationBody} numberOfLines={2}>
-                  {item.body}
+                <Text
+                  style={[
+                    styles.notificationTitle,
+                    !item.read && styles.unreadTitle,
+                  ]}
+                  numberOfLines={2}
+                >
+                  {item.title}
                 </Text>
-              )
-            ) : null}
-            <Text style={styles.notificationDate}>
-              {formatDate(item.created_at)}
-            </Text>
-          </View>
+              )}
+              {item.body &&
+              typeof item.body === "string" &&
+              item.body.trim() !== "" ? (
+                isMention ? (
+                  <HighlightedMentionText
+                    text={item.body}
+                    groupMembers={groupMembers}
+                    style={styles.notificationBody}
+                    numberOfLines={2}
+                  />
+                ) : (
+                  <Text style={styles.notificationBody} numberOfLines={2}>
+                    {item.body}
+                  </Text>
+                )
+              ) : null}
+              <Text style={styles.notificationDate}>
+                {formatDate(item.created_at)}
+              </Text>
+            </View>
 
-          <IconButton
-            icon="close"
-            size={20}
-            iconColor={COLORS.textSecondary}
-            onPress={(e) => {
-              e.stopPropagation();
-              handleDeleteNotification(item.id);
-            }}
-            style={styles.deleteButton}
-          />
+            <IconButton
+              icon="close"
+              size={20}
+              iconColor={COLORS.textSecondary}
+              onPress={(e) => {
+                e.stopPropagation();
+                handleDeleteNotification(item.id);
+              }}
+              style={styles.deleteButton}
+            />
 
-          {!item.read && <View style={styles.unreadDot} />}
-        </Pressable>
+            {!item.read && <View style={styles.unreadDot} />}
+          </Pressable>
+        </Reanimated.View>
       );
     },
     [handleNotificationPress, handleDeleteNotification, groupMembers]
@@ -736,9 +739,7 @@ export default function NotificationsScreen() {
               recuerdo={recuerdo}
               onDismiss={() => {
                 setDetailDialogVisible(false);
-                setTimeout(() => {
-                  setSelectedMemoryId(null);
-                }, 300);
+                setSelectedMemoryId(null);
               }}
               onUpdateRecuerdo={async () => {
                 // Actualizar no está disponible desde notificaciones
@@ -953,7 +954,7 @@ export default function NotificationsScreen() {
                             setActivityDetailDialogVisible(false);
                             setSelectedActivityId(null);
                             // Navegar usando href con el parámetro del tab y el activityId
-                            router.replace({
+                            router.navigate({
                               pathname: "/(tabs)/home",
                               params: {
                                 tab: "calendar",

@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import Animated, { FadeInUp } from "react-native-reanimated";
 import {
   StatusBar,
   View,
@@ -21,7 +22,7 @@ import { useGetMemories, Album } from "@elepad/api-client";
 import CreateAlbumDialog from "@/components/Recuerdos/CreateAlbumDialog";
 import AlbumCard from "@/components/shared/AlbumCard";
 import { useAlbumCreation } from "@/hooks/useAlbumCreation";
-import eleEmpthy from "@/assets/images/ele-idea.jpeg";
+import eleEmpthy from "@/assets/images/ele-idea.png";
 import { Image } from "react-native";
 
 const unwrapAlbums = (response: unknown): Album[] => {
@@ -151,17 +152,21 @@ export default function AlbumsScreen() {
                 colors={[COLORS.primary]}
               />
             }
-            renderItem={({ item }) => {
+            renderItem={({ item, index }) => {
               return (
-                <AlbumCard
-                  id={item.id}
-                  title={item.title}
-                  description={item.description}
-                  coverImageUrl={null}
-                  createdAt={item.createdAt}
-                  totalPages={undefined}
-                  onPress={() => handleAlbumPress(item.id)}
-                />
+                <Animated.View
+                  entering={FadeInUp.delay(index * 100).springify()}
+                >
+                  <AlbumCard
+                    id={item.id}
+                    title={item.title}
+                    description={item.description}
+                    coverImageUrl={null}
+                    createdAt={item.createdAt}
+                    totalPages={undefined}
+                    onPress={() => handleAlbumPress(item.id)}
+                  />
+                </Animated.View>
               );
             }}
             ListFooterComponent={

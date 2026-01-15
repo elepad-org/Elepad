@@ -1,4 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import Animated, { FadeInUp } from "react-native-reanimated";
+import { useIsFocused } from "@react-navigation/native";
 import {
   StatusBar,
   View,
@@ -53,7 +55,7 @@ import ChestIcon from "@/components/Recuerdos/ChestIcon";
 import SaveButton from "@/components/shared/SaveButton";
 import CancelButton from "@/components/shared/CancelButton";
 import BookCover from "@/components/Recuerdos/BookCover";
-import eleEmpthy from "@/assets/images/ele-idea.jpeg";
+import eleEmpthy from "@/assets/images/ele-fotografiando.png";
 
 // Tipos de recuerdos
 type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
@@ -126,6 +128,7 @@ const BAUL_COLOR_OPTIONS = [
 ] as const;
 
 export default function RecuerdosScreen() {
+  const isFocused = useIsFocused();
   const { loading: authLoading, userElepad } = useAuth();
 
   const groupId = userElepad?.groupId || "";
@@ -956,7 +959,7 @@ export default function RecuerdosScreen() {
               paddingBottom: 30,
               paddingHorizontal: 24,
               paddingTop: 10,
-              justifyContent: 'space-between',
+              justifyContent: "space-between",
             }}
           >
             <View style={{ width: 120 }}>
@@ -1601,14 +1604,16 @@ export default function RecuerdosScreen() {
         </View>
       ) : (
         <FlatList
-          key={`grid-${numColumns}`}
+          key={`grid-${numColumns}-${isFocused}`}
           data={recuerdos}
-          renderItem={({ item }) => (
-            <RecuerdoItemComponent
-              item={item}
-              numColumns={numColumns}
-              onPress={handleRecuerdoPress}
-            />
+          renderItem={({ item, index }) => (
+            <Animated.View entering={FadeInUp.delay(index * 50).springify()}>
+              <RecuerdoItemComponent
+                item={item}
+                numColumns={numColumns}
+                onPress={handleRecuerdoPress}
+              />
+            </Animated.View>
           )}
           keyExtractor={(item) => item.id}
           numColumns={numColumns}
@@ -1661,25 +1666,28 @@ export default function RecuerdosScreen() {
       {renderBookDialogs()}
 
       {/* Diálogo de detalle del recuerdo */}
-      <RecuerdoDetailDialog
-        visible={detailDialogVisible}
-        recuerdo={selectedRecuerdo}
-        onDismiss={() => {
-          handleCloseDetail();
-          router.setParams({ memoryId: "", bookId: "" });
-        }}
-        onUpdateRecuerdo={async (id, patch) => {
-          await updateMemoryMutation.mutateAsync({ id, patch });
-        }}
-        onDeleteRecuerdo={async (id) => {
-          await deleteMemoryMutation.mutateAsync(id);
-        }}
-        isMutating={
-          updateMemoryMutation.isPending || deleteMemoryMutation.isPending
-        }
-        familyMembers={groupMembers}
-        currentUserId={userElepad?.id}
-      />
+      {/* Diálogo de detalle del recuerdo */}
+      {detailDialogVisible && (
+        <RecuerdoDetailDialog
+          visible={detailDialogVisible}
+          recuerdo={selectedRecuerdo}
+          onDismiss={() => {
+            handleCloseDetail();
+            router.setParams({ memoryId: "", bookId: "" });
+          }}
+          onUpdateRecuerdo={async (id, patch) => {
+            await updateMemoryMutation.mutateAsync({ id, patch });
+          }}
+          onDeleteRecuerdo={async (id) => {
+            await deleteMemoryMutation.mutateAsync(id);
+          }}
+          isMutating={
+            updateMemoryMutation.isPending || deleteMemoryMutation.isPending
+          }
+          familyMembers={groupMembers}
+          currentUserId={userElepad?.id}
+        />
+      )}
 
       {/* Snackbar para mostrar mensajes */}
       <Snackbar
