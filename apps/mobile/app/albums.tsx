@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import Animated, { FadeInUp } from "react-native-reanimated";
 import {
   StatusBar,
   View,
@@ -151,17 +152,21 @@ export default function AlbumsScreen() {
                 colors={[COLORS.primary]}
               />
             }
-            renderItem={({ item }) => {
+            renderItem={({ item, index }) => {
               return (
-                <AlbumCard
-                  id={item.id}
-                  title={item.title}
-                  description={item.description}
-                  coverImageUrl={null}
-                  createdAt={item.createdAt}
-                  totalPages={undefined}
-                  onPress={() => handleAlbumPress(item.id)}
-                />
+                <Animated.View
+                  entering={FadeInUp.delay(index * 50).springify()}
+                >
+                  <AlbumCard
+                    id={item.id}
+                    title={item.title}
+                    description={item.description}
+                    coverImageUrl={null}
+                    createdAt={item.createdAt}
+                    totalPages={undefined}
+                    onPress={() => handleAlbumPress(item.id)}
+                  />
+                </Animated.View>
               );
             }}
             ListFooterComponent={
