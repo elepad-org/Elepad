@@ -173,6 +173,15 @@ export default function CalendarScreen() {
     }
   }, [params.activityId, activitiesQuery.data]);
 
+  // Detectar cuando se pasa el parámetro openForm para abrir el modal de agregar evento
+  useEffect(() => {
+    if (params.openForm === "true") {
+      setFormVisible(true);
+      // Limpiar el parámetro de la URL inmediatamente para evitar que se vuelva a abrir
+      router.setParams({ openForm: undefined });
+    }
+  }, [params.openForm]);
+
   const handleActivityViewed = () => {
     // Resetear el estado cuando se cierra el modal
     setActivityToView(null);

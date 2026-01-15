@@ -482,7 +482,16 @@ export default function HomeScreen() {
               <Text style={styles.emptyText}>No hay eventos próximos</Text>
               <Button
                 mode="outlined"
-                onPress={() => router.push("/calendar")}
+                onPress={() => {
+                  // Navegar usando el mismo patrón que notificaciones
+                  router.replace({
+                    pathname: "/(tabs)/home",
+                    params: {
+                      tab: "calendar",
+                      openForm: "true",
+                    },
+                  });
+                }}
                 style={styles.emptyButtonOutline}
                 labelStyle={{ color: COLORS.primary }}
               >
