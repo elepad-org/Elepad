@@ -15,6 +15,7 @@ import { lightTheme, darkTheme } from "@/styles/theme";
 import { supabase } from "@/lib/supabase";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StreakSnackbarProvider } from "@/hooks/useStreakSnackbar";
+import { COLORS } from "@/styles/base";
 
 const queryClient = new QueryClient();
 
@@ -59,7 +60,11 @@ export default function RootLayout() {
           <AuthProvider>
             <PaperProvider theme={paperTheme}>
               <NavigationThemeProvider value={navTheme}>
-                <Stack>
+                <Stack
+                  screenOptions={{
+                    contentStyle: { backgroundColor: COLORS.background },
+                  }}
+                >
                   <Stack.Screen
                     name="index"
                     options={{ headerShown: false, animation: "fade" }}
@@ -76,49 +81,49 @@ export default function RootLayout() {
                     name="familyGroup"
                     options={{
                       headerShown: false,
-                      animation: "slide_from_right",
+                      animation: "fade",
                     }}
                   />
                   <Stack.Screen
                     name="history"
                     options={{
                       headerShown: false,
-                      animation: "slide_from_right",
+                      animation: "fade",
                     }}
                   />
                   <Stack.Screen
                     name="focus-game"
                     options={{
                       headerShown: false,
-                      animation: "slide_from_right",
+                      animation: "fade",
                     }}
                   />
                   <Stack.Screen
                     name="memory-game"
                     options={{
                       headerShown: false,
-                      animation: "slide_from_right",
+                      animation: "fade",
                     }}
                   />
                   <Stack.Screen
                     name="net-game"
                     options={{
                       headerShown: false,
-                      animation: "slide_from_right",
+                      animation: "fade",
                     }}
                   />
                   <Stack.Screen
                     name="sudoku-game"
                     options={{
                       headerShown: false,
-                      animation: "slide_from_right",
+                      animation: "fade",
                     }}
                   />
                   <Stack.Screen
                     name="game-detail/[gameId]"
                     options={{
                       headerShown: false,
-                      animation: "slide_from_right",
+                      animation: "fade",
                       presentation: "card",
                     }}
                   />
