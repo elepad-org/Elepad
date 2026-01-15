@@ -441,8 +441,10 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
 
   const resetGame = useCallback(() => {
     hasInitialized.current = false;
+    // Invalidar achievements para recargar los logros actuales del usuario
+    queryClient.invalidateQueries({ queryKey: ["/achievements/user/memory"] });
     initializeGame();
-  }, [initializeGame]);
+  }, [initializeGame, queryClient]);
 
   const stats: GameStats = {
     moves,

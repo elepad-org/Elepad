@@ -7,6 +7,7 @@ import {
   usePostAttemptsStart,
   usePostAttemptsAttemptIdFinish,
 } from "@elepad/api-client";
+import { useFocusAchievementPrediction, type PredictedAchievement } from "./useFocusAchievementPrediction";
 
 export interface FocusStats {
   correct: number;
@@ -16,21 +17,23 @@ export interface FocusStats {
 
 export interface UnlockedAchievement {
   id: string;
+  code: string;
   title: string;
   icon?: string | null;
-  description?: string;
+  description?: string | null;
+  points: number;
 }
 
 interface UseFocusGameProps {
-  onAchievementUnlocked?: (achievement: UnlockedAchievement) => void;
   rounds: number;
 }
 
 export const useFocusGame = (props: UseFocusGameProps) => {
-  const { onAchievementUnlocked } = props;
-  const { markGameCompleted } = useAuth();
+  const { user } = useAuth();
 
   const queryClient = useQueryClient();
+  const { predictAchievements, validatePrediction } = useFocusAchievementPrediction();
+  const { markGameCompleted } = useAuth();
 
   // API Hooks
   const createPuzzle = usePostPuzzlesFocus();
@@ -60,6 +63,7 @@ export const useFocusGame = (props: UseFocusGameProps) => {
     setPuzzleId("");
     setUnlockedAchievements([]);
     hasFinishedAttempt.current = false;
+    startTimeRef.current = null; // Resetear el timer
     setIsLoading(true);
 
     try {
@@ -109,7 +113,8 @@ export const useFocusGame = (props: UseFocusGameProps) => {
       }
 
       setIsRunning(true);
-      startTimeRef.current = Date.now();
+      // NO iniciar el timer aquí - se inicia en la primera interacción del usuario
+      // startTimeRef.current = Date.now();
 
       const res = await startAttempt
         .mutateAsync({
@@ -156,7 +161,7 @@ export const useFocusGame = (props: UseFocusGameProps) => {
   // 3. Finalizar el Intento
   const finishGame = useCallback(
     async (stats: FocusStats, success: boolean) => {
-      if (!attemptId || hasFinishedAttempt.current) return null;
+      if (!attemptId || hasFinishedAttempt.current) return { predictedAchievements: [], finalAchievements: [] };
 
       hasFinishedAttempt.current = true;
       const durationMs =
@@ -164,6 +169,47 @@ export const useFocusGame = (props: UseFocusGameProps) => {
         (startTimeRef.current ? Date.now() - startTimeRef.current : 0);
 
       try {
+        // Variable para guardar los logros predichos (para validación posterior)
+        let predictedAchievements: PredictedAchievement[] = [];
+
+        // 🔮 PREDICCIÓN OPTIMISTA: Predecir logros ANTES de llamar al backend
+        if (success && user) {
+          // Calcular score usando la MISMA fórmula del backend
+          const moves = stats.rounds - stats.correct; // Errores cometidos
+          const durationSeconds = durationMs / 1000;
+          const timePenalty = durationSeconds * 5;
+          const movesPenalty = moves * 10;
+          const predictedScore = Math.max(
+            0,
+            Math.floor(1000 - timePenalty - movesPenalty),
+          );
+
+          console.log("[FRONTEND SCORE PREDICTION]");
+          console.log(`  Duration: ${durationMs}ms (${durationSeconds.toFixed(2)}s)`);
+          console.log(`  Correct: ${stats.correct} / ${stats.rounds}`);
+          console.log(`  Moves (errores): ${moves}`);
+          console.log(`  Time penalty: ${durationSeconds.toFixed(2)} * 5 = ${timePenalty.toFixed(2)}`);
+          console.log(`  Moves penalty: ${moves} * 10 = ${movesPenalty}`);
+          console.log(`  Predicted score: 1000 - ${timePenalty.toFixed(2)} - ${movesPenalty} = ${predictedScore}`);
+
+          predictedAchievements = predictAchievements({
+            gameType: "reaction",
+            gameName: "focus",
+            success: true,
+            score: predictedScore, // Usar score calculado con fórmula del backend
+            moves,
+            durationMs,
+            userId: user.id,
+          });
+
+          console.log(`🔮 Logros predichos: ${predictedAchievements.length}`);
+
+          // Mostrar logros predichos INMEDIATAMENTE
+          if (predictedAchievements.length > 0) {
+            setUnlockedAchievements(predictedAchievements);
+          }
+        }
+
         // 🔥 Actualización optimista de la racha si fue exitoso
         if (success) {
           await markGameCompleted();
@@ -190,18 +236,23 @@ export const useFocusGame = (props: UseFocusGameProps) => {
 
         setIsRunning(false);
 
-        // Manejo de Logros
+        // Validar predicción con respuesta real del backend
         const resData = "data" in finishResponse ? finishResponse.data : finishResponse;
-        if (
-          resData?.unlockedAchievements &&
-          resData.unlockedAchievements.length > 0
-        ) {
-          const newAchievements = resData.unlockedAchievements as UnlockedAchievement[];
-          setUnlockedAchievements(newAchievements);
-
-          newAchievements.forEach((achievement) => {
-            onAchievementUnlocked?.(achievement);
-          });
+        
+        if (resData && "unlockedAchievements" in resData) {
+          console.log(`🎯 Logros reales del backend: ${resData.unlockedAchievements?.length || 0}`);
+          
+          const realAchievements = (resData.unlockedAchievements || []) as UnlockedAchievement[];
+          
+          // Validar si la predicción fue correcta
+          const isCorrect = validatePrediction(predictedAchievements, realAchievements);
+          
+          if (!isCorrect) {
+            console.log("⚠️ Predicción incorrecta, actualizando con logros reales");
+            setUnlockedAchievements(realAchievements);
+          } else {
+            console.log("✅ Predicción correcta, sin cambios");
+          }
         }
         
         // Invalidar queries de rachas para refrescar datos (solo si success es true)
@@ -210,21 +261,79 @@ export const useFocusGame = (props: UseFocusGameProps) => {
           queryClient.invalidateQueries({ queryKey: ["getStreaksHistory"] });
         }
 
-
-        return resData.unlockedAchievements;
+        // Retornar logros predichos para uso inmediato
+        return { 
+          predictedAchievements,
+          finalAchievements: resData.unlockedAchievements || []
+        };
       } catch (error) {
         console.error("❌ Error finishing focus attempt", error);
         hasFinishedAttempt.current = false;
         throw error;
       }
     },
-    [attemptId, finishAttempt, onAchievementUnlocked]
+    [attemptId, finishAttempt, markGameCompleted, predictAchievements, user, validatePrediction, queryClient]
   );
 
   const resetGame = useCallback(() => {
     hasInitialized.current = false;
+    // Invalidar achievements para recargar los logros actuales del usuario
+    queryClient.invalidateQueries({ queryKey: ["/achievements/user/reaction"] });
     initializeGame();
-  }, [initializeGame]);
+  }, [initializeGame, queryClient]);
+
+  /**
+   * Inicia el cronómetro manualmente (llamado en la primera interacción)
+   */
+  const startTimer = useCallback(() => {
+    if (startTimeRef.current === null) {
+      startTimeRef.current = Date.now();
+    }
+  }, []);
+
+  /**
+   * Obtiene el tiempo transcurrido desde que inició el timer
+   */
+  const getDuration = useCallback(() => {
+    return startTimeRef.current ? Date.now() - startTimeRef.current : 0;
+  }, []);
+
+  /**
+   * Predice logros de forma síncrona sin llamar al backend
+   * Retorna inmediatamente para mostrar en UI
+   */
+  const predictAchievementsSync = useCallback(
+    (stats: FocusStats) => {
+      if (!user) return [];
+
+      const durationMs = stats.durationMs ?? getDuration();
+      const moves = stats.rounds - stats.correct;
+      const durationSeconds = durationMs / 1000;
+      const timePenalty = durationSeconds * 5;
+      const movesPenalty = moves * 10;
+      const predictedScore = Math.max(
+        0,
+        Math.floor(1000 - timePenalty - movesPenalty)
+      );
+
+      console.log("[FRONTEND SCORE PREDICTION - SYNC]");
+      console.log(`  Duration: ${durationMs}ms (${durationSeconds.toFixed(2)}s)`);
+      console.log(`  Correct: ${stats.correct} / ${stats.rounds}`);
+      console.log(`  Moves (errores): ${moves}`);
+      console.log(`  Predicted score: ${predictedScore}`);
+
+      return predictAchievements({
+        gameType: "reaction",
+        gameName: "focus",
+        success: true,
+        score: predictedScore,
+        moves,
+        durationMs,
+        userId: user.id,
+      });
+    },
+    [user, getDuration, predictAchievements]
+  );
 
   return {
     // State
@@ -235,6 +344,9 @@ export const useFocusGame = (props: UseFocusGameProps) => {
     unlockedAchievements,
     // Actions
     startGame,
+    startTimer,
+    getDuration,
+    predictAchievementsSync,
     finishGame,
     resetGame,
   };

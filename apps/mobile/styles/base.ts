@@ -122,7 +122,6 @@ export const STYLES = StyleSheet.create({
     width: "35%",
     borderRadius: 12,
     backgroundColor: COLORS.primary,
-    alignItems: "center",
   },
 
   // Buttons - consistent 12px border radius
@@ -131,7 +130,6 @@ export const STYLES = StyleSheet.create({
     width: "85%",
     borderRadius: 12,
     backgroundColor: COLORS.primary,
-    alignItems: "center",
   },
   buttonSecondary: {
     marginTop: 14,

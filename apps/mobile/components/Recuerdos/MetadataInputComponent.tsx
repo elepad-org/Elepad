@@ -3,6 +3,7 @@ import { View } from "react-native";
 import { TextInput, Text } from "react-native-paper";
 import { STYLES, COLORS } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
+import SaveButton from "../shared/SaveButton";
 import MentionInput from "./MentionInput";
 
 interface FamilyMember {
@@ -78,12 +79,17 @@ export default function MetadataInputComponent({
           alignItems: "center",
         }}
       >
-        <CancelButton onPress={onCancel} disabled={isUploading} />
-        <CancelButton
-          onPress={handleSubmit}
-          text={isUploading ? "Subiendo..." : "Guardar"}
-          disabled={isUploading}
-        />
+        <View style={{ width: 120 }}>
+          <CancelButton onPress={onCancel} disabled={isUploading} />
+        </View>
+        <View style={{ width: 120 }}>
+          <SaveButton
+            onPress={handleSubmit}
+            text={isUploading ? "Subiendo..." : "Guardar"}
+            disabled={isUploading}
+            loading={isUploading}
+          />
+        </View>
       </View>
     </View>
   );

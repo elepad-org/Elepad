@@ -113,7 +113,19 @@ export default function PickerModal({
                     }}
                   >
                     {option.icon ? (
-                      option.icon
+                      <View
+                        style={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: 16,
+                          backgroundColor: COLORS.backgroundSecondary,
+                          alignItems: "center",
+                          justifyContent: "center",
+                          marginRight: 12,
+                        }}
+                      >
+                        {option.icon}
+                      </View>
                     ) : option.avatarUrl ? (
                       <Image
                         source={{ uri: option.avatarUrl }}

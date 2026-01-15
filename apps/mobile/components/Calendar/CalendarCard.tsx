@@ -1,7 +1,8 @@
 import { useMemo, useState, useEffect } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
-import { Text, SegmentedButtons, IconButton } from "react-native-paper";
+import { Text, IconButton } from "react-native-paper";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
+import DropdownSelect from "../shared/DropdownSelect";
 import { Activity, useGetFrequencies } from "@elepad/api-client";
 import { COLORS } from "@/styles/base";
 import type { getActivitiesFamilyCodeIdFamilyGroupResponse } from "@elepad/api-client";
@@ -140,6 +141,8 @@ interface CalendarCardProps {
   activityToView?: string | null;
   activityDateToView?: string | null;
   onActivityViewed?: () => void;
+  selectedElderId: string | null;
+  onElderChange: (elderId: string | null) => void;
 }
 
 // Configuración de calendario en español
@@ -197,11 +200,12 @@ export default function CalendarCard(props: CalendarCardProps) {
     activityToView,
     activityDateToView,
     onActivityViewed,
+    selectedElderId,
+    onElderChange,
   } = props;
   const { userElepad } = useAuth();
   const today = getTodayLocal();
   const [selectedDay, setSelectedDay] = useState<string>(today);
-  const [filter, setFilter] = useState<"all" | "mine">("all");
 
   // Cambiar al día de la actividad cuando se recibe desde notificaciones
   useEffect(() => {
@@ -218,6 +222,13 @@ export default function CalendarCard(props: CalendarCardProps) {
       displayName: member.displayName || "Usuario",
       avatarUrl: member.avatarUrl || null,
     })) || [];
+  }, [groupInfo]);
+
+  // Preparar lista de adultos mayores para el filtro
+  const elders = useMemo(() => {
+    if (!groupInfo) return [];
+    const allMembers = [groupInfo.owner, ...(groupInfo.members || [])];
+    return allMembers.filter((member) => member?.elder === true);
   }, [groupInfo]);
 
   // Estado optimista local para las completaciones
@@ -403,13 +414,13 @@ export default function CalendarCard(props: CalendarCardProps) {
     return obj;
   }, [eventsByDate, selectedDay, streakHistoryQuery.data, userElepad]);
 
-  // Only user's activities only, ordenados: primero incompletos, luego completados
+  // Filtrar actividades por adulto mayor seleccionado, ordenados: primero incompletos, luego completados
   const dayEvents = useMemo(() => {
     const eventsToday = eventsByDate[selectedDay] ?? [];
-    const filtered =
-      filter === "mine"
-        ? eventsToday.filter((ev) => ev.createdBy === idUser)
-        : eventsToday;
+    // Si hay un adulto mayor seleccionado, filtrar por assignedTo
+    const filtered = selectedElderId
+      ? eventsToday.filter((ev) => ev.assignedTo === selectedElderId)
+      : eventsToday;
 
     // Separar completados de no completados usando completionsByDateMap
     const incomplete = filtered.filter((ev) => {
@@ -427,7 +438,7 @@ export default function CalendarCard(props: CalendarCardProps) {
 
     // Retornar incompletos primero, luego completados
     return [...incomplete, ...complete];
-  }, [eventsByDate, selectedDay, filter, idUser, completionsByDateMap]);
+  }, [eventsByDate, selectedDay, selectedElderId, completionsByDateMap]);
 
   // Función para toggle optimista con reintentos
   const handleToggleCompletion = async (activity: Activity) => {
@@ -519,37 +530,31 @@ export default function CalendarCard(props: CalendarCardProps) {
       </View>
 
       <View style={styles.controlsRow}>
-        <SegmentedButtons
-          value={filter}
-          onValueChange={setFilter}
-          buttons={[
-            {
-              value: "all",
-              label: "Todos",
-              style:
-                filter === "all"
-                  ? styles.segmentedButtonActive
-                  : styles.segmentedButtonInactive,
-              labelStyle:
-                filter === "all"
-                  ? styles.segmentedLabelActive
-                  : styles.segmentedLabelInactive,
-            },
-            {
-              value: "mine",
-              label: "Mis eventos",
-              style:
-                filter === "mine"
-                  ? styles.segmentedButtonActive
-                  : styles.segmentedButtonInactive,
-              labelStyle:
-                filter === "mine"
-                  ? styles.segmentedLabelActive
-                  : styles.segmentedLabelInactive,
-            },
-          ]}
-          style={styles.segmentedButtons}
+        <IconButton
+          icon="filter-variant"
+          size={24}
+          iconColor={COLORS.primary}
+          style={styles.filterIcon}
         />
+        <View style={{ flex: 1 }}>
+          <DropdownSelect
+            label="Filtrar actividades"
+            value={selectedElderId || "all"}
+            options={[
+              { key: "all", label: "Todos", icon: "account-group" },
+              ...elders.map((elder) => ({
+                key: elder.id,
+                label: elder.displayName,
+                avatarUrl: elder.avatarUrl || null,
+              })),
+            ]}
+            onSelect={(value) => {
+              onElderChange(value === "all" ? null : value);
+            }}
+            placeholder="Seleccionar adulto mayor"
+            showLabel={false}
+          />
+        </View>
         <IconButton
           icon="calendar-today"
           size={24}
@@ -574,7 +579,9 @@ export default function CalendarCard(props: CalendarCardProps) {
       {dayEvents.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>
-            {selectedDay === today
+            {selectedElderId
+              ? `No hay actividades programadas para ${elders.find((e) => e.id === selectedElderId)?.displayName || "este usuario"} ${selectedDay === today ? "hoy" : "en este día"}.`
+              : selectedDay === today
               ? "No hay eventos para hoy."
               : "No hay eventos para este día."}
           </Text>
@@ -641,32 +648,8 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 16,
   },
-  segmentedButtons: {
-    flex: 1,
-    backgroundColor: COLORS.backgroundSecondary,
-    borderRadius: 24,
-    borderWidth: 0,
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  segmentedButtonActive: {
-    backgroundColor: COLORS.primary,
-    borderRadius: 20,
-    borderWidth: 0,
-  },
-  segmentedButtonInactive: {
-    backgroundColor: COLORS.backgroundSecondary,
-    borderRadius: 20,
-    borderWidth: 0,
-  },
-  segmentedLabelActive: {
-    color: COLORS.white,
-  },
-  segmentedLabelInactive: {
-    color: COLORS.textSecondary,
+  filterIcon: {
+    margin: 0,
   },
   todayIconButton: {
     margin: 0,

@@ -1,5 +1,5 @@
-import { useEffect, useRef, useMemo } from "react";
-import { View, StyleSheet, ScrollView } from "react-native";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { View, StyleSheet, ScrollView, useWindowDimensions } from "react-native";
 import { Text, Button, Card } from "react-native-paper";
 import { SudokuCell } from "./SudokuCell";
 import { useSudoku, Difficulty } from "@/hooks/useSudoku";
@@ -9,14 +9,18 @@ import { COLORS } from "@/styles/base";
 interface SudokuGameBoardProps {
   difficulty: Difficulty;
   onQuit: () => void;
-  onComplete: (stats: { moves: number; timeElapsed: number }) => void;
-  onGameOver?: () => void;
-  onAchievementUnlocked?: (achievement: {
-    id: string;
-    title: string;
-    icon?: string | null;
-    description?: string;
+  onComplete: (stats: {
+    moves: number;
+    timeElapsed: number;
+    achievements?: Array<{
+      id: string;
+      title: string;
+      icon?: string | null;
+      description?: string | null;
+      points: number;
+    }>;
   }) => void;
+  onGameOver?: () => void;
 }
 
 export const SudokuGameBoard: React.FC<SudokuGameBoardProps> = ({
@@ -24,29 +28,46 @@ export const SudokuGameBoard: React.FC<SudokuGameBoardProps> = ({
   onQuit,
   onComplete,
   onGameOver,
-  onAchievementUnlocked,
 }) => {
   const {
     board,
     selectedCell,
     mistakes,
     timeElapsed,
+    userMoves,
     isComplete,
     isLoading,
     actions,
+    unlockedAchievements,
   } = useSudoku({
     difficulty,
     maxMistakes: 3,
     onGameOver,
-    onAchievementUnlocked,
   });
 
   const hasCalledOnComplete = useRef(false);
+  const [boardSize, setBoardSize] = useState(0);
+  const { width: windowWidth } = useWindowDimensions();
+
+  // Calcular el tamaño del tablero basado en el ancho de la pantalla
+  useEffect(() => {
+    const horizontalPadding = 32; // 16px de cada lado (como el Card de estadísticas)
+    const availableWidth = windowWidth - horizontalPadding;
+    setBoardSize(availableWidth);
+  }, [windowWidth]);
 
   const handleQuit = () => {
     actions.quitGame();
     onQuit();
   };
+
+  // Crear handlers memoizados para cada celda para evitar re-renders
+  const createCellPressHandler = useCallback(
+    (row: number, col: number) => () => {
+      actions.selectCell(row, col);
+    },
+    [actions]
+  );
 
   // Formatear el tiempo
   const formatTime = (seconds: number) => {
@@ -55,30 +76,18 @@ export const SudokuGameBoard: React.FC<SudokuGameBoardProps> = ({
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Calcular movimientos
-  const moves = useMemo(() => {
-    let count = 0;
-    board.forEach((row) =>
-      row.forEach((cell) => {
-        if (cell.value !== null && !cell.isReadOnly) {
-          count++;
-        }
-      }),
-    );
-    return count;
-  }, [board]);
-
   // Cuando el juego termina
   useEffect(() => {
     if (isComplete && !hasCalledOnComplete.current) {
       hasCalledOnComplete.current = true;
       console.log("🎊 Juego Sudoku completado");
       onComplete({
-        moves,
+        moves: userMoves,
         timeElapsed,
+        achievements: unlockedAchievements,
       });
     }
-  }, [isComplete, moves, timeElapsed, onComplete]);
+  }, [isComplete, userMoves, timeElapsed, onComplete, unlockedAchievements]);
 
   // Resetear el flag cuando se reinicia el juego
   useEffect(() => {
@@ -110,7 +119,7 @@ export const SudokuGameBoard: React.FC<SudokuGameBoardProps> = ({
               🎯 Movimientos
             </Text>
             <Text variant="headlineSmall" style={styles.statValue}>
-              {moves}
+              {userMoves}
             </Text>
           </View>
           <View style={styles.stat}>
@@ -136,32 +145,50 @@ export const SudokuGameBoard: React.FC<SudokuGameBoardProps> = ({
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.boardContainer}>
-          <View style={styles.board}>
-            {board.map((row, rowIndex) => (
-              <View key={rowIndex} style={styles.row}>
-                {row.map((cell, colIndex) => (
+          <View style={[styles.board, { width: boardSize, height: boardSize }]}>
+            {/* Renderizar el tablero como bloques 3x3 */}
+            {[0, 1, 2].map((blockRow) => (
+              <View key={`blockRow-${blockRow}`} style={styles.blockRow}>
+                {[0, 1, 2].map((blockCol) => (
                   <View
-                    key={`${rowIndex}-${colIndex}`}
+                    key={`block-${blockRow}-${blockCol}`}
                     style={[
-                      colIndex === 2 || colIndex === 5
-                        ? styles.cellRightBorder
-                        : null,
-                      rowIndex === 2 || rowIndex === 5
-                        ? styles.cellBottomBorder
-                        : null,
+                      styles.block,
+                      // Bordes redondeados en las esquinas del tablero
+                      blockRow === 0 && blockCol === 0 && styles.blockTopLeft,
+                      blockRow === 0 && blockCol === 2 && styles.blockTopRight,
+                      blockRow === 2 && blockCol === 0 && styles.blockBottomLeft,
+                      blockRow === 2 && blockCol === 2 && styles.blockBottomRight,
                     ]}
                   >
-                    <SudokuCell
-                      value={cell.value}
-                      isReadOnly={cell.isReadOnly}
-                      isError={cell.isError}
-                      isSelected={
-                        selectedCell?.row === rowIndex &&
-                        selectedCell?.col === colIndex
-                      }
-                      onPress={() => actions.selectCell(rowIndex, colIndex)}
-                      disabled={isComplete}
-                    />
+                    {/* Cada bloque 3x3 */}
+                    {[0, 1, 2].map((cellRow) => {
+                      const actualRow = blockRow * 3 + cellRow;
+                      return (
+                        <View key={`row-${actualRow}`} style={styles.row}>
+                          {[0, 1, 2].map((cellCol) => {
+                            const actualCol = blockCol * 3 + cellCol;
+                            const cell = board[actualRow]?.[actualCol];
+                            if (!cell) return null;
+                            
+                            return (
+                              <SudokuCell
+                                key={`cell-${actualRow}-${actualCol}`}
+                                value={cell.value}
+                                isReadOnly={cell.isReadOnly}
+                                isError={cell.isError}
+                                isSelected={
+                                  selectedCell?.row === actualRow &&
+                                  selectedCell?.col === actualCol
+                                }
+                                onPress={createCellPressHandler(actualRow, actualCol)}
+                                disabled={isComplete}
+                              />
+                            );
+                          })}
+                        </View>
+                      );
+                    })}
                   </View>
                 ))}
               </View>
@@ -169,7 +196,7 @@ export const SudokuGameBoard: React.FC<SudokuGameBoardProps> = ({
           </View>
 
           {/* Botones de numeros */}
-          <View style={styles.keyboard}>
+          <View style={[styles.keyboard, { width: boardSize }]}>
             <View style={styles.keyboardRow}>
               {[1, 2, 3, 4, 5].map((num) => (
                 <Button
@@ -270,18 +297,36 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingBottom: 16,
     width: "100%",
-    height: "100%",
-    paddingHorizontal: 16,
   },
   board: {
     backgroundColor: COLORS.backgroundSecondary,
     borderRadius: 12,
-    padding: 8,
-    width: "100%",
-    height: "58%",
-    maxWidth: 400,
+    padding: 4,
     borderWidth: 2,
     borderColor: COLORS.text,
+    aspectRatio: 1, // Mantener cuadrado
+    overflow: "hidden", // Para que los bordes redondeados de los bloques se vean bien
+  },
+  blockRow: {
+    flexDirection: "row",
+    flex: 1,
+  },
+  block: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: "#BDBDBD", // Gris más suave
+  },
+  blockTopLeft: {
+    borderTopLeftRadius: 8,
+  },
+  blockTopRight: {
+    borderTopRightRadius: 8,
+  },
+  blockBottomLeft: {
+    borderBottomLeftRadius: 8,
+  },
+  blockBottomRight: {
+    borderBottomRightRadius: 8,
   },
   row: {
     flexDirection: "row",
@@ -297,8 +342,6 @@ const styles = StyleSheet.create({
   },
   keyboard: {
     marginTop: 16,
-    width: "100%",
-    maxWidth: 400,
   },
   keyboardRow: {
     flexDirection: "row",
