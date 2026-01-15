@@ -1603,12 +1603,14 @@ export default function RecuerdosScreen() {
         <FlatList
           key={`grid-${numColumns}`}
           data={recuerdos}
-          renderItem={({ item }) => (
-            <RecuerdoItemComponent
-              item={item}
-              numColumns={numColumns}
-              onPress={handleRecuerdoPress}
-            />
+          renderItem={({ item, index }) => (
+            <Animated.View entering={FadeInUp.delay(index * 50).springify()}>
+              <RecuerdoItemComponent
+                item={item}
+                numColumns={numColumns}
+                onPress={handleRecuerdoPress}
+              />
+            </Animated.View>
           )}
           keyExtractor={(item) => item.id}
           numColumns={numColumns}
@@ -1661,25 +1663,28 @@ export default function RecuerdosScreen() {
       {renderBookDialogs()}
 
       {/* Diálogo de detalle del recuerdo */}
-      <RecuerdoDetailDialog
-        visible={detailDialogVisible}
-        recuerdo={selectedRecuerdo}
-        onDismiss={() => {
-          handleCloseDetail();
-          router.setParams({ memoryId: "", bookId: "" });
-        }}
-        onUpdateRecuerdo={async (id, patch) => {
-          await updateMemoryMutation.mutateAsync({ id, patch });
-        }}
-        onDeleteRecuerdo={async (id) => {
-          await deleteMemoryMutation.mutateAsync(id);
-        }}
-        isMutating={
-          updateMemoryMutation.isPending || deleteMemoryMutation.isPending
-        }
-        familyMembers={groupMembers}
-        currentUserId={userElepad?.id}
-      />
+      {/* Diálogo de detalle del recuerdo */}
+      {detailDialogVisible && (
+        <RecuerdoDetailDialog
+          visible={detailDialogVisible}
+          recuerdo={selectedRecuerdo}
+          onDismiss={() => {
+            handleCloseDetail();
+            router.setParams({ memoryId: "", bookId: "" });
+          }}
+          onUpdateRecuerdo={async (id, patch) => {
+            await updateMemoryMutation.mutateAsync({ id, patch });
+          }}
+          onDeleteRecuerdo={async (id) => {
+            await deleteMemoryMutation.mutateAsync(id);
+          }}
+          isMutating={
+            updateMemoryMutation.isPending || deleteMemoryMutation.isPending
+          }
+          familyMembers={groupMembers}
+          currentUserId={userElepad?.id}
+        />
+      )}
 
       {/* Snackbar para mostrar mensajes */}
       <Snackbar
