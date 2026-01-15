@@ -1,4 +1,4 @@
-import { View, Image, StyleSheet, Dimensions } from "react-native";
+import { View, StyleSheet, Dimensions } from "react-native";
 import { Text } from "react-native-paper";
 import { COLORS, SHADOWS } from "@/styles/base";
 import { AlbumPage } from "@elepad/api-client";
@@ -9,7 +9,7 @@ interface AlbumPageViewProps {
   totalPages: number;
 }
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function AlbumPageView({
   page,

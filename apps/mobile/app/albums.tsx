@@ -1,6 +1,18 @@
 import { useState, useCallback } from "react";
-import { StatusBar, View, StyleSheet, FlatList, RefreshControl } from "react-native";
-import { Text, ActivityIndicator, IconButton, Snackbar, FAB } from "react-native-paper";
+import {
+  StatusBar,
+  View,
+  StyleSheet,
+  FlatList,
+  RefreshControl,
+} from "react-native";
+import {
+  Text,
+  ActivityIndicator,
+  IconButton,
+  //Snackbar,
+  FAB,
+} from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
 import { COLORS, STYLES, LAYOUT } from "@/styles/base";
@@ -18,18 +30,15 @@ export default function AlbumsScreen() {
   const groupId = userElepad?.groupId || "";
 
   const [albumDialogVisible, setAlbumDialogVisible] = useState(false);
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
+  //const [snackbarVisible, setSnackbarVisible] = useState(false);
+  //const [snackbarMessage, setSnackbarMessage] = useState("");
   const [refreshing, setRefreshing] = useState(false);
 
   // Fetch albums using the custom hook
   const { albumsQuery } = useAlbumCreation();
 
   // Fetch memories for the album creation
-  const {
-    data: memoriesResponse,
-    isLoading: memoriesLoading,
-  } = useGetMemories(
+  const { data: memoriesResponse } = useGetMemories(
     {
       groupId,
       limit: 100,
@@ -49,17 +58,18 @@ export default function AlbumsScreen() {
   const albums: Album[] = (() => {
     const data = albumsQuery.data;
     if (!data) return [];
-    
+
     // Handle wrapped response
-    if (typeof data === 'object' && data !== null && 'data' in data) {
+    if (typeof data === "object" && data !== null && "data" in data) {
       const unwrapped = (data as any).data;
       if (Array.isArray(unwrapped)) return unwrapped;
-      if (unwrapped?.data && Array.isArray(unwrapped.data)) return unwrapped.data;
+      if (unwrapped?.data && Array.isArray(unwrapped.data))
+        return unwrapped.data;
     }
-    
+
     // Handle direct array
     if (Array.isArray(data)) return data;
-    
+
     return [];
   })();
 
@@ -67,9 +77,12 @@ export default function AlbumsScreen() {
     router.back();
   }, [router]);
 
-  const handleAlbumPress = useCallback((albumId: string) => {
-    router.push(`/album-viewer?id=${albumId}` as any);
-  }, [router]);
+  const handleAlbumPress = useCallback(
+    (albumId: string) => {
+      router.push(`/album-viewer?id=${albumId}`);
+    },
+    [router]
+  );
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -111,10 +124,7 @@ export default function AlbumsScreen() {
           </View>
         ) : albums.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Image
-              source={eleEmpthy}
-              style={styles.emptyImage}
-            />
+            <Image source={eleEmpthy} style={styles.emptyImage} />
             <Text style={STYLES.heading}>No hay álbumes aún</Text>
             <Text style={styles.emptyText}>
               Crea álbumes con narrativas generadas por IA a partir de tus
@@ -129,8 +139,8 @@ export default function AlbumsScreen() {
             columnWrapperStyle={styles.row}
             contentContainerStyle={styles.listContent}
             refreshControl={
-              <RefreshControl 
-                refreshing={refreshing} 
+              <RefreshControl
+                refreshing={refreshing}
                 onRefresh={onRefresh}
                 colors={[COLORS.primary]}
               />
@@ -173,7 +183,7 @@ export default function AlbumsScreen() {
       />
 
       {/* Snackbar para mostrar mensajes */}
-      <Snackbar
+      {/* <Snackbar
         visible={snackbarVisible}
         onDismiss={() => setSnackbarVisible(false)}
         duration={2200}
@@ -185,7 +195,7 @@ export default function AlbumsScreen() {
         }}
       >
         {snackbarMessage}
-      </Snackbar>
+      </Snackbar> */}
     </SafeAreaView>
   );
 }

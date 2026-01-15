@@ -9,6 +9,20 @@ import { Database } from "@/supabase-types";
 import { CreateAlbumRequest, AlbumWithPages, Album } from "./schema";
 import { NotificationsService } from "../notifications/service";
 
+export type pageWithMemory = {
+  id: string;
+  order: number;
+  title: string | null;
+  description: string | null;
+  memories: {
+    id: string;
+    title: string | null;
+    caption: string | null;
+    mediaUrl: string | null;
+    mimeType: string | null;
+  };
+};
+
 export class MemoriesAlbumService {
   private apiKey: string;
   private supabase: SupabaseClient<Database>;
@@ -70,7 +84,6 @@ export class MemoriesAlbumService {
 
       const model = genAI.getGenerativeModel({
         model: "gemini-3-flash-preview",
-
       });
 
       const prompt =
@@ -98,9 +111,7 @@ export class MemoriesAlbumService {
     } finally {
       try {
         if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
-      } catch {
-
-      }
+      } catch {}
     }
   }
 
@@ -111,15 +122,14 @@ export class MemoriesAlbumService {
     userId: string,
     data: CreateAlbumRequest
   ): Promise<AlbumWithPages> {
-
-    const {data:userGroup, error:userGroupError} = await this.supabase
+    const { data: userGroup, error: userGroupError } = await this.supabase
       .from("users")
       .select("groupId")
       .eq("id", userId)
-      .single()
+      .single();
 
-    if(!userGroup?.groupId || userGroupError){
-      throw new ApiException(404, "User family group not found")
+    if (!userGroup?.groupId || userGroupError) {
+      throw new ApiException(404, "User family group not found");
     }
 
     const { data: memories, error: memoriesError } = await this.supabase
@@ -196,9 +206,11 @@ export class MemoriesAlbumService {
       throw new ApiException(500, "Error creating album pages");
     }
 
-    this.processAlbumNarratives(album.id, userId, userGroup.groupId).catch((err) => {
-      console.error("Error processing album narratives:", err);
-    });
+    this.processAlbumNarratives(album.id, userId, userGroup.groupId).catch(
+      (err) => {
+        console.error("Error processing album narratives:", err);
+      }
+    );
 
     // Return the album with pages
     return {
@@ -337,7 +349,7 @@ export class MemoriesAlbumService {
   private async generateNarrativesWithGemini(
     album: { title: string; description: string | null },
     familyName: string,
-    pages: any[]
+    pages: pageWithMemory[]
   ): Promise<string[]> {
     if (!this.apiKey) {
       throw new Error("Gemini API key not configured");
@@ -346,7 +358,7 @@ export class MemoriesAlbumService {
     const genAI = new GoogleGenerativeAI(this.apiKey);
     const model = genAI.getGenerativeModel({
       //model: "gemini-2.0-flash-exp", //Este se supone es más eficiente pero me da error de query limit superado :(
-      model: "gemini-3-flash-preview"
+      model: "gemini-3-flash-preview",
     });
 
     // Download and convert images to base64
@@ -443,28 +455,28 @@ Este recuerdo nos muestra...`;
     userId: string,
     limit: number,
     offset: number
-  ) : Promise<Album[]> {
+  ): Promise<Album[]> {
     //get user gruopId
-    const {data:userGroup, error:userGroupError} = await this.supabase
+    const { data: userGroup, error: userGroupError } = await this.supabase
       .from("users")
       .select("groupId")
       .eq("id", userId)
-      .single()
+      .single();
 
-    if(!userGroup?.groupId || userGroupError){
-      throw new ApiException(404, "User family group not found")
+    if (!userGroup?.groupId || userGroupError) {
+      throw new ApiException(404, "User family group not found");
     }
 
-    const { data: albums, error: albumsError} = await this.supabase
+    const { data: albums, error: albumsError } = await this.supabase
       .from("memoriesAlbums")
       .select("*")
       .eq("groupId", userGroup.groupId)
       .eq("status", "ready")
       .range(offset, offset + limit - 1);
-    
-    if(albumsError){
-      console.error("Error getting the family group albums")
-      throw new ApiException(500, "Error getting the family group albums")
+
+    if (albumsError) {
+      console.error("Error getting the family group albums");
+      throw new ApiException(500, "Error getting the family group albums");
     }
 
     return albums.map((album) => ({
@@ -472,22 +484,18 @@ Este recuerdo nos muestra...`;
       createdAt: new Date(album.createdAt),
       updatedAt: album.updatedAt ? new Date(album.updatedAt) : null,
     }));
-
   }
 
-  async getAlbumById(
-    userId: string,
-    albumId: string,
-  ) : Promise<AlbumWithPages> {
+  async getAlbumById(userId: string, albumId: string): Promise<AlbumWithPages> {
     //get user gruopId
-    const {data:userGroup, error:userGroupError} = await this.supabase
+    const { data: userGroup, error: userGroupError } = await this.supabase
       .from("users")
       .select("groupId")
       .eq("id", userId)
-      .single()
+      .single();
 
-    if(!userGroup?.groupId || userGroupError){
-      throw new ApiException(404, "User family group not found")
+    if (!userGroup?.groupId || userGroupError) {
+      throw new ApiException(404, "User family group not found");
     }
 
     const { data: album, error: albumError } = await this.supabase
@@ -512,7 +520,7 @@ Este recuerdo nos muestra...`;
       throw new ApiException(500, "Error fetching album pages");
     }
 
-    return ({
+    return {
       ...album,
       createdAt: new Date(album.createdAt),
       updatedAt: album.updatedAt ? new Date(album.updatedAt) : null,
@@ -521,8 +529,6 @@ Este recuerdo nos muestra...`;
         createdAt: new Date(p.createdAt),
         updatedAt: p.updatedAt ? new Date(p.updatedAt) : null,
       })),
-    });
-
+    };
   }
-
 }

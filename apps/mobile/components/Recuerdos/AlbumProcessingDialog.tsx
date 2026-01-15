@@ -22,7 +22,7 @@ export default function AlbumProcessingDialog({
           <Text style={styles.title}>Creando tu álbum</Text>
 
           <Text style={styles.description}>
-            "{albumTitle}" se está procesando en segundo plano.
+            {albumTitle} se está procesando en segundo plano.
           </Text>
 
           <Text style={styles.subtitle}>
@@ -32,7 +32,7 @@ export default function AlbumProcessingDialog({
 
           <View style={styles.infoBox}>
             <Text style={styles.infoText}>
-              📱 Te enviaremos una notificación cuando tu álbum esté listo
+              Te enviaremos una notificación cuando tu álbum esté listo
             </Text>
           </View>
 

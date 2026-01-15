@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { View, StyleSheet, StatusBar, Dimensions } from "react-native";
+import { View, StyleSheet, StatusBar } from "react-native";
 import { ActivityIndicator, IconButton, Text } from "react-native-paper";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { COLORS } from "@/styles/base";
@@ -31,7 +31,7 @@ export default function AlbumViewerScreen() {
     
     // Handle wrapped response
     if ('data' in albumResponse) {
-      return (albumResponse as any).data as AlbumWithPages;
+      return (albumResponse).data as AlbumWithPages;
     }
     
     return albumResponse as AlbumWithPages;
@@ -41,7 +41,7 @@ export default function AlbumViewerScreen() {
 
   // Lock orientation to landscape on mount
   useEffect(() => {
-    let isMounted = true;
+    //let isMounted = true;
 
     const lockOrientation = async () => {
       try {
@@ -57,7 +57,7 @@ export default function AlbumViewerScreen() {
 
     // Cleanup: unlock orientation when unmounting
     return () => {
-      isMounted = false;
+      //isMounted = false;
       ScreenOrientation.unlockAsync().catch((err: Error) => {
         console.error("Error unlocking orientation:", err);
       });

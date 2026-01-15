@@ -566,24 +566,6 @@ export default function RecuerdosScreen() {
       });
   }, [memoriesResponse, memberNameById, sortOrder]);
 
-  // Extraer memories para pasar al CreateAlbumDialog
-  const memories = useMemo(() => {
-    const memoriesPayload =
-      memoriesResponse && "data" in memoriesResponse
-        ? (memoriesResponse as unknown as { data: unknown }).data
-        : undefined;
-
-    const memoriesData = Array.isArray(memoriesPayload)
-      ? memoriesPayload
-      : memoriesPayload &&
-          typeof memoriesPayload === "object" &&
-          "data" in (memoriesPayload as Record<string, unknown>)
-        ? (memoriesPayload as { data: unknown }).data
-        : [];
-
-    return Array.isArray(memoriesData) ? (memoriesData as Memory[]) : [];
-  }, [memoriesResponse]);
-
   const params = useLocalSearchParams();
   const { memoryId, bookId } = params;
 

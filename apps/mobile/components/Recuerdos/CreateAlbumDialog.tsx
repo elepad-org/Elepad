@@ -149,11 +149,11 @@ export default function CreateAlbumDialog({
   };
 
   // Mostrar snackbar si hay error, falta implementar
-  const showError = () => {
+  /* const showError = () => {
     if (error) {
       setSnackbarVisible(true);
     }
-  };
+  }; */
 
   return (
     <>
@@ -326,7 +326,7 @@ export default function CreateAlbumDialog({
         onDismiss={dismissProcessingDialog}
         duration={3000}
       >
-        ✅ Álbum "{processingAlbumTitle}" creado. Generando narrativas...
+        ✅ Álbum {processingAlbumTitle} creado. Generando narrativas...
       </Snackbar>
     </>
   );
