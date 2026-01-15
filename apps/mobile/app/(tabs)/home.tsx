@@ -61,12 +61,10 @@ export default function HomeScreen() {
 
   // Fetch recent memories
   const memoriesQuery = useGetMemories(
-    userElepad?.groupId
-      ? { limit: 1, groupId: userElepad.groupId }
-      : { limit: 1 },
+    { limit: 1, groupId: userElepad?.groupId || "" },
     {
       query: {
-        enabled: !!userElepad,
+        enabled: !!userElepad?.groupId,
       },
     }
   );
