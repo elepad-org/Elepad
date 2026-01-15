@@ -32,8 +32,20 @@ import { LinearGradient } from "expo-linear-gradient";
 import StreakCounter from "@/components/StreakCounter";
 import HighlightedMentionText from "@/components/Recuerdos/HighlightedMentionText";
 import { useNotifications } from "@/hooks/useNotifications";
+import { GAMES_INFO } from "@/constants/gamesInfo";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+// Helper para obtener info del juego
+const getGameInfo = (gameType: string) => {
+  const gameMap: Record<string, { name: string; emoji: string }> = {
+    memory: { name: GAMES_INFO.memory?.title || "Memoria", emoji: "🧠" },
+    logic: { name: GAMES_INFO.net?.title || "NET", emoji: "🧩" },
+    sudoku: { name: GAMES_INFO.sudoku?.title || "Sudoku", emoji: "🔢" },
+    focus: { name: GAMES_INFO.focus?.title || "Focus", emoji: "🎯" },
+  };
+  return gameMap[gameType] || { name: "Juego", emoji: "🎮" };
+};
 
 export default function HomeScreen() {
   const { userElepad, userElepadLoading } = useAuth();
@@ -495,28 +507,12 @@ export default function HomeScreen() {
             >
               <View style={styles.gameIcon}>
                 <Text style={styles.gameEmoji}>
-                  {lastAttempt.gameType === "memory" 
-                    ? "🧠" 
-                    : lastAttempt.gameType === "logic" 
-                    ? "🧩" 
-                    : lastAttempt.gameType === "sudoku"
-                    ? "🔢"
-                    : lastAttempt.gameType === "focus"
-                    ? "🎯"
-                    : "🎮"}
+                  {getGameInfo(lastAttempt.gameType || "").emoji}
                 </Text>
               </View>
               <View style={styles.gameInfo}>
                 <Text style={styles.gameName}>
-                  {lastAttempt.gameType === "memory"
-                    ? "Juego de Memoria"
-                    : lastAttempt.gameType === "logic"
-                    ? "Juego NET"
-                    : lastAttempt.gameType === "sudoku"
-                    ? "Sudoku"
-                    : lastAttempt.gameType === "focus"
-                    ? "Juego de Foco"
-                    : "Juego"}
+                  {getGameInfo(lastAttempt.gameType || "").name}
                 </Text>
                 <Text style={styles.gameTime}>
                   {new Date(lastAttempt.startedAt).toLocaleDateString("es", {
@@ -785,12 +781,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 12,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: "bold",
     color: COLORS.text,
+    marginBottom: 0,
   },
   sectionLink: {
     fontSize: 14,
@@ -865,6 +862,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderRadius: 16,
     padding: 18,
+    marginTop: 10,
     gap: 16,
     ...SHADOWS.card,
   },
@@ -930,7 +928,7 @@ const styles = StyleSheet.create({
   // Empty States
   emptySection: {
     alignItems: "center",
-    paddingVertical: 32,
+    paddingVertical: 20,
     backgroundColor: COLORS.backgroundSecondary,
     borderRadius: 16,
   },
