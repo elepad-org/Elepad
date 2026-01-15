@@ -2,10 +2,11 @@ import NewAccount from "@/components/Forms/Auth/NewAccount";
 import { useAuth } from "@/hooks/useAuth";
 import { Redirect } from "expo-router";
 import { useRef } from "react";
-import { Animated, StyleSheet, View } from "react-native";
+import { Animated, StyleSheet, View, ImageBackground } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator } from "react-native-paper";
 import { FONT } from "@/styles/base";
+import fondoLogin from "@/assets/images/fondoLogin.png";
 
 export default function SignupScreen() {
   const { session, loading } = useAuth();
@@ -24,15 +25,18 @@ export default function SignupScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <ImageBackground
+      source={fondoLogin}
+      style={[styles.container, { backgroundColor: "#FFFFFF" }]}
+      resizeMode="cover"
+      imageStyle={{ opacity: 0.3 }}
+    >
       <StatusBar style="light" translucent />
 
-      <Animated.View
-        style={{ flex: 1, opacity: fadeAnim, backgroundColor: "#FFFFFF" }}
-      >
+      <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
         <NewAccount />
       </Animated.View>
-    </View>
+    </ImageBackground>
   );
 }
 
