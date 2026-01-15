@@ -495,23 +495,58 @@ export default function HomeScreen() {
             >
               <View style={styles.gameIcon}>
                 <Text style={styles.gameEmoji}>
-                  {lastAttempt.gameType === "memory" ? "🧠" : "🧩"}
+                  {lastAttempt.gameType === "memory" 
+                    ? "🧠" 
+                    : lastAttempt.gameType === "logic" 
+                    ? "🧩" 
+                    : lastAttempt.gameType === "sudoku"
+                    ? "🔢"
+                    : lastAttempt.gameType === "focus"
+                    ? "🎯"
+                    : "🎮"}
                 </Text>
               </View>
               <View style={styles.gameInfo}>
                 <Text style={styles.gameName}>
                   {lastAttempt.gameType === "memory"
                     ? "Juego de Memoria"
-                    : "Juego NET"}
+                    : lastAttempt.gameType === "logic"
+                    ? "Juego NET"
+                    : lastAttempt.gameType === "sudoku"
+                    ? "Sudoku"
+                    : lastAttempt.gameType === "focus"
+                    ? "Juego de Foco"
+                    : "Juego"}
                 </Text>
                 <Text style={styles.gameTime}>
-                  {new Date(lastAttempt.createdAt).toLocaleDateString("es", {
+                  {new Date(lastAttempt.startedAt).toLocaleDateString("es", {
                     day: "numeric",
                     month: "long",
                     hour: "2-digit",
                     minute: "2-digit",
                   })}
                 </Text>
+                {/* Mostrar quién jugó solo si el usuario actual NO es elder (es ayudante) */}
+                {!userElepad?.elder && lastAttempt.user && (
+                  <View style={styles.playerInfo}>
+                    {lastAttempt.user.avatarUrl ? (
+                      <Avatar.Image
+                        size={20}
+                        source={{ uri: lastAttempt.user.avatarUrl }}
+                        style={styles.playerAvatar}
+                      />
+                    ) : (
+                      <Avatar.Text
+                        size={20}
+                        label={lastAttempt.user.displayName.substring(0, 2).toUpperCase()}
+                        style={styles.playerAvatar}
+                      />
+                    )}
+                    <Text style={styles.playerName}>
+                      {lastAttempt.user.displayName}
+                    </Text>
+                  </View>
+                )}
               </View>
               <View style={styles.gameScore}>
                 <Text style={styles.scoreLabel}>PUNTOS</Text>
@@ -856,6 +891,20 @@ const styles = StyleSheet.create({
   gameTime: {
     fontSize: 13,
     color: COLORS.textSecondary,
+  },
+  playerInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 6,
+    gap: 6,
+  },
+  playerAvatar: {
+    marginRight: 0,
+  },
+  playerName: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    fontWeight: "600",
   },
   gameScore: {
     alignItems: "center",

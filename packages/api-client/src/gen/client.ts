@@ -378,6 +378,44 @@ export interface FinishAttempt {
   clientDate?: string;
 }
 
+/**
+ * @nullable
+ */
+export type AttemptWithUserMeta = { [key: string]: unknown | null } | null;
+
+export type AttemptWithUserUser = {
+  displayName: string;
+  /** @nullable */
+  avatarUrl: string | null;
+};
+
+export interface AttemptWithUser {
+  id: string;
+  userId: string;
+  /** @nullable */
+  sudokuPuzzleId: string | null;
+  /** @nullable */
+  memoryPuzzleId: string | null;
+  /** @nullable */
+  logicPuzzleId: string | null;
+  startedAt: string;
+  /** @nullable */
+  finishedAt: string | null;
+  /** @nullable */
+  durationMs: number | null;
+  /** @nullable */
+  score: number | null;
+  /** @nullable */
+  success: boolean | null;
+  /** @nullable */
+  moves: number | null;
+  /** @nullable */
+  meta: AttemptWithUserMeta;
+  isFocusGame?: boolean;
+  gameType?: string;
+  user?: AttemptWithUserUser;
+}
+
 export interface AttemptStats {
   totalAttempts: number;
   successfulAttempts: number;
@@ -628,10 +666,6 @@ export type GetAttemptsParams = {
   offset?: number | null;
   gameType?: GameType;
   userId?: string;
-};
-
-export type GetAttempts200Item = {
-  id: string;
 };
 
 export type GetAttemptsStatsGameTypeParams = {
@@ -7233,7 +7267,7 @@ export function useGetAttemptsAttemptId<
 }
 
 export type getAttemptsResponse200 = {
-  data: GetAttempts200Item[];
+  data: AttemptWithUser[];
   status: 200;
 };
 
