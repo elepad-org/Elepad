@@ -1,7 +1,19 @@
 import { useState, useEffect } from "react";
-import { View, Platform } from "react-native";
-import { BottomNavigation, useTheme } from "react-native-paper";
+import {
+  View,
+  Platform,
+  useWindowDimensions,
+  Animated,
+  Pressable,
+} from "react-native";
+import { Icon, Text } from "react-native-paper";
 import { useLocalSearchParams } from "expo-router";
+import {
+  TabView,
+  SceneMap,
+  SceneRendererProps,
+  NavigationState,
+} from "react-native-tab-view";
 import HomeScreen from "./home";
 import JuegosScreen from "./juegos";
 import RecuerdosScreen from "./recuerdos";
@@ -13,8 +25,15 @@ import { useAuth } from "@/hooks/useAuth";
 // ~15% opacity for the active tab indicator background using primary color
 const activeIndicatorColor = "rgba(91, 80, 122, 0.15)"; // #5b507a with opacity
 
+type TabRoute = {
+  key: string;
+  title: string;
+  focusedIcon: string;
+  unfocusedIcon: string;
+};
+
 export default function TabLayout() {
-  const theme = useTheme();
+  const layout = useWindowDimensions();
   const params = useLocalSearchParams();
   const [index, setIndex] = useState(0);
   const { userElepad } = useAuth();
@@ -109,7 +128,7 @@ export default function TabLayout() {
     }
   }, [isElder]);
 
-  const renderScene = BottomNavigation.SceneMap({
+  const renderScene = SceneMap({
     home: HomeScreen,
     calendar: CalendarScreen,
     juegos: JuegosScreen,
@@ -117,31 +136,19 @@ export default function TabLayout() {
     configuracion: ConfiguracionScreen,
   });
 
-  return (
-    <View style={{ flex: 1, backgroundColor: COLORS.background }}>
-      {/* Content that occupies entire screen */}
-      <View
-        style={{
-          flex: 1,
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-        }}
-      >
-        {renderScene({
-          route: routes[index],
-          jumpTo: (key: string) => {
-            const routeIndex = routes.findIndex((route) => route.key === key);
-            if (routeIndex !== -1) {
-              setIndex(routeIndex);
-            }
-          },
-        })}
-      </View>
+  const renderTabBar = (
+    props: SceneRendererProps & {
+      navigationState: NavigationState<{
+        key: string;
+        title: string;
+        focusedIcon: string;
+        unfocusedIcon: string;
+      }>;
+    }
+  ) => {
+    const { navigationState, position } = props;
 
-      {/* Floating navigation bar */}
+    return (
       <View
         style={{
           position: "absolute",
@@ -165,35 +172,132 @@ export default function TabLayout() {
             },
           }),
           zIndex: 1000,
+          height: 72,
         }}
       >
-        <BottomNavigation.Bar
-          navigationState={{ index, routes }}
-          onTabPress={({ route }) => {
-            const routeIndex = routes.findIndex((r) => r.key === route.key);
-            if (routeIndex !== -1) {
-              setIndex(routeIndex);
-            }
-          }}
-          activeColor={COLORS.primary}
-          inactiveColor={COLORS.textLight}
-          activeIndicatorStyle={{
-            backgroundColor: activeIndicatorColor,
-            borderRadius: 12,
-          }}
-          style={{
-            backgroundColor: "transparent",
-            borderTopWidth: 0,
-            elevation: 0,
-            height: 72,
-            justifyContent: "center",
-          }}
-          labeled={true}
-          labelMaxFontSizeMultiplier={1.2}
-          theme={theme}
-          safeAreaInsets={{ bottom: 0 }}
-        />
+        <View style={{ flexDirection: "row", flex: 1 }}>
+          {navigationState.routes.map((route: TabRoute, index: number) => {
+            const isFocused = navigationState.index === index;
+
+            const onPress = () => {
+              props.jumpTo(route.key);
+            };
+
+            // Smooth transition over full swipe distance to clearly show shrink/grow effect
+            const activeOpacity = position.interpolate({
+              inputRange: [index - 1, index, index + 1],
+              outputRange: [0, 1, 0],
+              extrapolate: "clamp",
+            });
+
+            const activeScale = activeOpacity;
+
+            // Specific interpolation for local scale behavior (shrink/grow) per tab center
+            // We use the simpler [i-1, i, i+1] logic for per-item animation usually, but
+            // the full map above works correctly for the "whole array" input range too.
+
+            return (
+              <Pressable
+                key={route.key}
+                onPress={onPress}
+                style={{
+                  flex: 1,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <View
+                  style={{ alignItems: "center", justifyContent: "center" }}
+                >
+                  {/* Animated Indicator */}
+                  <Animated.View
+                    style={{
+                      position: "absolute",
+                      width: 64, // Approximate pill width
+                      height: 32,
+                      top: -4, // Adjust to center behind icon. Icon is ~24. Pill 32.
+                      backgroundColor: activeIndicatorColor,
+                      borderRadius: 16,
+                      opacity: activeOpacity,
+                      transform: [{ scale: activeScale }],
+                    }}
+                  />
+
+                  {/* Icons Container */}
+                  <View
+                    style={{
+                      width: 24,
+                      height: 24,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {/* Inactive Icon - Fades Out */}
+                    <Animated.View
+                      style={{
+                        position: "absolute",
+                        opacity: activeOpacity.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [1, 0],
+                        }),
+                      }}
+                    >
+                      <Icon
+                        source={route.unfocusedIcon}
+                        size={24}
+                        color={COLORS.textLight}
+                      />
+                    </Animated.View>
+
+                    {/* Active Icon - Fades In */}
+                    <Animated.View
+                      style={{
+                        position: "absolute",
+                        opacity: activeOpacity,
+                      }}
+                    >
+                      <Icon
+                        source={route.focusedIcon}
+                        size={24}
+                        color={COLORS.primary}
+                      />
+                    </Animated.View>
+                  </View>
+                </View>
+
+                <Text
+                  variant="labelSmall"
+                  style={{
+                    marginTop: 4,
+                    color: isFocused ? COLORS.primary : COLORS.textLight,
+                    textAlign: "center",
+                  }}
+                  numberOfLines={1}
+                >
+                  {route.title}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
+    );
+  };
+
+  return (
+    <View style={{ flex: 1, backgroundColor: COLORS.background }}>
+      <TabView
+        navigationState={{ index, routes }}
+        renderScene={renderScene}
+        onIndexChange={setIndex}
+        initialLayout={{ width: layout.width }}
+        renderTabBar={renderTabBar}
+        tabBarPosition="bottom"
+        swipeEnabled={true}
+        animationEnabled={true}
+        lazy={true}
+        lazyPreloadDistance={1}
+      />
     </View>
   );
 }

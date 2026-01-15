@@ -48,8 +48,17 @@ function AttemptItem({
   attempt: Attempt;
   gameType: string;
 }) {
+  // Mapeo de colores por tipo de juego
+  const gameColors: Record<string, string> = {
+    "Memoria": "#6B8DD6", // Azul suave
+    "NET": "#8E7CC3", // Púrpura
+    "Sudoku": "#F4A460", // Naranja suave
+    "Focus": "#66BB6A", // Verde
+  };
+
   const isSuccess = attempt?.success;
   const statusColor = isSuccess ? COLORS.success : COLORS.error;
+  const gameColor = gameColors[gameType] || COLORS.primary;
   const score = attempt?.score ?? "-";
 
   let dateFormatted = "-";
@@ -77,7 +86,7 @@ function AttemptItem({
         { backgroundColor: COLORS.backgroundSecondary },
       ]}
     >
-      <View style={[styles.statusStrip, { backgroundColor: statusColor }]} />
+      <View style={[styles.statusStrip, { backgroundColor: gameColor }]} />
       <View style={styles.attemptContent}>
         <View style={styles.attemptLeft}>
           <Text style={styles.attemptGameType}>{gameType}</Text>
@@ -145,6 +154,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
       id: string;
       displayName: string;
       elder: boolean;
+      avatarUrl?: string | null;
     }
     
     const groupInfo = membersQuery.data as { members?: GroupMember[]; owner?: GroupMember };
@@ -167,9 +177,9 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
 
   const gameTypesRender: Record<string, string> = {
     memory: "Memoria",
-    logic: "Lógica",
-    attention: "Atención",
-    reaction: "Reacción"
+    logic: "NET",
+    attention: "Sudoku",
+    reaction: "Focus"
   };
 
   const statsQueries = gameTypes.map((gt) =>
@@ -223,7 +233,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
 
   const detectGameType = (a: Attempt): string => {
     return (
-      (a.memoryPuzzleId && "Memoria") || (a.logicPuzzleId && "Lógica") || (a.sudokuPuzzleId && "Atención") || (a.isFocusGame && "Reacción") || ""
+      (a.memoryPuzzleId && "Memoria") || (a.logicPuzzleId && "NET") || (a.sudokuPuzzleId && "Sudoku") || (a.isFocusGame && "Focus") || ""
     );
   };
 
@@ -373,7 +383,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
                 </View>
               ) : (
                 <View style={styles.filterContainer}>
-                  <View style={{ flex: 1 }}>
+                  <View style={{ width: "48%", minWidth: 170 }}>
                     <DropdownSelect
                       label="Estadísticas de"
                       value={selectedElderId || ""}
@@ -381,13 +391,13 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
                       options={elders.map((elder) => ({
                         key: elder.id,
                         label: elder.displayName,
-                        icon: "account"
+                        avatarUrl: elder.avatarUrl,
                       }))}
                       onSelect={setSelectedElderId}
                       placeholder="Seleccionar adulto mayor"
                     />
                   </View>
-                  <View style={{ flex: 1 }}>
+                  <View style={{ width: "48%", minWidth: 170 }}>
                     <DropdownSelect
                       label="Tipo de juego"
                       value={selectedGame}
@@ -417,21 +427,24 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
           {/* Filter Dropdown for elders only */}
           {!isHelper && (
           <View style={styles.filterContainer}>
-            <DropdownSelect
-              label="Tipo de juego"
-              value={selectedGame}
-              options={[
-                { key: "all", label: "Todos los juegos", icon: "gamepad-variant" },
-                ...gameTypes.map((gt) => ({
-                  key: gt,
-                  label: gameTypesRender[gt],
-                  icon: gt === GameType.memory ? "brain" : 
-                        gt === GameType.logic ? "puzzle" : 
-                        gt === GameType.attention ? "eye" : "lightning-bolt"
-                }))
-              ]}
-              onSelect={setSelectedGame}
-            />
+            <View style={{ width: "50%", minWidth: 170, alignSelf: "flex-start" }}>
+              <DropdownSelect
+                label="Tipo de juego"
+                value={selectedGame}
+                showLabel={false}
+                options={[
+                  { key: "all", label: "Todos los juegos", icon: "gamepad-variant" },
+                  ...gameTypes.map((gt) => ({
+                    key: gt,
+                    label: gameTypesRender[gt],
+                    icon: gt === GameType.memory ? "brain" : 
+                          gt === GameType.logic ? "puzzle" : 
+                          gt === GameType.attention ? "eye" : "lightning-bolt"       
+                  }))
+                ]}
+                onSelect={setSelectedGame}
+              />
+            </View>
           </View>
           )}
 
@@ -473,7 +486,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
                           <Text style={styles.kpiLabel}>Partidas</Text>
                         </View>
                         <View style={styles.kpiItem}>
-                          <Text style={[styles.kpiValue, { color: "#FBC02D" }]}>
+                          <Text style={[styles.kpiValue, { color: COLORS.primary }]}>
                             {best}
                           </Text>
                           <Text style={styles.kpiLabel}>Récord</Text>

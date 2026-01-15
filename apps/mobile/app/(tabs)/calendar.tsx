@@ -38,6 +38,7 @@ export default function CalendarScreen() {
 
   const [formVisible, setFormVisible] = useState(false);
   const [editing, setEditing] = useState<Activity | null>(null);
+  const [selectedElderId, setSelectedElderId] = useState<string | null>(null);
   const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(familyCode);
   const membersQuery = useGetFamilyGroupIdGroupMembers(familyCode);
 
@@ -255,6 +256,8 @@ export default function CalendarScreen() {
           activityToView={activityToView}
           activityDateToView={activityDateToView}
           onActivityViewed={handleActivityViewed}
+          selectedElderId={selectedElderId}
+          onElderChange={setSelectedElderId}
         />
       </View>
 
@@ -268,6 +271,7 @@ export default function CalendarScreen() {
         initial={editing ?? null}
         familyMembers={familyMembers}
         currentUserId={idUser}
+        preSelectedElderId={selectedElderId}
       />
 
       <Dialog

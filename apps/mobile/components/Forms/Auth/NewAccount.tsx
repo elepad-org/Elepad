@@ -2,9 +2,17 @@ import { supabase } from "@/lib/supabase";
 import { postFamilyGroupCreate, postFamilyGroupLink } from "@elepad/api-client";
 import { Link } from "expo-router";
 import { useState } from "react";
-import { View, Alert, StyleSheet } from "react-native";
-import { TextInput, Button, Text, Switch } from "react-native-paper";
-import { COLORS } from "@/styles/base";
+import { View, StyleSheet } from "react-native";
+import {
+  TextInput,
+  Button,
+  Text,
+  Switch,
+  Portal,
+  Dialog,
+  Paragraph,
+} from "react-native-paper";
+import { COLORS, STYLES } from "@/styles/base";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function NewAccount() {
@@ -15,6 +23,37 @@ export default function NewAccount() {
   const [familyCode, setFamilyCode] = useState("");
   const [isElder, setIsElder] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [dialog, setDialog] = useState({
+    visible: false,
+    message: "",
+    icon: "alert-circle-outline",
+  });
+
+  const getFriendlyErrorMessage = (errorMsg: string) => {
+    if (errorMsg.includes("Invalid login credentials"))
+      return "Credenciales inválidas. Verifica tu correo y contraseña.";
+    if (errorMsg.includes("Email not confirmed"))
+      return "Tu correo no ha sido confirmado. Revisa tu bandeja de entrada.";
+    if (errorMsg.includes("User already registered"))
+      return "El usuario ya está registrado. Intenta iniciar sesión.";
+    if (errorMsg.includes("Password should be at least 6 characters"))
+      return "La contraseña debe tener al menos 6 caracteres.";
+    if (errorMsg.includes("Anonymous sign-ins are disabled"))
+      return "Debe completar con los datos necesarios.";
+    if (
+      errorMsg.toLowerCase().includes("missing email") ||
+      errorMsg === "Email is required"
+    )
+      return "Por favor ingresa tu correo electrónico.";
+    return errorMsg;
+  };
+
+  const showDialog = (
+    message: string,
+    icon: string = "alert-circle-outline"
+  ) => {
+    setDialog({ visible: true, message, icon });
+  };
 
   const handleSignUp = async () => {
     setLoading(true);
@@ -24,17 +63,17 @@ export default function NewAccount() {
         password,
         options: { data: { displayName, elder: isElder } },
       });
-      
+
       if (error) {
-        Alert.alert("Error al crear cuenta", error.message);
+        showDialog(getFriendlyErrorMessage(error.message));
         setLoading(false);
         return;
       }
-      
+
       if (!data.session) {
-        Alert.alert(
-          "Verificación requerida",
-          "Por favor verifica tu correo electrónico para continuar"
+        showDialog(
+          "Por favor verifica tu correo electrónico para continuar",
+          "email-check-outline"
         );
         setLoading(false);
         return;
@@ -49,21 +88,20 @@ export default function NewAccount() {
             ownerUserId: data.session.user.id,
           });
           if (!res) {
-            Alert.alert(
-              "Advertencia",
+            showDialog(
               "La cuenta se creó pero hubo un problema al crear el grupo familiar"
             );
           } else {
             // Wait a bit for the database to update
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise((resolve) => setTimeout(resolve, 500));
             // Refresh user data to get the new groupId
             await refreshUserElepad();
           }
         } catch (err: unknown) {
           console.error("Error creating family group:", err);
-          const errorMessage = err instanceof Error ? err.message : "Error desconocido";
-          Alert.alert(
-            "Advertencia",
+          const errorMessage =
+            err instanceof Error ? err.message : "Error desconocido";
+          showDialog(
             `La cuenta se creó pero hubo un problema al crear el grupo familiar: ${errorMessage}`
           );
         }
@@ -75,29 +113,29 @@ export default function NewAccount() {
             userId: data.session.user.id,
           });
           if (!res) {
-            Alert.alert(
-              "Advertencia",
+            showDialog(
               "La cuenta se creó pero no se pudo vincular al grupo familiar. Verifica el código."
             );
           } else {
             // Wait a bit for the database to update
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise((resolve) => setTimeout(resolve, 500));
             // Refresh user data to get the new groupId
             await refreshUserElepad();
           }
         } catch (err: unknown) {
           console.error("Error linking to family group:", err);
-          const errorMessage = err instanceof Error ? err.message : "Código inválido o expirado";
-          Alert.alert(
-            "Advertencia",
+          const errorMessage =
+            err instanceof Error ? err.message : "Código inválido o expirado";
+          showDialog(
             `La cuenta se creó pero no se pudo vincular al grupo familiar: ${errorMessage}`
           );
         }
       }
     } catch (err: unknown) {
       console.error("Signup error:", err);
-      const errorMessage = err instanceof Error ? err.message : "Error al crear la cuenta";
-      Alert.alert("Error", errorMessage);
+      const errorMessage =
+        err instanceof Error ? err.message : "Error al crear la cuenta";
+      showDialog(getFriendlyErrorMessage(errorMessage));
     } finally {
       setLoading(false);
     }
@@ -214,6 +252,39 @@ export default function NewAccount() {
           <Text style={styles.backText}>Volver</Text>
         </Link>
       </View>
+
+      <Portal>
+        <Dialog
+          visible={dialog.visible}
+          onDismiss={() => setDialog({ ...dialog, visible: false })}
+          style={{
+            backgroundColor: COLORS.background,
+            borderRadius: 20,
+            width: "90%",
+            alignSelf: "center",
+          }}
+        >
+          <Dialog.Icon icon={dialog.icon} size={48} color={COLORS.primary} />
+          <Dialog.Content>
+            <Paragraph style={{ ...STYLES.subheading, marginTop: 12 }}>
+              {dialog.message}
+            </Paragraph>
+          </Dialog.Content>
+          <Dialog.Actions
+            style={{ justifyContent: "center", paddingBottom: 16 }}
+          >
+            <Button
+              mode="contained"
+              onPress={() => setDialog({ ...dialog, visible: false })}
+              buttonColor={COLORS.primary}
+              textColor={COLORS.white}
+              style={{ paddingHorizontal: 24, borderRadius: 12 }}
+            >
+              Aceptar
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </View>
   );
 }

@@ -11,6 +11,7 @@ import {
 } from "expo-audio";
 import { STYLES, COLORS } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
+import SaveButton from "../shared/SaveButton";
 
 interface AudioRecorderProps {
   onAudioRecorded: (uri: string) => void;
@@ -238,16 +239,27 @@ export default function AudioRecorderComponent({
             alignItems: "center",
           }}
         >
-          <CancelButton onPress={onCancel} disabled={isUploading} />
-          <CancelButton
-            onPress={() => audioUri && onAudioRecorded(audioUri)}
-            text={isUploading ? "Subiendo..." : "Guardar"}
-            disabled={isUploading}
-          />
+          <View style={{ width: 120 }}>
+            <CancelButton onPress={onCancel} disabled={isUploading} />
+          </View>
+          <View style={{ width: 120 }}>
+            <SaveButton
+              onPress={() => audioUri && onAudioRecorded(audioUri)}
+              text={isUploading ? "Subiendo..." : "Guardar"}
+              disabled={isUploading}
+              loading={isUploading}
+            />
+          </View>
         </View>
       )}
 
-      {!audioUri && <CancelButton onPress={onCancel} disabled={isUploading} />}
+      {!audioUri && (
+        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <View style={{ width: 120 }}>
+            <CancelButton onPress={onCancel} disabled={isUploading} />
+          </View>
+        </View>
+      )}
     </View>
   );
 }

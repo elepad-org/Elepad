@@ -1,30 +1,32 @@
 import { Button } from "react-native-paper";
 import { COLORS } from "@/styles/base";
 
-const CancelButton = ({
+const SaveButton = ({
   onPress,
-  text = "Cancelar",
+  text = "Guardar",
   disabled = false,
+  loading = false,
 }: {
   onPress: () => void;
   text?: string;
   disabled?: boolean;
+  loading?: boolean;
 }) => {
   return (
     <Button
-      mode="outlined"
+      mode="contained"
       style={{
         borderRadius: 12,
-        borderColor: COLORS.secondary,
         width: "100%",
       }}
-      textColor={COLORS.secondary}
+      buttonColor={COLORS.primary}
       onPress={onPress}
       disabled={disabled}
+      loading={loading}
     >
       {text}
     </Button>
   );
 };
 
-export default CancelButton;
+export default SaveButton;

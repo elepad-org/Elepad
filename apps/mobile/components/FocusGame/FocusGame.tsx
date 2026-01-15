@@ -7,22 +7,27 @@ import { COLORS, STYLES } from "@/styles/base";
 import CancelButton from "@/components/shared/CancelButton";
 import { useFocusGame } from "@/hooks/useFocusGame";
 import { GameLoadingView } from "@/components/shared";
-import { Achievement } from "@/app/focus-game";
 
 type Props = {
   rounds?: number;
   onComplete?: (stats: {
     correct: number;
     rounds: number;
-    achievements: Achievement[];
+    errors: number;
+    score: number;
+    achievements?: Array<{
+      id: string;
+      title: string;
+      icon?: string | null;
+      description?: string | null;
+      points: number;
+    }>;
   }) => void;
-  onAchievementUnlocked?: (achievement: Achievement) => void;
 };
 
 export default function AttentionGame({
   rounds = 10,
   onComplete,
-  onAchievementUnlocked,
 }: Props) {
   const core = useMemo(() => new AttentionGameCore(), []);
   const [, setTick] = useState(0);
@@ -35,17 +40,14 @@ export default function AttentionGame({
   const [currentRound, setCurrentRound] = useState(1);
   const [gameId, setGameId] = useState<string>(Date.now().toString());
   const [isGameComplete, setIsGameComplete] = useState(false);
-  const [achievementsSection, setAchievementsSection] = useState<Achievement[]>([])
+  const [hasStartedPlaying, setHasStartedPlaying] = useState(false);
   
   const hasCalledOnComplete = useRef(false);
-  const isCheckingAchievements = useRef(false);
-  const lastCompletedGameId = useRef<string | null>(null);
   const prevGameId = useRef<string>(gameId);
 
   // Hook de Focus Game para manejar API
   const focus = useFocusGame({
     rounds,
-    onAchievementUnlocked,
   });
 
   // Detectar cuando cambia el gameId INMEDIATAMENTE
@@ -59,68 +61,12 @@ export default function AttentionGame({
     );
     prevGameId.current = gameId;
     hasCalledOnComplete.current = false;
-    isCheckingAchievements.current = false;
   }
-
-  // Cuando el juego se completa, marcar que estamos verificando logros
-  useEffect(() => {
-    if (isGameComplete && !hasCalledOnComplete.current) {
-      isCheckingAchievements.current = true;
-      console.log(
-        "🎮 Juego completado (gameId:",
-        gameId,
-        "), esperando verificación de logros...",
-      );
-    }
-  }, [isGameComplete, gameId]);
-
-  // Cuando se completa el juego Y se han verificado los logros, notificar al padre
-  useEffect(() => {
-    if (
-      isGameComplete &&
-      isCheckingAchievements.current &&
-      !hasCalledOnComplete.current
-    ) {
-      // Verificar que no sea el mismo juego completado anteriormente
-      if (lastCompletedGameId.current === gameId) {
-        console.log("⚠️ Ignorando completion duplicado del juego:", gameId);
-        return;
-      }
-
-      // Esperar un poco para dar tiempo a que los logros se procesen
-      const timer = setTimeout(() => {
-        hasCalledOnComplete.current = true;
-        isCheckingAchievements.current = false;
-        lastCompletedGameId.current = gameId;
-        console.log(
-          "🎊 Notificando juego completado (gameId:",
-          gameId,
-          ") con logros:",
-          achievementsSection,
-        );
-        onComplete?.({
-          correct: score.correct,
-          rounds,
-          achievements: achievementsSection,
-        });
-      }, 500);
-
-      return () => clearTimeout(timer);
-    }
-  }, [
-    isGameComplete,
-    score.correct,
-    rounds,
-    achievementsSection,
-    onComplete,
-    gameId,
-  ]);
 
   // Resetear el flag cuando se reinicia el juego
   useEffect(() => {
     if (!isGameComplete) {
       hasCalledOnComplete.current = false;
-      isCheckingAchievements.current = false;
     }
   }, [isGameComplete]);
 
@@ -145,6 +91,7 @@ export default function AttentionGame({
     setShowQuitDialog(false);
     setCurrentRound(1);
     setIsGameComplete(false);
+    setHasStartedPlaying(false);
     setTick((t) => t + 1);
     
     // Resetear el juego en el hook
@@ -162,6 +109,14 @@ export default function AttentionGame({
 
   const handleSelection = (selection: ColorName) => {
     if (!prompt || showQuitDialog) return;
+    
+    // Iniciar el timer en la PRIMERA interacción del usuario
+    if (!hasStartedPlaying) {
+      setHasStartedPlaying(true);
+      focus.startTimer();
+      console.log("⏱️ Timer iniciado en primera interacción");
+    }
+    
     const correct = core.handleSelection(selection);
     setLastResult(correct);
     
@@ -175,15 +130,26 @@ export default function AttentionGame({
       setLives((prev) => {
         const remaining = prev - 1;
         if (remaining <= 0) {
-          // PERDIÓ
-          setTimeout(async () => {
-            // Finalizar el intento en el backend
-            setAchievementsSection(await focus.finishGame(
-              { correct: newCorrectScore, rounds },
-              false // perdió
-            ) as Achievement[]);
+          // PERDIÓ - Llamar onComplete INMEDIATAMENTE
+          const errors = rounds - newCorrectScore;
+          onComplete?.({
+            correct: newCorrectScore,
+            rounds,
+            errors,
+            score: 0, // Score es 0 al perder
+            achievements: [], // No hay logros al perder
+          });
+          
+          // Finalizar el intento en el backend (no bloqueante)
+          focus.finishGame(
+            { correct: newCorrectScore, rounds },
+            false // perdió
+          ).then(() => {
             setIsGameComplete(true);
-          }, 350);
+          }).catch((error) => {
+            console.error("❌ Error al finalizar juego:", error);
+            setIsGameComplete(true);
+          });
         } else {
           // Sigue jugando tras error
           setTimeout(() => {
@@ -198,15 +164,36 @@ export default function AttentionGame({
     } else {
       // Acierto
       if (currentRound === rounds) {
-        // GANÓ
-        setTimeout(async () => {
-          // Finalizar el intento en el backend
-          setAchievementsSection( await focus.finishGame(
-            { correct: newCorrectScore, rounds },
-            true // ganó
-          ) as Achievement[]);
-          setIsGameComplete(true);
-        }, 350);
+        const errors = rounds - newCorrectScore;
+        const durationMs = focus.getDuration();
+        const calculatedScore = Math.max(
+          0,
+          Math.floor(1000 - (durationMs / 1000) * 5 - errors * 10)
+        );
+        
+        // Predecir logros SÍNCRONAMENTE
+        const predictedAchievements = focus.predictAchievementsSync({
+          correct: newCorrectScore,
+          rounds,
+          durationMs
+        });
+        
+        // Llamar onComplete INMEDIATAMENTE
+        onComplete?.({
+          correct: newCorrectScore,
+          rounds,
+          errors,
+          score: calculatedScore,
+          achievements: predictedAchievements,
+        });
+        
+        setIsGameComplete(true);
+        
+        // Backend en background
+        focus.finishGame(
+          { correct: newCorrectScore, rounds, durationMs },
+          true
+        ).catch((error) => console.error("❌ Error:", error));
       } else {
         // Sigue jugando tras acierto
         setTimeout(() => {

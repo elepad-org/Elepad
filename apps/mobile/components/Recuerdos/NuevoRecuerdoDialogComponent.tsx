@@ -1,4 +1,4 @@
-import { TouchableOpacity } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { Dialog, Text, IconButton, Divider } from "react-native-paper";
 import { STYLES, COLORS } from "@/styles/base";
 import ImagePickerComponent from "./ImagePickerComponent";
@@ -63,7 +63,7 @@ export default function NuevoRecuerdoDialogComponent({
     return (
       <Dialog
         visible={visible}
-        onDismiss={hideDialog}
+        onDismiss={onCancel}
         style={{
           backgroundColor: COLORS.background,
           width: "90%",
@@ -94,7 +94,7 @@ export default function NuevoRecuerdoDialogComponent({
     return (
       <Dialog
         visible={visible}
-        onDismiss={hideDialog}
+        onDismiss={onCancel}
         style={{
           backgroundColor: COLORS.background,
           width: "90%",
@@ -196,8 +196,10 @@ export default function NuevoRecuerdoDialogComponent({
           <Text style={STYLES.paragraphText}>Audio</Text>
         </TouchableOpacity>
       </Dialog.Content>
-      <Dialog.Actions style={{ paddingBottom: 12 }}>
-        <CancelButton onPress={hideDialog} />
+      <Dialog.Actions style={{ paddingBottom: 12, paddingHorizontal: 24 }}>
+        <View style={{ width: 120 }}>
+          <CancelButton onPress={hideDialog} />
+        </View>
       </Dialog.Actions>
     </Dialog>
   );
