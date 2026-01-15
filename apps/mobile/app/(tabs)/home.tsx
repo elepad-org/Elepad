@@ -26,7 +26,8 @@ import {
   GetFamilyGroupIdGroupMembers200,
 } from "@elepad/api-client";
 import { useRouter } from "expo-router";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import StreakCounter from "@/components/StreakCounter";
 import HighlightedMentionText from "@/components/Recuerdos/HighlightedMentionText";
@@ -38,6 +39,7 @@ export default function HomeScreen() {
   const { userElepad, userElepadLoading } = useAuth();
   const router = useRouter();
   const { unreadCount } = useNotifications();
+  const queryClient = useQueryClient();
 
   // Fetch today's activities
   const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(
@@ -160,6 +162,16 @@ export default function HomeScreen() {
     if (!Array.isArray(memories)) return null;
     return memories[0] || null;
   }, [memoriesQuery.data]);
+
+  // Invalidar queries cuando cambia el groupId
+  useEffect(() => {
+    if (userElepad?.groupId) {
+      // Invalidar las queries relacionadas con el grupo para forzar refetch
+      queryClient.invalidateQueries({ queryKey: ['getMemories'] });
+      queryClient.invalidateQueries({ queryKey: ['getActivitiesFamilyCodeIdFamilyGroup'] });
+      queryClient.invalidateQueries({ queryKey: ['getFamilyGroupIdGroupMembers'] });
+    }
+  }, [userElepad?.groupId, queryClient]);
 
   if (userElepadLoading || !userElepad) {
     return (
@@ -352,7 +364,10 @@ export default function HomeScreen() {
             )}
           </Pressable>
         ) : (
-          <View style={styles.memoryCardEmpty}>
+          <Pressable
+            style={styles.memoryCardEmpty}
+            onPress={() => router.push("/(tabs)/recuerdos")}
+          >
             <IconButton
               icon="heart-outline"
               size={48}
@@ -370,7 +385,7 @@ export default function HomeScreen() {
             >
               Crear recuerdo
             </Button>
-          </View>
+          </Pressable>
         )}
 
         {/* Contador de Racha - Solo para usuarios elder */}
