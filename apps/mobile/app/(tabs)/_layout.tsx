@@ -108,7 +108,7 @@ export default function TabLayout() {
     },
   ];
 
-  const [routes, setRoutes] = useState(elderRoutes);
+  const [routes, setRoutes] = useState(isElder ? elderRoutes : nonElderRoutes);
 
   // Escuchar cambios en el parámetro 'tab' para cambiar de tab programáticamente
   useEffect(() => {
@@ -116,9 +116,11 @@ export default function TabLayout() {
       const tabIndex = routes.findIndex((route) => route.key === params.tab);
       if (tabIndex !== -1) {
         setIndex(tabIndex);
-        // Limpiar el parámetro después de cambiar el tab
-        router.setParams({ tab: undefined });
       }
+      // Limpiar el parámetro después de cambiar el tab
+      setTimeout(() => {
+        router.setParams({ tab: undefined });
+      }, 100);
     }
   }, [params.tab, routes]);
 
