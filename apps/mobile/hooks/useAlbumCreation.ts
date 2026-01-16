@@ -86,7 +86,7 @@ export function useAlbumCreation(): UseAlbumCreationReturn {
       try {
         console.log("📝 Creando álbum:", data.title);
 
-        const response = await createAlbumApi.mutateAsync({
+        createAlbumApi.mutateAsync({
           data: {
             title: data.title,
             description: data.description || "",
@@ -94,31 +94,24 @@ export function useAlbumCreation(): UseAlbumCreationReturn {
           },
         });
 
-        console.log("📦 Respuesta del API:", response);
+        //console.log("📦 Respuesta del API:", response);
 
         // Extraer datos de la respuesta (puede estar envuelta)
-        const responseData = "data" in response ? response.data : response;
+        //const responseData = "data" in response ? response.data : response;
 
-        if (!responseData || typeof responseData !== "object") {
-          throw new Error("Invalid response data");
-        }
+        
 
-        const album = responseData as { title: string; id: string };
+        //const album = responseData as { title: string; id: string };
 
         // Mostrar dialog de procesamiento
-        setProcessingAlbumTitle(album.title);
+        //setProcessingAlbumTitle(album.title);
 
-        // Programar notificación local inicial
-        // PENDIENTE
-
-        setTimeout(() => {
-          setProcessingAlbumTitle(null);
-        }, 5000);
+       
 
         // Invalidar queries para refrescar la lista de álbumes
         await queryClient.invalidateQueries({ queryKey: ["GetAlbums"] });
 
-        console.log("✅ Álbum creado exitosamente:", album.id);
+        //console.log("✅ Álbum creado exitosamente:", album.id);
       } catch (err) {
         console.error("❌ Error creating album:", err);
         const errorMessage =

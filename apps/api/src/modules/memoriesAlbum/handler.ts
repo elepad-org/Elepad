@@ -108,7 +108,6 @@ albumApp.openapi(
     responses: {
       201: {
         description: "Album created and processing started",
-        content: { "application/json": { schema: AlbumWithPagesSchema } },
       },
       400: openApiErrorResponse("Invalid request or memories not found"),
       401: openApiErrorResponse("Unauthorized"),

@@ -21,6 +21,7 @@ export const AlbumPageSchema = z
     id: z.uuid(),
     albumId: z.uuid(),
     memoryId: z.uuid(),
+    imageUrl: z.string(),
     title: z.string().nullable(),
     description: z.string().nullable(),
     order: z.number().int(),

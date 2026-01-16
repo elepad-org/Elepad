@@ -472,110 +472,6 @@
           "text"
         ]
       },
-      "AlbumWithPages": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "groupId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "createdBy": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "title": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "processing",
-              "ready",
-              "error"
-            ]
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "nullable": true,
-            "format": "date-time"
-          },
-          "pages": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AlbumPage"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "groupId",
-          "createdBy",
-          "title",
-          "description",
-          "status",
-          "createdAt",
-          "updatedAt",
-          "pages"
-        ]
-      },
-      "AlbumPage": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "albumId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "memoryId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "title": {
-            "type": "string",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "order": {
-            "type": "integer"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "nullable": true,
-            "format": "date-time"
-          }
-        },
-        "required": [
-          "id",
-          "albumId",
-          "memoryId",
-          "title",
-          "description",
-          "order",
-          "createdAt",
-          "updatedAt"
-        ]
-      },
       "CreateAlbumRequest": {
         "type": "object",
         "properties": {
@@ -651,6 +547,114 @@
           "title",
           "description",
           "status",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "AlbumWithPages": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "groupId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "processing",
+              "ready",
+              "error"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "pages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AlbumPage"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "groupId",
+          "createdBy",
+          "title",
+          "description",
+          "status",
+          "createdAt",
+          "updatedAt",
+          "pages"
+        ]
+      },
+      "AlbumPage": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "albumId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "memoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "imageUrl": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "order": {
+            "type": "integer"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "albumId",
+          "memoryId",
+          "imageUrl",
+          "title",
+          "description",
+          "order",
           "createdAt",
           "updatedAt"
         ]
@@ -3396,14 +3400,7 @@
         },
         "responses": {
           "201": {
-            "description": "Album created and processing started",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AlbumWithPages"
-                }
-              }
-            }
+            "description": "Album created and processing started"
           },
           "400": {
             "description": "Invalid request or memories not found",

@@ -1,4 +1,5 @@
-import { View, StyleSheet, Dimensions } from "react-native";
+import React, { useState } from "react";
+import { View, StyleSheet, Dimensions, Image } from "react-native";
 import { Text } from "react-native-paper";
 import { COLORS, SHADOWS } from "@/styles/base";
 import { AlbumPage } from "@elepad/api-client";
@@ -16,6 +17,7 @@ export default function AlbumPageView({
   pageNumber,
   totalPages,
 }: AlbumPageViewProps) {
+  const [imageError, setImageError] = useState(false);
   
   return (
     <View style={styles.container}>
@@ -23,11 +25,19 @@ export default function AlbumPageView({
       <View style={styles.leftSide}>
         <View style={styles.polaroidContainer}>
           <View style={styles.polaroid}>
-            <View style={styles.placeholderPhoto}>
-              <Text style={styles.placeholderText}>
-                {page.title || "Memoria"}
-              </Text>
-            </View>
+            {page.imageUrl && !imageError ? (
+              <Image
+                source={{ uri: page.imageUrl }}
+                style={styles.photo}
+                resizeMode="cover"
+                onError={() => setImageError(true)}
+                accessibilityLabel={page.title || "Memoria"}
+              />
+            ) : (
+              <View style={styles.placeholderPhoto}>
+                <Text style={styles.placeholderText}>{page.title || "Memoria"}</Text>
+              </View>
+            )}
             {/* Polaroid bottom space */}
             <View style={styles.polaroidBottom}>
               {page.title && (

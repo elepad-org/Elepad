@@ -388,6 +388,7 @@ export type Database = {
           createdAt: string
           description: string | null
           id: string
+          imageUrl: string
           memoryId: string
           order: number
           title: string | null
@@ -398,6 +399,7 @@ export type Database = {
           createdAt?: string
           description?: string | null
           id?: string
+          imageUrl: string
           memoryId: string
           order: number
           title?: string | null
@@ -408,6 +410,7 @@ export type Database = {
           createdAt?: string
           description?: string | null
           id?: string
+          imageUrl?: string
           memoryId?: string
           order?: number
           title?: string | null
