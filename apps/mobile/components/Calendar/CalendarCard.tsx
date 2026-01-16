@@ -394,8 +394,17 @@ export default function CalendarCard(props: CalendarCardProps) {
       ? streakHistoryQuery.data?.dates || []
       : [];
 
+    // Filtrar los días con actividades según el adulto mayor seleccionado
     for (const d of Object.keys(eventsByDate)) {
-      obj[d] = { marked: true, dotColor: COLORS.primary };
+      const eventsOnDay = eventsByDate[d];
+      // Si hay un adulto mayor seleccionado, solo marcar si tiene actividades para él
+      const hasRelevantActivities = selectedElderId
+        ? eventsOnDay.some((ev) => ev.assignedTo === selectedElderId)
+        : eventsOnDay.length > 0;
+      
+      if (hasRelevantActivities) {
+        obj[d] = { marked: true, dotColor: COLORS.primary };
+      }
     }
 
     // Agregar círculos naranjas para días con racha - Solo para usuarios elder
@@ -419,7 +428,7 @@ export default function CalendarCard(props: CalendarCardProps) {
       ? { ...obj[selectedDay], selected: true }
       : { selected: true };
     return obj;
-  }, [eventsByDate, selectedDay, streakHistoryQuery.data, userElepad]);
+  }, [eventsByDate, selectedDay, streakHistoryQuery.data, userElepad, selectedElderId]);
 
   // Filtrar actividades por adulto mayor seleccionado, ordenados: primero incompletos, luego completados
   const dayEvents = useMemo(() => {
