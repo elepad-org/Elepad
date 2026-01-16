@@ -132,6 +132,16 @@ export class MemoriesAlbumService {
       throw new ApiException(404, "User family group not found");
     }
 
+    const notificationsService = new NotificationsService(this.supabase);
+      await notificationsService.createNotification({
+        userId,
+        eventType: "achievement", //TODO: change event & entity type to more appropiate ones
+        entityType: "memory",
+        entityId: userId, // ?
+        title: "Generando Álbum",
+        body: `Estamos generando tu álbum. Te avisaremos cuando esté listo.`,
+      });
+
     const { data: memories, error: memoriesError } = await this.supabase
       .from("memories")
       .select("id, groupId, title, caption, mediaUrl, mimeType")

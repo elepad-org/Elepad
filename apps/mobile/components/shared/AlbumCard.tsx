@@ -70,35 +70,28 @@ export default function AlbumCard({
           onDismiss={() => setDetailsVisible(false)}
           style={styles.dialog}
         >
-          <Dialog.Title style={STYLES.heading}>
+          <Dialog.Title style={{ fontWeight: "bold", color: COLORS.text }}>
             {title}
           </Dialog.Title>
 
           <Dialog.Content>
             {description && (
               <View style={{ marginBottom: 16 }}>
-                <Text style={STYLES.subheading}>Descripción</Text>
-                <Text style={styles.secondaryText}>{description}</Text>
+                <Text style={STYLES.paragraphText}>{description}</Text>
               </View>
             )}
 
-            <Text style={STYLES.subheading}>Información</Text>
-            <Text style={styles.secondaryText}>
-              Creado: {formatDate(createdAt)}
+            <Text style={STYLES.paragraphText}>
+              Creado el: {formatDate(createdAt)}
             </Text>
 
             {totalPages !== undefined && (
-              <Text style={styles.secondaryText}>
-                Páginas: {totalPages}
-              </Text>
+              <Text style={STYLES.paragraphText}>Páginas: {totalPages}</Text>
             )}
           </Dialog.Content>
 
           <Dialog.Actions style={styles.dialogActions}>
-            <Button
-              mode="outlined"
-              onPress={() => setDetailsVisible(false)}
-            >
+            <Button mode="outlined" onPress={() => setDetailsVisible(false)}>
               Cerrar
             </Button>
             <Button
@@ -127,12 +120,11 @@ const styles = StyleSheet.create({
   },
 
   imageWrapper: {
-  width: "100%",
-  aspectRatio: 1,
-  backgroundColor: COLORS.backgroundSecondary,
-  alignItems: "center",
-  justifyContent: "center",
-
+    width: "100%",
+    aspectRatio: 1,
+    backgroundColor: COLORS.backgroundSecondary,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   image: {
@@ -167,14 +159,10 @@ const styles = StyleSheet.create({
   },
 
   dialogActions: {
-    paddingHorizontal: 8,
-    paddingBottom: 8,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingBottom: 12,
     gap: 8,
-  },
-
-  secondaryText: {
-    ...STYLES.paragraphText,
-    color: COLORS.textSecondary,
-    marginTop: 4,
   },
 });
