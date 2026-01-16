@@ -546,12 +546,6 @@ export default function CalendarCard(props: CalendarCardProps) {
       </View>
 
       <View style={styles.controlsRow}>
-        <IconButton
-          icon="filter-variant"
-          size={24}
-          iconColor={COLORS.primary}
-          style={styles.filterIcon}
-        />
         <View style={{ flex: 1 }}>
           <DropdownSelect
             label="Filtrar actividades"
