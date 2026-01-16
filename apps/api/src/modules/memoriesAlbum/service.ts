@@ -121,7 +121,7 @@ export class MemoriesAlbumService {
   async createAlbum(
     userId: string,
     data: CreateAlbumRequest
-  ): Promise<AlbumWithPages> {
+  ) {
     const { data: userGroup, error: userGroupError } = await this.supabase
       .from("users")
       .select("groupId")
@@ -181,11 +181,12 @@ export class MemoriesAlbumService {
     const pagesToInsert = data.memoryIds
       .map((memoryId, index) => {
         const memory = imageMemories.find((m) => m.id === memoryId);
-        if (!memory) return null;
+        if (!memory || !memory.mediaUrl) return null;
 
         return {
           albumId: album.id,
           memoryId: memory.id,
+          imageUrl: memory.mediaUrl,
           title: memory.title || null,
           description: memory.caption || null,
           order: index,
@@ -201,7 +202,6 @@ export class MemoriesAlbumService {
     if (pagesError || !pages) {
       console.error("Error creating album pages:", pagesError);
       // Rollback: delete the album
-      // TODO: Terminar de implementar esto
       await this.supabase.from("memoriesAlbums").delete().eq("id", album.id);
       throw new ApiException(500, "Error creating album pages");
     }
@@ -209,20 +209,9 @@ export class MemoriesAlbumService {
     this.processAlbumNarratives(album.id, userId, userGroup.groupId).catch(
       (err) => {
         console.error("Error processing album narratives:", err);
+        throw new ApiException(500, "Error generating the album pages content");
       }
     );
-
-    // Return the album with pages
-    return {
-      ...album,
-      createdAt: new Date(album.createdAt),
-      updatedAt: album.updatedAt ? new Date(album.updatedAt) : null,
-      pages: pages.map((p) => ({
-        ...p,
-        createdAt: new Date(p.createdAt),
-        updatedAt: p.updatedAt ? new Date(p.updatedAt) : null,
-      })),
-    };
   }
 
   /**
@@ -316,7 +305,7 @@ export class MemoriesAlbumService {
         entityType: "memory",
         entityId: albumId,
         title: "¡Tu álbum está listo!",
-        body: `El álbum "${album.title}" ha sido procesado con narrativas generadas por IA.`,
+        body: `Ya generamos tu álbum "${album.title}". ¡Que lo disfrutes!`,
       });
     } catch (error) {
       console.error("Error processing album narratives:", error);
@@ -338,7 +327,7 @@ export class MemoriesAlbumService {
         entityType: "memory",
         entityId: albumId,
         title: "Error al procesar el álbum",
-        body: "Hubo un problema al generar las narrativas de tu álbum. Por favor, intenta nuevamente.",
+        body: "¡Lo sentimos! Hubo un problema al generar tu álbum. Por favor, intenta nuevamente.",
       });
     }
   }

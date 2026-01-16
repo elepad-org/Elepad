@@ -188,43 +188,6 @@ export interface Transcription {
   text: string;
 }
 
-export type AlbumWithPagesStatus =
-  (typeof AlbumWithPagesStatus)[keyof typeof AlbumWithPagesStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const AlbumWithPagesStatus = {
-  processing: "processing",
-  ready: "ready",
-  error: "error",
-} as const;
-
-export interface AlbumWithPages {
-  id: string;
-  groupId: string;
-  createdBy: string;
-  title: string;
-  description: string;
-  status: AlbumWithPagesStatus;
-  createdAt: string;
-  /** @nullable */
-  updatedAt: string | null;
-  pages: AlbumPage[];
-}
-
-export interface AlbumPage {
-  id: string;
-  albumId: string;
-  memoryId: string;
-  /** @nullable */
-  title: string | null;
-  /** @nullable */
-  description: string | null;
-  order: number;
-  createdAt: string;
-  /** @nullable */
-  updatedAt: string | null;
-}
-
 export interface CreateAlbumRequest {
   /**
    * @minLength 1
@@ -257,6 +220,44 @@ export interface Album {
   /** @nullable */
   description: string | null;
   status: AlbumStatus;
+  createdAt: string;
+  /** @nullable */
+  updatedAt: string | null;
+}
+
+export type AlbumWithPagesStatus =
+  (typeof AlbumWithPagesStatus)[keyof typeof AlbumWithPagesStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const AlbumWithPagesStatus = {
+  processing: "processing",
+  ready: "ready",
+  error: "error",
+} as const;
+
+export interface AlbumWithPages {
+  id: string;
+  groupId: string;
+  createdBy: string;
+  title: string;
+  description: string;
+  status: AlbumWithPagesStatus;
+  createdAt: string;
+  /** @nullable */
+  updatedAt: string | null;
+  pages: AlbumPage[];
+}
+
+export interface AlbumPage {
+  id: string;
+  albumId: string;
+  memoryId: string;
+  imageUrl: string;
+  /** @nullable */
+  title: string | null;
+  /** @nullable */
+  description: string | null;
+  order: number;
   createdAt: string;
   /** @nullable */
   updatedAt: string | null;
@@ -5255,7 +5256,7 @@ export const usePostAlbumTranscribe = <TError = Error, TContext = unknown>(
 };
 
 export type postAlbumCreateResponse201 = {
-  data: AlbumWithPages;
+  data: void;
   status: 201;
 };
 

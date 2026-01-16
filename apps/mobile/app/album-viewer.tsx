@@ -251,13 +251,14 @@ const styles = StyleSheet.create({
   titleOverlay: {
     position: "absolute",
     top: 16,
-    left: 16,
-    right: 80,
+    //left: 16,
+    //right: 80,
     zIndex: 99,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
+    width: "30%",
   },
   titleText: {
     fontSize: 20,
