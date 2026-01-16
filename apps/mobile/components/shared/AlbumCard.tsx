@@ -1,7 +1,8 @@
-import { View, Image, Pressable, StyleSheet } from "react-native";
-import { Text, Card } from "react-native-paper";
-import { COLORS, SHADOWS } from "@/styles/base";
+import { useState } from "react";
+import { View, Image, StyleSheet } from "react-native";
+import { Text, Card, Portal, Dialog, Button } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { COLORS, SHADOWS, STYLES } from "@/styles/base";
 
 interface AlbumCardProps {
   id: string;
@@ -21,30 +22,33 @@ export default function AlbumCard({
   totalPages,
   onPress,
 }: AlbumCardProps) {
+  const [detailsVisible, setDetailsVisible] = useState(false);
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+    return date.toLocaleDateString("es-AR");
   };
 
   return (
-    <Pressable onPress={onPress} style={styles.container}>
-      <Card style={styles.card} elevation={2}>
-        {/* Cover Image */}
-        <View style={styles.imageContainer}>
+    <>
+      <Card
+        style={styles.card}
+        onPress={() => setDetailsVisible(true)}
+        elevation={2}
+      >
+        {/* Image */}
+        <View style={styles.imageWrapper}>
           {coverImageUrl ? (
             <Image
               source={{ uri: coverImageUrl }}
-              style={styles.coverImage}
+              style={styles.image}
               resizeMode="cover"
             />
           ) : (
-            <View style={styles.placeholderContainer}>
+            <View style={styles.placeholder}>
               <MaterialCommunityIcons
                 name="book-open-page-variant"
-                size={60}
+                size={36}
                 color={COLORS.primary}
               />
             </View>
@@ -52,91 +56,125 @@ export default function AlbumCard({
         </View>
 
         {/* Content */}
-        <Card.Content style={styles.content}>
+        <View style={styles.content}>
           <Text style={styles.title} numberOfLines={2}>
             {title}
           </Text>
-          {description && (
-            <Text style={styles.description} numberOfLines={2}>
-              {description}
-            </Text>
-          )}
-          <View style={styles.footer}>
-            <Text style={styles.date}>{formatDate(createdAt)}</Text>
-            {totalPages !== undefined && (
-              <View style={styles.pagesContainer}>
-                <MaterialCommunityIcons
-                  name="file-document-outline"
-                  size={14}
-                  color={COLORS.textSecondary}
-                />
-                <Text style={styles.pages}>{totalPages} páginas</Text>
+        </View>
+      </Card>
+
+      {/* Dialog */}
+      <Portal>
+        <Dialog
+          visible={detailsVisible}
+          onDismiss={() => setDetailsVisible(false)}
+          style={styles.dialog}
+        >
+          <Dialog.Title style={STYLES.heading}>
+            {title}
+          </Dialog.Title>
+
+          <Dialog.Content>
+            {description && (
+              <View style={{ marginBottom: 16 }}>
+                <Text style={STYLES.subheading}>Descripción</Text>
+                <Text style={styles.secondaryText}>{description}</Text>
               </View>
             )}
-          </View>
-        </Card.Content>
-      </Card>
-    </Pressable>
+
+            <Text style={STYLES.subheading}>Información</Text>
+            <Text style={styles.secondaryText}>
+              Creado: {formatDate(createdAt)}
+            </Text>
+
+            {totalPages !== undefined && (
+              <Text style={styles.secondaryText}>
+                Páginas: {totalPages}
+              </Text>
+            )}
+          </Dialog.Content>
+
+          <Dialog.Actions style={styles.dialogActions}>
+            <Button
+              mode="outlined"
+              onPress={() => setDetailsVisible(false)}
+            >
+              Cerrar
+            </Button>
+            <Button
+              mode="contained"
+              onPress={() => {
+                setDetailsVisible(false);
+                onPress();
+              }}
+            >
+              Ver Álbum
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    width: "48%",
-    marginBottom: 16,
-  },
   card: {
     backgroundColor: COLORS.backgroundSecondary,
-    borderRadius: 12,
+    borderRadius: 14,
     overflow: "hidden",
+    marginBottom: 16,
     ...SHADOWS.light,
   },
-  imageContainer: {
-    width: "100%",
-    aspectRatio: 1,
-    backgroundColor: COLORS.border,
+
+  imageWrapper: {
+  width: "100%",
+  aspectRatio: 1,
+  backgroundColor: COLORS.backgroundSecondary,
+  alignItems: "center",
+  justifyContent: "center",
+
   },
-  coverImage: {
+
+  image: {
     width: "100%",
     height: "100%",
   },
-  placeholderContainer: {
-    width: "100%",
-    height: "100%",
+
+  placeholder: {
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: COLORS.backgroundSecondary,
   },
+
   content: {
-    padding: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    minHeight: 56,
+    justifyContent: "center",
   },
+
   title: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
     color: COLORS.text,
-    marginBottom: 4,
+    textAlign: "center",
   },
-  description: {
-    fontSize: 12,
+
+  dialog: {
+    backgroundColor: COLORS.background,
+    borderRadius: 16,
+    width: "92%",
+    alignSelf: "center",
+  },
+
+  dialogActions: {
+    paddingHorizontal: 8,
+    paddingBottom: 8,
+    gap: 8,
+  },
+
+  secondaryText: {
+    ...STYLES.paragraphText,
     color: COLORS.textSecondary,
-    marginBottom: 8,
-  },
-  footer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  date: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-  },
-  pagesContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  pages: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
+    marginTop: 4,
   },
 });

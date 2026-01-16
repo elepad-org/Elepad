@@ -10,9 +10,8 @@ import {
 import {
   Text,
   ActivityIndicator,
-  IconButton,
+  Button,
   //Snackbar,
-  FAB,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
@@ -22,6 +21,7 @@ import { useGetMemories, Album } from "@elepad/api-client";
 import CreateAlbumDialog from "@/components/Recuerdos/CreateAlbumDialog";
 import AlbumCard from "@/components/shared/AlbumCard";
 import { useAlbumCreation } from "@/hooks/useAlbumCreation";
+import { BackButton } from "@/components/shared/BackButton";
 import eleEmpthy from "@/assets/images/ele-idea.png";
 import { Image } from "react-native";
 
@@ -77,10 +77,6 @@ export default function AlbumsScreen() {
   // Extract albums from the query
   const albums: Album[] = unwrapAlbums(albumsQuery.data);
 
-  const handleBack = useCallback(() => {
-    router.back();
-  }, [router]);
-
   const handleAlbumPress = useCallback(
     (albumId: string) => {
       router.push(`/album-viewer?id=${albumId}`);
@@ -104,17 +100,29 @@ export default function AlbumsScreen() {
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
       {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <IconButton
-            icon="arrow-left"
-            size={24}
-            style={{ margin: 0 }}
-            onPress={handleBack}
-          />
-          <Text style={styles.headerTitle}>Álbumes</Text>
-          <View style={{ width: 40 }} />
+      <View
+        style={{
+          paddingHorizontal: 24,
+          paddingTop: 20,
+          paddingBottom: 8,
+          borderBottomColor: COLORS.border,
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <BackButton size={28} onPress={() => router.back()} />
+          <Text style={STYLES.superHeading}>Álbumes</Text>
         </View>
+        <Button
+          mode="contained"
+          onPress={() => setAlbumDialogVisible(true)}
+          style={{ ...STYLES.miniButton }}
+          icon="plus"
+        >
+          Agregar
+        </Button>
       </View>
 
       {/* Content */}
@@ -153,6 +161,7 @@ export default function AlbumsScreen() {
               return (
                 <Animated.View
                   entering={FadeInUp.delay(index * 100).springify()}
+                  style={styles.columnItem}
                 >
                   <AlbumCard
                     id={item.id}
@@ -172,16 +181,6 @@ export default function AlbumsScreen() {
           />
         )}
       </View>
-
-      {/* FAB for creating new album */}
-      {albums.length > 0 && (
-        <FAB
-          icon="plus"
-          style={styles.fab}
-          onPress={() => setAlbumDialogVisible(true)}
-          color={COLORS.white}
-        />
-      )}
 
       {/* Diálogo para crear álbum con IA */}
       <CreateAlbumDialog
@@ -209,23 +208,6 @@ export default function AlbumsScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    paddingHorizontal: 24,
-    paddingTop: 12,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  headerTop: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: COLORS.text,
-  },
   content: {
     flex: 1,
     paddingHorizontal: 24,
@@ -262,10 +244,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 4,
   },
-  fab: {
-    position: "absolute",
-    right: 16,
-    bottom: LAYOUT.bottomNavHeight + 16,
-    backgroundColor: COLORS.primary,
-  },
+  columnItem: {
+  width: "48%", 
+  marginBottom: 16,
+},
 });
