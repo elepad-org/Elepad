@@ -85,13 +85,7 @@ export default function DropdownSelect({
           style={[localStyles.button, buttonStyle]}
         >
           <View style={localStyles.buttonContent}>
-            {selectedOption?.avatarUrl && (
-              <Image
-                source={{ uri: selectedOption.avatarUrl }}
-                style={localStyles.avatar}
-              />
-            )}
-            {selectedOption?.icon && (
+            {selectedOption?.icon ? (
               <View style={localStyles.iconContainer}>
                 <MaterialCommunityIcons
                   name={selectedOption.icon as never}
@@ -99,7 +93,18 @@ export default function DropdownSelect({
                   color={COLORS.primary}
                 />
               </View>
-            )}
+            ) : selectedOption?.avatarUrl ? (
+              <Image
+                source={{ uri: selectedOption.avatarUrl }}
+                style={localStyles.avatar}
+              />
+            ) : selectedOption ? (
+              <View style={localStyles.initialContainer}>
+                <Text style={localStyles.initialText}>
+                  {selectedOption.label.charAt(0).toUpperCase()}
+                </Text>
+              </View>
+            ) : null}
             <Text
               style={[
                 localStyles.buttonText,
@@ -179,6 +184,19 @@ const localStyles = StyleSheet.create({
     backgroundColor: COLORS.backgroundSecondary,
     alignItems: "center",
     justifyContent: "center",
+  },
+  initialContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  initialText: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: "600",
   },
   buttonText: {
     fontSize: 16,
