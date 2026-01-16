@@ -21,7 +21,7 @@ interface TranscribeAudioData {
 interface UseAlbumCreationReturn {
   // Crear álbum
   isCreating: boolean;
-  isProcessing: boolean;
+  //isProcessing: boolean;
   processingAlbumTitle: string | null;
   error: string | null;
   createAlbum: (data: CreateAlbumData) => Promise<void>;
@@ -82,6 +82,7 @@ export function useAlbumCreation(): UseAlbumCreationReturn {
       isCreatingRef.current = true;
       setIsCreating(true);
       setError(null);
+      setProcessingAlbumTitle(data.title);
 
       try {
         console.log("📝 Creando álbum:", data.title);
@@ -93,25 +94,7 @@ export function useAlbumCreation(): UseAlbumCreationReturn {
             memoryIds: data.memoryIds,
           },
         });
-
-        //console.log("📦 Respuesta del API:", response);
-
-        // Extraer datos de la respuesta (puede estar envuelta)
-        //const responseData = "data" in response ? response.data : response;
-
         
-
-        //const album = responseData as { title: string; id: string };
-
-        // Mostrar dialog de procesamiento
-        //setProcessingAlbumTitle(album.title);
-
-       
-
-        // Invalidar queries para refrescar la lista de álbumes
-        await queryClient.invalidateQueries({ queryKey: ["GetAlbums"] });
-
-        //console.log("✅ Álbum creado exitosamente:", album.id);
       } catch (err) {
         console.error("❌ Error creating album:", err);
         const errorMessage =
@@ -192,7 +175,7 @@ export function useAlbumCreation(): UseAlbumCreationReturn {
   return {
     // Crear álbum
     isCreating,
-    isProcessing: processingAlbumTitle !== null,
+    //isProcessing: processingAlbumTitle !== null,
     processingAlbumTitle,
     error,
     createAlbum,
