@@ -420,7 +420,8 @@ const styles = StyleSheet.create({
   },
   completedText: {
     textDecorationLine: "line-through",
-    color: COLORS.textLight,
+    color: COLORS.primary,
+    opacity: 0.9,
   },
   description: {
     fontSize: 14,
