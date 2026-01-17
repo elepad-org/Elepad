@@ -616,7 +616,7 @@ export default function CalendarCard(props: CalendarCardProps) {
             <Animated.View
               key={`${item.id}-${selectedDay}`}
               layout={LinearTransition.duration(400)}
-              entering={ZoomIn.delay(index * 100).duration(300)}
+              entering={ZoomIn.delay(index * 50).duration(200)}
             >
               <ActivityItem
                 item={item}
