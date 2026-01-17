@@ -413,9 +413,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   title: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: COLORS.text,
+    fontSize: 14,
+    fontWeight: "bold",
+    color: COLORS.primary,
     marginBottom: 4,
   },
   completedText: {
