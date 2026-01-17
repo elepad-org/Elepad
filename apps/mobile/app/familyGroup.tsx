@@ -953,7 +953,7 @@ export default function FamilyGroup() {
               contentStyle={STYLES.buttonContent}
               style={[
                 STYLES.buttonPrimary,
-                { backgroundColor: COLORS.secondary },
+                { backgroundColor: COLORS.primary },
               ]}
             >
               Salir del grupo familiar
