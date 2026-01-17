@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { View, StyleSheet, StatusBar } from "react-native";
+import { View, StyleSheet, StatusBar, Platform } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityIndicator, IconButton, Text } from "react-native-paper";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { COLORS } from "@/styles/base";
@@ -16,6 +17,7 @@ export default function AlbumViewerScreen() {
   const albumId = params.id as string;
   const pagerRef = useRef<PagerView>(null);
   const [currentPage, setCurrentPage] = useState(0);
+  const insets = useSafeAreaInsets();
 
   // Fetch album with pages
   const { data: albumResponse, isLoading, error } = useGetAlbumId(
@@ -137,44 +139,7 @@ export default function AlbumViewerScreen() {
       <Stack.Screen options={{ headerShown: false }} />
       <StatusBar hidden />
 
-      {/* Close Button */}
-      <IconButton
-        icon="close"
-        size={28}
-        iconColor={COLORS.white}
-        onPress={handleClose}
-        style={styles.closeButton}
-      />
-
-      {/* Album Title Overlay */}
-      <View style={styles.titleOverlay}>
-        <Text style={styles.titleText} numberOfLines={1}>
-          {album.title}
-        </Text>
-      </View>
-
-      {/* Page Navigation Arrows */}
-      {currentPage > 0 && (
-        <IconButton
-          icon="chevron-left"
-          size={36}
-          iconColor={COLORS.white}
-          onPress={() => pagerRef.current?.setPage(currentPage - 1)}
-          style={styles.navButtonLeft}
-        />
-      )}
-
-      {currentPage < pages.length - 1 && (
-        <IconButton
-          icon="chevron-right"
-          size={36}
-          iconColor={COLORS.white}
-          onPress={() => pagerRef.current?.setPage(currentPage + 1)}
-          style={styles.navButtonRight}
-        />
-      )}
-
-      {/* Pager View */}
+      {/* Pager View - Debe ir primero para que los botones estén encima */}
       <PagerView
         ref={pagerRef}
         style={styles.pagerView}
@@ -191,6 +156,63 @@ export default function AlbumViewerScreen() {
           </View>
         ))}
       </PagerView>
+
+      {/* Close Button - Renderizado después para estar encima */}
+      <IconButton
+        icon="close"
+        size={32}
+        iconColor={COLORS.white}
+        onPress={handleClose}
+        style={[
+          styles.closeButton,
+          {
+            top: Math.max(insets.top, 12),
+            right: Math.max(insets.right, 12),
+          },
+        ]}
+      />
+
+      {/* Album Title Overlay */}
+      <View
+        style={[
+          styles.titleOverlay,
+          {
+            top: Math.max(insets.top, 12),
+            left: Math.max(insets.left, 12),
+          },
+        ]}
+      >
+        <Text style={styles.titleText} numberOfLines={1}>
+          {album.title}
+        </Text>
+      </View>
+
+      {/* Page Navigation Arrows */}
+      {currentPage > 0 && (
+        <IconButton
+          icon="chevron-left"
+          size={40}
+          iconColor={COLORS.white}
+          onPress={() => pagerRef.current?.setPage(currentPage - 1)}
+          style={[
+            styles.navButtonLeft,
+            { left: Math.max(insets.left, 12) },
+          ]}
+        />
+      )}
+
+      {currentPage < pages.length - 1 && (
+        <IconButton
+          icon="chevron-right"
+          size={40}
+          iconColor={COLORS.white}
+          onPress={() => pagerRef.current?.setPage(currentPage + 1)}
+          style={[
+            styles.navButtonRight,
+            { right: Math.max(insets.right, 12) },
+          ]}
+        />
+      )}>
     </View>
   );
 }
@@ -243,42 +265,50 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: "absolute",
-    top: 16,
-    right: 16,
-    zIndex: 100,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    zIndex: 1000,
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    elevation: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
   },
   titleOverlay: {
     position: "absolute",
-    top: 16,
-    //left: 16,
-    //right: 80,
-    zIndex: 99,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    paddingHorizontal: 16,
+    zIndex: 999,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 8,
-    width: "30%",
+    maxWidth: "35%",
   },
   titleText: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "600",
     color: COLORS.white,
   },
   navButtonLeft: {
     position: "absolute",
-    left: 16,
     top: "50%",
-    marginTop: -24,
-    zIndex: 98,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    marginTop: -28,
+    zIndex: 998,
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    elevation: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
   },
   navButtonRight: {
     position: "absolute",
-    right: 16,
     top: "50%",
-    marginTop: -24,
-    zIndex: 98,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    marginTop: -28,
+    zIndex: 998,
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    elevation: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
   },
 });
