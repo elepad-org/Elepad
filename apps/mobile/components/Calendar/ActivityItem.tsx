@@ -109,30 +109,12 @@ export default function ActivityItem({
   // Check if current user can edit this activity
   const canEdit = item.createdBy === idUser || isOwnerOfGroup;
 
-  const getFormatDate = () => {
-    const activityDate = new Date(item.startsAt);
-    const dateToday = new Date().toDateString();
-    const dateTomorrow = new Date(Date.now() + 86400000).toDateString();
-
-    const isToday = activityDate.toDateString() === dateToday;
-    const isTomorrow = activityDate.toDateString() === dateTomorrow;
-
-    let label = activityDate.toLocaleDateString("es", {
-      day: "numeric",
-      month: "short",
-    });
-
-    if (isToday) label = "Hoy";
-    if (isTomorrow) label = "Mañana";
-
-    return label;
-  };
-
   const getFormatTime = () => {
     const date = new Date(item.startsAt);
     return date.toLocaleTimeString("es", {
       hour: "2-digit",
       minute: "2-digit",
+      hour12: true,
     });
   };
 
@@ -150,6 +132,7 @@ export default function ActivityItem({
     const startTime = startDateObj.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
+      hour12: true,
     });
 
     // Si la actividad no es de hoy (fecha actual), mostrar fecha completa de inicio
@@ -165,6 +148,7 @@ export default function ActivityItem({
     const endTime = endDateObj.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
+      hour12: true,
     });
 
     if (startDateLocal === endDateLocal) {
@@ -196,8 +180,8 @@ export default function ActivityItem({
           ]}
           onPress={() => setShowModal(true)}
         >
-          {/* Accent Border Left */}
-          <View style={styles.accentBorder} />
+          {/* Accent Border Left - Only show if completed */}
+          {isCompleted && <View style={styles.accentBorder} />}
 
           {/* Checkbox Icon (Left) */}
           <IconButton
@@ -210,13 +194,6 @@ export default function ActivityItem({
             }}
             style={styles.actionButtonLeft}
           />
-
-          <View style={styles.timeContainer}>
-            <Text style={styles.dateLabel}>{getFormatDate()}</Text>
-            <Text style={styles.timeLabel}>{getFormatTime()}</Text>
-          </View>
-
-          <View style={styles.divider} />
 
           <View style={styles.contentContainer}>
             <Text
@@ -234,14 +211,14 @@ export default function ActivityItem({
               />
             )}
 
-            {/* Renderizar "Para:" solo si showTargetUser es true y hay asignado */}
-            {showTargetUser && activityAssignedTo && (
-              <View style={styles.assignedToContainer}>
-                <Text style={styles.assignedToText}>
-                  Para: {activityAssignedTo}
-                </Text>
-              </View>
-            )}
+            {/* Footer con información de hora y asignación */}
+            <View style={styles.assignedToContainer}>
+              <Text style={styles.assignedToText}>
+                {showTargetUser && activityAssignedTo
+                  ? `Para: ${activityAssignedTo}   ${getFormatTime()}`
+                  : getFormatTime()}
+              </Text>
+            </View>
           </View>
 
           <View style={styles.actionsContainer}>
@@ -419,8 +396,8 @@ const styles = StyleSheet.create({
   },
   actionButtonLeft: {
     margin: 0,
-    marginRight: -8, // Pull closer to date
-    marginLeft: 6, // Space from accent border
+    marginRight: 8, // Increased separation
+    marginLeft: 12, // More space from accent border
   },
   pressableArea: {
     flexDirection: "row",
@@ -430,29 +407,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     //overflow: "hidden", // Removing this from here, keeping on cardWrapper
   },
-  timeContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    minWidth: 50,
-  },
-  dateLabel: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: COLORS.primary,
-    marginBottom: 4,
-    textTransform: "uppercase",
-  },
-  timeLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: COLORS.text,
-  },
-  divider: {
-    width: 1,
-    height: "80%",
-    backgroundColor: COLORS.border,
-    marginHorizontal: 16,
-  },
+
   contentContainer: {
     flex: 1,
     justifyContent: "center",
