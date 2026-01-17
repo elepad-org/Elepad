@@ -69,11 +69,10 @@ export default function AlbumViewerScreen() {
   const handleClose = useCallback(async () => {
     // Unlock orientation before navigating back
     try {
-      await ScreenOrientation.lockAsync(
-        ScreenOrientation.OrientationLock.PORTRAIT
-      );
+      await ScreenOrientation.unlockAsync();
     } catch (err) {
-      console.error("Error restoring orientation:", err);
+      // Ignore orientation errors - some devices/simulators don't support all orientations
+      console.log("Could not unlock orientation:", err);
     }
     router.back();
   }, [router]);
@@ -212,7 +211,7 @@ export default function AlbumViewerScreen() {
             { right: Math.max(insets.right, 12) },
           ]}
         />
-      )}>
+      )}
     </View>
   );
 }
