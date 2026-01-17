@@ -73,7 +73,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: "row",
-    backgroundColor: "#F5E6D3",
     paddingHorizontal: 70, // Espacio para los botones laterales
     paddingVertical: 60, // Espacio para botones superior e inferior
   },

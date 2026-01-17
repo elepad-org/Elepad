@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { View, StyleSheet, StatusBar, Platform } from "react-native";
+import { View, StyleSheet, StatusBar, Platform, ImageBackground } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityIndicator, IconButton, Text } from "react-native-paper";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -86,18 +86,26 @@ export default function AlbumViewerScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
+      <ImageBackground
+        source={require("@/assets/images/fondoRecuerdos.png")}
+        style={styles.loadingContainer}
+        resizeMode="cover"
+      >
         <Stack.Screen options={{ headerShown: false }} />
         <StatusBar hidden />
         <ActivityIndicator size="large" color={COLORS.primary} />
         <Text style={styles.loadingText}>Cargando álbum...</Text>
-      </View>
+      </ImageBackground>
     );
   }
 
   if (error || !album) {
     return (
-      <View style={styles.errorContainer}>
+      <ImageBackground
+        source={require("@/assets/images/fondoRecuerdos.png")}
+        style={styles.errorContainer}
+        resizeMode="cover"
+      >
         <Stack.Screen options={{ headerShown: false }} />
         <StatusBar hidden />
         <Text style={styles.errorText}>
@@ -110,13 +118,17 @@ export default function AlbumViewerScreen() {
           onPress={handleClose}
           style={styles.closeButton}
         />
-      </View>
+      </ImageBackground>
     );
   }
 
   if (pages.length === 0) {
     return (
-      <View style={styles.emptyContainer}>
+      <ImageBackground
+        source={require("@/assets/images/fondoRecuerdos.png")}
+        style={styles.emptyContainer}
+        resizeMode="cover"
+      >
         <Stack.Screen options={{ headerShown: false }} />
         <StatusBar hidden />
         <Text style={styles.emptyText}>
@@ -129,12 +141,16 @@ export default function AlbumViewerScreen() {
           onPress={handleClose}
           style={styles.closeButton}
         />
-      </View>
+      </ImageBackground>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <ImageBackground
+      source={require("@/assets/images/fondoRecuerdos.png")}
+      style={styles.container}
+      resizeMode="cover"
+    >
       <Stack.Screen options={{ headerShown: false }} />
       <StatusBar hidden />
 
@@ -172,7 +188,7 @@ export default function AlbumViewerScreen() {
       />
 
       {/* Album Title Overlay */}
-      <View
+      {/* <View
         style={[
           styles.titleOverlay,
           {
@@ -184,7 +200,7 @@ export default function AlbumViewerScreen() {
         <Text style={styles.titleText} numberOfLines={1}>
           {album.title}
         </Text>
-      </View>
+      </View> */}
 
       {/* Page Navigation Arrows */}
       {currentPage > 0 && (
@@ -195,7 +211,7 @@ export default function AlbumViewerScreen() {
           onPress={() => pagerRef.current?.setPage(currentPage - 1)}
           style={[
             styles.navButtonLeft,
-            { left: Math.max(insets.left, 12) },
+            { left: Math.max(insets.left, 4) },
           ]}
         />
       )}
@@ -208,24 +224,22 @@ export default function AlbumViewerScreen() {
           onPress={() => pagerRef.current?.setPage(currentPage + 1)}
           style={[
             styles.navButtonRight,
-            { right: Math.max(insets.right, 12) },
+            { right: Math.max(insets.right, 4) },
           ]}
         />
       )}
-    </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5E6D3",
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F5E6D3",
   },
   loadingText: {
     marginTop: 16,
@@ -265,7 +279,7 @@ const styles = StyleSheet.create({
   closeButton: {
     position: "absolute",
     zIndex: 1000,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    backgroundColor: "rgba(0, 0, 0, 0.25)",
     elevation: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -275,7 +289,7 @@ const styles = StyleSheet.create({
   titleOverlay: {
     position: "absolute",
     zIndex: 999,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    backgroundColor: "rgba(0, 0, 0, 0.25)",
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 8,
@@ -291,7 +305,7 @@ const styles = StyleSheet.create({
     top: "50%",
     marginTop: -28,
     zIndex: 998,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
     elevation: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -303,7 +317,7 @@ const styles = StyleSheet.create({
     top: "50%",
     marginTop: -28,
     zIndex: 998,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
     elevation: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
