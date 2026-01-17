@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
 import { Text, IconButton } from "react-native-paper";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
-import Animated, { LinearTransition } from "react-native-reanimated";
+import Animated, { LinearTransition, ZoomIn } from "react-native-reanimated";
 import DropdownSelect from "../shared/DropdownSelect";
 import { Activity, useGetFrequencies } from "@elepad/api-client";
 import { COLORS } from "@/styles/base";
@@ -612,10 +612,11 @@ export default function CalendarCard(props: CalendarCardProps) {
             const completed = completionsByDateMap[key] || false;
             return `${i.id}-${completed}`;
           }}
-          renderItem={({ item }) => (
+          renderItem={({ item, index }) => (
             <Animated.View
               key={`${item.id}-${selectedDay}`}
               layout={LinearTransition.duration(400)}
+              entering={ZoomIn.delay(index * 100).duration(300)}
             >
               <ActivityItem
                 item={item}
