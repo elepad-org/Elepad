@@ -1,9 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { View, StyleSheet, Animated } from "react-native";
+import { View, StyleSheet, Animated, Pressable } from "react-native";
 import {
   Text,
-  Card,
-  List,
   IconButton,
   Portal,
   Dialog,
@@ -11,7 +9,7 @@ import {
   Divider,
 } from "react-native-paper";
 import { Activity, GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
-import { COLORS } from "@/styles/base";
+import { COLORS, SHADOWS } from "@/styles/base";
 import HighlightedMentionText from "../Recuerdos/HighlightedMentionText";
 
 interface ActivityItemProps {
@@ -109,6 +107,33 @@ export default function ActivityItem({
   // Check if current user can edit this activity
   const canEdit = item.createdBy === idUser || isOwnerOfGroup;
 
+  const getFormatDate = () => {
+    const activityDate = new Date(item.startsAt);
+    const dateToday = new Date().toDateString();
+    const dateTomorrow = new Date(Date.now() + 86400000).toDateString();
+
+    const isToday = activityDate.toDateString() === dateToday;
+    const isTomorrow = activityDate.toDateString() === dateTomorrow;
+
+    let label = activityDate.toLocaleDateString("es", {
+      day: "numeric",
+      month: "short",
+    });
+
+    if (isToday) label = "Hoy";
+    if (isTomorrow) label = "Mañana";
+
+    return label;
+  };
+
+  const getFormatTime = () => {
+    const date = new Date(item.startsAt);
+    return date.toLocaleTimeString("es", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   const timeDescription = (() => {
     const startDateObj = new Date(item.startsAt);
     const endDateObj = item.endsAt ? new Date(item.endsAt) : null;
@@ -156,60 +181,61 @@ export default function ActivityItem({
   const hasDescription = item.description && item.description.trim().length > 0;
 
   return (
-    <Card style={[styles.card, isCompleted && styles.completedCard]}>
-      <List.Item
-        style={styles.listItem}
-        titleStyle={isCompleted && { textDecorationLine: "line-through" }}
-        title={item.title}
-        description={
-          <View>
-            <Text variant="bodySmall" style={styles.timeText}>
-              {timeDescription}
-            </Text>
-          </View>
-        }
-        onPress={hasDescription ? () => setShowModal(true) : undefined}
-        background={undefined}
-        left={() => (
-          <View style={styles.checkboxContainer}>
-            <IconButton
-              icon={isCompleted ? "checkbox-marked" : "checkbox-blank-outline"}
-              iconColor={COLORS.primary}
-              size={24}
-              onPress={() => onToggleComplete(item)}
-              style={{ margin: 0 }}
+    <>
+      <Pressable
+        style={({ pressed }) => [
+          styles.container,
+          isCompleted && styles.containerCompleted,
+          pressed && { opacity: 0.95, transform: [{ scale: 0.99 }] },
+        ]}
+        onPress={() => setShowModal(true)}
+      >
+        <View style={styles.timeContainer}>
+          <Text style={styles.dateLabel}>{getFormatDate()}</Text>
+          <Text style={styles.timeLabel}>{getFormatTime()}</Text>
+        </View>
+
+        <View style={styles.divider} />
+
+        <View style={styles.contentContainer}>
+          <Text
+            style={[styles.title, isCompleted && styles.completedText]}
+            numberOfLines={1}
+          >
+            {item.title}
+          </Text>
+          {hasDescription && (
+            <HighlightedMentionText
+              text={item.description || ""}
+              familyMembers={allGroupMembers}
+              style={styles.description}
+              numberOfLines={1}
             />
-          </View>
-        )}
-        right={() => (
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            {canEdit && (
-              <>
-                <IconButton
-                  icon="pencil-outline"
-                  iconColor={COLORS.primary}
-                  size={22}
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    onEdit(item);
-                  }}
-                  style={{ margin: 0 }}
-                />
-                <IconButton
-                  icon="delete-outline"
-                  iconColor={COLORS.primary}
-                  size={22}
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    onDelete(item.id);
-                  }}
-                  style={{ margin: 0 }}
-                />
-              </>
-            )}
-          </View>
-        )}
-      />
+          )}
+
+          {/* Si está asignado a alguien más, mostrarlo pequeño */}
+          {activityAssignedTo && (
+            <View style={styles.assignedToContainer}>
+              <Text style={styles.assignedToText}>
+                Para: {activityAssignedTo}
+              </Text>
+            </View>
+          )}
+        </View>
+
+        <View style={styles.actionsContainer}>
+          <IconButton
+            icon={isCompleted ? "checkbox-marked" : "checkbox-blank-outline"}
+            iconColor={isCompleted ? COLORS.primary : COLORS.textPlaceholder}
+            size={24}
+            onPress={(e) => {
+              e.stopPropagation();
+              onToggleComplete(item);
+            }}
+            style={styles.actionButton}
+          />
+        </View>
+      </Pressable>
 
       {/* Modal de detalle */}
       <Portal>
@@ -224,9 +250,34 @@ export default function ActivityItem({
           }}
         >
           <Animated.View style={{ opacity: fadeAnim }}>
-            <Dialog.Title style={{ fontWeight: "bold", color: COLORS.text }}>
-              {item.title}
-            </Dialog.Title>
+            <View style={styles.dialogHeader}>
+              <Text style={styles.dialogTitle}>{item.title}</Text>
+              <View style={styles.dialogActions}>
+                {canEdit && (
+                  <>
+                    <IconButton
+                      icon="pencil-outline"
+                      iconColor={COLORS.primary}
+                      size={20}
+                      onPress={() => {
+                        setShowModal(false);
+                        onEdit(item);
+                      }}
+                    />
+                    <IconButton
+                      icon="delete-outline"
+                      iconColor={COLORS.error}
+                      size={20}
+                      onPress={() => {
+                        setShowModal(false);
+                        onDelete(item.id);
+                      }}
+                    />
+                  </>
+                )}
+              </View>
+            </View>
+
             <Dialog.Content>
               {/* Fecha y hora */}
               <View style={styles.modalRow}>
@@ -242,7 +293,6 @@ export default function ActivityItem({
               </View>
 
               {/* Creador y Destinatario */}
-              {/* Si creador y destinatario son diferentes, mostrar ambos */}
               {item.createdBy !== item.assignedTo && activityOwner && (
                 <View style={styles.modalRow}>
                   <IconButton
@@ -257,7 +307,6 @@ export default function ActivityItem({
                 </View>
               )}
 
-              {/* Siempre mostrar el destinatario si existe */}
               {activityAssignedTo && (
                 <View style={styles.modalRow}>
                   <IconButton
@@ -332,43 +381,80 @@ export default function ActivityItem({
           </Animated.View>
         </Dialog>
       </Portal>
-    </Card>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    marginBottom: 10,
-    borderRadius: 16,
+  container: {
+    ...SHADOWS.card,
     backgroundColor: COLORS.white,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    overflow: "hidden",
-    elevation: 0,
-  },
-  completedCard: {
-    backgroundColor: COLORS.primary + "10",
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.primary,
-    shadowColor: "transparent",
-    shadowOpacity: 0,
-    elevation: 0,
-  },
-  listItem: {
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-  },
-  checkboxContainer: {
-    justifyContent: "center",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    flexDirection: "row",
     alignItems: "center",
   },
-  timeText: {
-    color: COLORS.textSecondary,
-    marginBottom: 2,
+  containerCompleted: {
+    backgroundColor: "#F5F5F5",
+    opacity: 0.8,
   },
-  ownerText: {
+  timeContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 50,
+  },
+  dateLabel: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: COLORS.primary,
+    marginBottom: 4,
+    textTransform: "uppercase",
+  },
+  timeLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: COLORS.text,
+  },
+  divider: {
+    width: 1,
+    height: "80%",
+    backgroundColor: COLORS.border,
+    marginHorizontal: 16,
+  },
+  contentContainer: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+  completedText: {
+    textDecorationLine: "line-through",
+    color: COLORS.textLight,
+  },
+  description: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+  },
+  assignedToContainer: {
+    marginTop: 4,
+  },
+  assignedToText: {
+    fontSize: 11,
     color: COLORS.textLight,
     fontStyle: "italic",
+  },
+  actionsContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 8,
+  },
+  actionButton: {
+    margin: 0,
   },
   modalRow: {
     flexDirection: "row",
@@ -378,5 +464,25 @@ const styles = StyleSheet.create({
   modalText: {
     flex: 1,
     color: COLORS.textSecondary,
+  },
+  dialogHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    paddingHorizontal: 24,
+    paddingTop: 24,
+  },
+  dialogTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: COLORS.text,
+    flex: 1,
+    marginRight: 8,
+  },
+  dialogActions: {
+    flexDirection: "row",
+    gap: 0,
+    marginTop: -8,
+    marginRight: -12,
   },
 });

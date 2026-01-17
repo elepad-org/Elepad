@@ -401,7 +401,7 @@ export default function CalendarCard(props: CalendarCardProps) {
       const hasRelevantActivities = selectedElderId
         ? eventsOnDay.some((ev) => ev.assignedTo === selectedElderId)
         : eventsOnDay.length > 0;
-      
+
       if (hasRelevantActivities) {
         obj[d] = { marked: true, dotColor: COLORS.primary };
       }
@@ -428,7 +428,13 @@ export default function CalendarCard(props: CalendarCardProps) {
       ? { ...obj[selectedDay], selected: true }
       : { selected: true };
     return obj;
-  }, [eventsByDate, selectedDay, streakHistoryQuery.data, userElepad, selectedElderId]);
+  }, [
+    eventsByDate,
+    selectedDay,
+    streakHistoryQuery.data,
+    userElepad,
+    selectedElderId,
+  ]);
 
   // Filtrar actividades por adulto mayor seleccionado, ordenados: primero incompletos, luego completados
   const dayEvents = useMemo(() => {
@@ -520,62 +526,64 @@ export default function CalendarCard(props: CalendarCardProps) {
   };
   return (
     <View style={styles.container}>
-      <View style={styles.calendarWrapper}>
-        <Calendar
-          onDayPress={(d: DateData) => setSelectedDay(d.dateString)}
-          markedDates={marked}
-          markingType={"custom"}
-          enableSwipeMonths
-          style={styles.calendar}
-          theme={{
-            backgroundColor: COLORS.background,
-            calendarBackground: COLORS.background,
-            textSectionTitleColor: COLORS.textSecondary,
-            selectedDayBackgroundColor: COLORS.primary,
-            selectedDayTextColor: COLORS.white,
-            todayTextColor: COLORS.primary,
-            dayTextColor: COLORS.text,
-            textDisabledColor: COLORS.textPlaceholder,
-            monthTextColor: COLORS.text,
-            textMonthFontSize: 20,
-            textDayFontSize: 18,
-            textDayHeaderFontSize: 14,
-            arrowColor: COLORS.primary,
-          }}
-        />
-      </View>
-
-      <View style={styles.controlsRow}>
-        <View style={{ flex: 1 }}>
-          <DropdownSelect
-            label="Filtrar actividades"
-            value={selectedElderId || "all"}
-            options={[
-              { key: "all", label: "Todos", icon: "account-group" },
-              ...elders.map((elder) => ({
-                key: elder.id,
-                label: elder.displayName,
-                avatarUrl: elder.avatarUrl || null,
-              })),
-            ]}
-            onSelect={(value) => {
-              onElderChange(value === "all" ? null : value);
+      <View style={styles.headerContainer}>
+        <View style={styles.calendarWrapper}>
+          <Calendar
+            onDayPress={(d: DateData) => setSelectedDay(d.dateString)}
+            markedDates={marked}
+            markingType={"custom"}
+            enableSwipeMonths
+            style={styles.calendar}
+            theme={{
+              backgroundColor: COLORS.background,
+              calendarBackground: COLORS.background,
+              textSectionTitleColor: COLORS.textSecondary,
+              selectedDayBackgroundColor: COLORS.primary,
+              selectedDayTextColor: COLORS.white,
+              todayTextColor: COLORS.primary,
+              dayTextColor: COLORS.text,
+              textDisabledColor: COLORS.textPlaceholder,
+              monthTextColor: COLORS.text,
+              textMonthFontSize: 20,
+              textDayFontSize: 18,
+              textDayHeaderFontSize: 14,
+              arrowColor: COLORS.primary,
             }}
-            placeholder="Seleccionar adulto mayor"
-            showLabel={false}
           />
         </View>
-        <IconButton
-          icon="calendar-today"
-          size={24}
-          mode="contained"
-          onPress={() => {
-            setSelectedDay(today);
-          }}
-          style={styles.todayIconButton}
-          containerColor={COLORS.primary}
-          iconColor={COLORS.white}
-        />
+
+        <View style={styles.controlsRow}>
+          <View style={{ flex: 1 }}>
+            <DropdownSelect
+              label="Filtrar actividades"
+              value={selectedElderId || "all"}
+              options={[
+                { key: "all", label: "Todos", icon: "account-group" },
+                ...elders.map((elder) => ({
+                  key: elder.id,
+                  label: elder.displayName,
+                  avatarUrl: elder.avatarUrl || null,
+                })),
+              ]}
+              onSelect={(value) => {
+                onElderChange(value === "all" ? null : value);
+              }}
+              placeholder="Seleccionar adulto mayor"
+              showLabel={false}
+            />
+          </View>
+          <IconButton
+            icon="calendar-today"
+            size={24}
+            mode="contained"
+            onPress={() => {
+              setSelectedDay(today);
+            }}
+            style={styles.todayIconButton}
+            containerColor={COLORS.primary}
+            iconColor={COLORS.white}
+          />
+        </View>
       </View>
 
       {activitiesQuery.isLoading && <Text>Cargando...</Text>}
@@ -644,8 +652,10 @@ export default function CalendarCard(props: CalendarCardProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 16,
     backgroundColor: COLORS.background,
+  },
+  headerContainer: {
+    paddingHorizontal: 16,
   },
   calendarWrapper: {
     position: "relative",
@@ -671,7 +681,7 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     marginTop: 20,
-    paddingHorizontal: 10,
+    paddingHorizontal: 16,
     alignItems: "center",
   },
   emptyText: {
@@ -681,5 +691,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 100,
+    paddingHorizontal: 16,
+    paddingTop: 8,
   },
 });
