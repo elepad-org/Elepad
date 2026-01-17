@@ -73,7 +73,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: "row",
-    backgroundColor: "#F5E6D3",
+    paddingHorizontal: 70, // Espacio para los botones laterales
+    paddingVertical: 60, // Espacio para botones superior e inferior
   },
   leftSide: {
     flex: 1,
@@ -93,23 +94,23 @@ const styles = StyleSheet.create({
   },
   polaroid: {
     backgroundColor: "#FFFFFF",
-    padding: 12,
+    padding: 10,
     borderRadius: 4,
     ...SHADOWS.medium,
     // Slight rotation for realistic effect
     transform: [{ rotate: "-2deg" }],
-    maxWidth: SCREEN_HEIGHT * 0.6, // In landscape, height is smaller dimension
-    maxHeight: SCREEN_HEIGHT * 0.75,
+    maxWidth: SCREEN_HEIGHT * 0.55, // In landscape, height is smaller dimension
+    maxHeight: SCREEN_HEIGHT * 0.7,
   },
   photo: {
-    width: SCREEN_HEIGHT * 0.45,
-    height: SCREEN_HEIGHT * 0.45,
+    width: SCREEN_HEIGHT * 0.4,
+    height: SCREEN_HEIGHT * 0.4,
     borderRadius: 2,
     backgroundColor: COLORS.border,
   },
   placeholderPhoto: {
-    width: SCREEN_HEIGHT * 0.45,
-    height: SCREEN_HEIGHT * 0.45,
+    width: SCREEN_HEIGHT * 0.4,
+    height: SCREEN_HEIGHT * 0.4,
     borderRadius: 2,
     backgroundColor: COLORS.backgroundSecondary,
     justifyContent: "center",
