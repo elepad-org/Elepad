@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import Animated, { FadeInUp } from "react-native-reanimated";
+import Animated, { ZoomIn } from "react-native-reanimated";
 import {
   StatusBar,
   View,
@@ -160,7 +160,7 @@ export default function AlbumsScreen() {
             renderItem={({ item, index }) => {
               return (
                 <Animated.View
-                  entering={FadeInUp.delay(index * 100).springify()}
+                  entering={ZoomIn.delay(index * 50).duration(200)}
                   style={styles.columnItem}
                 >
                   <AlbumCard
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   columnItem: {
-  width: "48%", 
-  marginBottom: 16,
-},
+    width: "48%",
+    marginBottom: 16,
+  },
 });
