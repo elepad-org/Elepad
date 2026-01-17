@@ -224,6 +224,30 @@ export default function ActivityItem({
         </View>
 
         <View style={styles.actionsContainer}>
+          {canEdit && (
+            <>
+              <IconButton
+                icon="pencil-outline"
+                iconColor={COLORS.primary}
+                size={20}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  onEdit(item);
+                }}
+                style={styles.actionButton}
+              />
+              <IconButton
+                icon="delete-outline"
+                iconColor={COLORS.primary}
+                size={20}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  onDelete(item.id);
+                }}
+                style={styles.actionButton}
+              />
+            </>
+          )}
           <IconButton
             icon={isCompleted ? "checkbox-marked" : "checkbox-blank-outline"}
             iconColor={isCompleted ? COLORS.primary : COLORS.textPlaceholder}
@@ -252,30 +276,6 @@ export default function ActivityItem({
           <Animated.View style={{ opacity: fadeAnim }}>
             <View style={styles.dialogHeader}>
               <Text style={styles.dialogTitle}>{item.title}</Text>
-              <View style={styles.dialogActions}>
-                {canEdit && (
-                  <>
-                    <IconButton
-                      icon="pencil-outline"
-                      iconColor={COLORS.primary}
-                      size={20}
-                      onPress={() => {
-                        setShowModal(false);
-                        onEdit(item);
-                      }}
-                    />
-                    <IconButton
-                      icon="delete-outline"
-                      iconColor={COLORS.error}
-                      size={20}
-                      onPress={() => {
-                        setShowModal(false);
-                        onDelete(item.id);
-                      }}
-                    />
-                  </>
-                )}
-              </View>
             </View>
 
             <Dialog.Content>
@@ -449,6 +449,7 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
   },
   actionsContainer: {
+    flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     marginLeft: 8,
