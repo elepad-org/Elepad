@@ -1087,13 +1087,13 @@ export default function RecuerdosScreen() {
               icon="plus"
               disabled={!groupId}
             >
-              Agregar
+              Agregar 
             </Button>
           </View>
           <Button
             mode="outlined"
             onPress={() => router.push("../albums")}
-            style={{ borderRadius: 12, borderColor: COLORS.primary, marginTop: 12 }}
+            style={{ borderRadius: 12, borderColor: COLORS.primary, marginTop: 24 }}
             icon="book-multiple"
             textColor={COLORS.primary}
             disabled={!groupId}
@@ -1142,7 +1142,7 @@ export default function RecuerdosScreen() {
             keyExtractor={(item) => item.id}
             contentContainerStyle={{
               paddingHorizontal: 24,
-              paddingTop: 16,
+              paddingTop: 2,
               paddingBottom: LAYOUT.bottomNavHeight,
             }}
             numColumns={2}
