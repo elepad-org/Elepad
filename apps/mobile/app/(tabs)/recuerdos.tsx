@@ -1073,36 +1073,33 @@ export default function RecuerdosScreen() {
             paddingHorizontal: 24,
             paddingVertical: 16,
             borderBottomColor: COLORS.border,
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "stretch",
           }}
         >
-          <Text style={STYLES.superHeading}>Recuerdos</Text>
-          <View style={{ flexDirection: "column", gap: 4 }}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+            <Text style={STYLES.superHeading}>Recuerdos</Text>
             <Button
               mode="contained"
               onPress={openCreateBookDialog}
               style={{
                 borderRadius: 12,
-                backgroundColor: "#5b507a",
-                alignItems: "center",
+                backgroundColor: COLORS.primary,
               }}
               icon="plus"
               disabled={!groupId}
             >
-              Nuevo
-            </Button>
-            <Button
-              mode="outlined"
-              onPress={() => router.push("../albums")}
-              style={{ borderRadius: 12 }}
-              icon="book-multiple"
-              disabled={!groupId}
-            >
-              Álbumes
+              Agregar
             </Button>
           </View>
+          <Button
+            mode="outlined"
+            onPress={() => router.push("../albums")}
+            style={{ borderRadius: 12, borderColor: COLORS.primary, marginTop: 12 }}
+            icon="book-multiple"
+            textColor={COLORS.primary}
+            disabled={!groupId}
+          >
+            Álbumes
+          </Button>
         </View>
 
         {isBooksLoading && books.length === 0 ? (
