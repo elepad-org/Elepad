@@ -633,6 +633,7 @@ export default function CalendarCard(props: CalendarCardProps) {
                 familyMembers={familyMembers}
                 shouldOpen={activityToView === item.id}
                 onOpened={onActivityViewed}
+                showTargetUser={!selectedElderId}
               />
             </Animated.View>
           )}

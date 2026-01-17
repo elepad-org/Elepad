@@ -28,6 +28,7 @@ interface ActivityItemProps {
   }>;
   shouldOpen?: boolean;
   onOpened?: () => void;
+  showTargetUser?: boolean;
 }
 
 export default function ActivityItem({
@@ -42,6 +43,7 @@ export default function ActivityItem({
   familyMembers = [],
   shouldOpen = false,
   onOpened,
+  showTargetUser = true,
 }: ActivityItemProps) {
   const [showModal, setShowModal] = useState(false);
 
@@ -194,6 +196,21 @@ export default function ActivityItem({
           ]}
           onPress={() => setShowModal(true)}
         >
+          {/* Accent Border Left */}
+          <View style={styles.accentBorder} />
+
+          {/* Checkbox Icon (Left) */}
+          <IconButton
+            icon={isCompleted ? "checkbox-marked" : "checkbox-blank-outline"}
+            iconColor={isCompleted ? COLORS.primary : COLORS.primary}
+            size={24}
+            onPress={(e) => {
+              e.stopPropagation();
+              onToggleComplete(item);
+            }}
+            style={styles.actionButtonLeft}
+          />
+
           <View style={styles.timeContainer}>
             <Text style={styles.dateLabel}>{getFormatDate()}</Text>
             <Text style={styles.timeLabel}>{getFormatTime()}</Text>
@@ -217,8 +234,8 @@ export default function ActivityItem({
               />
             )}
 
-            {/* Si está asignado a alguien más, mostrarlo pequeño */}
-            {activityAssignedTo && (
+            {/* Renderizar "Para:" solo si showTargetUser es true y hay asignado */}
+            {showTargetUser && activityAssignedTo && (
               <View style={styles.assignedToContainer}>
                 <Text style={styles.assignedToText}>
                   Para: {activityAssignedTo}
@@ -252,16 +269,6 @@ export default function ActivityItem({
                 />
               </>
             )}
-            <IconButton
-              icon={isCompleted ? "checkbox-marked" : "checkbox-blank-outline"}
-              iconColor={isCompleted ? COLORS.primary : COLORS.textPlaceholder}
-              size={24}
-              onPress={(e) => {
-                e.stopPropagation();
-                onToggleComplete(item);
-              }}
-              style={styles.actionButton}
-            />
           </View>
         </Pressable>
       </View>
@@ -396,16 +403,32 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderRadius: 16,
     marginBottom: 12,
+    position: "relative",
+    overflow: "hidden", // Important for clipping the accent border
   },
   cardWrapperCompleted: {
     backgroundColor: "#F5F5F5",
+  },
+  accentBorder: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 6,
+    backgroundColor: COLORS.primary,
+  },
+  actionButtonLeft: {
+    margin: 0,
+    marginRight: -8, // Pull closer to date
+    marginLeft: 6, // Space from accent border
   },
   pressableArea: {
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
+    paddingLeft: 12, // Adjusted padding because of manual elements
     borderRadius: 16,
-    overflow: "hidden",
+    //overflow: "hidden", // Removing this from here, keeping on cardWrapper
   },
   timeContainer: {
     alignItems: "center",
