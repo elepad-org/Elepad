@@ -182,84 +182,89 @@ export default function ActivityItem({
 
   return (
     <>
-      <Pressable
-        style={({ pressed }) => [
-          styles.container,
-          isCompleted && styles.containerCompleted,
-          pressed && { opacity: 0.95, transform: [{ scale: 0.99 }] },
-        ]}
-        onPress={() => setShowModal(true)}
+      <View
+        style={[styles.cardWrapper, isCompleted && styles.cardWrapperCompleted]}
       >
-        <View style={styles.timeContainer}>
-          <Text style={styles.dateLabel}>{getFormatDate()}</Text>
-          <Text style={styles.timeLabel}>{getFormatTime()}</Text>
-        </View>
+        <Pressable
+          style={({ pressed }) => [
+            styles.pressableArea,
+            pressed && {
+              transform: [{ scale: 0.98 }],
+            },
+          ]}
+          onPress={() => setShowModal(true)}
+        >
+          <View style={styles.timeContainer}>
+            <Text style={styles.dateLabel}>{getFormatDate()}</Text>
+            <Text style={styles.timeLabel}>{getFormatTime()}</Text>
+          </View>
 
-        <View style={styles.divider} />
+          <View style={styles.divider} />
 
-        <View style={styles.contentContainer}>
-          <Text
-            style={[styles.title, isCompleted && styles.completedText]}
-            numberOfLines={1}
-          >
-            {item.title}
-          </Text>
-          {hasDescription && (
-            <HighlightedMentionText
-              text={item.description || ""}
-              familyMembers={allGroupMembers}
-              style={styles.description}
+          <View style={styles.contentContainer}>
+            <Text
+              style={[styles.title, isCompleted && styles.completedText]}
               numberOfLines={1}
+            >
+              {item.title}
+            </Text>
+            {hasDescription && (
+              <HighlightedMentionText
+                text={item.description || ""}
+                familyMembers={allGroupMembers}
+                style={styles.description}
+                numberOfLines={1}
+              />
+            )}
+
+            {/* Si está asignado a alguien más, mostrarlo pequeño */}
+            {activityAssignedTo && (
+              <View style={styles.assignedToContainer}>
+                <Text style={styles.assignedToText}>
+                  Para: {activityAssignedTo}
+                </Text>
+              </View>
+            )}
+          </View>
+
+          <View style={styles.actionsContainer}>
+            {canEdit && (
+              <>
+                <IconButton
+                  icon="pencil-outline"
+                  iconColor={COLORS.primary}
+                  size={20}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    onEdit(item);
+                  }}
+                  style={styles.actionButton}
+                />
+                <IconButton
+                  icon="delete-outline"
+                  iconColor={COLORS.primary}
+                  size={20}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    onDelete(item.id);
+                  }}
+                  style={styles.actionButton}
+                />
+              </>
+            )}
+            <IconButton
+              icon={isCompleted ? "checkbox-marked" : "checkbox-blank-outline"}
+              iconColor={isCompleted ? COLORS.primary : COLORS.textPlaceholder}
+              size={24}
+              onPress={(e) => {
+                e.stopPropagation();
+                onToggleComplete(item);
+              }}
+              style={styles.actionButton}
             />
-          )}
-
-          {/* Si está asignado a alguien más, mostrarlo pequeño */}
-          {activityAssignedTo && (
-            <View style={styles.assignedToContainer}>
-              <Text style={styles.assignedToText}>
-                Para: {activityAssignedTo}
-              </Text>
-            </View>
-          )}
-        </View>
-
-        <View style={styles.actionsContainer}>
-          {canEdit && (
-            <>
-              <IconButton
-                icon="pencil-outline"
-                iconColor={COLORS.primary}
-                size={20}
-                onPress={(e) => {
-                  e.stopPropagation();
-                  onEdit(item);
-                }}
-                style={styles.actionButton}
-              />
-              <IconButton
-                icon="delete-outline"
-                iconColor={COLORS.primary}
-                size={20}
-                onPress={(e) => {
-                  e.stopPropagation();
-                  onDelete(item.id);
-                }}
-                style={styles.actionButton}
-              />
-            </>
-          )}
-          <IconButton
-            icon={isCompleted ? "checkbox-marked" : "checkbox-blank-outline"}
-            iconColor={isCompleted ? COLORS.primary : COLORS.textPlaceholder}
-            size={24}
-            onPress={(e) => {
-              e.stopPropagation();
-              onToggleComplete(item);
-            }}
-            style={styles.actionButton}
-          />
-        </View>
-      </Pressable>
+          </View>
+        </Pressable>
+      </View>
 
       {/* Modal de detalle */}
       <Portal>
@@ -386,18 +391,21 @@ export default function ActivityItem({
 }
 
 const styles = StyleSheet.create({
-  container: {
+  cardWrapper: {
     ...SHADOWS.card,
     backgroundColor: COLORS.white,
     borderRadius: 16,
-    padding: 16,
     marginBottom: 12,
+  },
+  cardWrapperCompleted: {
+    backgroundColor: "#F5F5F5",
+  },
+  pressableArea: {
     flexDirection: "row",
     alignItems: "center",
-  },
-  containerCompleted: {
-    backgroundColor: "#F5F5F5",
-    opacity: 0.8,
+    padding: 16,
+    borderRadius: 16,
+    overflow: "hidden",
   },
   timeContainer: {
     alignItems: "center",
