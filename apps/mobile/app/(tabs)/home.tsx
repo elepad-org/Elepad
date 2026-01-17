@@ -1,4 +1,4 @@
-import Animated, { FadeIn, FadeInUp } from "react-native-reanimated";
+import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
 import {
   StatusBar,
   ScrollView,
@@ -464,7 +464,7 @@ export default function HomeScreen() {
                   return (
                     <Animated.View
                       key={activity.id}
-                      entering={FadeInUp.delay(index * 100).springify()}
+                      entering={ZoomIn.duration(200).delay(index * 50)}
                       style={styles.eventItem}
                     >
                       <View style={styles.eventTime}>

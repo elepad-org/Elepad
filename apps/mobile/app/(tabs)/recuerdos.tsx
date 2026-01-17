@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
-import Animated, { FadeInUp } from "react-native-reanimated";
+import Animated, { ZoomIn } from "react-native-reanimated";
 import { useIsFocused } from "@react-navigation/native";
 import {
   StatusBar,
@@ -1607,7 +1607,7 @@ export default function RecuerdosScreen() {
           key={`grid-${numColumns}-${isFocused}`}
           data={recuerdos}
           renderItem={({ item, index }) => (
-            <Animated.View entering={FadeInUp.delay(index * 50).springify()}>
+            <Animated.View entering={ZoomIn.delay(index * 50).duration(200)}>
               <RecuerdoItemComponent
                 item={item}
                 numColumns={numColumns}

@@ -1,9 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { View, StyleSheet, Animated } from "react-native";
+import { View, StyleSheet, Animated, Pressable } from "react-native";
 import {
   Text,
-  Card,
-  List,
   IconButton,
   Portal,
   Dialog,
@@ -11,7 +9,7 @@ import {
   Divider,
 } from "react-native-paper";
 import { Activity, GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
-import { COLORS } from "@/styles/base";
+import { COLORS, SHADOWS } from "@/styles/base";
 import HighlightedMentionText from "../Recuerdos/HighlightedMentionText";
 
 interface ActivityItemProps {
@@ -30,6 +28,7 @@ interface ActivityItemProps {
   }>;
   shouldOpen?: boolean;
   onOpened?: () => void;
+  showTargetUser?: boolean;
 }
 
 export default function ActivityItem({
@@ -44,6 +43,7 @@ export default function ActivityItem({
   familyMembers = [],
   shouldOpen = false,
   onOpened,
+  showTargetUser = true,
 }: ActivityItemProps) {
   const [showModal, setShowModal] = useState(false);
 
@@ -109,6 +109,15 @@ export default function ActivityItem({
   // Check if current user can edit this activity
   const canEdit = item.createdBy === idUser || isOwnerOfGroup;
 
+  const getFormatTime = () => {
+    const date = new Date(item.startsAt);
+    return date.toLocaleTimeString("es", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
   const timeDescription = (() => {
     const startDateObj = new Date(item.startsAt);
     const endDateObj = item.endsAt ? new Date(item.endsAt) : null;
@@ -123,6 +132,7 @@ export default function ActivityItem({
     const startTime = startDateObj.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
+      hour12: true,
     });
 
     // Si la actividad no es de hoy (fecha actual), mostrar fecha completa de inicio
@@ -138,6 +148,7 @@ export default function ActivityItem({
     const endTime = endDateObj.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
+      hour12: true,
     });
 
     if (startDateLocal === endDateLocal) {
@@ -156,60 +167,88 @@ export default function ActivityItem({
   const hasDescription = item.description && item.description.trim().length > 0;
 
   return (
-    <Card style={[styles.card, isCompleted && styles.completedCard]}>
-      <List.Item
-        style={styles.listItem}
-        titleStyle={isCompleted && { textDecorationLine: "line-through" }}
-        title={item.title}
-        description={
-          <View>
-            <Text variant="bodySmall" style={styles.timeText}>
-              {timeDescription}
+    <>
+      <View
+        style={[styles.cardWrapper, isCompleted && styles.cardWrapperCompleted]}
+      >
+        <Pressable
+          style={({ pressed }) => [
+            styles.pressableArea,
+            pressed && {
+              transform: [{ scale: 0.98 }],
+            },
+          ]}
+          onPress={() => setShowModal(true)}
+        >
+          {/* Accent Border Left - Only show if completed */}
+          {isCompleted && <View style={styles.accentBorder} />}
+
+          {/* Checkbox Icon (Left) */}
+          <IconButton
+            icon={isCompleted ? "checkbox-marked" : "checkbox-blank-outline"}
+            iconColor={isCompleted ? COLORS.primary : COLORS.primary}
+            size={24}
+            onPress={(e) => {
+              e.stopPropagation();
+              onToggleComplete(item);
+            }}
+            style={styles.actionButtonLeft}
+          />
+
+          <View style={styles.contentContainer}>
+            <Text
+              style={[styles.title, isCompleted && styles.completedText]}
+              numberOfLines={1}
+            >
+              {item.title}
             </Text>
+            {hasDescription && (
+              <HighlightedMentionText
+                text={item.description || ""}
+                familyMembers={allGroupMembers}
+                style={styles.description}
+                numberOfLines={1}
+              />
+            )}
+
+            {/* Footer con información de hora y asignación */}
+            <View style={styles.assignedToContainer}>
+              <Text style={styles.assignedToText}>
+                {showTargetUser && activityAssignedTo
+                  ? `Para: ${activityAssignedTo}   ${getFormatTime()}`
+                  : getFormatTime()}
+              </Text>
+            </View>
           </View>
-        }
-        onPress={hasDescription ? () => setShowModal(true) : undefined}
-        background={undefined}
-        left={() => (
-          <View style={styles.checkboxContainer}>
-            <IconButton
-              icon={isCompleted ? "checkbox-marked" : "checkbox-blank-outline"}
-              iconColor={COLORS.primary}
-              size={24}
-              onPress={() => onToggleComplete(item)}
-              style={{ margin: 0 }}
-            />
-          </View>
-        )}
-        right={() => (
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
+
+          <View style={styles.actionsContainer}>
             {canEdit && (
               <>
                 <IconButton
                   icon="pencil-outline"
                   iconColor={COLORS.primary}
-                  size={22}
+                  size={20}
                   onPress={(e) => {
                     e.stopPropagation();
                     onEdit(item);
                   }}
-                  style={{ margin: 0 }}
+                  style={styles.actionButton}
                 />
                 <IconButton
                   icon="delete-outline"
                   iconColor={COLORS.primary}
-                  size={22}
+                  size={20}
                   onPress={(e) => {
                     e.stopPropagation();
                     onDelete(item.id);
                   }}
-                  style={{ margin: 0 }}
+                  style={styles.actionButton}
                 />
               </>
             )}
           </View>
-        )}
-      />
+        </Pressable>
+      </View>
 
       {/* Modal de detalle */}
       <Portal>
@@ -224,9 +263,10 @@ export default function ActivityItem({
           }}
         >
           <Animated.View style={{ opacity: fadeAnim }}>
-            <Dialog.Title style={{ fontWeight: "bold", color: COLORS.text }}>
-              {item.title}
-            </Dialog.Title>
+            <View style={styles.dialogHeader}>
+              <Text style={styles.dialogTitle}>{item.title}</Text>
+            </View>
+
             <Dialog.Content>
               {/* Fecha y hora */}
               <View style={styles.modalRow}>
@@ -242,7 +282,6 @@ export default function ActivityItem({
               </View>
 
               {/* Creador y Destinatario */}
-              {/* Si creador y destinatario son diferentes, mostrar ambos */}
               {item.createdBy !== item.assignedTo && activityOwner && (
                 <View style={styles.modalRow}>
                   <IconButton
@@ -257,7 +296,6 @@ export default function ActivityItem({
                 </View>
               )}
 
-              {/* Siempre mostrar el destinatario si existe */}
               {activityAssignedTo && (
                 <View style={styles.modalRow}>
                   <IconButton
@@ -332,43 +370,79 @@ export default function ActivityItem({
           </Animated.View>
         </Dialog>
       </Portal>
-    </Card>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    marginBottom: 10,
-    borderRadius: 16,
+  cardWrapper: {
+    ...SHADOWS.card,
     backgroundColor: COLORS.white,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    overflow: "hidden",
-    elevation: 0,
+    borderRadius: 16,
+    marginBottom: 12,
+    position: "relative",
+    overflow: "hidden", // Important for clipping the accent border
   },
-  completedCard: {
-    backgroundColor: COLORS.primary + "10",
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.primary,
-    shadowColor: "transparent",
-    shadowOpacity: 0,
-    elevation: 0,
+  cardWrapperCompleted: {
+    backgroundColor: "#F5F5F5",
   },
-  listItem: {
-    paddingVertical: 4,
-    paddingHorizontal: 8,
+  accentBorder: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 6,
+    backgroundColor: COLORS.primary,
   },
-  checkboxContainer: {
-    justifyContent: "center",
+  actionButtonLeft: {
+    margin: 0,
+    marginRight: 8, // Increased separation
+    marginLeft: 12, // More space from accent border
+  },
+  pressableArea: {
+    flexDirection: "row",
     alignItems: "center",
+    padding: 16,
+    paddingLeft: 12, // Adjusted padding because of manual elements
+    borderRadius: 16,
+    //overflow: "hidden", // Removing this from here, keeping on cardWrapper
   },
-  timeText: {
+
+  contentContainer: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: COLORS.primary,
+    marginBottom: 4,
+  },
+  completedText: {
+    textDecorationLine: "line-through",
+    color: COLORS.primary,
+    opacity: 0.9,
+  },
+  description: {
+    fontSize: 14,
     color: COLORS.textSecondary,
-    marginBottom: 2,
   },
-  ownerText: {
+  assignedToContainer: {
+    marginTop: 4,
+  },
+  assignedToText: {
+    fontSize: 11,
     color: COLORS.textLight,
     fontStyle: "italic",
+  },
+  actionsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 8,
+  },
+  actionButton: {
+    margin: 0,
   },
   modalRow: {
     flexDirection: "row",
@@ -378,5 +452,25 @@ const styles = StyleSheet.create({
   modalText: {
     flex: 1,
     color: COLORS.textSecondary,
+  },
+  dialogHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    paddingHorizontal: 24,
+    paddingTop: 24,
+  },
+  dialogTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: COLORS.text,
+    flex: 1,
+    marginRight: 8,
+  },
+  dialogActions: {
+    flexDirection: "row",
+    gap: 0,
+    marginTop: -8,
+    marginRight: -12,
   },
 });
