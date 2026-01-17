@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { View, StyleSheet, StatusBar, Platform, ImageBackground } from "react-native";
+import { View, StyleSheet, StatusBar, ImageBackground } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActivityIndicator, IconButton, Text } from "react-native-paper";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -10,6 +10,7 @@ import PagerView, {
 } from "react-native-pager-view";
 import { useGetAlbumId, AlbumWithPages } from "@elepad/api-client";
 import AlbumPageView from "@/components/shared/AlbumPageView";
+import fondoRecuerdos from "@/assets/images/fondoRecuerdos.png";
 
 export default function AlbumViewerScreen() {
   const params = useLocalSearchParams();
@@ -20,24 +21,25 @@ export default function AlbumViewerScreen() {
   const insets = useSafeAreaInsets();
 
   // Fetch album with pages
-  const { data: albumResponse, isLoading, error } = useGetAlbumId(
-    albumId,
-    {
-      query: {
-        enabled: !!albumId,
-      },
-    }
-  );
+  const {
+    data: albumResponse,
+    isLoading,
+    error,
+  } = useGetAlbumId(albumId, {
+    query: {
+      enabled: !!albumId,
+    },
+  });
 
   // Extract album data
   const album: AlbumWithPages | null = (() => {
     if (!albumResponse) return null;
-    
+
     // Handle wrapped response
-    if ('data' in albumResponse) {
-      return (albumResponse).data as AlbumWithPages;
+    if ("data" in albumResponse) {
+      return albumResponse.data as AlbumWithPages;
     }
-    
+
     return albumResponse as AlbumWithPages;
   })();
 
@@ -45,7 +47,6 @@ export default function AlbumViewerScreen() {
 
   // Lock orientation to landscape on mount
   useEffect(() => {
-
     const lockOrientation = async () => {
       try {
         await ScreenOrientation.lockAsync(
@@ -87,7 +88,7 @@ export default function AlbumViewerScreen() {
   if (isLoading) {
     return (
       <ImageBackground
-        source={require("@/assets/images/fondoRecuerdos.png")}
+        source={fondoRecuerdos}
         style={styles.loadingContainer}
         resizeMode="cover"
       >
@@ -102,15 +103,13 @@ export default function AlbumViewerScreen() {
   if (error || !album) {
     return (
       <ImageBackground
-        source={require("@/assets/images/fondoRecuerdos.png")}
+        source={fondoRecuerdos}
         style={styles.errorContainer}
         resizeMode="cover"
       >
         <Stack.Screen options={{ headerShown: false }} />
         <StatusBar hidden />
-        <Text style={styles.errorText}>
-          Error al cargar el álbum
-        </Text>
+        <Text style={styles.errorText}>Error al cargar el álbum</Text>
         <IconButton
           icon="close"
           size={32}
@@ -125,15 +124,13 @@ export default function AlbumViewerScreen() {
   if (pages.length === 0) {
     return (
       <ImageBackground
-        source={require("@/assets/images/fondoRecuerdos.png")}
+        source={fondoRecuerdos}
         style={styles.emptyContainer}
         resizeMode="cover"
       >
         <Stack.Screen options={{ headerShown: false }} />
         <StatusBar hidden />
-        <Text style={styles.emptyText}>
-          Este álbum aún no tiene páginas
-        </Text>
+        <Text style={styles.emptyText}>Este álbum aún no tiene páginas</Text>
         <IconButton
           icon="close"
           size={32}
@@ -147,7 +144,7 @@ export default function AlbumViewerScreen() {
 
   return (
     <ImageBackground
-      source={require("@/assets/images/fondoRecuerdos.png")}
+      source={fondoRecuerdos}
       style={styles.container}
       resizeMode="cover"
     >
@@ -209,10 +206,7 @@ export default function AlbumViewerScreen() {
           size={40}
           iconColor={COLORS.white}
           onPress={() => pagerRef.current?.setPage(currentPage - 1)}
-          style={[
-            styles.navButtonLeft,
-            { left: Math.max(insets.left, 4) },
-          ]}
+          style={[styles.navButtonLeft, { left: Math.max(insets.left, 4) }]}
         />
       )}
 
@@ -222,10 +216,7 @@ export default function AlbumViewerScreen() {
           size={40}
           iconColor={COLORS.white}
           onPress={() => pagerRef.current?.setPage(currentPage + 1)}
-          style={[
-            styles.navButtonRight,
-            { right: Math.max(insets.right, 4) },
-          ]}
+          style={[styles.navButtonRight, { right: Math.max(insets.right, 4) }]}
         />
       )}
     </ImageBackground>
