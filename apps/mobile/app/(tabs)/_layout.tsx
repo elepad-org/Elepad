@@ -250,7 +250,7 @@ export default function TabLayout() {
                       <Icon
                         source={route.unfocusedIcon}
                         size={24}
-                        color={COLORS.textLight}
+                        color={COLORS.textSecondary}
                       />
                     </Animated.View>
 
@@ -274,7 +274,7 @@ export default function TabLayout() {
                   variant="labelSmall"
                   style={{
                     marginTop: 4,
-                    color: isFocused ? COLORS.primary : COLORS.textLight,
+                    color: isFocused ? COLORS.primary : COLORS.textSecondary,
                     textAlign: "center",
                   }}
                   numberOfLines={1}

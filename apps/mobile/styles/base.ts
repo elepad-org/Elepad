@@ -26,8 +26,8 @@ export const LAYOUT = {
  */
 export const COLORS = {
   // Primary colors from palette
-  primary: "#5b507a", // Deep purple from palette
-  secondary: "#5b618a", // Medium purple-blue from palette
+  primary: "#6e7d90", // Deep purple from palette
+  secondary: "#424a70", // Medium purple-blue from palette
   border: "#E5E5EA", // Light gray
 
   // Backgrounds
@@ -40,9 +40,9 @@ export const COLORS = {
 
   // Text hierarchy - High contrast
   text: "#000000", // Black
-  textSecondary: "#5b507a", // Deep purple from palette
-  textLight: "#5b618a", // Medium purple-blue from palette
-  textPlaceholder: "#9eadc8", // Light blue from palette
+  textSecondary: "#5c697b", // Deep purple from palette
+  textLight: "#424a70", // Medium purple-blue from palette
+  textPlaceholder: "#6f7e93", // Light blue from palette
 
   // Danger/Error colors - use secondary from palette
   red: "#5b618a", // Use secondary color instead of red
