@@ -1,7 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=Lobster&display=swap");
 
 :root {
-  --primary: #9ca0cf;
+  --primary: ##9a9ece;
   --secondary: #424a70;
   --accent: #9eadc8;
   --background: #ffffff;
@@ -80,10 +80,11 @@ h3 {
   font-size: 1.8em;
 }
 
+
 button,
 .button {
   border: none;
-  border-radius: 12px;
+  border-radius: 0;
   padding: 0.75em 1.5em;
   font-size: 1em;
   font-weight: 600;
@@ -91,24 +92,23 @@ button,
   background-color: var(--primary);
   color: white;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background 0.2s, color 0.2s;
   display: inline-block;
+  box-shadow: none;
 }
 
 button:hover,
-.button:hover {
-  background-color: var(--secondary);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(132, 150, 176, 0.3);
+.button:hover,
+button:focus,
+.button:focus {
+  background-color: var(--accent);
+  color: var(--secondary);
 }
 
 button:active,
 .button:active {
-  transform: translateY(0);
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  background-color: var(--secondary);
+  color: white;
 }
 
 @media (prefers-color-scheme: light) {
