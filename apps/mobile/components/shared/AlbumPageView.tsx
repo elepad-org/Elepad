@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     paddingHorizontal: 70, // Espacio para los botones laterales
-    paddingVertical: 60, // Espacio para botones superior e inferior
+    paddingVertical: 40, // Espacio para botones superior e inferior
   },
   leftSide: {
     flex: 1,
@@ -84,8 +84,8 @@ const styles = StyleSheet.create({
   },
   rightSide: {
     flex: 1,
-    justifyContent: "center",
-    padding: 30,
+    //justifyContent: "center",
+    //padding: 30,
     position: "relative",
   },
   polaroidContainer: {
@@ -135,7 +135,8 @@ const styles = StyleSheet.create({
   },
   narrativeContainer: {
     flex: 1,
-    justifyContent: "center",
+    //justifyContent: "center",
+    minHeight: 320,
   },
   narrativeText: {
     fontSize: 20,
@@ -146,7 +147,7 @@ const styles = StyleSheet.create({
   },
   pageIndicator: {
     position: "absolute",
-    bottom: 20,
+    bottom: 10,
     right: 30,
   },
   pageIndicatorText: {
