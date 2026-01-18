@@ -494,6 +494,8 @@ export default function NotificationsScreen() {
           return "message-image";
         } else if (entityType === "activity") {
           return "message-badge";
+        } else if (entityType === "album") {
+          return "image-multiple";
         }
         return "at";
       case "activity_created":
@@ -502,7 +504,12 @@ export default function NotificationsScreen() {
         return "bell-ring";
       case "activity_assigned":
         return "account-arrow-right";
+      case "achievement":
+        return "book-open-variant";
       default:
+        if (entityType === "album") {
+          return "book-open-variant";
+        }
         return "bell";
     }
   };
