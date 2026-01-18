@@ -6,7 +6,7 @@ import { Animated, StyleSheet, View, ImageBackground } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator } from "react-native-paper";
 import { FONT } from "@/styles/base";
-import fondoLogin from "@/assets/images/fondoLogin.png";
+import fondoLogin from "@/assets/images/fondoLogin2.png";
 
 export default function SignupScreen() {
   const { session, loading } = useAuth();
