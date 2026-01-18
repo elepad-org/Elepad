@@ -6,6 +6,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { ActivityIndicator, Text, Button, Icon } from "react-native-paper";
+import { Image } from "react-native";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, STYLES, SHADOWS, LAYOUT } from "@/styles/base";
@@ -15,15 +16,24 @@ import HistoryScreen from "../history";
 interface GameCardProps {
   emoji?: string;
   iconName?: string;
+  imageName?: string;
   title: string;
   description: string;
   onPlay: () => void;
   onDetails: () => void;
 }
 
+const GAME_IMAGES: Record<string, any> = {
+  memory: require("@/assets/images/memory.png"),
+  logic: require("@/assets/images/net.png"),
+  sudoku: require("@/assets/images/sudoku.png"),
+  focus: require("@/assets/images/focus.png"),
+};
+
 function GameCard({
   emoji,
   iconName,
+  imageName,
   title,
   description,
   onPlay,
@@ -37,7 +47,12 @@ function GameCard({
     >
       <View style={styles.gameCardContent}>
         <View style={styles.gameIconContainer}>
-          {iconName ? (
+          {imageName ? (
+            <Image
+              source={GAME_IMAGES[imageName]}
+              style={{ width: 36, height: 36, resizeMode: "contain" }}
+            />
+          ) : iconName ? (
             <Icon source={iconName} size={32} color={COLORS.primary} />
           ) : (
             <Text style={styles.gameEmoji}>{emoji}</Text>
@@ -107,7 +122,7 @@ export default function JuegosScreen() {
           {/* Games List */}
           <View style={styles.gamesContainer}>
             <GameCard
-              emoji="🧠"
+              imageName="memory"
               title="Memoria"
               description="Encuentra parejas de cartas y entrena tu memoria"
               onPlay={() => router.push("/memory-game")}
@@ -115,7 +130,7 @@ export default function JuegosScreen() {
             />
 
             <GameCard
-              iconName="lan"
+              imageName="logic"
               title="NET"
               description="Conecta la red girando las piezas"
               onPlay={() => router.push("/net-game")}
@@ -123,7 +138,7 @@ export default function JuegosScreen() {
             />
 
             <GameCard
-              emoji="🔢"
+              imageName="sudoku"
               title="Sudoku"
               description="Completa el tablero con números del 1 al 9"
               onPlay={() => router.push("/sudoku-game")}
@@ -131,7 +146,7 @@ export default function JuegosScreen() {
             />
 
             <GameCard
-              emoji="🎯"
+              imageName="focus"
               title="Focus"
               description="Selecciona el color indicado por la palabra."
               onPlay={() => router.push("/focus-game")}

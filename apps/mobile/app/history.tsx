@@ -58,7 +58,7 @@ function AttemptItem({
   };
 
   const isSuccess = attempt?.success;
-  const statusColor = isSuccess ? COLORS.success : COLORS.error;
+  const statusColor = COLORS.secondary;
   const gameColor = gameColors[gameType] || COLORS.primary;
   const score = attempt?.score ?? "-";
 
@@ -101,7 +101,7 @@ function AttemptItem({
           </View>
         </View>
         <View style={styles.attemptRight}>
-          <Text style={[styles.attemptScore, { color: statusColor }]}>
+          <Text style={[styles.attemptScore, { color: statusColor }]}> 
             {score} pts
           </Text>
           <View style={styles.attemptMeta}>
