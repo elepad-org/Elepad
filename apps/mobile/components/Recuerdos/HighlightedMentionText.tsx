@@ -1,4 +1,4 @@
-import { Text as RNText} from "react-native";
+import { Text as RNText } from "react-native";
 import { COLORS } from "@/styles/base";
 
 interface FamilyMember {
@@ -15,16 +15,16 @@ interface HighlightedMentionTextProps {
   numberOfLines?: number;
 }
 
-export default function HighlightedMentionText({ 
-  text, 
+export default function HighlightedMentionText({
+  text,
   familyMembers = [],
   groupMembers = [],
   style = {},
-  numberOfLines
+  numberOfLines,
 }: HighlightedMentionTextProps) {
   // Use groupMembers if provided, otherwise fallback to familyMembers
   const members = groupMembers.length > 0 ? groupMembers : familyMembers;
-  
+
   if (!text) return null;
 
   // Detectar menciones en formato <@user_id> estilo Discord
@@ -40,13 +40,13 @@ export default function HighlightedMentionText({
     const userId = match[1];
     const member = members.find((m) => m.id === userId);
     const displayName = member?.displayName || "Usuario desconocido";
-    
+
     // Texto antes de la mención
     if (match.index > lastIndex) {
       parts.push(
         <RNText key={`text-${lastIndex}`}>
           {text.substring(lastIndex, match.index)}
-        </RNText>
+        </RNText>,
       );
     }
 
@@ -62,7 +62,7 @@ export default function HighlightedMentionText({
         }}
       >
         {" " + displayName + " "}
-      </RNText>
+      </RNText>,
     );
 
     lastIndex = match.index + match[0].length;
@@ -71,9 +71,7 @@ export default function HighlightedMentionText({
   // Texto después de la última mención
   if (lastIndex < text.length) {
     parts.push(
-      <RNText key={`text-${lastIndex}`}>
-        {text.substring(lastIndex)}
-      </RNText>
+      <RNText key={`text-${lastIndex}`}>{text.substring(lastIndex)}</RNText>,
     );
   }
 

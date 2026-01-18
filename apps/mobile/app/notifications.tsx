@@ -494,8 +494,6 @@ export default function NotificationsScreen() {
           return "message-image";
         } else if (entityType === "activity") {
           return "message-badge";
-        } else if (entityType === "album") {
-          return "image-multiple";
         }
         return "at";
       case "activity_created":
@@ -517,13 +515,8 @@ export default function NotificationsScreen() {
   const renderNotification = useCallback(
     ({ item, index }: { item: GetNotifications200Item; index: number }) => {
       // Para menciones, detectar si el título o body contiene formato <@id>
-      const hasMention =
-        (item.title && /<@([^>]+)>/.test(item.title)) ||
-        (item.body && /<@([^>]+)>/.test(item.body));
-      const isMention =
-        item.event_type === "mention" ||
-        item.event_type === "activity_assigned" ||
-        hasMention;
+      // const hasMention = ... (removed)
+      // const isMention = ... (removed)
 
       return (
         <Reanimated.View entering={ZoomIn.delay(index * 50).springify()}>
@@ -547,47 +540,24 @@ export default function NotificationsScreen() {
             </View>
 
             <View style={styles.notificationContent}>
-              {isMention ? (
-                <HighlightedMentionText
-                  text={item.title || ""}
-                  groupMembers={groupMembers}
-                  style={
-                    item.read
-                      ? styles.notificationTitle
-                      : {
-                          fontSize: 14,
-                          color: COLORS.primary,
-                          fontWeight: "700" as const,
-                        }
-                  }
-                  numberOfLines={2}
-                />
-              ) : (
-                <Text
-                  style={[
-                    styles.notificationTitle,
-                    !item.read && styles.unreadTitle,
-                  ]}
-                  numberOfLines={2}
-                >
-                  {item.title}
-                </Text>
-              )}
+              <HighlightedMentionText
+                text={item.title || ""}
+                groupMembers={groupMembers}
+                style={[
+                  styles.notificationTitle,
+                  !item.read && styles.unreadTitle,
+                ]}
+                numberOfLines={2}
+              />
               {item.body &&
               typeof item.body === "string" &&
               item.body.trim() !== "" ? (
-                isMention ? (
-                  <HighlightedMentionText
-                    text={item.body}
-                    groupMembers={groupMembers}
-                    style={styles.notificationBody}
-                    numberOfLines={2}
-                  />
-                ) : (
-                  <Text style={styles.notificationBody} numberOfLines={2}>
-                    {item.body}
-                  </Text>
-                )
+                <HighlightedMentionText
+                  text={item.body}
+                  groupMembers={groupMembers}
+                  style={styles.notificationBody}
+                  numberOfLines={2}
+                />
               ) : null}
               <Text style={styles.notificationDate}>
                 {formatDate(item.created_at)}
