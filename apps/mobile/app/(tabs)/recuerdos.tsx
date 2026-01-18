@@ -70,7 +70,7 @@ interface RecuerdoData {
 // Función auxiliar para convertir Memory a Recuerdo para compatibilidad con componentes existentes
 const memoryToRecuerdo = (
   memory: Memory,
-  memberNameById: Record<string, string>
+  memberNameById: Record<string, string>,
 ): Recuerdo => {
   let tipo: RecuerdoTipo = "texto";
 
@@ -191,7 +191,7 @@ export default function RecuerdosScreen() {
   const [dialogVisible, setDialogVisible] = useState(false);
   const [detailDialogVisible, setDetailDialogVisible] = useState(false);
   const [selectedRecuerdo, setSelectedRecuerdo] = useState<Recuerdo | null>(
-    null
+    null,
   );
   const [selectedBook, setSelectedBook] = useState<MemoriesBook | null>(null);
   const [editingBook, setEditingBook] = useState<MemoriesBook | null>(null);
@@ -213,7 +213,7 @@ export default function RecuerdosScreen() {
 
   const [bookDialogVisible, setBookDialogVisible] = useState(false);
   const [bookDialogMode, setBookDialogMode] = useState<"create" | "edit">(
-    "create"
+    "create",
   );
   const [bookFormTitle, setBookFormTitle] = useState("");
   const [bookFormDescription, setBookFormDescription] = useState("");
@@ -243,7 +243,7 @@ export default function RecuerdosScreen() {
       query: {
         enabled: !!groupId,
       },
-    }
+    },
   );
 
   // Hook del API client
@@ -262,7 +262,7 @@ export default function RecuerdosScreen() {
       query: {
         enabled: !!groupId && !!selectedBook,
       },
-    }
+    },
   );
 
   const createBookMutation = useMutation({
@@ -285,7 +285,7 @@ export default function RecuerdosScreen() {
       setSnackbarMessage(
         `Error al crear el baúl: ${
           error instanceof Error ? error.message : "Error desconocido"
-        }`
+        }`,
       );
       setSnackbarError(true);
       setSnackbarVisible(true);
@@ -307,7 +307,7 @@ export default function RecuerdosScreen() {
       setSnackbarMessage(
         `Error al actualizar el baúl: ${
           error instanceof Error ? error.message : "Error desconocido"
-        }`
+        }`,
       );
       setSnackbarError(true);
       setSnackbarVisible(true);
@@ -329,7 +329,7 @@ export default function RecuerdosScreen() {
       setSnackbarMessage(
         `Error al eliminar el baúl: ${
           error instanceof Error ? error.message : "Error desconocido"
-        }`
+        }`,
       );
       setSnackbarError(true);
       setSnackbarVisible(true);
@@ -364,7 +364,7 @@ export default function RecuerdosScreen() {
       setSnackbarMessage(
         `Error al actualizar el recuerdo: ${
           error instanceof Error ? error.message : "Error desconocido"
-        }`
+        }`,
       );
       setSnackbarError(true);
       setSnackbarVisible(true);
@@ -389,7 +389,7 @@ export default function RecuerdosScreen() {
       setSnackbarMessage(
         `Error al eliminar el recuerdo: ${
           error instanceof Error ? error.message : "Error desconocido"
-        }`
+        }`,
       );
       setSnackbarError(true);
       setSnackbarVisible(true);
@@ -453,7 +453,7 @@ export default function RecuerdosScreen() {
       setSnackbarMessage(
         `Error al subir el recuerdo: ${
           error instanceof Error ? error.message : "Error desconocido"
-        }`
+        }`,
       );
       setSnackbarError(true);
       setSnackbarVisible(true);
@@ -507,7 +507,7 @@ export default function RecuerdosScreen() {
       setSnackbarMessage(
         `Error al crear la nota: ${
           error instanceof Error ? error.message : "Error desconocido"
-        }`
+        }`,
       );
       setSnackbarError(true);
       setSnackbarVisible(true);
@@ -662,7 +662,7 @@ export default function RecuerdosScreen() {
           return true; // Prevent default behavior
         }
         return false; // Let default behavior happen
-      }
+      },
     );
 
     return () => backHandler.remove();
@@ -817,7 +817,7 @@ export default function RecuerdosScreen() {
       setSnackbarMessage(
         `Error al preparar el archivo: ${
           error instanceof Error ? error.message : "Error desconocido"
-        }`
+        }`,
       );
       setSnackbarError(true);
       setSnackbarVisible(true);
@@ -1075,7 +1075,13 @@ export default function RecuerdosScreen() {
             borderBottomColor: COLORS.border,
           }}
         >
-          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
             <Text style={STYLES.superHeading}>Recuerdos</Text>
             <Button
               mode="contained"
@@ -1087,13 +1093,17 @@ export default function RecuerdosScreen() {
               icon="plus"
               disabled={!groupId}
             >
-              Agregar 
+              Agregar
             </Button>
           </View>
           <Button
             mode="outlined"
             onPress={() => router.push("../albums")}
-            style={{ borderRadius: 12, borderColor: COLORS.primary, marginTop: 24 }}
+            style={{
+              borderRadius: 12,
+              borderColor: COLORS.primary,
+              marginTop: 24,
+            }}
             icon="book-multiple"
             textColor={COLORS.primary}
             disabled={!groupId}
@@ -1604,7 +1614,7 @@ export default function RecuerdosScreen() {
           key={`grid-${numColumns}-${isFocused}`}
           data={recuerdos}
           renderItem={({ item, index }) => (
-            <Animated.View entering={ZoomIn.delay(index * 50).duration(200)}>
+            <Animated.View entering={ZoomIn.delay(index * 25).springify()}>
               <RecuerdoItemComponent
                 item={item}
                 numColumns={numColumns}

@@ -61,7 +61,7 @@ export default function HomeScreen() {
       query: {
         enabled: !!userElepad?.groupId,
       },
-    }
+    },
   );
 
   // Fetch recent attempts
@@ -71,7 +71,7 @@ export default function HomeScreen() {
       query: {
         enabled: !!userElepad,
       },
-    }
+    },
   );
 
   // Fetch recent memories
@@ -81,7 +81,7 @@ export default function HomeScreen() {
       query: {
         enabled: !!userElepad?.groupId,
       },
-    }
+    },
   );
 
   // Fetch family members
@@ -91,7 +91,7 @@ export default function HomeScreen() {
       query: {
         enabled: !!userElepad?.groupId,
       },
-    }
+    },
   );
 
   const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
@@ -151,7 +151,7 @@ export default function HomeScreen() {
       .filter((activity: Activity) => new Date(activity.startsAt) >= now)
       .sort(
         (a: Activity, b: Activity) =>
-          new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime()
+          new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime(),
       )
       .slice(0, 3);
   }, [activitiesQuery.data]);
@@ -346,7 +346,7 @@ export default function HomeScreen() {
                             day: "numeric",
                             month: "long",
                             year: "numeric",
-                          }
+                          },
                         )}
                       </Text>
                     </View>
@@ -444,7 +444,7 @@ export default function HomeScreen() {
                     title: string;
                     description?: string;
                   },
-                  index
+                  index,
                 ) => {
                   const activityDate = new Date(activity.startsAt);
                   const isToday =
@@ -492,7 +492,7 @@ export default function HomeScreen() {
                       </View>
                     </Animated.View>
                   );
-                }
+                },
               )}
             </View>
           ) : (
@@ -666,7 +666,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 6,
     right: 6,
-    backgroundColor: COLORS.error,
+    backgroundColor: COLORS.primary,
     borderRadius: 10,
     minWidth: 20,
     height: 20,
