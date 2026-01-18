@@ -29,7 +29,7 @@ import React, {
   useRef,
   useEffect,
 } from "react";
-import Reanimated, { FadeInRight } from "react-native-reanimated";
+import Reanimated, { ZoomIn } from "react-native-reanimated";
 import {
   View,
   FlatList,
@@ -519,7 +519,7 @@ export default function NotificationsScreen() {
         hasMention;
 
       return (
-        <Reanimated.View entering={FadeInRight.delay(index * 50).springify()}>
+        <Reanimated.View entering={ZoomIn.delay(index * 50).springify()}>
           <Pressable
             style={({ pressed }) => [
               styles.notificationCard,
