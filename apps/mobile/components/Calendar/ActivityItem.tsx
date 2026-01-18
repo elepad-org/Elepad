@@ -168,87 +168,85 @@ export default function ActivityItem({
 
   return (
     <>
-      <View
-        style={[styles.cardWrapper, isCompleted && styles.cardWrapperCompleted]}
+      <Pressable
+        style={({ pressed }) => [
+          styles.cardWrapper,
+          isCompleted && styles.cardWrapperCompleted,
+          styles.pressableArea,
+          pressed && {
+            transform: [{ scale: 0.98 }],
+          },
+        ]}
+        onPress={() => setShowModal(true)}
       >
-        <Pressable
-          style={({ pressed }) => [
-            styles.pressableArea,
-            pressed && {
-              transform: [{ scale: 0.98 }],
-            },
-          ]}
-          onPress={() => setShowModal(true)}
-        >
-          {/* Accent Border Left - Only show if completed */}
-          {isCompleted && <View style={styles.accentBorder} />}
+        {/* Accent Border Left - Only show if completed */}
+        {isCompleted && <View style={styles.accentBorder} />}
 
-          {/* Checkbox Icon (Left) */}
-          <IconButton
-            icon={isCompleted ? "checkbox-marked" : "checkbox-blank-outline"}
-            iconColor={isCompleted ? COLORS.primary : COLORS.primary}
-            size={24}
-            onPress={(e) => {
-              e.stopPropagation();
-              onToggleComplete(item);
-            }}
-            style={styles.actionButtonLeft}
-          />
+        {/* Checkbox Icon (Left) */}
+        <IconButton
+          icon={isCompleted ? "checkbox-marked" : "checkbox-blank-outline"}
+          iconColor={isCompleted ? COLORS.primary : COLORS.primary}
+          size={24}
+          onPress={(e) => {
+            e.stopPropagation();
+            onToggleComplete(item);
+          }}
+          style={styles.actionButtonLeft}
+        />
 
-          <View style={styles.contentContainer}>
-            <Text
-              style={[styles.title, isCompleted && styles.completedText]}
+        <View style={styles.contentContainer}>
+          <Text
+            style={[styles.title, isCompleted && styles.completedText]}
+            numberOfLines={1}
+          >
+            {item.title}
+          </Text>
+          {hasDescription && (
+            <HighlightedMentionText
+              text={item.description || ""}
+              familyMembers={allGroupMembers}
+              style={styles.description}
               numberOfLines={1}
-            >
-              {item.title}
+            />
+          )}
+
+          {/* Footer con información de hora y asignación */}
+          <View style={styles.assignedToContainer}>
+            <Text style={styles.assignedToText}>
+              {showTargetUser && activityAssignedTo
+                ? `Para: ${activityAssignedTo}   ${getFormatTime()}`
+                : getFormatTime()}
             </Text>
-            {hasDescription && (
-              <HighlightedMentionText
-                text={item.description || ""}
-                familyMembers={allGroupMembers}
-                style={styles.description}
-                numberOfLines={1}
+          </View>
+        </View>
+
+        <View style={styles.actionsContainer}>
+          {canEdit && (
+            <>
+              <IconButton
+                icon="pencil-outline"
+                iconColor={COLORS.primary}
+                size={20}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  onEdit(item);
+                }}
+                style={styles.actionButton}
               />
-            )}
-
-            {/* Footer con información de hora y asignación */}
-            <View style={styles.assignedToContainer}>
-              <Text style={styles.assignedToText}>
-                {showTargetUser && activityAssignedTo
-                  ? `Para: ${activityAssignedTo}   ${getFormatTime()}`
-                  : getFormatTime()}
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.actionsContainer}>
-            {canEdit && (
-              <>
-                <IconButton
-                  icon="pencil-outline"
-                  iconColor={COLORS.primary}
-                  size={20}
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    onEdit(item);
-                  }}
-                  style={styles.actionButton}
-                />
-                <IconButton
-                  icon="delete-outline"
-                  iconColor={COLORS.primary}
-                  size={20}
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    onDelete(item.id);
-                  }}
-                  style={styles.actionButton}
-                />
-              </>
-            )}
-          </View>
-        </Pressable>
-      </View>
+              <IconButton
+                icon="delete-outline"
+                iconColor={COLORS.primary}
+                size={20}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  onDelete(item.id);
+                }}
+                style={styles.actionButton}
+              />
+            </>
+          )}
+        </View>
+      </Pressable>
 
       {/* Modal de detalle */}
       <Portal>
