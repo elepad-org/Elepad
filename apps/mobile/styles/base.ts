@@ -26,7 +26,7 @@ export const LAYOUT = {
  */
 export const COLORS = {
   // Primary colors from palette
-  primary: "#8896b0", // Deep purple from palette
+  primary: "#9a9ece", // Deep purple from palette
   secondary: "#424a70", // Medium purple-blue from palette
   border: "#E5E5EA", // Light gray
 
@@ -40,7 +40,7 @@ export const COLORS = {
 
   // Text hierarchy - High contrast
   text: "#000000", // Black
-  textSecondary: "#5c697b", // Deep purple from palette
+  textSecondary: "#7374a7", // Deep purple from palette
   textLight: "#424a70", // Medium purple-blue from palette
   textPlaceholder: "#6f7e93", // Light blue from palette
 
@@ -213,11 +213,12 @@ export const STYLES = StyleSheet.create({
   },
   logoWrapWithMargin: {
     alignItems: "center",
-    marginTop: 70,
+    marginTop: 95,
   },
   logo: {
-    width: 255,
-    height: 255,
+    width: 200,
+    height: 200,
+    marginBottom: 10,
   },
   brand: {
     marginTop: -15,
