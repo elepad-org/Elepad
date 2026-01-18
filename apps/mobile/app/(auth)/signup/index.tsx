@@ -29,7 +29,7 @@ export default function SignupScreen() {
       source={fondoLogin}
       style={[styles.container, { backgroundColor: "#FFFFFF" }]}
       resizeMode="cover"
-      imageStyle={{ opacity: 0.55 }}
+      imageStyle={{ opacity: 0.60 }}
     >
       <StatusBar style="light" translucent />
 
