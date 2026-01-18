@@ -12,6 +12,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, STYLES, SHADOWS, LAYOUT } from "@/styles/base";
 import { router } from "expo-router";
 import HistoryScreen from "../history";
+import type { ImageSourcePropType } from "react-native";
+import memoryImage from "@/assets/images/memory.png";
+import netImage from "@/assets/images/net.png";
+import sudokuImage from "@/assets/images/sudoku.png";
+import focusImage from "@/assets/images/focus.png";
 
 interface GameCardProps {
   emoji?: string;
@@ -23,11 +28,11 @@ interface GameCardProps {
   onDetails: () => void;
 }
 
-const GAME_IMAGES: Record<string, any> = {
-  memory: require("@/assets/images/memory.png"),
-  logic: require("@/assets/images/net.png"),
-  sudoku: require("@/assets/images/sudoku.png"),
-  focus: require("@/assets/images/focus.png"),
+const GAME_IMAGES: Record<string, ImageSourcePropType> = {
+  memory: memoryImage,
+  logic: netImage,
+  sudoku: sudokuImage,
+  focus: focusImage,
 };
 
 function GameCard({

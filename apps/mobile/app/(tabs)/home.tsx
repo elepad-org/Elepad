@@ -35,12 +35,17 @@ import StreakCounter from "@/components/StreakCounter";
 import HighlightedMentionText from "@/components/Recuerdos/HighlightedMentionText";
 import { useNotifications } from "@/hooks/useNotifications";
 import { GAMES_INFO } from "@/constants/gamesInfo";
+import type { ImageSourcePropType } from "react-native";
+import memoryImage from "@/assets/images/memory.png";
+import netImage from "@/assets/images/net.png";
+import sudokuImage from "@/assets/images/sudoku.png";
+import focusImage from "@/assets/images/focus.png";
 
-const GAME_IMAGES: Record<string, any> = {
-  memory: require("@/assets/images/memory.png"),
-  logic: require("@/assets/images/net.png"),
-  sudoku: require("@/assets/images/sudoku.png"),
-  focus: require("@/assets/images/focus.png"),
+const GAME_IMAGES: Record<string, ImageSourcePropType> = {
+  memory: memoryImage,
+  logic: netImage,
+  sudoku: sudokuImage,
+  focus: focusImage,
 };
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -506,7 +511,7 @@ export default function HomeScreen() {
               </View>
             ) : (
               <View style={[styles.emptySection, { marginTop: 0 }]}> {/* Unifica separación */}
-                <Text style={styles.emptyText}>No hay eventos próximos</Text>
+                <Text style={styles.emptyText}> No hay eventos próximos </Text>
                 <Button
                   mode="outlined"
                   onPress={() => {

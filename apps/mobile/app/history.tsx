@@ -57,7 +57,6 @@ function AttemptItem({
     "Focus": "#66BB6A", // Verde
   };
 
-  const isSuccess = attempt?.success;
   const statusColor = COLORS.secondary;
   const gameColor = gameColors[gameType] || COLORS.primary;
   const score = attempt?.score ?? "-";
