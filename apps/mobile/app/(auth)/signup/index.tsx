@@ -6,7 +6,7 @@ import { Animated, StyleSheet, View, ImageBackground } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator } from "react-native-paper";
 import { FONT } from "@/styles/base";
-import fondoLogin from "@/assets/images/fondoLogin2.png";
+import fondoLogin from "@/assets/images/pirotecnia.png";
 
 export default function SignupScreen() {
   const { session, loading } = useAuth();
@@ -29,7 +29,7 @@ export default function SignupScreen() {
       source={fondoLogin}
       style={[styles.container, { backgroundColor: "#FFFFFF" }]}
       resizeMode="cover"
-      imageStyle={{ opacity: 0.3 }}
+      imageStyle={{ opacity: 0.55 }}
     >
       <StatusBar style="light" translucent />
 

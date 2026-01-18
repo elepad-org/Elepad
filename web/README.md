@@ -1,73 +1,56 @@
-# React + TypeScript + Vite
+# Elepad - Landing Page
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Landing page minimalista para la aplicación Elepad.
 
-Currently, two official plugins are available:
+## 🚀 Tecnologías
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Vite** - Build tool
+- **React 18** - UI library
+- **TypeScript** - Type safety
+- **CSS Modules** - Styling
 
-## React Compiler
+## 🎨 Diseño
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+La landing page sigue la estética minimalista de la app mobile con:
 
-## Expanding the ESLint configuration
+- Colores principales: `#8896b0` (primary), `#424a70` (secondary)
+- Fuente: Montserrat
+- Diseño responsive y accesible
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 📦 Desarrollo
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+```bash
+# Instalar dependencias
+npm install
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+# Ejecutar servidor de desarrollo
+npm run dev
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Build para producción
+npm run build
+
+# Preview del build
+npm run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🌐 Despliegue
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+El proyecto está listo para ser desplegado en plataformas como:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- **Vercel** - `vercel --prod`
+- **Netlify** - Drag & drop de la carpeta `dist/`
+- **GitHub Pages** - Configurar en settings del repo
+
+## 📄 Secciones
+
+- **Hero** - Presentación principal
+- **Características** - Features principales de la app
+- **Quiénes somos** - Información del proyecto
+- **Contacto** - Formulario y redes sociales
+
+## 🎯 SEO
+
+- Meta tags configurados
+- Open Graph para redes sociales
+- Semántica HTML correcta
+- Performance optimizado

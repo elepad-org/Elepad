@@ -26,7 +26,7 @@ export const LAYOUT = {
  */
 export const COLORS = {
   // Primary colors from palette
-  primary: "#8896b0", // Deep purple from palette
+  primary: "#9ca0cf", // Deep purple from palette
   secondary: "#424a70", // Medium purple-blue from palette
   border: "#E5E5EA", // Light gray
 
