@@ -6,10 +6,9 @@ import {
   StyleSheet,
   FlatList,
   Dimensions,
+  Modal,
 } from "react-native";
 import {
-  Portal,
-  Dialog,
   TextInput,
   Button,
   Text,
@@ -151,78 +150,76 @@ export default function CreateAlbumDialog({
   };
 
   return (
-    <>
-      <Portal>
-        <Dialog
-          visible={visible}
-          onDismiss={handleDismiss}
-          style={{
-            backgroundColor: COLORS.background,
-            width: "92%",
-            alignSelf: "center",
-            borderRadius: 16,
-            maxHeight: "85%",
-          }}
-        >
-          <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
+    <Modal
+      visible={visible}
+      animationType="fade"
+      transparent={true}
+      onRequestClose={handleDismiss}
+    >
+      <View style={styles.container}>
+        <TouchableOpacity
+          style={styles.backdrop}
+          activeOpacity={1}
+          onPress={handleDismiss}
+        />
+        <View style={step === "form" ? styles.formContainer : styles.imagesContainer}>
+          <Text style={styles.title}>
             {step === "form"
               ? "Crear Nuevo Álbum"
               : step === "select"
                 ? "Seleccionar Fotos"
                 : "Ordenar Fotos"}
-          </Dialog.Title>
+          </Text>
+          <Text style={styles.subtitle}>
+            {step === "form"
+              ? "Ingresa los datos del álbum"
+              : step === "select"
+                ? `${selectedMemories.length} foto(s) seleccionada(s)`
+                : "Mantén presionado y arrastra para reordenar"}
+          </Text>
 
-          <Dialog.Content style={{ minHeight: 300, maxHeight: 500 }}>
+          <View style={step==="form" ? styles.contentFormContainer :  styles.contentImagesContainer}>
             {step === "form" && (
-              <View>
+              <View style={{ width: "100%" }}>
                 <TextInput
-                  label="Título del álbum"
+                  mode="outlined"
+                  placeholder="Título"
                   value={title}
                   onChangeText={setTitle}
-                  mode="outlined"
-                  maxLength={200}
-                  outlineColor={COLORS.border}
-                  activeOutlineColor={COLORS.primary}
-                  style={{ marginBottom: 12 }}
+                  keyboardType="default"
+                  autoCapitalize="sentences"
+                  returnKeyType="next"
+                  style={styles.input}
+                  outlineStyle={styles.inputOutline}
+                  outlineColor="rgba(203, 203, 203, 0.92)"
+                  activeOutlineColor={COLORS.textLight}
+                  textColor={COLORS.text}
+                  placeholderTextColor={COLORS.textSecondary}
+                  dense
                 />
+
                 <TextInput
-                  label="Descripción"
+                  mode="outlined"
+                  placeholder="Descripción"
                   value={description}
                   onChangeText={setDescription}
-                  mode="outlined"
-                  multiline
-                  numberOfLines={3}
-                  maxLength={1000}
-                  outlineColor={COLORS.border}
-                  activeOutlineColor={COLORS.primary}
-                  style={{ marginBottom: 12 }}
+                  keyboardType="default"
+                  autoCapitalize="sentences"
+                  returnKeyType="done"
+                  style={styles.input}
+                  outlineStyle={styles.inputOutline}
+                  outlineColor="rgba(203, 203, 203, 0.92)"
+                  activeOutlineColor={COLORS.textLight}
+                  textColor={COLORS.text}
+                  placeholderTextColor={COLORS.textSecondary}
+                  dense
                 />
-                <Text
-                  style={{
-                    ...STYLES.subheading,
-                    textAlign: "left",
-                    marginTop: 8,
-                  }}
-                >
-                  Selecciona fotos para crear un álbum con narrativas generadas
-                  por IA
-                </Text>
+               
               </View>
             )}
 
             {step === "select" && (
-              <View style={{ flex: 1 }}>
-                <View style={{ marginBottom: 12 }}>
-                  <Text
-                    style={{
-                      ...STYLES.subheading,
-                      textAlign: "left",
-                      marginTop: 0,
-                    }}
-                  >
-                    {selectedMemories.length} foto(s) seleccionada(s)
-                  </Text>
-                </View>
+              <View style={{ flex: 1, width: "100%" }}>
                 <FlatList
                   data={imageMemories}
                   keyExtractor={(item) => item.id}
@@ -237,8 +234,9 @@ export default function CreateAlbumDialog({
                     const isSelected = selectedMemories.some(
                       (m) => m.id === item.id
                     );
-                    const dialogWidth = Dimensions.get("window").width * 0.92;
-                    const itemSize = (dialogWidth - 48 - 16) / 3;
+                    const containerWidth =
+                      Dimensions.get("window").width * 0.88 - 56;
+                    const itemSize = (containerWidth - 16) / 3;
 
                     return (
                       <TouchableOpacity
@@ -302,6 +300,7 @@ export default function CreateAlbumDialog({
                         justifyContent: "center",
                         alignItems: "center",
                         paddingVertical: 40,
+                        width: "100%",
                       }}
                     >
                       <Text
@@ -320,16 +319,7 @@ export default function CreateAlbumDialog({
             )}
 
             {step === "reorder" && (
-              <GestureHandlerRootView style={{ flex: 1 }}>
-                <Text
-                  style={{
-                    ...STYLES.subheading,
-                    textAlign: "center",
-                    marginBottom: 12,
-                  }}
-                >
-                  Mantén presionado y arrastra para reordenar
-                </Text>
+              <GestureHandlerRootView style={{ flex: 1, width: "100%" }}>
                 <DraggableFlatList
                   data={selectedMemories}
                   onDragEnd={({ data }) => {
@@ -345,125 +335,188 @@ export default function CreateAlbumDialog({
                 />
               </GestureHandlerRootView>
             )}
-          </Dialog.Content>
+          </View>
 
-          <Dialog.Actions
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              paddingHorizontal: 20,
-              paddingBottom: 12,
-              gap: 8,
-            }}
-          >
+          <View style={styles.buttonContainer}>
             {step === "form" && (
-              <View style={{ flex: 1 }}>
-                <CancelButton onPress={handleDismiss} disabled={isCreating} />
-              </View>
-            )}
-            {step === "form" && (
-              <View style={{ flex: 1 }}>
-                <Button
-                  mode="contained"
-                  onPress={() => setStep("select")}
-                  disabled={!title.trim() || isCreating}
-                  buttonColor={COLORS.primary}
-                  textColor={COLORS.white}
-                  style={{ borderRadius: 12 }}
-                >
-                  Siguiente
-                </Button>
-              </View>
+              <>
+                <View style={{ flex: 1 }}>
+                  <CancelButton onPress={handleDismiss} disabled={isCreating} />
+                </View>
+                <View style={{ flex: 1, marginLeft: 8 }}>
+                  <Button
+                    mode="contained"
+                    onPress={() => setStep("select")}
+                    disabled={!title.trim() || isCreating}
+                    buttonColor={COLORS.primary}
+                    textColor={COLORS.white}
+                    style={{ borderRadius: 12 }}
+                  >
+                    Siguiente
+                  </Button>
+                </View>
+              </>
             )}
 
             {step === "select" && (
-              <View style={{ flex: 1 }}>
-                <Button
-                  mode="outlined"
-                  onPress={() => setStep("form")}
-                  disabled={isCreating}
-                  style={{ borderRadius: 12, borderColor: COLORS.border }}
-                  textColor={COLORS.primary}
-                >
-                  Atrás
-                </Button>
-              </View>
-            )}
-            {step === "select" && (
-              <View style={{ flex: 1 }}>
-                <Button
-                  mode="contained"
-                  onPress={() => setStep("reorder")}
-                  disabled={selectedMemories.length === 0 || isCreating}
-                  buttonColor={COLORS.primary}
-                  textColor={COLORS.white}
-                  style={{ borderRadius: 12 }}
-                >
-                  Siguiente
-                </Button>
-              </View>
+              <>
+                <View style={{ flex: 1 }}>
+                  <Button
+                    mode="outlined"
+                    onPress={() => setStep("form")}
+                    disabled={isCreating}
+                    style={{ borderRadius: 12, borderColor: COLORS.border }}
+                    textColor={COLORS.primary}
+                  >
+                    Atrás
+                  </Button>
+                </View>
+                <View style={{ flex: 1, marginLeft: 8 }}>
+                  <Button
+                    mode="contained"
+                    onPress={() => setStep("reorder")}
+                    disabled={selectedMemories.length === 0 || isCreating}
+                    buttonColor={COLORS.primary}
+                    textColor={COLORS.white}
+                    style={{ borderRadius: 12 }}
+                  >
+                    Siguiente
+                  </Button>
+                </View>
+              </>
             )}
 
             {step === "reorder" && (
-              <View style={{ flex: 1 }}>
-                <Button
-                  mode="outlined"
-                  onPress={() => setStep("select")}
-                  disabled={isCreating}
-                  style={{ borderRadius: 12, borderColor: COLORS.border }}
-                  textColor={COLORS.primary}
-                >
-                  Atrás
-                </Button>
-              </View>
+              <>
+                <View style={{ flex: 1 }}>
+                  <Button
+                    mode="outlined"
+                    onPress={() => setStep("select")}
+                    disabled={isCreating}
+                    style={{ borderRadius: 12, borderColor: COLORS.border }}
+                    textColor={COLORS.primary}
+                  >
+                    Atrás
+                  </Button>
+                </View>
+                <View style={{ flex: 1, marginLeft: 8 }}>
+                  <SaveButton
+                    onPress={handleCreateAlbum}
+                    text="Crear"
+                    disabled={isCreating}
+                    loading={isCreating}
+                  />
+                </View>
+              </>
             )}
-            {step === "reorder" && (
-              <View style={{ flex: 1 }}>
+          </View>
+        </View>
+
+        {/* Modal de procesamiento de álbum */}
+        <Modal
+          visible={!!processingAlbumTitle}
+          animationType="fade"
+          transparent={true}
+          onRequestClose={() => {}}
+        >
+          <View style={styles.container}>
+            <TouchableOpacity
+              style={styles.backdrop}
+              activeOpacity={1}
+              disabled={true}
+            />
+            <View style={[styles.formContainer, { maxHeight: "50%" }]}>
+              <Text style={styles.processingTitle}>Creando Álbum</Text>
+
+              <Text style={styles.processingDescription}>
+                Estamos generando tu álbum {processingAlbumTitle}.
+              </Text>
+              <Text style={styles.processingDescription}>
+                Te enviaremos una notificación cuando esté listo.
+              </Text>
+
+              <View style={{ marginTop: 24, width: "100%" }}>
                 <SaveButton
-                  onPress={handleCreateAlbum}
-                  text="Crear"
-                  disabled={isCreating}
-                  loading={isCreating}
+                  onPress={() => {
+                    dismissProcessingDialog();
+                    handleDismiss();
+                  }}
+                  text="Aceptar"
                 />
               </View>
-            )}
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
-
-      {/* Modal de procesamiento de álbum */}
-      <Portal>
-        <Dialog
-          visible={!!processingAlbumTitle}
-          dismissable={false}
-          style={styles.processingDialog}
-        >
-          <Dialog.Content style={styles.processingContent}>
-            <Text style={styles.processingTitle}>Creando Álbum</Text>
-
-            <Text style={styles.processingDescription}>
-              Estamos generando tu álbum {processingAlbumTitle}.
-            </Text>
-            <Text style={styles.processingDescription}>
-              Te enviaremos una notificación cuando esté listo.
-            </Text>
-          </Dialog.Content>
-          <Dialog.Actions>
-            <SaveButton
-              onPress={() => {
-                dismissProcessingDialog();
-                handleDismiss();
-              }}
-              text="Aceptar"
-            />
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
-    </>
+            </View>
+          </View>
+        </Modal>
+      </View>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  imagesContainer: {
+    width: "100%",
+    maxWidth: 400,
+    minHeight: 600,
+    alignItems: "center",
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 20,
+    padding: 28,
+    zIndex: 1,
+  },
+  formContainer: {
+     width: "100%",
+    maxWidth: 400,
+    alignItems: "center",
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 20,
+    padding: 28,
+    zIndex: 1,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: COLORS.textSecondary,
+    marginBottom: 24,
+    textAlign: "center",
+  },
+  contentImagesContainer: {
+    flex: 1,
+    width: "100%",
+  },
+  contentFormContainer: {
+    width: "100%",
+    minHeight: 150,
+  },
+  input: {
+    width: "100%",
+    marginBottom: 14,
+    backgroundColor: "transparent",
+  },
+  inputOutline: {
+    borderRadius: 12,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    //marginTop: 20,
+    gap: 8,
+  },
   draggableItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -473,10 +526,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: COLORS.border,
+    alignSelf: "center",
+    maxWidth: "90%",
   },
   draggableItemActive: {
     backgroundColor: `${COLORS.primary}15`,
     borderColor: COLORS.primary,
+    maxWidth: "90%",
   },
   thumbnail: {
     width: 50,
@@ -496,12 +552,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.primary,
     fontWeight: "600",
-  },
-  processingDialog: {
-    borderRadius: 16,
-  },
-  processingContent: {
-    alignItems: "center",
   },
   processingTitle: {
     fontSize: 20,
