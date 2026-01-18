@@ -116,7 +116,6 @@ export default function CreateAlbumDialog({
         memoryIds: orderedMemoryIds,
       });
 
-      handleDismiss();
     } catch (err) {
       console.error("Error en handleCreateAlbum:", err);
     }
