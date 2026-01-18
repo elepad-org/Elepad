@@ -434,87 +434,90 @@ export default function HomeScreen() {
             <View style={styles.loadingContainer}>
               <ActivityIndicator />
             </View>
-          ) : upcomingActivities.length > 0 ? (
-            <View style={styles.eventsContainer}>
-              {upcomingActivities.map(
-                (
-                  activity: {
-                    id: string;
-                    startsAt: string;
-                    title: string;
-                    description?: string;
-                  },
-                  index
-                ) => {
-                  const activityDate = new Date(activity.startsAt);
-                  const isToday =
-                    activityDate.toDateString() === new Date().toDateString();
-                  const isTomorrow =
-                    activityDate.toDateString() ===
-                    new Date(Date.now() + 86400000).toDateString();
-
-                  let dateLabel = activityDate.toLocaleDateString("es", {
-                    day: "numeric",
-                    month: "short",
-                  });
-
-                  if (isToday) dateLabel = "Hoy";
-                  if (isTomorrow) dateLabel = "Mañana";
-
-                  return (
-                    <Animated.View
-                      key={activity.id}
-                      entering={ZoomIn.duration(200).delay(index * 50)}
-                      style={styles.eventItem}
-                    >
-                      <View style={styles.eventTime}>
-                        <Text style={styles.eventDate}>{dateLabel}</Text>
-                        <Text style={styles.eventHour}>
-                          {activityDate.toLocaleTimeString("es", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </Text>
-                      </View>
-                      <View style={styles.eventDivider} />
-                      <View style={styles.eventContent}>
-                        <Text style={styles.eventTitle} numberOfLines={1}>
-                          {activity.title}
-                        </Text>
-                        {activity.description && (
-                          <HighlightedMentionText
-                            text={activity.description}
-                            groupMembers={groupMembers}
-                            style={styles.eventDesc}
-                            numberOfLines={1}
-                          />
-                        )}
-                      </View>
-                    </Animated.View>
-                  );
-                }
-              )}
-            </View>
           ) : (
-            <View style={styles.emptySection}>
-              <Text style={styles.emptyText}>No hay eventos próximos</Text>
-              <Button
-                mode="outlined"
-                onPress={() => {
-                  router.navigate({
-                    pathname: "/(tabs)/home",
-                    params: {
-                      tab: "calendar",
-                      openForm: "true",
+            upcomingActivities.length > 0 ? (
+              <View style={[styles.eventsContainer, { marginTop: 0 }]}> {/* Unifica separación */}
+                {upcomingActivities.map(
+                  (
+                    activity: {
+                      id: string;
+                      startsAt: string;
+                      title: string;
+                      description?: string;
                     },
-                  });
-                }}
-                style={styles.emptyButtonOutline}
-                labelStyle={{ color: COLORS.primary }}
-              >
-                Crear evento
-              </Button>
-            </View>
+                    index
+                  ) => {
+                    const activityDate = new Date(activity.startsAt);
+                    const isToday =
+                      activityDate.toDateString() === new Date().toDateString();
+                    const isTomorrow =
+                      activityDate.toDateString() ===
+                      new Date(Date.now() + 86400000).toDateString();
+
+                    let dateLabel = activityDate.toLocaleDateString("es", {
+                      day: "numeric",
+                      month: "short",
+                    });
+
+                    if (isToday) dateLabel = "Hoy";
+                    if (isTomorrow) dateLabel = "Mañana";
+
+                    return (
+                      <Animated.View
+                        key={activity.id}
+                        entering={ZoomIn.duration(200).delay(index * 50)}
+                        style={styles.eventItem}
+                      >
+                        <View style={styles.eventTime}>
+                          <Text style={styles.eventDate}>{dateLabel}</Text>
+                          <Text style={styles.eventHour}>
+                            {activityDate.toLocaleTimeString("es", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </Text>
+                        </View>
+                        <View style={styles.eventDivider} />
+                        <View style={styles.eventContent}>
+                          <Text style={styles.eventTitle} numberOfLines={1}>
+                            {activity.title}
+                          </Text>
+                          {activity.description && (
+                            <HighlightedMentionText
+                              text={activity.description}
+                              groupMembers={groupMembers}
+                              style={styles.eventDesc}
+                              numberOfLines={1}
+                            />
+                          )}
+                        </View>
+                      </Animated.View>
+                    );
+                  }
+                )}
+              </View>
+            ) : (
+              <View style={[styles.emptySection, { marginTop: 0 }]}> {/* Unifica separación */}
+                <Text style={styles.emptyText}>No hay eventos próximos</Text>
+                <Button
+                  mode="outlined"
+                  onPress={() => {
+                    router.navigate({
+                      pathname: "/(tabs)/home",
+                      params: {
+                        tab: "calendar",
+                        openForm: "true",
+                      },
+                    });
+                  }}
+                  style={styles.emptyButtonOutline}
+                  textColor={COLORS.primary}
+                  icon="calendar-plus"
+                >
+                  Crear evento
+                </Button>
+              </View>
+            )
           )}
         </View>
 
