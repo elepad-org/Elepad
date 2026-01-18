@@ -23,7 +23,7 @@ import CalendarScreen from "./calendar";
 import { useAuth } from "@/hooks/useAuth";
 
 // ~15% opacity for the active tab indicator background using primary color
-const activeIndicatorColor = "rgba(91, 80, 122, 0.15)"; // #5b507a with opacity
+const activeIndicatorColor = "rgba(136, 150, 176, 0.15)"; // #8896b0 with opacity
 
 type TabRoute = {
   key: string;
@@ -149,7 +149,7 @@ export default function TabLayout() {
         focusedIcon: string;
         unfocusedIcon: string;
       }>;
-    }
+    },
   ) => {
     const { navigationState, position } = props;
 
