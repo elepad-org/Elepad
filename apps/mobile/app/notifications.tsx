@@ -549,7 +549,7 @@ export default function NotificationsScreen() {
                       ? styles.notificationTitle
                       : {
                           fontSize: 14,
-                          color: COLORS.text,
+                          color: COLORS.primary,
                           fontWeight: "700" as const,
                         }
                   }
@@ -1137,14 +1137,14 @@ const styles = StyleSheet.create({
   },
   notificationTitle: {
     fontSize: 15,
-    color: COLORS.text,
-    fontWeight: "500",
+    color: COLORS.primary,
+    fontWeight: "normal",
     marginBottom: 4,
     lineHeight: 20,
   },
   unreadTitle: {
     fontWeight: "700",
-    color: COLORS.text,
+    color: COLORS.primary,
   },
   notificationBody: {
     fontSize: 14,
