@@ -438,12 +438,12 @@ export default function HomeScreen() {
             )}
           </View>
 
-          {activitiesQuery.isLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator />
-            </View>
-          ) : (
-            upcomingActivities.length > 0 ? (
+          <>
+            {activitiesQuery.isLoading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator />
+              </View>
+            ) : upcomingActivities.length > 0 ? (
               <View style={[styles.eventsContainer, { marginTop: 0 }]}> {/* Unifica separación */}
                 {upcomingActivities.map(
                   (
@@ -525,8 +525,8 @@ export default function HomeScreen() {
                   Crear evento
                 </Button>
               </View>
-            )
-          )}
+            )}
+          </>
         </View>
 
         {/* Actividad Reciente */}
