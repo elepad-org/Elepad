@@ -7,6 +7,7 @@ import {
   Pressable,
   ImageBackground,
   Dimensions,
+  Image,
 } from "react-native";
 import {
   ActivityIndicator,
@@ -34,6 +35,13 @@ import StreakCounter from "@/components/StreakCounter";
 import HighlightedMentionText from "@/components/Recuerdos/HighlightedMentionText";
 import { useNotifications } from "@/hooks/useNotifications";
 import { GAMES_INFO } from "@/constants/gamesInfo";
+
+const GAME_IMAGES: Record<string, any> = {
+  memory: require("@/assets/images/memory.png"),
+  logic: require("@/assets/images/net.png"),
+  sudoku: require("@/assets/images/sudoku.png"),
+  focus: require("@/assets/images/focus.png"),
+};
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -535,9 +543,10 @@ export default function HomeScreen() {
               onPress={() => router.push("/history")}
             >
               <View style={styles.gameIcon}>
-                <Text style={styles.gameEmoji}>
-                  {getGameInfo(lastAttempt.gameType || "").emoji}
-                </Text>
+                <Image
+                  source={GAME_IMAGES[lastAttempt.gameType || "memory"]}
+                  style={{ width: 40, height: 40, resizeMode: "contain" }}
+                />
               </View>
               <View style={styles.gameInfo}>
                 <Text style={styles.gameName}>
@@ -547,7 +556,7 @@ export default function HomeScreen() {
                   {new Date(lastAttempt.startedAt).toLocaleDateString("es", {
                     day: "numeric",
                     month: "long",
-                    hour: "2-digit",
+                    hour: "2-digit", 
                     minute: "2-digit",
                   })}
                 </Text>
