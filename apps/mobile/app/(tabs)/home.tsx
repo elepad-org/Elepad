@@ -449,7 +449,7 @@ export default function HomeScreen() {
                 <ActivityIndicator />
               </View>
             ) : upcomingActivities.length > 0 ? (
-              <View style={[styles.eventsContainer, { marginTop: 0 }]}> {/* Unifica separación */}
+              <View style={[styles.eventsContainer, { marginTop: 0 }]}>
                 {upcomingActivities.map(
                   (
                     activity: {
@@ -458,7 +458,7 @@ export default function HomeScreen() {
                       title: string;
                       description?: string;
                     },
-                    index
+                    index,
                   ) => {
                     const activityDate = new Date(activity.startsAt);
                     const isToday =
@@ -506,11 +506,11 @@ export default function HomeScreen() {
                         </View>
                       </Animated.View>
                     );
-                  }
+                  },
                 )}
               </View>
             ) : (
-              <View style={[styles.emptySection, { marginTop: 0 }]}> {/* Unifica separación */}
+              <View style={[styles.emptySection, { marginTop: 0 }]}>
                 <Text style={styles.emptyText}> No hay eventos próximos </Text>
                 <Button
                   mode="outlined"
@@ -561,7 +561,7 @@ export default function HomeScreen() {
                   {new Date(lastAttempt.startedAt).toLocaleDateString("es", {
                     day: "numeric",
                     month: "long",
-                    hour: "2-digit", 
+                    hour: "2-digit",
                     minute: "2-digit",
                   })}
                 </Text>
