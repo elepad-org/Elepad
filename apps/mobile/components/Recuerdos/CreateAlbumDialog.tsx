@@ -116,7 +116,6 @@ export default function CreateAlbumDialog({
         memoryIds: orderedMemoryIds,
       });
 
-      handleDismiss();
     } catch (err) {
       console.error("Error en handleCreateAlbum:", err);
     }
@@ -514,7 +513,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
-    //marginTop: 20,
+    marginTop: 20,
     gap: 8,
   },
   draggableItem: {
@@ -564,6 +563,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.text,
     marginBottom: 12,
-    fontStyle: "italic",
   },
 });
