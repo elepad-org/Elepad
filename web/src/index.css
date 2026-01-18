@@ -1,15 +1,15 @@
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=Lobster&display=swap");
 
 :root {
-  --primary: #8896b0;
+  --primary: #9ca0cf;
   --secondary: #424a70;
   --accent: #9eadc8;
   --background: #ffffff;
   --background-secondary: #f2f2f7;
   --text: #000000;
-  --text-secondary: #5c697b;
-  --border: #e5e5ea;
-  --success: #6b8dd6;
+  --text-secondary: #7374a7;
+  --border: #E5E5EA;
+  --success: #6B8DD6;
 
   font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI",
     "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",

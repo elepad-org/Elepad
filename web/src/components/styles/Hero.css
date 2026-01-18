@@ -16,8 +16,27 @@
   width: 100%;
 }
 
+
 .hero-text {
   animation: slideInLeft 0.8s ease-out;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.left-align {
+  align-items: flex-start;
+}
+
+.hero-elephant {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 1rem;
+}
+
+.left-title {
+  text-align: left;
+  font-family: 'Montserrat', sans-serif;
 }
 
 .hero-title {
@@ -81,6 +100,14 @@
   justify-content: center;
   align-items: center;
   animation: slideInRight 0.8s ease-out;
+}
+
+.hero-capture {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 32px;
+  background: #f2f2f7;
 }
 
 .phone-mockup {

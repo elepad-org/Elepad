@@ -91,19 +91,6 @@ export function Contact() {
                 </p>
               </div>
             </div>
-
-            <div className="info-item">
-              <div className="info-icon">📱</div>
-              <div className="info-text">
-                <h3>Redes sociales</h3>
-                <div className="social-links">
-                  <a href="#twitter">Twitter</a>
-                  <a href="#instagram">Instagram</a>
-                  <a href="#facebook">Facebook</a>
-                </div>
-              </div>
-            </div>
-
             <div className="info-item">
               <div className="info-icon">🌍</div>
               <div className="info-text">

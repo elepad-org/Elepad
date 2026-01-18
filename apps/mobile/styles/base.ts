@@ -40,7 +40,7 @@ export const COLORS = {
 
   // Text hierarchy - High contrast
   text: "#000000", // Black
-  textSecondary: "#5c697b", // Deep purple from palette
+  textSecondary: "#7374a7", // Deep purple from palette
   textLight: "#424a70", // Medium purple-blue from palette
   textPlaceholder: "#6f7e93", // Light blue from palette
 

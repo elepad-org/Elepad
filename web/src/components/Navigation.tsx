@@ -16,8 +16,8 @@ export function Navigation() {
     <nav className="navbar">
       <div className="navbar-container">
         <div className="navbar-logo">
-          <span className="logo-icon">✨</span>
-          <span className="logo-text">Elepad</span>
+          <img src="/ele-gray.png" alt="Elepad Elefante" className="logo-elephant" />
+          <span className="logo-text left-title">Elepad</span>
         </div>
 
         <div className={`nav-menu ${isOpen ? "active" : ""}`}>
