@@ -1127,7 +1127,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
   },
   pressedCard: {
-    opacity: 0.85,
+    transform: [{ scale: 0.98 }],
   },
   notificationIconContainer: {
     width: 40,
