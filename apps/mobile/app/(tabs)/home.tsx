@@ -69,7 +69,7 @@ export default function HomeScreen() {
       query: {
         enabled: !!userElepad?.groupId,
       },
-    }
+    },
   );
 
   // Fetch recent attempts
@@ -79,7 +79,7 @@ export default function HomeScreen() {
       query: {
         enabled: !!userElepad,
       },
-    }
+    },
   );
 
   // Fetch recent memories
@@ -89,7 +89,7 @@ export default function HomeScreen() {
       query: {
         enabled: !!userElepad?.groupId,
       },
-    }
+    },
   );
 
   // Fetch family members
@@ -99,7 +99,7 @@ export default function HomeScreen() {
       query: {
         enabled: !!userElepad?.groupId,
       },
-    }
+    },
   );
 
   const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
@@ -159,7 +159,7 @@ export default function HomeScreen() {
       .filter((activity: Activity) => new Date(activity.startsAt) >= now)
       .sort(
         (a: Activity, b: Activity) =>
-          new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime()
+          new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime(),
       )
       .slice(0, 3);
   }, [activitiesQuery.data]);
@@ -354,7 +354,7 @@ export default function HomeScreen() {
                             day: "numeric",
                             month: "long",
                             year: "numeric",
-                          }
+                          },
                         )}
                       </Text>
                     </View>

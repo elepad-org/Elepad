@@ -29,7 +29,7 @@ import React, {
   useRef,
   useEffect,
 } from "react";
-import Reanimated, { FadeInRight } from "react-native-reanimated";
+import Reanimated, { ZoomIn } from "react-native-reanimated";
 import {
   View,
   FlatList,
@@ -65,7 +65,7 @@ import {
   GetNotifications200Item,
   GetActivityCompletions200DataItem,
 } from "@elepad/api-client";
-import { COLORS } from "@/styles/base";
+import { COLORS, SHADOWS } from "@/styles/base";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -94,7 +94,7 @@ interface Recuerdo {
 // Función auxiliar para convertir Memory a Recuerdo
 const memoryToRecuerdo = (
   memory: Memory,
-  memberNameById: Record<string, string>
+  memberNameById: Record<string, string>,
 ): Recuerdo => {
   let tipo: RecuerdoTipo = "texto";
 
@@ -136,7 +136,7 @@ export default function NotificationsScreen() {
   const [selectedMemoryId, setSelectedMemoryId] = useState<string | null>(null);
   const [detailDialogVisible, setDetailDialogVisible] = useState(false);
   const [selectedActivityId, setSelectedActivityId] = useState<string | null>(
-    null
+    null,
   );
   const [activityDetailDialogVisible, setActivityDetailDialogVisible] =
     useState(false);
@@ -187,7 +187,7 @@ export default function NotificationsScreen() {
       query: {
         enabled: !!userElepad?.groupId,
       },
-    }
+    },
   );
 
   const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
@@ -249,7 +249,7 @@ export default function NotificationsScreen() {
       query: {
         enabled: !!activityQuery.data && !!activityDateRange.startDate,
       },
-    }
+    },
   );
 
   // Determinar si la actividad está completada para su día específico
@@ -283,7 +283,7 @@ export default function NotificationsScreen() {
     // Buscar si existe una completación para esta actividad en este día
     return completions.some(
       (c: GetActivityCompletions200DataItem) =>
-        c.activityId === activity.id && c.completedDate === activityDate
+        c.activityId === activity.id && c.completedDate === activityDate,
     );
   }, [activityQuery.data, activityCompletionsQuery.data]);
 
@@ -344,7 +344,7 @@ export default function NotificationsScreen() {
       query: {
         refetchOnWindowFocus: false,
       },
-    }
+    },
   );
 
   // Mark as read mutation
@@ -386,7 +386,7 @@ export default function NotificationsScreen() {
         console.error("Error marking notification as read:", error);
       }
     },
-    [markAsReadMutation, queryClient]
+    [markAsReadMutation, queryClient],
   );
 
   const handleMarkAllAsRead = useCallback(async () => {
@@ -413,7 +413,7 @@ export default function NotificationsScreen() {
         console.error("Error deleting notification:", error);
       }
     },
-    [deleteNotificationMutation, queryClient]
+    [deleteNotificationMutation, queryClient],
   );
 
   const handleNotificationPress = useCallback(
@@ -450,7 +450,7 @@ export default function NotificationsScreen() {
       }
       // Add more navigation logic as needed
     },
-    [handleMarkAsRead, router]
+    [handleMarkAsRead, router],
   );
 
   const handleLoadMore = useCallback(() => {
@@ -502,7 +502,12 @@ export default function NotificationsScreen() {
         return "bell-ring";
       case "activity_assigned":
         return "account-arrow-right";
+      case "achievement":
+        return "book-open-variant";
       default:
+        if (entityType === "album") {
+          return "book-open-variant";
+        }
         return "bell";
     }
   };
@@ -510,24 +515,22 @@ export default function NotificationsScreen() {
   const renderNotification = useCallback(
     ({ item, index }: { item: GetNotifications200Item; index: number }) => {
       // Para menciones, detectar si el título o body contiene formato <@id>
-      const hasMention =
-        (item.title && /<@([^>]+)>/.test(item.title)) ||
-        (item.body && /<@([^>]+)>/.test(item.body));
-      const isMention =
-        item.event_type === "mention" ||
-        item.event_type === "activity_assigned" ||
-        hasMention;
+      // const hasMention = ... (removed)
+      // const isMention = ... (removed)
 
       return (
-        <Reanimated.View entering={FadeInRight.delay(index * 50).springify()}>
+        <Reanimated.View entering={ZoomIn.delay(index * 50).springify()}>
           <Pressable
             style={({ pressed }) => [
               styles.notificationCard,
-              !item.read && styles.unreadCard,
+              item.read && styles.readCard,
               pressed && styles.pressedCard,
             ]}
             onPress={() => handleNotificationPress(item)}
           >
+            {/* Accent Border Left - Only show if read (seen) */}
+            {item.read && <View style={styles.accentBorder} />}
+
             <View style={styles.notificationIconContainer}>
               <MaterialCommunityIcons
                 name={getNotificationIcon(item.event_type, item.entity_type)}
@@ -537,47 +540,24 @@ export default function NotificationsScreen() {
             </View>
 
             <View style={styles.notificationContent}>
-              {isMention ? (
-                <HighlightedMentionText
-                  text={item.title || ""}
-                  groupMembers={groupMembers}
-                  style={
-                    item.read
-                      ? styles.notificationTitle
-                      : {
-                          fontSize: 14,
-                          color: COLORS.text,
-                          fontWeight: "700" as const,
-                        }
-                  }
-                  numberOfLines={2}
-                />
-              ) : (
-                <Text
-                  style={[
-                    styles.notificationTitle,
-                    !item.read && styles.unreadTitle,
-                  ]}
-                  numberOfLines={2}
-                >
-                  {item.title}
-                </Text>
-              )}
+              <HighlightedMentionText
+                text={item.title || ""}
+                groupMembers={groupMembers}
+                style={[
+                  styles.notificationTitle,
+                  !item.read && styles.unreadTitle,
+                ]}
+                numberOfLines={2}
+              />
               {item.body &&
               typeof item.body === "string" &&
               item.body.trim() !== "" ? (
-                isMention ? (
-                  <HighlightedMentionText
-                    text={item.body}
-                    groupMembers={groupMembers}
-                    style={styles.notificationBody}
-                    numberOfLines={2}
-                  />
-                ) : (
-                  <Text style={styles.notificationBody} numberOfLines={2}>
-                    {item.body}
-                  </Text>
-                )
+                <HighlightedMentionText
+                  text={item.body}
+                  groupMembers={groupMembers}
+                  style={styles.notificationBody}
+                  numberOfLines={2}
+                />
               ) : null}
               <Text style={styles.notificationDate}>
                 {formatDate(item.created_at)}
@@ -600,7 +580,7 @@ export default function NotificationsScreen() {
         </Reanimated.View>
       );
     },
-    [handleNotificationPress, handleDeleteNotification, groupMembers]
+    [handleNotificationPress, handleDeleteNotification, groupMembers],
   );
 
   const renderEmpty = () => (
@@ -726,8 +706,8 @@ export default function NotificationsScreen() {
                       acc[m.id] = m.displayName;
                       return acc;
                     },
-                    {} as Record<string, string>
-                  )
+                    {} as Record<string, string>,
+                  ),
                 )
               : null;
 
@@ -832,14 +812,14 @@ export default function NotificationsScreen() {
                                 day: "numeric",
                                 month: "short",
                                 year: "numeric",
-                              }
+                              },
                             )}{" "}
                             {new Date(activity.startsAt).toLocaleTimeString(
                               [],
                               {
                                 hour: "2-digit",
                                 minute: "2-digit",
-                              }
+                              },
                             )}
                           </Text>
                         </View>
@@ -847,7 +827,7 @@ export default function NotificationsScreen() {
                         {/* Creador */}
                         {(() => {
                           const creator = groupMembers.find(
-                            (m) => m.id === activity.createdBy
+                            (m) => m.id === activity.createdBy,
                           );
                           return creator ? (
                             <View
@@ -1095,29 +1075,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   notificationCard: {
+    ...SHADOWS.card,
     flexDirection: "row",
     alignItems: "flex-start",
     backgroundColor: COLORS.white,
     marginBottom: 10,
     padding: 16,
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: COLORS.border,
     overflow: "hidden",
     position: "relative",
   },
-  unreadCard: {
-    backgroundColor: COLORS.primary + "10",
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.primary,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 0.5 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 1,
+  readCard: {
+    backgroundColor: "#F5F5F5",
+  },
+  accentBorder: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 6,
+    backgroundColor: COLORS.primary,
   },
   pressedCard: {
-    opacity: 0.85,
+    transform: [{ scale: 0.98 }],
   },
   notificationIconContainer: {
     width: 40,
@@ -1134,14 +1114,14 @@ const styles = StyleSheet.create({
   },
   notificationTitle: {
     fontSize: 15,
-    color: COLORS.text,
-    fontWeight: "500",
+    color: COLORS.primary,
+    fontWeight: "normal",
     marginBottom: 4,
     lineHeight: 20,
   },
   unreadTitle: {
     fontWeight: "700",
-    color: COLORS.text,
+    color: COLORS.primary,
   },
   notificationBody: {
     fontSize: 14,

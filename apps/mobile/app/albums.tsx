@@ -67,7 +67,7 @@ export default function AlbumsScreen() {
       query: {
         enabled: !!groupId,
       },
-    }
+    },
   );
 
   const memories = Array.isArray(memoriesResponse?.data)
@@ -81,7 +81,7 @@ export default function AlbumsScreen() {
     (albumId: string) => {
       router.push(`/album-viewer?id=${albumId}`);
     },
-    [router]
+    [router],
   );
 
   const onRefresh = useCallback(async () => {
@@ -160,7 +160,7 @@ export default function AlbumsScreen() {
             renderItem={({ item, index }) => {
               return (
                 <Animated.View
-                  entering={ZoomIn.delay(index * 50).duration(200)}
+                  entering={ZoomIn.delay(index * 25).springify()}
                   style={styles.columnItem}
                 >
                   <AlbumCard
