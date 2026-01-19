@@ -1,73 +1,92 @@
-# React + TypeScript + Vite
+# Elepad Landing Page
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Landing page del proyecto Elepad, construida con Vite, React, Material UI y Tailwind CSS.
 
-Currently, two official plugins are available:
+## 🎨 Características de Diseño
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Identidad Visual**: Usa la misma paleta de colores y fuentes que la aplicación móvil
+- **Minimalista**: Diseño limpio y moderno sin degradados innecesarios
+- **Responsivo**: Se adapta perfectamente a todos los tamaños de pantalla
+- **Componentes Material UI**: Interfaz consistente y accesible
+- **Tailwind CSS**: Estilos utilitarios para desarrollo rápido
 
-## React Compiler
+## 🚀 Inicio Rápido
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Instalación
 
-## Expanding the ESLint configuration
+\`\`\`bash
+npm install
+\`\`\`
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Desarrollo
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+\`\`\`bash
+npm run dev
+\`\`\`
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+El servidor se iniciará en [http://localhost:3000](http://localhost:3000)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Build de Producción
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+\`\`\`bash
+npm run build
+\`\`\`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Preview del Build
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+\`\`\`bash
+npm run preview
+\`\`\`
+
+## 📁 Estructura del Proyecto
+
+\`\`\`
+web/
+├── src/
+│   ├── components/
+│   │   ├── Navbar.tsx      # Barra de navegación
+│   │   ├── Hero.tsx        # Sección hero principal
+│   │   ├── Features.tsx    # Sección de características
+│   │   ├── CTA.tsx         # Call to action
+│   │   └── Footer.tsx      # Footer del sitio
+│   ├── theme.ts            # Configuración del tema Material UI
+│   ├── App.tsx             # Componente principal
+│   ├── main.tsx            # Punto de entrada
+│   └── index.css           # Estilos globales
+├── tailwind.config.js      # Configuración de Tailwind
+├── postcss.config.js       # Configuración de PostCSS
+└── package.json
+\`\`\`
+
+## 🎨 Paleta de Colores
+
+La landing page usa la misma paleta de colores que la app móvil:
+
+- **Primary**: \`#9a9ece\` - Púrpura suave
+- **Secondary**: \`#424a70\` - Púrpura-azul medio
+- **Accent**: \`#9eadc8\` - Azul claro
+- **Background**: \`#FFFFFF\` - Blanco
+- **Background Secondary**: \`#F2F2F7\` - Gris claro
+- **Text**: \`#000000\` - Negro
+- **Text Secondary**: \`#7374a7\` - Púrpura profundo
+- **Success**: \`#6B8DD6\` - Azul violáceo
+
+## 🔧 Tecnologías
+
+- **React 19** - Framework UI
+- **TypeScript** - Type safety
+- **Vite** - Build tool ultrarrápido
+- **Material UI v7** - Librería de componentes
+- **Tailwind CSS** - Framework de utilidades CSS
+- **Emotion** - CSS-in-JS para Material UI
+
+## 📝 Notas de Desarrollo
+
+- El preflight de Tailwind está deshabilitado para evitar conflictos con Material UI
+- Las fuentes de Google (Montserrat) se cargan desde CDN
+- Los componentes están diseñados para ser modulares y reutilizables
+- El diseño sigue los principios de Material Design 3
+
+## 🐘 ¡Elepad!
+
+Conectando generaciones con amor 💜
