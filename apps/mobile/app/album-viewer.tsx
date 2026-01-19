@@ -5,9 +5,10 @@ import { ActivityIndicator, IconButton, Text } from "react-native-paper";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { COLORS } from "@/styles/base";
 import * as ScreenOrientation from "expo-screen-orientation";
-import PagerView, {
-  PagerViewOnPageSelectedEvent,
-} from "react-native-pager-view";
+import Pager, {
+  type PagerOnPageSelectedEvent,
+  type PagerRef,
+} from "@/components/shared/Pager";
 import { useGetAlbumId, AlbumWithPages } from "@elepad/api-client";
 import AlbumPageView from "@/components/shared/AlbumPageView";
 import fondoRecuerdos from "@/assets/images/fondoRecuerdos.png";
@@ -16,7 +17,7 @@ export default function AlbumViewerScreen() {
   const params = useLocalSearchParams();
   const router = useRouter();
   const albumId = params.id as string;
-  const pagerRef = useRef<PagerView>(null);
+  const pagerRef = useRef<PagerRef>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const insets = useSafeAreaInsets();
 
@@ -79,7 +80,7 @@ export default function AlbumViewerScreen() {
   }, [router]);
 
   const handlePageChange = useCallback(
-    (event: PagerViewOnPageSelectedEvent) => {
+    (event: PagerOnPageSelectedEvent) => {
       setCurrentPage(event.nativeEvent.position);
     },
     []
@@ -152,14 +153,14 @@ export default function AlbumViewerScreen() {
       <StatusBar hidden />
 
       {/* Pager View - Debe ir primero para que los botones estén encima */}
-      <PagerView
+      <Pager
         ref={pagerRef}
         style={styles.pagerView}
         initialPage={0}
         onPageSelected={handlePageChange}
       >
         {pages.map((page, index) => (
-          <View key={page.id} style={styles.page}>
+          <View key={page.id} style={styles.page} collapsable={false}>
             <AlbumPageView
               page={page}
               pageNumber={index + 1}
@@ -167,7 +168,7 @@ export default function AlbumViewerScreen() {
             />
           </View>
         ))}
-      </PagerView>
+      </Pager>
 
       {/* Close Button - Renderizado después para estar encima */}
       <IconButton
