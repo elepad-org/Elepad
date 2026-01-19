@@ -1,8 +1,9 @@
 import { View, StyleSheet } from "react-native";
-import { Text, ActivityIndicator } from "react-native-paper";
+import { Text } from "react-native-paper";
 import { COLORS, FONT, SHADOWS } from "@/styles/base";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "@/hooks/useAuth";
+import { SkeletonBox } from "@/components/shared";
 
 export default function StreakCounter() {
   const { streak } = useAuth();
@@ -11,7 +12,13 @@ export default function StreakCounter() {
     return (
       <View style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="small" color={COLORS.primary} />
+          <View style={styles.skeletonContent}>
+            <View style={styles.skeletonText}>
+              <SkeletonBox width="60%" height={18} borderRadius={4} style={{ marginBottom: 8 }} />
+              <SkeletonBox width="80%" height={13} borderRadius={4} />
+            </View>
+            <SkeletonBox width={80} height={44} borderRadius={20} />
+          </View>
         </View>
       </View>
     );
@@ -53,10 +60,18 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     backgroundColor: COLORS.backgroundSecondary,
-    paddingVertical: 32,
-    alignItems: "center",
-    justifyContent: "center",
+    paddingVertical: 20,
+    paddingHorizontal: 20,
     borderRadius: 16,
+  },
+  skeletonContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  skeletonText: {
+    flex: 1,
+    marginRight: 16,
   },
   gradient: {
     width: "100%",

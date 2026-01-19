@@ -10,7 +10,6 @@ import {
   Image,
 } from "react-native";
 import {
-  ActivityIndicator,
   Text,
   Avatar,
   Button,
@@ -19,7 +18,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, SHADOWS } from "@/styles/base";
-import { LoadingProfile } from "@/components/shared";
+import { LoadingProfile, SkeletonBox } from "@/components/shared";
 import {
   useGetActivitiesFamilyCodeIdFamilyGroup,
   useGetAttempts,
@@ -310,7 +309,7 @@ export default function HomeScreen() {
         {/* Último Recuerdo - DESTACADO */}
         {memoriesQuery.isLoading ? (
           <View style={styles.memoryCardLoading}>
-            <ActivityIndicator size="large" />
+            <SkeletonBox width={SCREEN_WIDTH} height={280} borderRadius={0} />
           </View>
         ) : lastMemory ? (
           <Animated.View entering={FadeIn.duration(800)}>
@@ -445,8 +444,20 @@ export default function HomeScreen() {
 
           <>
             {activitiesQuery.isLoading ? (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator />
+              <View style={[styles.eventsContainer, { marginTop: 0 }]}>
+                {[1, 2, 3].map((i) => (
+                  <View key={i} style={styles.eventItem}>
+                    <View style={styles.eventTime}>
+                      <SkeletonBox width={60} height={16} borderRadius={4} style={{ marginBottom: 8 }} />
+                      <SkeletonBox width={50} height={14} borderRadius={4} />
+                    </View>
+                    <View style={styles.eventDivider} />
+                    <View style={styles.eventContent}>
+                      <SkeletonBox width="80%" height={18} borderRadius={4} style={{ marginBottom: 8 }} />
+                      <SkeletonBox width="60%" height={14} borderRadius={4} />
+                    </View>
+                  </View>
+                ))}
               </View>
             ) : upcomingActivities.length > 0 ? (
               <View style={[styles.eventsContainer, { marginTop: 0 }]}>
@@ -539,8 +550,13 @@ export default function HomeScreen() {
           <Text style={styles.sectionTitle}>Actividad reciente</Text>
 
           {attemptsQuery.isLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator />
+            <View style={[styles.gameCard, { marginTop: 10 }]}>
+              <SkeletonBox width={60} height={60} borderRadius={30} />
+              <View style={{ flex: 1, justifyContent: "center", gap: 8 }}>
+                <SkeletonBox width="70%" height={18} borderRadius={4} />
+                <SkeletonBox width="50%" height={14} borderRadius={4} />
+              </View>
+              <SkeletonBox width={70} height={60} borderRadius={14} />
             </View>
           ) : lastAttempt ? (
             <Pressable
