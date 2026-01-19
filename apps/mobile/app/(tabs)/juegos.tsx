@@ -13,10 +13,10 @@ import { COLORS, STYLES, SHADOWS, LAYOUT } from "@/styles/base";
 import { router } from "expo-router";
 import HistoryScreen from "../history";
 import type { ImageSourcePropType } from "react-native";
-import memoryImage from "@/assets/images/memory.png";
-import netImage from "@/assets/images/net.png";
+import memoryImage from "@/assets/images/memory2.png";
+import netImage from "@/assets/images/net2.png";
 import sudokuImage from "@/assets/images/sudoku.png";
-import focusImage from "@/assets/images/focus.png";
+import focusImage from "@/assets/images/focus2.png";
 
 interface GameCardProps {
   emoji?: string;

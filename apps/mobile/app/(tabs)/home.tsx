@@ -36,10 +36,10 @@ import HighlightedMentionText from "@/components/Recuerdos/HighlightedMentionTex
 import { useNotifications } from "@/hooks/useNotifications";
 import { GAMES_INFO } from "@/constants/gamesInfo";
 import type { ImageSourcePropType } from "react-native";
-import memoryImage from "@/assets/images/memory.png";
-import netImage from "@/assets/images/net.png";
+import memoryImage from "@/assets/images/memory2.png";
+import netImage from "@/assets/images/net2.png";
 import sudokuImage from "@/assets/images/sudoku.png";
-import focusImage from "@/assets/images/focus.png";
+import focusImage from "@/assets/images/focus2.png";
 
 const GAME_IMAGES: Record<string, ImageSourcePropType> = {
   memory: memoryImage,
