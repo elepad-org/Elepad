@@ -1,4 +1,4 @@
-import { useEffect, useState, createElement, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { View, StyleSheet, ScrollView, Animated, Platform } from "react-native";
 import { useRef } from "react";
 import { TextInput, Button, Text, Menu, Dialog } from "react-native-paper";
@@ -399,12 +399,12 @@ export default function ActivityForm({
                   <PaperDateTimeWeb
                     label="Inicio"
                     value={startsAtDate}
-                    onChange={(d: any) => setStartsAtDate(d || new Date())}
+                    onChange={(d: Date | undefined) => setStartsAtDate(d || new Date())}
                   />
                   <PaperDateTimeWeb
                     label="Fin"
                     value={endsAtDate}
-                    onChange={(d: any) => setEndsAtDate(d)}
+                    onChange={(d: Date | undefined) => setEndsAtDate(d)}
                   />
                 </>
               ) : (
