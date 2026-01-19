@@ -37,7 +37,7 @@ import { GAMES_INFO } from "@/constants/gamesInfo";
 import type { ImageSourcePropType } from "react-native";
 import memoryImage from "@/assets/images/memory2.png";
 import netImage from "@/assets/images/net2.png";
-import sudokuImage from "@/assets/images/sudoku.png";
+import sudokuImage from "@/assets/images/sudoku2.png";
 import focusImage from "@/assets/images/focus2.png";
 
 const GAME_IMAGES: Record<string, ImageSourcePropType> = {
