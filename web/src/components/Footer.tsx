@@ -1,5 +1,6 @@
 import { Box, Container, Typography, Link, Stack } from '@mui/material';
 import { Favorite } from '@mui/icons-material';
+import { Link as RouterLink } from 'react-router-dom';
 
 export default function Footer() {
   return (
@@ -56,31 +57,33 @@ export default function Footer() {
               Contacto
             </Link>
             <Link
-              href="#"
+              component={RouterLink}
+              to="/privacidad"
               underline="hover"
               sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
             >
-              Privacidad
+              Política de Privacidad
             </Link>
           </Stack>
 
           <Stack spacing={2} sx={{ alignItems: { xs: 'center', md: 'flex-start' } }}>
             <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem' }}>
-              Comunidad
+              Legal
             </Typography>
             <Link
-              href="#"
+              component={RouterLink}
+              to="/eliminar-cuenta"
               underline="hover"
               sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
             >
-              Blog
+              Eliminar Cuenta
             </Link>
             <Link
               href="#"
               underline="hover"
               sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
             >
-              Testimonios
+              Términos de Servicio
             </Link>
             <Link
               href="#"

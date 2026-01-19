@@ -1,24 +1,22 @@
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Box } from '@mui/material';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import AccountDeletion from './pages/AccountDeletion';
 import theme from './theme';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import Features from './components/Features';
-import CTA from './components/CTA';
-import Footer from './components/Footer';
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
-        <Navbar />
-        <Hero />
-        <Features />
-        <CTA />
-        <Footer />
-      </Box>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/privacidad" element={<PrivacyPolicy />} />
+          <Route path="/eliminar-cuenta" element={<AccountDeletion />} />
+        </Routes>
+      </BrowserRouter>
     </ThemeProvider>
   );
 }
