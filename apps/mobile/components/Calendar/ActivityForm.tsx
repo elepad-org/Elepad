@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
-import { View, StyleSheet, ScrollView, Animated } from "react-native";
+import { useEffect, useState, createElement, useCallback } from "react";
+import { View, StyleSheet, ScrollView, Animated, Platform } from "react-native";
 import { useRef } from "react";
 import { TextInput, Button, Text, Menu, Dialog } from "react-native-paper";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { DatePickerInput, TimePickerModal, registerTranslation, es } from 'react-native-paper-dates';
 import type { Activity } from "@elepad/api-client";
 import { useGetFrequencies } from "@elepad/api-client";
 import { COLORS } from "@/styles/base";
@@ -11,6 +12,9 @@ import SaveButton from "../shared/SaveButton";
 import MentionInput from "../Recuerdos/MentionInput";
 import DropdownSelect from "../shared/DropdownSelect";
 import { useAuth } from "@/hooks/useAuth";
+
+// Register locale for paper-dates
+registerTranslation("es", es);
 
 type Frequency = {
   id: string;
@@ -33,6 +37,128 @@ type Props = {
   familyMembers?: FamilyMember[];
   currentUserId?: string;
   preSelectedElderId?: string | null;
+};
+
+// Componente helper para input de fecha y hora en Web usando react-native-paper-dates
+const PaperDateTimeWeb = ({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: Date | undefined;
+  onChange: (d: Date | undefined) => void;
+}) => {
+  // Manejo del TimePicker
+  const [timePickerVisible, setTimePickerVisible] = useState(false);
+
+  const onConfirmTime = useCallback(
+    ({ hours, minutes }: { hours: number; minutes: number }) => {
+      setTimePickerVisible(false);
+      // Si no hay fecha seleccionada, usamos hoy
+      const baseDate = value ? new Date(value) : new Date();
+      baseDate.setHours(hours);
+      baseDate.setMinutes(minutes);
+      // Asegurar que seconds/ms estén en 0 para limpieza
+      baseDate.setSeconds(0);
+      baseDate.setMilliseconds(0);
+      onChange(baseDate);
+    },
+    [value, onChange]
+  );
+
+  return (
+    <View style={{ flex: 1, flexDirection: 'row', gap: 8 }}>
+      <View style={{ flex: 1 }}>
+        <Text
+          style={{
+            fontSize: 12,
+            color: COLORS.textSecondary,
+            marginBottom: 4,
+          }}
+        >
+          {label} - Fecha
+        </Text>
+        <DatePickerInput
+          locale="es"
+          label={label}
+          value={value}
+          onChange={(d) => {
+            if (d) {
+              const newDate = new Date(d);
+              if (value) {
+                newDate.setHours(value.getHours());
+                newDate.setMinutes(value.getMinutes());
+              } else {
+                const now = new Date();
+                newDate.setHours(now.getHours());
+                newDate.setMinutes(now.getMinutes());
+              }
+              onChange(newDate);
+            } else {
+              onChange(undefined);
+            }
+          }}
+          inputMode="start"
+          style={{
+            backgroundColor: COLORS.backgroundSecondary,
+            fontSize: 14,
+            height: 50,
+            borderRadius: 16,
+            borderTopLeftRadius: 16,
+            borderTopRightRadius: 16,
+          }}
+          mode="flat"
+          outlineColor="transparent"
+          activeOutlineColor="transparent"
+          underlineColor="transparent"
+          activeUnderlineColor="transparent"
+        />
+      </View>
+
+      <View style={{ flex: 1 }}>
+        <Text
+          style={{
+            fontSize: 12,
+            color: COLORS.textSecondary,
+            marginBottom: 4,
+          }}
+        >
+          {label} - Hora
+        </Text>
+        <Button
+          mode="outlined"
+          onPress={() => setTimePickerVisible(true)}
+          style={{
+            borderColor: "transparent",
+            backgroundColor: COLORS.backgroundSecondary,
+            borderRadius: 16,
+          }}
+          contentStyle={{ height: 50 }}
+          labelStyle={{ fontSize: 14, color: "#535353ff", fontWeight: "normal" }}
+        >
+          {value
+            ? value.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : "--:--"}
+        </Button>
+      </View>
+
+      <TimePickerModal
+        visible={timePickerVisible}
+        onDismiss={() => setTimePickerVisible(false)}
+        onConfirm={onConfirmTime}
+        hours={value ? value.getHours() : 12}
+        minutes={value ? value.getMinutes() : 0}
+        locale="es"
+        label="Seleccionar hora"
+        cancelLabel="Cancelar"
+        confirmLabel="Confirmar"
+      />
+    </View>
+  );
 };
 
 export default function ActivityForm({
@@ -268,35 +394,52 @@ export default function ActivityForm({
             </View>
 
             <View style={styles.dateRow}>
-              <View style={styles.dateColumn}>
-                <Button
-                  mode="outlined"
-                  onPress={() => setShowStartPicker(true)}
-                  style={styles.pickerButton}
-                  icon="calendar"
-                  contentStyle={{ paddingVertical: 4 }}
-                >
-                  Inicio
-                </Button>
-                <Text style={styles.dateText}>
-                  {formatDateTime(startsAtDate)}
-                </Text>
-              </View>
+              {Platform.OS === "web" ? (
+                <>
+                  <PaperDateTimeWeb
+                    label="Inicio"
+                    value={startsAtDate}
+                    onChange={(d: any) => setStartsAtDate(d || new Date())}
+                  />
+                  <PaperDateTimeWeb
+                    label="Fin"
+                    value={endsAtDate}
+                    onChange={(d: any) => setEndsAtDate(d)}
+                  />
+                </>
+              ) : (
+                <>
+                  <View style={styles.dateColumn}>
+                    <Button
+                      mode="outlined"
+                      onPress={() => setShowStartPicker(true)}
+                      style={styles.pickerButton}
+                      icon="calendar"
+                      contentStyle={{ paddingVertical: 4 }}
+                    >
+                      Inicio
+                    </Button>
+                    <Text style={styles.dateText}>
+                      {formatDateTime(startsAtDate)}
+                    </Text>
+                  </View>
 
-              <View style={styles.dateColumn}>
-                <Button
-                  mode="outlined"
-                  onPress={() => setShowEndPicker(true)}
-                  style={styles.pickerButton}
-                  icon="calendar"
-                  contentStyle={{ paddingVertical: 4 }}
-                >
-                  Fin
-                </Button>
-                <Text style={styles.dateText}>
-                  {endsAtDate ? formatDateTime(endsAtDate) : "No definido"}
-                </Text>
-              </View>
+                  <View style={styles.dateColumn}>
+                    <Button
+                      mode="outlined"
+                      onPress={() => setShowEndPicker(true)}
+                      style={styles.pickerButton}
+                      icon="calendar"
+                      contentStyle={{ paddingVertical: 4 }}
+                    >
+                      Fin
+                    </Button>
+                    <Text style={styles.dateText}>
+                      {endsAtDate ? formatDateTime(endsAtDate) : "No definido"}
+                    </Text>
+                  </View>
+                </>
+              )}
             </View>
 
             <Menu
