@@ -76,8 +76,9 @@ La landing page usa la misma paleta de colores que la app móvil:
 - **React 19** - Framework UI
 - **TypeScript** - Type safety
 - **Vite** - Build tool ultrarrápido
+- **React Router** - Enrutamiento entre páginas
 - **Material UI v7** - Librería de componentes
-- **Tailwind CSS** - Framework de utilidades CSS
+- **Tailwind CSS v3** - Framework de utilidades CSS
 - **Emotion** - CSS-in-JS para Material UI
 
 ## 📝 Notas de Desarrollo
