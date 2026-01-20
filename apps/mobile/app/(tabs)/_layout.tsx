@@ -202,7 +202,7 @@ export default function TabLayout() {
               elevation: 8,
             },
           }),
-          zIndex: 1000,
+          zIndex: 1, // Lower zIndex so it stays behind modals (which usually use Portals)
           height: 72,
         }}
       >

@@ -16,7 +16,7 @@ import {
   GetFamilyGroupIdGroupMembers200,
 } from "@elepad/api-client";
 import { COLORS, STYLES as baseStyles } from "@/styles/base";
-import { Text, Dialog, Button } from "react-native-paper";
+import { Text, Dialog, Button, Portal } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CancelButton from "@/components/shared/CancelButton";
 import SuccessSnackbar from "@/components/shared/SuccessSnackbar";
@@ -61,18 +61,31 @@ export default function CalendarScreen() {
   // Preparar lista de miembros de la familia para menciones y selector de destinatarios
   const familyMembers = useMemo(() => {
     if (!groupInfo) {
-      return [] as Array<{ id: string; displayName: string; avatarUrl: string | null; elder: boolean }>;
+      return [] as Array<{
+        id: string;
+        displayName: string;
+        avatarUrl: string | null;
+        elder: boolean;
+      }>;
     }
 
     const raw = [groupInfo.owner, ...groupInfo.members];
-    const byId = new Map<string, { id: string; displayName: string; avatarUrl: string | null; elder: boolean }>();
+    const byId = new Map<
+      string,
+      {
+        id: string;
+        displayName: string;
+        avatarUrl: string | null;
+        elder: boolean;
+      }
+    >();
     for (const m of raw) {
       if (!m?.id) continue;
-      byId.set(m.id, { 
-        id: m.id, 
-        displayName: m.displayName, 
+      byId.set(m.id, {
+        id: m.id,
+        displayName: m.displayName,
         avatarUrl: m.avatarUrl ?? null,
-        elder: m.elder ?? false
+        elder: m.elder ?? false,
       });
     }
     return Array.from(byId.values());
@@ -151,16 +164,24 @@ export default function CalendarScreen() {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<string | null>(null);
   const [activityToView, setActivityToView] = useState<string | null>(null);
-  const [activityDateToView, setActivityDateToView] = useState<string | null>(null);
+  const [activityDateToView, setActivityDateToView] = useState<string | null>(
+    null,
+  );
 
   // Detectar cuando se pasa un activityId desde notificaciones
   useEffect(() => {
-    if (params.activityId && typeof params.activityId === 'string' && activitiesQuery.data) {
+    if (
+      params.activityId &&
+      typeof params.activityId === "string" &&
+      activitiesQuery.data
+    ) {
       const activities = Array.isArray(activitiesQuery.data)
         ? activitiesQuery.data
         : (activitiesQuery.data as { data?: Activity[] }).data || [];
-      
-      const activity = activities.find((a: Activity) => a.id === params.activityId);
+
+      const activity = activities.find(
+        (a: Activity) => a.id === params.activityId,
+      );
       if (activity) {
         // Establecer la actividad a visualizar
         setActivityToView(params.activityId);
@@ -283,43 +304,45 @@ export default function CalendarScreen() {
         preSelectedElderId={selectedElderId}
       />
 
-      <Dialog
-        visible={deleteModalVisible}
-        onDismiss={() => setDeleteModalVisible(false)}
-        style={{
-          backgroundColor: COLORS.background,
-          width: "90%",
-          alignSelf: "center",
-          borderRadius: 16,
-          paddingVertical: 14,
-        }}
-      >
-        <Dialog.Title style={{ ...baseStyles.heading, paddingTop: 8 }}>
-          Eliminar evento
-        </Dialog.Title>
-        <Dialog.Content style={{ paddingBottom: 8 }}>
-          <Text style={{ ...baseStyles.subheading, marginTop: 0 }}>
-            ¿Estás seguro que quieres eliminar este evento?
-          </Text>
-        </Dialog.Content>
-        <Dialog.Actions
+      <Portal>
+        <Dialog
+          visible={deleteModalVisible}
+          onDismiss={() => setDeleteModalVisible(false)}
           style={{
-            paddingBottom: 12,
-            paddingHorizontal: 20,
-            justifyContent: "space-between",
+            backgroundColor: COLORS.background,
+            width: "90%",
+            alignSelf: "center",
+            borderRadius: 16,
+            paddingVertical: 14,
           }}
         >
-          <CancelButton onPress={() => setDeleteModalVisible(false)} />
-          <Button
-            onPress={handleDelete}
-            mode="contained"
-            buttonColor={COLORS.secondary}
-            style={{ borderRadius: 12, paddingHorizontal: 24 }}
+          <Dialog.Title style={{ ...baseStyles.heading, paddingTop: 8 }}>
+            Eliminar evento
+          </Dialog.Title>
+          <Dialog.Content style={{ paddingBottom: 8 }}>
+            <Text style={{ ...baseStyles.subheading, marginTop: 0 }}>
+              ¿Estás seguro que quieres eliminar este evento?
+            </Text>
+          </Dialog.Content>
+          <Dialog.Actions
+            style={{
+              paddingBottom: 12,
+              paddingHorizontal: 20,
+              justifyContent: "space-between",
+            }}
           >
-            Eliminar
-          </Button>
-        </Dialog.Actions>
-      </Dialog>
+            <CancelButton onPress={() => setDeleteModalVisible(false)} />
+            <Button
+              onPress={handleDelete}
+              mode="contained"
+              buttonColor={COLORS.secondary}
+              style={{ borderRadius: 12, paddingHorizontal: 24 }}
+            >
+              Eliminar
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
 
       {snackbarType === "success" ? (
         <SuccessSnackbar
