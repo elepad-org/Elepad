@@ -60,9 +60,11 @@ jobs:
         run: |
           echo "$SUPABASE_URL" | npx -w apps/api wrangler secret put SUPABASE_URL --config wrangler.toml
           echo "$SUPABASE_SERVICE_ROLE_KEY" | npx -w apps/api wrangler secret put SUPABASE_SERVICE_ROLE_KEY --config wrangler.toml
+          echo "$GEMINI_API_KEY" | npx -w apps/api wrangler secret put GEMINI_API_KEY --config wrangler.toml
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
