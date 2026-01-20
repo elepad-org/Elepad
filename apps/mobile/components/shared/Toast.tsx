@@ -24,6 +24,7 @@ interface ToastProps {
     label: string;
     onPress: () => void;
   };
+  withNavbar?: boolean;
 }
 
 const TOAST_ICONS: Record<ToastType, string> = {
@@ -48,8 +49,9 @@ const Toast = ({
   onDismiss,
   duration = 3000,
   action,
+  withNavbar = true,
 }: ToastProps) => {
-  const translateY = useRef(new Animated.Value(100)).current;
+  const scale = useRef(new Animated.Value(0.8)).current;
   const opacity = useRef(new Animated.Value(0)).current;
   const [isVisible, setIsVisible] = useState(false);
 
@@ -57,14 +59,14 @@ const Toast = ({
     if (visible) {
       setIsVisible(true);
       Animated.parallel([
-        Animated.timing(translateY, {
-          toValue: 0,
-          duration: 300,
+        Animated.spring(scale, {
+          toValue: 1,
+          friction: 6,
           useNativeDriver: true,
         }),
         Animated.timing(opacity, {
           toValue: 1,
-          duration: 300,
+          duration: 200,
           useNativeDriver: true,
         }),
       ]).start();
@@ -82,14 +84,14 @@ const Toast = ({
 
   const hide = () => {
     Animated.parallel([
-      Animated.timing(translateY, {
-        toValue: 100,
-        duration: 300,
+      Animated.timing(scale, {
+        toValue: 0.8,
+        duration: 200,
         useNativeDriver: true,
       }),
       Animated.timing(opacity, {
         toValue: 0,
-        duration: 250,
+        duration: 200,
         useNativeDriver: true,
       }),
     ]).start(() => {
@@ -100,22 +102,24 @@ const Toast = ({
 
   if (!visible && !isVisible) return null;
 
+  // Calculate dynamic bottom position based on navbar presence
+  const bottomPosition = withNavbar ? LAYOUT.bottomNavHeight + 10 : 30;
+
   return (
     <Animated.View
       style={[
         styles.container,
         {
+          bottom: bottomPosition,
           opacity,
-          transform: [{ translateY }],
+          transform: [{ scale }],
         },
       ]}
     >
-      <View
-        style={[
-          styles.contentContainer,
-          { borderLeftColor: TOAST_COLORS[type] },
-        ]}
-      >
+      <View style={styles.contentContainer}>
+        <View
+          style={[styles.accentBorder, { backgroundColor: TOAST_COLORS[type] }]}
+        />
         <View
           style={[
             styles.iconContainer,
@@ -172,6 +176,7 @@ interface ShowToastOptions {
     label: string;
     onPress: () => void;
   };
+  withNavbar?: boolean;
 }
 
 interface ToastContextType {
@@ -196,6 +201,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
     visible: false,
     message: "",
     onDismiss: () => {},
+    withNavbar: true,
   });
 
   const hideToast = useCallback(() => {
@@ -209,6 +215,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
       type = "info",
       duration = 3000,
       action,
+      withNavbar = true,
     }: ShowToastOptions) => {
       setToastConfig({
         visible: true,
@@ -218,6 +225,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
         duration,
         action,
         onDismiss: hideToast,
+        withNavbar,
       });
     },
     [hideToast],
@@ -234,24 +242,35 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    bottom: LAYOUT.bottomNavHeight + 20,
     left: 20,
     right: 20,
+    // Provide explicit height or flexible layout
     zIndex: 9999,
-    alignItems: "center",
+    // Add shadow properties to the animated container
+    ...SHADOWS.medium,
+    borderRadius: 16,
+    backgroundColor: COLORS.white, // Ensure shadow has a body to cast from
+    // Ensure we don't clip overflow here so shadow is visible
   },
   contentContainer: {
     flexDirection: "row",
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
-    padding: 12,
+    alignItems: "center",
     width: "100%",
     minHeight: 60,
-    alignItems: "center",
-    borderLeftWidth: 4,
-    ...SHADOWS.medium,
+    padding: 12,
+    // Internal clipping for the accent border
+    borderRadius: 16,
+    overflow: "hidden",
+    // border moved here
     borderWidth: 1,
     borderColor: "rgba(0,0,0,0.05)",
+  },
+  accentBorder: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 6,
   },
   iconContainer: {
     width: 40,
