@@ -15,13 +15,13 @@ import { patchUsersId } from "@elepad/api-client/src/gen/client";
 import { UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import ProfileHeader from "@/components/ProfileHeader";
 import { LoadingProfile } from "@/components/shared";
-import SuccessSnackbar from "@/components/shared/SuccessSnackbar";
-import ErrorSnackbar from "@/components/shared/ErrorSnackbar";
 import { useRouter } from "expo-router";
 import { COLORS, STYLES } from "@/styles/base";
+import { useToast } from "@/components/shared/Toast";
 
 export default function ConfiguracionScreen() {
   const router = useRouter();
+  const { showToast } = useToast();
 
   const { userElepad, refreshUserElepad, signOut, userElepadLoading } =
     useAuth();
@@ -49,11 +49,6 @@ export default function ConfiguracionScreen() {
   const [editExpanded, setEditExpanded] = useState(false);
   const [formName, setFormName] = useState(displayName);
   const [saving, setSaving] = useState(false);
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarType, setSnackbarType] = useState<"success" | "error">(
-    "success"
-  );
   const [photoOpen, setPhotoOpen] = useState(false);
   const [googleCalendarEnabled, setGoogleCalendarEnabled] = useState(false);
   const [loadingGoogleCalendar, setLoadingGoogleCalendar] = useState(false);
@@ -76,16 +71,16 @@ export default function ConfiguracionScreen() {
       // TODO: Implement API call to enable/disable Google Calendar
       // For now, just toggle the state
       setGoogleCalendarEnabled(newValue);
-      setSnackbarMessage(
-        `Google Calendar ${newValue ? "habilitado" : "deshabilitado"}`
-      );
-      setSnackbarType("success");
-      setSnackbarVisible(true);
+      showToast({
+        message: `Google Calendar ${newValue ? "habilitado" : "deshabilitado"}`,
+        type: "success",
+      });
     } catch (error) {
       console.error("Error toggling Google Calendar:", error);
-      setSnackbarMessage("Error al cambiar configuración de Google Calendar");
-      setSnackbarType("error");
-      setSnackbarVisible(true);
+      showToast({
+        message: "Error al cambiar configuración de Google Calendar",
+        type: "error",
+      });
     } finally {
       setLoadingGoogleCalendar(false);
     }
@@ -175,13 +170,19 @@ export default function ConfiguracionScreen() {
                         });
                         setEditExpanded(false);
                         await refreshUserElepad?.();
-                        setSnackbarVisible(true);
+                        showToast({
+                          message: "Nombre actualizado correctamente",
+                          type: "success",
+                        });
                       } catch (e: unknown) {
                         const msg =
                           e instanceof Error
                             ? e.message
                             : "Error al actualizar";
-                        alert(msg);
+                        showToast({
+                          message: msg,
+                          type: "error",
+                        });
                       } finally {
                         setSaving(false);
                       }
@@ -246,22 +247,12 @@ export default function ConfiguracionScreen() {
             onReopen={() => setPhotoOpen(true)}
             onSuccess={async () => {
               await refreshUserElepad?.();
-              setSnackbarVisible(true);
+              showToast({
+                message: "Foto actualizada correctamente",
+                type: "success",
+              });
             }}
           />
-          {snackbarType === "success" ? (
-            <SuccessSnackbar
-              visible={snackbarVisible}
-              onDismiss={() => setSnackbarVisible(false)}
-              message={snackbarMessage}
-            />
-          ) : (
-            <ErrorSnackbar
-              visible={snackbarVisible}
-              onDismiss={() => setSnackbarVisible(false)}
-              message={snackbarMessage}
-            />
-          )}
         </Portal>
       </ScrollView>
     </SafeAreaView>
