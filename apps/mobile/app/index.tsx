@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
-import { Redirect, useRouter } from "expo-router";
-import { useRef } from "react";
+import { useRouter } from "expo-router";
+import { useRef, useEffect } from "react";
 import { Animated, View, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Text, ActivityIndicator } from "react-native-paper";
@@ -11,6 +11,15 @@ export default function IndexRedirect() {
   const { session, loading } = useAuth();
   const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(1)).current;
+  const hasRedirected = useRef(false);
+
+  // Si hay sesión, redirigir a home una sola vez
+  useEffect(() => {
+    if (session && !loading && !hasRedirected.current) {
+      hasRedirected.current = true;
+      router.replace("/home");
+    }
+  }, [session, loading]);
 
   if (loading) {
     return (
@@ -20,8 +29,13 @@ export default function IndexRedirect() {
     );
   }
 
+  // Si hay sesión, mostrar loading mientras redirige
   if (session) {
-    return <Redirect href="/home" />;
+    return (
+      <View style={STYLES.center}>
+        <ActivityIndicator />
+      </View>
+    );
   }
 
   return (

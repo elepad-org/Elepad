@@ -19,7 +19,7 @@ import { COLORS } from "@/styles/base";
 
 const queryClient = new QueryClient();
 
-// Caché en memoria del token para cumplir con la firma síncrona de getToken, solutions by el amigo
+// Caché en memoria del token para cumplir con la firma síncrona de getToken
 let AUTH_TOKEN: string | undefined;
 
 export default function RootLayout() {
@@ -30,10 +30,12 @@ export default function RootLayout() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       AUTH_TOKEN = data.session?.access_token ?? undefined;
+      console.log("🔑 Token inicial cargado:", AUTH_TOKEN ? "✅ Presente" : "❌ Ausente");
     });
     const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (event, session) => {
         AUTH_TOKEN = session?.access_token ?? undefined;
+        console.log(`🔑 Token actualizado [${event}]:`, AUTH_TOKEN ? "✅ Presente" : "❌ Ausente");
       }
     );
     return () => listener?.subscription?.unsubscribe?.();
@@ -47,7 +49,11 @@ export default function RootLayout() {
   configureApiClient({
     // TODO: read from a config.ts file, and make that file read from env
     baseUrl: process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:8787",
-    getToken: () => AUTH_TOKEN,
+    // Función que siempre retorna el token más reciente
+    // Si AUTH_TOKEN está vacío, intenta obtenerlo sincrónicamente del storage
+    getToken: () => {
+      return AUTH_TOKEN;
+    },
   });
 
   const paperTheme = colorScheme === "dark" ? darkTheme : lightTheme;

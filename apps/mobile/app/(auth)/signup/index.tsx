@@ -1,28 +1,12 @@
 import NewAccount from "@/components/Forms/Auth/NewAccount";
-import { useAuth } from "@/hooks/useAuth";
-import { Redirect } from "expo-router";
 import { useRef } from "react";
-import { Animated, StyleSheet, View, ImageBackground } from "react-native";
+import { Animated, StyleSheet, ImageBackground } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { ActivityIndicator } from "react-native-paper";
 import { FONT } from "@/styles/base";
 import fondoLogin from "@/assets/images/pirotecnia.png";
 
 export default function SignupScreen() {
-  const { session, loading } = useAuth();
   const fadeAnim = useRef(new Animated.Value(1)).current;
-
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator />
-      </View>
-    );
-  }
-
-  if (session) {
-    return <Redirect href="/home" />;
-  }
 
   return (
     <ImageBackground
@@ -46,7 +30,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
   logoContainer: {
     width: 300,
     height: 300,

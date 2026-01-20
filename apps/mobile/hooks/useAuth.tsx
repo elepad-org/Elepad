@@ -49,6 +49,10 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   
   // Ref para tracking de cambio de día
   const lastCheckedDate = useRef<string | null>(null);
+  // Ref para evitar redirects múltiples
+  const hasInitialized = useRef(false);
+  // Ref para evitar múltiples redirects después de login
+  const hasRedirectedAfterSignIn = useRef(false);
   
   // Obtener la fecha local del cliente en formato YYYY-MM-DD
   const getClientDate = () => {
@@ -207,13 +211,15 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         setUserElepadLoading(false);
       }
       setLoading(false);
-      if (session) router.replace("/home");
+      hasInitialized.current = true;
+      // No redirigir aquí - dejar que cada pantalla maneje su propia redirección
     };
 
     setData();
 
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log("🔐 Auth state change:", event);
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
@@ -222,11 +228,23 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
             await new Promise(resolve => setTimeout(resolve, 300));
           }
           await loadElepadUserById(session.user.id);
-          router.replace("/home");
+          // Solo redirigir a home si el usuario acaba de iniciar sesión explícitamente
+          // Y SOLO la primera vez (no en refrescos de token o window focus)
+          if (event === 'SIGNED_IN' && hasInitialized.current && !hasRedirectedAfterSignIn.current) {
+            console.log("✅ Redirigiendo a home después de login");
+            hasRedirectedAfterSignIn.current = true;
+            router.replace("/home");
+          }
         } else {
           setUserElepad(null);
           setUserElepadLoading(false);
-          router.replace("/");
+          // Resetear flag cuando se cierra sesión
+          hasRedirectedAfterSignIn.current = false;
+          // Solo redirigir a login si ya se había inicializado (evitar redirect en mount inicial)
+          if (hasInitialized.current && event === 'SIGNED_OUT') {
+            console.log("🚪 Redirigiendo a login después de logout");
+            router.replace("/");
+          }
         }
         setLoading(false);
       },
