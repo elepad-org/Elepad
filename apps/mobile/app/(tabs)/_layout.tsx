@@ -5,6 +5,7 @@ import {
   useWindowDimensions,
   Animated,
   Pressable,
+  Keyboard,
 } from "react-native";
 import { Icon, Text } from "react-native-paper";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -141,6 +142,28 @@ export default function TabLayout() {
     configuracion: ConfiguracionScreen,
   });
 
+  // Detect global keyboard visibility to hide tab bar
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    // Keyboard listeners
+    const showListener =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideListener =
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const onShow = () => setIsKeyboardVisible(true);
+    const onHide = () => setIsKeyboardVisible(false);
+
+    const showSubscription = Keyboard.addListener(showListener, onShow);
+    const hideSubscription = Keyboard.addListener(hideListener, onHide);
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
+
   const renderTabBar = (
     props: SceneRendererProps & {
       navigationState: NavigationState<{
@@ -152,6 +175,9 @@ export default function TabLayout() {
     },
   ) => {
     const { navigationState, position } = props;
+
+    // If keyboard is open, do not render the floating tab bar
+    if (isKeyboardVisible) return null;
 
     return (
       <View
