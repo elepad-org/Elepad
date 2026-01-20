@@ -22,18 +22,9 @@ export default function Footer() {
           }}
         >
           <Box>
-            <Typography
-              variant="h5"
-              sx={{
-                fontWeight: 700,
-                color: 'primary.main',
-                mb: 1,
-              }}
-            >
-              Elepad
-            </Typography>
               {/* Tagline removed as requested */}
           </Box>
+              {/* Logo or brand area removed for a cleaner look */}
 
           <Stack spacing={2} sx={{ alignItems: { xs: 'center', md: 'flex-start' } }}>
             <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem' }}>
@@ -106,7 +97,7 @@ export default function Footer() {
           }}
         >
           <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>
-            © {new Date().getFullYear()} Elepad. Todos los derechos reservados.
+                © {new Date().getFullYear()} Todos los derechos reservados.
           </Typography>
         </Box>
       </Container>
