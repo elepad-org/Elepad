@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import { Animated, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Text, Icon } from "react-native-paper";
+import { useSegments } from "expo-router";
 import { COLORS, SHADOWS, FONT, LAYOUT } from "@/styles/base";
 
 export type ToastType = "success" | "error" | "info" | "warning";
@@ -49,11 +50,18 @@ const Toast = ({
   onDismiss,
   duration = 3000,
   action,
-  withNavbar = true,
+  withNavbar,
 }: ToastProps) => {
+  const segments = useSegments();
   const scale = useRef(new Animated.Value(0.8)).current;
   const opacity = useRef(new Animated.Value(0)).current;
   const [isVisible, setIsVisible] = useState(false);
+
+  // Determine if we should account for navbar height
+  // If withNavbar is manually passed, use it.
+  // Otherwise, auto-detect if we are inside a (tabs) route.
+  const effectiveWithNavbar =
+    withNavbar !== undefined ? withNavbar : segments.includes("(tabs)");
 
   useEffect(() => {
     if (visible) {
@@ -103,7 +111,7 @@ const Toast = ({
   if (!visible && !isVisible) return null;
 
   // Calculate dynamic bottom position based on navbar presence
-  const bottomPosition = withNavbar ? LAYOUT.bottomNavHeight + 10 : 30;
+  const bottomPosition = effectiveWithNavbar ? LAYOUT.bottomNavHeight + 10 : 30;
 
   return (
     <Animated.View
@@ -201,7 +209,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
     visible: false,
     message: "",
     onDismiss: () => {},
-    withNavbar: true,
+    // withNavbar left undefined to allow auto-detection in component
   });
 
   const hideToast = useCallback(() => {
@@ -215,7 +223,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
       type = "info",
       duration = 3000,
       action,
-      withNavbar = true,
+      withNavbar,
     }: ShowToastOptions) => {
       setToastConfig({
         visible: true,
@@ -244,13 +252,13 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 20,
     right: 20,
-    // Provide explicit height or flexible layout
     zIndex: 9999,
     // Add shadow properties to the animated container
     ...SHADOWS.medium,
     borderRadius: 16,
     backgroundColor: COLORS.white, // Ensure shadow has a body to cast from
     // Ensure we don't clip overflow here so shadow is visible
+    alignItems: "center",
   },
   contentContainer: {
     flexDirection: "row",
