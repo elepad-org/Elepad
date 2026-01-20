@@ -868,11 +868,7 @@ export default function NotificationsScreen() {
                                 : "checkbox-blank-circle-outline"
                             }
                             size={20}
-                            color={
-                              isActivityCompleted
-                                ? COLORS.primary
-                                : COLORS.textLight
-                            }
+                            color={COLORS.primary}
                             style={{ marginRight: 12 }}
                           />
                           <Text

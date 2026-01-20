@@ -299,7 +299,7 @@ export default function ActivityItem({
                   <IconButton
                     icon="account-arrow-right"
                     size={20}
-                    iconColor={COLORS.secondary}
+                    iconColor={COLORS.primary}
                     style={{ margin: 0 }}
                   />
                   <Text variant="bodyMedium" style={styles.modalText}>
@@ -317,7 +317,7 @@ export default function ActivityItem({
                       : "checkbox-blank-circle-outline"
                   }
                   size={20}
-                  iconColor={isCompleted ? COLORS.primary : COLORS.textLight}
+                  iconColor={COLORS.primary}
                   style={{ margin: 0 }}
                 />
                 <Text variant="bodyMedium" style={styles.modalText}>
