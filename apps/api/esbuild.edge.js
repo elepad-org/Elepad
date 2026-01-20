@@ -10,8 +10,16 @@ await build({
   bundle: true,
   format: "esm",
   platform: "neutral", // not Nodejs
-  // These packages are ESM-only and use bare specifiers, so we need to mark them as external.
-  external: ["@supabase/supabase-js", "@hono/zod-openapi"],
+  // These packages are ESM-only and use bare specifiers, or have Node.js dependencies, so we need to mark them as external.
+  external: [
+    "@supabase/supabase-js",
+    "@hono/zod-openapi",
+    "googleapis",
+    "@google/generative-ai",
+    "fs",
+    "os",
+    "path",
+  ],
 });
 
 console.log(`✅ Bundled the API as a Cloudflare Worker at ${outfile}`);
