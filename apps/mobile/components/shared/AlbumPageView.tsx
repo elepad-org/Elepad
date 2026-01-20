@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Dimensions, Image, ScrollView } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Dimensions,
+  Image,
+  ScrollView,
+  Platform,
+} from "react-native";
 import { Text } from "react-native-paper";
 import { COLORS, SHADOWS } from "@/styles/base";
 import { AlbumPage } from "@elepad/api-client";
@@ -18,24 +25,30 @@ export default function AlbumPageView({
   totalPages,
 }: AlbumPageViewProps) {
   const [imageError, setImageError] = useState(false);
-  
+
   return (
     <View style={styles.container}>
       {/* Left Side - Photo */}
       <View style={styles.leftSide}>
         <View style={styles.polaroidContainer}>
-          <View style={styles.polaroid}>
+          <View
+            style={
+              Platform.OS === "web" ? styles.polaroidWeb : styles.polaroidMobile
+            }
+          >
             {page.imageUrl && !imageError ? (
               <Image
                 source={{ uri: page.imageUrl }}
-                style={styles.photo}
+                style={Platform.OS === "web" ? styles.photoWeb : styles.photoMobile}
                 resizeMode="cover"
                 onError={() => setImageError(true)}
                 accessibilityLabel={page.title || "Memoria"}
               />
             ) : (
-              <View style={styles.placeholderPhoto}>
-                <Text style={styles.placeholderText}>{page.title || "Memoria"}</Text>
+              <View style={Platform.OS === "web" ? styles.placeholderPhotoWeb : styles.placeholderPhotoMobile}>
+                <Text style={styles.placeholderText}>
+                  {page.title || "Memoria"}
+                </Text>
               </View>
             )}
             {/* Polaroid bottom space */}
@@ -52,19 +65,27 @@ export default function AlbumPageView({
 
       {/* Right Side - Narrative */}
       <View style={styles.rightSide}>
-        <View style={styles.narrativeWrapper}>
-          <ScrollView
-            style={styles.narrativeContainer}
-            contentContainerStyle={styles.narrativeContent}
-            showsVerticalScrollIndicator={true}
-            bounces={false}
-            overScrollMode="never"
-          >
-            <Text style={styles.narrativeText}>
+        {Platform.OS === "web" ? (
+          <View style={styles.narrativeWrapper}>
+            <ScrollView
+              style={styles.narrativeContainerWeb}
+              contentContainerStyle={styles.narrativeContent}
+              showsVerticalScrollIndicator={true}
+              bounces={false}
+              overScrollMode="never"
+            >
+              <Text style={styles.narrativeTextWeb}>
+                {page.description || "Generando narrativa..."}
+              </Text>
+            </ScrollView>
+          </View>
+        ) : (
+          <View style={styles.narrativeContainerMobile}>
+            <Text style={styles.narrativeTextMobile}>
               {page.description || "Generando narrativa..."}
             </Text>
-          </ScrollView>
-        </View>
+          </View>
+        )}
 
         {/* Page Indicator */}
         <View style={styles.pageIndicator}>
@@ -101,7 +122,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  polaroid: {
+  polaroidWeb: {
     backgroundColor: "#FFFFFF",
     padding: 12,
     borderRadius: 4,
@@ -111,13 +132,38 @@ const styles = StyleSheet.create({
     maxWidth: SCREEN_HEIGHT * 0.87, // In landscape, height is smaller dimension
     maxHeight: SCREEN_HEIGHT * 0.97,
   },
-  photo: {
+  polaroidMobile: {
+    backgroundColor: "#FFFFFF",
+    padding: 6,
+    borderRadius: 4,
+    ...SHADOWS.medium,
+    // Slight rotation for realistic effect
+    transform: [{ rotate: "-2deg" }],
+    maxWidth: SCREEN_HEIGHT * 0.50, // In landscape, height is smaller dimension
+    maxHeight: SCREEN_HEIGHT * 0.65,
+  },
+  photoWeb: {
     width: SCREEN_HEIGHT * 0.67,
     height: SCREEN_HEIGHT * 0.67,
     borderRadius: 2,
     backgroundColor: COLORS.border,
   },
-  placeholderPhoto: {
+  photoMobile: {
+    width: SCREEN_HEIGHT * 0.4,
+    height: SCREEN_HEIGHT * 0.4,
+    borderRadius: 2,
+    backgroundColor: COLORS.border,
+  },
+  placeholderPhotoMobile: {
+    width: SCREEN_HEIGHT * 0.4,
+    height: SCREEN_HEIGHT * 0.4,
+    borderRadius: 2,
+    backgroundColor: COLORS.backgroundSecondary,
+    justifyContent: "center",
+    textAlign: "center",
+    fontFamily: "Georgia", // Handwritten-like serif font
+  },
+  placeholderPhotoWeb: {
     width: SCREEN_HEIGHT * 0.67,
     height: SCREEN_HEIGHT * 0.67,
     borderRadius: 2,
@@ -148,16 +194,20 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     overflow: "hidden",
   },
-  narrativeContainer: {
+  narrativeContainerWeb: {
     flex: 1,
     width: "100%",
+  },
+  narrativeContainerMobile: {
+    flex: 1,
+    minHeight: 320
   },
   narrativeContent: {
     flexGrow: 1,
     paddingRight: 20,
     paddingBottom: 20, // Extra padding at bottom
   },
-  narrativeText: {
+  narrativeTextWeb: {
     fontSize: 20,
     lineHeight: 32,
     color: "#2C2416", // Dark brown for good contrast
@@ -165,6 +215,13 @@ const styles = StyleSheet.create({
     textAlign: "left",
     width: "100%",
     flexWrap: "wrap",
+  },
+  narrativeTextMobile: {
+    fontSize: 20,
+    lineHeight: 32,
+    color: "#2C2416", // Dark brown for good contrast
+    fontFamily: "Georgia", // Serif font for nostalgic feel
+    textAlign: "left",
   },
   pageIndicator: {
     position: "absolute",
