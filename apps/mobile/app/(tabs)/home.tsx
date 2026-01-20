@@ -640,11 +640,13 @@ export default function HomeScreen() {
               mode="contained"
               onPress={() =>
                 showToast({
-                  message: "¡Operación exitosa!",
+                  title: "Actividad Completada",
+                  message: "¡Muy bien! Has terminado tu sesión.",
                   type: "success",
                 })
               }
-              style={{ flex: 1, backgroundColor: COLORS.success }}
+              style={{ flex: 1, backgroundColor: "#9AD6AA" }}
+              labelStyle={{ fontSize: 12, color: "#2E4A33" }}
             >
               Éxito
             </Button>
@@ -652,30 +654,45 @@ export default function HomeScreen() {
               mode="contained"
               onPress={() =>
                 showToast({
-                  title: "Error",
-                  message: "Algo salió mal",
+                  title: "Error de Conexión",
+                  message: "No se pudo actualizar la lista.",
                   type: "error",
                 })
               }
-              style={{ flex: 1, backgroundColor: COLORS.error }}
+              style={{ flex: 1, backgroundColor: "#FF9999" }}
+              labelStyle={{ fontSize: 12, color: "#5F2A2A" }}
             >
               Error
+            </Button>
+          </View>
+          <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
+            <Button
+              mode="contained"
+              onPress={() =>
+                showToast({
+                  title: "Recordatorio",
+                  message: "Tienes una actividad pendiente.",
+                  type: "info",
+                })
+              }
+              style={{ flex: 1, backgroundColor: "#8CC0FF" }}
+              labelStyle={{ fontSize: 12, color: "#1F4068" }}
+            >
+              Info
             </Button>
             <Button
               mode="contained"
               onPress={() =>
                 showToast({
-                  message: "Nueva actualización disponible",
-                  type: "info",
-                  action: {
-                    label: "Ver",
-                    onPress: () => console.log("Ver update"),
-                  },
+                  title: "Batería Baja",
+                  message: "Conecta tu dispositivo pronto.",
+                  type: "warning",
                 })
               }
-              style={{ flex: 1, backgroundColor: COLORS.secondary }}
+              style={{ flex: 1, backgroundColor: "#FFE082" }}
+              labelStyle={{ fontSize: 12, color: "#5C4B1F" }}
             >
-              Info
+              Aviso
             </Button>
           </View>
         </View>

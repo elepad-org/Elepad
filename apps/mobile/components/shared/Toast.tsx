@@ -36,10 +36,10 @@ const TOAST_ICONS: Record<ToastType, string> = {
 };
 
 const TOAST_COLORS: Record<ToastType, string> = {
-  success: "#28a745", // Green
-  error: "#dc3545", // Red
-  info: "#17a2b8", // Cyan/Blue
-  warning: "#ffc107", // Yellow
+  success: "#9AD6AA", // Soft Pastel Green (Matches Home)
+  error: "#FF9999", // Soft Pastel Red (Matches Home)
+  info: "#8CC0FF", // Soft Pastel Blue (Matches Home)
+  warning: "#FFE082", // Soft Pastel Yellow (Matches Home)
 };
 
 const Toast = ({
