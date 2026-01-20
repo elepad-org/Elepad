@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "scheme": "elepad",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/ele-def.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "jsEngine": "hermes",
@@ -14,7 +14,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/ele-def.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
