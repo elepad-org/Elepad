@@ -9,16 +9,12 @@ import {
   Dimensions,
   Image,
 } from "react-native";
-import {
-  Text,
-  Avatar,
-  Button,
-  IconButton,
-} from "react-native-paper";
+import { Text, Avatar, Button, IconButton } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, SHADOWS } from "@/styles/base";
 import { LoadingProfile, SkeletonBox } from "@/components/shared";
+import { useToast } from "@/components/shared/Toast";
 import {
   useGetActivitiesFamilyCodeIdFamilyGroup,
   useGetAttempts,
@@ -62,6 +58,7 @@ const getGameInfo = (gameType: string) => {
 
 export default function HomeScreen() {
   const { userElepad, userElepadLoading } = useAuth();
+  const { showToast } = useToast();
   const router = useRouter();
   const { unreadCount } = useNotifications();
   const queryClient = useQueryClient();
@@ -448,12 +445,22 @@ export default function HomeScreen() {
                 {[1, 2, 3].map((i) => (
                   <View key={i} style={styles.eventItem}>
                     <View style={styles.eventTime}>
-                      <SkeletonBox width={60} height={16} borderRadius={4} style={{ marginBottom: 8 }} />
+                      <SkeletonBox
+                        width={60}
+                        height={16}
+                        borderRadius={4}
+                        style={{ marginBottom: 8 }}
+                      />
                       <SkeletonBox width={50} height={14} borderRadius={4} />
                     </View>
                     <View style={styles.eventDivider} />
                     <View style={styles.eventContent}>
-                      <SkeletonBox width="80%" height={18} borderRadius={4} style={{ marginBottom: 8 }} />
+                      <SkeletonBox
+                        width="80%"
+                        height={18}
+                        borderRadius={4}
+                        style={{ marginBottom: 8 }}
+                      />
                       <SkeletonBox width="60%" height={14} borderRadius={4} />
                     </View>
                   </View>
@@ -623,6 +630,54 @@ export default function HomeScreen() {
               </Button>
             </View>
           )}
+        </View>
+
+        {/* Toast Showcase */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Prueba de Toasts</Text>
+          <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
+            <Button
+              mode="contained"
+              onPress={() =>
+                showToast({
+                  message: "¡Operación exitosa!",
+                  type: "success",
+                })
+              }
+              style={{ flex: 1, backgroundColor: COLORS.success }}
+            >
+              Éxito
+            </Button>
+            <Button
+              mode="contained"
+              onPress={() =>
+                showToast({
+                  title: "Error",
+                  message: "Algo salió mal",
+                  type: "error",
+                })
+              }
+              style={{ flex: 1, backgroundColor: COLORS.error }}
+            >
+              Error
+            </Button>
+            <Button
+              mode="contained"
+              onPress={() =>
+                showToast({
+                  message: "Nueva actualización disponible",
+                  type: "info",
+                  action: {
+                    label: "Ver",
+                    onPress: () => console.log("Ver update"),
+                  },
+                })
+              }
+              style={{ flex: 1, backgroundColor: COLORS.secondary }}
+            >
+              Info
+            </Button>
+          </View>
         </View>
 
         {/* Espacio inferior para que el contenido no quede debajo del menú */}
