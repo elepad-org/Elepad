@@ -160,8 +160,8 @@ export default function Hero() {
                 src={eleDef}
                 alt="Elepad"
                 sx={{
-                  width: '100%',
-                  height: '100%',
+                  width: '82%',
+                  height: '82%',
                   objectFit: 'contain',
                   filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.12))',
                 }}

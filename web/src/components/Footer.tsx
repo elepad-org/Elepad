@@ -32,9 +32,7 @@ export default function Footer() {
             >
               Elepad
             </Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              Conectando generaciones con amor
-            </Typography>
+              {/* Tagline removed as requested */}
           </Box>
 
           <Stack spacing={2} sx={{ alignItems: { xs: 'center', md: 'flex-start' } }}>
@@ -42,14 +40,16 @@ export default function Footer() {
               Enlaces
             </Typography>
             <Link
-              href="#"
+              component={RouterLink}
+              to="/sobre-nosotros"
               underline="hover"
               sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
             >
               Sobre Nosotros
             </Link>
             <Link
-              href="#"
+              component={RouterLink}
+              to="/contacto"
               underline="hover"
               sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
             >
@@ -78,14 +78,16 @@ export default function Footer() {
               Eliminar Cuenta
             </Link>
             <Link
-              href="#"
+              component={RouterLink}
+              to="/terminos-de-servicio"
               underline="hover"
               sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
             >
               Términos de Servicio
             </Link>
             <Link
-              href="#"
+              component={RouterLink}
+              to="/ayuda"
               underline="hover"
               sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
             >
