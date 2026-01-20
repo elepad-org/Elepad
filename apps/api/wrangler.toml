@@ -2,6 +2,8 @@ name = "api"
 main = "cloudflare-worker.js"
 compatibility_date = "2025-08-16"
 
+compatibility_flags = ["nodejs_compat"]
+
 [observability]
 enabled = true
 head_sampling_rate = 1  # store 100% percent of logs
