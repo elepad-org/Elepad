@@ -1,0 +1,293 @@
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  ReactNode,
+} from "react";
+import { Animated, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Text, Icon } from "react-native-paper";
+import { COLORS, SHADOWS, FONT, LAYOUT } from "@/styles/base";
+
+export type ToastType = "success" | "error" | "info" | "warning";
+
+interface ToastProps {
+  visible: boolean;
+  title?: string;
+  message: string;
+  type?: ToastType;
+  onDismiss: () => void;
+  duration?: number;
+  action?: {
+    label: string;
+    onPress: () => void;
+  };
+}
+
+const TOAST_ICONS: Record<ToastType, string> = {
+  success: "check-circle",
+  error: "alert-circle",
+  info: "information",
+  warning: "alert",
+};
+
+const TOAST_COLORS: Record<ToastType, string> = {
+  success: "#28a745", // Green
+  error: "#dc3545", // Red
+  info: "#17a2b8", // Cyan/Blue
+  warning: "#ffc107", // Yellow
+};
+
+const Toast = ({
+  visible,
+  title,
+  message,
+  type = "info",
+  onDismiss,
+  duration = 3000,
+  action,
+}: ToastProps) => {
+  const translateY = useRef(new Animated.Value(100)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    if (visible) {
+      setIsVisible(true);
+      Animated.parallel([
+        Animated.timing(translateY, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      if (duration > 0) {
+        const timer = setTimeout(() => {
+          hide();
+        }, duration);
+        return () => clearTimeout(timer);
+      }
+    } else {
+      hide();
+    }
+  }, [visible]);
+
+  const hide = () => {
+    Animated.parallel([
+      Animated.timing(translateY, {
+        toValue: 100,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setIsVisible(false);
+      onDismiss();
+    });
+  };
+
+  if (!visible && !isVisible) return null;
+
+  return (
+    <Animated.View
+      style={[
+        styles.container,
+        {
+          opacity,
+          transform: [{ translateY }],
+        },
+      ]}
+    >
+      <View
+        style={[
+          styles.contentContainer,
+          { borderLeftColor: TOAST_COLORS[type] },
+        ]}
+      >
+        <View
+          style={[
+            styles.iconContainer,
+            { backgroundColor: `${TOAST_COLORS[type]}15` },
+          ]}
+        >
+          <Icon
+            source={TOAST_ICONS[type]}
+            size={24}
+            color={TOAST_COLORS[type]}
+          />
+        </View>
+
+        <View style={styles.textContainer}>
+          {title && (
+            <Text
+              style={[styles.title, { color: TOAST_COLORS[type] }]}
+              numberOfLines={1}
+            >
+              {title}
+            </Text>
+          )}
+          <Text style={styles.message} numberOfLines={2}>
+            {message}
+          </Text>
+        </View>
+
+        {action ? (
+          <TouchableOpacity
+            onPress={action.onPress}
+            style={styles.actionButton}
+          >
+            <Text style={[styles.actionText, { color: TOAST_COLORS[type] }]}>
+              {action.label}
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={hide} style={styles.closeButton}>
+            <Icon source="close" size={20} color={COLORS.textPlaceholder} />
+          </TouchableOpacity>
+        )}
+      </View>
+    </Animated.View>
+  );
+};
+
+// Context Logic
+interface ShowToastOptions {
+  title?: string;
+  message: string;
+  type?: ToastType;
+  duration?: number;
+  action?: {
+    label: string;
+    onPress: () => void;
+  };
+}
+
+interface ToastContextType {
+  showToast: (options: ShowToastOptions) => void;
+  hideToast: () => void;
+}
+
+const ToastContext = createContext<ToastContextType | undefined>(undefined);
+
+export const useToast = () => {
+  const context = useContext(ToastContext);
+  if (!context) {
+    throw new Error("useToast must be used within a ToastProvider");
+  }
+  return context;
+};
+
+export const ToastProvider = ({ children }: { children: ReactNode }) => {
+  const [toastConfig, setToastConfig] = useState<
+    ToastProps & { visible: boolean }
+  >({
+    visible: false,
+    message: "",
+    onDismiss: () => {},
+  });
+
+  const hideToast = useCallback(() => {
+    setToastConfig((prev) => ({ ...prev, visible: false }));
+  }, []);
+
+  const showToast = useCallback(
+    ({
+      title,
+      message,
+      type = "info",
+      duration = 3000,
+      action,
+    }: ShowToastOptions) => {
+      setToastConfig({
+        visible: true,
+        title,
+        message,
+        type,
+        duration,
+        action,
+        onDismiss: hideToast,
+      });
+    },
+    [hideToast],
+  );
+
+  return (
+    <ToastContext.Provider value={{ showToast, hideToast }}>
+      {children}
+      <Toast {...toastConfig} onDismiss={hideToast} />
+    </ToastContext.Provider>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    position: "absolute",
+    bottom: LAYOUT.bottomNavHeight + 20,
+    left: 20,
+    right: 20,
+    zIndex: 9999,
+    alignItems: "center",
+  },
+  contentContainer: {
+    flexDirection: "row",
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    padding: 12,
+    width: "100%",
+    minHeight: 60,
+    alignItems: "center",
+    borderLeftWidth: 4,
+    ...SHADOWS.medium,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.05)",
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  textContainer: {
+    flex: 1,
+    justifyContent: "center",
+    paddingVertical: 4,
+  },
+  title: {
+    fontFamily: FONT.bold,
+    fontSize: 14,
+    marginBottom: 2,
+  },
+  message: {
+    fontFamily: FONT.medium,
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    lineHeight: 18,
+  },
+  closeButton: {
+    padding: 8,
+    marginLeft: 4,
+  },
+  actionButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginLeft: 4,
+  },
+  actionText: {
+    fontFamily: FONT.bold,
+    fontSize: 13,
+  },
+});
