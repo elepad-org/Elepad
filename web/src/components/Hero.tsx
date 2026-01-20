@@ -1,5 +1,6 @@
 import { Box, Container, Typography, Button, Stack } from '@mui/material';
 import { ArrowForward, Download } from '@mui/icons-material';
+import eleDef from '../assets/ele-def2.png';
 
 export default function Hero() {
   return (
@@ -147,38 +148,24 @@ export default function Hero() {
           >
             <Box
               sx={{
-                width: { xs: '280px', sm: '350px', md: '450px' },
-                height: { xs: '280px', sm: '350px', md: '450px' },
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, #9a9ece 0%, #9eadc8 100%)',
+                width: { xs: '340px', sm: '420px', md: '540px' },
+                height: { xs: '340px', sm: '420px', md: '540px' },
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 20px 60px rgba(154, 158, 206, 0.3)',
-                position: 'relative',
-                '&::before': {
-                  content: '""',
-                  position: 'absolute',
-                  width: '100%',
-                  height: '100%',
-                  borderRadius: '50%',
-                  background: 'inherit',
-                  filter: 'blur(40px)',
-                  opacity: 0.5,
-                  zIndex: -1,
-                },
               }}
             >
-              <Typography
-                variant="h2"
+              <Box
+                component="img"
+                src={eleDef}
+                alt="Elepad"
                 sx={{
-                  color: 'white',
-                  fontWeight: 700,
-                  fontSize: { xs: '3rem', md: '4rem' },
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.12))',
                 }}
-              >
-                🐘
-              </Typography>
+              />
             </Box>
           </Box>
         </Box>
