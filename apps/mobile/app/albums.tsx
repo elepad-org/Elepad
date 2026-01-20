@@ -7,12 +7,7 @@ import {
   FlatList,
   RefreshControl,
 } from "react-native";
-import {
-  Text,
-  ActivityIndicator,
-  Button,
-  //Snackbar,
-} from "react-native-paper";
+import { Text, ActivityIndicator, Button } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
 import { COLORS, STYLES, LAYOUT } from "@/styles/base";
@@ -188,21 +183,6 @@ export default function AlbumsScreen() {
         onDismiss={() => setAlbumDialogVisible(false)}
         memories={memories}
       />
-
-      {/* Snackbar para mostrar mensajes */}
-      {/* <Snackbar
-        visible={snackbarVisible}
-        onDismiss={() => setSnackbarVisible(false)}
-        duration={2200}
-        style={{
-          backgroundColor: COLORS.success,
-          borderRadius: 16,
-          marginBottom: 10,
-          marginHorizontal: 20,
-        }}
-      >
-        {snackbarMessage}
-      </Snackbar> */}
     </SafeAreaView>
   );
 }
