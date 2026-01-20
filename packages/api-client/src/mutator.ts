@@ -33,7 +33,8 @@ export class ApiError extends Error {
 
 export async function rnFetch<T>(
   url: string,
-  init: RequestInit = {}
+  init: RequestInit = {},
+  retryCount = 0
 ): Promise<T> {
   const headers = new Headers(init.headers);
 
@@ -56,6 +57,14 @@ export async function rnFetch<T>(
   });
 
   if (!res.ok) {
+    // Si es 401 y es el primer intento, esperar 500ms y reintentar
+    // (puede ser que el token se esté refrescando)
+    if (res.status === 401 && retryCount === 0) {
+      console.warn("⚠️ 401 detectado, esperando refresh de token...");
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return rnFetch<T>(url, init, retryCount + 1);
+    }
+
     try {
       const errorBody = await res.json();
       // Solo mostrar errores que no sean 404 o recursos no encontrados
