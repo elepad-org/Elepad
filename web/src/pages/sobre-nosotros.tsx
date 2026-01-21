@@ -1,5 +1,5 @@
 import LegalNavbar from '../components/LegalNavbar';
-import { Container, Typography, Box, Avatar, Grid, Paper } from '@mui/material';
+import { Container, Typography, Box, Avatar, Paper } from '@mui/material';
 
 const integrantes = [
   { nombre: 'André San Lorenzo', img: '' },
@@ -26,16 +26,14 @@ export default function SobreNosotros() {
               <Typography variant="h5" gutterBottom sx={{ mb: 3, fontWeight: 600, textAlign: 'center' }}>
                 Nuestro equipo
               </Typography>
-              <Grid container spacing={4} justifyContent="center">
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'center' }}>
                 {integrantes.map((integrante, idx) => (
-                  <Grid item xs={12} sm={6} md={4} key={idx}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 2, boxShadow: 2, borderRadius: 3, background: '#fff' }}>
-                      <Avatar src={integrante.img} sx={{ width: 96, height: 96, mb: 2 }} />
-                      <Typography variant="h6" sx={{ fontWeight: 500 }}>{integrante.nombre}</Typography>
-                    </Box>
-                  </Grid>
+                  <Box key={idx} sx={{ width: { xs: '100%', sm: 'calc(50% - 16px)', md: 'calc(33.333% - 22px)' }, display: 'flex', flexDirection: 'column', alignItems: 'center', p: 2, boxShadow: 2, borderRadius: 3, background: '#fff' }}>
+                    <Avatar src={integrante.img} sx={{ width: 96, height: 96, mb: 2 }} />
+                    <Typography variant="h6" sx={{ fontWeight: 500 }}>{integrante.nombre}</Typography>
+                  </Box>
                 ))}
-              </Grid>
+              </Box>
             </Box>
           </Paper>
         </Container>
