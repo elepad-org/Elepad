@@ -73,6 +73,7 @@ import HighlightedMentionText from "@/components/Recuerdos/HighlightedMentionTex
 import RecuerdoDetailDialog from "@/components/Recuerdos/RecuerdoDetailDialog";
 import { BackButton } from "@/components/shared/BackButton";
 import { Portal } from "react-native-paper";
+import { useToast } from "@/components/shared/Toast";
 
 const PAGE_SIZE = 20;
 
@@ -132,6 +133,7 @@ export default function NotificationsScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { userElepad } = useAuth();
+  const toast = useToast();
   const [page, setPage] = useState(0);
   const [selectedMemoryId, setSelectedMemoryId] = useState<string | null>(null);
   const [detailDialogVisible, setDetailDialogVisible] = useState(false);
@@ -140,8 +142,6 @@ export default function NotificationsScreen() {
   );
   const [activityDetailDialogVisible, setActivityDetailDialogVisible] =
     useState(false);
-  const [notFoundDialogVisible, setNotFoundDialogVisible] = useState(false);
-  const [notFoundMessage, setNotFoundMessage] = useState("");
 
   const activityFadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -157,28 +157,6 @@ export default function NotificationsScreen() {
       activityFadeAnim.setValue(0);
     }
   }, [activityDetailDialogVisible]);
-
-  const notFoundFadeAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    if (notFoundDialogVisible) {
-      // Reset values immediately
-      notFoundFadeAnim.setValue(0);
-
-      // Add a small delay to ensure Dialog is rendered before animating
-      const timer = setTimeout(() => {
-        Animated.timing(notFoundFadeAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }).start();
-      }, 100);
-
-      return () => clearTimeout(timer);
-    } else {
-      notFoundFadeAnim.setValue(0);
-    }
-  }, [notFoundDialogVisible]);
 
   // Fetch family members for displaying names in mentions
   const membersQuery = useGetFamilyGroupIdGroupMembers(
@@ -292,8 +270,10 @@ export default function NotificationsScreen() {
     if (memoryQuery.isError && selectedMemoryId) {
       setDetailDialogVisible(false);
       setSelectedMemoryId(null);
-      setNotFoundMessage("Este recuerdo ya no existe o ha sido eliminado.");
-      setNotFoundDialogVisible(true);
+      toast.showToast({
+        message: "Este recuerdo ya no existe o ha sido eliminado.",
+        type: "error",
+      });
     }
   }, [memoryQuery.isError, selectedMemoryId]);
 
@@ -302,8 +282,10 @@ export default function NotificationsScreen() {
     if (activityQuery.isError && selectedActivityId) {
       setActivityDetailDialogVisible(false);
       setSelectedActivityId(null);
-      setNotFoundMessage("Esta actividad ya no existe o ha sido eliminada.");
-      setNotFoundDialogVisible(true);
+      toast.showToast({
+        message: "Esta actividad ya no existe o ha sido eliminada.",
+        type: "error",
+      });
     }
   }, [activityQuery.isError, selectedActivityId]);
 
@@ -949,63 +931,6 @@ export default function NotificationsScreen() {
                   );
                 })()
               : null}
-          </Animated.View>
-        </Dialog>
-      </Portal>
-
-      {/* Dialog para mostrar cuando algo no existe */}
-      <Portal>
-        <Dialog
-          visible={notFoundDialogVisible}
-          onDismiss={() => setNotFoundDialogVisible(false)}
-          style={{
-            backgroundColor: "transparent",
-            width: "90%",
-            alignSelf: "center",
-            elevation: 0,
-            shadowColor: "transparent",
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: 0,
-            shadowRadius: 0,
-          }}
-        >
-          <Animated.View
-            style={{
-              backgroundColor: COLORS.background,
-              borderRadius: 16,
-              opacity: notFoundFadeAnim,
-              overflow: "hidden",
-            }}
-          >
-            <View style={{ alignItems: "center", paddingTop: 24 }}>
-              <MaterialCommunityIcons
-                name="alert-circle-outline"
-                size={48}
-                color={COLORS.primary}
-              />
-            </View>
-            <Dialog.Title style={{ textAlign: "center", color: COLORS.text }}>
-              Contenido no disponible
-            </Dialog.Title>
-            <Dialog.Content>
-              <Text
-                variant="bodyMedium"
-                style={{ textAlign: "center", color: COLORS.textSecondary }}
-              >
-                {notFoundMessage}
-              </Text>
-            </Dialog.Content>
-            <Dialog.Actions>
-              <Button
-                mode="contained"
-                onPress={() => setNotFoundDialogVisible(false)}
-                buttonColor={COLORS.primary}
-                style={{ borderRadius: 12 }}
-                contentStyle={{ paddingVertical: 8 }}
-              >
-                Entendido
-              </Button>
-            </Dialog.Actions>
           </Animated.View>
         </Dialog>
       </Portal>
