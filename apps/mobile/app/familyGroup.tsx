@@ -18,7 +18,6 @@ import {
   IconButton,
   Dialog,
   Card,
-  Snackbar,
 } from "react-native-paper";
 import { router } from "expo-router";
 import * as Clipboard from "expo-clipboard";
@@ -38,9 +37,11 @@ import { COLORS, STYLES } from "@/styles/base";
 import { BackButton } from "@/components/shared/BackButton";
 import CancelButton from "@/components/shared/CancelButton";
 import SaveButton from "@/components/shared/SaveButton";
+import { useToast } from "@/components/shared/Toast";
 
 export default function FamilyGroup() {
   const { userElepad, refreshUserElepad } = useAuth();
+  const { showToast } = useToast();
   const [invitationCode, setInvitationCode] =
     useState<getFamilyGroupIdGroupInviteResponse>();
 
@@ -63,7 +64,7 @@ export default function FamilyGroup() {
   const [advancedOptionsExpanded, setAdvancedOptionsExpanded] = useState(false);
   const [avatarModalVisible, setAvatarModalVisible] = useState(false);
   const [selectedAvatarUrl, setSelectedAvatarUrl] = useState<string | null>(
-    null
+    null,
   );
   const [selectedMemberName, setSelectedMemberName] = useState<string>("");
 
@@ -95,9 +96,6 @@ export default function FamilyGroup() {
     avatarUrl: string | null;
   } | null>(null);
   const [confirmTransferVisible, setConfirmTransferVisible] = useState(false);
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarError, setSnackbarError] = useState(false);
 
   // Fetch group members via the generated React Query hook
   const membersQuery = useGetFamilyGroupIdGroupMembers(groupId ?? "");
@@ -143,14 +141,20 @@ export default function FamilyGroup() {
         e instanceof Error
           ? e.message
           : "Error al generar el enlace de invitación";
-      Alert.alert("Error", msg);
+      showToast({
+        message: msg,
+        type: "error",
+      });
     }
   };
 
   const copyInvitationCode = async () => {
     if (invitationCode) {
       await Clipboard.setStringAsync(String(invitationCode));
-      Alert.alert("¡Copiado!", "El código se ha copiado al portapapeles");
+      showToast({
+        message: "El código se ha copiado al portapapeles",
+        type: "success",
+      });
     }
   };
 
@@ -181,7 +185,10 @@ export default function FamilyGroup() {
   const confirmRemove = async () => {
     try {
       if (!groupId || !memberToRemove?.id) {
-        Alert.alert("Error", "Faltan datos del grupo o del miembro");
+        showToast({
+          message: "Faltan datos del grupo o del miembro",
+          type: "error",
+        });
         return;
       }
 
@@ -194,10 +201,10 @@ export default function FamilyGroup() {
 
       await membersQuery.refetch();
 
-      Alert.alert(
-        "Miembro eliminado",
-        "El miembro fue eliminado correctamente."
-      );
+      showToast({
+        message: "El miembro fue eliminado correctamente",
+        type: "success",
+      });
     } catch (e: unknown) {
       type MaybeApiError = {
         data?: { error?: { message?: string } };
@@ -208,7 +215,10 @@ export default function FamilyGroup() {
         err?.data?.error?.message ??
         err?.message ??
         "Error eliminando al miembro";
-      Alert.alert("Error", msg);
+      showToast({
+        message: msg,
+        type: "error",
+      });
     } finally {
       closeConfirm();
     }
@@ -242,7 +252,10 @@ export default function FamilyGroup() {
   const confirmTransferOwnership = async () => {
     try {
       if (!groupId || !selectedNewOwner?.id) {
-        Alert.alert("Error", "Faltan datos del grupo o del nuevo owner");
+        showToast({
+          message: "Faltan datos del grupo o del nuevo owner",
+          type: "error",
+        });
         return;
       }
 
@@ -253,10 +266,10 @@ export default function FamilyGroup() {
 
       await membersQuery.refetch();
 
-      Alert.alert(
-        "Transferencia exitosa",
-        `${selectedNewOwner.displayName} es ahora el nuevo administrador del grupo.`
-      );
+      showToast({
+        message: `${selectedNewOwner.displayName} es ahora el nuevo administrador del grupo.`,
+        type: "success",
+      });
     } catch (e: unknown) {
       type MaybeApiError = {
         data?: { error?: { message?: string } };
@@ -267,7 +280,10 @@ export default function FamilyGroup() {
         err?.data?.error?.message ??
         err?.message ??
         "Error transfiriendo la administración";
-      Alert.alert("Error", msg);
+      showToast({
+        message: msg,
+        type: "error",
+      });
     } finally {
       closeConfirmTransfer();
     }
@@ -277,7 +293,10 @@ export default function FamilyGroup() {
   const handleCreateNewGroup = async () => {
     try {
       if (!userElepad?.id || !userElepad?.displayName || !groupId) {
-        Alert.alert("Error", "No se pudo obtener la información del usuario");
+        showToast({
+          message: "No se pudo obtener la información del usuario",
+          type: "error",
+        });
         return;
       }
 
@@ -310,10 +329,11 @@ export default function FamilyGroup() {
       setShowJoinCodeInput(false);
       setJoinCodeInput("");
 
-      Alert.alert(
-        "Grupo creado",
-        "Has salido del grupo anterior y se ha creado tu nuevo grupo familiar exitosamente."
-      );
+      showToast({
+        message:
+          "Has salido del grupo anterior y se ha creado tu nuevo grupo familiar exitosamente.",
+        type: "success",
+      });
     } catch (e: unknown) {
       type MaybeApiError = {
         data?: { error?: { message?: string } };
@@ -322,7 +342,10 @@ export default function FamilyGroup() {
       const err = e as MaybeApiError;
       const msg =
         err?.data?.error?.message ?? err?.message ?? "Error en el proceso";
-      Alert.alert("Error", msg);
+      showToast({
+        message: msg,
+        type: "error",
+      });
 
       // Intentar refrescar de todos modos para ver el estado actual
       await refreshUserElepad();
@@ -332,12 +355,18 @@ export default function FamilyGroup() {
   const handleJoinWithCode = async () => {
     try {
       if (!userElepad?.id || !groupId) {
-        Alert.alert("Error", "No se pudo obtener la información del usuario");
+        showToast({
+          message: "No se pudo obtener la información del usuario",
+          type: "error",
+        });
         return;
       }
 
       if (!joinCodeInput.trim()) {
-        Alert.alert("Error", "Debes ingresar un código de invitación");
+        showToast({
+          message: "Debes ingresar un código de invitación",
+          type: "error",
+        });
         return;
       }
 
@@ -370,10 +399,11 @@ export default function FamilyGroup() {
       setShowJoinCodeInput(false);
       setJoinCodeInput("");
 
-      Alert.alert(
-        "¡Bienvenido!",
-        "Has salido del grupo anterior y te has unido al nuevo grupo familiar exitosamente."
-      );
+      showToast({
+        message:
+          "Has salido del grupo anterior y te has unido al nuevo grupo familiar exitosamente.",
+        type: "success",
+      });
     } catch (e: unknown) {
       type MaybeApiError = {
         data?: { error?: { message?: string } };
@@ -382,7 +412,10 @@ export default function FamilyGroup() {
       const err = e as MaybeApiError;
       const msg =
         err?.data?.error?.message ?? err?.message ?? "Error en el proceso";
-      Alert.alert("Error", msg);
+      showToast({
+        message: msg,
+        type: "error",
+      });
 
       // Intentar refrescar de todos modos para ver el estado actual
       await refreshUserElepad();
@@ -405,9 +438,10 @@ export default function FamilyGroup() {
         data: { name: newGroupName },
       });
       setIsEditing(false);
-      setSnackbarMessage("Nombre del grupo familiar actualizado correctamente");
-      setSnackbarError(false);
-      setSnackbarVisible(true);
+      showToast({
+        message: "Nombre del grupo familiar actualizado correctamente",
+        type: "success",
+      });
       if (membersQuery.refetch) {
         await membersQuery.refetch();
       }
@@ -416,9 +450,10 @@ export default function FamilyGroup() {
         e instanceof Error
           ? e.message
           : "Error al actualizar el nombre del grupo";
-      setSnackbarMessage(msg);
-      setSnackbarError(true);
-      setSnackbarVisible(true);
+      showToast({
+        message: msg, // Show Toast instead of Snackbar
+        type: "error",
+      });
     }
   };
 
@@ -854,7 +889,7 @@ export default function FamilyGroup() {
                                   ) {
                                     Alert.alert(
                                       "Sin miembros",
-                                      "No hay otros miembros en el grupo para transferir la administración."
+                                      "No hay otros miembros en el grupo para transferir la administración.",
                                     );
                                     return;
                                   }
@@ -942,7 +977,7 @@ export default function FamilyGroup() {
                   Alert.alert(
                     "No puedes salir del grupo",
                     "Como administrador del grupo, primero debes transferir la administración a otro miembro antes de poder salir.",
-                    [{ text: "Entendido", style: "default" }]
+                    [{ text: "Entendido", style: "default" }],
                   );
                   return;
                 }
@@ -1091,7 +1126,7 @@ export default function FamilyGroup() {
                             onPress={() =>
                               openAvatarModal(
                                 member.avatarUrl!,
-                                member.displayName
+                                member.displayName,
                               )
                             }
                           >
@@ -1377,17 +1412,6 @@ export default function FamilyGroup() {
             </Dialog.Content>
           </Dialog>
         </Portal>
-
-        <Snackbar
-          visible={snackbarVisible}
-          onDismiss={() => setSnackbarVisible(false)}
-          duration={3000}
-          style={{
-            backgroundColor: snackbarError ? COLORS.error : COLORS.success,
-          }}
-        >
-          {snackbarMessage}
-        </Snackbar>
       </ScrollView>
     </SafeAreaView>
   );

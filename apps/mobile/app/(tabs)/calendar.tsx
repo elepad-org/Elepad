@@ -19,8 +19,7 @@ import { COLORS, STYLES as baseStyles } from "@/styles/base";
 import { Text, Dialog, Button, Portal } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CancelButton from "@/components/shared/CancelButton";
-import SuccessSnackbar from "@/components/shared/SuccessSnackbar";
-import ErrorSnackbar from "@/components/shared/ErrorSnackbar";
+import { useToast } from "@/components/shared/Toast";
 
 export default function CalendarScreen() {
   const { userElepad } = useAuth();
@@ -29,11 +28,7 @@ export default function CalendarScreen() {
   const familyCode = userElepad?.groupId ?? "";
   const idUser = userElepad?.id ?? "";
 
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarType, setSnackbarType] = useState<"success" | "error">(
-    "success",
-  );
+  const { showToast } = useToast();
   const [googleCalendarEnabled] = useState(false);
 
   const [formVisible, setFormVisible] = useState(false);
@@ -96,16 +91,16 @@ export default function CalendarScreen() {
       retry: 2, // Reintentar 2 veces antes de fallar
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000), // Exponential backoff: 1s, 2s
       onSuccess: async () => {
-        setSnackbarMessage(
-          "Actividad creada correctamente" +
+        showToast({
+          message:
+            "Actividad creada correctamente" +
             (googleCalendarEnabled
               ? " y sincronizada con Google Calendar"
               : ""),
-        );
-        setSnackbarType("success");
+          type: "success",
+        });
         setFormVisible(false);
         setEditing(null);
-        setSnackbarVisible(true);
         await activitiesQuery.refetch();
       },
       onError: (error) => {
@@ -121,16 +116,16 @@ export default function CalendarScreen() {
       retry: 2, // Reintentar 2 veces antes de fallar
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000), // Exponential backoff: 1s, 2s
       onSuccess: async () => {
-        setSnackbarMessage(
-          "Actividad actualizada correctamente" +
+        showToast({
+          message:
+            "Actividad actualizada correctamente" +
             (googleCalendarEnabled
               ? " y sincronizada con Google Calendar"
               : ""),
-        );
-        setSnackbarType("success");
+          type: "success",
+        });
         setFormVisible(false);
         setEditing(null);
-        setSnackbarVisible(true);
         await activitiesQuery.refetch();
       },
       onError: (error) => {
@@ -144,19 +139,20 @@ export default function CalendarScreen() {
   const deleteActivity = useDeleteActivitiesId({
     mutation: {
       onSuccess: async () => {
-        setSnackbarMessage(
-          "Actividad eliminada correctamente" +
+        showToast({
+          message:
+            "Actividad eliminada correctamente" +
             (googleCalendarEnabled ? " y eliminada de Google Calendar" : ""),
-        );
-        setSnackbarType("success");
-        setSnackbarVisible(true);
+          type: "success",
+        });
         await activitiesQuery.refetch();
       },
       onError: (error) => {
         console.error("Error al eliminar actividad:", error);
-        setSnackbarMessage("No se pudo eliminar la actividad");
-        setSnackbarType("error");
-        setSnackbarVisible(true);
+        showToast({
+          message: "No se pudo eliminar la actividad",
+          type: "error",
+        });
       },
     },
   });
@@ -343,20 +339,6 @@ export default function CalendarScreen() {
           </Dialog.Actions>
         </Dialog>
       </Portal>
-
-      {snackbarType === "success" ? (
-        <SuccessSnackbar
-          visible={snackbarVisible}
-          onDismiss={() => setSnackbarVisible(false)}
-          message={snackbarMessage}
-        />
-      ) : (
-        <ErrorSnackbar
-          visible={snackbarVisible}
-          onDismiss={() => setSnackbarVisible(false)}
-          message={snackbarMessage}
-        />
-      )}
     </SafeAreaView>
   );
 }

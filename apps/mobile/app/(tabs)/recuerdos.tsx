@@ -15,7 +15,6 @@ import {
   Portal,
   Dialog,
   Button,
-  Snackbar,
   ActivityIndicator,
   IconButton,
   Menu,
@@ -56,6 +55,7 @@ import SaveButton from "@/components/shared/SaveButton";
 import CancelButton from "@/components/shared/CancelButton";
 import BookCover from "@/components/Recuerdos/BookCover";
 import eleEmpthy from "@/assets/images/ele-fotografiando.png";
+import { useToast } from "@/components/shared/Toast";
 
 // Tipos de recuerdos
 type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
@@ -130,6 +130,7 @@ const BAUL_COLOR_OPTIONS = [
 export default function RecuerdosScreen() {
   const isFocused = useIsFocused();
   const { loading: authLoading, userElepad } = useAuth();
+  const { showToast } = useToast();
 
   const groupId = userElepad?.groupId || "";
 
@@ -226,9 +227,6 @@ export default function RecuerdosScreen() {
   const [selectedTipo, setSelectedTipo] = useState<RecuerdoTipo | null>(null);
   const [selectedFileUri, setSelectedFileUri] = useState<string | null>(null);
   const [selectedMimeType, setSelectedMimeType] = useState<string | null>(null);
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarError, setSnackbarError] = useState(false);
 
   const [memberFilterId, setMemberFilterId] = useState<string | null>(null);
   const [memberMenuMounted] = useState(true);
@@ -276,19 +274,16 @@ export default function RecuerdosScreen() {
     },
     onSuccess: async () => {
       await refetchBooks();
-      setSnackbarMessage("Baúl creado");
-      setSnackbarError(false);
-      setSnackbarVisible(true);
+      showToast({ message: "Baúl creado", type: "success" });
       setBookDialogVisible(false);
     },
     onError: (error) => {
-      setSnackbarMessage(
-        `Error al crear el baúl: ${
+      showToast({
+        message: `Error al crear el baúl: ${
           error instanceof Error ? error.message : "Error desconocido"
         }`,
-      );
-      setSnackbarError(true);
-      setSnackbarVisible(true);
+        type: "error",
+      });
     },
   });
 
@@ -298,19 +293,16 @@ export default function RecuerdosScreen() {
     },
     onSuccess: async () => {
       await refetchBooks();
-      setSnackbarMessage("Baúl actualizado");
-      setSnackbarError(false);
-      setSnackbarVisible(true);
+      showToast({ message: "Baúl actualizado", type: "success" });
       setBookDialogVisible(false);
     },
     onError: (error) => {
-      setSnackbarMessage(
-        `Error al actualizar el baúl: ${
+      showToast({
+        message: `Error al actualizar el baúl: ${
           error instanceof Error ? error.message : "Error desconocido"
         }`,
-      );
-      setSnackbarError(true);
-      setSnackbarVisible(true);
+        type: "error",
+      });
     },
   });
 
@@ -320,19 +312,16 @@ export default function RecuerdosScreen() {
     },
     onSuccess: async () => {
       await refetchBooks();
-      setSnackbarMessage("Baúl eliminado");
-      setSnackbarError(false);
-      setSnackbarVisible(true);
+      showToast({ message: "Baúl eliminado", type: "success" });
       setBookToDelete(null);
     },
     onError: (error) => {
-      setSnackbarMessage(
-        `Error al eliminar el baúl: ${
+      showToast({
+        message: `Error al eliminar el baúl: ${
           error instanceof Error ? error.message : "Error desconocido"
         }`,
-      );
-      setSnackbarError(true);
-      setSnackbarVisible(true);
+        type: "error",
+      });
     },
   });
 
@@ -356,18 +345,15 @@ export default function RecuerdosScreen() {
           descripcion: updated.caption || undefined,
         };
       });
-      setSnackbarMessage("Recuerdo actualizado");
-      setSnackbarError(false);
-      setSnackbarVisible(true);
+      showToast({ message: "Recuerdo actualizado", type: "success" });
     },
     onError: (error) => {
-      setSnackbarMessage(
-        `Error al actualizar el recuerdo: ${
+      showToast({
+        message: `Error al actualizar el recuerdo: ${
           error instanceof Error ? error.message : "Error desconocido"
         }`,
-      );
-      setSnackbarError(true);
-      setSnackbarVisible(true);
+        type: "error",
+      });
     },
   });
 
@@ -381,18 +367,15 @@ export default function RecuerdosScreen() {
       await refetchMemories();
       setDetailDialogVisible(false);
       setSelectedRecuerdo(null);
-      setSnackbarMessage("Recuerdo eliminado");
-      setSnackbarError(false);
-      setSnackbarVisible(true);
+      showToast({ message: "Recuerdo eliminado", type: "success" });
     },
     onError: (error) => {
-      setSnackbarMessage(
-        `Error al eliminar el recuerdo: ${
+      showToast({
+        message: `Error al eliminar el recuerdo: ${
           error instanceof Error ? error.message : "Error desconocido"
         }`,
-      );
-      setSnackbarError(true);
-      setSnackbarVisible(true);
+        type: "error",
+      });
     },
   });
 
@@ -437,9 +420,7 @@ export default function RecuerdosScreen() {
       console.log("Upload mutation onSuccess:", data);
       // Refrescar la lista de memorias
       refetchMemories();
-      setSnackbarMessage("Recuerdo agregado exitosamente");
-      setSnackbarError(false);
-      setSnackbarVisible(true);
+      showToast({ message: "Recuerdo agregado exitosamente", type: "success" });
 
       // Resetear estado del diálogo
       setDialogVisible(false);
@@ -450,13 +431,12 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       console.error("Upload mutation onError:", error);
-      setSnackbarMessage(
-        `Error al subir el recuerdo: ${
+      showToast({
+        message: `Error al subir el recuerdo: ${
           error instanceof Error ? error.message : "Error desconocido"
         }`,
-      );
-      setSnackbarError(true);
-      setSnackbarVisible(true);
+        type: "error",
+      });
     },
   });
 
@@ -491,9 +471,7 @@ export default function RecuerdosScreen() {
       console.log("Create note mutation onSuccess:", data);
       // Refrescar la lista de memorias
       refetchMemories();
-      setSnackbarMessage("Nota agregada exitosamente");
-      setSnackbarError(false);
-      setSnackbarVisible(true);
+      showToast({ message: "Nota agregada exitosamente", type: "success" });
 
       // Resetear estado del diálogo
       setDialogVisible(false);
@@ -504,13 +482,12 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       console.error("Create note mutation onError:", error);
-      setSnackbarMessage(
-        `Error al crear la nota: ${
+      showToast({
+        message: `Error al crear la nota: ${
           error instanceof Error ? error.message : "Error desconocido"
         }`,
-      );
-      setSnackbarError(true);
-      setSnackbarVisible(true);
+        type: "error",
+      });
     },
   });
 
@@ -519,9 +496,7 @@ export default function RecuerdosScreen() {
     try {
       await refetchMemories();
     } catch {
-      setSnackbarMessage("Error al cargar los recuerdos");
-      setSnackbarError(true);
-      setSnackbarVisible(true);
+      showToast({ message: "Error al cargar los recuerdos", type: "error" });
     }
   }, [refetchMemories]);
 
@@ -529,9 +504,7 @@ export default function RecuerdosScreen() {
     try {
       await refetchBooks();
     } catch {
-      setSnackbarMessage("Error al cargar los baúles");
-      setSnackbarError(true);
-      setSnackbarVisible(true);
+      showToast({ message: "Error al cargar los baúles", type: "error" });
     }
   }, [refetchBooks]);
 
@@ -639,9 +612,7 @@ export default function RecuerdosScreen() {
         await cargarBaules();
       }
     } catch {
-      setSnackbarMessage("Error al refrescar los recuerdos");
-      setSnackbarError(true);
-      setSnackbarVisible(true);
+      showToast({ message: "Error al refrescar los recuerdos", type: "error" });
     } finally {
       setRefreshing(false);
     }
@@ -692,15 +663,17 @@ export default function RecuerdosScreen() {
     const color = bookFormColor;
 
     if (!title) {
-      setSnackbarMessage("El nombre del baúl es obligatorio");
-      setSnackbarError(true);
-      setSnackbarVisible(true);
+      showToast({
+        message: "El nombre del baúl es obligatorio",
+        type: "error",
+      });
       return;
     }
     if (!color) {
-      setSnackbarMessage("El color del baúl es obligatorio");
-      setSnackbarError(true);
-      setSnackbarVisible(true);
+      showToast({
+        message: "El color del baúl es obligatorio",
+        type: "error",
+      });
       return;
     }
 
@@ -742,9 +715,10 @@ export default function RecuerdosScreen() {
   const handleGuardarRecuerdo = async (data: RecuerdoData) => {
     try {
       if (!selectedBook?.id) {
-        setSnackbarMessage("Selecciona un baúl antes de agregar recuerdos");
-        setSnackbarError(true);
-        setSnackbarVisible(true);
+        showToast({
+          message: "Selecciona un baúl antes de agregar recuerdos",
+          type: "error",
+        });
         return;
       }
 
@@ -814,13 +788,12 @@ export default function RecuerdosScreen() {
         await uploadMemoryMutation.mutateAsync(uploadData);
       }
     } catch (error) {
-      setSnackbarMessage(
-        `Error al preparar el archivo: ${
+      showToast({
+        message: `Error al preparar el archivo: ${
           error instanceof Error ? error.message : "Error desconocido"
         }`,
-      );
-      setSnackbarError(true);
-      setSnackbarVisible(true);
+        type: "error",
+      });
     }
   };
 
@@ -1232,17 +1205,6 @@ export default function RecuerdosScreen() {
         )}
 
         {renderBookDialogs()}
-
-        <Snackbar
-          visible={snackbarVisible}
-          onDismiss={() => setSnackbarVisible(false)}
-          duration={3000}
-          style={{
-            backgroundColor: snackbarError ? COLORS.error : COLORS.primary,
-          }}
-        >
-          {snackbarMessage}
-        </Snackbar>
       </SafeAreaView>
     );
   }
@@ -1695,21 +1657,6 @@ export default function RecuerdosScreen() {
           currentUserId={userElepad?.id}
         />
       )}
-
-      {/* Snackbar para mostrar mensajes */}
-      <Snackbar
-        visible={snackbarVisible}
-        onDismiss={() => setSnackbarVisible(false)}
-        duration={2200}
-        style={{
-          backgroundColor: snackbarError ? COLORS.error : COLORS.success,
-          borderRadius: 16,
-          marginBottom: LAYOUT.bottomNavHeight + 10,
-          marginHorizontal: 20,
-        }}
-      >
-        {snackbarMessage}
-      </Snackbar>
     </SafeAreaView>
   );
 }
