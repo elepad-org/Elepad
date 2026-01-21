@@ -22,7 +22,11 @@ export default function TabLayout() {
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
   const isElder = userElepad?.elder === true;
-  const isLargeScreen = layout.width >= 768;
+  
+  // Detectar si es una pantalla muy grande (desktop/web)
+  // Usamos 1024px como breakpoint para que tablets usen el tab bar
+  // y solo pantallas de PC/desktop muestren el sidebar
+  const isLargeScreen = layout.width >= 1024;
 
   const [routes, setRoutes] = useState<TabRoute[]>(
     isElder ? elderRoutes : nonElderRoutes
