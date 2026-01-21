@@ -55,7 +55,21 @@ export default function NewAccount() {
     setDialog({ visible: true, message, icon });
   };
 
+  const isFormValid = () => {
+    return (
+      email.trim() !== "" &&
+      displayName.trim() !== "" &&
+      password.trim() !== ""
+    );
+  };
+
   const handleSignUp = async () => {
+    // Validar campos obligatorios
+    if (!email.trim() || !displayName.trim() || !password.trim()) {
+      showDialog("Por favor completa todos los campos obligatorios.");
+      return;
+    }
+
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -233,7 +247,7 @@ export default function NewAccount() {
           buttonColor={COLORS.primary}
           onPress={handleSignUp}
           loading={loading}
-          disabled={loading}
+          disabled={loading || !isFormValid()}
         >
           Continuar
         </Button>
