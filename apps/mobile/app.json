@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Elepad",
-    "slug": "Elepad",
+    "slug": "elepad",
     "version": "1.0.0",
     "scheme": "elepad",
     "orientation": "portrait",
