@@ -41,6 +41,10 @@ export default function TabLayout() {
   const { userElepad } = useAuth();
 
   const isElder = userElepad?.elder === true;
+  
+  // Detectar si es una pantalla grande (tablet/desktop)
+  // Consideramos pantalla grande si el ancho es >= 768px (breakpoint común para tablets)
+  const isLargeScreen = layout.width >= 768;
 
   // Different routes for elder vs non-elder users
   const elderRoutes = [
@@ -164,6 +168,78 @@ export default function TabLayout() {
     };
   }, []);
 
+  const renderSidebar = () => {
+    const navigationState = { index, routes };
+    
+    return (
+      <View
+        style={{
+          width: 240,
+          backgroundColor: COLORS.white,
+          borderRightWidth: 1,
+          borderRightColor: COLORS.border,
+          paddingTop: 48,
+          paddingBottom: 24,
+          ...Platform.select({
+            ios: {
+              shadowColor: "#18020c",
+              shadowOffset: { width: 2, height: 0 },
+              shadowOpacity: 0.08,
+              shadowRadius: 16,
+            },
+            android: {
+              elevation: 8,
+            },
+          }),
+        }}
+      >
+        <View style={{ flex: 1, paddingHorizontal: 12 }}>
+          {navigationState.routes.map((route: TabRoute, idx: number) => {
+            const isFocused = navigationState.index === idx;
+
+            const onPress = () => {
+              setIndex(idx);
+            };
+
+            return (
+              <Pressable
+                key={route.key}
+                onPress={onPress}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  paddingVertical: 16,
+                  paddingHorizontal: 16,
+                  marginVertical: 4,
+                  borderRadius: 12,
+                  backgroundColor: isFocused
+                    ? activeIndicatorColor
+                    : "transparent",
+                }}
+              >
+                <Icon
+                  source={isFocused ? route.focusedIcon : route.unfocusedIcon}
+                  size={24}
+                  color={isFocused ? COLORS.primary : COLORS.textSecondary}
+                />
+                <Text
+                  variant="bodyMedium"
+                  style={{
+                    marginLeft: 16,
+                    color: isFocused ? COLORS.primary : COLORS.textSecondary,
+                    fontWeight: isFocused ? "600" : "400",
+                  }}
+                >
+                  {route.title}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
+    );
+  };
+
   const renderTabBar = (
     props: SceneRendererProps & {
       navigationState: NavigationState<{
@@ -176,9 +252,13 @@ export default function TabLayout() {
   ) => {
     const { navigationState, position } = props;
 
-    // If keyboard is open, do not render the floating tab bar
+    // Don't render tab bar for large screens (sidebar is used instead)
+    if (isLargeScreen) return null;
+
+    // If keyboard is open on mobile, do not render the tab bar
     if (isKeyboardVisible) return null;
 
+    // Render bottom tab bar for mobile/small screens
     return (
       <View
         style={{
@@ -316,19 +396,25 @@ export default function TabLayout() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: COLORS.background }}>
-      <TabView
-        navigationState={{ index, routes }}
-        renderScene={renderScene}
-        onIndexChange={setIndex}
-        initialLayout={{ width: layout.width }}
-        renderTabBar={renderTabBar}
-        tabBarPosition="bottom"
-        swipeEnabled={true}
-        animationEnabled={true}
-        lazy={true}
-        lazyPreloadDistance={1}
-      />
+    <View style={{ flex: 1, backgroundColor: COLORS.background, flexDirection: "row" }}>
+      {/* Sidebar for large screens */}
+      {isLargeScreen && renderSidebar()}
+      
+      {/* Content area */}
+      <View style={{ flex: 1 }}>
+        <TabView
+          navigationState={{ index, routes }}
+          renderScene={renderScene}
+          onIndexChange={setIndex}
+          initialLayout={{ width: isLargeScreen ? layout.width - 240 : layout.width }}
+          renderTabBar={renderTabBar}
+          tabBarPosition="bottom"
+          swipeEnabled={!isLargeScreen} // Disable swipe on large screens
+          animationEnabled={true}
+          lazy={true}
+          lazyPreloadDistance={1}
+        />
+      </View>
     </View>
   );
 }
