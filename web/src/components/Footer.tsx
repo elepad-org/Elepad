@@ -1,5 +1,4 @@
 import { Box, Container, Typography, Link, Stack } from '@mui/material';
-import { Favorite } from '@mui/icons-material';
 import { Link as RouterLink } from 'react-router-dom';
 
 export default function Footer() {
@@ -23,34 +22,25 @@ export default function Footer() {
           }}
         >
           <Box>
-            <Typography
-              variant="h5"
-              sx={{
-                fontWeight: 700,
-                color: 'primary.main',
-                mb: 1,
-              }}
-            >
-              Elepad
-            </Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              Conectando generaciones con amor
-            </Typography>
+              {/* Tagline removed as requested */}
           </Box>
+              {/* Logo or brand area removed for a cleaner look */}
 
           <Stack spacing={2} sx={{ alignItems: { xs: 'center', md: 'flex-start' } }}>
             <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem' }}>
               Enlaces
             </Typography>
             <Link
-              href="#"
+              component={RouterLink}
+              to="/sobre-nosotros"
               underline="hover"
               sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
             >
               Sobre Nosotros
             </Link>
             <Link
-              href="#"
+              component={RouterLink}
+              to="/contacto"
               underline="hover"
               sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
             >
@@ -79,14 +69,16 @@ export default function Footer() {
               Eliminar Cuenta
             </Link>
             <Link
-              href="#"
+              component={RouterLink}
+              to="/terminos-de-servicio"
               underline="hover"
               sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
             >
               Términos de Servicio
             </Link>
             <Link
-              href="#"
+              component={RouterLink}
+              to="/ayuda"
               underline="hover"
               sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
             >
@@ -104,21 +96,8 @@ export default function Footer() {
             textAlign: 'center',
           }}
         >
-          <Typography
-            variant="body2"
-            sx={{
-              color: 'text.secondary',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 1,
-            }}
-          >
-            Hecho con <Favorite sx={{ color: 'primary.main', fontSize: 18 }} /> para
-            todas las familias
-          </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>
-            © {new Date().getFullYear()} Elepad. Todos los derechos reservados.
+                © {new Date().getFullYear()} Todos los derechos reservados.
           </Typography>
         </Box>
       </Container>

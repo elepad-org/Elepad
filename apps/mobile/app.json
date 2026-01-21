@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "elepad",
-    "slug": "elepad",
+    "name": "Elepad",
+    "slug": "Elepad",
     "version": "1.0.0",
     "scheme": "elepad",
     "orientation": "portrait",
@@ -30,7 +30,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/ele-gray.png",
+          "image": "./assets/images/ele-def.png",
           "imageWidth": 250,
           "resizeMode": "contain",
           "backgroundColor": "#F8F9FA"

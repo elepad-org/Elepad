@@ -4,7 +4,7 @@ import { useRef, useEffect } from "react";
 import { Animated, View, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Text, ActivityIndicator } from "react-native-paper";
-import heroImage from "@/assets/images/ele-def2.png";
+import heroImage from "@/assets/images/ele-def3.png";
 import { COLORS, STYLES } from "@/styles/base";
 
 export default function IndexRedirect() {
