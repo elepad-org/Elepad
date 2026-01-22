@@ -8,6 +8,7 @@ export type ProfileHeaderProps = {
   avatarUrl?: string;
   size?: number;
   onEditPhoto?: () => void;
+  frameUrl?: string; // New prop for the frame
 };
 
 function getInitials(name: string) {
@@ -22,21 +23,50 @@ function getInitials(name: string) {
   );
 }
 
+import { Image } from "react-native"; // Make sure to import Image
+
 export const ProfileHeader = ({
   name,
   email,
   avatarUrl,
   size = 112,
   onEditPhoto,
+  frameUrl,
 }: ProfileHeaderProps) => {
   return (
     <View style={styles.profileHeader}>
       <View style={styles.avatarWrapper}>
-        {avatarUrl ? (
-          <Avatar.Image size={size} source={{ uri: avatarUrl }} />
-        ) : (
-          <Avatar.Text size={size} label={getInitials(name)} />
+        <View
+          style={{
+            width: size,
+            height: size,
+            borderRadius: size / 2,
+            overflow: "hidden",
+          }}
+        >
+          {avatarUrl ? (
+            <Avatar.Image size={size} source={{ uri: avatarUrl }} />
+          ) : (
+            <Avatar.Text size={size} label={getInitials(name)} />
+          )}
+        </View>
+
+        {/* Frame Overlay */}
+        {frameUrl && (
+          <Image
+            source={{ uri: frameUrl }}
+            style={{
+              position: "absolute",
+              width: size * 1.4, // Frames are usually slightly larger than the avatar
+              height: size * 1.4,
+              top: -size * 0.2,
+              left: -size * 0.2,
+              zIndex: 10,
+            }}
+            resizeMode="contain"
+          />
         )}
+
         {onEditPhoto ? (
           <IconButton
             icon="pencil"
