@@ -35,7 +35,14 @@ export default function ShopScreen() {
   const router = useRouter();
   const { userElepad: user } = useAuth();
   const { showToast } = useToast();
-  const [selectedItem, setSelectedItem] = React.useState<any | null>(null);
+  const [selectedItem, setSelectedItem] = React.useState<{
+    id: string;
+    title: string;
+    cost: number;
+    type?: string;
+    assetUrl?: string;
+  } | null>(null);
+  const [activeFilter, setActiveFilter] = React.useState("Todos");
 
   // Helpers to normalize data
   const normalizeData = (data: any) => {
@@ -60,6 +67,55 @@ export default function ShopScreen() {
   const inventoryResponse = useGetShopInventory();
   const inventoryData = normalizeData(inventoryResponse.data);
   const refetchInventory = inventoryResponse.refetch;
+
+  const isOwned = (itemId: string) => {
+    return (
+      Array.isArray(inventoryData) &&
+      inventoryData.some((inv: any) => inv.itemId === itemId)
+    );
+  };
+
+  // Sorting: Owned items at the end
+  const sortedItems = React.useMemo(() => {
+    if (!Array.isArray(itemsData)) return [];
+    return [...itemsData].sort((a, b) => {
+      const aOwned = isOwned(a.id);
+      const bOwned = isOwned(b.id);
+      if (aOwned === bOwned) return 0;
+      return aOwned ? 1 : -1;
+    });
+  }, [itemsData, inventoryData]);
+
+  // Available categories
+  const categories = React.useMemo(() => {
+    const types = new Set<string>();
+    types.add("Todos");
+    itemsData.forEach((item: any) => {
+      if (item.type) types.add(item.type);
+    });
+    return Array.from(types);
+  }, [itemsData]);
+
+  // Filtering
+  const filteredItems = React.useMemo(() => {
+    if (activeFilter === "Todos") return sortedItems;
+    return sortedItems.filter((item) => item.type === activeFilter);
+  }, [sortedItems, activeFilter]);
+
+  const TYPE_COLORS: Record<string, string> = {
+    sticker: "#8CC0FF", // Soft Pastel Blue
+    Sticker: "#8CC0FF",
+    frame: "#9AD6AA", // Soft Pastel Green
+    Frame: "#9AD6AA",
+    animation: "#FFE082", // Soft Pastel Yellow
+    Animation: "#FFE082",
+    other: "#FF9999", // Soft Pastel Red
+    Other: "#FF9999",
+  };
+
+  const getPastelColor = (type: string) => {
+    return TYPE_COLORS[type] || "#E5E5EA";
+  };
 
   // Mutation
   const { mutate: buyItem, isPending: isBuying } = usePostShopBuy({
@@ -94,10 +150,6 @@ export default function ShopScreen() {
     buyItem({ data: { itemId: selectedItem.id } });
   };
 
-  const isOwned = (itemId: string) => {
-    return inventoryData?.some((inv: any) => inv.itemId === itemId);
-  };
-
   const renderItem = ({ item, index }: { item: any; index: number }) => {
     const owned = isOwned(item.id);
 
@@ -115,6 +167,16 @@ export default function ShopScreen() {
           onPress={() => !owned && setSelectedItem(item)}
         >
           <View style={styles.imageContainer}>
+            {item.type && (
+              <View
+                style={[
+                  styles.typeBadge,
+                  { backgroundColor: getPastelColor(item.type) },
+                ]}
+              >
+                <Text style={styles.typeBadgeText}>{item.type}</Text>
+              </View>
+            )}
             {item.assetUrl ? (
               <Image
                 source={{ uri: item.assetUrl }}
@@ -214,10 +276,41 @@ export default function ShopScreen() {
           </Chip>
           <Text style={styles.subtitleText}>¡Canjea tus premios!</Text>
         </View>
+
+        {/* Filter Bar */}
+        <View style={{ marginTop: 12 }}>
+          <FlatList
+            horizontal
+            data={categories}
+            keyExtractor={(item) => item}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 8, paddingBottom: 4 }}
+            renderItem={({ item }) => (
+              <Pressable
+                onPress={() => setActiveFilter(item)}
+                style={[
+                  styles.filterChip,
+                  activeFilter === item && styles.filterChipActive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.filterChipText,
+                    activeFilter === item && styles.filterChipTextActive,
+                  ]}
+                >
+                  {item === "Todos"
+                    ? item
+                    : item.charAt(0).toUpperCase() + item.slice(1)}
+                </Text>
+              </Pressable>
+            )}
+          />
+        </View>
       </View>
 
       <FlatList
-        data={itemsData}
+        data={filteredItems}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         numColumns={2}
@@ -366,6 +459,26 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontWeight: "500",
   },
+  filterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: COLORS.backgroundSecondary,
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+  filterChipActive: {
+    backgroundColor: COLORS.primary + "15",
+    borderColor: COLORS.primary,
+  },
+  filterChipText: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  filterChipTextActive: {
+    color: COLORS.primary,
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
@@ -425,11 +538,27 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  typeBadge: {
+    position: "absolute",
+    top: 8,
+    left: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    zIndex: 10,
+    ...SHADOWS.light,
+  },
+  typeBadgeText: {
+    fontSize: 11,
+    fontWeight: "bold",
+    color: "rgba(0,0,0,0.6)",
+    textTransform: "uppercase",
+  },
   ownedOverlay: {
     position: "absolute",
     top: 8,
     right: 8,
-    backgroundColor: COLORS.success,
+    backgroundColor: "#9AD6AA", // Pastel same as success toast
     width: 32,
     height: 32,
     borderRadius: 16,

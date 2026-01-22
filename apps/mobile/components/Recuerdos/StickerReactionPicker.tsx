@@ -44,13 +44,15 @@ export default function StickerReactionPicker({
   // Normalize data helper
   const normalizeData = (
     data: unknown,
-  ): (Record<string, any> | any[]) | undefined => {
+  ): (Record<string, unknown> | unknown[]) | undefined => {
     if (!data) return undefined;
     if (Array.isArray(data)) return data;
     if (typeof data === "object" && data !== null && "data" in data) {
-      return (data as Record<string, any>).data;
+      return (data as Record<string, unknown>).data as
+        | Record<string, unknown>
+        | unknown[];
     }
-    return data;
+    return data as Record<string, unknown> | unknown[];
   };
 
   // Get user's sticker inventory
@@ -60,7 +62,12 @@ export default function StickerReactionPicker({
 
   // Filter only stickers from inventory - using 'type' field from shop_items table
   const stickers = Array.isArray(inventoryData)
-    ? (inventoryData as any[]).filter((item: any) => {
+    ? (
+        inventoryData as Array<{
+          itemId: string;
+          item?: { type: string; assetUrl?: string; title?: string };
+        }>
+      ).filter((item: any) => {
         const itemType = item.item?.type || item.type;
         return itemType === "Sticker" || itemType === "sticker";
       })
