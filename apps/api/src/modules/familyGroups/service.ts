@@ -153,14 +153,20 @@ export class FamilyGroupService {
 
       if (frames) {
         frames.forEach((f) => {
-          if (f.item && (f.item as any).asset_url) {
-             framesMap[f.user_id] = (f.item as any).asset_url;
+          // Cast item to expected shape since Supabase join types can be complex
+          const item = f.item as unknown as {
+            type: string;
+            asset_url: string | null;
+          } | null;
+
+          if (item?.asset_url) {
+            framesMap[f.user_id] = item.asset_url;
           }
         });
       }
     }
 
-    const enrichMember = (m: any) => ({
+    const enrichMember = (m: (typeof membersList)[number]) => ({
         ...m,
         activeFrameUrl: framesMap[m.id] || null
     });
@@ -187,7 +193,7 @@ export class FamilyGroupService {
         console.error("Owner not found in users: ", ownerErr);
         throw new ApiException(404, "Group owner not found");
       }
-      ownerToReturn = ownerUser as any; // Temporary cast to merge properties next
+      ownerToReturn = ownerUser;
     }
 
     // Enrich owner with frame
