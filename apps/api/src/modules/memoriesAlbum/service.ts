@@ -136,14 +136,14 @@ export class MemoriesAlbumService {
     }
 
     const notificationsService = new NotificationsService(this.supabase);
-      await notificationsService.createNotification({
+      /* await notificationsService.createNotification({
         userId,
         eventType: "achievement", //TODO: change event & entity type to more appropiate ones
         entityType: "memory",
         entityId: userId, // ?
         title: "Generando Álbum",
         body: `Estamos generando tu álbum. Te avisaremos cuando esté listo.`,
-      });
+      }); */
 
     const { data: memories, error: memoriesError } = await this.supabase
       .from("memories")
@@ -259,7 +259,7 @@ export class MemoriesAlbumService {
       throw new ApiException(500, "Error creating album pages");
     }
 
-    this.processAlbumNarratives(album.id, userId, userGroup.groupId).catch(
+    await this.processAlbumNarratives(album.id, userId, userGroup.groupId).catch(
       (err) => {
         console.error("Error processing album narratives:", err);
         throw new ApiException(500, "Error generating the album pages content");
