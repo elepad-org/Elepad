@@ -43,6 +43,19 @@ export default function AttentionGame({
   const [gameId, setGameId] = useState<string>(Date.now().toString());
   const [isGameComplete, setIsGameComplete] = useState(false);
   const [hasStartedPlaying, setHasStartedPlaying] = useState(false);
+  const [gameEndStats, setGameEndStats] = useState<{
+    correct: number;
+    rounds: number;
+    errors: number;
+    score: number;
+    achievements?: Array<{
+      id: string;
+      title: string;
+      icon?: string | null;
+      description?: string | null;
+      points: number;
+    }>;
+  } | null>(null);
   
   const hasCalledOnComplete = useRef(false);
   const prevGameId = useRef<string>(gameId);
@@ -72,6 +85,14 @@ export default function AttentionGame({
     }
   }, [isGameComplete]);
 
+  // Effect para llamar onComplete cuando el juego termina
+  useEffect(() => {
+    if (gameEndStats && !hasCalledOnComplete.current) {
+      hasCalledOnComplete.current = true;
+      onComplete?.(gameEndStats);
+    }
+  }, [gameEndStats, onComplete]);
+
   useEffect(() => {
     core.startRound();
     setTick((t) => t + 1);
@@ -88,6 +109,7 @@ export default function AttentionGame({
     setCurrentRound(1);
     setIsGameComplete(false);
     setHasStartedPlaying(false);
+    setGameEndStats(null);
     
     // 2. Resetear el core del juego
     core.reset();
@@ -142,9 +164,9 @@ export default function AttentionGame({
       setLives((prev) => {
         const remaining = prev - 1;
         if (remaining <= 0) {
-          // PERDIÓ - Llamar onComplete INMEDIATAMENTE
+          // PERDIÓ - Guardar los stats para que se llame onComplete en el useEffect
           const errors = rounds - newCorrectScore;
-          onComplete?.({
+          setGameEndStats({
             correct: newCorrectScore,
             rounds,
             errors,
@@ -190,8 +212,8 @@ export default function AttentionGame({
           durationMs
         });
         
-        // Llamar onComplete INMEDIATAMENTE
-        onComplete?.({
+        // Guardar los stats para que se llame onComplete en el useEffect
+        setGameEndStats({
           correct: newCorrectScore,
           rounds,
           errors,

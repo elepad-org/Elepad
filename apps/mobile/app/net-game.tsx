@@ -16,6 +16,7 @@ export default function NetGameScreen() {
   const [showResultsDialog, setShowResultsDialog] = useState(false);
   const [showHelpDialog, setShowHelpDialog] = useState(false);
   const [wasSolvedAutomatically, setWasSolvedAutomatically] = useState(false);
+  const [gameResetCounter, setGameResetCounter] = useState(0);
   const [gameResults, setGameResults] = useState<{
     moves: number;
     timeElapsed: number;
@@ -93,7 +94,7 @@ export default function NetGameScreen() {
     setShowResultsDialog(false);
     setGameResults(null);
     setWasSolvedAutomatically(false);
-    // El juego se reiniciará automáticamente al cambiar el key
+    setGameResetCounter((prev) => prev + 1);
   }, []);
 
   const handleBackToGames = useCallback(() => {
@@ -113,6 +114,7 @@ export default function NetGameScreen() {
         <View style={styles.container}>
           {/* Tablero de juego */}
           <NetGameBoard
+            key={`net-5-${gameResetCounter}`}
             gridSize={5}
             onQuit={handleQuit}
             onComplete={handleComplete}
