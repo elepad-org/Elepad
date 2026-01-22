@@ -641,28 +641,50 @@ export default function FamilyGroup() {
                         <View
                           style={{ flexDirection: "row", alignItems: "center" }}
                         >
-                          {o.avatarUrl ? (
-                            <Pressable
-                              onPress={() =>
-                                openAvatarModal(o.avatarUrl!, o.displayName)
-                              }
-                            >
+                          <View
+                            style={{
+                              position: "relative",
+                              width: 47,
+                              height: 47,
+                            }}
+                          >
+                            {o.avatarUrl ? (
+                              <Pressable
+                                onPress={() =>
+                                  openAvatarModal(o.avatarUrl!, o.displayName)
+                                }
+                              >
+                                <Image
+                                  source={{ uri: o.avatarUrl }}
+                                  style={{
+                                    width: 47,
+                                    height: 47,
+                                    borderRadius: 40,
+                                  }}
+                                />
+                              </Pressable>
+                            ) : (
+                              <View style={STYLES.memberAvatarPlaceholder}>
+                                <Text style={STYLES.memberInitials}>
+                                  {getInitials(o.displayName)}
+                                </Text>
+                              </View>
+                            )}
+                            {o.activeFrameUrl && (
                               <Image
-                                source={{ uri: o.avatarUrl }}
+                                source={{ uri: o.activeFrameUrl }}
                                 style={{
-                                  width: 47,
-                                  height: 47,
-                                  borderRadius: 40,
+                                  position: "absolute",
+                                  width: 47 * 1.4,
+                                  height: 47 * 1.4,
+                                  top: -47 * 0.2,
+                                  left: -47 * 0.2,
+                                  zIndex: 10,
                                 }}
+                                resizeMode="contain"
                               />
-                            </Pressable>
-                          ) : (
-                            <View style={STYLES.memberAvatarPlaceholder}>
-                              <Text style={STYLES.memberInitials}>
-                                {getInitials(o.displayName)}
-                              </Text>
-                            </View>
-                          )}
+                            )}
+                          </View>
                           <View style={{ marginLeft: 12 }}>
                             <Text style={STYLES.paragraphText}>
                               {o.displayName}
@@ -715,28 +737,50 @@ export default function FamilyGroup() {
                         <View
                           style={{ flexDirection: "row", alignItems: "center" }}
                         >
-                          {m.avatarUrl ? (
-                            <Pressable
-                              onPress={() =>
-                                openAvatarModal(m.avatarUrl!, m.displayName)
-                              }
-                            >
+                          <View
+                            style={{
+                              position: "relative",
+                              width: 47,
+                              height: 47,
+                            }}
+                          >
+                            {m.avatarUrl ? (
+                              <Pressable
+                                onPress={() =>
+                                  openAvatarModal(m.avatarUrl!, m.displayName)
+                                }
+                              >
+                                <Image
+                                  source={{ uri: m.avatarUrl }}
+                                  style={{
+                                    width: 47,
+                                    height: 47,
+                                    borderRadius: 40,
+                                  }}
+                                />
+                              </Pressable>
+                            ) : (
+                              <View style={STYLES.memberAvatarPlaceholder}>
+                                <Text style={STYLES.memberInitials}>
+                                  {getInitials(m.displayName)}
+                                </Text>
+                              </View>
+                            )}
+                            {m.activeFrameUrl && (
                               <Image
-                                source={{ uri: m.avatarUrl }}
+                                source={{ uri: m.activeFrameUrl }}
                                 style={{
-                                  width: 47,
-                                  height: 47,
-                                  borderRadius: 40,
+                                  position: "absolute",
+                                  width: 47 * 1.4,
+                                  height: 47 * 1.4,
+                                  top: -47 * 0.2,
+                                  left: -47 * 0.2,
+                                  zIndex: 10,
                                 }}
+                                resizeMode="contain"
                               />
-                            </Pressable>
-                          ) : (
-                            <View style={STYLES.memberAvatarPlaceholder}>
-                              <Text style={STYLES.memberInitials}>
-                                {getInitials(m.displayName)}
-                              </Text>
-                            </View>
-                          )}
+                            )}
+                          </View>
                           <View style={{ marginLeft: 12 }}>
                             <Text style={STYLES.paragraphText}>
                               {m.displayName}
