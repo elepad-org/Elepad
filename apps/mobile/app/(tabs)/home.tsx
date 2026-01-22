@@ -495,6 +495,11 @@ export default function HomeScreen() {
                       <Pressable
                         key={activity.id}
                         onPress={() => {
+                          console.log("🏠 Home: duende Navigating to calendar with activity", {
+                            activityId: activity.id,
+                            title: activity.title,
+                            startsAt: activity.startsAt,
+                          });
                           // Navegar al tab de calendario y abrir el detalle del evento
                           router.navigate({
                             pathname: "/(tabs)/home",

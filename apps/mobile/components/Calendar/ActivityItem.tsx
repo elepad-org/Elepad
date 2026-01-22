@@ -50,13 +50,17 @@ export default function ActivityItem({
   // Abrir el modal automáticamente si shouldOpen es true
   useEffect(() => {
     if (shouldOpen && !showModal) {
-      setShowModal(true);
-      // Notificar que se abrió
-      if (onOpened) {
-        onOpened();
-      }
+      console.log("📱 ActivityItem: Opening modal for activity", item.id);
+      // Pequeño delay para asegurar que el componente esté completamente renderizado
+      setTimeout(() => {
+        setShowModal(true);
+        // Notificar que se abrió
+        if (onOpened) {
+          onOpened();
+        }
+      }, 300);
     }
-  }, [shouldOpen]);
+  }, [shouldOpen, showModal]);
 
   // Usar completed de la prop si está disponible, sino usar item.completed
   const isCompleted = completed !== undefined ? completed : item.completed;

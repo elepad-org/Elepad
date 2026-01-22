@@ -20,6 +20,7 @@ import { Text, Dialog, Button, Portal } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CancelButton from "@/components/shared/CancelButton";
 import { useToast } from "@/components/shared/Toast";
+import { toLocalDateString } from "@/lib/dateHelpers";
 
 export default function CalendarScreen() {
   const { userElepad } = useAuth();
@@ -164,7 +165,7 @@ export default function CalendarScreen() {
     null,
   );
 
-  // Detectar cuando se pasa un activityId desde notificaciones
+  // Detectar cuando se pasa un activityId desde notificaciones o desde home
   useEffect(() => {
     if (
       params.activityId &&
@@ -179,14 +180,24 @@ export default function CalendarScreen() {
         (a: Activity) => a.id === params.activityId,
       );
       if (activity) {
+        console.log("📅 Opening activity from params:", {
+          id: params.activityId,
+          title: activity.title,
+          startsAt: activity.startsAt,
+        });
         // Establecer la actividad a visualizar
         setActivityToView(params.activityId);
-        // Establecer la fecha de la actividad (formato YYYY-MM-DD)
-        const activityDate = activity.startsAt.slice(0, 10);
+        // Establecer la fecha de la actividad en hora local (formato YYYY-MM-DD)
+        const activityDate = toLocalDateString(new Date(activity.startsAt));
+        console.log("📅 Activity date in local timezone:", activityDate);
         setActivityDateToView(activityDate);
+      } else {
+        console.warn("⚠️ Activity not found:", params.activityId);
       }
-      // Limpiar el parámetro de la URL inmediatamente para evitar que se vuelva a abrir
-      router.setParams({ activityId: undefined });
+      // Limpiar el parámetro de la URL después de un pequeño delay para asegurar que se procese
+      setTimeout(() => {
+        router.setParams({ activityId: undefined });
+      }, 200);
     }
   }, [params.activityId, activitiesQuery.data]);
 
