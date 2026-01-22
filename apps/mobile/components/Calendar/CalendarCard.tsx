@@ -213,6 +213,7 @@ export default function CalendarCard(props: CalendarCardProps) {
   // Cambiar al día de la actividad cuando se recibe desde notificaciones
   useEffect(() => {
     if (activityDateToView) {
+      console.log("📅 CalendarCard: Changing selected day to", activityDateToView);
       setSelectedDay(activityDateToView);
     }
   }, [activityDateToView]);

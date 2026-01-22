@@ -428,7 +428,14 @@ export default function HomeScreen() {
             {upcomingActivities.length > 0 && (
               <Button
                 mode="text"
-                onPress={() => router.push("/calendar")}
+                onPress={() => {
+                  router.navigate({
+                    pathname: "/(tabs)/home",
+                    params: {
+                      tab: "calendar",
+                    },
+                  });
+                }}
                 labelStyle={styles.sectionLink}
                 compact
               >
@@ -492,35 +499,54 @@ export default function HomeScreen() {
                     if (isTomorrow) dateLabel = "Mañana";
 
                     return (
-                      <Animated.View
+                      <Pressable
                         key={activity.id}
-                        entering={ZoomIn.duration(200).delay(index * 50)}
-                        style={styles.eventItem}
+                        onPress={() => {
+                          console.log("🏠 Home: Navigating to calendar with activity", {
+                            activityId: activity.id,
+                            title: activity.title,
+                            startsAt: activity.startsAt,
+                          });
+                          // Navegar al tab de calendario y abrir el detalle del evento
+                          router.navigate({
+                            pathname: "/(tabs)/home",
+                            params: {
+                              tab: "calendar",
+                              activityId: activity.id,
+                            },
+                          });
+                        }}
+                        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
                       >
-                        <View style={styles.eventTime}>
-                          <Text style={styles.eventDate}>{dateLabel}</Text>
-                          <Text style={styles.eventHour}>
-                            {activityDate.toLocaleTimeString("es", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </Text>
-                        </View>
-                        <View style={styles.eventDivider} />
-                        <View style={styles.eventContent}>
-                          <Text style={styles.eventTitle} numberOfLines={1}>
-                            {activity.title}
-                          </Text>
-                          {activity.description && (
-                            <HighlightedMentionText
-                              text={activity.description}
-                              groupMembers={groupMembers}
-                              style={styles.eventDesc}
-                              numberOfLines={1}
-                            />
-                          )}
-                        </View>
-                      </Animated.View>
+                        <Animated.View
+                          entering={ZoomIn.duration(200).delay(index * 50)}
+                          style={styles.eventItem}
+                        >
+                          <View style={styles.eventTime}>
+                            <Text style={styles.eventDate}>{dateLabel}</Text>
+                            <Text style={styles.eventHour}>
+                              {activityDate.toLocaleTimeString("es", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </Text>
+                          </View>
+                          <View style={styles.eventDivider} />
+                          <View style={styles.eventContent}>
+                            <Text style={styles.eventTitle} numberOfLines={1}>
+                              {activity.title}
+                            </Text>
+                            {activity.description && (
+                              <HighlightedMentionText
+                                text={activity.description}
+                                groupMembers={groupMembers}
+                                style={styles.eventDesc}
+                                numberOfLines={1}
+                              />
+                            )}
+                          </View>
+                        </Animated.View>
+                      </Pressable>
                     );
                   },
                 )}
@@ -566,7 +592,20 @@ export default function HomeScreen() {
           ) : lastAttempt ? (
             <Pressable
               style={styles.gameCard}
-              onPress={() => router.push("/history")}
+              onPress={() => {
+                if (userElepad?.elder) {
+                  // Si es adulto mayor, ir a la pantalla de historial completo
+                  router.push("/history");
+                } else {
+                  // Si es familiar, navegar al tab de estadísticas
+                  router.navigate({
+                    pathname: "/(tabs)/home",
+                    params: {
+                      tab: "juegos",
+                    },
+                  });
+                }
+              }}
             >
               <View style={styles.gameIcon}>
                 <Image
