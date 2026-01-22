@@ -2,7 +2,7 @@ import { useState } from "react";
 import { View, Image, StyleSheet } from "react-native";
 import { Text, Card, Portal, Dialog, Button } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { COLORS, SHADOWS, STYLES } from "@/styles/base";
+import { COLORS, STYLES } from "@/styles/base";
 
 interface AlbumCardProps {
   id: string;
@@ -116,7 +116,12 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     overflow: "hidden",
     marginBottom: 16,
-    ...SHADOWS.light,
+    //...SHADOWS.light,
+    shadowColor: "#000000a8",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.03,
+    shadowRadius: 28,
+    elevation: 1,
   },
 
   imageWrapper: {

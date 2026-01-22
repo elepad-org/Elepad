@@ -52,7 +52,17 @@ export default function LogIn() {
     });
   };
 
+  const isFormValid = () => {
+    return email.trim() !== "" && password.trim() !== "";
+  };
+
   const handleLogin = async () => {
+    // Validar campos obligatorios
+    if (!email.trim() || !password.trim()) {
+      showError("Por favor completa todos los campos obligatorios.");
+      return;
+    }
+
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -216,7 +226,7 @@ export default function LogIn() {
           buttonColor={COLORS.primary}
           onPress={handleLogin}
           loading={loading}
-          disabled={loading}
+          disabled={loading || !isFormValid()}
         >
           Continuar
         </Button>
@@ -228,10 +238,10 @@ export default function LogIn() {
         </View>
 
         <TouchableOpacity
-          style={styles.googleButton}
+          style={[styles.googleButton, !isFormValid() || loading ? { opacity: 0.5 } : {}]}
           activeOpacity={0.85}
           onPress={handleGoogleLogin}
-          disabled={loading}
+          disabled={loading || !isFormValid()}
         >
           <View style={styles.googleIconWrap}>
             <Image
