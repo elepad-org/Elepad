@@ -23,7 +23,7 @@ import {
   usePostShopBuy,
   useGetShopInventory,
 } from "@elepad/api-client";
-import { COLORS, SHADOWS } from "@/styles/base";
+import { COLORS, SHADOWS, FONT } from "@/styles/base";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BackButton } from "@/components/shared/BackButton";
@@ -45,15 +45,20 @@ export default function ShopScreen() {
   const [activeFilter, setActiveFilter] = React.useState("Todos");
 
   // Helpers to normalize data
-  const normalizeData = (data: any) => {
+  const normalizeData = (data: unknown) => {
     if (!data) return undefined;
     if (Array.isArray(data)) return data;
-    return "data" in data ? data.data : data;
+    if (typeof data === "object" && data !== null && "data" in data) {
+      return (data as { data: any }).data;
+    }
+    return data;
   };
 
   // Queries
   const balanceResponse = useGetShopBalance();
-  const balanceData = normalizeData(balanceResponse.data);
+  const balanceData = normalizeData(balanceResponse.data) as
+    | { pointsBalance: number }
+    | undefined;
   const refetchBalance = balanceResponse.refetch;
 
   const itemsResponse = useGetShopItems();
@@ -71,7 +76,9 @@ export default function ShopScreen() {
   const isOwned = (itemId: string) => {
     return (
       Array.isArray(inventoryData) &&
-      inventoryData.some((inv: any) => inv.itemId === itemId)
+      (inventoryData as Array<{ itemId: string }>).some(
+        (inv) => inv.itemId === itemId,
+      )
     );
   };
 
@@ -213,10 +220,7 @@ export default function ShopScreen() {
             {owned ? (
               <Text style={styles.ownedText}>Comprado</Text>
             ) : (
-              <>
-                <Text style={{ fontSize: 16 }}>💎</Text>
-                <Text style={styles.priceText}>{item.cost}</Text>
-              </>
+              <Text style={styles.priceText}>{item.cost} Puntos</Text>
             )}
           </View>
         </Pressable>
@@ -267,11 +271,7 @@ export default function ShopScreen() {
         </View>
 
         <View style={styles.headerActions}>
-          <Chip
-            icon={() => <Text style={{ fontSize: 16 }}>💎</Text>}
-            style={styles.chip}
-            textStyle={styles.chipText}
-          >
+          <Chip style={styles.chip} textStyle={styles.chipText}>
             {balanceData?.pointsBalance ?? 0} Puntos
           </Chip>
           <Text style={styles.subtitleText}>¡Canjea tus premios!</Text>
@@ -345,16 +345,14 @@ export default function ShopScreen() {
                   marginBottom: 24,
                 }}
               >
-                <Text style={{ fontSize: 24 }}>💎</Text>
                 <Text
                   style={{
                     fontSize: 24,
-                    fontWeight: "bold",
+                    fontFamily: FONT.bold,
                     color: COLORS.primary,
-                    marginLeft: 8,
                   }}
                 >
-                  {selectedItem.cost}
+                  {selectedItem.cost} Puntos
                 </Text>
               </View>
 
@@ -431,7 +429,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontFamily: FONT.bold,
     color: COLORS.text,
     letterSpacing: -0.5,
     flex: 1,
@@ -451,13 +449,13 @@ const styles = StyleSheet.create({
   },
   chipText: {
     color: COLORS.primary,
-    fontWeight: "700",
+    fontFamily: FONT.bold,
     fontSize: 15,
   },
   subtitleText: {
     fontSize: 14,
     color: COLORS.textSecondary,
-    fontWeight: "500",
+    fontFamily: FONT.medium,
   },
   filterChip: {
     paddingHorizontal: 16,
@@ -474,7 +472,7 @@ const styles = StyleSheet.create({
   filterChipText: {
     color: COLORS.textSecondary,
     fontSize: 14,
-    fontWeight: "600",
+    fontFamily: FONT.semiBold,
   },
   filterChipTextActive: {
     color: COLORS.primary,
@@ -495,6 +493,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: "center",
     color: COLORS.text,
+    fontFamily: FONT.regular,
   },
   listContent: {
     paddingHorizontal: 16,
@@ -550,7 +549,7 @@ const styles = StyleSheet.create({
   },
   typeBadgeText: {
     fontSize: 11,
-    fontWeight: "bold",
+    fontFamily: FONT.bold,
     color: "rgba(0,0,0,0.6)",
     textTransform: "uppercase",
   },
@@ -569,7 +568,7 @@ const styles = StyleSheet.create({
   },
   itemTitle: {
     fontSize: 15,
-    fontWeight: "600",
+    fontFamily: FONT.semiBold,
     color: COLORS.text,
     textAlign: "center",
     marginBottom: 8,
@@ -587,13 +586,12 @@ const styles = StyleSheet.create({
   },
   priceText: {
     fontSize: 15,
-    fontWeight: "bold",
+    fontFamily: FONT.bold,
     color: COLORS.text,
-    marginLeft: 4,
   },
   ownedText: {
     fontSize: 13,
-    fontWeight: "600",
+    fontFamily: FONT.semiBold,
     color: COLORS.success,
   },
   modalContent: {
@@ -606,7 +604,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontFamily: FONT.bold,
     marginBottom: 8,
     color: COLORS.text,
     textAlign: "center",
@@ -616,6 +614,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     color: COLORS.textSecondary,
     fontSize: 16,
+    fontFamily: FONT.regular,
   },
   modalItemPreview: {
     width: 120,
@@ -639,6 +638,6 @@ const styles = StyleSheet.create({
     color: COLORS.error,
     textAlign: "center",
     marginTop: 16,
-    fontWeight: "500",
+    fontFamily: FONT.medium,
   },
 });
