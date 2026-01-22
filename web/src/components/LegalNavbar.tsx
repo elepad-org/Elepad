@@ -17,8 +17,8 @@ export default function LegalNavbar() {
             sx={{
               fontWeight: 700,
               fontFamily: 'Lobster',
-              fontSize: '2rem',
-              color: 'primary.main',
+              fontSize: '2.75rem',
+              color: 'text.primary',
               letterSpacing: '-0.01em',
             }}
           >

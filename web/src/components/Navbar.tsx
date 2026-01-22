@@ -3,6 +3,12 @@ import { Download } from '@mui/icons-material';
 import { Link as RouterLink } from 'react-router-dom';
 
 export default function Navbar() {
+  const handleScrollToFeatures = () => {
+    const element = document.getElementById('features');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
   return (
     <AppBar
       position="sticky"
@@ -11,13 +17,13 @@ export default function Navbar() {
         backgroundColor: 'rgba(255, 255, 255, 0.95)',
       }}
     >
-      <Toolbar disableGutters sx={{ justifyContent: 'space-between', py: 1, px: 10 }}>
+      <Toolbar disableGutters sx={{ justifyContent: 'space-between', py: -10, px: 10 }}>
           <Typography         
             sx={{
               fontWeight: 700,
               fontFamily: 'Lobster',
-              fontSize: '2.5rem',
-              color: 'primary.main',
+              fontSize: '2.75rem',
+              color: 'text.primary',
               letterSpacing: '-0.01em',
             }}
           >
@@ -26,8 +32,7 @@ export default function Navbar() {
 
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             <Button
-              component={RouterLink}
-              to="#features"
+              onClick={handleScrollToFeatures}
               variant="text"
               color="primary"
               size="large"
