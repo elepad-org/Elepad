@@ -444,10 +444,23 @@ export default function NotificationsScreen() {
           notification.event_type === "achievement") &&
         notification.entity_id
       ) {
-        console.log("📚 Opening album detail:", notification.entity_id);
-        // Verificar si el álbum existe antes de abrirlo
-        setSelectedAlbumId(notification.entity_id);
-        setAlbumDetailDialogVisible(true);
+        // Check for error notifications
+        const isError = notification.title
+          ?.toLowerCase()
+          .includes("error al procesar");
+
+        if (isError) {
+          console.log("❌ Album processing error notification");
+          toast.showToast({
+            message: "Hubo un error al procesar el álbum.",
+            type: "error",
+          });
+        } else {
+          console.log("📚 Opening album detail:", notification.entity_id);
+          // Verificar si el álbum existe antes de abrirlo
+          setSelectedAlbumId(notification.entity_id);
+          setAlbumDetailDialogVisible(true);
+        }
       } else {
         console.log("⚠️ No action for this notification type");
       }
