@@ -1,10 +1,10 @@
-import LegalNavbar from '../components/LegalNavbar';
+import Navbar from '../components/Navbar';
 import { Container, Typography, Box, TextField, Button, Paper } from '@mui/material';
 
 export default function Contacto() {
   return (
     <>
-      <LegalNavbar />
+      <Navbar variant="legal" />
       <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default', py: 8 }}>
         <Container maxWidth="sm">
           <Paper sx={{ p: 4, borderRadius: 3 }}>

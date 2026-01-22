@@ -1,11 +1,11 @@
 import { Box, Container, Typography, List, ListItem, ListItemText, ListItemIcon, Paper, Button } from '@mui/material';
 import { Security, Email, Timer, Info, Camera, CalendarMonth, Notifications } from '@mui/icons-material';
-import LegalNavbar from '../components/LegalNavbar';
+import Navbar from '../components/Navbar';
 
 export default function PrivacyPolicy() {
   return (
     <>
-      <LegalNavbar />
+      <Navbar variant="legal" />
       <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default', py: 8 }}>
       <Container maxWidth="md">
         {/* Header */}

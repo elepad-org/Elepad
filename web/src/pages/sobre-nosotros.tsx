@@ -1,4 +1,4 @@
-import LegalNavbar from '../components/LegalNavbar';
+import Navbar from '../components/Navbar';
 import { Container, Typography, Box, Avatar, Paper } from '@mui/material';
 
 const integrantes = [
@@ -12,7 +12,7 @@ const integrantes = [
 export default function SobreNosotros() {
   return (
     <>
-      <LegalNavbar />
+      <Navbar variant="legal" />
       <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default', py: 8 }}>
         <Container maxWidth="md">
           <Paper sx={{ p: 4, borderRadius: 3 }}>

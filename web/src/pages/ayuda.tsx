@@ -1,11 +1,11 @@
-import LegalNavbar from '../components/LegalNavbar';
+import Navbar from '../components/Navbar';
 import { Container, Typography, Accordion, AccordionSummary, AccordionDetails, Box, Paper } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 export default function Ayuda() {
   return (
     <>
-      <LegalNavbar />
+      <Navbar variant="legal" />
       <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default', py: 8 }}>
         <Container maxWidth="md">
           <Paper sx={{ p: 4, borderRadius: 3 }}>

@@ -1,11 +1,11 @@
 import { Box, Container, Typography, Paper, Button, Alert, List, ListItem, ListItemIcon, ListItemText, Divider, Card, CardContent } from '@mui/material';
 import { DeleteForever, Email, CheckCircle, Info, Schedule, ContentCopy } from '@mui/icons-material';
-import LegalNavbar from '../components/LegalNavbar';
+import Navbar from '../components/Navbar';
 
 export default function AccountDeletion() {
   return (
     <>
-      <LegalNavbar />
+      <Navbar variant="legal" />
       <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default', py: 8 }}>
         <Container maxWidth="md">{/* Header */}
           <Box sx={{ textAlign: 'center', mb: 6 }}>
