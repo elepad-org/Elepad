@@ -28,10 +28,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BackButton } from "@/components/shared/BackButton";
 import Reanimated, { ZoomIn } from "react-native-reanimated";
+import { useToast } from "@/components/shared/Toast";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function ShopScreen() {
   const router = useRouter();
   const { userElepad: user } = useAuth();
+  const { showToast } = useToast();
   const [selectedItem, setSelectedItem] = React.useState<any | null>(null);
 
   // Helpers to normalize data
@@ -62,7 +65,7 @@ export default function ShopScreen() {
   const { mutate: buyItem, isPending: isBuying } = usePostShopBuy({
     mutation: {
       onSuccess: () => {
-        Alert.alert("¡Éxito!", "Has comprado el artículo correctamente.");
+        showToast({ message: "¡Compra realizada con éxito!", type: "success" });
         setSelectedItem(null);
         refetchBalance(); // Update points
         refetchInventory(); // Update inventory
@@ -131,7 +134,11 @@ export default function ShopScreen() {
 
             {owned && (
               <View style={styles.ownedOverlay}>
-                <Text style={{ fontSize: 24 }}>✓</Text>
+                <MaterialCommunityIcons
+                  name="check-bold"
+                  size={20}
+                  color={COLORS.white}
+                />
               </View>
             )}
           </View>
