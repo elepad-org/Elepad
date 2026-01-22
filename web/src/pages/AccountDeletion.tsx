@@ -1,8 +1,10 @@
 import { Box, Container, Typography, Paper, Button, Alert, List, ListItem, ListItemIcon, ListItemText, Divider, Card, CardContent } from '@mui/material';
 import { DeleteForever, Email, CheckCircle, Info, Schedule, ContentCopy } from '@mui/icons-material';
 import Navbar from '../components/Navbar';
+import { useTranslation } from 'react-i18next';
 
 export default function AccountDeletion() {
+  const { t } = useTranslation();
   return (
     <>
       <Navbar variant="legal" />
@@ -11,20 +13,20 @@ export default function AccountDeletion() {
           <Box sx={{ textAlign: 'center', mb: 6 }}>
           <DeleteForever sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
           <Typography variant="h3" sx={{ fontWeight: 700, mb: 2, color: 'text.primary' }}>
-            Eliminación de Cuenta
+            {t('accountDeletion.title')}
           </Typography>
           <Typography variant="h6" sx={{ color: 'text.secondary', fontWeight: 400 }}>
-            Solicitud de Eliminación de Datos
+            {t('accountDeletion.subtitle')}
           </Typography>
         </Box>
 
         {/* Importante */}
         <Alert severity="warning" sx={{ mb: 4, borderRadius: 2 }}>
           <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
-            Esta acción es permanente e irreversible
+            {t('accountDeletion.warning.title')}
           </Typography>
           <Typography variant="body2">
-            Una vez procesada tu solicitud, no podremos recuperar tu cuenta ni tus datos. Por favor, lee cuidadosamente la información antes de proceder.
+            {t('accountDeletion.warning.description')}
           </Typography>
         </Alert>
 
@@ -33,11 +35,11 @@ export default function AccountDeletion() {
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
             <DeleteForever sx={{ mr: 1, color: 'error.main' }} />
             <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              Datos que se eliminarán permanentemente
+              {t('accountDeletion.whatGetsDeleted.title')}
             </Typography>
           </Box>
           <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
-            Al eliminar tu cuenta de Elepad, se borrarán de forma permanente los siguientes datos:
+            {t('accountDeletion.whatGetsDeleted.description')}
           </Typography>
           <List>
             <ListItem>
@@ -45,7 +47,7 @@ export default function AccountDeletion() {
                 <CheckCircle color="error" />
               </ListItemIcon>
               <ListItemText 
-                primary="Información de tu Cuenta"
+                primary={t('accountDeletion.whatGetsDeleted.accountInfo')}
                 secondary="Nombre, email, fecha de nacimiento, foto de perfil y credenciales de autenticación."
               />
             </ListItem>
@@ -54,7 +56,7 @@ export default function AccountDeletion() {
                 <CheckCircle color="error" />
               </ListItemIcon>
               <ListItemText 
-                primary="Progreso en Juegos Cognitivos"
+                primary={t('accountDeletion.whatGetsDeleted.gameProgress')}
                 secondary="Todas tus puntuaciones, logros, rachas y estadísticas de juegos (Memoria, Sudoku, NET, Focus)."
               />
             </ListItem>
@@ -63,7 +65,7 @@ export default function AccountDeletion() {
                 <CheckCircle color="error" />
               </ListItemIcon>
               <ListItemText 
-                primary="Recuerdos y Memorias Personales"
+                primary={t('accountDeletion.whatGetsDeleted.memories')}
                 secondary="Todas las fotos, álbumes, notas y recuerdos que hayas creado."
               />
             </ListItem>
@@ -72,7 +74,7 @@ export default function AccountDeletion() {
                 <CheckCircle color="error" />
               </ListItemIcon>
               <ListItemText 
-                primary="Eventos y Calendario"
+                primary={t('accountDeletion.whatGetsDeleted.events')}
                 secondary="Todos los eventos familiares, actividades programadas y sincronizaciones con Google Calendar."
               />
             </ListItem>
@@ -81,7 +83,7 @@ export default function AccountDeletion() {
                 <CheckCircle color="error" />
               </ListItemIcon>
               <ListItemText 
-                primary="Membresía en Grupos Familiares"
+                primary={t('accountDeletion.whatGetsDeleted.familyGroups')}
                 secondary="Serás removido de todos los grupos familiares. El contenido compartido por otros miembros permanecerá visible para ellos."
               />
             </ListItem>
@@ -90,7 +92,7 @@ export default function AccountDeletion() {
                 <CheckCircle color="error" />
               </ListItemIcon>
               <ListItemText 
-                primary="Historial de Actividades"
+                primary={t('accountDeletion.whatGetsDeleted.activityHistory')}
                 secondary="Todo tu historial de uso de la aplicación y métricas de comportamiento."
               />
             </ListItem>
@@ -102,11 +104,11 @@ export default function AccountDeletion() {
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
             <Info sx={{ mr: 1, color: 'info.main' }} />
             <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              Datos que se conservan (Temporalmente)
+              {t('accountDeletion.whatRemains.title')}
             </Typography>
           </Box>
           <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
-            Por razones legales, técnicas y de seguridad, algunos datos se conservan por un periodo limitado:
+            {t('accountDeletion.whatRemains.description')}
           </Typography>
           <List>
             <ListItem>

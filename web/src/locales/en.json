@@ -58,8 +58,8 @@
       "activityHistory": "Activity History"
     },
     "whatRemains": {
-      "title": "What data is retained",
-      "description": "Some anonymous data may be retained for statistical analysis and service improvement:"
+      "title": "Data that is retained (Temporarily)",
+      "description": "For legal, technical and security reasons, some data is retained for a limited period:"
     }
   },
   "common": {

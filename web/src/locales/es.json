@@ -58,8 +58,8 @@
       "activityHistory": "Historial de Actividades"
     },
     "whatRemains": {
-      "title": "Qué datos se conservan",
-      "description": "Algunos datos anónimos pueden conservarse para análisis estadísticos y mejora del servicio:"
+      "title": "Datos que se conservan (Temporalmente)",
+      "description": "Por razones legales, técnicas y de seguridad, algunos datos se conservan por un periodo limitado:"
     }
   },
   "common": {

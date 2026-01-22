@@ -169,7 +169,7 @@ export default function PrivacyPolicy() {
         {/* Cambios en la Política */}
         <Paper sx={{ p: 4, mb: 4, borderRadius: 3, backgroundColor: '#FFFFFF', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
           <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
-            Cambios en esta Política
+            {t('privacy.changes')}
           </Typography>
           <Typography variant="body1" sx={{ lineHeight: 1.8, color: 'text.secondary' }}>
             Podemos actualizar esta política de privacidad ocasionalmente. Te notificaremos sobre cambios significativos mediante un aviso en la aplicación o por correo electrónico. Te recomendamos revisar esta política periódicamente.
@@ -181,11 +181,11 @@ export default function PrivacyPolicy() {
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
             <Email sx={{ mr: 1 }} />
             <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              ¿Preguntas o Inquietudes?
+              {t('privacy.contact.title')}
             </Typography>
           </Box>
           <Typography variant="body1" sx={{ lineHeight: 1.8 }}>
-            Si tienes alguna pregunta sobre esta política de privacidad o sobre cómo manejamos tus datos, no dudes en contactarnos:
+            {t('privacy.contact.description')}
           </Typography>
           <Button 
             variant="contained" 
@@ -202,7 +202,7 @@ export default function PrivacyPolicy() {
             }}
           >
             <Email sx={{ mr: 1 }} />
-            Enviar Consulta
+            {t('privacy.contact.button')}
           </Button>
         </Paper>
       </Container>
