@@ -290,6 +290,61 @@
         ],
         "additionalProperties": false
       },
+      "MemoryWithReactions": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Memory"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "reactions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Reaction"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "Reaction": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "memoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stickerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stickerUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "memoryId",
+          "userId",
+          "stickerId",
+          "stickerUrl",
+          "createdAt"
+        ]
+      },
       "Memory": {
         "type": "object",
         "properties": {
@@ -2683,7 +2738,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/Memory"
+                        "$ref": "#/components/schemas/MemoryWithReactions"
                       }
                     },
                     "total": {
@@ -3063,7 +3118,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Memory"
+                  "$ref": "#/components/schemas/MemoryWithReactions"
                 }
               }
             }
@@ -3407,6 +3462,89 @@
           },
           "401": {
             "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/memories/{id}/reaction": {
+      "post": {
+        "tags": [
+          "memories"
+        ],
+        "operationId": "addReaction",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stickerId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "stickerId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reaction added/updated successfully"
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Memory not found",
             "content": {
               "application/json": {
                 "schema": {
