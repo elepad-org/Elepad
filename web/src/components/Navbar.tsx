@@ -20,10 +20,10 @@ export default function Navbar({ variant = 'main' }: NavbarProps) {
       elevation={0}
       sx={{
         backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        py: 0.5,
+        py: -0.1,
       }}
     >
-      <Toolbar sx={{ justifyContent: 'space-between', px: variant === 'main' ? 12 : 8 }}>
+      <Toolbar sx={{ justifyContent: 'space-between', mx: 4 }}>
           <Typography         
             sx={{
               fontWeight: 700,
