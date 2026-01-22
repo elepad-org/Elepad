@@ -4,6 +4,7 @@ import {
   MemoriesBookSchema,
   MemoryFiltersSchema,
   MemorySchema,
+  MemorySchemaWithReactions,
   NewMemoriesBookSchema,
   UpdateMemorySchema,
   UpdateMemoriesBookSchema,
@@ -46,7 +47,7 @@ memoriesApp.openapi(
         content: {
           "application/json": {
             schema: z.object({
-              data: z.array(MemorySchema),
+              data: z.array(MemorySchemaWithReactions),
               total: z.number(),
               limit: z.number(),
               offset: z.number(),
@@ -271,7 +272,7 @@ memoriesApp.openapi(
         description: "Memory details",
         content: {
           "application/json": {
-            schema: MemorySchema,
+            schema: MemorySchemaWithReactions,
           },
         },
       },
@@ -544,5 +545,44 @@ memoriesApp.openapi(
     await c.var.memoriesService.deleteMemory(id, user.id);
 
     return c.json({ message: "Memory deleted successfully" }, 200);
+  }
+);
+
+// POST /memories/{id}/reaction - Agregar o actualizar reacción
+memoriesApp.openapi(
+  {
+    method: "post",
+    path: "/memories/{id}/reaction",
+    tags: ["memories"],
+    operationId: "addReaction",
+    request: {
+      params: z.object({ id: z.string().uuid() }),
+      body: {
+        content: {
+          "application/json": {
+            schema: z.object({ stickerId: z.string().uuid() }),
+          },
+        },
+        required: true,
+      },
+    },
+    responses: {
+      200: {
+        description: "Reaction added/updated successfully",
+      },
+      400: openApiErrorResponse("Invalid request"),
+      401: openApiErrorResponse("Unauthorized"),
+      404: openApiErrorResponse("Memory not found"),
+      500: openApiErrorResponse("Internal Server Error"),
+    },
+  },
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const { stickerId } = c.req.valid("json");
+    const user = c.var.user;
+
+    await c.var.memoriesService.upsertReaction(id, stickerId, user.id);
+
+    return c.json({ message: "Reaction added/updated successfully" }, 200);
   }
 );

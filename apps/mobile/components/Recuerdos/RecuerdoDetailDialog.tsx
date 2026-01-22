@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { View, Image, Dimensions, Animated } from "react-native";
+import Reanimated, { ZoomIn, ZoomOut } from "react-native-reanimated";
 import {
   Dialog,
   Portal,
@@ -9,12 +10,13 @@ import {
   Button,
   TextInput,
 } from "react-native-paper";
-import { COLORS, STYLES, FONT } from "@/styles/base";
+import { COLORS, STYLES, FONT, SHADOWS } from "@/styles/base";
 import { useAudioPlayer } from "expo-audio";
 import { VideoView, useVideoPlayer } from "expo-video";
 import Slider from "@react-native-community/slider";
 import HighlightedMentionText from "./HighlightedMentionText";
 import MentionInput from "./MentionInput";
+import StickerReactionPicker from "./StickerReactionPicker";
 
 type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
 
@@ -28,6 +30,12 @@ interface Recuerdo {
   autorId?: string;
   autorNombre?: string;
   fecha: Date;
+  reactions?: {
+    id: string;
+    userId: string;
+    stickerId: string;
+    stickerUrl: string | null;
+  }[];
 }
 
 interface RecuerdoDetailDialogProps {
@@ -39,6 +47,7 @@ interface RecuerdoDetailDialogProps {
     patch: { title?: string; caption?: string },
   ) => Promise<void>;
   onDeleteRecuerdo: (id: string) => Promise<void>;
+  onReact?: (recuerdoId: string, stickerId: string) => void;
   isMutating?: boolean;
   familyMembers?: Array<{
     id: string;
@@ -46,6 +55,7 @@ interface RecuerdoDetailDialogProps {
     avatarUrl?: string | null;
   }>;
   currentUserId?: string;
+  isElder?: boolean;
 }
 
 const screenWidth = Dimensions.get("window").width;
@@ -56,9 +66,11 @@ export default function RecuerdoDetailDialog({
   onDismiss,
   onUpdateRecuerdo,
   onDeleteRecuerdo,
+  onReact,
   isMutating = false,
   familyMembers = [],
   currentUserId,
+  isElder = false,
 }: RecuerdoDetailDialogProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -70,6 +82,9 @@ export default function RecuerdoDetailDialog({
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
+  const [lastReactedStickerUrl, setLastReactedStickerUrl] = useState<
+    string | null
+  >(null);
 
   // SIEMPRE crear los players (regla de hooks), pero con valores seguros
   const audioUrl =
@@ -213,7 +228,7 @@ export default function RecuerdoDetailDialog({
     setDeleteConfirmVisible(false);
   };
 
-  const InfoHeader = () => (
+  const renderInfoHeader = () => (
     <View
       style={{
         flexDirection: "row",
@@ -268,9 +283,9 @@ export default function RecuerdoDetailDialog({
     </View>
   );
 
-  const InfoBlock = () => (
+  const renderInfoBlock = () => (
     <View style={{ padding: 20, paddingTop: 16 }}>
-      <InfoHeader />
+      {renderInfoHeader()}
 
       {!!recuerdo.descripcion && (
         <HighlightedMentionText
@@ -314,6 +329,78 @@ export default function RecuerdoDetailDialog({
           minute: "2-digit",
         })}
       </Text>
+
+      {/* Reacciones */}
+      {recuerdo.reactions && recuerdo.reactions.length > 0 && (
+        <View
+          style={{
+            marginTop: 16,
+            flexDirection: "row",
+            flexWrap: "wrap",
+            gap: 8,
+          }}
+        >
+          {recuerdo.reactions.map((reaction) => {
+            const member = familyMembers.find((m) => m.id === reaction.userId);
+            if (!member) return null;
+            return (
+              <Reanimated.View
+                entering={ZoomIn.springify()}
+                key={reaction.id}
+                style={{ position: "relative", marginRight: 4 }}
+              >
+                {member.avatarUrl ? (
+                  <Image
+                    source={{ uri: member.avatarUrl }}
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 18,
+                      borderWidth: 2,
+                      borderColor: COLORS.white,
+                    }}
+                  />
+                ) : (
+                  <View
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 18,
+                      backgroundColor: COLORS.primary,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderWidth: 2,
+                      borderColor: COLORS.white,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: COLORS.white,
+                        fontSize: 14,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {member.displayName.charAt(0).toUpperCase()}
+                    </Text>
+                  </View>
+                )}
+                {reaction.stickerUrl && (
+                  <Image
+                    source={{ uri: reaction.stickerUrl }}
+                    style={{
+                      width: 20,
+                      height: 20,
+                      position: "absolute",
+                      bottom: -4,
+                      right: -4,
+                    }}
+                  />
+                )}
+              </Reanimated.View>
+            );
+          })}
+        </View>
+      )}
     </View>
   );
 
@@ -408,7 +495,6 @@ export default function RecuerdoDetailDialog({
             style={{
               backgroundColor: COLORS.white,
               borderRadius: 10,
-              overflow: "hidden",
               width: screenWidth * 0.92,
               elevation: 0,
               shadowColor: "transparent",
@@ -416,6 +502,7 @@ export default function RecuerdoDetailDialog({
               shadowOpacity: 0,
               shadowRadius: 0,
               opacity: fadeAnim,
+              position: "relative",
             }}
           >
             {/* Contenido principal según el tipo */}
@@ -434,7 +521,7 @@ export default function RecuerdoDetailDialog({
                 </View>
 
                 {/* Información debajo de la imagen */}
-                <InfoBlock />
+                {renderInfoBlock()}
               </View>
             )}
 
@@ -454,16 +541,14 @@ export default function RecuerdoDetailDialog({
                 </View>
 
                 {/* Información debajo del video */}
-                <InfoBlock />
+                {renderInfoBlock()}
               </View>
             )}
 
             {recuerdo.tipo === "texto" && (
               <View>
                 {/* Información de la nota */}
-                <View style={{ paddingTop: 4 }}>
-                  <InfoBlock />
-                </View>
+                <View style={{ paddingTop: 4 }}>{renderInfoBlock()}</View>
               </View>
             )}
 
@@ -536,10 +621,53 @@ export default function RecuerdoDetailDialog({
                 </View>
 
                 {/* Información debajo del audio */}
-                <InfoBlock />
+                {renderInfoBlock()}
               </View>
             )}
+            {/* Visual Feedback for Reaction */}
+            {lastReactedStickerUrl && (
+              <Reanimated.View
+                entering={ZoomIn.springify()}
+                exiting={ZoomOut.duration(400)}
+                style={{
+                  position: "absolute",
+                  top: "30%",
+                  alignSelf: "center",
+                  zIndex: 2000,
+                  backgroundColor: "rgba(255,255,255,0.9)",
+                  borderRadius: 50,
+                  padding: 20,
+                  ...SHADOWS.medium,
+                }}
+              >
+                <Image
+                  source={{ uri: lastReactedStickerUrl }}
+                  style={{ width: 100, height: 100 }}
+                  resizeMode="contain"
+                />
+              </Reanimated.View>
+            )}
           </Animated.View>
+
+          {/* Sticker Reaction Picker - Only for elders - Positioned below the dialog */}
+          {isElder && onReact && recuerdo && (
+            <StickerReactionPicker
+              onReact={(stickerId, stickerUrl) => {
+                // Show feedback animation
+                setLastReactedStickerUrl(stickerUrl);
+
+                // Call the actual reaction handler
+                if (onReact) onReact(recuerdo.id, stickerId);
+
+                // Hide feedback after some time
+                setTimeout(() => {
+                  setLastReactedStickerUrl(null);
+                }, 1500);
+              }}
+              disabled={isMutating}
+              onOpenShop={handleDismiss}
+            />
+          )}
         </Dialog>
 
         <Dialog

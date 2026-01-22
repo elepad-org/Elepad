@@ -117,7 +117,7 @@ shopApp.openapi(
         // Hono catches HTTPExceptions automatically, so regular errors need mapping.
         const errorMessage = e instanceof Error ? e.message : String(e);
         if (errorMessage === "Insufficient points" || errorMessage === "You already own this item") {
-             return c.json({ error: errorMessage }, 400);
+             return c.json({ error: { message: errorMessage } }, 400);
         }
         throw e;
     }

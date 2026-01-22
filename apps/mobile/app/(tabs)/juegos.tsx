@@ -131,7 +131,7 @@ export default function JuegosScreen() {
                 onPress={() => router.navigate("/history")}
                 style={{
                   borderRadius: 12,
-                  backgroundColor: COLORS.secondary,
+                  backgroundColor: COLORS.primary,
                 }}
                 icon="history"
               >
