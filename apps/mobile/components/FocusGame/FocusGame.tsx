@@ -23,11 +23,13 @@ type Props = {
       points: number;
     }>;
   }) => void;
+  onRestartRef?: React.MutableRefObject<(() => void) | null>;
 };
 
 export default function AttentionGame({
   rounds = 10,
   onComplete,
+  onRestartRef,
 }: Props) {
   const core = useMemo(() => new AttentionGameCore(), []);
   const [, setTick] = useState(0);
@@ -78,13 +80,7 @@ export default function AttentionGame({
   const prompt = core.currentPrompt;
 
   const restartGame = useCallback(() => {
-    // Generar nuevo ID de juego
-    const newGameId = Date.now().toString();
-    setGameId(newGameId);
-    console.log("🆕 Nuevo juego iniciado con ID:", newGameId);
-    
-    core.reset();
-    core.startRound();
+    // 1. Resetear estados locales PRIMERO
     setScore({ correct: 0, rounds });
     setLives(3);
     setLastResult(null);
@@ -92,11 +88,27 @@ export default function AttentionGame({
     setCurrentRound(1);
     setIsGameComplete(false);
     setHasStartedPlaying(false);
+    
+    // 2. Resetear el core del juego
+    core.reset();
+    core.startRound();
     setTick((t) => t + 1);
     
-    // Resetear el juego en el hook
+    // 3. Generar nuevo ID de juego (dispara el sync)
+    const newGameId = Date.now().toString();
+    setGameId(newGameId);
+    console.log("🆕 Nuevo juego iniciado con ID:", newGameId);
+    
+    // 4. Resetear el juego en el hook
     focus.resetGame();
   }, [core, rounds, focus]);
+
+  // Asignar la función restartGame al ref para que pueda ser llamada desde el padre
+  useEffect(() => {
+    if (onRestartRef) {
+      onRestartRef.current = restartGame;
+    }
+  }, [restartGame, onRestartRef]);
 
   const handleQuit = useCallback(() => {
     setShowQuitDialog(true);
@@ -322,7 +334,9 @@ export default function AttentionGame({
             style={{
               paddingBottom: 12,
               paddingHorizontal: 20,
-              justifyContent: "space-between",
+              justifyContent: "center",
+              flexDirection: "column",
+              gap: 10,
             }}
           >
             <CancelButton onPress={() => setShowQuitDialog(false)} />
@@ -330,7 +344,7 @@ export default function AttentionGame({
               mode="contained"
               onPress={confirmQuit}
               buttonColor={COLORS.secondary}
-              style={{ borderRadius: 12 }}
+              style={{ borderRadius: 12, width: "100%" }}
             >
               Salir
             </Button>
