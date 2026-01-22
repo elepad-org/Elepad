@@ -12,12 +12,11 @@ export default function Navbar() {
       }}
     >
       <Toolbar disableGutters sx={{ justifyContent: 'space-between', py: 1, px: 10 }}>
-          <Typography
-            variant="h5"
+          <Typography         
             sx={{
               fontWeight: 700,
-              fontFamily: 'Lobster_400Regular',
-              fontSize: '2rem',
+              fontFamily: 'Lobster',
+              fontSize: '2.5rem',
               color: 'primary.main',
               letterSpacing: '-0.01em',
             }}

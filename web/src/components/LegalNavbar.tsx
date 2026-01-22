@@ -16,7 +16,7 @@ export default function LegalNavbar() {
             variant="h5"
             sx={{
               fontWeight: 700,
-              fontFamily: 'Lobster_400Regular',
+              fontFamily: 'Lobster',
               fontSize: '2rem',
               color: 'primary.main',
               letterSpacing: '-0.01em',
