@@ -22,7 +22,7 @@ interface StickerReactionPickerProps {
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const BUTTON_SIZE = 44;
 const STICKER_SIZE = 40;
-const EXPANDED_HEIGHT = 56;
+const EXPANDED_HEIGHT = 44;
 
 export default function StickerReactionPicker({
   onReact,
@@ -228,7 +228,7 @@ export default function StickerReactionPicker({
             }}
           >
             <MaterialCommunityIcons
-              name="sticker-circle-outline"
+              name="sticker-emoji"
               size={24}
               color={COLORS.white}
             />
@@ -253,7 +253,6 @@ const styles = StyleSheet.create({
     borderRadius: EXPANDED_HEIGHT / 2,
     flexDirection: "row",
     alignItems: "center",
-    paddingLeft: 10,
     ...SHADOWS.medium,
     overflow: "hidden",
   },
@@ -261,6 +260,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   stickerList: {
+    paddingLeft: 12,
     paddingRight: 10,
     alignItems: "center",
     gap: 8,
