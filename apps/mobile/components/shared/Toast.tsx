@@ -61,7 +61,9 @@ const Toast = ({
   // If withNavbar is manually passed, use it.
   // Otherwise, auto-detect if we are inside a (tabs) route.
   const effectiveWithNavbar =
-    withNavbar !== undefined ? withNavbar : segments.includes("(tabs)");
+    withNavbar !== undefined
+      ? withNavbar
+      : (segments as string[]).includes("(tabs)");
 
   useEffect(() => {
     if (visible) {

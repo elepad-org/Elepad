@@ -3,31 +3,20 @@ import { postFamilyGroupCreate, postFamilyGroupLink } from "@elepad/api-client";
 import { Link } from "expo-router";
 import { useState } from "react";
 import { View, StyleSheet } from "react-native";
-import {
-  TextInput,
-  Button,
-  Text,
-  Switch,
-  Portal,
-  Dialog,
-  Paragraph,
-} from "react-native-paper";
-import { COLORS, STYLES } from "@/styles/base";
+import { TextInput, Button, Text, Switch } from "react-native-paper";
+import { COLORS } from "@/styles/base";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/components/shared/Toast";
 
 export default function NewAccount() {
   const { refreshUserElepad } = useAuth();
+  const toast = useToast();
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
   const [familyCode, setFamilyCode] = useState("");
   const [isElder, setIsElder] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [dialog, setDialog] = useState({
-    visible: false,
-    message: "",
-    icon: "alert-circle-outline",
-  });
 
   const getFriendlyErrorMessage = (errorMsg: string) => {
     if (errorMsg.includes("Invalid login credentials"))
@@ -45,17 +34,39 @@ export default function NewAccount() {
       errorMsg === "Email is required"
     )
       return "Por favor ingresa tu correo electrónico.";
+    if (
+      errorMsg.toLowerCase().includes("invalid email") ||
+      errorMsg.toLowerCase().includes("unable to validate email address")
+    )
+      return "El formato del correo electrónico es inválido.";
     return errorMsg;
   };
 
   const showDialog = (
     message: string,
-    icon: string = "alert-circle-outline"
+    icon: string = "alert-circle-outline",
   ) => {
-    setDialog({ visible: true, message, icon });
+    toast.showToast({
+      message,
+      type: icon === "email-check-outline" ? "success" : "error",
+    });
+  };
+
+  const isFormValid = () => {
+    return (
+      email.trim() !== "" &&
+      displayName.trim() !== "" &&
+      password.trim() !== ""
+    );
   };
 
   const handleSignUp = async () => {
+    // Validar campos obligatorios
+    if (!email.trim() || !displayName.trim() || !password.trim()) {
+      showDialog("Por favor completa todos los campos obligatorios.");
+      return;
+    }
+
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -73,7 +84,7 @@ export default function NewAccount() {
       if (!data.session) {
         showDialog(
           "Por favor verifica tu correo electrónico para continuar",
-          "email-check-outline"
+          "email-check-outline",
         );
         setLoading(false);
         return;
@@ -89,7 +100,7 @@ export default function NewAccount() {
           });
           if (!res) {
             showDialog(
-              "La cuenta se creó pero hubo un problema al crear el grupo familiar"
+              "La cuenta se creó pero hubo un problema al crear el grupo familiar",
             );
           } else {
             // Wait a bit for the database to update
@@ -102,7 +113,7 @@ export default function NewAccount() {
           const errorMessage =
             err instanceof Error ? err.message : "Error desconocido";
           showDialog(
-            `La cuenta se creó pero hubo un problema al crear el grupo familiar: ${errorMessage}`
+            `La cuenta se creó pero hubo un problema al crear el grupo familiar: ${errorMessage}`,
           );
         }
       } else {
@@ -114,7 +125,7 @@ export default function NewAccount() {
           });
           if (!res) {
             showDialog(
-              "La cuenta se creó pero no se pudo vincular al grupo familiar. Verifica el código."
+              "La cuenta se creó pero no se pudo vincular al grupo familiar. Verifica el código.",
             );
           } else {
             // Wait a bit for the database to update
@@ -127,7 +138,7 @@ export default function NewAccount() {
           const errorMessage =
             err instanceof Error ? err.message : "Código inválido o expirado";
           showDialog(
-            `La cuenta se creó pero no se pudo vincular al grupo familiar: ${errorMessage}`
+            `La cuenta se creó pero no se pudo vincular al grupo familiar: ${errorMessage}`,
           );
         }
       }
@@ -233,7 +244,7 @@ export default function NewAccount() {
           buttonColor={COLORS.primary}
           onPress={handleSignUp}
           loading={loading}
-          disabled={loading}
+          disabled={loading || !isFormValid()}
         >
           Continuar
         </Button>
@@ -252,39 +263,6 @@ export default function NewAccount() {
           <Text style={styles.backText}>Volver</Text>
         </Link>
       </View>
-
-      <Portal>
-        <Dialog
-          visible={dialog.visible}
-          onDismiss={() => setDialog({ ...dialog, visible: false })}
-          style={{
-            backgroundColor: COLORS.background,
-            borderRadius: 20,
-            width: "90%",
-            alignSelf: "center",
-          }}
-        >
-          <Dialog.Icon icon={dialog.icon} size={48} color={COLORS.primary} />
-          <Dialog.Content>
-            <Paragraph style={{ ...STYLES.subheading, marginTop: 12 }}>
-              {dialog.message}
-            </Paragraph>
-          </Dialog.Content>
-          <Dialog.Actions
-            style={{ justifyContent: "center", paddingBottom: 16 }}
-          >
-            <Button
-              mode="contained"
-              onPress={() => setDialog({ ...dialog, visible: false })}
-              buttonColor={COLORS.primary}
-              textColor={COLORS.white}
-              style={{ paddingHorizontal: 24, borderRadius: 12 }}
-            >
-              Aceptar
-            </Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
     </View>
   );
 }

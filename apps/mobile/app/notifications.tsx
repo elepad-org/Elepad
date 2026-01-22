@@ -64,6 +64,8 @@ import {
   useGetActivityCompletions,
   GetNotifications200Item,
   GetActivityCompletions200DataItem,
+  useGetAlbumId,
+  AlbumWithPages,
 } from "@elepad/api-client";
 import { COLORS, SHADOWS } from "@/styles/base";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -73,6 +75,7 @@ import HighlightedMentionText from "@/components/Recuerdos/HighlightedMentionTex
 import RecuerdoDetailDialog from "@/components/Recuerdos/RecuerdoDetailDialog";
 import { BackButton } from "@/components/shared/BackButton";
 import { Portal } from "react-native-paper";
+import { useToast } from "@/components/shared/Toast";
 
 const PAGE_SIZE = 20;
 
@@ -132,6 +135,7 @@ export default function NotificationsScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { userElepad } = useAuth();
+  const toast = useToast();
   const [page, setPage] = useState(0);
   const [selectedMemoryId, setSelectedMemoryId] = useState<string | null>(null);
   const [detailDialogVisible, setDetailDialogVisible] = useState(false);
@@ -140,8 +144,10 @@ export default function NotificationsScreen() {
   );
   const [activityDetailDialogVisible, setActivityDetailDialogVisible] =
     useState(false);
-  const [notFoundDialogVisible, setNotFoundDialogVisible] = useState(false);
-  const [notFoundMessage, setNotFoundMessage] = useState("");
+
+  const [selectedAlbumId, setSelectedAlbumId] = useState<string | null>(null);
+  const [albumDetailDialogVisible, setAlbumDetailDialogVisible] =
+    useState(false);
 
   const activityFadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -157,28 +163,6 @@ export default function NotificationsScreen() {
       activityFadeAnim.setValue(0);
     }
   }, [activityDetailDialogVisible]);
-
-  const notFoundFadeAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    if (notFoundDialogVisible) {
-      // Reset values immediately
-      notFoundFadeAnim.setValue(0);
-
-      // Add a small delay to ensure Dialog is rendered before animating
-      const timer = setTimeout(() => {
-        Animated.timing(notFoundFadeAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }).start();
-      }, 100);
-
-      return () => clearTimeout(timer);
-    } else {
-      notFoundFadeAnim.setValue(0);
-    }
-  }, [notFoundDialogVisible]);
 
   // Fetch family members for displaying names in mentions
   const membersQuery = useGetFamilyGroupIdGroupMembers(
@@ -217,6 +201,13 @@ export default function NotificationsScreen() {
     query: {
       enabled: !!selectedActivityId,
       retry: false,
+    },
+  });
+
+  // Query para obtener el álbum seleccionado con lógica copiada de album-viewer
+  const albumQuery = useGetAlbumId(selectedAlbumId || "", {
+    query: {
+      enabled: !!selectedAlbumId,
     },
   });
 
@@ -292,8 +283,10 @@ export default function NotificationsScreen() {
     if (memoryQuery.isError && selectedMemoryId) {
       setDetailDialogVisible(false);
       setSelectedMemoryId(null);
-      setNotFoundMessage("Este recuerdo ya no existe o ha sido eliminado.");
-      setNotFoundDialogVisible(true);
+      toast.showToast({
+        message: "Este recuerdo ya no existe o ha sido eliminado.",
+        type: "error",
+      });
     }
   }, [memoryQuery.isError, selectedMemoryId]);
 
@@ -302,8 +295,10 @@ export default function NotificationsScreen() {
     if (activityQuery.isError && selectedActivityId) {
       setActivityDetailDialogVisible(false);
       setSelectedActivityId(null);
-      setNotFoundMessage("Esta actividad ya no existe o ha sido eliminada.");
-      setNotFoundDialogVisible(true);
+      toast.showToast({
+        message: "Esta actividad ya no existe o ha sido eliminada.",
+        type: "error",
+      });
     }
   }, [activityQuery.isError, selectedActivityId]);
 
@@ -427,7 +422,11 @@ export default function NotificationsScreen() {
       });
 
       // Navigate or show detail based on notification type
-      if (notification.entity_type === "memory" && notification.entity_id) {
+      if (
+        notification.entity_type === "memory" &&
+        notification.entity_id &&
+        notification.event_type !== "achievement"
+      ) {
         console.log("📖 Opening memory detail:", notification.entity_id);
         // Verificar si el recuerdo existe antes de abrirlo
         setSelectedMemoryId(notification.entity_id);
@@ -440,6 +439,28 @@ export default function NotificationsScreen() {
         // Verificar si la actividad existe antes de abrirla
         setSelectedActivityId(notification.entity_id);
         setActivityDetailDialogVisible(true);
+      } else if (
+        (notification.entity_type === "album" ||
+          notification.event_type === "achievement") &&
+        notification.entity_id
+      ) {
+        // Check for error notifications
+        const isError = notification.title
+          ?.toLowerCase()
+          .includes("error al procesar");
+
+        if (isError) {
+          console.log("❌ Album processing error notification");
+          toast.showToast({
+            message: "Hubo un error al procesar el álbum.",
+            type: "error",
+          });
+        } else {
+          console.log("📚 Opening album detail:", notification.entity_id);
+          // Verificar si el álbum existe antes de abrirlo
+          setSelectedAlbumId(notification.entity_id);
+          setAlbumDetailDialogVisible(true);
+        }
       } else {
         console.log("⚠️ No action for this notification type");
       }
@@ -668,7 +689,8 @@ export default function NotificationsScreen() {
 
       {/* Loading Overlay - Global spinner instead of modal */}
       {(memoryQuery.isLoading && selectedMemoryId) ||
-      (activityQuery.isLoading && selectedActivityId) ? (
+      (activityQuery.isLoading && selectedActivityId) ||
+      (albumQuery.isLoading && selectedAlbumId) ? (
         <View
           style={[
             StyleSheet.absoluteFill,
@@ -683,6 +705,139 @@ export default function NotificationsScreen() {
           <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : null}
+
+      {/* Dialog para mostrar detalle del álbum */}
+      <Portal>
+        {!albumQuery.isLoading && (
+          <Dialog
+            visible={albumDetailDialogVisible}
+            onDismiss={() => {
+              setAlbumDetailDialogVisible(false);
+              setSelectedAlbumId(null);
+            }}
+            style={{ backgroundColor: COLORS.background }}
+          >
+            <Dialog.Title style={{ fontWeight: "bold", color: COLORS.primary }}>
+              {(() => {
+                // Extract title safely
+                let title = "Detalle del Álbum";
+                if (albumQuery.data && !albumQuery.isError) {
+                  const data =
+                    "data" in albumQuery.data
+                      ? albumQuery.data.data
+                      : albumQuery.data;
+                  if (data && typeof data === "object" && "title" in data) {
+                    title = (data as { title: string }).title;
+                  }
+                }
+                return title;
+              })()}
+            </Dialog.Title>
+            <Dialog.Content>
+              {(() => {
+                let album: AlbumWithPages | null = null;
+                if (albumQuery.data && !albumQuery.isError) {
+                  if ("data" in albumQuery.data) {
+                    album = albumQuery.data.data as AlbumWithPages;
+                  } else {
+                    album = albumQuery.data as AlbumWithPages;
+                  }
+                }
+
+                if (!album) {
+                  return (
+                    <Text
+                      style={{
+                        textAlign: "center",
+                        marginBottom: 8,
+                        color: COLORS.error,
+                      }}
+                    >
+                      No se pudieron cargar los detalles del álbum.
+                    </Text>
+                  );
+                }
+
+                return (
+                  <>
+                    {/* Title is in Header */}
+                    {album.description && (
+                      <View style={{ marginBottom: 16 }}>
+                        <Text
+                          style={{
+                            fontSize: 16,
+                            lineHeight: 24,
+                            color: COLORS.textSecondary,
+                          }}
+                        >
+                          {album.description}
+                        </Text>
+                      </View>
+                    )}
+
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        lineHeight: 24,
+                        color: COLORS.textSecondary,
+                      }}
+                    >
+                      Creado el:{" "}
+                      {new Date(album.createdAt).toLocaleDateString("es-AR")}
+                    </Text>
+
+                    {album.pages && (
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          lineHeight: 24,
+                          color: COLORS.textSecondary,
+                        }}
+                      >
+                        Páginas: {album.pages.length}
+                      </Text>
+                    )}
+                  </>
+                );
+              })()}
+            </Dialog.Content>
+            <Dialog.Actions
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                paddingHorizontal: 20,
+                paddingBottom: 12,
+                gap: 8,
+              }}
+            >
+              <Button
+                mode="outlined"
+                onPress={() => {
+                  setAlbumDetailDialogVisible(false);
+                  setSelectedAlbumId(null);
+                }}
+                textColor={COLORS.primary}
+              >
+                Cerrar
+              </Button>
+              <Button
+                onPress={() => {
+                  if (selectedAlbumId) {
+                    setAlbumDetailDialogVisible(false);
+                    console.log("Navigating to album:", selectedAlbumId);
+                    router.push(`/album-viewer?id=${selectedAlbumId}`);
+                    setSelectedAlbumId(null);
+                  }
+                }}
+                mode="contained"
+                buttonColor={COLORS.primary}
+              >
+                Ver Álbum
+              </Button>
+            </Dialog.Actions>
+          </Dialog>
+        )}
+      </Portal>
 
       {/* Dialog para mostrar detalle del recuerdo - Solo si data está lista */}
       {!memoryQuery.isLoading &&
@@ -783,7 +938,7 @@ export default function NotificationsScreen() {
                   return (
                     <View>
                       <Dialog.Title
-                        style={{ fontWeight: "bold", color: COLORS.text }}
+                        style={{ fontWeight: "bold", color: COLORS.primary }}
                       >
                         {activity.title}
                       </Dialog.Title>
@@ -949,63 +1104,6 @@ export default function NotificationsScreen() {
                   );
                 })()
               : null}
-          </Animated.View>
-        </Dialog>
-      </Portal>
-
-      {/* Dialog para mostrar cuando algo no existe */}
-      <Portal>
-        <Dialog
-          visible={notFoundDialogVisible}
-          onDismiss={() => setNotFoundDialogVisible(false)}
-          style={{
-            backgroundColor: "transparent",
-            width: "90%",
-            alignSelf: "center",
-            elevation: 0,
-            shadowColor: "transparent",
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: 0,
-            shadowRadius: 0,
-          }}
-        >
-          <Animated.View
-            style={{
-              backgroundColor: COLORS.background,
-              borderRadius: 16,
-              opacity: notFoundFadeAnim,
-              overflow: "hidden",
-            }}
-          >
-            <View style={{ alignItems: "center", paddingTop: 24 }}>
-              <MaterialCommunityIcons
-                name="alert-circle-outline"
-                size={48}
-                color={COLORS.primary}
-              />
-            </View>
-            <Dialog.Title style={{ textAlign: "center", color: COLORS.text }}>
-              Contenido no disponible
-            </Dialog.Title>
-            <Dialog.Content>
-              <Text
-                variant="bodyMedium"
-                style={{ textAlign: "center", color: COLORS.textSecondary }}
-              >
-                {notFoundMessage}
-              </Text>
-            </Dialog.Content>
-            <Dialog.Actions>
-              <Button
-                mode="contained"
-                onPress={() => setNotFoundDialogVisible(false)}
-                buttonColor={COLORS.primary}
-                style={{ borderRadius: 12 }}
-                contentStyle={{ paddingVertical: 8 }}
-              >
-                Entendido
-              </Button>
-            </Dialog.Actions>
           </Animated.View>
         </Dialog>
       </Portal>

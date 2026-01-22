@@ -8,6 +8,9 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/supabase-types";
 import { CreateAlbumRequest, AlbumWithPages, Album } from "./schema";
 import { NotificationsService } from "../notifications/service";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export type pageWithMemory = {
   id: string;
@@ -133,14 +136,14 @@ export class MemoriesAlbumService {
     }
 
     const notificationsService = new NotificationsService(this.supabase);
-      await notificationsService.createNotification({
+      /* await notificationsService.createNotification({
         userId,
         eventType: "achievement", //TODO: change event & entity type to more appropiate ones
         entityType: "memory",
         entityId: userId, // ?
         title: "Generando Álbum",
         body: `Estamos generando tu álbum. Te avisaremos cuando esté listo.`,
-      });
+      }); */
 
     const { data: memories, error: memoriesError } = await this.supabase
       .from("memories")
@@ -150,10 +153,26 @@ export class MemoriesAlbumService {
 
     if (memoriesError) {
       console.error("Error fetching memories:", memoriesError);
+      await notificationsService.createNotification({
+        userId,
+        eventType: "achievement", //TODO: change event & entity type to more appropiate ones
+        entityType: "memory",
+        entityId: userId, // ?
+        title: "Error al procesar el álbum",
+        body: "¡Lo sentimos! Hubo un problema al generar tu álbum. Por favor, intenta nuevamente.",
+      });
       throw new ApiException(500, "Error fetching memories");
     }
 
     if (!memories || memories.length !== data.memoryIds.length) {
+      await notificationsService.createNotification({
+        userId,
+        eventType: "achievement", //TODO: change event & entity type to more appropiate ones
+        entityType: "memory",
+        entityId: userId, // ?
+        title: "Error al procesar el álbum",
+        body: "¡Lo sentimos! Hubo un problema al generar tu álbum. Por favor, intenta nuevamente.",
+      });
       throw new ApiException(
         400,
         "Some memories not found or don't belong to your group"
@@ -166,6 +185,14 @@ export class MemoriesAlbumService {
     );
 
     if (imageMemories.length === 0) {
+      await notificationsService.createNotification({
+        userId,
+        eventType: "achievement", //TODO: change event & entity type to more appropiate ones
+        entityType: "memory",
+        entityId: userId, // ?
+        title: "Error al procesar el álbum",
+        body: "¡Lo sentimos! Hubo un problema al generar tu álbum. Por favor, intenta nuevamente.",
+      });
       throw new ApiException(400, "No image memories found in the selection");
     }
 
@@ -184,6 +211,14 @@ export class MemoriesAlbumService {
 
     if (albumError || !album) {
       console.error("Error creating album:", albumError);
+      await notificationsService.createNotification({
+        userId,
+        eventType: "achievement", //TODO: change event & entity type to more appropiate ones
+        entityType: "memory",
+        entityId: userId, // ?
+        title: "Error al procesar el álbum",
+        body: "¡Lo sentimos! Hubo un problema al generar tu álbum. Por favor, intenta nuevamente.",
+      });
       throw new ApiException(500, "Error creating album");
     }
 
@@ -213,10 +248,18 @@ export class MemoriesAlbumService {
       console.error("Error creating album pages:", pagesError);
       // Rollback: delete the album
       await this.supabase.from("memoriesAlbums").delete().eq("id", album.id);
+      await notificationsService.createNotification({
+        userId,
+        eventType: "achievement", //TODO: change event & entity type to more appropiate ones
+        entityType: "memory",
+        entityId: userId, // ?
+        title: "Error al procesar el álbum",
+        body: "¡Lo sentimos! Hubo un problema al generar tu álbum. Por favor, intenta nuevamente.",
+      });
       throw new ApiException(500, "Error creating album pages");
     }
 
-    this.processAlbumNarratives(album.id, userId, userGroup.groupId).catch(
+    await this.processAlbumNarratives(album.id, userId, userGroup.groupId).catch(
       (err) => {
         console.error("Error processing album narratives:", err);
         throw new ApiException(500, "Error generating the album pages content");
@@ -356,7 +399,7 @@ export class MemoriesAlbumService {
 
     const genAI = new GoogleGenerativeAI(this.apiKey);
     const model = genAI.getGenerativeModel({
-      //model: "gemini-2.0-flash-exp", //Este se supone es más eficiente pero me da error de query limit superado :(
+      //model: "gemini-2.0-flash-exp",
       model: "gemini-3-flash-preview",
     });
 
@@ -414,7 +457,7 @@ ${pagesContext}
 Tu tarea es generar una narrativa emotiva y personalizada para CADA imagen, creando una historia coherente que conecte todas las fotos del álbum. Cada narrativa debe:
 1. Ser emotiva y capturar el momento especial
 2. Conectar con las otras imágenes para crear una historia fluida
-3. Tener entre 3-5 oraciones
+3. Tener entre 2-3 oraciones
 4. Usar un tono cálido y personal
 5. Incorporar detalles visibles en la imagen
 
