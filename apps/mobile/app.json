@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "scheme": "elepad",
     "orientation": "portrait",
-    "icon": "./assets/images/ele-def.png",
+    "icon": "./assets/images/ele-def-quad.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "jsEngine": "hermes",
@@ -14,7 +14,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/ele-def.png",
+        "foregroundImage": "./assets/images/ele-def-quad.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
@@ -30,7 +30,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/ele-def.png",
+          "image": "./assets/images/ele-def-quad.png",
           "imageWidth": 250,
           "resizeMode": "contain",
           "backgroundColor": "#F8F9FA"
