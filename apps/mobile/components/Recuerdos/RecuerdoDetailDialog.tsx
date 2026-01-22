@@ -228,7 +228,7 @@ export default function RecuerdoDetailDialog({
     setDeleteConfirmVisible(false);
   };
 
-  const InfoHeader = () => (
+  const renderInfoHeader = () => (
     <View
       style={{
         flexDirection: "row",
@@ -283,9 +283,9 @@ export default function RecuerdoDetailDialog({
     </View>
   );
 
-  const InfoBlock = () => (
+  const renderInfoBlock = () => (
     <View style={{ padding: 20, paddingTop: 16 }}>
-      <InfoHeader />
+      {renderInfoHeader()}
 
       {!!recuerdo.descripcion && (
         <HighlightedMentionText
@@ -521,7 +521,7 @@ export default function RecuerdoDetailDialog({
                 </View>
 
                 {/* Información debajo de la imagen */}
-                <InfoBlock />
+                {renderInfoBlock()}
               </View>
             )}
 
@@ -541,16 +541,14 @@ export default function RecuerdoDetailDialog({
                 </View>
 
                 {/* Información debajo del video */}
-                <InfoBlock />
+                {renderInfoBlock()}
               </View>
             )}
 
             {recuerdo.tipo === "texto" && (
               <View>
                 {/* Información de la nota */}
-                <View style={{ paddingTop: 4 }}>
-                  <InfoBlock />
-                </View>
+                <View style={{ paddingTop: 4 }}>{renderInfoBlock()}</View>
               </View>
             )}
 
@@ -623,7 +621,7 @@ export default function RecuerdoDetailDialog({
                 </View>
 
                 {/* Información debajo del audio */}
-                <InfoBlock />
+                {renderInfoBlock()}
               </View>
             )}
             {/* Visual Feedback for Reaction */}
