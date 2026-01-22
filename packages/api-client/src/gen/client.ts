@@ -451,6 +451,50 @@ export interface AchievementProgress {
   earnedPoints: number;
 }
 
+export type ShopItemType = (typeof ShopItemType)[keyof typeof ShopItemType];
+
+export const ShopItemType = {
+  sticker: "sticker",
+  frame: "frame",
+  animation: "animation",
+  other: "other",
+} as const;
+
+export interface ShopItem {
+  id: string;
+  title: string;
+  description: string | null;
+  /** @minimum 0 */
+  cost: number;
+  type: ShopItemType;
+  assetUrl: string | null;
+  isActive?: boolean;
+  createdAt: string;
+}
+
+export interface UserInventory {
+  id: string;
+  userId: string;
+  itemId: string;
+  equipped?: boolean;
+  acquiredAt: string;
+  item?: ShopItem;
+}
+
+export interface BuyItemResponse {
+  success: boolean;
+  newBalance: number;
+  inventoryItem: UserInventory;
+}
+
+export interface BuyItemRequest {
+  itemId: string;
+}
+
+export interface UserBalance {
+  pointsBalance: number;
+}
+
 export type PatchUsersIdAvatarBody = {
   avatarFile?: Blob;
 };
@@ -10181,3 +10225,614 @@ export const useDeleteNotificationsId = <TError = unknown, TContext = unknown>(
     queryClient,
   );
 };
+
+/**
+ * @summary List available shop items
+ */
+export type getShopItemsResponse200 = {
+  data: ShopItem[];
+  status: 200;
+};
+
+export type getShopItemsResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type getShopItemsResponseSuccess = getShopItemsResponse200 & {
+  headers: Headers;
+};
+export type getShopItemsResponseError = getShopItemsResponse500 & {
+  headers: Headers;
+};
+
+export type getShopItemsResponse =
+  | getShopItemsResponseSuccess
+  | getShopItemsResponseError;
+
+export const getGetShopItemsUrl = () => {
+  return `/shop/items`;
+};
+
+export const getShopItems = async (
+  options?: RequestInit,
+): Promise<getShopItemsResponse> => {
+  return rnFetch<getShopItemsResponse>(getGetShopItemsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetShopItemsQueryKey = () => {
+  return [`/shop/items`] as const;
+};
+
+export const getGetShopItemsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getShopItems>>,
+  TError = Error,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof getShopItems>>, TError, TData>
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetShopItemsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getShopItems>>> = ({
+    signal,
+  }) => getShopItems({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getShopItems>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetShopItemsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getShopItems>>
+>;
+export type GetShopItemsQueryError = Error;
+
+export function useGetShopItems<
+  TData = Awaited<ReturnType<typeof getShopItems>>,
+  TError = Error,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getShopItems>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getShopItems>>,
+          TError,
+          Awaited<ReturnType<typeof getShopItems>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetShopItems<
+  TData = Awaited<ReturnType<typeof getShopItems>>,
+  TError = Error,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getShopItems>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getShopItems>>,
+          TError,
+          Awaited<ReturnType<typeof getShopItems>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetShopItems<
+  TData = Awaited<ReturnType<typeof getShopItems>>,
+  TError = Error,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getShopItems>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary List available shop items
+ */
+
+export function useGetShopItems<
+  TData = Awaited<ReturnType<typeof getShopItems>>,
+  TError = Error,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getShopItems>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetShopItemsQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get current user's inventory
+ */
+export type getShopInventoryResponse200 = {
+  data: UserInventory[];
+  status: 200;
+};
+
+export type getShopInventoryResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type getShopInventoryResponseSuccess = getShopInventoryResponse200 & {
+  headers: Headers;
+};
+export type getShopInventoryResponseError = getShopInventoryResponse500 & {
+  headers: Headers;
+};
+
+export type getShopInventoryResponse =
+  | getShopInventoryResponseSuccess
+  | getShopInventoryResponseError;
+
+export const getGetShopInventoryUrl = () => {
+  return `/shop/inventory`;
+};
+
+export const getShopInventory = async (
+  options?: RequestInit,
+): Promise<getShopInventoryResponse> => {
+  return rnFetch<getShopInventoryResponse>(getGetShopInventoryUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetShopInventoryQueryKey = () => {
+  return [`/shop/inventory`] as const;
+};
+
+export const getGetShopInventoryQueryOptions = <
+  TData = Awaited<ReturnType<typeof getShopInventory>>,
+  TError = Error,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof getShopInventory>>, TError, TData>
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetShopInventoryQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getShopInventory>>
+  > = ({ signal }) => getShopInventory({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getShopInventory>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetShopInventoryQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getShopInventory>>
+>;
+export type GetShopInventoryQueryError = Error;
+
+export function useGetShopInventory<
+  TData = Awaited<ReturnType<typeof getShopInventory>>,
+  TError = Error,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getShopInventory>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getShopInventory>>,
+          TError,
+          Awaited<ReturnType<typeof getShopInventory>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetShopInventory<
+  TData = Awaited<ReturnType<typeof getShopInventory>>,
+  TError = Error,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getShopInventory>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getShopInventory>>,
+          TError,
+          Awaited<ReturnType<typeof getShopInventory>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetShopInventory<
+  TData = Awaited<ReturnType<typeof getShopInventory>>,
+  TError = Error,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getShopInventory>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get current user's inventory
+ */
+
+export function useGetShopInventory<
+  TData = Awaited<ReturnType<typeof getShopInventory>>,
+  TError = Error,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getShopInventory>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetShopInventoryQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Purchase an item
+ */
+export type postShopBuyResponse200 = {
+  data: BuyItemResponse;
+  status: 200;
+};
+
+export type postShopBuyResponse400 = {
+  data: Error;
+  status: 400;
+};
+
+export type postShopBuyResponse403 = {
+  data: Error;
+  status: 403;
+};
+
+export type postShopBuyResponse404 = {
+  data: Error;
+  status: 404;
+};
+
+export type postShopBuyResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type postShopBuyResponseSuccess = postShopBuyResponse200 & {
+  headers: Headers;
+};
+export type postShopBuyResponseError = (
+  | postShopBuyResponse400
+  | postShopBuyResponse403
+  | postShopBuyResponse404
+  | postShopBuyResponse500
+) & {
+  headers: Headers;
+};
+
+export type postShopBuyResponse =
+  | postShopBuyResponseSuccess
+  | postShopBuyResponseError;
+
+export const getPostShopBuyUrl = () => {
+  return `/shop/buy`;
+};
+
+export const postShopBuy = async (
+  buyItemRequest: BuyItemRequest,
+  options?: RequestInit,
+): Promise<postShopBuyResponse> => {
+  return rnFetch<postShopBuyResponse>(getPostShopBuyUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(buyItemRequest),
+  });
+};
+
+export const getPostShopBuyMutationOptions = <
+  TError = Error,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postShopBuy>>,
+    TError,
+    { data: BuyItemRequest },
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postShopBuy>>,
+  TError,
+  { data: BuyItemRequest },
+  TContext
+> => {
+  const mutationKey = ["postShopBuy"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postShopBuy>>,
+    { data: BuyItemRequest }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postShopBuy(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostShopBuyMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postShopBuy>>
+>;
+export type PostShopBuyMutationBody = BuyItemRequest;
+export type PostShopBuyMutationError = Error;
+
+/**
+ * @summary Purchase an item
+ */
+export const usePostShopBuy = <TError = Error, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postShopBuy>>,
+      TError,
+      { data: BuyItemRequest },
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postShopBuy>>,
+  TError,
+  { data: BuyItemRequest },
+  TContext
+> => {
+  return useMutation(getPostShopBuyMutationOptions(options), queryClient);
+};
+
+/**
+ * @summary Get user point balance
+ */
+export type getShopBalanceResponse200 = {
+  data: UserBalance;
+  status: 200;
+};
+
+export type getShopBalanceResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type getShopBalanceResponseSuccess = getShopBalanceResponse200 & {
+  headers: Headers;
+};
+export type getShopBalanceResponseError = getShopBalanceResponse500 & {
+  headers: Headers;
+};
+
+export type getShopBalanceResponse =
+  | getShopBalanceResponseSuccess
+  | getShopBalanceResponseError;
+
+export const getGetShopBalanceUrl = () => {
+  return `/shop/balance`;
+};
+
+export const getShopBalance = async (
+  options?: RequestInit,
+): Promise<getShopBalanceResponse> => {
+  return rnFetch<getShopBalanceResponse>(getGetShopBalanceUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetShopBalanceQueryKey = () => {
+  return [`/shop/balance`] as const;
+};
+
+export const getGetShopBalanceQueryOptions = <
+  TData = Awaited<ReturnType<typeof getShopBalance>>,
+  TError = Error,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof getShopBalance>>, TError, TData>
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetShopBalanceQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getShopBalance>>> = ({
+    signal,
+  }) => getShopBalance({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getShopBalance>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetShopBalanceQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getShopBalance>>
+>;
+export type GetShopBalanceQueryError = Error;
+
+export function useGetShopBalance<
+  TData = Awaited<ReturnType<typeof getShopBalance>>,
+  TError = Error,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getShopBalance>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getShopBalance>>,
+          TError,
+          Awaited<ReturnType<typeof getShopBalance>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetShopBalance<
+  TData = Awaited<ReturnType<typeof getShopBalance>>,
+  TError = Error,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getShopBalance>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getShopBalance>>,
+          TError,
+          Awaited<ReturnType<typeof getShopBalance>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetShopBalance<
+  TData = Awaited<ReturnType<typeof getShopBalance>>,
+  TError = Error,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getShopBalance>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get user point balance
+ */
+
+export function useGetShopBalance<
+  TData = Awaited<ReturnType<typeof getShopBalance>>,
+  TError = Error,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getShopBalance>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetShopBalanceQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}

@@ -1280,6 +1280,130 @@
           "totalPoints",
           "earnedPoints"
         ]
+      },
+      "ShopItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "cost": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "sticker",
+              "frame",
+              "animation",
+              "other"
+            ]
+          },
+          "assetUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "default": true
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "cost",
+          "type",
+          "assetUrl",
+          "createdAt"
+        ]
+      },
+      "UserInventory": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "equipped": {
+            "type": "boolean",
+            "default": false
+          },
+          "acquiredAt": {
+            "type": "string"
+          },
+          "item": {
+            "$ref": "#/components/schemas/ShopItem"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "itemId",
+          "acquiredAt"
+        ]
+      },
+      "BuyItemResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "newBalance": {
+            "type": "integer"
+          },
+          "inventoryItem": {
+            "$ref": "#/components/schemas/UserInventory"
+          }
+        },
+        "required": [
+          "success",
+          "newBalance",
+          "inventoryItem"
+        ]
+      },
+      "BuyItemRequest": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "itemId"
+        ]
+      },
+      "UserBalance": {
+        "type": "object",
+        "properties": {
+          "pointsBalance": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "pointsBalance"
+        ]
       }
     },
     "parameters": {}
@@ -5289,6 +5413,171 @@
                   "required": [
                     "success"
                   ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shop/items": {
+      "get": {
+        "tags": [
+          "shop"
+        ],
+        "summary": "List available shop items",
+        "responses": {
+          "200": {
+            "description": "List of active items in the shop",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ShopItem"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shop/inventory": {
+      "get": {
+        "tags": [
+          "shop"
+        ],
+        "summary": "Get current user's inventory",
+        "responses": {
+          "200": {
+            "description": "List of items owned by the user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserInventory"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shop/buy": {
+      "post": {
+        "tags": [
+          "shop"
+        ],
+        "summary": "Purchase an item",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyItemRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Purchase successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Insufficient funds or already owned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Only elders can purchase",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Item not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shop/balance": {
+      "get": {
+        "tags": [
+          "shop"
+        ],
+        "summary": "Get user point balance",
+        "responses": {
+          "200": {
+            "description": "User current points balance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserBalance"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
