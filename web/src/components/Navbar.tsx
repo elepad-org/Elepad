@@ -11,7 +11,7 @@ export default function Navbar() {
         backgroundColor: 'rgba(255, 255, 255, 0.95)',
       }}
     >
-      <Toolbar sx={{ justifyContent: 'space-between', py: 1, px: 2 }}>
+      <Toolbar disableGutters sx={{ justifyContent: 'space-between', py: 1, px: 10 }}>
           <Typography
             variant="h5"
             sx={{
