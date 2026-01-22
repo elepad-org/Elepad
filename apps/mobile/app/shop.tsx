@@ -22,6 +22,7 @@ import {
   useGetShopBalance,
   usePostShopBuy,
   useGetShopInventory,
+  usePostShopEquip,
 } from "@elepad/api-client";
 import { COLORS, SHADOWS, FONT } from "@/styles/base";
 import { useAuth } from "@/hooks/useAuth";
@@ -34,7 +35,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 export default function ShopScreen() {
   const router = useRouter();
-  const { userElepad: user } = useAuth();
+  const { userElepad: user, refreshUserElepad } = useAuth();
   const { showToast } = useToast();
   const [selectedItem, setSelectedItem] = React.useState<{
     id: string;
@@ -74,12 +75,24 @@ export default function ShopScreen() {
   const inventoryData = normalizeData(inventoryResponse.data);
   const refetchInventory = inventoryResponse.refetch;
 
+  // Removed duplicate isOwned declaration
+
+  /* Helper definitions moved up */
+  const castInventory = inventoryData as
+    | Array<{ itemId: string; equipped?: boolean }>
+    | undefined;
+
   const isOwned = (itemId: string) => {
     return (
-      Array.isArray(inventoryData) &&
-      (inventoryData as Array<{ itemId: string }>).some(
-        (inv) => inv.itemId === itemId,
-      )
+      Array.isArray(castInventory) &&
+      castInventory.some((inv) => inv.itemId === itemId)
+    );
+  };
+
+  const isEquipped = (itemId: string) => {
+    return (
+      Array.isArray(castInventory) &&
+      castInventory.some((inv) => inv.itemId === itemId && inv.equipped)
     );
   };
 
@@ -144,6 +157,23 @@ export default function ShopScreen() {
     },
   });
 
+  const { mutate: equipItem, isPending: isEquipping } = usePostShopEquip({
+    mutation: {
+      onSuccess: () => {
+        showToast({ message: "¡Marco equipado con éxito!", type: "success" });
+        setSelectedItem(null);
+        refetchInventory();
+        refreshUserElepad(); // Refresh user to update active frame
+      },
+      onError: (error: Error) => {
+        const message =
+          (error as { response?: { data?: { message?: string } } })?.response
+            ?.data?.message || "No se pudo equipar el item.";
+        Alert.alert("Error", message);
+      },
+    },
+  });
+
   // Verify elder permission
   useEffect(() => {
     if (user && !user.elder) {
@@ -159,6 +189,13 @@ export default function ShopScreen() {
     if (!selectedItem) return;
     buyItem({ data: { itemId: selectedItem.id } });
   };
+
+  const handleEquip = () => {
+    if (!selectedItem) return;
+    equipItem({ data: { itemId: selectedItem.id } });
+  };
+
+  /* Redundant declarations removed */
 
   const renderItem = ({
     item,
@@ -186,7 +223,15 @@ export default function ShopScreen() {
             owned && styles.ownedCard,
             pressed && styles.pressedCard,
           ]}
-          onPress={() => !owned && setSelectedItem(item)}
+          onPress={() => {
+            if (owned) {
+              if (item.type === "frame") {
+                setSelectedItem(item);
+              }
+            } else {
+              setSelectedItem(item);
+            }
+          }}
         >
           <View style={styles.imageContainer}>
             {item.type && (
@@ -422,24 +467,61 @@ export default function ShopScreen() {
                   >
                     Quizás luego
                   </Button>
-                  <Button
-                    mode="contained"
-                    onPress={handleBuy}
-                    loading={isBuying}
-                    disabled={
-                      isBuying ||
-                      (balanceData?.pointsBalance ?? 0) < selectedItem.cost
-                    }
-                    style={styles.modalConfirmBtn}
-                    buttonColor={COLORS.primary}
-                    labelStyle={{
-                      fontFamily: FONT.bold,
-                      fontSize: 16,
-                      color: COLORS.white,
-                    }}
-                  >
-                    Canjear ahora
-                  </Button>
+
+                  {isOwned(selectedItem.id) ? (
+                    selectedItem.type === "frame" ? (
+                      <Button
+                        mode="contained"
+                        onPress={handleEquip}
+                        loading={isEquipping}
+                        disabled={isEquipping || isEquipped(selectedItem.id)}
+                        style={styles.modalConfirmBtn}
+                        buttonColor={COLORS.secondary} // Use a different color for equipping
+                        labelStyle={{
+                          fontFamily: FONT.bold,
+                          fontSize: 16,
+                          color: COLORS.white,
+                        }}
+                      >
+                        {isEquipped(selectedItem.id)
+                          ? "Equipado"
+                          : "Usar Marco"}
+                      </Button>
+                    ) : (
+                      <Button
+                        mode="contained"
+                        disabled={true}
+                        style={styles.modalConfirmBtn}
+                        buttonColor={COLORS.textLight}
+                        labelStyle={{
+                          fontFamily: FONT.bold,
+                          fontSize: 16,
+                          color: COLORS.white,
+                        }}
+                      >
+                        Ya lo tienes
+                      </Button>
+                    )
+                  ) : (
+                    <Button
+                      mode="contained"
+                      onPress={handleBuy}
+                      loading={isBuying}
+                      disabled={
+                        isBuying ||
+                        (balanceData?.pointsBalance ?? 0) < selectedItem.cost
+                      }
+                      style={styles.modalConfirmBtn}
+                      buttonColor={COLORS.primary}
+                      labelStyle={{
+                        fontFamily: FONT.bold,
+                        fontSize: 16,
+                        color: COLORS.white,
+                      }}
+                    >
+                      Canjear
+                    </Button>
+                  )}
                 </View>
 
                 {(balanceData?.pointsBalance ?? 0) < selectedItem.cost && (
