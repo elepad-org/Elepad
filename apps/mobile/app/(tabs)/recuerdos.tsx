@@ -1682,10 +1682,6 @@ export default function RecuerdosScreen() {
                 data: { stickerId },
               });
               await refetchMemories();
-              showToast({
-                message: "¡Reacción agregada!",
-                type: "success",
-              });
             } catch (error) {
               console.error("Error adding reaction:", error);
               showToast({
