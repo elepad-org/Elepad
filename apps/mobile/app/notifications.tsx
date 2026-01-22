@@ -64,6 +64,8 @@ import {
   useGetActivityCompletions,
   GetNotifications200Item,
   GetActivityCompletions200DataItem,
+  useGetAlbumId,
+  AlbumWithPages,
 } from "@elepad/api-client";
 import { COLORS, SHADOWS } from "@/styles/base";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -143,6 +145,10 @@ export default function NotificationsScreen() {
   const [activityDetailDialogVisible, setActivityDetailDialogVisible] =
     useState(false);
 
+  const [selectedAlbumId, setSelectedAlbumId] = useState<string | null>(null);
+  const [albumDetailDialogVisible, setAlbumDetailDialogVisible] =
+    useState(false);
+
   const activityFadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -195,6 +201,13 @@ export default function NotificationsScreen() {
     query: {
       enabled: !!selectedActivityId,
       retry: false,
+    },
+  });
+
+  // Query para obtener el álbum seleccionado con lógica copiada de album-viewer
+  const albumQuery = useGetAlbumId(selectedAlbumId || "", {
+    query: {
+      enabled: !!selectedAlbumId,
     },
   });
 
@@ -409,7 +422,11 @@ export default function NotificationsScreen() {
       });
 
       // Navigate or show detail based on notification type
-      if (notification.entity_type === "memory" && notification.entity_id) {
+      if (
+        notification.entity_type === "memory" &&
+        notification.entity_id &&
+        notification.event_type !== "achievement"
+      ) {
         console.log("📖 Opening memory detail:", notification.entity_id);
         // Verificar si el recuerdo existe antes de abrirlo
         setSelectedMemoryId(notification.entity_id);
@@ -422,6 +439,15 @@ export default function NotificationsScreen() {
         // Verificar si la actividad existe antes de abrirla
         setSelectedActivityId(notification.entity_id);
         setActivityDetailDialogVisible(true);
+      } else if (
+        (notification.entity_type === "album" ||
+          notification.event_type === "achievement") &&
+        notification.entity_id
+      ) {
+        console.log("📚 Opening album detail:", notification.entity_id);
+        // Verificar si el álbum existe antes de abrirlo
+        setSelectedAlbumId(notification.entity_id);
+        setAlbumDetailDialogVisible(true);
       } else {
         console.log("⚠️ No action for this notification type");
       }
@@ -650,7 +676,8 @@ export default function NotificationsScreen() {
 
       {/* Loading Overlay - Global spinner instead of modal */}
       {(memoryQuery.isLoading && selectedMemoryId) ||
-      (activityQuery.isLoading && selectedActivityId) ? (
+      (activityQuery.isLoading && selectedActivityId) ||
+      (albumQuery.isLoading && selectedAlbumId) ? (
         <View
           style={[
             StyleSheet.absoluteFill,
@@ -665,6 +692,161 @@ export default function NotificationsScreen() {
           <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       ) : null}
+
+      {/* Dialog para mostrar detalle del álbum */}
+      <Portal>
+        <Dialog
+          visible={albumDetailDialogVisible}
+          onDismiss={() => {
+            setAlbumDetailDialogVisible(false);
+            setSelectedAlbumId(null);
+          }}
+          style={{ backgroundColor: COLORS.background }}
+        >
+          <Dialog.Title style={{ fontWeight: "bold", color: COLORS.text }}>
+            {albumQuery.isLoading
+              ? "Cargando..."
+              : albumQuery.isError
+                ? "Error"
+                : (() => {
+                    // Extract title safely for header
+                    let title = "Detalle del Álbum";
+                    if (albumQuery.data && !albumQuery.isError) {
+                      const data =
+                        "data" in albumQuery.data
+                          ? albumQuery.data.data
+                          : albumQuery.data;
+                      if (data && typeof data === "object" && "title" in data) {
+                        title = (data as { title: string }).title;
+                      }
+                    }
+                    return title;
+                  })()}
+          </Dialog.Title>
+          <Dialog.Content>
+            {albumQuery.isLoading ? (
+              <View style={{ padding: 20 }}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+              </View>
+            ) : (
+              (() => {
+                let album: AlbumWithPages | null = null;
+                if (albumQuery.data && !albumQuery.isError) {
+                  if ("data" in albumQuery.data) {
+                    album = albumQuery.data.data as AlbumWithPages;
+                  } else {
+                    album = albumQuery.data as AlbumWithPages;
+                  }
+                }
+
+                if (!album) {
+                  return (
+                    <Text
+                      style={{
+                        textAlign: "center",
+                        marginBottom: 8,
+                        color: COLORS.error,
+                      }}
+                    >
+                      No se pudieron cargar los detalles del álbum.
+                    </Text>
+                  );
+                }
+
+                return (
+                  <>
+                    {/* Title is in Header already, so just content here */}
+                    {album.title && (
+                      // For reliability if header extraction failed or was generic
+                      <Text
+                        style={{
+                          fontSize: 18,
+                          fontWeight: "bold",
+                          marginBottom: 8,
+                          display: "none",
+                        }}
+                      >
+                        {album.title}
+                      </Text>
+                    )}
+
+                    {album.description && (
+                      <View style={{ marginBottom: 16 }}>
+                        <Text
+                          style={{
+                            fontSize: 16,
+                            lineHeight: 24,
+                            color: COLORS.textSecondary,
+                          }}
+                        >
+                          {album.description}
+                        </Text>
+                      </View>
+                    )}
+
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        lineHeight: 24,
+                        color: COLORS.textSecondary,
+                      }}
+                    >
+                      Creado el:{" "}
+                      {new Date(album.createdAt).toLocaleDateString("es-AR")}
+                    </Text>
+
+                    {album.pages && (
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          lineHeight: 24,
+                          color: COLORS.textSecondary,
+                        }}
+                      >
+                        Páginas: {album.pages.length}
+                      </Text>
+                    )}
+                  </>
+                );
+              })()
+            )}
+          </Dialog.Content>
+          <Dialog.Actions
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              paddingHorizontal: 20,
+              paddingBottom: 12,
+              gap: 8,
+            }}
+          >
+            <Button
+              mode="outlined"
+              onPress={() => {
+                setAlbumDetailDialogVisible(false);
+                setSelectedAlbumId(null);
+              }}
+              textColor={COLORS.primary}
+            >
+              Cerrar
+            </Button>
+            <Button
+              onPress={() => {
+                if (selectedAlbumId) {
+                  setAlbumDetailDialogVisible(false);
+                  console.log("Navigating to album:", selectedAlbumId);
+                  router.push(`/album-viewer?id=${selectedAlbumId}`);
+                  setSelectedAlbumId(null);
+                }
+              }}
+              mode="contained"
+              buttonColor={COLORS.primary}
+            >
+              Ver Álbum
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
 
       {/* Dialog para mostrar detalle del recuerdo - Solo si data está lista */}
       {!memoryQuery.isLoading &&
