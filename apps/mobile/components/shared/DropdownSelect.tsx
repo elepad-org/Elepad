@@ -10,6 +10,7 @@ interface DropdownOption {
   label: string;
   icon?: string;
   avatarUrl?: string | null;
+  frameUrl?: string | null;
 }
 
 interface DropdownSelectProps {
@@ -94,10 +95,26 @@ export default function DropdownSelect({
                 />
               </View>
             ) : selectedOption?.avatarUrl ? (
-              <Image
-                source={{ uri: selectedOption.avatarUrl }}
-                style={localStyles.avatar}
-              />
+              <View style={{ position: "relative" }}>
+                <Image
+                  source={{ uri: selectedOption.avatarUrl }}
+                  style={localStyles.avatar}
+                />
+                {selectedOption.frameUrl && (
+                  <Image
+                    source={{ uri: selectedOption.frameUrl }}
+                    style={{
+                      position: "absolute",
+                      width: 32 * 1.4,
+                      height: 32 * 1.4,
+                      top: -32 * 0.2,
+                      left: -32 * 0.2,
+                      zIndex: 10,
+                    }}
+                    resizeMode="contain"
+                  />
+                )}
+              </View>
             ) : selectedOption ? (
               <View style={localStyles.initialContainer}>
                 <Text style={localStyles.initialText}>
@@ -132,6 +149,7 @@ export default function DropdownSelect({
           id: option.key,
           label: option.label,
           avatarUrl: option.avatarUrl,
+          frameUrl: option.frameUrl,
           icon: option.icon ? (
             <MaterialCommunityIcons
               name={option.icon as never}

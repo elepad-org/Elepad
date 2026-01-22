@@ -180,12 +180,18 @@ export default function RecuerdosScreen() {
         id: string;
         displayName: string;
         avatarUrl?: string | null;
+        activeFrameUrl?: string | null;
       }>;
 
     const raw = [groupInfo.owner, ...groupInfo.members];
     const byId = new Map<
       string,
-      { id: string; displayName: string; avatarUrl?: string | null }
+      {
+        id: string;
+        displayName: string;
+        avatarUrl?: string | null;
+        activeFrameUrl?: string | null;
+      }
     >();
     for (const m of raw) {
       if (!m?.id) continue;
@@ -193,6 +199,7 @@ export default function RecuerdosScreen() {
         id: m.id,
         displayName: m.displayName,
         avatarUrl: m.avatarUrl ?? null,
+        activeFrameUrl: m.activeFrameUrl ?? null,
       });
     }
     return Array.from(byId.values());
@@ -1539,6 +1546,7 @@ export default function RecuerdosScreen() {
                   key: m.id,
                   label: m.displayName,
                   avatarUrl: m.avatarUrl || null,
+                  frameUrl: m.activeFrameUrl || null,
                 })),
               ]}
               onSelect={(value) => {

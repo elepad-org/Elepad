@@ -1459,6 +1459,33 @@
         "required": [
           "pointsBalance"
         ]
+      },
+      "EquipItemResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
+      },
+      "EquipItemRequest": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "itemId"
+        ]
       }
     },
     "parameters": {}
@@ -1850,13 +1877,18 @@
                         },
                         "elder": {
                           "type": "boolean"
+                        },
+                        "activeFrameUrl": {
+                          "type": "string",
+                          "nullable": true
                         }
                       },
                       "required": [
                         "id",
                         "displayName",
                         "avatarUrl",
-                        "elder"
+                        "elder",
+                        "activeFrameUrl"
                       ]
                     },
                     "members": {
@@ -1877,13 +1909,18 @@
                           },
                           "elder": {
                             "type": "boolean"
+                          },
+                          "activeFrameUrl": {
+                            "type": "string",
+                            "nullable": true
                           }
                         },
                         "required": [
                           "id",
                           "displayName",
                           "avatarUrl",
-                          "elder"
+                          "elder",
+                          "activeFrameUrl"
                         ]
                       }
                     }
@@ -5706,6 +5743,65 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UserBalance"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shop/equip": {
+      "post": {
+        "tags": [
+          "shop"
+        ],
+        "summary": "Equip an item (e.g. Frame)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EquipItemRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item equipped successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid item type or request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Item not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }

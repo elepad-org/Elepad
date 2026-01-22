@@ -45,6 +45,7 @@ export default function ConfiguracionScreen() {
   const displayName = userElepad?.displayName?.trim() || "Usuario";
   const email = userElepad?.email || "-";
   const avatarUrl = userElepad?.avatarUrl || "";
+  const activeFrameUrl = userElepad?.activeFrameUrl;
 
   const [editExpanded, setEditExpanded] = useState(false);
   const [formName, setFormName] = useState(displayName);
@@ -101,6 +102,7 @@ export default function ConfiguracionScreen() {
           name={displayName}
           email={email}
           avatarUrl={avatarUrl}
+          frameUrl={activeFrameUrl} // Pass the frame URL
           onEditPhoto={() => setPhotoOpen(true)}
         />
 
