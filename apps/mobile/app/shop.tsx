@@ -409,7 +409,6 @@ const styles = StyleSheet.create({
     width: "100%",
     aspectRatio: 1,
     borderRadius: 12,
-    backgroundColor: COLORS.backgroundSecondary,
     marginBottom: 12,
     justifyContent: "center",
     alignItems: "center",
@@ -492,7 +491,6 @@ const styles = StyleSheet.create({
   modalItemPreview: {
     width: 120,
     height: 120,
-    backgroundColor: COLORS.backgroundSecondary,
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
