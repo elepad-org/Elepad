@@ -1,6 +1,4 @@
 import React, { useEffect } from "react";
-import { View, StyleSheet, Alert, FlatList, Image } from "react-native";
-import React, { useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -124,7 +122,7 @@ export default function ShopScreen() {
               <View
                 style={[
                   styles.placeholderImage,
-                  { backgroundColor: COLORS.purple.primary + "15" },
+                  { backgroundColor: COLORS.purple.light + "50" },
                 ]}
               >
                 <Text style={{ fontSize: 32 }}>🎁</Text>
