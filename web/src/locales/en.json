@@ -9,7 +9,66 @@
     "title": "Welcome to Elepad",
     "subtitle": "Your companion for family cognitive wellness"
   },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated",
+    "introduction": "This privacy policy describes how Elepad collects, uses and protects your personal information.",
+    "dataCollection": {
+      "title": "What data we collect",
+      "personalInfo": "Personal Information",
+      "usageData": "Application Usage Data",
+      "userContent": "User Generated Content",
+      "familyData": "Family Group Data"
+    },
+    "dataStorage": {
+      "title": "Data Storage and Security",
+      "location": "Location",
+      "encryption": "Encryption",
+      "retention": "Retention Period",
+      "backup": "Backups"
+    },
+    "permissions": {
+      "title": "Application Permissions",
+      "camera": "Camera and Photo Gallery",
+      "calendar": "Calendar (optional)",
+      "notifications": "Notifications"
+    },
+    "changes": "Changes to this Policy",
+    "contact": {
+      "title": "Questions or Concerns?",
+      "description": "If you have any questions about this privacy policy or how we handle your data, please don't hesitate to contact us:",
+      "button": "Send Inquiry"
+    }
+  },
+  "accountDeletion": {
+    "title": "Account Deletion",
+    "subtitle": "Data Deletion Request",
+    "warning": {
+      "title": "This action is permanent and irreversible",
+      "description": "Once your request is processed, we will not be able to recover your account or data. Please read the information carefully before proceeding."
+    },
+    "whatGetsDeleted": {
+      "title": "Data that will be permanently deleted",
+      "description": "When deleting your Elepad account, the following data will be permanently deleted:",
+      "accountInfo": "Your Account Information",
+      "gameProgress": "Cognitive Games Progress",
+      "memories": "Personal Memories and Stories",
+      "events": "Events and Calendar",
+      "familyGroups": "Family Group Membership",
+      "activityHistory": "Activity History"
+    },
+    "whatRemains": {
+      "title": "What data is retained",
+      "description": "Some anonymous data may be retained for statistical analysis and service improvement:"
+    }
+  },
   "common": {
-    "language": "Language"
+    "language": "Language",
+    "email": "Email",
+    "name": "Name",
+    "send": "Send",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close"
   }
 }

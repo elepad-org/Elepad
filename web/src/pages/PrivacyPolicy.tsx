@@ -1,8 +1,10 @@
 import { Box, Container, Typography, List, ListItem, ListItemText, ListItemIcon, Paper, Button } from '@mui/material';
 import { Security, Email, Timer, Info, Camera, CalendarMonth, Notifications } from '@mui/icons-material';
 import Navbar from '../components/Navbar';
+import { useTranslation } from 'react-i18next';
 
 export default function PrivacyPolicy() {
+  const { t } = useTranslation();
   return (
     <>
       <Navbar variant="legal" />
@@ -11,10 +13,10 @@ export default function PrivacyPolicy() {
         {/* Header */}
         <Box sx={{ textAlign: 'center', mb: 6 }}>
           <Typography variant="h3" sx={{ fontWeight: 700, mb: 2, color: 'black' }}>
-            Política de Privacidad
+            {t('privacy.title')}
           </Typography>
           <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-            Última actualización: {new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+            {t('privacy.lastUpdated')}: {new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
           </Typography>
         </Box>
 
@@ -23,11 +25,11 @@ export default function PrivacyPolicy() {
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <Info sx={{ mr: 1, color: 'primary.main' }} />
             <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              Introducción
+              {t('privacy.introduction')}
             </Typography>
           </Box>
           <Typography variant="body1" sx={{ lineHeight: 1.8, color: 'text.secondary' }}>
-            En Elepad, nos comprometemos a proteger la privacidad y seguridad de nuestros usuarios. Esta política describe cómo recopilamos, usamos, almacenamos y protegemos su información personal cuando utiliza nuestra aplicación móvil.
+            {t('privacy.introduction')}
           </Typography>
         </Paper>
 
@@ -36,12 +38,12 @@ export default function PrivacyPolicy() {
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <Security sx={{ mr: 1, color: 'primary.main' }} />
             <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              Información que Recopilamos
+              {t('privacy.dataCollection.title')}
             </Typography>
           </Box>
           
           <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 600 }}>
-            1. Información de Cuenta
+            1. {t('privacy.dataCollection.personalInfo')}
           </Typography>
           <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8, color: 'text.secondary' }}>
             • Nombre y apellidos<br />
@@ -52,7 +54,7 @@ export default function PrivacyPolicy() {
           </Typography>
 
           <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 600 }}>
-            2. Datos de uso de la Aplicación
+            2. {t('privacy.dataCollection.usageData')}
           </Typography>
           <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8, color: 'text.secondary' }}>
             • Progreso y puntuaciones en juegos cognitivos (Memoria, Sudoku, NET, Focus)<br />
@@ -62,7 +64,7 @@ export default function PrivacyPolicy() {
           </Typography>
 
           <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 600 }}>
-            3. Contenido generado por el usuario
+            3. {t('privacy.dataCollection.userContent')}
           </Typography>
           <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8, color: 'text.secondary' }}>
             • Recuerdos y memorias compartidas<br />
@@ -72,7 +74,7 @@ export default function PrivacyPolicy() {
           </Typography>
 
           <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 600 }}>
-            4. Datos del Grupo Familiar
+            4. {t('privacy.dataCollection.familyData')}
           </Typography>
           <Typography variant="body1" sx={{ lineHeight: 1.8, color: 'text.secondary' }}>
             • Información de miembros del grupo familiar (con su consentimiento)<br />
@@ -87,33 +89,33 @@ export default function PrivacyPolicy() {
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <Timer sx={{ mr: 1, color: 'primary.main' }} />
             <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              Almacenamiento y Seguridad de Datos
+              {t('privacy.dataStorage.title')}
             </Typography>
           </Box>
           
           <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 600 }}>
-            Ubicación
+            {t('privacy.dataStorage.location')}
           </Typography>
           <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8, color: 'primary.main' }}>
             Tus datos se almacenan de forma segura en servidores de Supabase, que utiliza infraestructura de AWS con certificación SOC 2.
           </Typography>
           
           <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 600 }}>
-            Encriptación
+            {t('privacy.dataStorage.encryption')}
           </Typography>
           <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8, color: 'primary.main' }}>
             Toda la información se transmite mediante HTTPS/TLS y se almacena con encriptación en reposo.
           </Typography>
           
           <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 600 }}>
-            Periodo de retención
+            {t('privacy.dataStorage.retention')}
           </Typography>
           <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8, color: 'primary.main' }}>
             Mantenemos tus datos mientras tu cuenta esté activa. Si no usas la aplicación durante 2 años consecutivos, te contactaremos para confirmar si deseas mantener tu cuenta.
           </Typography>
           
           <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 600 }}>
-            Copias de seguridad
+            {t('privacy.dataStorage.backup')}
           </Typography>
           <Typography variant="body1" sx={{ lineHeight: 1.8, color: 'primary.main' }}>
             Realizamos copias de seguridad automáticas que se conservan por 30 días para recuperación ante desastres.
@@ -125,7 +127,7 @@ export default function PrivacyPolicy() {
         {/* Permisos de la Aplicación */}
         <Paper sx={{ p: 4, mb: 4, borderRadius: 3, backgroundColor: '#FFFFFF', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
           <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
-            Permisos de la Aplicación
+            {t('privacy.permissions.title')}
           </Typography>
           <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8, color: 'text.secondary' }}>
             Elepad solicita los siguientes permisos:
@@ -136,7 +138,7 @@ export default function PrivacyPolicy() {
                 <Camera />
               </ListItemIcon>
               <ListItemText 
-                primary="Cámara y Galería de Fotos"
+                primary={t('privacy.permissions.camera')}
                 secondary="Para tomar fotos de perfil y añadir imágenes a tus recuerdos. Solo accedemos a las fotos que tú seleccionas."
                 primaryTypographyProps={{ fontWeight: 600 }}
               />
@@ -146,7 +148,7 @@ export default function PrivacyPolicy() {
                 <CalendarMonth />
               </ListItemIcon>
               <ListItemText 
-                primary="Calendario (opcional)"
+                primary={t('privacy.permissions.calendar')}
                 secondary="Para sincronizar eventos familiares con Google Calendar. Puedes vincular o desvincular en cualquier momento."
                 primaryTypographyProps={{ fontWeight: 600 }}
               />
@@ -156,7 +158,7 @@ export default function PrivacyPolicy() {
                 <Notifications />
               </ListItemIcon>
               <ListItemText 
-                primary="Notificaciones"
+                primary={t('privacy.permissions.notifications')}
                 secondary="Para recordatorios de eventos, logros y celebraciones de rachas. Puedes desactivarlas en cualquier momento."
                 primaryTypographyProps={{ fontWeight: 600 }}
               />

@@ -9,7 +9,66 @@
     "title": "Bienvenido a Elepad",
     "subtitle": "Tu compañero para el bienestar cognitivo familiar"
   },
+  "privacy": {
+    "title": "Política de Privacidad",
+    "lastUpdated": "Última actualización",
+    "introduction": "Esta política de privacidad describe cómo Elepad recopila, utiliza y protege tu información personal.",
+    "dataCollection": {
+      "title": "Qué datos recopilamos",
+      "personalInfo": "Información Personal",
+      "usageData": "Datos de uso de la Aplicación",
+      "userContent": "Contenido generado por el usuario",
+      "familyData": "Datos del Grupo Familiar"
+    },
+    "dataStorage": {
+      "title": "Almacenamiento y Seguridad de Datos",
+      "location": "Ubicación",
+      "encryption": "Encriptación",
+      "retention": "Periodo de retención",
+      "backup": "Copias de seguridad"
+    },
+    "permissions": {
+      "title": "Permisos de la Aplicación",
+      "camera": "Cámara y Galería de Fotos",
+      "calendar": "Calendario (opcional)",
+      "notifications": "Notificaciones"
+    },
+    "changes": "Cambios en esta Política",
+    "contact": {
+      "title": "¿Preguntas o Inquietudes?",
+      "description": "Si tienes alguna pregunta sobre esta política de privacidad o sobre cómo manejamos tus datos, no dudes en contactarnos:",
+      "button": "Enviar Consulta"
+    }
+  },
+  "accountDeletion": {
+    "title": "Eliminación de Cuenta",
+    "subtitle": "Solicitud de Eliminación de Datos",
+    "warning": {
+      "title": "Esta acción es permanente e irreversible",
+      "description": "Una vez procesada tu solicitud, no podremos recuperar tu cuenta ni tus datos. Por favor, lee cuidadosamente la información antes de proceder."
+    },
+    "whatGetsDeleted": {
+      "title": "Datos que se eliminarán permanentemente",
+      "description": "Al eliminar tu cuenta de Elepad, se borrarán de forma permanente los siguientes datos:",
+      "accountInfo": "Información de tu Cuenta",
+      "gameProgress": "Progreso en Juegos Cognitivos",
+      "memories": "Recuerdos y Memorias Personales",
+      "events": "Eventos y Calendario",
+      "familyGroups": "Membresía en Grupos Familiares",
+      "activityHistory": "Historial de Actividades"
+    },
+    "whatRemains": {
+      "title": "Qué datos se conservan",
+      "description": "Algunos datos anónimos pueden conservarse para análisis estadísticos y mejora del servicio:"
+    }
+  },
   "common": {
-    "language": "Idioma"
+    "language": "Idioma",
+    "email": "Correo electrónico",
+    "name": "Nombre",
+    "send": "Enviar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "close": "Cerrar"
   }
 }

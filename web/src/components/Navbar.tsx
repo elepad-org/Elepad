@@ -78,7 +78,6 @@ export default function Navbar({ variant = 'main' }: NavbarProps) {
               >
                 {t('nav.about')}
               </Button>
-              <LanguageSelector />
               <Button
                 variant="contained"
                 color="primary"
@@ -90,6 +89,7 @@ export default function Navbar({ variant = 'main' }: NavbarProps) {
               >
                 {t('nav.download')}
               </Button>
+              <LanguageSelector />
             </Box>
           ) : (
             <Button
