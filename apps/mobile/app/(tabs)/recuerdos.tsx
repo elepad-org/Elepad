@@ -102,7 +102,7 @@ const memoryToRecuerdo = (
     autorId: memory.createdBy,
     autorNombre: memberNameById[memory.createdBy] || undefined,
     fecha: new Date(memory.createdAt),
-    reactions: (memory.reactions || []).map((r) => ({
+    reactions: (memory.reactions || []).map((r: any) => ({
       id: r.id,
       userId: r.userId,
       stickerId: r.stickerId,
@@ -597,6 +597,16 @@ export default function RecuerdosScreen() {
       }
     }
   }, [memoryId, selectedBook, memoriesResponse, recuerdos]);
+
+  // Sync selectedRecuerdo with recuerdos list when it updates (e.g. after adding a reaction)
+  useEffect(() => {
+    if (selectedRecuerdo) {
+      const updated = recuerdos.find((r) => r.id === selectedRecuerdo.id);
+      if (updated && updated !== selectedRecuerdo) {
+        setSelectedRecuerdo(updated);
+      }
+    }
+  }, [recuerdos]);
 
   // Estados de carga y error (patrón original restaurado)
   const isLoading =
