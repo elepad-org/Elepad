@@ -31,7 +31,10 @@ export default function RootLayout() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       AUTH_TOKEN = data.session?.access_token ?? undefined;
-      console.log("🔑 Token inicial cargado:", AUTH_TOKEN ? "✅ Presente" : "❌ Ausente");
+      console.log(
+        "🔑 Token inicial cargado:",
+        AUTH_TOKEN ? "✅ Presente" : "❌ Ausente",
+      );
     });
     const { data: listener } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -139,6 +142,13 @@ export default function RootLayout() {
                       options={{
                         headerShown: false,
                         presentation: "card",
+                        animation: "fade",
+                      }}
+                    />
+                    <Stack.Screen
+                      name="shop"
+                      options={{
+                        headerShown: false,
                         animation: "fade",
                       }}
                     />
