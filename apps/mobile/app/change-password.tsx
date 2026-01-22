@@ -159,63 +159,69 @@ export default function ChangePasswordScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <Card style={STYLES.menuCard}>
+        <Card style={[STYLES.menuCard, { backgroundColor: COLORS.white }]}>
           <Card.Content>
             <Text variant="bodyMedium" style={styles.description}>
               Ingresa tu contraseña actual y la nueva contraseña que deseas
               utilizar.
             </Text>
 
-            <TextInput
-              label="Contraseña actual"
-              value={currentPassword}
-              onChangeText={setCurrentPassword}
-              secureTextEntry={!showCurrentPassword}
-              style={styles.input}
-              mode="outlined"
-              outlineColor={COLORS.textPlaceholder}
-              activeOutlineColor={COLORS.primary}
-              right={
-                <TextInput.Icon
-                  icon={showCurrentPassword ? "eye-off" : "eye"}
-                  onPress={() => setShowCurrentPassword(!showCurrentPassword)}
-                />
-              }
-            />
+            <View style={styles.inputWrapper}>
+              <TextInput
+                label="Contraseña actual"
+                value={currentPassword}
+                onChangeText={setCurrentPassword}
+                secureTextEntry={!showCurrentPassword}
+                mode="flat"
+                outlineColor="transparent"
+                activeOutlineColor="transparent"
+                style={{ backgroundColor: "transparent" }}
+                right={
+                  <TextInput.Icon
+                    icon={showCurrentPassword ? "eye-off" : "eye"}
+                    onPress={() => setShowCurrentPassword(!showCurrentPassword)}
+                  />
+                }
+              />
+            </View>
 
-            <TextInput
-              label="Nueva contraseña"
-              value={newPassword}
-              onChangeText={setNewPassword}
-              secureTextEntry={!showNewPassword}
-              style={styles.input}
-              mode="outlined"
-              outlineColor={COLORS.textPlaceholder}
-              activeOutlineColor={COLORS.primary}
-              right={
-                <TextInput.Icon
-                  icon={showNewPassword ? "eye-off" : "eye"}
-                  onPress={() => setShowNewPassword(!showNewPassword)}
-                />
-              }
-            />
+            <View style={styles.inputWrapper}>
+              <TextInput
+                label="Nueva contraseña"
+                value={newPassword}
+                onChangeText={setNewPassword}
+                secureTextEntry={!showNewPassword}
+                mode="flat"
+                outlineColor="transparent"
+                activeOutlineColor="transparent"
+                style={{ backgroundColor: "transparent" }}
+                right={
+                  <TextInput.Icon
+                    icon={showNewPassword ? "eye-off" : "eye"}
+                    onPress={() => setShowNewPassword(!showNewPassword)}
+                  />
+                }
+              />
+            </View>
 
-            <TextInput
-              label="Confirmar nueva contraseña"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry={!showConfirmPassword}
-              style={styles.input}
-              mode="outlined"
-              outlineColor={COLORS.textPlaceholder}
-              activeOutlineColor={COLORS.primary}
-              right={
-                <TextInput.Icon
-                  icon={showConfirmPassword ? "eye-off" : "eye"}
-                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                />
-              }
-            />
+            <View style={styles.inputWrapper}>
+              <TextInput
+                label="Confirmar nueva contraseña"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry={!showConfirmPassword}
+                mode="flat"
+                outlineColor="transparent"
+                activeOutlineColor="transparent"
+                style={{ backgroundColor: "transparent" }}
+                right={
+                  <TextInput.Icon
+                    icon={showConfirmPassword ? "eye-off" : "eye"}
+                    onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                  />
+                }
+              />
+            </View>
 
             <Text variant="bodySmall" style={styles.hint}>
               • La contraseña debe tener al menos 6 caracteres
@@ -258,9 +264,11 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     lineHeight: 22,
   },
-  input: {
+  inputWrapper: {
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 16,
+    overflow: "hidden",
     marginBottom: 16,
-    backgroundColor: COLORS.white,
   },
   hint: {
     marginTop: 8,
