@@ -15,6 +15,7 @@ import { VideoView, useVideoPlayer } from "expo-video";
 import Slider from "@react-native-community/slider";
 import HighlightedMentionText from "./HighlightedMentionText";
 import MentionInput from "./MentionInput";
+import StickerReactionPicker from "./StickerReactionPicker";
 
 type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
 
@@ -39,6 +40,7 @@ interface RecuerdoDetailDialogProps {
     patch: { title?: string; caption?: string },
   ) => Promise<void>;
   onDeleteRecuerdo: (id: string) => Promise<void>;
+  onReact?: (recuerdoId: string, stickerId: string) => void;
   isMutating?: boolean;
   familyMembers?: Array<{
     id: string;
@@ -46,6 +48,7 @@ interface RecuerdoDetailDialogProps {
     avatarUrl?: string | null;
   }>;
   currentUserId?: string;
+  isElder?: boolean;
 }
 
 const screenWidth = Dimensions.get("window").width;
@@ -56,9 +59,11 @@ export default function RecuerdoDetailDialog({
   onDismiss,
   onUpdateRecuerdo,
   onDeleteRecuerdo,
+  onReact,
   isMutating = false,
   familyMembers = [],
   currentUserId,
+  isElder = false,
 }: RecuerdoDetailDialogProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -408,7 +413,6 @@ export default function RecuerdoDetailDialog({
             style={{
               backgroundColor: COLORS.white,
               borderRadius: 10,
-              overflow: "hidden",
               width: screenWidth * 0.92,
               elevation: 0,
               shadowColor: "transparent",
@@ -416,6 +420,7 @@ export default function RecuerdoDetailDialog({
               shadowOpacity: 0,
               shadowRadius: 0,
               opacity: fadeAnim,
+              position: "relative",
             }}
           >
             {/* Contenido principal según el tipo */}
@@ -540,6 +545,14 @@ export default function RecuerdoDetailDialog({
               </View>
             )}
           </Animated.View>
+
+          {/* Sticker Reaction Picker - Only for elders - Positioned below the dialog */}
+          {isElder && onReact && recuerdo && (
+            <StickerReactionPicker
+              onReact={(stickerId) => onReact(recuerdo.id, stickerId)}
+              disabled={isMutating}
+            />
+          )}
         </Dialog>
 
         <Dialog

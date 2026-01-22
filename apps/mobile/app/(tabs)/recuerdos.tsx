@@ -1650,11 +1650,25 @@ export default function RecuerdosScreen() {
           onDeleteRecuerdo={async (id) => {
             await deleteMemoryMutation.mutateAsync(id);
           }}
+          onReact={(recuerdoId, stickerId) => {
+            // TODO: Implement API call to save reaction
+            showToast({
+              message: "¡Reacción agregada!",
+              type: "success",
+            });
+            console.log(
+              "React to memory:",
+              recuerdoId,
+              "with sticker:",
+              stickerId,
+            );
+          }}
           isMutating={
             updateMemoryMutation.isPending || deleteMemoryMutation.isPending
           }
           familyMembers={groupMembers}
           currentUserId={userElepad?.id}
+          isElder={userElepad?.elder || false}
         />
       )}
     </SafeAreaView>
