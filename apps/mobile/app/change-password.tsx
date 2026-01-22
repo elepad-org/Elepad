@@ -8,7 +8,7 @@ import {
   IconButton,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useRouter, Stack } from "expo-router";
 import { COLORS, STYLES } from "@/styles/base";
 import { useToast } from "@/components/shared/Toast";
 import { supabase } from "@/lib/supabase";
@@ -139,6 +139,7 @@ export default function ChangePasswordScreen() {
 
   return (
     <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
+      <Stack.Screen options={{ headerShown: false }} />
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
       <View style={styles.header}>
