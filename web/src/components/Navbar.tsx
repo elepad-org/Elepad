@@ -9,8 +9,6 @@ export default function Navbar() {
       sx={{
         backgroundColor: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid',
-        borderColor: 'divider',
       }}
     >
       <Container maxWidth="lg">
@@ -33,8 +31,7 @@ export default function Navbar() {
                 fontWeight: 500,
                 display: { xs: 'none', md: 'inline-flex' },
                 '&:hover': {
-                  backgroundColor: 'transparent',
-                  color: 'primary.main',
+                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
                 },
               }}
             >
@@ -46,8 +43,7 @@ export default function Navbar() {
                 fontWeight: 500,
                 display: { xs: 'none', md: 'inline-flex' },
                 '&:hover': {
-                  backgroundColor: 'transparent',
-                  color: 'primary.main',
+                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
                 },
               }}
             >
@@ -59,7 +55,6 @@ export default function Navbar() {
               startIcon={<Download />}
               sx={{
                 px: 3,
-                boxShadow: '0 2px 8px rgba(154, 158, 206, 0.3)',
               }}
             >
               Descargar

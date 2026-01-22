@@ -10,8 +10,6 @@ export default function LegalNavbar() {
       sx={{
         backgroundColor: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(10px)',
-        borderBottom: '1px solid',
-        borderColor: 'divider',
       }}
     >
       <Container maxWidth="lg">
@@ -35,8 +33,7 @@ export default function LegalNavbar() {
               color: 'text.primary',
               fontWeight: 500,
               '&:hover': {
-                backgroundColor: 'transparent',
-                color: 'primary.main',
+                backgroundColor: 'rgba(0, 0, 0, 0.04)',
               },
             }}
           >
