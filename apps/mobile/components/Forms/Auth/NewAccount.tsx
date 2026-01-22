@@ -14,9 +14,12 @@ export default function NewAccount() {
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [familyCode, setFamilyCode] = useState("");
   const [isElder, setIsElder] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const getFriendlyErrorMessage = (errorMsg: string) => {
     if (errorMsg.includes("Invalid login credentials"))
@@ -56,14 +59,28 @@ export default function NewAccount() {
     return (
       email.trim() !== "" &&
       displayName.trim() !== "" &&
-      password.trim() !== ""
+      password.trim() !== "" &&
+      confirmPassword.trim() !== "" &&
+      password === confirmPassword
     );
   };
 
   const handleSignUp = async () => {
     // Validar campos obligatorios
-    if (!email.trim() || !displayName.trim() || !password.trim()) {
+    if (!email.trim() || !displayName.trim() || !password.trim() || !confirmPassword.trim()) {
       showDialog("Por favor completa todos los campos obligatorios.");
+      return;
+    }
+
+    // Validar que las contraseñas coincidan
+    if (password !== confirmPassword) {
+      showDialog("Las contraseñas no coinciden.");
+      return;
+    }
+
+    // Validar longitud de contraseña
+    if (password.length < 6) {
+      showDialog("La contraseña debe tener al menos 6 caracteres.");
       return;
     }
 
@@ -223,7 +240,31 @@ export default function NewAccount() {
           placeholder="Contraseña"
           value={password}
           onChangeText={setPassword}
-          secureTextEntry
+          secureTextEntry={!showPassword}
+          autoCapitalize="none"
+          returnKeyType="next"
+          style={styles.input}
+          outlineStyle={styles.inputOutline}
+          outlineColor="rgba(203, 203, 203, 0.92)"
+          activeOutlineColor={COLORS.textLight}
+          textColor={COLORS.text}
+          placeholderTextColor={COLORS.textSecondary}
+          disabled={loading}
+          dense
+          right={
+            <TextInput.Icon
+              icon={showPassword ? "eye-off" : "eye"}
+              onPress={() => setShowPassword(!showPassword)}
+            />
+          }
+        />
+
+        <TextInput
+          mode="outlined"
+          placeholder="Confirmar contraseña"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry={!showConfirmPassword}
           autoCapitalize="none"
           returnKeyType="done"
           style={styles.input}
@@ -235,6 +276,12 @@ export default function NewAccount() {
           onSubmitEditing={handleSignUp}
           disabled={loading}
           dense
+          right={
+            <TextInput.Icon
+              icon={showConfirmPassword ? "eye-off" : "eye"}
+              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+            />
+          }
         />
 
         <Button
