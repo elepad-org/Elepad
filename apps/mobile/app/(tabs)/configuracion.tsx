@@ -199,6 +199,15 @@ export default function ConfiguracionScreen() {
 
             <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
             <List.Item
+              title="Cambiar contraseña"
+              left={(props) => <List.Icon {...props} icon="lock-reset" />}
+              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              onPress={() => {
+                router.navigate("/change-password");
+              }}
+            />
+            <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
+            <List.Item
               title="Google Calendar"
               description="Sincronizar actividades con Google Calendar"
               left={(props) => <List.Icon {...props} icon="calendar" />}
