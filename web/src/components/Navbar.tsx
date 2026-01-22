@@ -1,5 +1,5 @@
-import { AppBar, Toolbar, Typography, Button, Container, Box } from '@mui/material';
-import { Download, ArrowForward } from '@mui/icons-material';
+import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
+import { Download } from '@mui/icons-material';
 import { Link as RouterLink } from 'react-router-dom';
 
 export default function Navbar() {
@@ -11,12 +11,13 @@ export default function Navbar() {
         backgroundColor: 'rgba(255, 255, 255, 0.95)',
       }}
     >
-      <Container maxWidth="lg">
-        <Toolbar sx={{ justifyContent: 'space-between', py: 1 }}>
+      <Toolbar sx={{ justifyContent: 'space-between', py: 1, px: 2 }}>
           <Typography
             variant="h5"
             sx={{
               fontWeight: 700,
+              fontFamily: 'Lobster_400Regular',
+              fontSize: '2rem',
               color: 'primary.main',
               letterSpacing: '-0.01em',
             }}
@@ -31,12 +32,14 @@ export default function Navbar() {
               variant="text"
               color="primary"
               size="large"
-              endIcon={<ArrowForward />}
               sx={{
                 px: 4,
                 py: 1.5,
+              
+                boxShadow: 'none',
                 '&:hover': {
                   backgroundColor: 'rgba(154, 158, 206, 0.05)',
+                  boxShadow: 'none',
                 },
               }}
             >
@@ -48,12 +51,14 @@ export default function Navbar() {
               variant="text"
               color="primary"
               size="large"
-              endIcon={<ArrowForward />}
               sx={{
                 px: 4,
                 py: 1.5,
+              
+                boxShadow: 'none',
                 '&:hover': {
                   backgroundColor: 'rgba(154, 158, 206, 0.05)',
+                  boxShadow: 'none',
                 },
               }}
             >
@@ -63,6 +68,7 @@ export default function Navbar() {
               variant="contained"
               color="primary"
               startIcon={<Download />}
+              disableElevation
               sx={{
                 px: 3,
               }}
@@ -71,7 +77,6 @@ export default function Navbar() {
             </Button>
           </Box>
         </Toolbar>
-      </Container>
-    </AppBar>
+      </AppBar>
   );
 }
