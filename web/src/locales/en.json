@@ -48,33 +48,60 @@
     "help": "Help",
     "copyright": "© {year} All rights reserved."
   },
+  "about": {
+    "title": "About Us",
+    "description": "We are 5 software developers and systems engineers, graduates from UTN Regional Resistencia. We seek to transform families through technology, creating tools that strengthen bonds and generate meaningful experiences between generations.",
+    "team": "Our Team"
+  },
+  "contact": {
+    "title": "Contact",
+    "description": "If you have questions, suggestions or want to contact us, fill out the following form and we will respond as soon as possible.",
+    "name": "Name",
+    "email": "Email",
+    "message": "Message",
+    "send": "Send"
+  },
   "privacy": {
     "title": "Privacy Policy",
     "lastUpdated": "Last updated",
-    "introduction": "This privacy policy describes how Elepad collects, uses and protects your personal information.",
+    "introduction": "Introduction",
+    "introductionText": "This privacy policy describes how Elepad collects, uses and protects your personal information.",
     "dataCollection": {
       "title": "What data we collect",
-      "personalInfo": "Personal Information",
-      "usageData": "Application Usage Data",
-      "userContent": "User Generated Content",
-      "familyData": "Family Group Data"
+      "personalInfo": "1. Personal Information",
+      "personalInfoDetails": "• First and last name<br />• Email address<br />• Profile picture (optional)<br />• Date of birth<br />• Authentication information (when using Google OAuth)",
+      "usageData": "2. Application Usage Data",
+      "usageDataDetails": "• Progress and scores in cognitive games (Memory, Sudoku, NET, Focus)<br />• Achievements and activity streaks<br />• History of completed games<br />• Application usage frequency",
+      "userContent": "3. User Generated Content",
+      "userContentDetails": "• Shared memories and stories<br />• Family photos and albums<br />• Calendar events and activities<br />• Personal notes and descriptions",
+      "familyData": "4. Family Group Data",
+      "familyDataDetails": "• Information about family group members (with their consent)<br />• Family relationships<br />• Content shared within the group"
     },
     "dataStorage": {
       "title": "Data Storage and Security",
       "location": "Location",
+      "locationDetails": "Your data is securely stored on Supabase servers, which uses AWS infrastructure with SOC 2 certification.",
       "encryption": "Encryption",
+      "encryptionDetails": "All information is transmitted via HTTPS/TLS and stored with encryption at rest.",
       "retention": "Retention Period",
-      "backup": "Backups"
+      "retentionDetails": "We maintain your data while your account is active. If you don't use the application for 2 consecutive years, we will contact you to confirm if you wish to keep your account.",
+      "backup": "Backups",
+      "backupDetails": "We perform automatic backups that are kept for 30 days for disaster recovery."
     },
     "permissions": {
       "title": "Application Permissions",
+      "intro": "Elepad requests the following permissions:",
       "camera": "Camera and Photo Gallery",
+      "cameraDetails": "To take profile photos and add images to your memories. We only access photos that you select.",
       "calendar": "Calendar (optional)",
-      "notifications": "Notifications"
+      "calendarDetails": "To sync family events with Google Calendar. You can link or unlink at any time.",
+      "notifications": "Notifications",
+      "notificationsDetails": "For reminders of events, achievements and streak celebrations. You can disable them at any time."
     },
     "changes": "Changes to this Policy",
+    "changesDetails": "We may update this privacy policy occasionally. We will notify you of significant changes through an in-app notice or email. We recommend reviewing this policy periodically.",
     "contact": {
-      "title": "¿Questions or Concerns?",
+      "title": "Questions or Concerns?",
       "description": "If you have any questions about this privacy policy or how we handle your data, please don't hesitate to contact us:",
       "button": "Send Inquiry"
     }

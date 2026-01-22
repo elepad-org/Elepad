@@ -48,31 +48,58 @@
     "help": "Ayuda",
     "copyright": "© {year} Todos los derechos reservados."
   },
+  "about": {
+    "title": "Sobre Nosotros",
+    "description": "Somos 5 desarrolladores de software e ingenieros en sistemas, egresados de la UTN Regional Resistencia. Buscamos transformar a las familias a través de la tecnología, creando herramientas que fortalezcan los vínculos y generen experiencias significativas entre generaciones.",
+    "team": "Nuestro equipo"
+  },
+  "contact": {
+    "title": "Contacto",
+    "description": "Si tienes dudas, sugerencias o quieres comunicarte con nosotros, completa el siguiente formulario y te responderemos a la brevedad.",
+    "name": "Nombre",
+    "email": "Email",
+    "message": "Mensaje",
+    "send": "Enviar"
+  },
   "privacy": {
     "title": "Política de Privacidad",
     "lastUpdated": "Última actualización",
-    "introduction": "Esta política de privacidad describe cómo Elepad recopila, utiliza y protege tu información personal.",
+    "introduction": "Introducción",
+    "introductionText": "Esta política de privacidad describe cómo Elepad recopila, utiliza y protege tu información personal.",
     "dataCollection": {
       "title": "Qué datos recopilamos",
-      "personalInfo": "Información Personal",
-      "usageData": "Datos de uso de la Aplicación",
-      "userContent": "Contenido generado por el usuario",
-      "familyData": "Datos del Grupo Familiar"
+      "personalInfo": "1. Información Personal",
+      "personalInfoDetails": "• Nombre y apellidos<br />• Dirección de correo electrónico<br />• Foto de perfil (opcional)<br />• Fecha de nacimiento<br />• Información de autenticación (cuando usas Google OAuth)",
+      "usageData": "2. Datos de uso de la Aplicación",
+      "usageDataDetails": "• Progreso y puntuaciones en juegos cognitivos (Memoria, Sudoku, NET, Focus)<br />• Logros y rachas de actividad<br />• Historial de juegos completados<br />• Frecuencia de uso de la aplicación",
+      "userContent": "3. Contenido generado por el usuario",
+      "userContentDetails": "• Recuerdos y memorias compartidas<br />• Fotos y álbumes familiares<br />• Eventos y actividades del calendario<br />• Notas y descripciones personales",
+      "familyData": "4. Datos del Grupo Familiar",
+      "familyDataDetails": "• Información de miembros del grupo familiar (con su consentimiento)<br />• Relaciones familiares<br />• Contenido compartido dentro del grupo"
     },
     "dataStorage": {
       "title": "Almacenamiento y Seguridad de Datos",
       "location": "Ubicación",
+      "locationDetails": "Tus datos se almacenan de forma segura en servidores de Supabase, que utiliza infraestructura de AWS con certificación SOC 2.",
       "encryption": "Encriptación",
+      "encryptionDetails": "Toda la información se transmite mediante HTTPS/TLS y se almacena con encriptación en reposo.",
       "retention": "Periodo de retención",
-      "backup": "Copias de seguridad"
+      "retentionDetails": "Mantenemos tus datos mientras tu cuenta esté activa. Si no usas la aplicación durante 2 años consecutivos, te contactaremos para confirmar si deseas mantener tu cuenta.",
+      "backup": "Copias de seguridad",
+      "backupDetails": "Realizamos copias de seguridad automáticas que se conservan por 30 días para recuperación ante desastres."
     },
     "permissions": {
       "title": "Permisos de la Aplicación",
+      "intro": "Elepad solicita los siguientes permisos:",
       "camera": "Cámara y Galería de Fotos",
+      "cameraDetails": "Para tomar fotos de perfil y añadir imágenes a tus recuerdos. Solo accedemos a las fotos que tú seleccionas.",
       "calendar": "Calendario (opcional)",
-      "notifications": "Notificaciones"
+      "calendarDetails": "Para sincronizar eventos familiares con Google Calendar. Puedes vincular o desvincular en cualquier momento.",
+      "notifications": "Notificaciones",
+      "notificationsDetails": "Para recordatorios de eventos, logros y celebraciones de rachas. Puedes desactivarlas en cualquier momento."
     },
     "changes": "Cambios en esta Política",
+    "changesDetails": "Podemos actualizar esta política de privacidad ocasionalmente. Te notificaremos sobre cambios significativos mediante un aviso en la aplicación o por correo electrónico. Te recomendamos revisar esta política periódicamente.",
     "contact": {
       "title": "¿Preguntas o Inquietudes?",
       "description": "Si tienes alguna pregunta sobre esta política de privacidad o sobre cómo manejamos tus datos, no dudes en contactarnos:",

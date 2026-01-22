@@ -92,25 +92,28 @@ export default function Navbar({ variant = 'main' }: NavbarProps) {
               <LanguageSelector />
             </Box>
           ) : (
-            <Button
-              component={RouterLink}
-              to="/"
-              startIcon={<ArrowBack />}
-              variant="text"
-              color="primary"
-              size="large"
-              sx={{
-                px: 4,
-                py: 1.5,
-                boxShadow: 'none',
-                '&:hover': {
-                  backgroundColor: 'rgba(154, 158, 206, 0.05)',
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <Button
+                component={RouterLink}
+                to="/"
+                startIcon={<ArrowBack />}
+                variant="text"
+                color="primary"
+                size="large"
+                sx={{
+                  px: 4,
+                  py: 1.5,
                   boxShadow: 'none',
-                },
-              }}
-            >
-              {t('nav.backToHome')}
-            </Button>
+                  '&:hover': {
+                    backgroundColor: 'rgba(154, 158, 206, 0.05)',
+                    boxShadow: 'none',
+                  },
+                }}
+              >
+                {t('nav.backToHome')}
+              </Button>
+              <LanguageSelector />
+            </Box>
           )}
         </Toolbar>
       </AppBar>

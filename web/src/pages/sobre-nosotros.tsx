@@ -1,5 +1,6 @@
 import Navbar from '../components/Navbar';
 import { Container, Typography, Box, Avatar, Paper } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 const integrantes = [
   { nombre: 'André San Lorenzo', img: '' },
@@ -10,6 +11,7 @@ const integrantes = [
 ];
 
 export default function SobreNosotros() {
+  const { t } = useTranslation();
   return (
     <>
       <Navbar variant="legal" />
@@ -17,14 +19,14 @@ export default function SobreNosotros() {
         <Container maxWidth="md">
           <Paper sx={{ p: 4, borderRadius: 3 }}>
             <Typography variant="h3" sx={{ fontWeight: 700, mb: 2, color: 'primary.main', textAlign: 'center' }}>
-              Sobre Nosotros
+              {t('about.title')}
             </Typography>
             <Typography variant="body1" sx={{ mb: 4, color: 'text.secondary', textAlign: 'center' }}>
-              Somos 5 desarrolladores de software e ingenieros en sistemas, egresados de la UTN Regional Resistencia. Buscamos transformar a las familias a través de la tecnología, creando herramientas que fortalezcan los vínculos y generen experiencias significativas entre generaciones.
+              {t('about.description')}
             </Typography>
             <Box sx={{ mt: 6 }}>
               <Typography variant="h5" gutterBottom sx={{ mb: 3, fontWeight: 600, textAlign: 'center' }}>
-                Nuestro equipo
+                {t('about.team')}
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4, justifyContent: 'center' }}>
                 {integrantes.map((integrante, idx) => (

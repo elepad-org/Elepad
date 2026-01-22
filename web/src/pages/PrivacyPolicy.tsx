@@ -4,7 +4,7 @@ import Navbar from '../components/Navbar';
 import { useTranslation } from 'react-i18next';
 
 export default function PrivacyPolicy() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   return (
     <>
       <Navbar variant="legal" />
@@ -16,7 +16,7 @@ export default function PrivacyPolicy() {
             {t('privacy.title')}
           </Typography>
           <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-            {t('privacy.lastUpdated')}: {new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+            {t('privacy.lastUpdated')}: {new Date().toLocaleDateString(i18n.language === 'es' ? 'es-ES' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </Typography>
         </Box>
 
@@ -29,7 +29,7 @@ export default function PrivacyPolicy() {
             </Typography>
           </Box>
           <Typography variant="body1" sx={{ lineHeight: 1.8, color: 'text.secondary' }}>
-            {t('privacy.introduction')}
+            {t('privacy.introductionText')}
           </Typography>
         </Paper>
 
@@ -43,43 +43,27 @@ export default function PrivacyPolicy() {
           </Box>
           
           <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 600 }}>
-            1. {t('privacy.dataCollection.personalInfo')}
+            {t('privacy.dataCollection.personalInfo')}
           </Typography>
-          <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8, color: 'text.secondary' }}>
-            • Nombre y apellidos<br />
-            • Dirección de correo electrónico<br />
-            • Foto de perfil (opcional)<br />
-            • Fecha de nacimiento<br />
-            • Información de autenticación (cuando usas Google OAuth)
+          <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8, color: 'text.secondary' }} dangerouslySetInnerHTML={{ __html: t('privacy.dataCollection.personalInfoDetails') }}>
           </Typography>
 
           <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 600 }}>
-            2. {t('privacy.dataCollection.usageData')}
+            {t('privacy.dataCollection.usageData')}
           </Typography>
-          <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8, color: 'text.secondary' }}>
-            • Progreso y puntuaciones en juegos cognitivos (Memoria, Sudoku, NET, Focus)<br />
-            • Logros y rachas de actividad<br />
-            • Historial de juegos completados<br />
-            • Frecuencia de uso de la aplicación
+          <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8, color: 'text.secondary' }} dangerouslySetInnerHTML={{ __html: t('privacy.dataCollection.usageDataDetails') }}>
           </Typography>
 
           <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 600 }}>
-            3. {t('privacy.dataCollection.userContent')}
+            {t('privacy.dataCollection.userContent')}
           </Typography>
-          <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8, color: 'text.secondary' }}>
-            • Recuerdos y memorias compartidas<br />
-            • Fotos y álbumes familiares<br />
-            • Eventos y actividades del calendario<br />
-            • Notas y descripciones personales
+          <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8, color: 'text.secondary' }} dangerouslySetInnerHTML={{ __html: t('privacy.dataCollection.userContentDetails') }}>
           </Typography>
 
           <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 600 }}>
-            4. {t('privacy.dataCollection.familyData')}
+            {t('privacy.dataCollection.familyData')}
           </Typography>
-          <Typography variant="body1" sx={{ lineHeight: 1.8, color: 'text.secondary' }}>
-            • Información de miembros del grupo familiar (con su consentimiento)<br />
-            • Relaciones familiares<br />
-            • Contenido compartido dentro del grupo
+          <Typography variant="body1" sx={{ lineHeight: 1.8, color: 'text.secondary' }} dangerouslySetInnerHTML={{ __html: t('privacy.dataCollection.familyDataDetails') }}>
           </Typography>
         </Paper>
 
@@ -97,28 +81,28 @@ export default function PrivacyPolicy() {
             {t('privacy.dataStorage.location')}
           </Typography>
           <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8, color: 'primary.main' }}>
-            Tus datos se almacenan de forma segura en servidores de Supabase, que utiliza infraestructura de AWS con certificación SOC 2.
+            {t('privacy.dataStorage.locationDetails')}
           </Typography>
           
           <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 600 }}>
             {t('privacy.dataStorage.encryption')}
           </Typography>
           <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8, color: 'primary.main' }}>
-            Toda la información se transmite mediante HTTPS/TLS y se almacena con encriptación en reposo.
+            {t('privacy.dataStorage.encryptionDetails')}
           </Typography>
           
           <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 600 }}>
             {t('privacy.dataStorage.retention')}
           </Typography>
           <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8, color: 'primary.main' }}>
-            Mantenemos tus datos mientras tu cuenta esté activa. Si no usas la aplicación durante 2 años consecutivos, te contactaremos para confirmar si deseas mantener tu cuenta.
+            {t('privacy.dataStorage.retentionDetails')}
           </Typography>
           
           <Typography variant="h6" sx={{ mt: 3, mb: 1, fontWeight: 600 }}>
             {t('privacy.dataStorage.backup')}
           </Typography>
           <Typography variant="body1" sx={{ lineHeight: 1.8, color: 'primary.main' }}>
-            Realizamos copias de seguridad automáticas que se conservan por 30 días para recuperación ante desastres.
+            {t('privacy.dataStorage.backupDetails')}
           </Typography>
         </Paper>
 
@@ -130,7 +114,7 @@ export default function PrivacyPolicy() {
             {t('privacy.permissions.title')}
           </Typography>
           <Typography variant="body1" sx={{ mb: 2, lineHeight: 1.8, color: 'text.secondary' }}>
-            Elepad solicita los siguientes permisos:
+            {t('privacy.permissions.intro')}
           </Typography>
           <List>
             <ListItem>
@@ -139,7 +123,7 @@ export default function PrivacyPolicy() {
               </ListItemIcon>
               <ListItemText 
                 primary={t('privacy.permissions.camera')}
-                secondary="Para tomar fotos de perfil y añadir imágenes a tus recuerdos. Solo accedemos a las fotos que tú seleccionas."
+                secondary={t('privacy.permissions.cameraDetails')}
                 primaryTypographyProps={{ fontWeight: 600 }}
               />
             </ListItem>
@@ -149,7 +133,7 @@ export default function PrivacyPolicy() {
               </ListItemIcon>
               <ListItemText 
                 primary={t('privacy.permissions.calendar')}
-                secondary="Para sincronizar eventos familiares con Google Calendar. Puedes vincular o desvincular en cualquier momento."
+                secondary={t('privacy.permissions.calendarDetails')}
                 primaryTypographyProps={{ fontWeight: 600 }}
               />
             </ListItem>
@@ -159,7 +143,7 @@ export default function PrivacyPolicy() {
               </ListItemIcon>
               <ListItemText 
                 primary={t('privacy.permissions.notifications')}
-                secondary="Para recordatorios de eventos, logros y celebraciones de rachas. Puedes desactivarlas en cualquier momento."
+                secondary={t('privacy.permissions.notificationsDetails')}
                 primaryTypographyProps={{ fontWeight: 600 }}
               />
             </ListItem>
@@ -172,7 +156,7 @@ export default function PrivacyPolicy() {
             {t('privacy.changes')}
           </Typography>
           <Typography variant="body1" sx={{ lineHeight: 1.8, color: 'text.secondary' }}>
-            Podemos actualizar esta política de privacidad ocasionalmente. Te notificaremos sobre cambios significativos mediante un aviso en la aplicación o por correo electrónico. Te recomendamos revisar esta política periódicamente.
+            {t('privacy.changesDetails')}
           </Typography>
         </Paper>
 
