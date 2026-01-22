@@ -60,17 +60,24 @@ export default function StickerReactionPicker({
   const inventoryData = normalizeData(inventoryResponse.data);
   const isLoading = inventoryResponse.isLoading;
 
-  // Filter only stickers from inventory - using 'type' field from shop_items table
+  // Filter and sort stickers from inventory
   const stickers = Array.isArray(inventoryData)
     ? (
         inventoryData as Array<{
           itemId: string;
           item?: { type: string; assetUrl?: string; title?: string };
+          createdAt?: string;
         }>
-      ).filter((item: any) => {
-        const itemType = item.item?.type || item.type;
-        return itemType === "Sticker" || itemType === "sticker";
-      })
+      )
+        .filter((item: any) => {
+          const itemType = item.item?.type || item.type;
+          return itemType === "Sticker" || itemType === "sticker";
+        })
+        .sort((a: any, b: any) => {
+          const dateA = new Date(a.createdAt || 0).getTime();
+          const dateB = new Date(b.createdAt || 0).getTime();
+          return dateB - dateA; // Descending: newest first
+        })
     : [];
 
   useEffect(() => {
