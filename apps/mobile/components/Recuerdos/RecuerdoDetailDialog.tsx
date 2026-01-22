@@ -36,7 +36,7 @@ interface RecuerdoDetailDialogProps {
   onDismiss: () => void;
   onUpdateRecuerdo: (
     id: string,
-    patch: { title?: string; caption?: string }
+    patch: { title?: string; caption?: string },
   ) => Promise<void>;
   onDeleteRecuerdo: (id: string) => Promise<void>;
   isMutating?: boolean;
@@ -224,6 +224,7 @@ export default function RecuerdoDetailDialog({
       <Text
         style={{
           ...STYLES.heading,
+          color: COLORS.primary,
           textAlign: "left",
           flex: 1,
           paddingRight: 8,
@@ -551,7 +552,9 @@ export default function RecuerdoDetailDialog({
             borderRadius: 16,
           }}
         >
-          <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
+          <Dialog.Title
+            style={{ ...STYLES.heading, color: COLORS.primary, paddingTop: 8 }}
+          >
             Modificar recuerdo
           </Dialog.Title>
           <Dialog.Content>
@@ -604,7 +607,9 @@ export default function RecuerdoDetailDialog({
             borderRadius: 16,
           }}
         >
-          <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
+          <Dialog.Title
+            style={{ ...STYLES.heading, color: COLORS.primary, paddingTop: 8 }}
+          >
             Eliminar recuerdo
           </Dialog.Title>
           <Dialog.Content>
