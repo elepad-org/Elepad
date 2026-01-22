@@ -428,7 +428,14 @@ export default function HomeScreen() {
             {upcomingActivities.length > 0 && (
               <Button
                 mode="text"
-                onPress={() => router.push("/calendar")}
+                onPress={() => {
+                  router.navigate({
+                    pathname: "/(tabs)/home",
+                    params: {
+                      tab: "calendar",
+                    },
+                  });
+                }}
                 labelStyle={styles.sectionLink}
                 compact
               >
@@ -495,7 +502,7 @@ export default function HomeScreen() {
                       <Pressable
                         key={activity.id}
                         onPress={() => {
-                          console.log("🏠 Home: duende Navigating to calendar with activity", {
+                          console.log("🏠 Home: Navigating to calendar with activity", {
                             activityId: activity.id,
                             title: activity.title,
                             startsAt: activity.startsAt,
@@ -585,7 +592,20 @@ export default function HomeScreen() {
           ) : lastAttempt ? (
             <Pressable
               style={styles.gameCard}
-              onPress={() => router.push("/history")}
+              onPress={() => {
+                if (userElepad?.elder) {
+                  // Si es adulto mayor, ir a la pantalla de historial completo
+                  router.push("/history");
+                } else {
+                  // Si es familiar, navegar al tab de estadísticas
+                  router.navigate({
+                    pathname: "/(tabs)/home",
+                    params: {
+                      tab: "juegos",
+                    },
+                  });
+                }
+              }}
             >
               <View style={styles.gameIcon}>
                 <Image
