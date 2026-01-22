@@ -112,11 +112,12 @@ shopApp.openapi(
     try {
         const result = await c.var.shopService.buyItem(userId, itemId);
         return c.json(result, 200);
-    } catch (e: any) {
+    } catch (e: unknown) {
         // If service threw an HTTPException, we could rethrow or handle here.
         // Hono catches HTTPExceptions automatically, so regular errors need mapping.
-        if (e.message === "Insufficient points" || e.message === "You already own this item") {
-             return c.json({ error: e.message }, 400);
+        const errorMessage = e instanceof Error ? e.message : String(e);
+        if (errorMessage === "Insufficient points" || errorMessage === "You already own this item") {
+             return c.json({ error: errorMessage }, 400);
         }
         throw e;
     }
