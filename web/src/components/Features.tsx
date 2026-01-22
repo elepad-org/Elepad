@@ -31,6 +31,7 @@ const features = [
 export default function Features() {
   return (
     <Box
+      id="features"
       sx={{
         py: { xs: 8, md: 12 },
         backgroundColor: 'background.default',

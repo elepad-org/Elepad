@@ -1,5 +1,6 @@
 import { AppBar, Toolbar, Typography, Button, Container, Box } from '@mui/material';
-import { Download } from '@mui/icons-material';
+import { Download, ArrowForward } from '@mui/icons-material';
+import { Link as RouterLink } from 'react-router-dom';
 
 export default function Navbar() {
   return (
@@ -8,7 +9,6 @@ export default function Navbar() {
       elevation={0}
       sx={{
         backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(10px)',
       }}
     >
       <Container maxWidth="lg">
@@ -26,24 +26,34 @@ export default function Navbar() {
 
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             <Button
+              component={RouterLink}
+              to="#features"
+              variant="text"
+              color="primary"
+              size="large"
+              endIcon={<ArrowForward />}
               sx={{
-                color: 'text.primary',
-                fontWeight: 500,
-                display: { xs: 'none', md: 'inline-flex' },
+                px: 4,
+                py: 1.5,
                 '&:hover': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                  backgroundColor: 'rgba(154, 158, 206, 0.05)',
                 },
               }}
             >
               Características
             </Button>
             <Button
+              component={RouterLink}
+              to="/sobre-nosotros"
+              variant="text"
+              color="primary"
+              size="large"
+              endIcon={<ArrowForward />}
               sx={{
-                color: 'text.primary',
-                fontWeight: 500,
-                display: { xs: 'none', md: 'inline-flex' },
+                px: 4,
+                py: 1.5,
                 '&:hover': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                  backgroundColor: 'rgba(154, 158, 206, 0.05)',
                 },
               }}
             >

@@ -9,7 +9,6 @@ export default function LegalNavbar() {
       elevation={0}
       sx={{
         backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(10px)',
       }}
     >
       <Container maxWidth="lg">
@@ -29,11 +28,14 @@ export default function LegalNavbar() {
             component={RouterLink}
             to="/"
             startIcon={<ArrowBack />}
+            variant="text"
+            color="primary"
+            size="large"
             sx={{
-              color: 'text.primary',
-              fontWeight: 500,
+              px: 4,
+              py: 1.5,
               '&:hover': {
-                backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                backgroundColor: 'rgba(154, 158, 206, 0.05)',
               },
             }}
           >
