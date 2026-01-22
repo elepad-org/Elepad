@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   },
   row: {
     justifyContent: "space-between",
-    paddingHorizontal: 4,
+    paddingHorizontal: 16,
   },
   columnItem: {
     width: "48%",
