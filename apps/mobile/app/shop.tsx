@@ -222,6 +222,7 @@ export default function ShopScreen() {
             styles.shopCard,
             owned && styles.ownedCard,
             pressed && styles.pressedCard,
+            pressed && { opacity: 0.9 },
           ]}
           onPress={() => {
             if (owned) {
@@ -348,9 +349,10 @@ export default function ShopScreen() {
             renderItem={({ item }) => (
               <Pressable
                 onPress={() => setActiveFilter(item)}
-                style={[
+                style={({ pressed }) => [
                   styles.filterChip,
                   activeFilter === item && styles.filterChipActive,
+                  pressed && { opacity: 0.7 },
                 ]}
               >
                 <Text
@@ -476,7 +478,7 @@ export default function ShopScreen() {
                         loading={isEquipping}
                         disabled={isEquipping || isEquipped(selectedItem.id)}
                         style={styles.modalConfirmBtn}
-                        buttonColor={COLORS.secondary} // Use a different color for equipping
+                        buttonColor={COLORS.primary} // Use primary color for equipping as requested
                         labelStyle={{
                           fontFamily: FONT.bold,
                           fontSize: 16,

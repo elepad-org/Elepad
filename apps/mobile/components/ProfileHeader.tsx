@@ -51,20 +51,24 @@ export const ProfileHeader = ({
           )}
         </View>
 
-        {/* Frame Overlay */}
         {frameUrl && (
-          <Image
-            source={{ uri: frameUrl }}
+          <View
+            pointerEvents="none"
             style={{
               position: "absolute",
-              width: size * 1.4, // Frames are usually slightly larger than the avatar
+              width: size * 1.4,
               height: size * 1.4,
               top: -size * 0.2,
               left: -size * 0.2,
               zIndex: 10,
             }}
-            resizeMode="contain"
-          />
+          >
+            <Image
+              source={{ uri: frameUrl }}
+              style={{ width: "100%", height: "100%" }}
+              resizeMode="contain"
+            />
+          </View>
         )}
 
         {onEditPhoto ? (
@@ -74,7 +78,7 @@ export const ProfileHeader = ({
             onPress={onEditPhoto}
             iconColor="#fff"
             containerColor={COLORS.primary}
-            style={styles.avatarBadge}
+            style={[styles.avatarBadge, { zIndex: 20 }]}
           />
         ) : null}
       </View>

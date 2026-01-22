@@ -671,8 +671,8 @@ export default function FamilyGroup() {
                               </View>
                             )}
                             {o.activeFrameUrl && (
-                              <Image
-                                source={{ uri: o.activeFrameUrl }}
+                              <View
+                                pointerEvents="none"
                                 style={{
                                   position: "absolute",
                                   width: 47 * 1.4,
@@ -681,8 +681,13 @@ export default function FamilyGroup() {
                                   left: -47 * 0.2,
                                   zIndex: 10,
                                 }}
-                                resizeMode="contain"
-                              />
+                              >
+                                <Image
+                                  source={{ uri: o.activeFrameUrl }}
+                                  style={{ width: "100%", height: "100%" }}
+                                  resizeMode="contain"
+                                />
+                              </View>
                             )}
                           </View>
                           <View style={{ marginLeft: 12 }}>
@@ -767,8 +772,8 @@ export default function FamilyGroup() {
                               </View>
                             )}
                             {m.activeFrameUrl && (
-                              <Image
-                                source={{ uri: m.activeFrameUrl }}
+                              <View
+                                pointerEvents="none"
                                 style={{
                                   position: "absolute",
                                   width: 47 * 1.4,
@@ -777,8 +782,13 @@ export default function FamilyGroup() {
                                   left: -47 * 0.2,
                                   zIndex: 10,
                                 }}
-                                resizeMode="contain"
-                              />
+                              >
+                                <Image
+                                  source={{ uri: m.activeFrameUrl }}
+                                  style={{ width: "100%", height: "100%" }}
+                                  resizeMode="contain"
+                                />
+                              </View>
                             )}
                           </View>
                           <View style={{ marginLeft: 12 }}>
