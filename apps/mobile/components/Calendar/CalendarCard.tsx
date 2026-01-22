@@ -30,7 +30,7 @@ function expandRecurringActivity(
   activity: Activity,
   startDate: Date,
   endDate: Date,
-  frequencies: Record<string, { label: string; rrule: string | null }>
+  frequencies: Record<string, { label: string; rrule: string | null }>,
 ): string[] {
   // Si no tiene frecuencia, solo retorna el día de inicio
   if (!activity.frequencyId || !frequencies[activity.frequencyId]) {
@@ -213,7 +213,10 @@ export default function CalendarCard(props: CalendarCardProps) {
   // Cambiar al día de la actividad cuando se recibe desde notificaciones
   useEffect(() => {
     if (activityDateToView) {
-      console.log("📅 CalendarCard: Changing selected day to", activityDateToView);
+      console.log(
+        "📅 CalendarCard: Changing selected day to",
+        activityDateToView,
+      );
       setSelectedDay(activityDateToView);
     }
   }, [activityDateToView]);
@@ -226,6 +229,7 @@ export default function CalendarCard(props: CalendarCardProps) {
         id: member.id,
         displayName: member.displayName || "Usuario",
         avatarUrl: member.avatarUrl || null,
+        activeFrameUrl: member.activeFrameUrl || null,
       })) || []
     );
   }, [groupInfo]);
@@ -270,7 +274,7 @@ export default function CalendarCard(props: CalendarCardProps) {
   // Cargar historial de rachas - Solo si el usuario es elder
   const streakHistoryQuery = useStreakHistory(
     userElepad?.elder ? dateRange.startDate : undefined,
-    userElepad?.elder ? dateRange.endDate : undefined
+    userElepad?.elder ? dateRange.endDate : undefined,
   );
 
   // Mutation para toggle de completaciones
@@ -336,7 +340,7 @@ export default function CalendarCard(props: CalendarCardProps) {
         ev,
         startRange,
         endRange,
-        frequenciesMap
+        frequenciesMap,
       );
 
       // Agregar la actividad a cada fecha expandida
@@ -564,6 +568,7 @@ export default function CalendarCard(props: CalendarCardProps) {
                   key: elder.id,
                   label: elder.displayName,
                   avatarUrl: elder.avatarUrl || null,
+                  frameUrl: elder.activeFrameUrl || null,
                 })),
               ]}
               onSelect={(value) => {

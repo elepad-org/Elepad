@@ -140,6 +140,19 @@ export interface Memory {
   createdAt: string;
 }
 
+export interface Reaction {
+  id: string;
+  memoryId: string;
+  userId: string;
+  stickerId: string;
+  stickerUrl: string | null;
+  createdAt: string;
+}
+
+export type MemoryWithReactions = Memory & {
+  reactions?: Reaction[];
+};
+
 export interface MemoriesBook {
   id: string;
   groupId: string;
@@ -566,6 +579,15 @@ export interface UserBalance {
   pointsBalance: number;
 }
 
+export interface EquipItemResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface EquipItemRequest {
+  itemId: string;
+}
+
 export type PatchUsersIdAvatarBody = {
   avatarFile?: Blob;
 };
@@ -576,6 +598,7 @@ export type GetFamilyGroupIdGroupMembers200Owner = {
   /** @nullable */
   avatarUrl: string | null;
   elder: boolean;
+  activeFrameUrl: string | null;
 };
 
 export type GetFamilyGroupIdGroupMembers200MembersItem = {
@@ -584,6 +607,7 @@ export type GetFamilyGroupIdGroupMembers200MembersItem = {
   /** @nullable */
   avatarUrl: string | null;
   elder: boolean;
+  activeFrameUrl: string | null;
 };
 
 export type GetFamilyGroupIdGroupMembers200 = {
@@ -659,7 +683,7 @@ export type GetMemoriesParams = {
 };
 
 export type GetMemories200 = {
-  data: Memory[];
+  data: MemoryWithReactions[];
   total: number;
   limit: number;
   offset: number;
@@ -680,6 +704,10 @@ export type CreateMemoryWithMediaBody = {
   caption?: string;
   /** Media file to upload (image, video, or audio) */
   image: Blob;
+};
+
+export type AddReactionBody = {
+  stickerId: string;
 };
 
 export type PostAlbumTranscribeBody = {
@@ -4484,7 +4512,7 @@ export const useDeleteMemoriesBook = <TError = Error, TContext = unknown>(
 };
 
 export type getMemoriesIdResponse200 = {
-  data: Memory;
+  data: MemoryWithReactions;
   status: 200;
 };
 
@@ -5174,6 +5202,128 @@ export const useCreateNote = <TError = Error, TContext = unknown>(
   const mutationOptions = getCreateNoteMutationOptions(options);
 
   return useMutation(mutationOptions, queryClient);
+};
+
+export type addReactionResponse200 = {
+  data: void;
+  status: 200;
+};
+
+export type addReactionResponse400 = {
+  data: Error;
+  status: 400;
+};
+
+export type addReactionResponse401 = {
+  data: Error;
+  status: 401;
+};
+
+export type addReactionResponse404 = {
+  data: Error;
+  status: 404;
+};
+
+export type addReactionResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type addReactionResponseSuccess = addReactionResponse200 & {
+  headers: Headers;
+};
+export type addReactionResponseError = (
+  | addReactionResponse400
+  | addReactionResponse401
+  | addReactionResponse404
+  | addReactionResponse500
+) & {
+  headers: Headers;
+};
+
+export type addReactionResponse =
+  | addReactionResponseSuccess
+  | addReactionResponseError;
+
+export const getAddReactionUrl = (id: string) => {
+  return `/memories/${id}/reaction`;
+};
+
+export const addReaction = async (
+  id: string,
+  addReactionBody: AddReactionBody,
+  options?: RequestInit,
+): Promise<addReactionResponse> => {
+  return rnFetch<addReactionResponse>(getAddReactionUrl(id), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(addReactionBody),
+  });
+};
+
+export const getAddReactionMutationOptions = <
+  TError = Error,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof addReaction>>,
+    TError,
+    { id: string; data: AddReactionBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof addReaction>>,
+  TError,
+  { id: string; data: AddReactionBody },
+  TContext
+> => {
+  const mutationKey = ["addReaction"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof addReaction>>,
+    { id: string; data: AddReactionBody }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return addReaction(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AddReactionMutationResult = NonNullable<
+  Awaited<ReturnType<typeof addReaction>>
+>;
+export type AddReactionMutationBody = AddReactionBody;
+export type AddReactionMutationError = Error;
+
+export const useAddReaction = <TError = Error, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof addReaction>>,
+      TError,
+      { id: string; data: AddReactionBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof addReaction>>,
+  TError,
+  { id: string; data: AddReactionBody },
+  TContext
+> => {
+  return useMutation(getAddReactionMutationOptions(options), queryClient);
 };
 
 export type postAlbumTranscribeResponse200 = {
@@ -11007,3 +11157,124 @@ export function useGetShopBalance<
 
   return query;
 }
+
+/**
+ * @summary Equip an item (e.g. Frame)
+ */
+export type postShopEquipResponse200 = {
+  data: EquipItemResponse;
+  status: 200;
+};
+
+export type postShopEquipResponse400 = {
+  data: Error;
+  status: 400;
+};
+
+export type postShopEquipResponse404 = {
+  data: Error;
+  status: 404;
+};
+
+export type postShopEquipResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type postShopEquipResponseSuccess = postShopEquipResponse200 & {
+  headers: Headers;
+};
+export type postShopEquipResponseError = (
+  | postShopEquipResponse400
+  | postShopEquipResponse404
+  | postShopEquipResponse500
+) & {
+  headers: Headers;
+};
+
+export type postShopEquipResponse =
+  | postShopEquipResponseSuccess
+  | postShopEquipResponseError;
+
+export const getPostShopEquipUrl = () => {
+  return `/shop/equip`;
+};
+
+export const postShopEquip = async (
+  equipItemRequest: EquipItemRequest,
+  options?: RequestInit,
+): Promise<postShopEquipResponse> => {
+  return rnFetch<postShopEquipResponse>(getPostShopEquipUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(equipItemRequest),
+  });
+};
+
+export const getPostShopEquipMutationOptions = <
+  TError = Error,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postShopEquip>>,
+    TError,
+    { data: EquipItemRequest },
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postShopEquip>>,
+  TError,
+  { data: EquipItemRequest },
+  TContext
+> => {
+  const mutationKey = ["postShopEquip"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postShopEquip>>,
+    { data: EquipItemRequest }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postShopEquip(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostShopEquipMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postShopEquip>>
+>;
+export type PostShopEquipMutationBody = EquipItemRequest;
+export type PostShopEquipMutationError = Error;
+
+/**
+ * @summary Equip an item (e.g. Frame)
+ */
+export const usePostShopEquip = <TError = Error, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postShopEquip>>,
+      TError,
+      { data: EquipItemRequest },
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postShopEquip>>,
+  TError,
+  { data: EquipItemRequest },
+  TContext
+> => {
+  return useMutation(getPostShopEquipMutationOptions(options), queryClient);
+};

@@ -119,3 +119,33 @@ export const CreateNoteSchema = z
   .openapi("CreateNote");
 
 export type CreateNote = z.infer<typeof CreateNoteSchema>;
+
+// Schema para Reaction
+export const ReactionSchema = z
+  .object({
+    id: z.string().uuid(),
+    memoryId: z.string().uuid(),
+    userId: z.string().uuid(),
+    stickerId: z.string().uuid(),
+    stickerUrl: z.string().nullable(),
+    createdAt: z.string().datetime(),
+  })
+  .openapi("Reaction");
+
+export type Reaction = z.infer<typeof ReactionSchema>;
+
+// Update MemorySchema to include reactions
+export const MemorySchemaWithReactions = MemorySchema.extend({
+  reactions: z.array(ReactionSchema).optional(), // Optional for backward compatibility or list views if query is heavy
+}).openapi("MemoryWithReactions");
+
+export type MemoryWithReactions = z.infer<typeof MemorySchemaWithReactions>;
+
+// Schema to add a reaction
+export const AddReactionSchema = z
+  .object({
+    stickerId: z.string().uuid(),
+  })
+  .openapi("AddReaction");
+
+export type AddReaction = z.infer<typeof AddReactionSchema>;
