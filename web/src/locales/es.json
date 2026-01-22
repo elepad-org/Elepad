@@ -1,0 +1,15 @@
+{
+  "nav": {
+    "features": "Características",
+    "about": "Sobre Nosotros",
+    "download": "Descargar",
+    "backToHome": "Volver al Inicio"
+  },
+  "hero": {
+    "title": "Bienvenido a Elepad",
+    "subtitle": "Tu compañero para el bienestar cognitivo familiar"
+  },
+  "common": {
+    "language": "Idioma"
+  }
+}

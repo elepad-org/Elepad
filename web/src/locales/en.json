@@ -1,0 +1,15 @@
+{
+  "nav": {
+    "features": "Features",
+    "about": "About Us",
+    "download": "Download",
+    "backToHome": "Back to Home"
+  },
+  "hero": {
+    "title": "Welcome to Elepad",
+    "subtitle": "Your companion for family cognitive wellness"
+  },
+  "common": {
+    "language": "Language"
+  }
+}

@@ -1,12 +1,15 @@
 import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
 import { Download, ArrowBack } from '@mui/icons-material';
 import { Link as RouterLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import LanguageSelector from './LanguageSelector';
 
 interface NavbarProps {
   variant?: 'main' | 'legal';
 }
 
 export default function Navbar({ variant = 'main' }: NavbarProps) {
+  const { t } = useTranslation();
   const handleScrollToFeatures = () => {
     const element = document.getElementById('features');
     if (element) {
@@ -54,7 +57,7 @@ export default function Navbar({ variant = 'main' }: NavbarProps) {
                   },
                 }}
               >
-                Características
+                {t('nav.features')}
               </Button>
               <Button
                 component={RouterLink}
@@ -73,8 +76,9 @@ export default function Navbar({ variant = 'main' }: NavbarProps) {
                   },
                 }}
               >
-                Sobre Nosotros
+                {t('nav.about')}
               </Button>
+              <LanguageSelector />
               <Button
                 variant="contained"
                 color="primary"
@@ -84,7 +88,7 @@ export default function Navbar({ variant = 'main' }: NavbarProps) {
                   px: 3,
                 }}
               >
-                Descargar
+                {t('nav.download')}
               </Button>
             </Box>
           ) : (
@@ -105,7 +109,7 @@ export default function Navbar({ variant = 'main' }: NavbarProps) {
                 },
               }}
             >
-              Volver al Inicio
+              {t('nav.backToHome')}
             </Button>
           )}
         </Toolbar>
