@@ -98,8 +98,9 @@ export default function ShopScreen() {
   const categories = React.useMemo(() => {
     const types = new Set<string>();
     types.add("Todos");
-    itemsData.forEach((item: any) => {
-      if (item.type) types.add(item.type);
+    itemsData.forEach((item) => {
+      const typedItem = item as { type?: string };
+      if (typedItem.type) types.add(typedItem.type);
     });
     return Array.from(types);
   }, [itemsData]);
@@ -134,9 +135,10 @@ export default function ShopScreen() {
         refetchBalance(); // Update points
         refetchInventory(); // Update inventory
       },
-      onError: (error: any) => {
+      onError: (error: Error) => {
         const message =
-          error?.response?.data?.error || "No se pudo realizar la compra.";
+          (error as { response?: { data?: { error?: string } } })?.response
+            ?.data?.error || "No se pudo realizar la compra.";
         Alert.alert("Error", message);
       },
     },
@@ -158,7 +160,19 @@ export default function ShopScreen() {
     buyItem({ data: { itemId: selectedItem.id } });
   };
 
-  const renderItem = ({ item, index }: { item: any; index: number }) => {
+  const renderItem = ({
+    item,
+    index,
+  }: {
+    item: {
+      id: string;
+      type?: string;
+      title: string;
+      cost: number;
+      assetUrl?: string;
+    };
+    index: number;
+  }) => {
     const owned = isOwned(item.id);
 
     return (

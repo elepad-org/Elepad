@@ -10,7 +10,6 @@ import {
   UpdateMemory,
   UpdateMemoriesBook,
   MemoryWithReactions,
-  Reaction,
 } from "./schema";
 import { Database } from "@/supabase-types";
 import {
@@ -89,9 +88,13 @@ export class MemoriesService {
     }
 
     // Map reactions to schema
-    return (data || []).map((memory: any) => ({
+    return (data || []).map((memory: Database["public"]["Tables"]["memories"]["Row"] & { 
+      reactions: Array<Database["public"]["Tables"]["memory_reactions"]["Row"] & { 
+        sticker: { asset_url: string | null } | null 
+      }> 
+    }) => ({
       ...memory,
-      reactions: memory.reactions.map((r: any) => ({
+      reactions: (memory.reactions || []).map((r) => ({
         id: r.id,
         memoryId: r.memory_id,
         userId: r.user_id,
@@ -99,7 +102,7 @@ export class MemoriesService {
         stickerUrl: r.sticker?.asset_url || null,
         createdAt: r.created_at,
       })),
-    }));
+    })) as MemoryWithReactions[];
   }
 
   /**
@@ -131,9 +134,15 @@ export class MemoriesService {
       throw new ApiException(500, "Error fetching memory");
     }
 
+    const memoryData = data as Database["public"]["Tables"]["memories"]["Row"] & { 
+      reactions: Array<Database["public"]["Tables"]["memory_reactions"]["Row"] & { 
+        sticker: { asset_url: string | null } | null 
+      }> 
+    };
+
     return {
-      ...data,
-      reactions: (data.reactions || []).map((r: any) => ({
+      ...memoryData,
+      reactions: (memoryData.reactions || []).map((r) => ({
         id: r.id,
         memoryId: r.memory_id,
         userId: r.user_id,

@@ -102,12 +102,19 @@ const memoryToRecuerdo = (
     autorId: memory.createdBy,
     autorNombre: memberNameById[memory.createdBy] || undefined,
     fecha: new Date(memory.createdAt),
-    reactions: (memory.reactions || []).map((r: any) => ({
-      id: r.id,
-      userId: r.userId,
-      stickerId: r.stickerId,
-      stickerUrl: r.stickerUrl,
-    })),
+    reactions: (memory.reactions || []).map(
+      (r: {
+        id: string;
+        userId: string;
+        stickerId: string;
+        stickerUrl: string | null;
+      }) => ({
+        id: r.id,
+        userId: r.userId,
+        stickerId: r.stickerId,
+        stickerUrl: r.stickerUrl,
+      }),
+    ),
   };
 };
 

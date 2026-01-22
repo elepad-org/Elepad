@@ -29,6 +29,17 @@ const EXPANDED_HEIGHT = 44;
 const POP_SOUND_URL =
   "https://codeskulptor-demos.commondatastorage.googleapis.com/pang/pop.mp3";
 
+interface InventoryItem {
+  id: string;
+  itemId: string;
+  createdAt?: string;
+  item?: {
+    type: string;
+    assetUrl?: string;
+    title?: string;
+  };
+}
+
 export default function StickerReactionPicker({
   onReact,
   disabled = false,
@@ -62,18 +73,13 @@ export default function StickerReactionPicker({
 
   // Filter and sort stickers from inventory
   const stickers = Array.isArray(inventoryData)
-    ? (
-        inventoryData as Array<{
-          itemId: string;
-          item?: { type: string; assetUrl?: string; title?: string };
-          createdAt?: string;
-        }>
-      )
-        .filter((item: any) => {
-          const itemType = item.item?.type || item.type;
+    ? (inventoryData as InventoryItem[])
+        .filter((item) => {
+          const typedItem = item as { item?: { type: string }; type?: string };
+          const itemType = typedItem.item?.type || typedItem.type;
           return itemType === "Sticker" || itemType === "sticker";
         })
-        .sort((a: any, b: any) => {
+        .sort((a, b) => {
           const dateA = new Date(a.createdAt || 0).getTime();
           const dateB = new Date(b.createdAt || 0).getTime();
           return dateB - dateA; // Descending: newest first
@@ -164,15 +170,17 @@ export default function StickerReactionPicker({
             contentContainerStyle={styles.stickerList}
             style={styles.scrollView}
           >
-            {stickers.map((inventoryItem: Record<string, any>) => (
+            {stickers.map((inventoryItem: InventoryItem) => (
               <Pressable
                 key={inventoryItem.id}
-                onPress={() =>
-                  handleStickerPress(
-                    inventoryItem.itemId,
-                    inventoryItem.item?.assetUrl || "",
-                  )
-                }
+                onPress={() => {
+                  if (inventoryItem.item?.assetUrl) {
+                    handleStickerPress(
+                      inventoryItem.itemId,
+                      inventoryItem.item.assetUrl,
+                    );
+                  }
+                }}
                 style={({ pressed }) => [
                   styles.stickerButton,
                   pressed && styles.stickerPressed,
