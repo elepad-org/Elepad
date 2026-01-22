@@ -492,35 +492,49 @@ export default function HomeScreen() {
                     if (isTomorrow) dateLabel = "Mañana";
 
                     return (
-                      <Animated.View
+                      <Pressable
                         key={activity.id}
-                        entering={ZoomIn.duration(200).delay(index * 50)}
-                        style={styles.eventItem}
+                        onPress={() => {
+                          // Navegar al tab de calendario y abrir el detalle del evento
+                          router.navigate({
+                            pathname: "/(tabs)/home",
+                            params: {
+                              tab: "calendar",
+                              activityId: activity.id,
+                            },
+                          });
+                        }}
+                        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
                       >
-                        <View style={styles.eventTime}>
-                          <Text style={styles.eventDate}>{dateLabel}</Text>
-                          <Text style={styles.eventHour}>
-                            {activityDate.toLocaleTimeString("es", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </Text>
-                        </View>
-                        <View style={styles.eventDivider} />
-                        <View style={styles.eventContent}>
-                          <Text style={styles.eventTitle} numberOfLines={1}>
-                            {activity.title}
-                          </Text>
-                          {activity.description && (
-                            <HighlightedMentionText
-                              text={activity.description}
-                              groupMembers={groupMembers}
-                              style={styles.eventDesc}
-                              numberOfLines={1}
-                            />
-                          )}
-                        </View>
-                      </Animated.View>
+                        <Animated.View
+                          entering={ZoomIn.duration(200).delay(index * 50)}
+                          style={styles.eventItem}
+                        >
+                          <View style={styles.eventTime}>
+                            <Text style={styles.eventDate}>{dateLabel}</Text>
+                            <Text style={styles.eventHour}>
+                              {activityDate.toLocaleTimeString("es", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </Text>
+                          </View>
+                          <View style={styles.eventDivider} />
+                          <View style={styles.eventContent}>
+                            <Text style={styles.eventTitle} numberOfLines={1}>
+                              {activity.title}
+                            </Text>
+                            {activity.description && (
+                              <HighlightedMentionText
+                                text={activity.description}
+                                groupMembers={groupMembers}
+                                style={styles.eventDesc}
+                                numberOfLines={1}
+                              />
+                            )}
+                          </View>
+                        </Animated.View>
+                      </Pressable>
                     );
                   },
                 )}

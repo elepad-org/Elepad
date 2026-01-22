@@ -28,7 +28,7 @@ export default function BottomTabBar({
   const insets = useSafeAreaInsets();
   
   // Calculate bottom position: base padding + safe area inset for navigation buttons
-  const bottomPosition = 24 + insets.bottom;
+  const bottomPosition =  insets.bottom;
   
   return (
     <View
