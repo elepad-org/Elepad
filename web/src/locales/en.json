@@ -6,8 +6,47 @@
     "backToHome": "Back to Home"
   },
   "hero": {
-    "title": "Welcome to Elepad",
-    "subtitle": "Your companion for family cognitive wellness"
+    "title": "Welcome to",
+    "elepad": "Elepad",
+    "subtitle": "The platform that connects generations through cognitive games, shared memories and special moments."
+  },
+  "features": {
+    "title": "Everything you need in",
+    "highlight": "one place",
+    "description": "Elepad combines entertainment, cognitive health and family connection in a unique experience.",
+    "cognitiveGames": {
+      "title": "Cognitive Games",
+      "description": "Exercise your mind with games specifically designed to stimulate memory and thinking."
+    },
+    "achievementsStreaks": {
+      "title": "Achievements and Streaks",
+      "description": "Keep your motivation with an achievement and streak system that rewards your consistency."
+    },
+    "familyConnection": {
+      "title": "Family Connection",
+      "description": "Share special moments with your loved ones and strengthen family bonds."
+    },
+    "memoriesEvents": {
+      "title": "Memories and Events",
+      "description": "Save your most precious memories and plan important family events."
+    }
+  },
+  "cta": {
+    "title": "Start your journey today",
+    "description": "Download Elepad for free and discover a new way to keep your mind active while sharing unique moments with your family.",
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
+  },
+  "footer": {
+    "links": "Links",
+    "about": "About Us",
+    "contact": "Contact",
+    "privacy": "Privacy Policy",
+    "legal": "Legal",
+    "deleteAccount": "Delete Account",
+    "terms": "Terms of Service",
+    "help": "Help",
+    "copyright": "© {year} All rights reserved."
   },
   "privacy": {
     "title": "Privacy Policy",
@@ -35,7 +74,7 @@
     },
     "changes": "Changes to this Policy",
     "contact": {
-      "title": "Questions or Concerns?",
+      "title": "¿Questions or Concerns?",
       "description": "If you have any questions about this privacy policy or how we handle your data, please don't hesitate to contact us:",
       "button": "Send Inquiry"
     }

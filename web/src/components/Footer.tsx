@@ -1,7 +1,9 @@
 import { Box, Typography, Link, Stack } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function Footer() {
+  const { t } = useTranslation();
   return (
     <Box
       sx={{
@@ -26,7 +28,7 @@ export default function Footer() {
 
           <Stack spacing={2} sx={{ alignItems: { xs: 'center', md: 'flex-start' } }}>
             <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem' }}>
-              Enlaces
+              {t('footer.links')}
             </Typography>
             <Link
               component={RouterLink}
@@ -34,7 +36,7 @@ export default function Footer() {
               underline="hover"
               sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
             >
-              Sobre Nosotros
+              {t('footer.about')}
             </Link>
             <Link
               component={RouterLink}
@@ -42,7 +44,7 @@ export default function Footer() {
               underline="hover"
               sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
             >
-              Contacto
+              {t('footer.contact')}
             </Link>
             <Link
               component={RouterLink}
@@ -50,13 +52,13 @@ export default function Footer() {
               underline="hover"
               sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
             >
-              Política de Privacidad
+              {t('footer.privacy')}
             </Link>
           </Stack>
 
           <Stack spacing={2} sx={{ alignItems: { xs: 'center', md: 'flex-start' } }}>
             <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem' }}>
-              Legal
+              {t('footer.legal')}
             </Typography>
             <Link
               component={RouterLink}
@@ -64,7 +66,7 @@ export default function Footer() {
               underline="hover"
               sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
             >
-              Eliminar Cuenta
+              {t('footer.deleteAccount')}
             </Link>
             <Link
               component={RouterLink}
@@ -72,7 +74,7 @@ export default function Footer() {
               underline="hover"
               sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
             >
-              Términos de Servicio
+              {t('footer.terms')}
             </Link>
             <Link
               component={RouterLink}
@@ -80,7 +82,7 @@ export default function Footer() {
               underline="hover"
               sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
             >
-              Ayuda
+              {t('footer.help')}
             </Link>
           </Stack>
         </Stack>
@@ -95,7 +97,7 @@ export default function Footer() {
           }}
         >
           <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>
-                © {new Date().getFullYear()} Todos los derechos reservados.
+            {t('footer.copyright', { year: 2026 })}
           </Typography>
         </Box>
     </Box>

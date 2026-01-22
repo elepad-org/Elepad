@@ -6,8 +6,47 @@
     "backToHome": "Volver al Inicio"
   },
   "hero": {
-    "title": "Bienvenido a Elepad",
-    "subtitle": "Tu compañero para el bienestar cognitivo familiar"
+    "title": "Bienvenido a",
+    "elepad": "Elepad",
+    "subtitle": "La plataforma que conecta generaciones a través de juegos cognitivos, recuerdos compartidos y momentos especiales."
+  },
+  "features": {
+    "title": "Todo lo que necesitas en",
+    "highlight": "un solo lugar",
+    "description": "Elepad combina entretenimiento, salud cognitiva y conexión familiar en una experiencia única.",
+    "cognitiveGames": {
+      "title": "Juegos Cognitivos",
+      "description": "Ejercita la mente con juegos diseñados específicamente para estimular la memoria y el pensamiento."
+    },
+    "achievementsStreaks": {
+      "title": "Logros y Rachas",
+      "description": "Mantén tu motivación con un sistema de logros y rachas que premia tu constancia."
+    },
+    "familyConnection": {
+      "title": "Conexión Familiar",
+      "description": "Comparte momentos especiales con tus seres queridos y fortalece los lazos familiares."
+    },
+    "memoriesEvents": {
+      "title": "Recuerdos y Eventos",
+      "description": "Guarda tus memorias más preciadas y planifica eventos familiares importantes."
+    }
+  },
+  "cta": {
+    "title": "Comienza tu viaje hoy",
+    "description": "Descarga Elepad gratis y descubre una nueva forma de mantener tu mente activa mientras compartes momentos únicos con tu familia.",
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
+  },
+  "footer": {
+    "links": "Enlaces",
+    "about": "Sobre Nosotros",
+    "contact": "Contacto",
+    "privacy": "Política de Privacidad",
+    "legal": "Legal",
+    "deleteAccount": "Eliminar Cuenta",
+    "terms": "Términos de Servicio",
+    "help": "Ayuda",
+    "copyright": "© {year} Todos los derechos reservados."
   },
   "privacy": {
     "title": "Política de Privacidad",
