@@ -1,4 +1,4 @@
-import { Box, Container, Typography, Link, Stack } from '@mui/material';
+import { Box, Typography, Link, Stack } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 
 export default function Footer() {
@@ -9,22 +9,20 @@ export default function Footer() {
         py: 6,
         borderTop: '1px solid',
         borderColor: 'divider',
+        px: 4,
       }}
     >
-      <Container maxWidth="lg">
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          spacing={4}
-          sx={{
-            justifyContent: 'space-between',
-            alignItems: { xs: 'center', md: 'flex-start' },
-            textAlign: { xs: 'center', md: 'left' },
-          }}
-        >
-          <Box>
-              {/* Tagline removed as requested */}
-          </Box>
-              {/* Logo or brand area removed for a cleaner look */}
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        spacing={20}
+        sx={{
+          justifyContent: 'center',
+          alignItems: { xs: 'center', md: 'flex-start' },
+          textAlign: { xs: 'center', md: 'left' },
+          maxWidth: '1200px',
+          mx: 'auto',
+        }}
+      >
 
           <Stack spacing={2} sx={{ alignItems: { xs: 'center', md: 'flex-start' } }}>
             <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem' }}>
@@ -100,7 +98,6 @@ export default function Footer() {
                 © {new Date().getFullYear()} Todos los derechos reservados.
           </Typography>
         </Box>
-      </Container>
     </Box>
   );
 }
