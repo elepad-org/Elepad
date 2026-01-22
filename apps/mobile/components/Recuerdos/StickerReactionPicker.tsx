@@ -14,27 +14,37 @@ import { COLORS, SHADOWS } from "@/styles/base";
 import { useGetShopInventory } from "@elepad/api-client";
 import { useRouter } from "expo-router";
 
+import { useAudioPlayer } from "expo-audio";
+
 interface StickerReactionPickerProps {
-  onReact: (stickerId: string) => void;
+  onReact: (stickerId: string, stickerUrl: string) => void;
   disabled?: boolean;
+  onOpenShop?: () => void;
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const BUTTON_SIZE = 44;
 const STICKER_SIZE = 40;
 const EXPANDED_HEIGHT = 44;
+const POP_SOUND_URL =
+  "https://codeskulptor-demos.commondatastorage.googleapis.com/pang/pop.mp3";
 
 export default function StickerReactionPicker({
   onReact,
   disabled = false,
+  onOpenShop,
 }: StickerReactionPickerProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const expandAnim = useRef(new Animated.Value(0)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const router = useRouter();
 
+  const soundPlayer = useAudioPlayer(POP_SOUND_URL);
+
   // Normalize data helper
-  const normalizeData = (data: unknown): any => {
+  const normalizeData = (
+    data: unknown,
+  ): (Record<string, any> | any[]) | undefined => {
     if (!data) return undefined;
     if (Array.isArray(data)) return data;
     if (typeof data === "object" && data !== null && "data" in data) {
@@ -50,21 +60,11 @@ export default function StickerReactionPicker({
 
   // Filter only stickers from inventory - using 'type' field from shop_items table
   const stickers = Array.isArray(inventoryData)
-    ? inventoryData.filter((item: any) => {
+    ? (inventoryData as any[]).filter((item: any) => {
         const itemType = item.item?.type || item.type;
-        console.log("Item type:", itemType, "Full item:", item);
         return itemType === "Sticker" || itemType === "sticker";
       })
     : [];
-
-  // Debug logs
-  console.log("=== StickerReactionPicker Debug ===");
-  console.log("isLoading:", isLoading);
-  console.log("inventoryData:", inventoryData);
-  console.log("stickers found:", stickers.length);
-  if (stickers.length > 0) {
-    console.log("First sticker:", stickers[0]);
-  }
 
   useEffect(() => {
     Animated.parallel([
@@ -88,13 +88,22 @@ export default function StickerReactionPicker({
     setIsExpanded(!isExpanded);
   };
 
-  const handleStickerPress = (stickerId: string) => {
-    onReact(stickerId);
+  const handleStickerPress = (stickerId: string, assetUrl: string) => {
+    try {
+      soundPlayer.seekTo(0);
+      soundPlayer.play();
+    } catch (e) {
+      console.warn("Failed to play sound", e);
+    }
+    onReact(stickerId, assetUrl || "");
     setIsExpanded(false);
   };
 
   const handleShopPress = () => {
     setIsExpanded(false);
+    if (onOpenShop) {
+      onOpenShop();
+    }
     router.push("/shop");
   };
 
@@ -144,7 +153,12 @@ export default function StickerReactionPicker({
             {stickers.map((inventoryItem: Record<string, any>) => (
               <Pressable
                 key={inventoryItem.id}
-                onPress={() => handleStickerPress(inventoryItem.itemId)}
+                onPress={() =>
+                  handleStickerPress(
+                    inventoryItem.itemId,
+                    inventoryItem.item?.assetUrl || "",
+                  )
+                }
                 style={({ pressed }) => [
                   styles.stickerButton,
                   pressed && styles.stickerPressed,

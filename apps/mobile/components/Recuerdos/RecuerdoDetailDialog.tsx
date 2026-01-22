@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { View, Image, Dimensions, Animated } from "react-native";
+import Reanimated, { ZoomIn, ZoomOut } from "react-native-reanimated";
 import {
   Dialog,
   Portal,
@@ -9,7 +10,7 @@ import {
   Button,
   TextInput,
 } from "react-native-paper";
-import { COLORS, STYLES, FONT } from "@/styles/base";
+import { COLORS, STYLES, FONT, SHADOWS } from "@/styles/base";
 import { useAudioPlayer } from "expo-audio";
 import { VideoView, useVideoPlayer } from "expo-video";
 import Slider from "@react-native-community/slider";
@@ -81,6 +82,9 @@ export default function RecuerdoDetailDialog({
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
+  const [lastReactedStickerUrl, setLastReactedStickerUrl] = useState<
+    string | null
+  >(null);
 
   // SIEMPRE crear los players (regla de hooks), pero con valores seguros
   const audioUrl =
@@ -340,7 +344,8 @@ export default function RecuerdoDetailDialog({
             const member = familyMembers.find((m) => m.id === reaction.userId);
             if (!member) return null;
             return (
-              <View
+              <Reanimated.View
+                entering={ZoomIn.springify()}
                 key={reaction.id}
                 style={{ position: "relative", marginRight: 4 }}
               >
@@ -391,7 +396,7 @@ export default function RecuerdoDetailDialog({
                     }}
                   />
                 )}
-              </View>
+              </Reanimated.View>
             );
           })}
         </View>
@@ -621,13 +626,48 @@ export default function RecuerdoDetailDialog({
                 <InfoBlock />
               </View>
             )}
+            {/* Visual Feedback for Reaction */}
+            {lastReactedStickerUrl && (
+              <Reanimated.View
+                entering={ZoomIn.springify()}
+                exiting={ZoomOut.duration(400)}
+                style={{
+                  position: "absolute",
+                  top: "30%",
+                  alignSelf: "center",
+                  zIndex: 2000,
+                  backgroundColor: "rgba(255,255,255,0.9)",
+                  borderRadius: 50,
+                  padding: 20,
+                  ...SHADOWS.medium,
+                }}
+              >
+                <Image
+                  source={{ uri: lastReactedStickerUrl }}
+                  style={{ width: 100, height: 100 }}
+                  resizeMode="contain"
+                />
+              </Reanimated.View>
+            )}
           </Animated.View>
 
           {/* Sticker Reaction Picker - Only for elders - Positioned below the dialog */}
           {isElder && onReact && recuerdo && (
             <StickerReactionPicker
-              onReact={(stickerId) => onReact(recuerdo.id, stickerId)}
+              onReact={(stickerId, stickerUrl) => {
+                // Show feedback animation
+                setLastReactedStickerUrl(stickerUrl);
+
+                // Call the actual reaction handler
+                if (onReact) onReact(recuerdo.id, stickerId);
+
+                // Hide feedback after some time
+                setTimeout(() => {
+                  setLastReactedStickerUrl(null);
+                }, 1500);
+              }}
               disabled={isMutating}
+              onOpenShop={handleDismiss}
             />
           )}
         </Dialog>
