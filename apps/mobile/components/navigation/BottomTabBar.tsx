@@ -1,6 +1,7 @@
 import { View, Platform, Animated, Pressable } from "react-native";
 import { Icon, Text } from "react-native-paper";
 import { NavigationState } from "react-native-tab-view";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { COLORS } from "@/styles/base";
 
 // ~15% opacity for the active tab indicator background using primary color
@@ -24,11 +25,16 @@ export default function BottomTabBar({
   position,
   jumpTo,
 }: BottomTabBarProps) {
+  const insets = useSafeAreaInsets();
+  
+  // Calculate bottom position: base padding + safe area inset for navigation buttons
+  const bottomPosition = 24 + insets.bottom;
+  
   return (
     <View
       style={{
         position: "absolute",
-        bottom: 24,
+        bottom: bottomPosition,
         left: 20,
         right: 20,
         borderRadius: 24,
