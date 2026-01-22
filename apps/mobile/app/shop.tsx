@@ -15,6 +15,7 @@ import {
   Portal,
   Modal,
   Chip,
+  Avatar,
 } from "react-native-paper";
 import { useRouter } from "expo-router";
 import {
@@ -396,7 +397,61 @@ export default function ShopScreen() {
                 style={styles.modalHeader}
               >
                 <View style={styles.modalPreviewContainer}>
-                  {selectedItem.assetUrl ? (
+                  {selectedItem.type === "frame" && user ? (
+                    <View
+                      style={{
+                        position: "relative",
+                        width: 140,
+                        height: 140,
+                        // Ensure wrapper centers content if needed, though pure View works
+                      }}
+                    >
+                      {/* Base Avatar */}
+                      <View
+                        style={{
+                          width: 140,
+                          height: 140,
+                          borderRadius: 70,
+                          overflow: "hidden",
+                        }}
+                      >
+                        {user.avatarUrl ? (
+                          <Avatar.Image
+                            size={140}
+                            source={{ uri: user.avatarUrl }}
+                          />
+                        ) : (
+                          <Avatar.Text
+                            size={140}
+                            label={(user.displayName || user.email || "U")
+                              .substring(0, 2)
+                              .toUpperCase()}
+                          />
+                        )}
+                      </View>
+
+                      {/* Frame Overlay */}
+                      {selectedItem.assetUrl && (
+                        <View
+                          pointerEvents="none"
+                          style={{
+                            position: "absolute",
+                            width: 140 * 1.4,
+                            height: 140 * 1.4,
+                            top: -140 * 0.2, // ~ -28
+                            left: -140 * 0.2, // ~ -28
+                            zIndex: 10,
+                          }}
+                        >
+                          <Image
+                            source={{ uri: selectedItem.assetUrl }}
+                            style={{ width: "100%", height: "100%" }}
+                            resizeMode="contain"
+                          />
+                        </View>
+                      )}
+                    </View>
+                  ) : selectedItem.assetUrl ? (
                     <Image
                       source={{ uri: selectedItem.assetUrl }}
                       style={styles.modalImage}
@@ -422,42 +477,48 @@ export default function ShopScreen() {
 
               <View style={styles.modalBody}>
                 <Text style={styles.modalTitle}>{selectedItem.title}</Text>
-                <Text style={styles.modalDescription}>
-                  ¿Quieres canjear este premio por tus puntos acumulados?
-                </Text>
+                {!isOwned(selectedItem.id) && (
+                  <>
+                    <Text style={styles.modalDescription}>
+                      ¿Quieres canjear este premio por tus puntos acumulados?
+                    </Text>
 
-                <View style={styles.modalCostContainer}>
-                  <Text style={styles.modalCostLabel}>Costo del canje</Text>
-                  <Text style={styles.modalCostValue}>
-                    {selectedItem.cost} Puntos
-                  </Text>
-                </View>
+                    <View style={styles.modalCostContainer}>
+                      <Text style={styles.modalCostLabel}>Costo del canje</Text>
+                      <Text style={styles.modalCostValue}>
+                        {selectedItem.cost} Puntos
+                      </Text>
+                    </View>
+                  </>
+                )}
 
                 {/* Point Info */}
-                <View style={styles.pointsInfoRow}>
-                  <View style={styles.pointsInfoItem}>
-                    <Text style={styles.pointsInfoLabel}>Tus puntos</Text>
-                    <Text style={styles.pointsInfoValue}>
-                      {balanceData?.pointsBalance ?? 0}
-                    </Text>
+                {!isOwned(selectedItem.id) && (
+                  <View style={styles.pointsInfoRow}>
+                    <View style={styles.pointsInfoItem}>
+                      <Text style={styles.pointsInfoLabel}>Tus puntos</Text>
+                      <Text style={styles.pointsInfoValue}>
+                        {balanceData?.pointsBalance ?? 0}
+                      </Text>
+                    </View>
+                    <View style={styles.pointsInfoDivider} />
+                    <View style={styles.pointsInfoItem}>
+                      <Text style={styles.pointsInfoLabel}>Restantes</Text>
+                      <Text
+                        style={[
+                          styles.pointsInfoValue,
+                          (balanceData?.pointsBalance ?? 0) <
+                            selectedItem.cost && styles.pointsNegative,
+                        ]}
+                      >
+                        {Math.max(
+                          0,
+                          (balanceData?.pointsBalance ?? 0) - selectedItem.cost,
+                        )}
+                      </Text>
+                    </View>
                   </View>
-                  <View style={styles.pointsInfoDivider} />
-                  <View style={styles.pointsInfoItem}>
-                    <Text style={styles.pointsInfoLabel}>Restantes</Text>
-                    <Text
-                      style={[
-                        styles.pointsInfoValue,
-                        (balanceData?.pointsBalance ?? 0) < selectedItem.cost &&
-                          styles.pointsNegative,
-                      ]}
-                    >
-                      {Math.max(
-                        0,
-                        (balanceData?.pointsBalance ?? 0) - selectedItem.cost,
-                      )}
-                    </Text>
-                  </View>
-                </View>
+                )}
 
                 <View style={styles.modalActions}>
                   <Button
@@ -472,57 +533,101 @@ export default function ShopScreen() {
 
                   {isOwned(selectedItem.id) ? (
                     selectedItem.type === "frame" ? (
-                      <Button
-                        mode="contained"
+                      <Pressable
                         onPress={handleEquip}
-                        loading={isEquipping}
                         disabled={isEquipping || isEquipped(selectedItem.id)}
-                        style={styles.modalConfirmBtn}
-                        buttonColor={COLORS.primary} // Use primary color for equipping as requested
-                        labelStyle={{
-                          fontFamily: FONT.bold,
-                          fontSize: 16,
-                          color: COLORS.white,
-                        }}
+                        style={({ pressed }) => [
+                          styles.modalConfirmBtn,
+                          {
+                            backgroundColor: COLORS.primary,
+                            opacity:
+                              pressed ||
+                              isEquipping ||
+                              isEquipped(selectedItem.id)
+                                ? 0.7
+                                : 1,
+                          },
+                        ]}
                       >
-                        {isEquipped(selectedItem.id)
-                          ? "Equipado"
-                          : "Usar Marco"}
-                      </Button>
+                        {isEquipping ? (
+                          <ActivityIndicator
+                            size="small"
+                            color={COLORS.white}
+                          />
+                        ) : (
+                          <Text
+                            style={{
+                              color: COLORS.white,
+                              fontFamily: FONT.bold,
+                              fontSize: 16,
+                              textAlign: "center",
+                            }}
+                          >
+                            {isEquipped(selectedItem.id)
+                              ? "Equipado"
+                              : "Usar Marco"}
+                          </Text>
+                        )}
+                      </Pressable>
                     ) : (
-                      <Button
-                        mode="contained"
+                      <Pressable
                         disabled={true}
-                        style={styles.modalConfirmBtn}
-                        buttonColor={COLORS.textLight}
-                        labelStyle={{
-                          fontFamily: FONT.bold,
-                          fontSize: 16,
-                          color: COLORS.white,
-                        }}
+                        style={[
+                          styles.modalConfirmBtn,
+                          {
+                            backgroundColor: COLORS.primary,
+                            opacity: 0.7,
+                          },
+                        ]}
                       >
-                        Ya lo tienes
-                      </Button>
+                        <Text
+                          style={{
+                            color: COLORS.white,
+                            fontFamily: FONT.bold,
+                            fontSize: 16,
+                            textAlign: "center",
+                          }}
+                        >
+                          Ya lo tienes
+                        </Text>
+                      </Pressable>
                     )
                   ) : (
-                    <Button
-                      mode="contained"
+                    <Pressable
                       onPress={handleBuy}
-                      loading={isBuying}
                       disabled={
                         isBuying ||
                         (balanceData?.pointsBalance ?? 0) < selectedItem.cost
                       }
-                      style={styles.modalConfirmBtn}
-                      buttonColor={COLORS.primary}
-                      labelStyle={{
-                        fontFamily: FONT.bold,
-                        fontSize: 16,
-                        color: COLORS.white,
-                      }}
+                      style={({ pressed }) => [
+                        styles.modalConfirmBtn,
+                        {
+                          backgroundColor: COLORS.primary,
+                          opacity:
+                            pressed ||
+                            isBuying ||
+                            (balanceData?.pointsBalance ?? 0) <
+                              selectedItem.cost
+                              ? 0.7
+                              : 1,
+                        },
+                      ]}
                     >
-                      Canjear
-                    </Button>
+                      {isBuying ? (
+                        <ActivityIndicator size="small" color={COLORS.white} />
+                      ) : (
+                        <Text
+                          style={{
+                            color: COLORS.white,
+                            fontFamily: FONT.bold,
+                            fontSize: 16,
+                            textAlign: "center",
+                          }}
+                        >
+                          Canjear
+                        </Text>
+                      )}
+                    </Pressable>
                   )}
                 </View>
 
