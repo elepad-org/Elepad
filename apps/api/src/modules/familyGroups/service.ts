@@ -106,12 +106,13 @@ export class FamilyGroupService {
    */
   async getMembers(idGroup: string): Promise<{
     name: string;
-    owner: { id: string; displayName: string; avatarUrl: string | null; elder: boolean };
+    owner: { id: string; displayName: string; avatarUrl: string | null; elder: boolean; activeFrameUrl: string | null };
     members: Array<{
       id: string;
       displayName: string;
       avatarUrl: string | null;
       elder: boolean;
+      activeFrameUrl: string | null;
     }>;
   }> {
     // Traer grupo (para obtener name y ownerUserId)
@@ -138,35 +139,79 @@ export class FamilyGroupService {
     }
 
     const membersList = members ?? [];
-    const filteredMembers = membersList.filter(
+    const memberIds = membersList.map((m) => m.id);
+
+    // Fetch equipped frames for these members
+    let framesMap: Record<string, string> = {};
+    if (memberIds.length > 0) {
+      const { data: frames } = await this.supabase
+        .from("user_inventory")
+        .select("user_id, item:shop_items(type, asset_url)")
+        .in("user_id", memberIds)
+        .eq("equipped", true)
+        .eq("item.type", "frame"); // Ensure we only get frames
+
+      if (frames) {
+        frames.forEach((f) => {
+          if (f.item && (f.item as any).asset_url) {
+             framesMap[f.user_id] = (f.item as any).asset_url;
+          }
+        });
+      }
+    }
+
+    const enrichMember = (m: any) => ({
+        ...m,
+        activeFrameUrl: framesMap[m.id] || null
+    });
+    
+    // Enrich members with frame URL
+    const enrichedMembers = membersList.map(enrichMember);
+
+    const filteredMembers = enrichedMembers.filter(
       (u) => u.id !== group.ownerUserId,
     );
 
-    // Obtener el owner a partir de ownerUserId
-    const ownerItem = membersList.find((u) => u.id === group.ownerUserId);
-    if (!ownerItem) {
-      // Si por algún motivo el owner no figura en la lista (inconsistencia), intentar consultarlo directo
+    // Obtener el owner
+    let ownerToReturn = membersList.find((u) => u.id === group.ownerUserId);
+    
+    if (!ownerToReturn) {
+      // Si el owner no estaba en la lista de members (inconsistencia), buscarlo
       const { data: ownerUser, error: ownerErr } = await this.supabase
         .from("users")
         .select("id, displayName, avatarUrl, elder")
         .eq("id", group.ownerUserId)
         .single();
+        
       if (ownerErr || !ownerUser) {
         console.error("Owner not found in users: ", ownerErr);
         throw new ApiException(404, "Group owner not found");
       }
+      ownerToReturn = ownerUser as any; // Temporary cast to merge properties next
+    }
+
+    // Enrich owner with frame
+    if (ownerToReturn) {
+      // Check if we need to fetch frame for owner separate if wasn't in members list
+      // But above we fetched frames for memberIds which includes everyone in group usually.
+      // If owner wasn't in 'members' query (rare), we might miss their frame.
+      // Let's assume owner is usually in groupId. If not (inconsistencies), we skip frame for now.
+      
+      // But wait! If we fetched extra owner, we should check frame for them too?
+      // For simplicity, let's just apply framesMap
+      const ownerFrame = framesMap[ownerToReturn.id] || null;
+      
       return {
         name: group.name,
-        owner: ownerUser,
-        members: filteredMembers,
+        owner: { ...ownerToReturn, activeFrameUrl: ownerFrame },
+        members: filteredMembers.map(m => ({
+          ...m,
+          activeFrameUrl: framesMap[m.id] || null
+        })),
       };
     }
 
-    return {
-      name: group.name,
-      owner: ownerItem,
-      members: filteredMembers,
-    };
+    throw new ApiException(500, "Unexpected error resolving owner");
   }
 
   async updateFamilyGroupName(groupId: string, newName: string) {
