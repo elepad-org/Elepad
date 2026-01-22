@@ -695,41 +695,33 @@ export default function NotificationsScreen() {
 
       {/* Dialog para mostrar detalle del álbum */}
       <Portal>
-        <Dialog
-          visible={albumDetailDialogVisible}
-          onDismiss={() => {
-            setAlbumDetailDialogVisible(false);
-            setSelectedAlbumId(null);
-          }}
-          style={{ backgroundColor: COLORS.background }}
-        >
-          <Dialog.Title style={{ fontWeight: "bold", color: COLORS.text }}>
-            {albumQuery.isLoading
-              ? "Cargando..."
-              : albumQuery.isError
-                ? "Error"
-                : (() => {
-                    // Extract title safely for header
-                    let title = "Detalle del Álbum";
-                    if (albumQuery.data && !albumQuery.isError) {
-                      const data =
-                        "data" in albumQuery.data
-                          ? albumQuery.data.data
-                          : albumQuery.data;
-                      if (data && typeof data === "object" && "title" in data) {
-                        title = (data as { title: string }).title;
-                      }
-                    }
-                    return title;
-                  })()}
-          </Dialog.Title>
-          <Dialog.Content>
-            {albumQuery.isLoading ? (
-              <View style={{ padding: 20 }}>
-                <ActivityIndicator size="large" color={COLORS.primary} />
-              </View>
-            ) : (
-              (() => {
+        {!albumQuery.isLoading && (
+          <Dialog
+            visible={albumDetailDialogVisible}
+            onDismiss={() => {
+              setAlbumDetailDialogVisible(false);
+              setSelectedAlbumId(null);
+            }}
+            style={{ backgroundColor: COLORS.background }}
+          >
+            <Dialog.Title style={{ fontWeight: "bold", color: COLORS.text }}>
+              {(() => {
+                // Extract title safely
+                let title = "Detalle del Álbum";
+                if (albumQuery.data && !albumQuery.isError) {
+                  const data =
+                    "data" in albumQuery.data
+                      ? albumQuery.data.data
+                      : albumQuery.data;
+                  if (data && typeof data === "object" && "title" in data) {
+                    title = (data as { title: string }).title;
+                  }
+                }
+                return title;
+              })()}
+            </Dialog.Title>
+            <Dialog.Content>
+              {(() => {
                 let album: AlbumWithPages | null = null;
                 if (albumQuery.data && !albumQuery.isError) {
                   if ("data" in albumQuery.data) {
@@ -755,21 +747,7 @@ export default function NotificationsScreen() {
 
                 return (
                   <>
-                    {/* Title is in Header already, so just content here */}
-                    {album.title && (
-                      // For reliability if header extraction failed or was generic
-                      <Text
-                        style={{
-                          fontSize: 18,
-                          fontWeight: "bold",
-                          marginBottom: 8,
-                          display: "none",
-                        }}
-                      >
-                        {album.title}
-                      </Text>
-                    )}
-
+                    {/* Title is in Header */}
                     {album.description && (
                       <View style={{ marginBottom: 16 }}>
                         <Text
@@ -808,44 +786,44 @@ export default function NotificationsScreen() {
                     )}
                   </>
                 );
-              })()
-            )}
-          </Dialog.Content>
-          <Dialog.Actions
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              paddingHorizontal: 20,
-              paddingBottom: 12,
-              gap: 8,
-            }}
-          >
-            <Button
-              mode="outlined"
-              onPress={() => {
-                setAlbumDetailDialogVisible(false);
-                setSelectedAlbumId(null);
+              })()}
+            </Dialog.Content>
+            <Dialog.Actions
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                paddingHorizontal: 20,
+                paddingBottom: 12,
+                gap: 8,
               }}
-              textColor={COLORS.primary}
             >
-              Cerrar
-            </Button>
-            <Button
-              onPress={() => {
-                if (selectedAlbumId) {
+              <Button
+                mode="outlined"
+                onPress={() => {
                   setAlbumDetailDialogVisible(false);
-                  console.log("Navigating to album:", selectedAlbumId);
-                  router.push(`/album-viewer?id=${selectedAlbumId}`);
                   setSelectedAlbumId(null);
-                }
-              }}
-              mode="contained"
-              buttonColor={COLORS.primary}
-            >
-              Ver Álbum
-            </Button>
-          </Dialog.Actions>
-        </Dialog>
+                }}
+                textColor={COLORS.primary}
+              >
+                Cerrar
+              </Button>
+              <Button
+                onPress={() => {
+                  if (selectedAlbumId) {
+                    setAlbumDetailDialogVisible(false);
+                    console.log("Navigating to album:", selectedAlbumId);
+                    router.push(`/album-viewer?id=${selectedAlbumId}`);
+                    setSelectedAlbumId(null);
+                  }
+                }}
+                mode="contained"
+                buttonColor={COLORS.primary}
+              >
+                Ver Álbum
+              </Button>
+            </Dialog.Actions>
+          </Dialog>
+        )}
       </Portal>
 
       {/* Dialog para mostrar detalle del recuerdo - Solo si data está lista */}
