@@ -97,7 +97,7 @@ export default function Footer() {
           }}
         >
           <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>
-            {t('footer.copyright', { year: 2026 })}
+            {t('footer.copyright', { year: new Date().getFullYear() })}
           </Typography>
         </Box>
     </Box>
