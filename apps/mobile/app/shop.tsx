@@ -30,6 +30,7 @@ import { BackButton } from "@/components/shared/BackButton";
 import Reanimated, { ZoomIn } from "react-native-reanimated";
 import { useToast } from "@/components/shared/Toast";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function ShopScreen() {
   const router = useRouter();
@@ -49,7 +50,7 @@ export default function ShopScreen() {
     if (!data) return undefined;
     if (Array.isArray(data)) return data;
     if (typeof data === "object" && data !== null && "data" in data) {
-      return (data as { data: any }).data;
+      return (data as { data: unknown }).data;
     }
     return data;
   };
@@ -204,9 +205,9 @@ export default function ShopScreen() {
             {owned && (
               <View style={styles.ownedOverlay}>
                 <MaterialCommunityIcons
-                  name="check-bold"
-                  size={20}
-                  color={COLORS.white}
+                  name="star"
+                  size={18}
+                  color={COLORS.primary}
                 />
               </View>
             )}
@@ -327,83 +328,120 @@ export default function ShopScreen() {
           contentContainerStyle={styles.modalContent}
         >
           {selectedItem && (
-            <>
-              <Text style={styles.modalTitle}>Confirmar Compra</Text>
-              <Text style={styles.modalDescription}>
-                ¿Quieres canjear{" "}
-                <Text style={{ fontWeight: "bold" }}>
-                  "{selectedItem.title}"
-                </Text>{" "}
-                por?
-              </Text>
-
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginBottom: 24,
-                }}
+            <View style={styles.modalInner}>
+              {/* Modal Header/Preview */}
+              <LinearGradient
+                colors={[COLORS.primary + "15", COLORS.white]}
+                style={styles.modalHeader}
               >
-                <Text
-                  style={{
-                    fontSize: 24,
-                    fontFamily: FONT.bold,
-                    color: COLORS.primary,
-                  }}
-                >
-                  {selectedItem.cost} Puntos
-                </Text>
-              </View>
+                <View style={styles.modalPreviewContainer}>
+                  {selectedItem.assetUrl ? (
+                    <Image
+                      source={{ uri: selectedItem.assetUrl }}
+                      style={styles.modalImage}
+                      resizeMode="contain"
+                    />
+                  ) : (
+                    <Text style={{ fontSize: 60 }}>🎁</Text>
+                  )}
+                </View>
+                {selectedItem.type && (
+                  <View
+                    style={[
+                      styles.modalTypeBadge,
+                      { backgroundColor: getPastelColor(selectedItem.type) },
+                    ]}
+                  >
+                    <Text style={styles.modalTypeBadgeText}>
+                      {selectedItem.type}
+                    </Text>
+                  </View>
+                )}
+              </LinearGradient>
 
-              <View style={styles.modalItemPreview}>
-                {selectedItem.assetUrl ? (
-                  <Image
-                    source={{ uri: selectedItem.assetUrl }}
-                    style={styles.modalImage}
-                    resizeMode="contain"
-                  />
-                ) : (
-                  <Text style={{ fontSize: 50 }}>🎁</Text>
+              <View style={styles.modalBody}>
+                <Text style={styles.modalTitle}>{selectedItem.title}</Text>
+                <Text style={styles.modalDescription}>
+                  ¿Quieres canjear este premio por tus puntos acumulados?
+                </Text>
+
+                <View style={styles.modalCostContainer}>
+                  <Text style={styles.modalCostLabel}>Costo del canje</Text>
+                  <Text style={styles.modalCostValue}>
+                    {selectedItem.cost} Puntos
+                  </Text>
+                </View>
+
+                {/* Point Info */}
+                <View style={styles.pointsInfoRow}>
+                  <View style={styles.pointsInfoItem}>
+                    <Text style={styles.pointsInfoLabel}>Tus puntos</Text>
+                    <Text style={styles.pointsInfoValue}>
+                      {balanceData?.pointsBalance ?? 0}
+                    </Text>
+                  </View>
+                  <View style={styles.pointsInfoDivider} />
+                  <View style={styles.pointsInfoItem}>
+                    <Text style={styles.pointsInfoLabel}>Restantes</Text>
+                    <Text
+                      style={[
+                        styles.pointsInfoValue,
+                        (balanceData?.pointsBalance ?? 0) < selectedItem.cost &&
+                          styles.pointsNegative,
+                      ]}
+                    >
+                      {Math.max(
+                        0,
+                        (balanceData?.pointsBalance ?? 0) - selectedItem.cost,
+                      )}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.modalActions}>
+                  <Button
+                    mode="text"
+                    onPress={() => setSelectedItem(null)}
+                    style={styles.modalCancelBtn}
+                    textColor={COLORS.textSecondary}
+                    labelStyle={{ fontFamily: FONT.semiBold }}
+                  >
+                    Quizás luego
+                  </Button>
+                  <Button
+                    mode="contained"
+                    onPress={handleBuy}
+                    loading={isBuying}
+                    disabled={
+                      isBuying ||
+                      (balanceData?.pointsBalance ?? 0) < selectedItem.cost
+                    }
+                    style={styles.modalConfirmBtn}
+                    buttonColor={COLORS.primary}
+                    labelStyle={{
+                      fontFamily: FONT.bold,
+                      fontSize: 16,
+                      color: COLORS.white,
+                    }}
+                  >
+                    Canjear ahora
+                  </Button>
+                </View>
+
+                {(balanceData?.pointsBalance ?? 0) < selectedItem.cost && (
+                  <View style={styles.errorBanner}>
+                    <MaterialCommunityIcons
+                      name="alert-circle"
+                      size={16}
+                      color={COLORS.error}
+                    />
+                    <Text style={styles.insufficientPoints}>
+                      No tienes suficientes puntos para este item.
+                    </Text>
+                  </View>
                 )}
               </View>
-
-              <View style={styles.modalActions}>
-                <Button
-                  mode="outlined"
-                  onPress={() => setSelectedItem(null)}
-                  style={{
-                    flex: 1,
-                    marginRight: 8,
-                    borderColor: COLORS.primary,
-                  }}
-                  textColor={COLORS.primary}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  mode="contained"
-                  onPress={handleBuy}
-                  loading={isBuying}
-                  disabled={
-                    isBuying ||
-                    (balanceData?.pointsBalance ?? 0) < selectedItem.cost
-                  }
-                  style={{
-                    flex: 1,
-                    marginLeft: 8,
-                    backgroundColor: COLORS.primary,
-                  }}
-                >
-                  Canjear
-                </Button>
-              </View>
-              {(balanceData?.pointsBalance ?? 0) < selectedItem.cost && (
-                <Text style={styles.insufficientPoints}>
-                  No tienes suficientes puntos.
-                </Text>
-              )}
-            </>
+            </View>
           )}
         </Modal>
       </Portal>
@@ -557,14 +595,15 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 8,
     right: 8,
-    backgroundColor: "#9AD6AA", // Pastel same as success toast
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    backgroundColor: COLORS.white,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 2,
-    borderColor: COLORS.white,
+    borderWidth: 1.5,
+    borderColor: COLORS.primary,
+    ...SHADOWS.light,
   },
   itemTitle: {
     fontSize: 15,
@@ -575,69 +614,168 @@ const styles = StyleSheet.create({
     height: 40,
   },
   priceContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
     backgroundColor: COLORS.backgroundSecondary,
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 20,
     width: "100%",
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   priceText: {
-    fontSize: 15,
+    fontSize: 13,
     fontFamily: FONT.bold,
-    color: COLORS.text,
+    color: COLORS.secondary,
   },
   ownedText: {
     fontSize: 13,
-    fontFamily: FONT.semiBold,
-    color: COLORS.success,
+    fontFamily: FONT.bold,
+    color: COLORS.primary,
   },
   modalContent: {
+    padding: 0,
+    margin: 24,
+    borderRadius: 28,
+    overflow: "hidden",
     backgroundColor: COLORS.white,
-    padding: 24,
-    margin: 20,
-    borderRadius: 24,
+    ...SHADOWS.medium,
+  },
+  modalInner: {
+    borderRadius: 28,
+    overflow: "hidden",
+  },
+  modalHeader: {
+    paddingTop: 40,
+    paddingBottom: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  modalPreviewContainer: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: COLORS.white,
+    justifyContent: "center",
     alignItems: "center",
     ...SHADOWS.medium,
   },
-  modalTitle: {
-    fontSize: 20,
-    fontFamily: FONT.bold,
-    marginBottom: 8,
-    color: COLORS.text,
-    textAlign: "center",
+  modalImage: {
+    width: 100,
+    height: 100,
   },
-  modalDescription: {
-    textAlign: "center",
-    marginBottom: 16,
-    color: COLORS.textSecondary,
-    fontSize: 16,
-    fontFamily: FONT.regular,
-  },
-  modalItemPreview: {
-    width: 120,
-    height: 120,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 24,
+  modalTypeBadge: {
+    position: "absolute",
+    top: 20,
+    right: 24,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
     ...SHADOWS.light,
   },
-  modalImage: {
-    width: 90,
-    height: 90,
+  modalTypeBadgeText: {
+    fontSize: 12,
+    fontFamily: FONT.bold,
+    color: "rgba(0,0,0,0.6)",
+    textTransform: "uppercase",
+  },
+  modalBody: {
+    padding: 24,
+    paddingTop: 16,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontFamily: FONT.bold,
+    color: COLORS.text,
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  modalDescription: {
+    fontSize: 15,
+    fontFamily: FONT.medium,
+    color: COLORS.textSecondary,
+    textAlign: "center",
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  modalCostContainer: {
+    backgroundColor: COLORS.backgroundSecondary,
+    padding: 16,
+    borderRadius: 20,
+    alignItems: "center",
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  modalCostLabel: {
+    fontSize: 13,
+    fontFamily: FONT.semiBold,
+    color: COLORS.textSecondary,
+    textTransform: "uppercase",
+    marginBottom: 4,
+  },
+  modalCostValue: {
+    fontSize: 22,
+    fontFamily: FONT.bold,
+    color: COLORS.primary,
+  },
+  pointsInfoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+    marginBottom: 30,
+    paddingHorizontal: 8,
+  },
+  pointsInfoItem: {
+    alignItems: "center",
+  },
+  pointsInfoLabel: {
+    fontSize: 12,
+    fontFamily: FONT.medium,
+    color: COLORS.textSecondary,
+    marginBottom: 2,
+  },
+  pointsInfoValue: {
+    fontSize: 16,
+    fontFamily: FONT.bold,
+    color: COLORS.secondary,
+  },
+  pointsInfoDivider: {
+    width: 1,
+    height: 30,
+    backgroundColor: COLORS.border,
+  },
+  pointsNegative: {
+    color: COLORS.red,
   },
   modalActions: {
+    flexDirection: "column",
+    gap: 12,
+  },
+  modalConfirmBtn: {
+    borderRadius: 16,
+    height: 54,
+    justifyContent: "center",
+  },
+  modalCancelBtn: {
+    borderRadius: 16,
+    height: 48,
+    justifyContent: "center",
+  },
+  errorBanner: {
     flexDirection: "row",
-    width: "100%",
-    justifyContent: "space-between",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: COLORS.red + "10",
+    padding: 10,
+    borderRadius: 12,
+    marginTop: 16,
+    gap: 8,
   },
   insufficientPoints: {
-    color: COLORS.error,
+    color: COLORS.red,
+    fontSize: 13,
+    fontFamily: FONT.semiBold,
     textAlign: "center",
-    marginTop: 16,
-    fontFamily: FONT.medium,
   },
 });
