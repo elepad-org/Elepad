@@ -114,14 +114,30 @@ export default function JuegosScreen() {
           {/* Header */}
           <View style={styles.header}>
             <Text style={STYLES.superHeading}>Juegos</Text>
-            <Button
-              mode="contained"
-              onPress={() => router.navigate("/history")}
-              style={STYLES.miniButton}
-              icon="history"
-            >
-              Historial
-            </Button>
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              <Button
+                mode="contained"
+                onPress={() => router.push("/shop")}
+                style={{
+                  borderRadius: 12,
+                  backgroundColor: COLORS.primary,
+                }}
+                icon="store"
+              >
+                Tienda
+              </Button>
+              <Button
+                mode="contained"
+                onPress={() => router.navigate("/history")}
+                style={{
+                  borderRadius: 12,
+                  backgroundColor: COLORS.secondary,
+                }}
+                icon="history"
+              >
+                Historial
+              </Button>
+            </View>
           </View>
 
           {/* Games List */}

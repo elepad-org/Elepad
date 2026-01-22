@@ -12,6 +12,7 @@ import { familyGroupApp } from "./modules/familyGroups/handler.js";
 import { activitiesApp } from "./modules/activities/handler.js";
 import { Database } from "./supabase-types.js";
 import { memoriesApp } from "./modules/memories/handler.js";
+import { shopApp } from "./modules/shop/handler.js";
 import { frequenciesApp } from "./modules/frequencies/handler.js";
 import { activityCompletionsHandler } from "./modules/activityCompletions/handler.js";
 import { puzzlesApp } from "./modules/puzzles/handler.js";
@@ -132,6 +133,9 @@ app.route("/", streaksApp);
 
 app.use("/notifications/*", withAuth);
 app.route("/", notificationsApp);
+
+app.use("/shop/*", withAuth);
+app.route("/", shopApp);
 
 // OpenAPI spec.
 app.doc("/openapi.json", {
