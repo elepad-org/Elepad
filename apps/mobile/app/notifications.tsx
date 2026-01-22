@@ -717,7 +717,7 @@ export default function NotificationsScreen() {
             }}
             style={{ backgroundColor: COLORS.background }}
           >
-            <Dialog.Title style={{ fontWeight: "bold", color: COLORS.text }}>
+            <Dialog.Title style={{ fontWeight: "bold", color: COLORS.primary }}>
               {(() => {
                 // Extract title safely
                 let title = "Detalle del Álbum";
@@ -938,7 +938,7 @@ export default function NotificationsScreen() {
                   return (
                     <View>
                       <Dialog.Title
-                        style={{ fontWeight: "bold", color: COLORS.text }}
+                        style={{ fontWeight: "bold", color: COLORS.primary }}
                       >
                         {activity.title}
                       </Dialog.Title>
