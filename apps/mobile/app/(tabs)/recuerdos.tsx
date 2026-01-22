@@ -34,11 +34,12 @@ import {
   deleteMemory,
   deleteMemoriesBook,
   GetFamilyGroupIdGroupMembers200,
-  Memory,
+  MemoryWithReactions,
   MemoriesBook,
   UpdateMemoriesBook,
   updateMemory,
   updateMemoriesBook,
+  useAddReaction,
 } from "@elepad/api-client";
 import { useMutation } from "@tanstack/react-query";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -69,7 +70,7 @@ interface RecuerdoData {
 
 // Función auxiliar para convertir Memory a Recuerdo para compatibilidad con componentes existentes
 const memoryToRecuerdo = (
-  memory: Memory,
+  memory: MemoryWithReactions,
   memberNameById: Record<string, string>,
 ): Recuerdo => {
   let tipo: RecuerdoTipo = "texto";
@@ -101,6 +102,12 @@ const memoryToRecuerdo = (
     autorId: memory.createdBy,
     autorNombre: memberNameById[memory.createdBy] || undefined,
     fecha: new Date(memory.createdAt),
+    reactions: (memory.reactions || []).map((r) => ({
+      id: r.id,
+      userId: r.userId,
+      stickerId: r.stickerId,
+      stickerUrl: r.stickerUrl,
+    })),
   };
 };
 
@@ -114,6 +121,12 @@ interface Recuerdo {
   autorId?: string;
   autorNombre?: string;
   fecha: Date;
+  reactions?: {
+    id: string;
+    userId: string;
+    stickerId: string;
+    stickerUrl: string | null;
+  }[];
 }
 
 const BAUL_COLOR_OPTIONS = [
@@ -131,6 +144,8 @@ export default function RecuerdosScreen() {
   const isFocused = useIsFocused();
   const { loading: authLoading, userElepad } = useAuth();
   const { showToast } = useToast();
+
+  const { mutateAsync: addReaction } = useAddReaction();
 
   const groupId = userElepad?.groupId || "";
 
@@ -333,7 +348,7 @@ export default function RecuerdosScreen() {
       // rnFetch (mutator) devuelve el JSON directamente y tira excepción si !res.ok
       // (aunque el tipo generado por orval incluya {status, data}).
       const updated = await updateMemory(data.id, data.patch);
-      return updated as unknown as Memory;
+      return updated as unknown as MemoryWithReactions;
     },
     onSuccess: async (updated) => {
       await refetchMemories();
@@ -525,7 +540,7 @@ export default function RecuerdosScreen() {
         : [];
 
     const memories = Array.isArray(memoriesData)
-      ? (memoriesData as Memory[])
+      ? (memoriesData as MemoryWithReactions[])
       : [];
 
     return memories
@@ -1650,18 +1665,24 @@ export default function RecuerdosScreen() {
           onDeleteRecuerdo={async (id) => {
             await deleteMemoryMutation.mutateAsync(id);
           }}
-          onReact={(recuerdoId, stickerId) => {
-            // TODO: Implement API call to save reaction
-            showToast({
-              message: "¡Reacción agregada!",
-              type: "success",
-            });
-            console.log(
-              "React to memory:",
-              recuerdoId,
-              "with sticker:",
-              stickerId,
-            );
+          onReact={async (recuerdoId, stickerId) => {
+            try {
+              await addReaction({
+                id: recuerdoId,
+                data: { stickerId },
+              });
+              await refetchMemories();
+              showToast({
+                message: "¡Reacción agregada!",
+                type: "success",
+              });
+            } catch (error) {
+              console.error("Error adding reaction:", error);
+              showToast({
+                message: "Error al agregar reacción",
+                type: "error",
+              });
+            }
           }}
           isMutating={
             updateMemoryMutation.isPending || deleteMemoryMutation.isPending

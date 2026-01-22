@@ -29,6 +29,12 @@ interface Recuerdo {
   autorId?: string;
   autorNombre?: string;
   fecha: Date;
+  reactions?: {
+    id: string;
+    userId: string;
+    stickerId: string;
+    stickerUrl: string | null;
+  }[];
 }
 
 interface RecuerdoDetailDialogProps {
@@ -319,6 +325,77 @@ export default function RecuerdoDetailDialog({
           minute: "2-digit",
         })}
       </Text>
+
+      {/* Reacciones */}
+      {recuerdo.reactions && recuerdo.reactions.length > 0 && (
+        <View
+          style={{
+            marginTop: 16,
+            flexDirection: "row",
+            flexWrap: "wrap",
+            gap: 8,
+          }}
+        >
+          {recuerdo.reactions.map((reaction) => {
+            const member = familyMembers.find((m) => m.id === reaction.userId);
+            if (!member) return null;
+            return (
+              <View
+                key={reaction.id}
+                style={{ position: "relative", marginRight: 4 }}
+              >
+                {member.avatarUrl ? (
+                  <Image
+                    source={{ uri: member.avatarUrl }}
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 18,
+                      borderWidth: 2,
+                      borderColor: COLORS.white,
+                    }}
+                  />
+                ) : (
+                  <View
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 18,
+                      backgroundColor: COLORS.primary,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderWidth: 2,
+                      borderColor: COLORS.white,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: COLORS.white,
+                        fontSize: 14,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {member.displayName.charAt(0).toUpperCase()}
+                    </Text>
+                  </View>
+                )}
+                {reaction.stickerUrl && (
+                  <Image
+                    source={{ uri: reaction.stickerUrl }}
+                    style={{
+                      width: 20,
+                      height: 20,
+                      position: "absolute",
+                      bottom: -4,
+                      right: -4,
+                    }}
+                  />
+                )}
+              </View>
+            );
+          })}
+        </View>
+      )}
     </View>
   );
 
