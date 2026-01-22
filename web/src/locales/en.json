@@ -61,6 +61,33 @@
     "message": "Message",
     "send": "Send"
   },
+  "help": {
+    "title": "Help",
+    "description": "Here you will find answers to the most frequently asked questions and resources to get support.",
+    "faq": {
+      "createAccount": {
+        "question": "How do I create an account?",
+        "answer": "To create an account, click on 'Sign Up' and complete the form with your information."
+      },
+      "resetPassword": {
+        "question": "How do I reset my password?",
+        "answer": "On the login screen, click on 'Forgot your password?' and follow the indicated steps."
+      },
+      "contactSupport": {
+        "question": "How do I contact support?",
+        "answer": "You can write to us from the contact page and we will respond as soon as possible."
+      }
+    }
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "description": "By using Elepad, you accept our terms and conditions. We reserve the right to modify these terms at any time. The use of the platform implies acceptance of privacy policies and commitment to use the service responsibly and respectfully.",
+    "rules": {
+      "rule1": "Do not share third-party personal information without consent.",
+      "rule2": "Do not use the platform for illegal or harmful activities.",
+      "rule3": "Respect the privacy and security of all users."
+    }
+  },
   "privacy": {
     "title": "Privacy Policy",
     "lastUpdated": "Last updated",
@@ -117,15 +144,70 @@
       "title": "Data that will be permanently deleted",
       "description": "When deleting your Elepad account, the following data will be permanently deleted:",
       "accountInfo": "Your Account Information",
+      "accountInfoDetails": "Name, email, date of birth, profile picture and authentication credentials.",
       "gameProgress": "Cognitive Games Progress",
+      "gameProgressDetails": "All your scores, achievements, streaks and game statistics (Memory, Sudoku, NET, Focus).",
       "memories": "Personal Memories and Stories",
+      "memoriesDetails": "All photos, albums, notes and memories you have created.",
       "events": "Events and Calendar",
+      "eventsDetails": "All family events, scheduled activities and Google Calendar synchronizations.",
       "familyGroups": "Family Group Membership",
-      "activityHistory": "Activity History"
+      "familyGroupsDetails": "You will be removed from all family groups. Content shared by other members will remain visible to them.",
+      "activityHistory": "Activity History",
+      "activityHistoryDetails": "All your application usage history and behavior metrics."
     },
     "whatRemains": {
       "title": "Data that is retained (Temporarily)",
-      "description": "For legal, technical and security reasons, some data is retained for a limited period:"
+      "description": "For legal, technical and security reasons, some data is retained for a limited period:",
+      "systemLogs": "System activity logs (30 days)",
+      "systemLogsDetails": "Technical logs necessary for security, fraud detection and error debugging. They do not contain personally identifiable information.",
+      "backups": "Backups (30 days)",
+      "backupsDetails": "Automatic backups are completely purged after 30 days of account deletion.",
+      "sharedContent": "Content shared in Family Groups",
+      "sharedContentDetails": "The memories and photos you shared with your family group will remain visible to other members, but your identification as author will be removed.",
+      "note": "Note: After the indicated retention periods, all remaining data is permanently and irrecoverably deleted from our systems."
+    },
+    "deletionProcess": {
+      "title": "Account Deletion Process",
+      "description": "Follow these steps to request the deletion of your Elepad account:",
+      "step1": {
+        "title": "Step 1: Make a copy of your data (Optional)",
+        "description": "Before deleting your account, you can export your data from the app:<br /><strong>Profile → Settings → Privacy → Download my data</strong><br />You will receive a file with all your memories, photos and statistics."
+      },
+      "step2": {
+        "title": "Step 2: Send your request",
+        "description": "Send an email from the account registered in Elepad to:",
+        "subject": "Account Deletion Request - Elepad",
+        "include": "Include in the message:",
+        "items": {
+          "name": "• Your full name registered in the app",
+          "email": "• Your Elepad account email",
+          "confirmation": "• Confirmation that you understand this action is irreversible",
+          "reason": "• Reason for deletion (optional, helps us improve)"
+        }
+      },
+      "step3": {
+        "title": "Step 3: Identity verification",
+        "description": "For security, we will verify your identity. You will receive a confirmation code by email that you must respond to. This ensures you are the legitimate account holder."
+      },
+      "step4": {
+        "title": "Step 4: Reflection period (7 days)",
+        "description": "After confirming your identity, your account will enter a 'pending deletion' period of <strong>7 calendar days</strong>. During this time:",
+        "items": {
+          "cancel": "✓ You can cancel the request if you change your mind",
+          "deactivated": "✓ Your account will be deactivated but your data intact",
+          "noAccess": "✓ You will not be able to access the application"
+        }
+      },
+      "step5": {
+        "title": "Step 5: Permanent deletion",
+        "description": "After 7 days, if you do not cancel the request, your account and all associated data will be deleted <strong>permanently and irreversibly</strong>. You will receive a final confirmation email when the process is completed."
+      }
+    },
+    "contact": {
+      "title": "Need help?",
+      "description": "If you have questions about the account deletion process or need assistance, do not hesitate to contact us:",
+      "button": "Send Deletion Request"
     }
   },
   "common": {
