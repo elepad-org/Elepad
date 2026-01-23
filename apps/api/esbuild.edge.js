@@ -16,9 +16,11 @@ await build({
     "@hono/zod-openapi",
     "googleapis",
     "@google/generative-ai",
+    "dotenv",
     "fs",
     "os",
     "path",
+    "crypto",
   ],
 });
 
