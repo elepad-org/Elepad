@@ -1,7 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/supabase-types";
 
-export type EventType = "mention" | "achievement" | "activity_reminder" | "activity_assigned";
+export type EventType = "mention" | "achievement" | "activity_reminder" | "activity_assigned" | "reaction";
 export type EntityType = "memory" | "activity" | "puzzle" | "achievement";
 
 export interface CreateNotificationParams {
