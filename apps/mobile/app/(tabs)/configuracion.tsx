@@ -66,11 +66,14 @@ export default function ConfiguracionScreen() {
   const initials = useMemo(() => getInitials(displayName), [displayName]);
 
   const timezones = [
+    'America/Argentina/Buenos_Aires',
     'America/New_York',
     'America/Los_Angeles',
     'America/Mexico_City',
+    'America/Sao_Paulo',
     'Europe/London',
     'Europe/Paris',
+    'Europe/Madrid',
     'Europe/Berlin',
     'Asia/Tokyo',
     'Asia/Shanghai',

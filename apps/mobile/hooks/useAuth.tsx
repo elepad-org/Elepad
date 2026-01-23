@@ -312,4 +312,5 @@ export type ElepadUser = {
   avatarUrl?: string;
   groupId?: string;
   elder: boolean;
+  timezone?: string;
 };

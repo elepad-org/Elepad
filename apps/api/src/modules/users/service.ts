@@ -18,7 +18,7 @@ export class UserService {
   async getUserById(id: string) {
     const { data, error } = await this.supabase
       .from("users")
-      .select("id, email, displayName, avatarUrl, groupId, elder")
+      .select("id, email, displayName, avatarUrl, groupId, elder, timezone")
       .eq("id", id)
       .maybeSingle();
 
@@ -36,7 +36,7 @@ export class UserService {
    * Update a user's information (except their avatar).
    */
   async update(id: string, payload: UpdateUser) {
-    const updates: { displayName?: string; avatarUrl?: string } = {};
+    const updates: { displayName?: string; avatarUrl?: string; timezone?: string } = {};
 
     if (payload.displayName !== undefined) {
       updates.displayName = payload.displayName;
@@ -46,11 +46,15 @@ export class UserService {
       updates.avatarUrl = payload.avatarUrl;
     }
 
+    if (payload.timezone !== undefined) {
+      updates.timezone = payload.timezone;
+    }
+
     const { data, error } = await this.supabase
       .from("users")
       .update(updates)
       .eq("id", id)
-      .select("id, email, displayName, avatarUrl, groupId, elder")
+      .select("id, email, displayName, avatarUrl, groupId, elder, timezone")
       .maybeSingle();
 
     if (error) {
