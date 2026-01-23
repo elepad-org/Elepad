@@ -237,17 +237,21 @@ export default function RecuerdoDetailDialog({
         justifyContent: "space-between",
       }}
     >
-      <Text
-        style={{
-          ...STYLES.heading,
-          color: COLORS.primary,
-          textAlign: "left",
-          flex: 1,
-          paddingRight: 8,
-        }}
-      >
-        {recuerdo.titulo || "Sin título"}
-      </Text>
+      {recuerdo.titulo ? (
+        <Text
+          style={{
+            ...STYLES.heading,
+            color: COLORS.primary,
+            textAlign: "left",
+            flex: 1,
+            paddingRight: 8,
+          }}
+        >
+          {recuerdo.titulo}
+        </Text>
+      ) : (
+        <View style={{ flex: 1 }} />
+      )}
 
       {menuMounted && recuerdo.autorId === currentUserId && (
         <Menu
