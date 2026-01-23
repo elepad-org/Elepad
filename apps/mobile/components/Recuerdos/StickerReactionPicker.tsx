@@ -3,12 +3,12 @@ import {
   View,
   StyleSheet,
   Pressable,
-  Image,
   ScrollView,
   Animated,
   Dimensions,
 } from "react-native";
 import { Text, ActivityIndicator } from "react-native-paper";
+import { Image } from "expo-image";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, SHADOWS } from "@/styles/base";
 import { useGetShopInventory } from "@elepad/api-client";
@@ -203,7 +203,7 @@ export default function StickerReactionPicker({
                     <Image
                       source={{ uri: inventoryItem.item.assetUrl }}
                       style={styles.stickerImage}
-                      resizeMode="contain"
+                      contentFit="contain"
                     />
                   ) : (
                     <Text style={styles.stickerPlaceholder}>🎁</Text>
