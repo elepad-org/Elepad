@@ -208,4 +208,56 @@ export class ShopService {
     if (error) throw error;
     return { pointsBalance: data.points_balance };
   }
+
+  /**
+   * Equip an item (specifically for Frames)
+   */
+  async equipItem(userId: string, itemId: string) {
+    // 1. Verify ownership
+    const { data: inventoryItem, error: ownershipError } = await this.supabase
+      .from("user_inventory")
+      .select("*, item:shop_items(*)")
+      .eq("user_id", userId)
+      .eq("item_id", itemId)
+      .single();
+
+    if (ownershipError || !inventoryItem) {
+      throw new HTTPException(404, { message: "Item not found in inventory" });
+    }
+
+    const item = inventoryItem.item as Database["public"]["Tables"]["shop_items"]["Row"];
+
+    // 2. Limit: Only Frames can be equipped for now (as per requirement)
+    if (item.type !== "frame") {
+      throw new HTTPException(400, { message: "Only frames can be equipped" });
+    }
+
+    // 3. Unequip all other frames for this user
+    // First, find all inventory items that are frames for this user
+    const { data: allUserFrames } = await this.supabase
+      .from("user_inventory")
+      .select("id, item:shop_items!inner(type)")
+      .eq("user_id", userId)
+      .eq("item.type", "frame");
+    
+    if (allUserFrames && allUserFrames.length > 0) {
+      const idsToUnequip = allUserFrames.map(f => f.id);
+      await this.supabase
+        .from("user_inventory")
+        .update({ equipped: false })
+        .in("id", idsToUnequip);
+    }
+
+    // 4. Equip the target item
+    const { error: updateError } = await this.supabase
+      .from("user_inventory")
+      .update({ equipped: true })
+      .eq("id", inventoryItem.id);
+
+    if (updateError) {
+      throw new Error(`Error equipping item: ${updateError.message}`);
+    }
+
+    return { success: true, message: "Frame equipped successfully" };
+  }
 }

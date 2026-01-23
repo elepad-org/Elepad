@@ -8,6 +8,7 @@ export type ProfileHeaderProps = {
   avatarUrl?: string;
   size?: number;
   onEditPhoto?: () => void;
+  frameUrl?: string; // New prop for the frame
 };
 
 function getInitials(name: string) {
@@ -22,21 +23,54 @@ function getInitials(name: string) {
   );
 }
 
+import { Image } from "react-native"; // Make sure to import Image
+
 export const ProfileHeader = ({
   name,
   email,
   avatarUrl,
   size = 112,
   onEditPhoto,
+  frameUrl,
 }: ProfileHeaderProps) => {
   return (
     <View style={styles.profileHeader}>
       <View style={styles.avatarWrapper}>
-        {avatarUrl ? (
-          <Avatar.Image size={size} source={{ uri: avatarUrl }} />
-        ) : (
-          <Avatar.Text size={size} label={getInitials(name)} />
+        <View
+          style={{
+            width: size,
+            height: size,
+            borderRadius: size / 2,
+            overflow: "hidden",
+          }}
+        >
+          {avatarUrl ? (
+            <Avatar.Image size={size} source={{ uri: avatarUrl }} />
+          ) : (
+            <Avatar.Text size={size} label={getInitials(name)} />
+          )}
+        </View>
+
+        {frameUrl && (
+          <View
+            pointerEvents="none"
+            style={{
+              position: "absolute",
+              width: size * 1.4,
+              height: size * 1.4,
+              top: -size * 0.2,
+              left: -size * 0.2,
+              zIndex: 10,
+            }}
+          >
+            <Image
+              source={{ uri: frameUrl }}
+              style={{ width: "100%", height: "100%" }}
+              resizeMode="contain"
+            />
+          </View>
         )}
+
         {onEditPhoto ? (
           <IconButton
             icon="pencil"
@@ -44,7 +78,7 @@ export const ProfileHeader = ({
             onPress={onEditPhoto}
             iconColor="#fff"
             containerColor={COLORS.primary}
-            style={styles.avatarBadge}
+            style={[styles.avatarBadge, { zIndex: 20 }]}
           />
         ) : null}
       </View>

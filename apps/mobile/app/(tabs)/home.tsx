@@ -284,20 +284,37 @@ export default function HomeScreen() {
             </Pressable>
 
             {/* Avatar */}
-            {userElepad?.avatarUrl ? (
-              <Avatar.Image
-                size={55}
-                source={{ uri: userElepad?.avatarUrl }}
-                style={styles.avatar}
-              />
-            ) : (
-              <Avatar.Text
-                size={55}
-                label={getInitials(displayName)}
-                style={[styles.avatar, { backgroundColor: COLORS.primary }]}
-                labelStyle={{ color: COLORS.white, fontSize: 22 }}
-              />
-            )}
+            {/* Avatar with Frame */}
+            <View style={{ position: "relative" }}>
+              {userElepad?.avatarUrl ? (
+                <Avatar.Image
+                  size={55}
+                  source={{ uri: userElepad?.avatarUrl }}
+                  style={styles.avatar}
+                />
+              ) : (
+                <Avatar.Text
+                  size={55}
+                  label={getInitials(displayName)}
+                  style={[styles.avatar, { backgroundColor: COLORS.primary }]}
+                  labelStyle={{ color: COLORS.white, fontSize: 22 }}
+                />
+              )}
+              {userElepad?.activeFrameUrl && (
+                <Image
+                  source={{ uri: userElepad?.activeFrameUrl }}
+                  style={{
+                    position: "absolute",
+                    width: 55 * 1.4,
+                    height: 55 * 1.4,
+                    top: -55 * 0.2,
+                    left: -55 * 0.2,
+                    zIndex: 10,
+                  }}
+                  resizeMode="contain"
+                />
+              )}
+            </View>
           </View>
         </View>
 
@@ -502,11 +519,14 @@ export default function HomeScreen() {
                       <Pressable
                         key={activity.id}
                         onPress={() => {
-                          console.log("🏠 Home: Navigating to calendar with activity", {
-                            activityId: activity.id,
-                            title: activity.title,
-                            startsAt: activity.startsAt,
-                          });
+                          console.log(
+                            "🏠 Home: Navigating to calendar with activity",
+                            {
+                              activityId: activity.id,
+                              title: activity.title,
+                              startsAt: activity.startsAt,
+                            },
+                          );
                           // Navegar al tab de calendario y abrir el detalle del evento
                           router.navigate({
                             pathname: "/(tabs)/home",
@@ -516,7 +536,9 @@ export default function HomeScreen() {
                             },
                           });
                         }}
-                        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                        style={({ pressed }) => ({
+                          opacity: pressed ? 0.7 : 1,
+                        })}
                       >
                         <Animated.View
                           entering={ZoomIn.duration(200).delay(index * 50)}
