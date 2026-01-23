@@ -1,4 +1,4 @@
-import { utcToZonedTime, zonedTimeToUtc, format } from 'date-fns-tz';
+import { toZonedTime, fromZonedTime, format } from 'date-fns-tz';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -22,7 +22,7 @@ export function toUserLocalTime(
   timezone?: string | null
 ): Date {
   const date = typeof utcDate === 'string' ? new Date(utcDate) : utcDate;
-  return utcToZonedTime(date, getUserTimezone(timezone));
+  return toZonedTime(date, getUserTimezone(timezone));
 }
 
 /**
@@ -33,7 +33,7 @@ export function toUTC(
   timezone?: string | null
 ): Date {
   const date = typeof localDate === 'string' ? new Date(localDate) : localDate;
-  return zonedTimeToUtc(date, getUserTimezone(timezone));
+  return fromZonedTime(date, getUserTimezone(timezone));
 }
 
 /**
