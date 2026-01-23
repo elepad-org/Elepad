@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { View, Image, Dimensions, Animated } from "react-native";
+import { View, Dimensions, Animated } from "react-native";
+import { Image } from "expo-image";
 import Reanimated, { ZoomIn, ZoomOut } from "react-native-reanimated";
 import {
   Dialog,
@@ -516,7 +517,7 @@ export default function RecuerdoDetailDialog({
                       height: screenWidth * 0.84,
                       borderRadius: 0,
                     }}
-                    resizeMode="cover"
+                    contentFit="cover"
                   />
                 </View>
 
@@ -643,7 +644,7 @@ export default function RecuerdoDetailDialog({
                 <Image
                   source={{ uri: lastReactedStickerUrl }}
                   style={{ width: 100, height: 100 }}
-                  resizeMode="contain"
+                  contentFit="contain"
                 />
               </Reanimated.View>
             )}
