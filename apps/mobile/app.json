@@ -18,7 +18,10 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.elepadorg.elepad"
+      "package": "com.elepadorg.elepad",
+      "permissions": [
+        "android.permission.POST_NOTIFICATIONS"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -46,7 +49,15 @@
       "expo-font",
       "expo-audio",
       "expo-web-browser",
-      "expo-video"
+      "expo-video",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/ele-def-fondo-cuad.png",
+          "color": "#8896B0",
+          "sounds": []
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
