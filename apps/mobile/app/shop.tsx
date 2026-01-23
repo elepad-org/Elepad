@@ -266,7 +266,7 @@ export default function ShopScreen() {
             {owned && (
               <View style={styles.ownedOverlay}>
                 <MaterialCommunityIcons
-                  name="star"
+                  name="check-circle"
                   size={18}
                   color={COLORS.primary}
                 />
