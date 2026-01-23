@@ -43,9 +43,13 @@ export default function ForgotPasswordScreen() {
 
     setLoading(true);
     try {
-      // En mobile, no especificamos redirectTo porque Supabase enviará un enlace
-      // que el usuario abrirá en su navegador web, donde podrá cambiar la contraseña
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      // Configurar el redirect URL para que apunte a la página de update-password
+      // Este URL debe estar en la lista de Redirect URLs permitidos en Supabase
+      const redirectUrl = 'https://ele.expo.app/update-password';
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl,
+      });
 
       if (error) {
         throw error;
@@ -145,7 +149,7 @@ export default function ForgotPasswordScreen() {
                     </Text>
                     <Text variant="bodyMedium" style={styles.successText}>
                       Revisa tu bandeja de entrada. El enlace te llevará a una página
-                      web donde podrás establecer tu nueva contraseña.
+                      donde podrás establecer tu nueva contraseña.
                     </Text>
                     <Text variant="bodySmall" style={[styles.successText, { marginTop: 16, fontStyle: 'italic' }]}>
                       Nota: Si no recibes el correo en unos minutos, revisa tu carpeta
