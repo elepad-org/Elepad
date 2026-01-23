@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -519,52 +519,6 @@ export type Database = {
           },
         ]
       }
-      memory_reactions: {
-        Row: {
-          created_at: string
-          id: string
-          memory_id: string
-          sticker_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          memory_id: string
-          sticker_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          memory_id?: string
-          sticker_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "memory_reactions_memory_id_fkey"
-            columns: ["memory_id"]
-            isOneToOne: false
-            referencedRelation: "memories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "memory_reactions_sticker_id_fkey"
-            columns: ["sticker_id"]
-            isOneToOne: false
-            referencedRelation: "shop_items"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "memory_reactions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       memoryGames: {
         Row: {
           cols: number
@@ -997,6 +951,7 @@ export type Database = {
           groupId: string | null
           id: string
           points_balance: number
+          timezone: string | null
           updatedAt: string
         }
         Insert: {
@@ -1010,6 +965,7 @@ export type Database = {
           groupId?: string | null
           id: string
           points_balance?: number
+          timezone?: string | null
           updatedAt?: string
         }
         Update: {
@@ -1023,6 +979,7 @@ export type Database = {
           groupId?: string | null
           id?: string
           points_balance?: number
+          timezone?: string | null
           updatedAt?: string
         }
         Relationships: [

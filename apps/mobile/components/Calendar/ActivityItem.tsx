@@ -11,6 +11,8 @@ import {
 import { Activity, GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 import { COLORS, SHADOWS } from "@/styles/base";
 import HighlightedMentionText from "../Recuerdos/HighlightedMentionText";
+import { formatInUserTimezone, toUserLocalTime } from "@/lib/timezoneHelpers";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ActivityItemProps {
   item: Activity;
@@ -45,6 +47,8 @@ export default function ActivityItem({
   onOpened,
   showTargetUser = true,
 }: ActivityItemProps) {
+  const { userElepad } = useAuth();
+  const userTimezone = userElepad?.timezone;
   const [showModal, setShowModal] = useState(false);
 
   // Abrir el modal automáticamente si shouldOpen es true
@@ -114,56 +118,36 @@ export default function ActivityItem({
   const canEdit = item.createdBy === idUser || isOwnerOfGroup;
 
   const getFormatTime = () => {
-    const date = new Date(item.startsAt);
-    return date.toLocaleTimeString("es", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+    return formatInUserTimezone(item.startsAt, "hh:mm a", userTimezone);
   };
 
   const timeDescription = (() => {
-    const startDateObj = new Date(item.startsAt);
-    const endDateObj = item.endsAt ? new Date(item.endsAt) : null;
+    const endDateObj = item.endsAt ? toUserLocalTime(item.endsAt, userTimezone) : null;
 
-    // Comparar fechas en hora local
-    const startDateLocal = startDateObj.toLocaleDateString("en-CA"); // formato YYYY-MM-DD
-    const endDateLocal = endDateObj?.toLocaleDateString("en-CA");
-    const actualToday = new Date().toLocaleDateString("en-CA");
+    // Comparar fechas en hora local del usuario
+    const startDateLocal = formatInUserTimezone(item.startsAt, "yyyy-MM-dd", userTimezone);
+    const endDateLocal = endDateObj ? formatInUserTimezone(item.endsAt!, "yyyy-MM-dd", userTimezone) : null;
+    const actualToday = formatInUserTimezone(new Date(), "yyyy-MM-dd", userTimezone);
 
     const isActuallyToday = startDateLocal === actualToday;
 
-    const startTime = startDateObj.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+    const startTime = formatInUserTimezone(item.startsAt, "hh:mm a", userTimezone);
 
     // Si la actividad no es de hoy (fecha actual), mostrar fecha completa de inicio
     const startDisplay = isActuallyToday
       ? startTime
-      : `${startDateObj.toLocaleDateString([], {
-          day: "numeric",
-          month: "short",
-        })} ${startTime}`;
+      : `${formatInUserTimezone(item.startsAt, "d MMM", userTimezone)} ${startTime}`;
 
     if (!endDateObj) return startDisplay;
 
-    const endTime = endDateObj.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+    const endTime = formatInUserTimezone(item.endsAt!, "hh:mm a", userTimezone);
 
     if (startDateLocal === endDateLocal) {
       // Mismo día local - solo mostrar hora de fin
       return `${startDisplay} - ${endTime}`;
     } else {
       // Diferente día - mostrar fecha completa de fin
-      const endDateFormatted = endDateObj.toLocaleDateString([], {
-        day: "numeric",
-        month: "short",
-      });
+      const endDateFormatted = formatInUserTimezone(item.endsAt!, "d MMM", userTimezone);
       return `${startDisplay} - ${endDateFormatted} ${endTime}`;
     }
   })();
