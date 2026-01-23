@@ -48,6 +48,10 @@
           },
           "elder": {
             "type": "boolean"
+          },
+          "timezone": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
@@ -56,7 +60,8 @@
           "displayName",
           "avatarUrl",
           "groupId",
-          "elder"
+          "elder",
+          "timezone"
         ]
       },
       "Error": {
@@ -89,6 +94,9 @@
             "minLength": 1
           },
           "avatarUrl": {
+            "type": "string"
+          },
+          "timezone": {
             "type": "string"
           }
         },
