@@ -92,11 +92,17 @@ interface Recuerdo {
   autorId?: string;
   autorNombre?: string;
   fecha: Date;
+  reactions?: {
+    id: string;
+    userId: string;
+    stickerId: string;
+    stickerUrl: string | null;
+  }[];
 }
 
 // Función auxiliar para convertir Memory a Recuerdo
 const memoryToRecuerdo = (
-  memory: Memory,
+  memory: Memory & { reactions?: any[] },
   memberNameById: Record<string, string>,
 ): Recuerdo => {
   let tipo: RecuerdoTipo = "texto";
@@ -128,6 +134,12 @@ const memoryToRecuerdo = (
     autorId: memory.createdBy,
     autorNombre: memberNameById[memory.createdBy] || undefined,
     fecha: new Date(memory.createdAt),
+    reactions: memory.reactions?.map((r: any) => ({
+      id: r.id,
+      userId: r.userId,
+      stickerId: r.stickerId,
+      stickerUrl: r.stickerUrl,
+    })),
   };
 };
 
@@ -889,6 +901,10 @@ export default function NotificationsScreen() {
               isMutating={false}
               familyMembers={groupMembers}
               currentUserId={userElepad?.id}
+              isElder={userElepad?.elder}
+              onReact={() => {
+                /* Read only from notifications for now, or just allow viewing */
+              }}
             />
           );
         })()}
@@ -1216,7 +1232,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   unreadTitle: {
-    fontWeight: "700",
+    fontWeight: "600",
     color: COLORS.primary,
   },
   notificationBody: {
