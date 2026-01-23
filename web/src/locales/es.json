@@ -1,0 +1,222 @@
+{
+  "nav": {
+    "features": "Características",
+    "about": "Sobre Nosotros",
+    "download": "Descargar",
+    "backToHome": "Volver al Inicio"
+  },
+  "hero": {
+    "title": "Bienvenido a",
+    "elepad": "Elepad",
+    "subtitle": "La plataforma que conecta generaciones a través de juegos cognitivos, recuerdos compartidos y momentos especiales."
+  },
+  "features": {
+    "title": "Todo lo que necesitas en",
+    "highlight": "un solo lugar",
+    "description": "Elepad combina entretenimiento, salud cognitiva y conexión familiar en una experiencia única.",
+    "cognitiveGames": {
+      "title": "Juegos Cognitivos",
+      "description": "Ejercita la mente con juegos diseñados específicamente para estimular la memoria y el pensamiento."
+    },
+    "achievementsStreaks": {
+      "title": "Logros y Rachas",
+      "description": "Mantén tu motivación con un sistema de logros y rachas que premia tu constancia."
+    },
+    "familyConnection": {
+      "title": "Conexión Familiar",
+      "description": "Comparte momentos especiales con tus seres queridos y fortalece los lazos familiares."
+    },
+    "memoriesEvents": {
+      "title": "Recuerdos y Eventos",
+      "description": "Guarda tus memorias más preciadas y planifica eventos familiares importantes."
+    }
+  },
+  "cta": {
+    "title": "Comienza tu viaje hoy",
+    "description": "Descarga Elepad gratis y descubre una nueva forma de mantener tu mente activa mientras compartes momentos únicos con tu familia.",
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
+  },
+  "footer": {
+    "links": "Enlaces",
+    "about": "Sobre Nosotros",
+    "contact": "Contacto",
+    "privacy": "Política de Privacidad",
+    "legal": "Legal",
+    "deleteAccount": "Eliminar Cuenta",
+    "terms": "Términos de Servicio",
+    "help": "Ayuda",
+    "copyright": "© {year} Todos los derechos reservados."
+  },
+  "about": {
+    "title": "Sobre Nosotros",
+    "description": "Somos 5 desarrolladores de software e ingenieros en sistemas, egresados de la UTN Regional Resistencia. Buscamos transformar a las familias a través de la tecnología, creando herramientas que fortalezcan los vínculos y generen experiencias significativas entre generaciones.",
+    "team": "Nuestro equipo"
+  },
+  "contact": {
+    "title": "Contacto",
+    "description": "Si tienes dudas, sugerencias o quieres comunicarte con nosotros, completa el siguiente formulario y te responderemos a la brevedad.",
+    "name": "Nombre",
+    "email": "Email",
+    "message": "Mensaje",
+    "send": "Enviar"
+  },
+  "help": {
+    "title": "Ayuda",
+    "description": "Aquí encontrarás respuestas a las preguntas más frecuentes y recursos para obtener soporte.",
+    "faq": {
+      "createAccount": {
+        "question": "¿Cómo creo una cuenta?",
+        "answer": "Para crear una cuenta, haz clic en 'Registrarse' y completa el formulario con tus datos."
+      },
+      "resetPassword": {
+        "question": "¿Cómo restablezco mi contraseña?",
+        "answer": "En la pantalla de inicio de sesión, haz clic en '¿Olvidaste tu contraseña?' y sigue los pasos indicados."
+      },
+      "contactSupport": {
+        "question": "¿Cómo contacto al soporte?",
+        "answer": "Puedes escribirnos desde la página de contacto y te responderemos a la brevedad."
+      }
+    }
+  },
+  "terms": {
+    "title": "Términos de Servicio",
+    "description": "Al utilizar Elepad, aceptas nuestros términos y condiciones. Nos reservamos el derecho de modificar estos términos en cualquier momento. El uso de la plataforma implica la aceptación de las políticas de privacidad y el compromiso de utilizar el servicio de manera responsable y respetuosa.",
+    "rules": {
+      "rule1": "No compartas información personal de terceros sin consentimiento.",
+      "rule2": "No utilices la plataforma para actividades ilícitas o dañinas.",
+      "rule3": "Respeta la privacidad y seguridad de todos los usuarios."
+    }
+  },
+  "privacy": {
+    "title": "Política de Privacidad",
+    "lastUpdated": "Última actualización",
+    "introduction": "Introducción",
+    "introductionText": "Esta política de privacidad describe cómo Elepad recopila, utiliza y protege tu información personal.",
+    "dataCollection": {
+      "title": "Qué datos recopilamos",
+      "personalInfo": "1. Información Personal",
+      "personalInfoDetails": "• Nombre y apellidos<br />• Dirección de correo electrónico<br />• Foto de perfil (opcional)<br />• Fecha de nacimiento<br />• Información de autenticación (cuando usas Google OAuth)",
+      "usageData": "2. Datos de uso de la Aplicación",
+      "usageDataDetails": "• Progreso y puntuaciones en juegos cognitivos (Memoria, Sudoku, NET, Focus)<br />• Logros y rachas de actividad<br />• Historial de juegos completados<br />• Frecuencia de uso de la aplicación",
+      "userContent": "3. Contenido generado por el usuario",
+      "userContentDetails": "• Recuerdos y memorias compartidas<br />• Fotos y álbumes familiares<br />• Eventos y actividades del calendario<br />• Notas y descripciones personales",
+      "familyData": "4. Datos del Grupo Familiar",
+      "familyDataDetails": "• Información de miembros del grupo familiar (con su consentimiento)<br />• Relaciones familiares<br />• Contenido compartido dentro del grupo"
+    },
+    "dataStorage": {
+      "title": "Almacenamiento y Seguridad de Datos",
+      "location": "Ubicación",
+      "locationDetails": "Tus datos se almacenan de forma segura en servidores de Supabase, que utiliza infraestructura de AWS con certificación SOC 2.",
+      "encryption": "Encriptación",
+      "encryptionDetails": "Toda la información se transmite mediante HTTPS/TLS y se almacena con encriptación en reposo.",
+      "retention": "Periodo de retención",
+      "retentionDetails": "Mantenemos tus datos mientras tu cuenta esté activa. Si no usas la aplicación durante 2 años consecutivos, te contactaremos para confirmar si deseas mantener tu cuenta.",
+      "backup": "Copias de seguridad",
+      "backupDetails": "Realizamos copias de seguridad automáticas que se conservan por 30 días para recuperación ante desastres."
+    },
+    "permissions": {
+      "title": "Permisos de la Aplicación",
+      "intro": "Elepad solicita los siguientes permisos:",
+      "camera": "Cámara y Galería de Fotos",
+      "cameraDetails": "Para tomar fotos de perfil y añadir imágenes a tus recuerdos. Solo accedemos a las fotos que tú seleccionas.",
+      "calendar": "Calendario (opcional)",
+      "calendarDetails": "Para sincronizar eventos familiares con Google Calendar. Puedes vincular o desvincular en cualquier momento.",
+      "notifications": "Notificaciones",
+      "notificationsDetails": "Para recordatorios de eventos, logros y celebraciones de rachas. Puedes desactivarlas en cualquier momento."
+    },
+    "changes": "Cambios en esta Política",
+    "changesDetails": "Podemos actualizar esta política de privacidad ocasionalmente. Te notificaremos sobre cambios significativos mediante un aviso en la aplicación o por correo electrónico. Te recomendamos revisar esta política periódicamente.",
+    "contact": {
+      "title": "¿Preguntas o Inquietudes?",
+      "description": "Si tienes alguna pregunta sobre esta política de privacidad o sobre cómo manejamos tus datos, no dudes en contactarnos:",
+      "button": "Enviar Consulta"
+    }
+  },
+  "accountDeletion": {
+    "title": "Eliminación de Cuenta",
+    "subtitle": "Solicitud de Eliminación de Datos",
+    "warning": {
+      "title": "Esta acción es permanente e irreversible",
+      "description": "Una vez procesada tu solicitud, no podremos recuperar tu cuenta ni tus datos. Por favor, lee cuidadosamente la información antes de proceder."
+    },
+    "whatGetsDeleted": {
+      "title": "Datos que se eliminarán permanentemente",
+      "description": "Al eliminar tu cuenta de Elepad, se borrarán de forma permanente los siguientes datos:",
+      "accountInfo": "Información de tu Cuenta",
+      "accountInfoDetails": "Nombre, email, fecha de nacimiento, foto de perfil y credenciales de autenticación.",
+      "gameProgress": "Progreso en Juegos Cognitivos",
+      "gameProgressDetails": "Todas tus puntuaciones, logros, rachas y estadísticas de juegos (Memoria, Sudoku, NET, Focus).",
+      "memories": "Recuerdos y Memorias Personales",
+      "memoriesDetails": "Todas las fotos, álbumes, notas y recuerdos que hayas creado.",
+      "events": "Eventos y Calendario",
+      "eventsDetails": "Todos los eventos familiares, actividades programadas y sincronizaciones con Google Calendar.",
+      "familyGroups": "Membresía en Grupos Familiares",
+      "familyGroupsDetails": "Serás removido de todos los grupos familiares. El contenido compartido por otros miembros permanecerá visible para ellos.",
+      "activityHistory": "Historial de Actividades",
+      "activityHistoryDetails": "Todo tu historial de uso de la aplicación y métricas de comportamiento."
+    },
+    "whatRemains": {
+      "title": "Datos que se conservan (Temporalmente)",
+      "description": "Por razones legales, técnicas y de seguridad, algunos datos se conservan por un periodo limitado:",
+      "systemLogs": "Registros de actividad del sistema (30 días)",
+      "systemLogsDetails": "Logs técnicos necesarios para seguridad, detección de fraudes y depuración de errores. No contienen información personal identificable.",
+      "backups": "Copias de seguridad (30 días)",
+      "backupsDetails": "Las copias de seguridad automáticas se purgan completamente después de 30 días de la eliminación de tu cuenta.",
+      "sharedContent": "Contenido compartido en Grupos Familiares",
+      "sharedContentDetails": "Los recuerdos y fotos que compartiste con tu grupo familiar permanecerán visibles para los demás miembros, pero se eliminará tu identificación como autor.",
+      "note": "Nota: Después de los periodos de retención indicados, todos los datos restantes se eliminan de forma permanente e irrecuperable de nuestros sistemas."
+    },
+    "deletionProcess": {
+      "title": "Proceso de Eliminación de Cuenta",
+      "description": "Sigue estos pasos para solicitar la eliminación de tu cuenta de Elepad:",
+      "step1": {
+        "title": "Paso 1: Haz una copia de tus datos (Opcional)",
+        "description": "Antes de eliminar tu cuenta, puedes exportar tus datos desde la app:<br /><strong>Perfil → Configuración → Privacidad → Descargar mis datos</strong><br />Recibirás un archivo con todos tus recuerdos, fotos y estadísticas."
+      },
+      "step2": {
+        "title": "Paso 2: Envía tu solicitud",
+        "description": "Envía un correo electrónico desde la cuenta registrada en Elepad a:",
+        "subject": "Solicitud de Eliminación de Cuenta - Elepad",
+        "include": "Incluye en el mensaje:",
+        "items": {
+          "name": "• Tu nombre completo registrado en la app",
+          "email": "• El email de tu cuenta de Elepad",
+          "confirmation": "• Confirmación de que entiendes que esta acción es irreversible",
+          "reason": "• Motivo de la eliminación (opcional, nos ayuda a mejorar)"
+        }
+      },
+      "step3": {
+        "title": "Paso 3: Verificación de identidad",
+        "description": "Por seguridad, verificaremos tu identidad. Recibirás un código de confirmación por email que deberás responder. Esto nos asegura de que eres el titular legítimo de la cuenta."
+      },
+      "step4": {
+        "title": "Paso 4: Periodo de reflexión (7 días)",
+        "description": "Después de confirmar tu identidad, tu cuenta entrará en un periodo de 'eliminación pendiente' de <strong>7 días calendario</strong>. Durante este tiempo:",
+        "items": {
+          "cancel": "✓ Podrás cancelar la solicitud si cambias de opinión",
+          "deactivated": "✓ Tu cuenta estará desactivada pero tus datos intactos",
+          "noAccess": "✓ No podrás acceder a la aplicación"
+        }
+      },
+      "step5": {
+        "title": "Paso 5: Eliminación permanente",
+        "description": "Después de 7 días, si no cancelas la solicitud, tu cuenta y todos los datos asociados se eliminarán de forma <strong>permanente e irreversible</strong>. Recibirás un email de confirmación final cuando el proceso se haya completado."
+      }
+    },
+    "contact": {
+      "title": "¿Necesitas ayuda?",
+      "description": "Si tienes preguntas sobre el proceso de eliminación de cuenta o necesitas asistencia, no dudes en contactarnos:",
+      "button": "Enviar Solicitud de Eliminación"
+    }
+  },
+  "common": {
+    "language": "Idioma",
+    "email": "Correo electrónico",
+    "name": "Nombre",
+    "send": "Enviar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "close": "Cerrar"
+  }
+}

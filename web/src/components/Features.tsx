@@ -1,36 +1,35 @@
 import { Box, Container, Typography, Card, CardContent } from '@mui/material';
 import { Psychology, EmojiEvents, Groups, CalendarMonth } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 const features = [
   {
     icon: <Psychology sx={{ fontSize: 48 }} />,
-    title: 'Juegos Cognitivos',
-    description:
-      'Ejercita la mente con juegos diseñados específicamente para estimular la memoria y el pensamiento.',
+    titleKey: 'features.cognitiveGames.title',
+    descriptionKey: 'features.cognitiveGames.description',
   },
   {
     icon: <EmojiEvents sx={{ fontSize: 48 }} />,
-    title: 'Logros y Rachas',
-    description:
-      'Mantén tu motivación con un sistema de logros y rachas que premia tu constancia.',
+    titleKey: 'features.achievementsStreaks.title',
+    descriptionKey: 'features.achievementsStreaks.description',
   },
   {
     icon: <Groups sx={{ fontSize: 48 }} />,
-    title: 'Conexión Familiar',
-    description:
-      'Comparte momentos especiales con tus seres queridos y fortalece los lazos familiares.',
+    titleKey: 'features.familyConnection.title',
+    descriptionKey: 'features.familyConnection.description',
   },
   {
     icon: <CalendarMonth sx={{ fontSize: 48 }} />,
-    title: 'Recuerdos y Eventos',
-    description:
-      'Guarda tus memorias más preciadas y planifica eventos familiares importantes.',
+    titleKey: 'features.memoriesEvents.title',
+    descriptionKey: 'features.memoriesEvents.description',
   },
 ];
 
 export default function Features() {
+  const { t } = useTranslation();
   return (
     <Box
+      id="features"
       sx={{
         py: { xs: 8, md: 12 },
         backgroundColor: 'background.default',
@@ -47,9 +46,9 @@ export default function Features() {
               color: 'text.primary',
             }}
           >
-            Todo lo que necesitas en{' '}
+            {t('features.title')}{' '}
             <Box component="span" sx={{ color: 'primary.main' }}>
-              un solo lugar
+              {t('features.highlight')}
             </Box>
           </Typography>
           <Typography
@@ -61,8 +60,7 @@ export default function Features() {
               mx: 'auto',
             }}
           >
-            Elepad combina entretenimiento, salud cognitiva y conexión familiar
-            en una experiencia única.
+            {t('features.description')}
           </Typography>
         </Box>
 
@@ -115,7 +113,7 @@ export default function Features() {
                     color: 'text.primary',
                   }}
                 >
-                  {feature.title}
+                  {t(feature.titleKey)}
                 </Typography>
                 <Typography
                   variant="body1"
@@ -124,7 +122,7 @@ export default function Features() {
                     lineHeight: 1.7,
                   }}
                 >
-                  {feature.description}
+                  {t(feature.descriptionKey)}
                 </Typography>
               </CardContent>
             </Card>

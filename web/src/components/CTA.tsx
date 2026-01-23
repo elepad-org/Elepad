@@ -1,7 +1,9 @@
 import { Box, Container, Typography, Button, Stack } from '@mui/material';
 import { Apple, Android } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 export default function CTA() {
+  const { t } = useTranslation();
   return (
     <Box
       sx={{
@@ -49,7 +51,7 @@ export default function CTA() {
               letterSpacing: '-0.01em',
             }}
           >
-            Comienza tu viaje hoy
+            {t('cta.title')}
           </Typography>
           <Typography
             variant="h6"
@@ -63,8 +65,7 @@ export default function CTA() {
               lineHeight: 1.6,
             }}
           >
-            Descarga Elepad gratis y descubre una nueva forma de mantener tu
-            mente activa mientras compartes momentos únicos con tu familia.
+            {t('cta.description')}
           </Typography>
 
           <Stack
@@ -90,7 +91,7 @@ export default function CTA() {
                 },
               }}
             >
-              App Store
+              {t('cta.appStore')}
             </Button>
             <Button
               variant="contained"
@@ -110,7 +111,7 @@ export default function CTA() {
                 },
               }}
             >
-              Google Play
+              {t('cta.googlePlay')}
             </Button>
           </Stack>
         </Box>

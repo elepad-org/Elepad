@@ -1,43 +1,45 @@
 import { Box, Container, Typography, Paper, Button, Alert, List, ListItem, ListItemIcon, ListItemText, Divider, Card, CardContent } from '@mui/material';
-import { DeleteForever, Email, CheckCircle, Info, Schedule } from '@mui/icons-material';
-import LegalNavbar from '../components/LegalNavbar';
+import { DeleteForever, Email, CheckCircle, Info, Schedule, ContentCopy } from '@mui/icons-material';
+import Navbar from '../components/Navbar';
+import { useTranslation } from 'react-i18next';
 
 export default function AccountDeletion() {
+  const { t } = useTranslation();
   return (
     <>
-      <LegalNavbar />
+      <Navbar variant="legal" />
       <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default', py: 8 }}>
         <Container maxWidth="md">{/* Header */}
           <Box sx={{ textAlign: 'center', mb: 6 }}>
           <DeleteForever sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
           <Typography variant="h3" sx={{ fontWeight: 700, mb: 2, color: 'text.primary' }}>
-            Eliminación de Cuenta
+            {t('accountDeletion.title')}
           </Typography>
           <Typography variant="h6" sx={{ color: 'text.secondary', fontWeight: 400 }}>
-            Elepad - Solicitud de Eliminación de Datos
+            {t('accountDeletion.subtitle')}
           </Typography>
         </Box>
 
         {/* Importante */}
         <Alert severity="warning" sx={{ mb: 4, borderRadius: 2 }}>
           <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
-            ⚠️ Esta acción es permanente e irreversible
+            {t('accountDeletion.warning.title')}
           </Typography>
           <Typography variant="body2">
-            Una vez procesada tu solicitud, no podremos recuperar tu cuenta ni tus datos. Por favor, lee cuidadosamente la información antes de proceder.
+            {t('accountDeletion.warning.description')}
           </Typography>
         </Alert>
 
         {/* Qué se Elimina */}
-        <Paper sx={{ p: 4, mb: 4, borderRadius: 3 }}>
+        <Paper sx={{ p: 4, mb: 4, borderRadius: 3, backgroundColor: '#FFFFFF', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
             <DeleteForever sx={{ mr: 1, color: 'error.main' }} />
             <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              Datos que se Eliminarán Permanentemente
+              {t('accountDeletion.whatGetsDeleted.title')}
             </Typography>
           </Box>
           <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
-            Al eliminar tu cuenta de Elepad, se borrarán de forma permanente los siguientes datos:
+            {t('accountDeletion.whatGetsDeleted.description')}
           </Typography>
           <List>
             <ListItem>
@@ -45,8 +47,8 @@ export default function AccountDeletion() {
                 <CheckCircle color="error" />
               </ListItemIcon>
               <ListItemText 
-                primary="Información de tu Cuenta"
-                secondary="Nombre, email, fecha de nacimiento, foto de perfil y credenciales de autenticación."
+                primary={t('accountDeletion.whatGetsDeleted.accountInfo')}
+                secondary={t('accountDeletion.whatGetsDeleted.accountInfoDetails')}
               />
             </ListItem>
             <ListItem>
@@ -54,8 +56,8 @@ export default function AccountDeletion() {
                 <CheckCircle color="error" />
               </ListItemIcon>
               <ListItemText 
-                primary="Progreso en Juegos Cognitivos"
-                secondary="Todas tus puntuaciones, logros, rachas y estadísticas de juegos (Memoria, Sudoku, NET, Focus)."
+                primary={t('accountDeletion.whatGetsDeleted.gameProgress')}
+                secondary={t('accountDeletion.whatGetsDeleted.gameProgressDetails')}
               />
             </ListItem>
             <ListItem>
@@ -63,8 +65,8 @@ export default function AccountDeletion() {
                 <CheckCircle color="error" />
               </ListItemIcon>
               <ListItemText 
-                primary="Recuerdos y Memorias Personales"
-                secondary="Todas las fotos, álbumes, notas y recuerdos que hayas creado."
+                primary={t('accountDeletion.whatGetsDeleted.memories')}
+                secondary={t('accountDeletion.whatGetsDeleted.memoriesDetails')}
               />
             </ListItem>
             <ListItem>
@@ -72,8 +74,8 @@ export default function AccountDeletion() {
                 <CheckCircle color="error" />
               </ListItemIcon>
               <ListItemText 
-                primary="Eventos y Calendario"
-                secondary="Todos los eventos familiares, actividades programadas y sincronizaciones con Google Calendar."
+                primary={t('accountDeletion.whatGetsDeleted.events')}
+                secondary={t('accountDeletion.whatGetsDeleted.eventsDetails')}
               />
             </ListItem>
             <ListItem>
@@ -81,8 +83,8 @@ export default function AccountDeletion() {
                 <CheckCircle color="error" />
               </ListItemIcon>
               <ListItemText 
-                primary="Membresía en Grupos Familiares"
-                secondary="Serás removido de todos los grupos familiares. El contenido compartido por otros miembros permanecerá visible para ellos."
+                primary={t('accountDeletion.whatGetsDeleted.familyGroups')}
+                secondary={t('accountDeletion.whatGetsDeleted.familyGroupsDetails')}
               />
             </ListItem>
             <ListItem>
@@ -90,23 +92,23 @@ export default function AccountDeletion() {
                 <CheckCircle color="error" />
               </ListItemIcon>
               <ListItemText 
-                primary="Historial de Actividades"
-                secondary="Todo tu historial de uso de la aplicación y métricas de comportamiento."
+                primary={t('accountDeletion.whatGetsDeleted.activityHistory')}
+                secondary={t('accountDeletion.whatGetsDeleted.activityHistoryDetails')}
               />
             </ListItem>
           </List>
         </Paper>
 
         {/* Qué se Conserva */}
-        <Paper sx={{ p: 4, mb: 4, borderRadius: 3, border: '2px solid', borderColor: 'info.main' }}>
+        <Paper sx={{ p: 4, mb: 4, borderRadius: 3, backgroundColor: '#FFFFFF', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
             <Info sx={{ mr: 1, color: 'info.main' }} />
             <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              Datos que se Conservan (Temporalmente)
+              {t('accountDeletion.whatRemains.title')}
             </Typography>
           </Box>
           <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
-            Por razones legales, técnicas y de seguridad, algunos datos se conservan por un periodo limitado:
+            {t('accountDeletion.whatRemains.description')}
           </Typography>
           <List>
             <ListItem>
@@ -114,8 +116,8 @@ export default function AccountDeletion() {
                 <Schedule color="info" />
               </ListItemIcon>
               <ListItemText 
-                primary="Registros de Actividad del Sistema (30 días)"
-                secondary="Logs técnicos necesarios para seguridad, detección de fraudes y depuración de errores. No contienen información personal identificable."
+                primary={t('accountDeletion.whatRemains.systemLogs')}
+                secondary={t('accountDeletion.whatRemains.systemLogsDetails')}
               />
             </ListItem>
             <ListItem>
@@ -123,8 +125,8 @@ export default function AccountDeletion() {
                 <Schedule color="info" />
               </ListItemIcon>
               <ListItemText 
-                primary="Copias de Seguridad (30 días)"
-                secondary="Las copias de seguridad automáticas se purgan completamente después de 30 días de la eliminación de tu cuenta."
+                primary={t('accountDeletion.whatRemains.backups')}
+                secondary={t('accountDeletion.whatRemains.backupsDetails')}
               />
             </ListItem>
             <ListItem>
@@ -132,46 +134,34 @@ export default function AccountDeletion() {
                 <Schedule color="info" />
               </ListItemIcon>
               <ListItemText 
-                primary="Datos de Facturación (Si aplicable) (7 años)"
-                secondary="Si tuvieras suscripciones de pago futuras, los registros de facturación se conservan por obligaciones fiscales y legales."
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <Schedule color="info" />
-              </ListItemIcon>
-              <ListItemText 
-                primary="Contenido Compartido en Grupos Familiares"
-                secondary="Los recuerdos y fotos que compartiste con tu grupo familiar permanecerán visibles para los demás miembros, pero se eliminará tu identificación como autor."
+                primary={t('accountDeletion.whatRemains.sharedContent')}
+                secondary={t('accountDeletion.whatRemains.sharedContentDetails')}
               />
             </ListItem>
           </List>
           <Divider sx={{ my: 2 }} />
           <Alert severity="info" sx={{ borderRadius: 2 }}>
             <Typography variant="body2">
-              <strong>Nota:</strong> Después de los periodos de retención indicados, todos los datos restantes se eliminan de forma permanente e irrecuperable de nuestros sistemas.
+              <strong>{t('accountDeletion.whatRemains.note')}</strong>
             </Typography>
           </Alert>
         </Paper>
 
         {/* Proceso de Eliminación */}
-        <Paper sx={{ p: 4, mb: 4, borderRadius: 3, backgroundColor: 'background.paper' }}>
+        <Paper sx={{ p: 4, mb: 4, borderRadius: 3, backgroundColor: '#FFFFFF', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
           <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
-            Proceso de Eliminación de Cuenta
+            {t('accountDeletion.deletionProcess.title')}
           </Typography>
           <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
-            Sigue estos pasos para solicitar la eliminación de tu cuenta de Elepad:
+            {t('accountDeletion.deletionProcess.description')}
           </Typography>
           
           <Card sx={{ mb: 2, borderLeft: '4px solid', borderColor: 'primary.main' }}>
             <CardContent>
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                Paso 1: Haz una Copia de tus Datos (Opcional)
+                {t('accountDeletion.deletionProcess.step1.title')}
               </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Antes de eliminar tu cuenta, puedes exportar tus datos desde la app:<br />
-                <strong>Perfil → Configuración → Privacidad → Descargar mis datos</strong><br />
-                Recibirás un archivo con todos tus recuerdos, fotos y estadísticas.
+              <Typography variant="body2" sx={{ color: 'text.secondary' }} dangerouslySetInnerHTML={{ __html: t('accountDeletion.deletionProcess.step1.description') }}>
               </Typography>
             </CardContent>
           </Card>
@@ -179,40 +169,56 @@ export default function AccountDeletion() {
           <Card sx={{ mb: 2, borderLeft: '4px solid', borderColor: 'primary.main' }}>
             <CardContent>
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                Paso 2: Envía tu Solicitud
+                {t('accountDeletion.deletionProcess.step2.title')}
               </Typography>
               <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-                Envía un correo electrónico desde la cuenta registrada en Elepad a:
+                {t('accountDeletion.deletionProcess.step2.description')}
               </Typography>
               <Box sx={{ 
-                p: 2, 
+                p: 1.5, 
                 backgroundColor: 'primary.main', 
                 color: 'white', 
                 borderRadius: 2,
                 textAlign: 'center',
-                mb: 2
+                mb: 2,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 1
               }}>
-                <Email sx={{ mb: 1 }} />
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  eliminar-cuenta@elepad.com
+                <Email sx={{ fontSize: 20 }} />
+                <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                  proyectoelepad@gmail.com
                 </Typography>
+                <Button
+                  size="small"
+                  onClick={() => navigator.clipboard.writeText('proyectoelepad@gmail.com')}
+                  sx={{ 
+                    color: 'white', 
+                    minWidth: 'auto', 
+                    p: 0.5,
+                    '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' }
+                  }}
+                >
+                  <ContentCopy sx={{ fontSize: 16 }} />
+                </Button>
               </Box>
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                <strong>Asunto del correo:</strong> "Solicitud de Eliminación de Cuenta - Elepad"<br />
-                <strong>Incluye en el mensaje:</strong>
+                <strong>{t('accountDeletion.deletionProcess.step2.subject')}</strong><br />
+                <strong>{t('accountDeletion.deletionProcess.step2.include')}</strong>
               </Typography>
               <List dense>
                 <ListItem sx={{ pl: 4 }}>
-                  <ListItemText primary="• Tu nombre completo registrado en la app" />
+                  <ListItemText primary={t('accountDeletion.deletionProcess.step2.items.name')} />
                 </ListItem>
                 <ListItem sx={{ pl: 4 }}>
-                  <ListItemText primary="• El email de tu cuenta de Elepad" />
+                  <ListItemText primary={t('accountDeletion.deletionProcess.step2.items.email')} />
                 </ListItem>
                 <ListItem sx={{ pl: 4 }}>
-                  <ListItemText primary="• Confirmación de que entiendes que esta acción es irreversible" />
+                  <ListItemText primary={t('accountDeletion.deletionProcess.step2.items.confirmation')} />
                 </ListItem>
                 <ListItem sx={{ pl: 4 }}>
-                  <ListItemText primary="• Motivo de la eliminación (opcional, nos ayuda a mejorar)" />
+                  <ListItemText primary={t('accountDeletion.deletionProcess.step2.items.reason')} />
                 </ListItem>
               </List>
             </CardContent>
@@ -221,10 +227,10 @@ export default function AccountDeletion() {
           <Card sx={{ mb: 2, borderLeft: '4px solid', borderColor: 'primary.main' }}>
             <CardContent>
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                Paso 3: Verificación de Identidad
+                {t('accountDeletion.deletionProcess.step3.title')}
               </Typography>
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Por seguridad, verificaremos tu identidad. Recibirás un código de confirmación por email que deberás responder. Esto nos asegura de que eres el titular legítimo de la cuenta.
+                {t('accountDeletion.deletionProcess.step3.description')}
               </Typography>
             </CardContent>
           </Card>
@@ -232,20 +238,19 @@ export default function AccountDeletion() {
           <Card sx={{ mb: 2, borderLeft: '4px solid', borderColor: 'primary.main' }}>
             <CardContent>
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
-                Paso 4: Periodo de Reflexión (7 días)
+                {t('accountDeletion.deletionProcess.step4.title')}
               </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Después de confirmar tu identidad, tu cuenta entrará en un periodo de "eliminación pendiente" de <strong>7 días calendario</strong>. Durante este tiempo:
+              <Typography variant="body2" sx={{ color: 'text.secondary' }} dangerouslySetInnerHTML={{ __html: t('accountDeletion.deletionProcess.step4.description') }}>
               </Typography>
               <List dense>
                 <ListItem sx={{ pl: 4 }}>
-                  <ListItemText primary="✓ Podrás cancelar la solicitud si cambias de opinión" />
+                  <ListItemText primary={t('accountDeletion.deletionProcess.step4.items.cancel')} />
                 </ListItem>
                 <ListItem sx={{ pl: 4 }}>
-                  <ListItemText primary="✓ Tu cuenta estará desactivada pero tus datos intactos" />
+                  <ListItemText primary={t('accountDeletion.deletionProcess.step4.items.deactivated')} />
                 </ListItem>
                 <ListItem sx={{ pl: 4 }}>
-                  <ListItemText primary="✓ No podrás acceder a la aplicación" />
+                  <ListItemText primary={t('accountDeletion.deletionProcess.step4.items.noAccess')} />
                 </ListItem>
               </List>
             </CardContent>
@@ -254,113 +259,27 @@ export default function AccountDeletion() {
           <Card sx={{ borderLeft: '4px solid', borderColor: 'error.main' }}>
             <CardContent>
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 1, color: 'error.main' }}>
-                Paso 5: Eliminación Permanente
+                {t('accountDeletion.deletionProcess.step5.title')}
               </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Después de 7 días, si no cancelas la solicitud, tu cuenta y todos los datos asociados se eliminarán de forma <strong>permanente e irreversible</strong>. Recibirás un email de confirmación final cuando el proceso se haya completado.
+              <Typography variant="body2" sx={{ color: 'text.secondary' }} dangerouslySetInnerHTML={{ __html: t('accountDeletion.deletionProcess.step5.description') }}>
               </Typography>
             </CardContent>
           </Card>
         </Paper>
 
-        {/* Timeline Visual */}
-        <Paper sx={{ p: 4, mb: 4, borderRadius: 3 }}>
-          <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
-            Línea de Tiempo del Proceso
-          </Typography>
-          <Box sx={{ pl: 2, borderLeft: '3px solid', borderColor: 'primary.main' }}>
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'primary.main' }}>
-                Día 0 - Solicitud Recibida
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Envías el correo de solicitud de eliminación
-              </Typography>
-            </Box>
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'primary.main' }}>
-                Día 0-1 - Verificación
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Verificamos tu identidad y te enviamos código de confirmación
-              </Typography>
-            </Box>
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'primary.main' }}>
-                Días 1-7 - Periodo de Reflexión
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Cuenta desactivada, datos intactos, puedes cancelar la solicitud
-              </Typography>
-            </Box>
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'error.main' }}>
-                Día 7 - Eliminación Permanente
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Tu cuenta y datos se eliminan de forma irreversible
-              </Typography>
-            </Box>
-            <Box>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'success.main' }}>
-                Día 37 - Purga Completa
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Se eliminan copias de seguridad y logs técnicos (30 días adicionales)
-              </Typography>
-            </Box>
-          </Box>
-        </Paper>
-
-        {/* Alternativas */}
-        <Paper sx={{ p: 4, mb: 4, borderRadius: 3, backgroundColor: 'info.light' }}>
-          <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
-            ¿Estás Seguro? Considera estas Alternativas
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 2, color: 'text.secondary' }}>
-            Si no estás completamente seguro de eliminar tu cuenta, considera estas opciones:
-          </Typography>
-          <List>
-            <ListItem>
-              <ListItemText 
-                primary="📴 Desactivación Temporal"
-                secondary="Puedes desactivar tu cuenta temporalmente sin perder tus datos. La reactivación es instantánea cuando quieras volver."
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemText 
-                primary="🔕 Desactivar Notificaciones"
-                secondary="Si las notificaciones te molestan, puedes desactivarlas completamente sin eliminar la cuenta."
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemText 
-                primary="👥 Salir de Grupos Familiares"
-                secondary="Puedes salir de grupos específicos sin eliminar toda tu cuenta y datos."
-              />
-            </ListItem>
-            <ListItem>
-              <ListItemText 
-                primary="🔒 Cambiar Configuración de Privacidad"
-                secondary="Ajusta qué información compartes y con quién desde la configuración de privacidad."
-              />
-            </ListItem>
-          </List>
-        </Paper>
 
         {/* Contacto */}
-        <Paper sx={{ p: 4, borderRadius: 3, backgroundColor: 'primary.main', color: 'white', textAlign: 'center' }}>
-          <Email sx={{ fontSize: 48, mb: 2 }} />
+        <Paper sx={{ p: 1.5, borderRadius: 3, backgroundColor: 'primary.main', color: 'white', textAlign: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
           <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
-            ¿Necesitas Ayuda?
+            {t('accountDeletion.contact.title')}
           </Typography>
           <Typography variant="body1" sx={{ mb: 3, lineHeight: 1.8 }}>
-            Si tienes preguntas sobre el proceso de eliminación de cuenta o necesitas asistencia, no dudes en contactarnos:
+            {t('accountDeletion.contact.description')}
           </Typography>
           <Button 
             variant="contained" 
             size="large"
-            href="mailto:eliminar-cuenta@elepad.com"
+            href="mailto:proyectoelepad@gmail.com"
             sx={{ 
               backgroundColor: 'white', 
               color: 'primary.main',
@@ -370,12 +289,8 @@ export default function AccountDeletion() {
               } 
             }}
           >
-            Enviar Solicitud de Eliminación
+            {t('accountDeletion.contact.button')}
           </Button>
-          <Typography variant="body2" sx={{ mt: 2, opacity: 0.9 }}>
-            📧 eliminar-cuenta@elepad.com<br />
-            🌐 www.elepad.com/soporte
-          </Typography>
         </Paper>
       </Container>
     </Box>

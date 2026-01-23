@@ -1,7 +1,9 @@
-import { Box, Container, Typography, Link, Stack } from '@mui/material';
+import { Box, Typography, Link, Stack } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function Footer() {
+  const { t } = useTranslation();
   return (
     <Box
       sx={{
@@ -9,26 +11,24 @@ export default function Footer() {
         py: 6,
         borderTop: '1px solid',
         borderColor: 'divider',
+        px: 4,
       }}
     >
-      <Container maxWidth="lg">
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          spacing={4}
-          sx={{
-            justifyContent: 'space-between',
-            alignItems: { xs: 'center', md: 'flex-start' },
-            textAlign: { xs: 'center', md: 'left' },
-          }}
-        >
-          <Box>
-              {/* Tagline removed as requested */}
-          </Box>
-              {/* Logo or brand area removed for a cleaner look */}
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        spacing={20}
+        sx={{
+          justifyContent: 'center',
+          alignItems: { xs: 'center', md: 'flex-start' },
+          textAlign: { xs: 'center', md: 'left' },
+          maxWidth: '1200px',
+          mx: 'auto',
+        }}
+      >
 
           <Stack spacing={2} sx={{ alignItems: { xs: 'center', md: 'flex-start' } }}>
             <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem' }}>
-              Enlaces
+              {t('footer.links')}
             </Typography>
             <Link
               component={RouterLink}
@@ -36,7 +36,7 @@ export default function Footer() {
               underline="hover"
               sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
             >
-              Sobre Nosotros
+              {t('footer.about')}
             </Link>
             <Link
               component={RouterLink}
@@ -44,7 +44,7 @@ export default function Footer() {
               underline="hover"
               sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
             >
-              Contacto
+              {t('footer.contact')}
             </Link>
             <Link
               component={RouterLink}
@@ -52,13 +52,13 @@ export default function Footer() {
               underline="hover"
               sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
             >
-              Política de Privacidad
+              {t('footer.privacy')}
             </Link>
           </Stack>
 
           <Stack spacing={2} sx={{ alignItems: { xs: 'center', md: 'flex-start' } }}>
             <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem' }}>
-              Legal
+              {t('footer.legal')}
             </Typography>
             <Link
               component={RouterLink}
@@ -66,7 +66,7 @@ export default function Footer() {
               underline="hover"
               sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
             >
-              Eliminar Cuenta
+              {t('footer.deleteAccount')}
             </Link>
             <Link
               component={RouterLink}
@@ -74,7 +74,7 @@ export default function Footer() {
               underline="hover"
               sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
             >
-              Términos de Servicio
+              {t('footer.terms')}
             </Link>
             <Link
               component={RouterLink}
@@ -82,7 +82,7 @@ export default function Footer() {
               underline="hover"
               sx={{ color: 'text.secondary', '&:hover': { color: 'primary.main' } }}
             >
-              Ayuda
+              {t('footer.help')}
             </Link>
           </Stack>
         </Stack>
@@ -97,10 +97,9 @@ export default function Footer() {
           }}
         >
           <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>
-                © {new Date().getFullYear()} Todos los derechos reservados.
+            {t('footer.copyright', { year: new Date().getFullYear() })}
           </Typography>
         </Box>
-      </Container>
     </Box>
   );
 }
