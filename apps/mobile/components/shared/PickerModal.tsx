@@ -13,6 +13,7 @@ interface PickerOption {
   id: string;
   label: string;
   avatarUrl?: string | null;
+  frameUrl?: string | null;
   icon?: React.ReactNode;
 }
 
@@ -137,15 +138,30 @@ export default function PickerModal({
                           {option.icon}
                         </View>
                       ) : option.avatarUrl ? (
-                        <Image
-                          source={{ uri: option.avatarUrl }}
-                          style={{
-                            width: 32,
-                            height: 32,
-                            borderRadius: 16,
-                            marginRight: 12,
-                          }}
-                        />
+                        <View style={{ position: "relative", marginRight: 12 }}>
+                          <Image
+                            source={{ uri: option.avatarUrl }}
+                            style={{
+                              width: 32,
+                              height: 32,
+                              borderRadius: 16,
+                            }}
+                          />
+                          {option.frameUrl && (
+                            <Image
+                              source={{ uri: option.frameUrl }}
+                              style={{
+                                position: "absolute",
+                                width: 32 * 1.4,
+                                height: 32 * 1.4,
+                                top: -32 * 0.2,
+                                left: -32 * 0.2,
+                                zIndex: 10,
+                              }}
+                              resizeMode="contain"
+                            />
+                          )}
+                        </View>
                       ) : (
                         <View
                           style={{

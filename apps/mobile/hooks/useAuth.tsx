@@ -22,6 +22,7 @@ type AuthContext = {
   userElepad: ElepadUser | null;
   userElepadLoading: boolean;
   refreshUserElepad: () => Promise<void>;
+  updateUserTimezone: (timezone: string) => void;
   // Estado de racha optimista
   streak: StreakState | null;
   markGameCompleted: () => Promise<void>;
@@ -46,35 +47,38 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [streak, setStreak] = useState<StreakState | null>(null);
   const router = useRouter();
   const { showStreakExtended } = useStreakSnackbar();
-  
+
   // Ref para tracking de cambio de día
   const lastCheckedDate = useRef<string | null>(null);
   // Ref para evitar redirects múltiples
   const hasInitialized = useRef(false);
   // Ref para evitar múltiples redirects después de login
   const hasRedirectedAfterSignIn = useRef(false);
-  
+
   // Obtener la fecha local del cliente en formato YYYY-MM-DD
   const getClientDate = () => {
     const now = new Date();
     const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
-  
+
   // Query para obtener racha del backend
-  const streakQuery = useGetStreaksMe({
-    clientDate: getClientDate(),
-  }, {
-    query: {
-      enabled: !!userElepad?.elder, // Solo si es elder
-      staleTime: 0,
-      gcTime: 1000 * 60, // gcTime reemplaza cacheTime en React Query v5
-      refetchOnMount: "always",
-      refetchOnWindowFocus: true,
+  const streakQuery = useGetStreaksMe(
+    {
+      clientDate: getClientDate(),
     },
-  });
+    {
+      query: {
+        enabled: !!userElepad?.elder, // Solo si es elder
+        staleTime: 0,
+        gcTime: 1000 * 60, // gcTime reemplaza cacheTime en React Query v5
+        refetchOnMount: "always",
+        refetchOnWindowFocus: true,
+      },
+    },
+  );
 
   async function loadElepadUserById(userId: string) {
     setUserElepadLoading(true);
@@ -89,6 +93,21 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         return;
       }
       const u = (maybeData ?? (res as unknown)) as ElepadUser;
+
+      // Fetch equipped frame
+      const { data: frameData } = await supabase
+        .from("user_inventory")
+        .select("item:shop_items(asset_url)")
+        .eq("user_id", userId)
+        .eq("equipped", true)
+        .single();
+
+      if (frameData?.item) {
+        // Safe cast as we know the structure from the query
+        const item = frameData.item as unknown as { asset_url: string };
+        u.activeFrameUrl = item.asset_url;
+      }
+
       setUserElepad(u);
     } catch (err) {
       console.warn("loadElepadUserById error", err);
@@ -104,7 +123,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       setStreak(null);
       return;
     }
-    
+
     await streakQuery.refetch();
   };
 
@@ -112,27 +131,35 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   useEffect(() => {
     if (userElepad?.elder && streakQuery.data) {
       const today = getTodayLocal();
-      
+
       // Extraer datos - la respuesta puede estar envuelta en {data: ...}
-      const responseData = 'data' in streakQuery.data ? streakQuery.data.data : streakQuery.data;
-      
+      const responseData =
+        "data" in streakQuery.data ? streakQuery.data.data : streakQuery.data;
+
       // Validar que sea del tipo correcto
-      if (!responseData || typeof responseData !== 'object' || 'message' in responseData) {
+      if (
+        !responseData ||
+        typeof responseData !== "object" ||
+        "message" in responseData
+      ) {
         return; // Es un error, no procesar
       }
-      
+
       const streakData = responseData as GetStreaksMe200;
-      
+
       // Las fechas ya vienen en formato local del cliente desde el backend
-      const hasPlayedToday = isSameLocalDate(streakData.lastPlayedDate || '', today);
-      
+      const hasPlayedToday = isSameLocalDate(
+        streakData.lastPlayedDate || "",
+        today,
+      );
+
       setStreak({
         currentStreak: streakData.currentStreak,
         longestStreak: streakData.longestStreak,
         lastPlayedDate: streakData.lastPlayedDate,
         hasPlayedToday,
       });
-      
+
       lastCheckedDate.current = today;
     } else if (!userElepad?.elder) {
       setStreak(null);
@@ -142,17 +169,17 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   // Detectar cambio de día y resetear hasPlayedToday
   useEffect(() => {
     if (!userElepad?.elder || !streak) return;
-    
+
     const interval = setInterval(() => {
       const today = getTodayLocal();
-      
+
       if (lastCheckedDate.current && lastCheckedDate.current !== today) {
         console.log("🗓️ Cambio de día detectado, reseteando hasPlayedToday");
-        setStreak(prev => prev ? { ...prev, hasPlayedToday: false } : null);
+        setStreak((prev) => (prev ? { ...prev, hasPlayedToday: false } : null));
         lastCheckedDate.current = today;
       }
     }, 60000); // Check cada minuto
-    
+
     return () => clearInterval(interval);
   }, [userElepad, streak]);
 
@@ -162,18 +189,20 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       console.warn("⚠️ Usuario no es elder o no tiene racha inicializada");
       return;
     }
-    
+
     // Solo actualizar si NO ha jugado hoy
     if (streak.hasPlayedToday) {
       console.log("ℹ️ Ya jugó hoy, no se extiende la racha");
       return;
     }
-    
+
     const today = getTodayLocal();
     const newStreakValue = streak.currentStreak + 1;
-    
+
     // ✅ Actualización optimista inmediata
-    console.log(`🔥 Actualización optimista: ${streak.currentStreak} -> ${newStreakValue}`);
+    console.log(
+      `🔥 Actualización optimista: ${streak.currentStreak} -> ${newStreakValue}`,
+    );
     setStreak({
       ...streak,
       currentStreak: newStreakValue,
@@ -181,12 +210,12 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       lastPlayedDate: today,
       hasPlayedToday: true,
     });
-    
+
     // Mostrar toast inmediatamente
     showStreakExtended(newStreakValue);
-    
+
     // 🌐 Sincronizar con backend en background (sin await para no bloquear)
-    syncStreak().catch(err => {
+    syncStreak().catch((err) => {
       console.error("❌ Error sincronizando racha:", err);
       // Revertir en caso de error
       streakQuery.refetch();
@@ -224,13 +253,17 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         setUser(session?.user ?? null);
         if (session?.user) {
           // If this is a new sign up, wait a bit for the database to sync
-          if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-            await new Promise(resolve => setTimeout(resolve, 300));
+          if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
+            await new Promise((resolve) => setTimeout(resolve, 300));
           }
           await loadElepadUserById(session.user.id);
           // Solo redirigir a home si el usuario acaba de iniciar sesión explícitamente
           // Y SOLO la primera vez (no en refrescos de token o window focus)
-          if (event === 'SIGNED_IN' && hasInitialized.current && !hasRedirectedAfterSignIn.current) {
+          if (
+            event === "SIGNED_IN" &&
+            hasInitialized.current &&
+            !hasRedirectedAfterSignIn.current
+          ) {
             console.log("✅ Redirigiendo a home después de login");
             hasRedirectedAfterSignIn.current = true;
             router.replace("/home");
@@ -241,7 +274,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
           // Resetear flag cuando se cierra sesión
           hasRedirectedAfterSignIn.current = false;
           // Solo redirigir a login si ya se había inicializado (evitar redirect en mount inicial)
-          if (hasInitialized.current && event === 'SIGNED_OUT') {
+          if (hasInitialized.current && event === "SIGNED_OUT") {
             console.log("🚪 Redirigiendo a login después de logout");
             router.replace("/");
           }
@@ -286,6 +319,12 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     if (id) await loadElepadUserById(id);
   };
 
+  const updateUserTimezone = (timezone: string) => {
+    if (userElepad) {
+      setUserElepad({ ...userElepad, timezone });
+    }
+  };
+
   const value = {
     session,
     user,
@@ -294,6 +333,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     userElepad,
     userElepadLoading,
     refreshUserElepad,
+    updateUserTimezone,
     streak,
     markGameCompleted,
     syncStreak,
@@ -312,4 +352,6 @@ export type ElepadUser = {
   avatarUrl?: string;
   groupId?: string;
   elder: boolean;
+  timezone?: string;
+  activeFrameUrl?: string;
 };

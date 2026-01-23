@@ -8,6 +8,7 @@ interface FamilyMember {
   id: string;
   displayName: string;
   avatarUrl?: string | null;
+  activeFrameUrl?: string | null;
 }
 
 interface MentionInputProps {
@@ -48,7 +49,7 @@ export default function MentionInput({
 
   // Filtrar al usuario actual de las opciones
   const availableMembers = familyMembers.filter(
-    (member) => member.id !== currentUserId
+    (member) => member.id !== currentUserId,
   );
 
   // Convertir formato interno <@user_id> a formato de display @nombre
@@ -58,7 +59,7 @@ export default function MentionInput({
     availableMembers.forEach((member) => {
       const internalMention = `<@${member.id}>`;
       // Eliminar espacios del nombre para facilitar el parsing
-      const displayName = member.displayName.replace(/\s+/g, '');
+      const displayName = member.displayName.replace(/\s+/g, "");
       result = result.split(internalMention).join(`@${displayName}`);
     });
     return result;
@@ -70,7 +71,7 @@ export default function MentionInput({
     let result = displayValue;
     availableMembers.forEach((member) => {
       // Eliminar espacios del nombre para facilitar el parsing
-      const displayName = member.displayName.replace(/\s+/g, '');
+      const displayName = member.displayName.replace(/\s+/g, "");
       const displayMention = `@${displayName}`;
       result = result.split(displayMention).join(`<@${member.id}>`);
     });
@@ -105,22 +106,22 @@ export default function MentionInput({
     } else {
       setShowMentionMenu(false);
     }
-    
+
     // Convertir a formato interno antes de guardar
     const internalText = toInternalValue(text);
     onChangeText(internalText);
   };
 
   const handleMentionSelect = (member: FamilyMember) => {
-    const displayName = member.displayName.replace(/\s+/g, '');
+    const displayName = member.displayName.replace(/\s+/g, "");
     const beforeMention = displayValue.substring(0, mentionStartPos);
     const afterMention = displayValue.substring(
-      mentionStartPos + mentionSearch.length + 1
+      mentionStartPos + mentionSearch.length + 1,
     );
-    
+
     // Crear el nuevo valor en formato display
     const newDisplayValue = `${beforeMention}@${displayName} ${afterMention}`;
-    
+
     // Convertir a formato interno para guardar
     const newInternalValue = toInternalValue(newDisplayValue);
 
@@ -137,7 +138,7 @@ export default function MentionInput({
   };
 
   const filteredMembers = availableMembers.filter((member) => {
-    const searchName = member.displayName.replace(/\s+/g, '').toLowerCase();
+    const searchName = member.displayName.replace(/\s+/g, "").toLowerCase();
     return searchName.includes(mentionSearch.toLowerCase());
   });
 
@@ -161,13 +162,14 @@ export default function MentionInput({
       <PickerModal
         visible={showMentionMenu}
         title="Mencionar a:"
-        options={filteredMembers.map(member => ({
+        options={filteredMembers.map((member) => ({
           id: member.id,
           label: member.displayName,
-          avatarUrl: member.avatarUrl
+          avatarUrl: member.avatarUrl,
+          frameUrl: member.activeFrameUrl,
         }))}
         onSelect={(option) => {
-          const member = filteredMembers.find(m => m.id === option.id);
+          const member = filteredMembers.find((m) => m.id === option.id);
           if (member) handleMentionSelect(member);
         }}
       />

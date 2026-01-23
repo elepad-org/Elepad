@@ -53,6 +53,16 @@ export const COLORS = {
 
   // Borders and separators
   separator: "#E5E5EA", // Light gray
+
+  // Custom shades for specific UI elements
+  purple: {
+    light: "#D1D3E8",
+    dark: "#5b507a",
+  },
+  gray: {
+    medium: "#9eadc8",
+    light: "#F2F2F7",
+  },
 } as const;
 
 /** Apple-style subtle shadows. */

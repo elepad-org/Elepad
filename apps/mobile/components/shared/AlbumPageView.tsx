@@ -139,8 +139,8 @@ const styles = StyleSheet.create({
     ...SHADOWS.medium,
     // Slight rotation for realistic effect
     transform: [{ rotate: "-2deg" }],
-    maxWidth: SCREEN_HEIGHT * 0.50, // In landscape, height is smaller dimension
-    maxHeight: SCREEN_HEIGHT * 0.65,
+    maxWidth: SCREEN_HEIGHT * 0.45, // In landscape, height is smaller dimension
+    maxHeight: SCREEN_HEIGHT * 0.60,
   },
   photoWeb: {
     width: SCREEN_HEIGHT * 0.67,
@@ -149,14 +149,14 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.border,
   },
   photoMobile: {
-    width: SCREEN_HEIGHT * 0.4,
-    height: SCREEN_HEIGHT * 0.4,
+    width: SCREEN_HEIGHT * 0.35,
+    height: SCREEN_HEIGHT * 0.35,
     borderRadius: 2,
     backgroundColor: COLORS.border,
   },
   placeholderPhotoMobile: {
-    width: SCREEN_HEIGHT * 0.4,
-    height: SCREEN_HEIGHT * 0.4,
+    width: SCREEN_HEIGHT * 0.35,
+    height: SCREEN_HEIGHT * 0.35,
     borderRadius: 2,
     backgroundColor: COLORS.backgroundSecondary,
     justifyContent: "center",
@@ -217,15 +217,15 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   narrativeTextMobile: {
-    fontSize: 20,
-    lineHeight: 32,
+    fontSize: 16,
+    lineHeight: 28,
     color: "#2C2416", // Dark brown for good contrast
     fontFamily: "Georgia", // Serif font for nostalgic feel
     textAlign: "left",
   },
   pageIndicator: {
     position: "absolute",
-    bottom: 10,
+    bottom: 0,
     right: 30,
   },
   pageIndicatorText: {

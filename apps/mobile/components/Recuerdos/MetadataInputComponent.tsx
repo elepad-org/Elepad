@@ -10,6 +10,7 @@ interface FamilyMember {
   id: string;
   displayName: string;
   avatarUrl?: string | null;
+  activeFrameUrl?: string | null;
 }
 
 interface MetadataInputProps {

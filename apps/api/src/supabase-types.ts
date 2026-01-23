@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -382,6 +382,52 @@ export type Database = {
           },
         ]
       }
+      memory_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          memory_id: string
+          sticker_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          memory_id: string
+          sticker_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          memory_id?: string
+          sticker_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memory_reactions_memory_id_fkey"
+            columns: ["memory_id"]
+            isOneToOne: false
+            referencedRelation: "memories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "memory_reactions_sticker_id_fkey"
+            columns: ["sticker_id"]
+            isOneToOne: false
+            referencedRelation: "shop_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "memory_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       memoriesAlbumPages: {
         Row: {
           albumId: string
@@ -637,6 +683,41 @@ export type Database = {
           },
         ]
       }
+      point_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          reference_id: string | null
+          source: Database["public"]["Enums"]["transaction_source"]
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          reference_id?: string | null
+          source: Database["public"]["Enums"]["transaction_source"]
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          reference_id?: string | null
+          source?: Database["public"]["Enums"]["transaction_source"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "point_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       puzzles: {
         Row: {
           createdAt: string
@@ -661,6 +742,39 @@ export type Database = {
           gameType?: Database["public"]["Enums"]["game_type"]
           id?: string
           title?: string | null
+        }
+        Relationships: []
+      }
+      shop_items: {
+        Row: {
+          asset_url: string | null
+          cost: number
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          title: string
+          type: Database["public"]["Enums"]["shop_item_type"]
+        }
+        Insert: {
+          asset_url?: string | null
+          cost: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          title: string
+          type: Database["public"]["Enums"]["shop_item_type"]
+        }
+        Update: {
+          asset_url?: string | null
+          cost?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          title?: string
+          type?: Database["public"]["Enums"]["shop_item_type"]
         }
         Relationships: []
       }
@@ -794,6 +908,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_inventory: {
+        Row: {
+          acquired_at: string
+          equipped: boolean | null
+          id: string
+          item_id: string
+          user_id: string
+        }
+        Insert: {
+          acquired_at?: string
+          equipped?: boolean | null
+          id?: string
+          item_id: string
+          user_id: string
+        }
+        Update: {
+          acquired_at?: string
+          equipped?: boolean | null
+          id?: string
+          item_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_inventory_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "shop_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_inventory_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_streaks: {
         Row: {
           createdAt: string
@@ -843,6 +996,8 @@ export type Database = {
           google_calendar_id: string | null
           groupId: string | null
           id: string
+          points_balance: number
+          timezone: string | null
           updatedAt: string
         }
         Insert: {
@@ -855,6 +1010,8 @@ export type Database = {
           google_calendar_id?: string | null
           groupId?: string | null
           id: string
+          points_balance?: number
+          timezone?: string | null
           updatedAt?: string
         }
         Update: {
@@ -867,6 +1024,8 @@ export type Database = {
           google_calendar_id?: string | null
           groupId?: string | null
           id?: string
+          points_balance?: number
+          timezone?: string | null
           updatedAt?: string
         }
         Relationships: [
@@ -907,6 +1066,12 @@ export type Database = {
     Enums: {
       album_status: "processing" | "ready" | "error"
       game_type: "memory" | "logic" | "attention" | "reaction"
+      shop_item_type: "sticker" | "frame" | "animation" | "other"
+      transaction_source:
+        | "game_reward"
+        | "achievement"
+        | "purchase"
+        | "admin_adjustment"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1036,6 +1201,13 @@ export const Constants = {
     Enums: {
       album_status: ["processing", "ready", "error"],
       game_type: ["memory", "logic", "attention", "reaction"],
+      shop_item_type: ["sticker", "frame", "animation", "other"],
+      transaction_source: [
+        "game_reward",
+        "achievement",
+        "purchase",
+        "admin_adjustment",
+      ],
     },
   },
 } as const

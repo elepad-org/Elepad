@@ -22,6 +22,7 @@ import StatisticsChart from "@/components/Historial/StatisticsChart";
 import { useAuth } from "@/hooks/useAuth";
 import DropdownSelect from "@/components/shared/DropdownSelect";
 import { BackButton } from "@/components/shared/BackButton";
+import { formatInUserTimezone } from "@/lib/timezoneHelpers";
 
 const PAGE_SIZE = 50;
 
@@ -45,9 +46,11 @@ type Props = {
 function AttemptItem({
   attempt,
   gameType,
+  userTimezone,
 }: {
   attempt: Attempt;
   gameType: string;
+  userTimezone?: string;
 }) {
   // Mapeo de colores por tipo de juego
   const gameColors: Record<string, string> = {
@@ -63,12 +66,11 @@ function AttemptItem({
 
   let dateFormatted = "-";
   if (attempt?.startedAt) {
-    const dateObj = new Date(attempt.startedAt);
-    const day = dateObj.getDate().toString().padStart(2, "0");
-    const month = (dateObj.getMonth() + 1).toString().padStart(2, "0");
-    const hours = dateObj.getHours().toString().padStart(2, "0");
-    const minutes = dateObj.getMinutes().toString().padStart(2, "0");
-    dateFormatted = `${day}/${month} - ${hours}:${minutes}`;
+    dateFormatted = formatInUserTimezone(
+      attempt.startedAt,
+      "dd/MM - HH:mm",
+      userTimezone
+    );
   }
 
   let durationFormatted = "-";
@@ -464,7 +466,11 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
               data={attempts}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
-                <AttemptItem attempt={item} gameType={detectGameType(item)} />
+                <AttemptItem 
+                  attempt={item} 
+                  gameType={detectGameType(item)}
+                  userTimezone={userElepad?.timezone}
+                />
               )}
               ListHeaderComponent={
                 <>

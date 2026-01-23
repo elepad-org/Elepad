@@ -1,28 +1,30 @@
-import LegalNavbar from '../components/LegalNavbar';
+import Navbar from '../components/Navbar';
 import { Container, Typography, Box, Paper } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 export default function TerminosDeServicio() {
+  const { t } = useTranslation();
   return (
     <>
-      <LegalNavbar />
+      <Navbar variant="legal" />
       <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default', py: 8 }}>
         <Container maxWidth="md">
           <Paper sx={{ p: 4, borderRadius: 3 }}>
             <Typography variant="h3" sx={{ fontWeight: 700, mb: 2, color: 'primary.main', textAlign: 'center' }}>
-              Términos de Servicio
+              {t('terms.title')}
             </Typography>
             <Typography variant="body1" sx={{ mb: 4, color: 'text.secondary', textAlign: 'center' }}>
-              Al utilizar Elepad, aceptas nuestros términos y condiciones. Nos reservamos el derecho de modificar estos términos en cualquier momento. El uso de la plataforma implica la aceptación de las políticas de privacidad y el compromiso de utilizar el servicio de manera responsable y respetuosa.
+              {t('terms.description')}
             </Typography>
             <Box>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                - No compartas información personal de terceros sin consentimiento.
+                - {t('terms.rules.rule1')}
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                - No utilices la plataforma para actividades ilícitas o dañinas.
+                - {t('terms.rules.rule2')}
               </Typography>
               <Typography variant="body2" sx={{ mb: 1 }}>
-                - Respeta la privacidad y seguridad de todos los usuarios.
+                - {t('terms.rules.rule3')}
               </Typography>
             </Box>
           </Paper>

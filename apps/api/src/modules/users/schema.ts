@@ -8,6 +8,7 @@ export const UserSchema = z
     avatarUrl: z.url().nullable(),
     groupId: z.uuid().nullable(),
     elder: z.boolean(),
+    timezone: z.string().nullable(),
   })
   .openapi("User");
 
@@ -17,6 +18,7 @@ export const UpdateUserSchema = z
   .object({
     displayName: z.string().min(1).optional(),
     avatarUrl: z.string().optional(),
+    timezone: z.string().optional(),
   })
   .strict()
   .openapi("UpdateUser");

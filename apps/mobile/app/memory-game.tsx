@@ -20,6 +20,7 @@ export default function MemoryGameScreen() {
   const [showModeSelectionDialog, setShowModeSelectionDialog] = useState(true);
   const [showHelpDialog, setShowHelpDialog] = useState(false);
   const [selectedMode, setSelectedMode] = useState<GameMode | null>(null);
+  const [gameResetCounter, setGameResetCounter] = useState(0);
   const [gameResults, setGameResults] = useState<{
     moves: number;
     timeElapsed: number;
@@ -86,9 +87,7 @@ export default function MemoryGameScreen() {
   const handlePlayAgain = useCallback(() => {
     setShowResultsDialog(false);
     setGameResults(null);
-    // NO cambiar el modo ni mostrar el modal de selección
-    // El juego se reiniciará automáticamente al cerrar el diálogo
-    // y el usuario puede usar el botón "Reiniciar" del tablero
+    setGameResetCounter((prev) => prev + 1);
   }, []);
 
   const handleBackToGames = useCallback(() => {
@@ -119,6 +118,7 @@ export default function MemoryGameScreen() {
           {/* Tablero de juego */}
           {selectedMode && (
             <MemoryGameBoard
+              key={`memory-${selectedMode}-${gameResetCounter}`}
               mode={selectedMode}
               onQuit={handleQuit}
               onComplete={handleComplete}

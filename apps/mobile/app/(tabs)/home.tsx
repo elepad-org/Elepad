@@ -29,6 +29,7 @@ import StreakCounter from "@/components/StreakCounter";
 import HighlightedMentionText from "@/components/Recuerdos/HighlightedMentionText";
 import { useNotifications } from "@/hooks/useNotifications";
 import { GAMES_INFO } from "@/constants/gamesInfo";
+import { formatInUserTimezone, toUserLocalTime } from "@/lib/timezoneHelpers";
 import type { ImageSourcePropType } from "react-native";
 import memoryImage from "@/assets/images/memory2.png";
 import netImage from "@/assets/images/net2.png";
@@ -284,20 +285,37 @@ export default function HomeScreen() {
             </Pressable>
 
             {/* Avatar */}
-            {userElepad?.avatarUrl ? (
-              <Avatar.Image
-                size={55}
-                source={{ uri: userElepad?.avatarUrl }}
-                style={styles.avatar}
-              />
-            ) : (
-              <Avatar.Text
-                size={55}
-                label={getInitials(displayName)}
-                style={[styles.avatar, { backgroundColor: COLORS.primary }]}
-                labelStyle={{ color: COLORS.white, fontSize: 22 }}
-              />
-            )}
+            {/* Avatar with Frame */}
+            <View style={{ position: "relative" }}>
+              {userElepad?.avatarUrl ? (
+                <Avatar.Image
+                  size={55}
+                  source={{ uri: userElepad?.avatarUrl }}
+                  style={styles.avatar}
+                />
+              ) : (
+                <Avatar.Text
+                  size={55}
+                  label={getInitials(displayName)}
+                  style={[styles.avatar, { backgroundColor: COLORS.primary }]}
+                  labelStyle={{ color: COLORS.white, fontSize: 22 }}
+                />
+              )}
+              {userElepad?.activeFrameUrl && (
+                <Image
+                  source={{ uri: userElepad?.activeFrameUrl }}
+                  style={{
+                    position: "absolute",
+                    width: 55 * 1.4,
+                    height: 55 * 1.4,
+                    top: -55 * 0.2,
+                    left: -55 * 0.2,
+                    zIndex: 10,
+                  }}
+                  resizeMode="contain"
+                />
+              )}
+            </View>
           </View>
         </View>
 
@@ -347,13 +365,10 @@ export default function HomeScreen() {
                         />
                       )}
                       <Text style={styles.memoryDate}>
-                        {new Date(lastMemory.createdAt).toLocaleDateString(
-                          "es",
-                          {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          },
+                        {formatInUserTimezone(
+                          lastMemory.createdAt,
+                          "d 'de' MMMM 'de' yyyy",
+                          userElepad?.timezone
                         )}
                       </Text>
                     </View>
@@ -382,11 +397,11 @@ export default function HomeScreen() {
                       />
                     )}
                     <Text style={styles.memoryDateDark}>
-                      {new Date(lastMemory.createdAt).toLocaleDateString("es", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })}
+                      {formatInUserTimezone(
+                        lastMemory.createdAt,
+                        "d 'de' MMMM 'de' yyyy",
+                        userElepad?.timezone
+                      )}
                     </Text>
                   </View>
                 </View>
@@ -483,17 +498,21 @@ export default function HomeScreen() {
                     },
                     index,
                   ) => {
-                    const activityDate = new Date(activity.startsAt);
+                    const activityDate = toUserLocalTime(activity.startsAt, userElepad?.timezone);
+                    const now = toUserLocalTime(new Date(), userElepad?.timezone);
+                    const tomorrow = new Date(now);
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    
                     const isToday =
-                      activityDate.toDateString() === new Date().toDateString();
+                      activityDate.toDateString() === now.toDateString();
                     const isTomorrow =
-                      activityDate.toDateString() ===
-                      new Date(Date.now() + 86400000).toDateString();
+                      activityDate.toDateString() === tomorrow.toDateString();
 
-                    let dateLabel = activityDate.toLocaleDateString("es", {
-                      day: "numeric",
-                      month: "short",
-                    });
+                    let dateLabel = formatInUserTimezone(
+                      activity.startsAt,
+                      "d MMM",
+                      userElepad?.timezone
+                    );
 
                     if (isToday) dateLabel = "Hoy";
                     if (isTomorrow) dateLabel = "Mañana";
@@ -502,11 +521,14 @@ export default function HomeScreen() {
                       <Pressable
                         key={activity.id}
                         onPress={() => {
-                          console.log("🏠 Home: Navigating to calendar with activity", {
-                            activityId: activity.id,
-                            title: activity.title,
-                            startsAt: activity.startsAt,
-                          });
+                          console.log(
+                            "🏠 Home: Navigating to calendar with activity",
+                            {
+                              activityId: activity.id,
+                              title: activity.title,
+                              startsAt: activity.startsAt,
+                            },
+                          );
                           // Navegar al tab de calendario y abrir el detalle del evento
                           router.navigate({
                             pathname: "/(tabs)/home",
@@ -516,7 +538,9 @@ export default function HomeScreen() {
                             },
                           });
                         }}
-                        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                        style={({ pressed }) => ({
+                          opacity: pressed ? 0.7 : 1,
+                        })}
                       >
                         <Animated.View
                           entering={ZoomIn.duration(200).delay(index * 50)}
@@ -525,10 +549,11 @@ export default function HomeScreen() {
                           <View style={styles.eventTime}>
                             <Text style={styles.eventDate}>{dateLabel}</Text>
                             <Text style={styles.eventHour}>
-                              {activityDate.toLocaleTimeString("es", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
+                              {formatInUserTimezone(
+                                activity.startsAt,
+                                "HH:mm",
+                                userElepad?.timezone
+                              )}
                             </Text>
                           </View>
                           <View style={styles.eventDivider} />
@@ -618,12 +643,11 @@ export default function HomeScreen() {
                   {getGameInfo(lastAttempt.gameType || "").name}
                 </Text>
                 <Text style={styles.gameTime}>
-                  {new Date(lastAttempt.startedAt).toLocaleDateString("es", {
-                    day: "numeric",
-                    month: "long",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {formatInUserTimezone(
+                    lastAttempt.startedAt,
+                    "d 'de' MMMM, HH:mm",
+                    userElepad?.timezone
+                  )}
                 </Text>
                 {/* Mostrar quién jugó solo si el usuario actual NO es elder (es ayudante) */}
                 {!userElepad?.elder && lastAttempt.user && (

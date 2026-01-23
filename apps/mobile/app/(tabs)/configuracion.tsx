@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { StatusBar, ScrollView, View } from "react-native";
+import { StatusBar, ScrollView, View, FlatList } from "react-native";
 import {
   Button,
   Card,
@@ -8,6 +8,7 @@ import {
   Portal,
   TextInput,
   Switch,
+  Dialog,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/hooks/useAuth";
@@ -23,7 +24,7 @@ export default function ConfiguracionScreen() {
   const router = useRouter();
   const { showToast } = useToast();
 
-  const { userElepad, refreshUserElepad, signOut, userElepadLoading } =
+  const { userElepad, refreshUserElepad, signOut, userElepadLoading, updateUserTimezone } =
     useAuth();
 
   // Mostrar loading si está cargando o si no hay usuario aún
@@ -45,6 +46,7 @@ export default function ConfiguracionScreen() {
   const displayName = userElepad?.displayName?.trim() || "Usuario";
   const email = userElepad?.email || "-";
   const avatarUrl = userElepad?.avatarUrl || "";
+  const activeFrameUrl = userElepad?.activeFrameUrl;
 
   const [editExpanded, setEditExpanded] = useState(false);
   const [formName, setFormName] = useState(displayName);
@@ -52,6 +54,8 @@ export default function ConfiguracionScreen() {
   const [photoOpen, setPhotoOpen] = useState(false);
   const [googleCalendarEnabled, setGoogleCalendarEnabled] = useState(false);
   const [loadingGoogleCalendar, setLoadingGoogleCalendar] = useState(false);
+  const [timezone, setTimezone] = useState(userElepad?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone);
+  const [timezoneDialogVisible, setTimezoneDialogVisible] = useState(false);
   const getInitials = (name: string) =>
     name
       .split(/\s+/)
@@ -61,6 +65,22 @@ export default function ConfiguracionScreen() {
       .join("")
       .toUpperCase() || "U";
   const initials = useMemo(() => getInitials(displayName), [displayName]);
+
+  const timezones = [
+    'America/Argentina/Buenos_Aires',
+    'America/New_York',
+    'America/Los_Angeles',
+    'America/Mexico_City',
+    'America/Sao_Paulo',
+    'Europe/London',
+    'Europe/Paris',
+    'Europe/Madrid',
+    'Europe/Berlin',
+    'Asia/Tokyo',
+    'Asia/Shanghai',
+    'Australia/Sydney',
+    'Pacific/Auckland',
+  ];
 
   const handleGoogleCalendarToggle = async () => {
     if (!userElepad?.id) return;
@@ -86,6 +106,32 @@ export default function ConfiguracionScreen() {
     }
   };
 
+  const handleSaveTimezone = async (tz: string) => {
+    if (!userElepad?.id) return;
+    
+    // Actualizar optimísticamente el timezone en el estado sin loading
+    updateUserTimezone(tz);
+    
+    try {
+      await patchUsersId(userElepad.id, { timezone: tz });
+      showToast({
+        message: "Zona horaria actualizada correctamente",
+        type: "success",
+      });
+    } catch (e: unknown) {
+      // Si falla, revertir al timezone original
+      updateUserTimezone(userElepad.timezone || 'America/Argentina/Buenos_Aires');
+      const msg =
+        e instanceof Error
+          ? e.message
+          : "Error al actualizar zona horaria";
+      showToast({
+        message: msg,
+        type: "error",
+      });
+    }
+  };
+
   return (
     <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
@@ -101,6 +147,7 @@ export default function ConfiguracionScreen() {
           name={displayName}
           email={email}
           avatarUrl={avatarUrl}
+          frameUrl={activeFrameUrl} // Pass the frame URL
           onEditPhoto={() => setPhotoOpen(true)}
         />
 
@@ -221,6 +268,14 @@ export default function ConfiguracionScreen() {
             />
             <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
             <List.Item
+              title="Zona horaria"
+              description={timezone}
+              left={(props) => <List.Icon {...props} icon="clock-outline" />}
+              right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              onPress={() => setTimezoneDialogVisible(true)}
+            />
+            <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
+            <List.Item
               title="Grupo familiar"
               left={(props) => <List.Icon {...props} icon="account-group" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
@@ -246,6 +301,25 @@ export default function ConfiguracionScreen() {
           </Button>
         </View>
         <Portal>
+          <Dialog visible={timezoneDialogVisible} onDismiss={() => setTimezoneDialogVisible(false)}>
+            <Dialog.Title>Seleccionar zona horaria</Dialog.Title>
+            <Dialog.Content style={{ maxHeight: 300 }}>
+              <FlatList
+                data={timezones}
+                keyExtractor={(item) => item}
+                renderItem={({ item }) => (
+                  <List.Item
+                    title={item}
+                    onPress={() => {
+                      setTimezone(item);
+                      setTimezoneDialogVisible(false);
+                      handleSaveTimezone(item);
+                    }}
+                  />
+                )}
+              />
+            </Dialog.Content>
+          </Dialog>
           <UpdatePhotoDialog
             visible={photoOpen}
             userId={userElepad?.id || ""}

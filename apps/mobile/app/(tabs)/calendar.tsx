@@ -64,6 +64,7 @@ export default function CalendarScreen() {
         displayName: string;
         avatarUrl: string | null;
         elder: boolean;
+        activeFrameUrl: string | null;
       }>;
     }
 
@@ -75,6 +76,7 @@ export default function CalendarScreen() {
         displayName: string;
         avatarUrl: string | null;
         elder: boolean;
+        activeFrameUrl: string | null;
       }
     >();
     for (const m of raw) {
@@ -84,6 +86,7 @@ export default function CalendarScreen() {
         displayName: m.displayName,
         avatarUrl: m.avatarUrl ?? null,
         elder: m.elder ?? false,
+        activeFrameUrl: m.activeFrameUrl ?? null,
       });
     }
     return Array.from(byId.values());

@@ -1,8 +1,10 @@
 import { Box, Container, Typography, Button, Stack } from '@mui/material';
 import { ArrowForward, Download } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import eleDef from '../assets/ele-def2.png';
 
 export default function Hero() {
+  const { t } = useTranslation();
   return (
     <Box
       sx={{
@@ -64,7 +66,7 @@ export default function Hero() {
                 letterSpacing: '-0.02em',
               }}
             >
-              Bienvenido a{' '}
+              {t('hero.title')}{' '}
               <Box
                 component="span"
                 sx={{
@@ -72,7 +74,7 @@ export default function Hero() {
                   display: 'inline-block',
                 }}
               >
-                Elepad
+                {t('hero.elepad')}
               </Box>
             </Typography>
 
@@ -88,8 +90,7 @@ export default function Hero() {
                 mx: { xs: 'auto', md: 0 },
               }}
             >
-              La plataforma que conecta generaciones a través de juegos
-              cognitivos, recuerdos compartidos y momentos especiales.
+              {t('hero.subtitle')}
             </Typography>
 
             <Stack
@@ -114,7 +115,7 @@ export default function Hero() {
                   },
                 }}
               >
-                Descargar App
+                {t('nav.download')}
               </Button>
               <Button
                 variant="outlined"
@@ -132,7 +133,7 @@ export default function Hero() {
                   },
                 }}
               >
-                Saber Más
+                {t('nav.features')}
               </Button>
             </Stack>
           </Box>

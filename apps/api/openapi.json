@@ -48,6 +48,10 @@
           },
           "elder": {
             "type": "boolean"
+          },
+          "timezone": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
@@ -56,7 +60,8 @@
           "displayName",
           "avatarUrl",
           "groupId",
-          "elder"
+          "elder",
+          "timezone"
         ]
       },
       "Error": {
@@ -89,6 +94,9 @@
             "minLength": 1
           },
           "avatarUrl": {
+            "type": "string"
+          },
+          "timezone": {
             "type": "string"
           }
         },
@@ -289,6 +297,61 @@
           "startsAt"
         ],
         "additionalProperties": false
+      },
+      "MemoryWithReactions": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Memory"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "reactions": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Reaction"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "Reaction": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "memoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stickerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stickerUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "memoryId",
+          "userId",
+          "stickerId",
+          "stickerUrl",
+          "createdAt"
+        ]
       },
       "Memory": {
         "type": "object",
@@ -1280,6 +1343,157 @@
           "totalPoints",
           "earnedPoints"
         ]
+      },
+      "ShopItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "cost": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "sticker",
+              "frame",
+              "animation",
+              "other"
+            ]
+          },
+          "assetUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "default": true
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "cost",
+          "type",
+          "assetUrl",
+          "createdAt"
+        ]
+      },
+      "UserInventory": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "equipped": {
+            "type": "boolean",
+            "default": false
+          },
+          "acquiredAt": {
+            "type": "string"
+          },
+          "item": {
+            "$ref": "#/components/schemas/ShopItem"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "itemId",
+          "acquiredAt"
+        ]
+      },
+      "BuyItemResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "newBalance": {
+            "type": "integer"
+          },
+          "inventoryItem": {
+            "$ref": "#/components/schemas/UserInventory"
+          }
+        },
+        "required": [
+          "success",
+          "newBalance",
+          "inventoryItem"
+        ]
+      },
+      "BuyItemRequest": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "itemId"
+        ]
+      },
+      "UserBalance": {
+        "type": "object",
+        "properties": {
+          "pointsBalance": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "pointsBalance"
+        ]
+      },
+      "EquipItemResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
+      },
+      "EquipItemRequest": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "itemId"
+        ]
       }
     },
     "parameters": {}
@@ -1671,13 +1885,18 @@
                         },
                         "elder": {
                           "type": "boolean"
+                        },
+                        "activeFrameUrl": {
+                          "type": "string",
+                          "nullable": true
                         }
                       },
                       "required": [
                         "id",
                         "displayName",
                         "avatarUrl",
-                        "elder"
+                        "elder",
+                        "activeFrameUrl"
                       ]
                     },
                     "members": {
@@ -1698,13 +1917,18 @@
                           },
                           "elder": {
                             "type": "boolean"
+                          },
+                          "activeFrameUrl": {
+                            "type": "string",
+                            "nullable": true
                           }
                         },
                         "required": [
                           "id",
                           "displayName",
                           "avatarUrl",
-                          "elder"
+                          "elder",
+                          "activeFrameUrl"
                         ]
                       }
                     }
@@ -2559,7 +2783,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/Memory"
+                        "$ref": "#/components/schemas/MemoryWithReactions"
                       }
                     },
                     "total": {
@@ -2939,7 +3163,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Memory"
+                  "$ref": "#/components/schemas/MemoryWithReactions"
                 }
               }
             }
@@ -3283,6 +3507,89 @@
           },
           "401": {
             "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/memories/{id}/reaction": {
+      "post": {
+        "tags": [
+          "memories"
+        ],
+        "operationId": "addReaction",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "stickerId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "stickerId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reaction added/updated successfully"
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Memory not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -5289,6 +5596,230 @@
                   "required": [
                     "success"
                   ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shop/items": {
+      "get": {
+        "tags": [
+          "shop"
+        ],
+        "summary": "List available shop items",
+        "responses": {
+          "200": {
+            "description": "List of active items in the shop",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ShopItem"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shop/inventory": {
+      "get": {
+        "tags": [
+          "shop"
+        ],
+        "summary": "Get current user's inventory",
+        "responses": {
+          "200": {
+            "description": "List of items owned by the user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserInventory"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shop/buy": {
+      "post": {
+        "tags": [
+          "shop"
+        ],
+        "summary": "Purchase an item",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuyItemRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Purchase successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuyItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Insufficient funds or already owned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Only elders can purchase",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Item not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shop/balance": {
+      "get": {
+        "tags": [
+          "shop"
+        ],
+        "summary": "Get user point balance",
+        "responses": {
+          "200": {
+            "description": "User current points balance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserBalance"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shop/equip": {
+      "post": {
+        "tags": [
+          "shop"
+        ],
+        "summary": "Equip an item (e.g. Frame)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EquipItemRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item equipped successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EquipItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid item type or request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Item not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }

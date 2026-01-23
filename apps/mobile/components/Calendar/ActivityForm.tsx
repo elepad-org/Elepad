@@ -24,6 +24,7 @@ import SaveButton from "../shared/SaveButton";
 import MentionInput from "../Recuerdos/MentionInput";
 import DropdownSelect from "../shared/DropdownSelect";
 import { useAuth } from "@/hooks/useAuth";
+import { formatInUserTimezone } from "@/lib/timezoneHelpers";
 
 // Register locale for paper-dates
 registerTranslation("es", es);
@@ -39,6 +40,7 @@ type FamilyMember = {
   displayName: string;
   avatarUrl?: string | null;
   elder?: boolean;
+  activeFrameUrl?: string | null;
 };
 
 type Props = {
@@ -157,6 +159,7 @@ const PaperDateTimeWeb = ({
             ? value.toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
+                hour12: false,
               })
             : "--:--"}
         </Button>
@@ -333,10 +336,7 @@ export default function ActivityForm({
 
   const formatDateTime = (d?: Date) => {
     if (!d) return "No definido";
-    return `${d.toLocaleDateString()} ${d.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    })}`;
+    return formatInUserTimezone(d, "dd/MM/yyyy HH:mm", userElepad?.timezone);
   };
 
   return (
@@ -382,6 +382,7 @@ export default function ActivityForm({
                       key: elder.id,
                       label: elder.displayName,
                       avatarUrl: elder.avatarUrl || null,
+                      frameUrl: elder.activeFrameUrl || null,
                     }))}
                     onSelect={(value) => setAssignedTo(value)}
                     placeholder="Seleccionar adulto mayor"
