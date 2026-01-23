@@ -46,8 +46,9 @@ export function formatInUserTimezone(
 ): string {
   const date = typeof utcDate === 'string' ? new Date(utcDate) : utcDate;
   const userTz = getUserTimezone(timezone);
+  const localDate = toUserLocalTime(date, userTz);
   
-  return format(toUserLocalTime(date, userTz), formatString, {
+  return format(localDate, formatString, {
     timeZone: userTz,
   });
 }

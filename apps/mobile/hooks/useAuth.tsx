@@ -22,6 +22,7 @@ type AuthContext = {
   userElepad: ElepadUser | null;
   userElepadLoading: boolean;
   refreshUserElepad: () => Promise<void>;
+  updateUserTimezone: (timezone: string) => void;
   // Estado de racha optimista
   streak: StreakState | null;
   markGameCompleted: () => Promise<void>;
@@ -318,6 +319,12 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     if (id) await loadElepadUserById(id);
   };
 
+  const updateUserTimezone = (timezone: string) => {
+    if (userElepad) {
+      setUserElepad({ ...userElepad, timezone });
+    }
+  };
+
   const value = {
     session,
     user,
@@ -326,6 +333,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     userElepad,
     userElepadLoading,
     refreshUserElepad,
+    updateUserTimezone,
     streak,
     markGameCompleted,
     syncStreak,

@@ -24,7 +24,7 @@ export default function ConfiguracionScreen() {
   const router = useRouter();
   const { showToast } = useToast();
 
-  const { userElepad, refreshUserElepad, signOut, userElepadLoading } =
+  const { userElepad, refreshUserElepad, signOut, userElepadLoading, updateUserTimezone } =
     useAuth();
 
   // Mostrar loading si está cargando o si no hay usuario aún
@@ -108,14 +108,19 @@ export default function ConfiguracionScreen() {
 
   const handleSaveTimezone = async (tz: string) => {
     if (!userElepad?.id) return;
+    
+    // Actualizar optimísticamente el timezone en el estado sin loading
+    updateUserTimezone(tz);
+    
     try {
       await patchUsersId(userElepad.id, { timezone: tz });
-      await refreshUserElepad?.();
       showToast({
         message: "Zona horaria actualizada correctamente",
         type: "success",
       });
     } catch (e: unknown) {
+      // Si falla, revertir al timezone original
+      updateUserTimezone(userElepad.timezone || 'America/Argentina/Buenos_Aires');
       const msg =
         e instanceof Error
           ? e.message
