@@ -2,7 +2,7 @@ import { supabase } from "@/lib/supabase";
 import { Session, User } from "@supabase/supabase-js";
 import { getUsersId } from "@elepad/api-client/src/gen/client";
 import { useGetStreaksMe, GetStreaksMe200 } from "@elepad/api-client";
-import { useRouter } from "expo-router";
+import { useRouter, useSegments } from "expo-router";
 import {
   PropsWithChildren,
   createContext,
@@ -47,6 +47,13 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [streak, setStreak] = useState<StreakState | null>(null);
   const router = useRouter();
   const { showStreakExtended } = useStreakSnackbar();
+  const segments = useSegments();
+  const segmentsRef = useRef(segments);
+
+  // Mantener segments actualizados en ref
+  useEffect(() => {
+    segmentsRef.current = segments;
+  }, [segments]);
 
   // Ref para tracking de cambio de día
   const lastCheckedDate = useRef<string | null>(null);
@@ -251,6 +258,20 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         console.log("🔐 Auth state change:", event);
         setSession(session);
         setUser(session?.user ?? null);
+
+        // Verificar si estamos en flujo de recuperación
+        const inRecovery = segmentsRef.current.some(
+          (s) => s.includes("update-password") || s.includes("forgot-password"),
+        );
+
+        if (inRecovery) {
+          console.log(
+            "🔒 Modo recuperación detectado, saltando carga de perfil y redirección",
+          );
+          setLoading(false);
+          return;
+        }
+
         if (session?.user) {
           // If this is a new sign up, wait a bit for the database to sync
           if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {

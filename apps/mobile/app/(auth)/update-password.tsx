@@ -25,6 +25,24 @@ export default function UpdatePasswordScreen() {
   const [tokenValid, setTokenValid] = useState(false);
   const [checkingToken, setCheckingToken] = useState(true);
 
+  // Escuchar cambios en el estado de autenticación
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('🔐 Auth event en update-password:', event, 'Session:', !!session);
+      
+      // Si el usuario inició sesión y estamos esperando validar el token, marcarlo como válido
+      if (event === 'SIGNED_IN' && session && checkingToken) {
+        console.log('✅ Sesión detectada vía onAuthStateChange, mostrando formulario');
+        setTokenValid(true);
+        setCheckingToken(false);
+      }
+    });
+
+    return () => {
+      authListener?.subscription?.unsubscribe?.();
+    };
+  }, [checkingToken]);
+
   // Verificar si hay un token válido en la URL (solo una vez)
   useEffect(() => {
     const checkToken = async () => {
@@ -54,26 +72,31 @@ export default function UpdatePasswordScreen() {
           console.log('🔑 Token de recuperación encontrado, estableciendo sesión...');
           
           // Establecer la sesión con el token de recuperación
-          const { data, error } = await supabase.auth.setSession({
+          // No esperamos la respuesta, el onAuthStateChange lo manejará
+          supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
-          });
-
-          console.log('📊 Resultado de setSession:', { hasData: !!data, hasError: !!error });
-
-          if (error) {
-            console.error('❌ Error setting session:', error);
-            showToast({
-              message: "El enlace de recuperación no es válido o ha expirado",
-              type: "error",
-            });
+          }).then(({ data, error }) => {
+            console.log('📊 Resultado de setSession:', { hasData: !!data, hasError: !!error });
+            
+            if (error) {
+              console.error('❌ Error setting session:', error);
+              showToast({
+                message: "El enlace de recuperación no es válido o ha expirado",
+                type: "error",
+              });
+              setTokenValid(false);
+              setCheckingToken(false);
+            } else {
+              console.log('✅ setSession completó exitosamente');
+              // El onAuthStateChange manejará el resto
+            }
+          }).catch((err) => {
+            console.error('💥 Exception en setSession:', err);
             setTokenValid(false);
             setCheckingToken(false);
-          } else {
-            console.log('✅ Sesión establecida correctamente');
-            setTokenValid(true);
-            setCheckingToken(false);
-          }
+          });
+          
         } else {
           console.log('⚠️ No se encontró token válido');
           showToast({
@@ -122,20 +145,29 @@ export default function UpdatePasswordScreen() {
   };
 
   const handleUpdatePassword = async () => {
+    console.log('🔄 handleUpdatePassword iniciado');
+    
     if (!validatePasswords()) {
+      console.log('❌ Validación fallida');
       return;
     }
 
+    console.log('✅ Validación exitosa, actualizando contraseña...');
     setLoading(true);
+    
     try {
+      console.log('📡 Llamando a supabase.auth.updateUser...');
       const { error } = await supabase.auth.updateUser({
         password: newPassword,
       });
+
+      console.log('📊 Respuesta de updateUser:', { hasError: !!error });
 
       if (error) {
         throw error;
       }
 
+      console.log('✅ Contraseña actualizada correctamente');
       showToast({
         message: "Contraseña actualizada correctamente",
         type: "success",
@@ -147,10 +179,11 @@ export default function UpdatePasswordScreen() {
 
       // Redirigir al login después de un momento
       setTimeout(() => {
-        router.replace("/login");
+        console.log('🔀 Redirigiendo a login...');
+        router.replace("/(auth)/login");
       }, 2000);
     } catch (error: unknown) {
-      console.error("Error al actualizar contraseña:", error);
+      console.error("❌ Error al actualizar contraseña:", error);
       const msg =
         error instanceof Error
           ? error.message
@@ -160,6 +193,7 @@ export default function UpdatePasswordScreen() {
         type: "error",
       });
     } finally {
+      console.log('🏁 Finalizando, setLoading(false)');
       setLoading(false);
     }
   };
@@ -188,7 +222,7 @@ export default function UpdatePasswordScreen() {
           <IconButton
             icon="arrow-left"
             size={24}
-            onPress={() => router.replace("/login")}
+            onPress={() => router.replace("/(auth)/login")}
           />
           <Text style={styles.headerTitle}>Enlace inválido</Text>
           <View style={{ width: 48 }} />
@@ -206,7 +240,7 @@ export default function UpdatePasswordScreen() {
               </Text>
               <Button
                 mode="contained"
-                onPress={() => router.replace("/forgot-password")}
+                onPress={() => router.replace("/(auth)/forgot-password")}
                 style={[STYLES.buttonPrimary, { marginTop: 16 }]}
                 contentStyle={STYLES.buttonContent}
               >
@@ -229,7 +263,7 @@ export default function UpdatePasswordScreen() {
         <IconButton
           icon="arrow-left"
           size={24}
-          onPress={() => router.replace("/login")}
+          onPress={() => router.replace("/(auth)/login")}
         />
         <Text style={styles.headerTitle}>Nueva contraseña</Text>
         <View style={{ width: 48 }} />

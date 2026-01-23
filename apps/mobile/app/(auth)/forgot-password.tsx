@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { StatusBar, ScrollView, View, StyleSheet, ImageBackground } from "react-native";
+import { StatusBar, ScrollView, View, StyleSheet, ImageBackground, Platform } from "react-native";
 import {
   Button,
   Card,
@@ -43,9 +43,23 @@ export default function ForgotPasswordScreen() {
 
     setLoading(true);
     try {
-      // Configurar el redirect URL para que apunte a la página de update-password
-      // Este URL debe estar en la lista de Redirect URLs permitidos en Supabase
-      const redirectUrl = 'https://ele.expo.app/update-password';
+      // Detectar entorno automáticamente
+      let redirectUrl = 'https://ele.expo.app/(auth)/update-password'; // Producción por defecto
+      
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        const hostname = window.location.hostname;
+        const port = window.location.port;
+        
+        // Si estamos en localhost, usar la URL local
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+          redirectUrl = `http://localhost:${port}/(auth)/update-password`;
+          console.log('🏠 Entorno de desarrollo detectado, usando:', redirectUrl);
+        } else {
+          console.log('🌍 Entorno de producción detectado, usando:', redirectUrl);
+        }
+      }
+      
+      console.log('📧 Enviando email de recuperación con redirectTo:', redirectUrl);
       
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl,
