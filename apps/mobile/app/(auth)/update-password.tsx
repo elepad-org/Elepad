@@ -66,6 +66,16 @@ export default function UpdatePasswordScreen() {
             hasRefreshToken: !!refreshToken,
             type 
           });
+
+          // LOGIC: Redirigir a la app nativa si estamos en un dispositivo móvil
+          const isMobile = /iPhone|iPad|iPod|Android/i.test(window.navigator.userAgent);
+          if (isMobile && accessToken) {
+            console.log("📱 Dispositivo móvil detectado en Web, intentando abrir App...");
+            // Intentar abrir la app usando el esquema personalizado
+            // Se usa el hash original que contiene los tokens
+            const deepLink = `elepad://(auth)/update-password#${hash}`;
+            window.location.href = deepLink;
+          }
         }
 
         if (accessToken && type === 'recovery') {
