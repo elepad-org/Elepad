@@ -21,6 +21,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import CancelButton from "@/components/shared/CancelButton";
 import { useToast } from "@/components/shared/Toast";
 import { toLocalDateString } from "@/lib/dateHelpers";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function CalendarScreen() {
   const { userElepad } = useAuth();
@@ -28,6 +29,7 @@ export default function CalendarScreen() {
   const router = useRouter();
   const familyCode = userElepad?.groupId ?? "";
   const idUser = userElepad?.id ?? "";
+  const queryClient = useQueryClient();
 
   const { showToast } = useToast();
   const [googleCalendarEnabled] = useState(false);
@@ -105,7 +107,13 @@ export default function CalendarScreen() {
         });
         setFormVisible(false);
         setEditing(null);
-        await activitiesQuery.refetch();
+        // Invalidar caché para forzar actualización inmediata
+        queryClient.invalidateQueries({
+          queryKey: ["/activities/family-code/{id}/family-group"],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["/activities"],
+        });
       },
       onError: (error) => {
         console.error("Error al crear actividad:", error);
@@ -130,7 +138,13 @@ export default function CalendarScreen() {
         });
         setFormVisible(false);
         setEditing(null);
-        await activitiesQuery.refetch();
+        // Invalidar caché para forzar actualización inmediata
+        queryClient.invalidateQueries({
+          queryKey: ["/activities/family-code/{id}/family-group"],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["/activities"],
+        });
       },
       onError: (error) => {
         console.error("Error al actualizar actividad:", error);
@@ -149,7 +163,13 @@ export default function CalendarScreen() {
             (googleCalendarEnabled ? " y eliminada de Google Calendar" : ""),
           type: "success",
         });
-        await activitiesQuery.refetch();
+        // Invalidar caché para forzar actualización inmediata
+        queryClient.invalidateQueries({
+          queryKey: ["/activities/family-code/{id}/family-group"],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["/activities"],
+        });
       },
       onError: (error) => {
         console.error("Error al eliminar actividad:", error);

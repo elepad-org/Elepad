@@ -73,7 +73,7 @@ export const ProfileHeader = ({
 
         {onEditPhoto ? (
           <IconButton
-            icon="pencil"
+            icon="camera"
             size={15}
             onPress={onEditPhoto}
             iconColor="#fff"
