@@ -219,6 +219,14 @@ export default function LogIn() {
           dense
         />
 
+        <Link href="/forgot-password" asChild>
+          <TouchableOpacity style={styles.forgotPassword} disabled={loading}>
+            <Text style={styles.forgotPasswordText}>
+              ¿Olvidaste tu contraseña?
+            </Text>
+          </TouchableOpacity>
+        </Link>
+
         <Button
           mode="contained"
           contentStyle={styles.buttonContent}
@@ -299,6 +307,15 @@ const styles = StyleSheet.create({
   },
   inputOutline: {
     borderRadius: 12,
+  },
+  forgotPassword: {
+    alignSelf: "flex-end",
+    marginBottom: 8,
+  },
+  forgotPasswordText: {
+    fontSize: 14,
+    color: COLORS.primary,
+    fontWeight: "500",
   },
   primaryButton: {
     marginTop: 8,
