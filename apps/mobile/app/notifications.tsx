@@ -517,6 +517,8 @@ export default function NotificationsScreen() {
           return "message-badge";
         }
         return "at";
+      case "reaction":
+        return "sticker-emoji";
       case "activity_created":
         return "calendar-plus";
       case "activity_reminder":
