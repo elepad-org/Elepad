@@ -144,6 +144,7 @@ familyGroupApp.openapi(
                 displayName: z.string(),
                 avatarUrl: z.string().nullable(),
                 elder: z.boolean(),
+                activeFrameUrl: z.string().nullable(),
               }),
               members: z.array(
                 z.object({
@@ -151,6 +152,7 @@ familyGroupApp.openapi(
                   displayName: z.string(),
                   avatarUrl: z.string().nullable(),
                   elder: z.boolean(),
+                  activeFrameUrl: z.string().nullable(),
                 }),
               ),
             }),

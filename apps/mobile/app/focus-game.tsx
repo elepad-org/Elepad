@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from "react";
+import React, {useState, useCallback, useRef} from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar, View } from "react-native";
 import { COLORS, STYLES, LAYOUT } from "@/styles/base";
@@ -26,6 +26,7 @@ export default function AttentionGameScreen() {
     score: number;
     achievements?: Achievement[];
   } | null>(null);
+  const restartGameRef = useRef<(() => void) | null>(null);
 
   const handleComplete = useCallback(
     (stats: {
@@ -50,6 +51,10 @@ export default function AttentionGameScreen() {
 
   const handlePlayAgain = useCallback(() => {
     setShowResultsDialog(false);
+    // Llamar la función de reinicio del juego
+    if (restartGameRef.current) {
+      restartGameRef.current();
+    }
     setGameResults(null);
   }, []);
 
@@ -76,10 +81,11 @@ export default function AttentionGameScreen() {
           <Text style={{ marginBottom: 12, color: COLORS.textSecondary }}>
             Selecciona el color que indica la palabra (no el color del texto).
           </Text>
-
+          
           <AttentionGame
             rounds={ROUNDS}
             onComplete={handleComplete}
+            onRestartRef={restartGameRef}
           />
 
           {/* Modal de resultados con logros */}

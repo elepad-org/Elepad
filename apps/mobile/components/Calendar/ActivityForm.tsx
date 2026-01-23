@@ -40,6 +40,7 @@ type FamilyMember = {
   displayName: string;
   avatarUrl?: string | null;
   elder?: boolean;
+  activeFrameUrl?: string | null;
 };
 
 type Props = {
@@ -381,6 +382,7 @@ export default function ActivityForm({
                       key: elder.id,
                       label: elder.displayName,
                       avatarUrl: elder.avatarUrl || null,
+                      frameUrl: elder.activeFrameUrl || null,
                     }))}
                     onSelect={(value) => setAssignedTo(value)}
                     placeholder="Seleccionar adulto mayor"

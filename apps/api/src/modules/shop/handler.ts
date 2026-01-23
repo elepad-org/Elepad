@@ -6,6 +6,8 @@ import {
   BuyItemRequestSchema,
   BuyItemResponseSchema,
   UserBalanceSchema,
+  EquipItemRequestSchema,
+  EquipItemResponseSchema,
 } from "./schema";
 import { openApiErrorResponse } from "@/utils/api-error";
 
@@ -117,7 +119,7 @@ shopApp.openapi(
         // Hono catches HTTPExceptions automatically, so regular errors need mapping.
         const errorMessage = e instanceof Error ? e.message : String(e);
         if (errorMessage === "Insufficient points" || errorMessage === "You already own this item") {
-             return c.json({ error: errorMessage }, 400);
+             return c.json({ error: { message: errorMessage } }, 400);
         }
         throw e;
     }
@@ -149,3 +151,48 @@ shopApp.openapi(
       return c.json(balance, 200);
     }
   );
+
+// 5. Equip Item
+shopApp.openapi(
+  {
+    method: "post",
+    path: "/shop/equip",
+    tags: ["shop"],
+    summary: "Equip an item (e.g. Frame)",
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: EquipItemRequestSchema,
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        description: "Item equipped successfully",
+        content: {
+          "application/json": {
+            schema: EquipItemResponseSchema,
+          },
+        },
+      },
+      400: openApiErrorResponse("Invalid item type or request"),
+      404: openApiErrorResponse("Item not found"),
+      500: openApiErrorResponse("Internal server error"),
+    },
+  },
+  async (c) => {
+    const { itemId } = c.req.valid("json");
+    const userId = c.var.user.id;
+
+    try {
+      const result = await c.var.shopService.equipItem(userId, itemId);
+      return c.json(result, 200);
+    } catch (e: unknown) {
+        // Hono catches HTTPExceptions automatically. For others, map them.
+        const errorMessage = e instanceof Error ? e.message : String(e);
+        return c.json({ error: { message: errorMessage } }, 400);
+    }
+  }
+);

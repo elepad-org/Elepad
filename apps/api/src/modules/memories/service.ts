@@ -9,6 +9,7 @@ import {
   CreateNote,
   UpdateMemory,
   UpdateMemoriesBook,
+  MemoryWithReactions,
 } from "./schema";
 import { Database } from "@/supabase-types";
 import {
@@ -47,10 +48,20 @@ export class MemoriesService {
   /**
    * Get all memories with optional filters
    */
-  async getAllMemories(filters?: MemoryFilters): Promise<Memory[]> {
+  async getAllMemories(filters?: MemoryFilters): Promise<MemoryWithReactions[]> {
     let query = this.supabase
       .from("memories")
-      .select("*")
+      .select(`
+        *,
+        reactions:memory_reactions(
+          id,
+          memory_id,
+          user_id,
+          sticker_id,
+          created_at,
+          sticker:shop_items(asset_url)
+        )
+      `)
       .order("createdAt", { ascending: false });
 
     // Apply filters if provided
@@ -76,16 +87,41 @@ export class MemoriesService {
       throw new ApiException(500, "Error fetching memories");
     }
 
-    return data || [];
+    // Map reactions to schema
+    return (data || []).map((memory: Database["public"]["Tables"]["memories"]["Row"] & { 
+      reactions: Array<Database["public"]["Tables"]["memory_reactions"]["Row"] & { 
+        sticker: { asset_url: string | null } | null 
+      }> 
+    }) => ({
+      ...memory,
+      reactions: (memory.reactions || []).map((r) => ({
+        id: r.id,
+        memoryId: r.memory_id,
+        userId: r.user_id,
+        stickerId: r.sticker_id,
+        stickerUrl: r.sticker?.asset_url || null,
+        createdAt: r.created_at,
+      })),
+    })) as MemoryWithReactions[];
   }
 
   /**
    * Get a single memory by ID
    */
-  async getMemoryById(id: string): Promise<Memory | null> {
+  async getMemoryById(id: string): Promise<MemoryWithReactions | null> {
     const { data, error } = await this.supabase
       .from("memories")
-      .select("*")
+      .select(`
+        *,
+        reactions:memory_reactions(
+          id,
+          memory_id,
+          user_id,
+          sticker_id,
+          created_at,
+          sticker:shop_items(asset_url)
+        )
+      `)
       .eq("id", id)
       .single();
 
@@ -98,7 +134,23 @@ export class MemoriesService {
       throw new ApiException(500, "Error fetching memory");
     }
 
-    return data;
+    const memoryData = data as Database["public"]["Tables"]["memories"]["Row"] & { 
+      reactions: Array<Database["public"]["Tables"]["memory_reactions"]["Row"] & { 
+        sticker: { asset_url: string | null } | null 
+      }> 
+    };
+
+    return {
+      ...memoryData,
+      reactions: (memoryData.reactions || []).map((r) => ({
+        id: r.id,
+        memoryId: r.memory_id,
+        userId: r.user_id,
+        stickerId: r.sticker_id,
+        stickerUrl: r.sticker?.asset_url || null,
+        createdAt: r.created_at,
+      })),
+    } as MemoryWithReactions;
   }
 
   /**
@@ -532,5 +584,73 @@ export class MemoriesService {
     }
 
     return true;
+  }
+
+  /**
+   * Add or update a reaction to a memory
+   */
+  async upsertReaction(
+    memoryId: string,
+    stickerId: string,
+    userId: string
+  ): Promise<void> {
+    // Check if memory exists
+    const memory = await this.getMemoryById(memoryId);
+    if (!memory) {
+      throw new ApiException(404, "Memory not found");
+    }
+
+    // Ensure only one reaction per user per memory
+    // First try to find existing reaction
+    const { data: existingReaction } = await this.supabase
+      .from("memory_reactions")
+      .select("id")
+      .eq("memory_id", memoryId)
+      .eq("user_id", userId)
+      .single();
+
+    if (existingReaction) {
+      // Update existing reaction
+      const { error } = await this.supabase
+        .from("memory_reactions")
+        .update({
+          sticker_id: stickerId,
+          created_at: new Date().toISOString(),
+        })
+        .eq("id", existingReaction.id);
+
+      if (error) {
+        console.error("Error updating reaction:", error);
+        throw new ApiException(500, "Error updating reaction");
+      }
+    } else {
+      // Create new reaction
+      const { error } = await this.supabase.from("memory_reactions").insert({
+        memory_id: memoryId,
+        user_id: userId,
+        sticker_id: stickerId,
+      });
+
+      if (error) {
+        console.error("Error creating reaction:", error);
+        throw new ApiException(500, "Error creating reaction");
+      }
+    }
+  }
+
+  /**
+   * Remove a reaction from a memory
+   */
+  async removeReaction(memoryId: string, userId: string): Promise<void> {
+    const { error } = await this.supabase
+      .from("memory_reactions")
+      .delete()
+      .eq("memory_id", memoryId)
+      .eq("user_id", userId);
+
+    if (error) {
+      console.error("Error deleting reaction:", error);
+      throw new ApiException(500, "Error deleting reaction");
+    }
   }
 }

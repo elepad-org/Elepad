@@ -72,3 +72,16 @@ export const UserBalanceSchema = z
     pointsBalance: z.number().int(),
   })
   .openapi("UserBalance");
+
+export const EquipItemRequestSchema = z
+  .object({
+    itemId: z.string().uuid(),
+  })
+  .openapi("EquipItemRequest");
+
+export const EquipItemResponseSchema = z
+  .object({
+    success: z.boolean(),
+    message: z.string(),
+  })
+  .openapi("EquipItemResponse");
