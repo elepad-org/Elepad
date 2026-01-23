@@ -1,7 +1,8 @@
 import { Box, Container, Typography, Button, Stack } from '@mui/material';
 import { ArrowForward, Download } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
-import eleDef from '../assets/ele-def2.png';
+import eleSvg from '/ele.svg';
+
 
 export default function Hero() {
   const { t } = useTranslation();
@@ -158,11 +159,11 @@ export default function Hero() {
             >
               <Box
                 component="img"
-                src={eleDef}
+                src={eleSvg}
                 alt="Elepad"
                 sx={{
-                  width: '82%',
-                  height: '82%',
+                  width: '84%',
+                  height: '84%',
                   objectFit: 'contain',
                   filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.12))',
                 }}
