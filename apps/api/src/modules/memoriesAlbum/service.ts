@@ -149,8 +149,6 @@ export class MemoriesAlbumService {
       throw new ApiException(404, "User family group not found");
     }
 
-    const notificationsService = new NotificationsService(this.supabase);
-
     const { data: memories, error: memoriesError } = await this.supabase
       .from("memories")
       .select("id, groupId, title, caption, mediaUrl, mimeType")
@@ -459,18 +457,14 @@ Este recuerdo nos muestra...`;
       // Extract text safely from result
       let responseText = "";
       if (result) {
-        if (typeof (result as any).text === "string") {
-          responseText = (result as any).text;
-        } else if ((result as any).candidates?.[0]?.content?.parts) {
-          for (const part of (result as any).candidates[0].content.parts) {
+        if (typeof result.text === "string") {
+          responseText = result.text;
+        } else if (result.candidates?.[0]?.content?.parts) {
+          for (const part of result.candidates[0].content.parts) {
             if (part.text) {
-              if (typeof part.text === "string") responseText += part.text;
-              else if (Array.isArray(part.text)) responseText += part.text.map((t: any) => t.text || "").join("");
+              responseText += part.text;
             }
-            if (part.outputText) responseText += part.outputText;
           }
-        } else if ((result as any).outputText) {
-          responseText = (result as any).outputText;
         }
       }
 
