@@ -10,7 +10,8 @@
     "newArchEnabled": true,
     "jsEngine": "hermes",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.elepadorg.elepad"
     },
     "android": {
       "adaptiveIcon": {
@@ -20,7 +21,9 @@
       "edgeToEdgeEnabled": true,
       "package": "com.elepadorg.elepad",
       "permissions": [
-        "android.permission.POST_NOTIFICATIONS"
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
       "googleServicesFile": "./google-services.json"
     },
