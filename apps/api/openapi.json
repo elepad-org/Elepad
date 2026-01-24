@@ -4838,6 +4838,33 @@
             "required": false,
             "name": "userId",
             "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": false,
+            "name": "startDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": false,
+            "name": "endDate",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "boolean",
+              "nullable": true
+            },
+            "required": false,
+            "name": "elderOnly",
+            "in": "query"
           }
         ],
         "responses": {
