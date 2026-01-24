@@ -604,10 +604,21 @@ export class MemoriesService {
     // First try to find existing reaction
     const { data: existingReaction } = await this.supabase
       .from("memory_reactions")
-      .select("id")
+      .select("id, sticker_id")
       .eq("memory_id", memoryId)
       .eq("user_id", userId)
       .single();
+
+
+    // Or if sticker changed, maybe we want to notify too? Usually only new reactions notify.
+    // The user requirement says "reacciono a su recuerdo", usually implies doing it.
+    // If they just change the emoji, it might be annoying to re-notify, but let's assume we notify on new reaction.
+    // However, if they update, it might be better NOT to spam notifications.
+    // Let's stick to notifying only if it's a NEW reaction or if the previous reaction was deleted (which effectively makes it new here if we don't handle soft deletes).
+    // Actually, "reacciono" implies the act of reacting. If I change from verify to heart, I am reacting again?
+    // Let's notify only if it didn't exist before, to avoid spam when user clicks multiple stickers to test.
+
+    let shouldNotify = !existingReaction;
 
     if (existingReaction) {
       // Update existing reaction
@@ -634,6 +645,70 @@ export class MemoriesService {
       if (error) {
         console.error("Error creating reaction:", error);
         throw new ApiException(500, "Error creating reaction");
+      }
+    }
+
+    if (shouldNotify) {
+      try {
+        // 1. Get reactor's name
+        const { data: actor, error: actorError } = await this.supabase
+          .from("users")
+          .select("displayName")
+          .eq("id", userId)
+          .single();
+
+        if (actorError || !actor) {
+          console.warn("Could not fetch actor details for notification");
+          return;
+        }
+
+        const notificationPromises: Promise<void>[] = [];
+
+        // 2. Notify memory author (if it's not the reactor)
+        if (memory.createdBy !== userId) {
+          notificationPromises.push(
+            this.notificationsService.createNotification({
+              userId: memory.createdBy,
+              actorId: userId,
+              eventType: "reaction",
+              entityType: "memory",
+              entityId: memoryId,
+              title: `<@${userId}> reaccionó a tu recuerdo`,
+              body: memory.title || "Un recuerdo tuyo",
+            })
+          );
+        }
+
+        // 3. Notify mentioned users
+        // Extract mentions from title and caption
+        const mentionedIds = [
+          ...this.mentionsService.extractMentionIds(memory.title),
+          ...this.mentionsService.extractMentionIds(memory.caption),
+        ];
+
+        // Filter duplicates and remove the reactor (if mentioned) and the author (already notified above)
+        const uniqueMentionedIds = [...new Set(mentionedIds)].filter(
+          (id) => id !== userId && id !== memory.createdBy
+        );
+
+        for (const mentionedId of uniqueMentionedIds) {
+          notificationPromises.push(
+            this.notificationsService.createNotification({
+              userId: mentionedId,
+              actorId: userId,
+              eventType: "reaction",
+              entityType: "memory",
+              entityId: memoryId,
+              title: `<@${userId}> reaccionó a un recuerdo donde apareces`,
+              body: memory.title || "Un recuerdo donde fuiste mencionado",
+            })
+          );
+        }
+
+        await Promise.all(notificationPromises);
+      } catch (error) {
+        console.error("Error sending reaction notifications:", error);
+        // Do not fail the reaction if notification fails
       }
     }
   }

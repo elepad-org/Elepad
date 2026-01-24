@@ -4,10 +4,10 @@ import {
   StyleSheet,
   Alert,
   FlatList,
-  Image,
   Pressable,
   StatusBar,
 } from "react-native";
+import { Image } from "expo-image";
 import {
   Text,
   ActivityIndicator,
@@ -250,7 +250,7 @@ export default function ShopScreen() {
               <Image
                 source={{ uri: item.assetUrl }}
                 style={styles.itemImage}
-                resizeMode="contain"
+                contentFit="contain"
               />
             ) : (
               <View
@@ -266,7 +266,7 @@ export default function ShopScreen() {
             {owned && (
               <View style={styles.ownedOverlay}>
                 <MaterialCommunityIcons
-                  name="star"
+                  name="check-circle"
                   size={18}
                   color={COLORS.primary}
                 />
@@ -446,7 +446,7 @@ export default function ShopScreen() {
                           <Image
                             source={{ uri: selectedItem.assetUrl }}
                             style={{ width: "100%", height: "100%" }}
-                            resizeMode="contain"
+                            contentFit="contain"
                           />
                         </View>
                       )}
@@ -455,7 +455,7 @@ export default function ShopScreen() {
                     <Image
                       source={{ uri: selectedItem.assetUrl }}
                       style={styles.modalImage}
-                      resizeMode="contain"
+                      contentFit="contain"
                     />
                   ) : (
                     <Text style={{ fontSize: 60 }}>🎁</Text>
