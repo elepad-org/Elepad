@@ -756,42 +756,14 @@ export default function HomeScreen() {
                 <Text style={styles.emptyText}>No hay actividad reciente en el grupo</Text>
                 <Button
                   mode="outlined"
-                  onPress={() => router.navigate({
-                    pathname: "/(tabs)/home",
-                    params: { tab: "juegos" },
-                  })}
+                  onPress={() => router.navigate({ pathname: "/(tabs)/home", params: { tab: "juegos" } })}
                   style={styles.emptyButtonOutline}
                   labelStyle={{ color: COLORS.primary }}
                 >
                   Ver estadísticas
                 </Button>
               </View>
-            </Pressable>
-          ) : (
-            <View style={styles.emptySection}>
-              <Text style={styles.emptyText}>{userElepad?.elder ? "Aún no has jugado" : "Mira quienes han jugado recientemente"}</Text>
-              <Button
-                mode="outlined"
-                onPress={() => {
-                if (userElepad?.elder) {
-                  // Si es adulto mayor, ir a la pantalla de historial completo
-                  router.push("/juegos");
-                } else {
-                  // Si es familiar, navegar al tab de estadísticas
-                  router.navigate({
-                    pathname: "/(tabs)/home",
-                    params: {
-                      tab: "juegos",
-                    },
-                  });
-                }
-              }}
-                style={styles.emptyButtonOutline}
-                labelStyle={{ color: COLORS.primary }}
-              >
-                {userElepad?.elder ? "Explorar juegos" : "Ver historial"}
-              </Button>
-            </View>
+            )
           )}
           </View>
         
