@@ -585,6 +585,10 @@
             "type": "string",
             "nullable": true
           },
+          "coverImageUrl": {
+            "type": "string",
+            "nullable": true
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -609,6 +613,7 @@
           "createdBy",
           "title",
           "description",
+          "coverImageUrl",
           "status",
           "createdAt",
           "updatedAt"
@@ -634,6 +639,10 @@
           },
           "description": {
             "type": "string"
+          },
+          "coverImageUrl": {
+            "type": "string",
+            "nullable": true
           },
           "status": {
             "type": "string",
@@ -665,6 +674,7 @@
           "createdBy",
           "title",
           "description",
+          "coverImageUrl",
           "status",
           "createdAt",
           "updatedAt",

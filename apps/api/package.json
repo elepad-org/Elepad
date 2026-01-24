@@ -21,6 +21,7 @@
     "gen:types": "supabase gen types typescript --project-id sdnmoweppzszpxyggdyg > src/supabase-types.ts"
   },
   "dependencies": {
+    "@google/genai": "^1.38.0",
     "@google/generative-ai": "^0.24.1",
     "@hono/node-server": "^1.13.7",
     "@hono/swagger-ui": "^0.5.2",

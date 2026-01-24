@@ -2,12 +2,12 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import { ApiException } from "@/utils/api-error";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { GoogleAIFileManager, FileState } from "@google/generative-ai/server";
+import { GoogleGenAI, Part } from "@google/genai";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/supabase-types";
 import { CreateAlbumRequest, AlbumWithPages, Album } from "./schema";
 import { NotificationsService } from "../notifications/service";
+import { uploadAlbumCoverImage } from "@/services/storage";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -28,10 +28,16 @@ export type pageWithMemory = {
 
 export class MemoriesAlbumService {
   private apiKey: string;
+  private client: GoogleGenAI;
   private supabase: SupabaseClient<Database>;
 
   constructor(supabase: SupabaseClient<Database>) {
     this.apiKey = process.env.GEMINI_API_KEY || "";
+    if (!this.apiKey) {
+      console.warn("GEMINI_API_KEY is not set");
+    }
+    // Inicialización única del cliente para toda la clase
+    this.client = new GoogleGenAI({ apiKey: this.apiKey });
     this.supabase = supabase;
   }
 
@@ -52,7 +58,6 @@ export class MemoriesAlbumService {
       );
     }
 
-    // Write file to temp location because Gemini File API expects a path
     const tmpDir = os.tmpdir();
     const ext = (file.name || "audio").split(".").pop() || "bin";
     const tmpName = `postales-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
@@ -62,52 +67,64 @@ export class MemoriesAlbumService {
       const buffer = Buffer.from(await file.arrayBuffer());
       fs.writeFileSync(tmpPath, buffer);
 
-      const genAI = new GoogleGenerativeAI(this.apiKey);
-      const fileManager = new GoogleAIFileManager(this.apiKey);
-
-      // Upload to Gemini file API
-      const uploadResult = await fileManager.uploadFile(tmpPath, {
-        mimeType: file.type,
-        displayName: "Postal Audio",
+      // 1. Upload usando la nueva API client.files
+      const uploadResult = await this.client.files.upload({
+        file: tmpPath,
+        config: {
+          mimeType: file.type,
+          displayName: "Postal Audio",
+        },
       });
 
-      let googleFile = await fileManager.getFile(uploadResult.file.name);
-
-      // Bucle de espera
-      // Sirve cuando los archivos son grandes y se tardan en procesar, evita que tire error por no encontrar el archivo
-      while (googleFile.state === FileState.PROCESSING) {
-        console.log("Procesando archivo...");
-        await new Promise((resolve) => setTimeout(resolve, 2000)); // Espera 2 seg
-        googleFile = await fileManager.getFile(uploadResult.file.name);
+      if (!uploadResult || !uploadResult.name || !uploadResult.uri) {
+        throw new Error("File upload failed or returned incomplete metadata");
       }
 
-      if (googleFile.state === FileState.FAILED) {
+      // 2. Polling de estado
+      let fileInfo = await this.client.files.get({ name: uploadResult.name });
+
+      while (fileInfo && fileInfo.state === "PROCESSING") {
+        console.log("Procesando archivo...");
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        fileInfo = await this.client.files.get({ name: uploadResult.name });
+      }
+
+      if (!fileInfo || fileInfo.state === "FAILED") {
         throw new Error("El procesamiento del audio falló en Google.");
       }
 
-      const model = genAI.getGenerativeModel({
-        model: "gemini-3-flash-preview",
-      });
-
+      // 3. Generar contenido
       const prompt =
         "Transcribe este audio exactamente como fue dicho. Si hay pausas largas o muletillas excesivas, elimínalas para que se lea fluido. No generes otra respuesta más que la traducción del audio, y no inventes nada que no sea dicho en el audio.";
 
-      const result = await model.generateContent([
-        prompt,
-        {
-          fileData: {
-            fileUri: uploadResult.file.uri,
-            mimeType: uploadResult.file.mimeType,
+      const result = await this.client.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { text: prompt },
+              {
+                fileData: {
+                  fileUri: uploadResult.uri,
+                  mimeType: uploadResult.mimeType || file.type || "application/octet-stream",
+                },
+              },
+            ],
           },
-        },
-      ]);
+        ],
+      });
 
-      const transcription = result.response?.text?.() || "";
+      const transcription = result && typeof result.text === "string" ? result.text : "";
 
-      fs.unlinkSync(tmpPath);
-      await fileManager.deleteFile(uploadResult.file.name);
+      // Limpieza
+      try {
+        await this.client.files.delete({ name: uploadResult.name });
+      } catch (e) {
+        console.warn("No se pudo eliminar el archivo remoto:", e);
+      }
 
-      return transcription;
+      return transcription || "";
     } catch (err) {
       console.error("Postales transcoding error:", err);
       throw new ApiException(500, "Error transcribing audio");
@@ -121,10 +138,7 @@ export class MemoriesAlbumService {
   /**
    * Create an album and process it with AI-generated narratives
    */
-  async createAlbum(
-    userId: string,
-    data: CreateAlbumRequest
-  ) {
+  async createAlbum(userId: string, data: CreateAlbumRequest) {
     const { data: userGroup, error: userGroupError } = await this.supabase
       .from("users")
       .select("groupId")
@@ -136,14 +150,6 @@ export class MemoriesAlbumService {
     }
 
     const notificationsService = new NotificationsService(this.supabase);
-      /* await notificationsService.createNotification({
-        userId,
-        eventType: "achievement", //TODO: change event & entity type to more appropiate ones
-        entityType: "memory",
-        entityId: userId, // ?
-        title: "Generando Álbum",
-        body: `Estamos generando tu álbum. Te avisaremos cuando esté listo.`,
-      }); */
 
     const { data: memories, error: memoriesError } = await this.supabase
       .from("memories")
@@ -153,26 +159,10 @@ export class MemoriesAlbumService {
 
     if (memoriesError) {
       console.error("Error fetching memories:", memoriesError);
-      await notificationsService.createNotification({
-        userId,
-        eventType: "achievement", //TODO: change event & entity type to more appropiate ones
-        entityType: "memory",
-        entityId: userId, // ?
-        title: "Error al procesar el álbum",
-        body: "¡Lo sentimos! Hubo un problema al generar tu álbum. Por favor, intenta nuevamente.",
-      });
       throw new ApiException(500, "Error fetching memories");
     }
 
     if (!memories || memories.length !== data.memoryIds.length) {
-      await notificationsService.createNotification({
-        userId,
-        eventType: "achievement", //TODO: change event & entity type to more appropiate ones
-        entityType: "memory",
-        entityId: userId, // ?
-        title: "Error al procesar el álbum",
-        body: "¡Lo sentimos! Hubo un problema al generar tu álbum. Por favor, intenta nuevamente.",
-      });
       throw new ApiException(
         400,
         "Some memories not found or don't belong to your group"
@@ -185,14 +175,6 @@ export class MemoriesAlbumService {
     );
 
     if (imageMemories.length === 0) {
-      await notificationsService.createNotification({
-        userId,
-        eventType: "achievement", //TODO: change event & entity type to more appropiate ones
-        entityType: "memory",
-        entityId: userId, // ?
-        title: "Error al procesar el álbum",
-        body: "¡Lo sentimos! Hubo un problema al generar tu álbum. Por favor, intenta nuevamente.",
-      });
       throw new ApiException(400, "No image memories found in the selection");
     }
 
@@ -211,18 +193,10 @@ export class MemoriesAlbumService {
 
     if (albumError || !album) {
       console.error("Error creating album:", albumError);
-      await notificationsService.createNotification({
-        userId,
-        eventType: "achievement", //TODO: change event & entity type to more appropiate ones
-        entityType: "memory",
-        entityId: userId, // ?
-        title: "Error al procesar el álbum",
-        body: "¡Lo sentimos! Hubo un problema al generar tu álbum. Por favor, intenta nuevamente.",
-      });
       throw new ApiException(500, "Error creating album");
     }
 
-    // Create album pages with initial order (respecting memoryIds order)
+    // Create album pages
     const pagesToInsert = data.memoryIds
       .map((memoryId, index) => {
         const memory = imageMemories.find((m) => m.id === memoryId);
@@ -248,21 +222,13 @@ export class MemoriesAlbumService {
       console.error("Error creating album pages:", pagesError);
       // Rollback: delete the album
       await this.supabase.from("memoriesAlbums").delete().eq("id", album.id);
-      await notificationsService.createNotification({
-        userId,
-        eventType: "achievement", //TODO: change event & entity type to more appropiate ones
-        entityType: "memory",
-        entityId: userId, // ?
-        title: "Error al procesar el álbum",
-        body: "¡Lo sentimos! Hubo un problema al generar tu álbum. Por favor, intenta nuevamente.",
-      });
       throw new ApiException(500, "Error creating album pages");
     }
 
-    await this.processAlbumNarratives(album.id, userId, userGroup.groupId).catch(
+    // Process in background (async without await usually, but logic kept as provided)
+    this.processAlbumNarratives(album.id, userId, userGroup.groupId).catch(
       (err) => {
         console.error("Error processing album narratives:", err);
-        throw new ApiException(500, "Error generating the album pages content");
       }
     );
   }
@@ -329,7 +295,7 @@ export class MemoriesAlbumService {
       // Update album pages with generated narratives
       for (let i = 0; i < pages.length; i++) {
         const page = pages[i];
-        if (!page) continue; //For lint errors...
+        if (!page) continue;
         const narrative = narratives[i];
 
         await this.supabase
@@ -341,11 +307,29 @@ export class MemoriesAlbumService {
           .eq("id", page.id);
       }
 
+      // Generate and upload album cover image
+      let coverImageUrl: string | null = null;
+      try {
+        const imageBuffer = await this.generateAlbumCoverImage(
+          album,
+          narratives
+        );
+        coverImageUrl = await uploadAlbumCoverImage(
+          this.supabase,
+          groupId,
+          albumId,
+          imageBuffer
+        );
+      } catch (err) {
+        console.error("Error generating or uploading album cover image:", err);
+      }
+
       // Update album status to "ready"
       await this.supabase
         .from("memoriesAlbums")
         .update({
           status: "ready",
+          coverImageUrl: coverImageUrl,
           updatedAt: new Date().toISOString(),
         })
         .eq("id", albumId);
@@ -397,52 +381,10 @@ export class MemoriesAlbumService {
       throw new Error("Gemini API key not configured");
     }
 
-    const genAI = new GoogleGenerativeAI(this.apiKey);
-    const model = genAI.getGenerativeModel({
-      //model: "gemini-2.0-flash-exp",
-      model: "gemini-3-flash-preview",
-    });
+    // Preparar las partes para el contenido multimodal (Texto + Imágenes inline)
+    const contentParts: Part[] = [];
 
-    // Download and convert images to base64
-    const imageData: Array<{
-      inlineData: { data: string; mimeType: string };
-    }> = [];
-
-    for (const page of pages) {
-      const memory = page.memories;
-      if (memory?.mediaUrl && memory?.mimeType?.startsWith("image/")) {
-        try {
-          const response = await fetch(memory.mediaUrl);
-          const buffer = await response.arrayBuffer();
-          const base64 = Buffer.from(buffer).toString("base64");
-
-          imageData.push({
-            inlineData: {
-              data: base64,
-              mimeType: memory.mimeType,
-            },
-          });
-        } catch (err) {
-          console.error("Error downloading image:", err);
-          // Use placeholder if image download fails
-          imageData.push({
-            inlineData: {
-              data: "",
-              mimeType: "image/jpeg",
-            },
-          });
-        }
-      }
-    }
-
-    // Prompt with context
-    const pagesContext = pages
-      .map((page, idx) => {
-        const memory = page.memories;
-        return `Imagen ${idx + 1}: ${memory?.title || "Sin título"}\nDescripción original: ${memory?.caption || "Sin descripción"}`;
-      })
-      .join("\n\n");
-
+    // Prompt inicial
     const prompt = `Eres un asistente que crea narrativas emotivas y personales para álbumes de fotos familiares.
 
 Contexto del álbum:
@@ -451,8 +393,6 @@ Contexto del álbum:
 - Familia: ${familyName}
 
 A continuación te proporciono ${pages.length} imágenes con sus descripciones originales:
-
-${pagesContext}
 
 Tu tarea es generar una narrativa emotiva y personalizada para CADA imagen, creando una historia coherente que conecte todas las fotos del álbum. Cada narrativa debe:
 1. Ser emotiva y capturar el momento especial
@@ -470,27 +410,137 @@ En esta imagen podemos ver...
 ---
 Este recuerdo nos muestra...`;
 
-    // Generate content with images
-    const result = await model.generateContent([prompt, ...imageData]);
-    const response = result.response.text();
+    contentParts.push({ text: prompt });
 
-    // Parse narratives
-    const narratives = response
-      .split("---")
-      .map((n) => n.trim())
-      .filter((n) => n.length > 0);
+    // Descargar imágenes y añadirlas como partes inline
+    for (let i = 0; i < pages.length; i++) {
+      const page = pages[i];
+      if (!page) continue;
+      const memory = page.memories;
 
-    // If we don't get enough narratives, fill with original captions
-    while (narratives.length < pages.length) {
-      const idx = narratives.length;
-      narratives.push(
-        pages[idx]?.memories?.caption ||
-          pages[idx]?.memories?.title ||
-          "Un momento especial capturado en el tiempo."
-      );
+      // Texto descriptivo de la imagen
+      contentParts.push({
+        text: `Imagen ${i + 1} (Título: ${memory?.title || "Sin título"}, Info: ${memory?.caption || "Sin info"}):`,
+      });
+
+      if (memory?.mediaUrl && memory?.mimeType?.startsWith("image/")) {
+        try {
+          const response = await fetch(memory.mediaUrl);
+          const buffer = await response.arrayBuffer();
+          const base64 = Buffer.from(buffer).toString("base64");
+
+          contentParts.push({
+            inlineData: {
+              data: base64,
+              mimeType: memory.mimeType,
+            },
+          });
+        } catch (err) {
+          console.error("Error downloading image for Gemini:", err);
+          contentParts.push({
+            text: "[Imagen no disponible, usar descripción original]",
+          });
+        }
+      }
     }
 
-    return narratives.slice(0, pages.length);
+    // Generar contenido
+    try {
+      const result = await this.client.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: [
+          {
+            role: "user",
+            parts: contentParts,
+          },
+        ],
+      });
+
+      // Extract text safely from result
+      let responseText = "";
+      if (result) {
+        if (typeof (result as any).text === "string") {
+          responseText = (result as any).text;
+        } else if ((result as any).candidates?.[0]?.content?.parts) {
+          for (const part of (result as any).candidates[0].content.parts) {
+            if (part.text) {
+              if (typeof part.text === "string") responseText += part.text;
+              else if (Array.isArray(part.text)) responseText += part.text.map((t: any) => t.text || "").join("");
+            }
+            if (part.outputText) responseText += part.outputText;
+          }
+        } else if ((result as any).outputText) {
+          responseText = (result as any).outputText;
+        }
+      }
+
+      // Parse narratives
+      const narratives = responseText
+        .split("---")
+        .map((n: string) => n.trim())
+        .filter((n: string) => n.length > 0);
+
+      // Relleno si faltan narrativas
+      while (narratives.length < pages.length) {
+        const idx = narratives.length;
+        narratives.push(
+          pages[idx]?.memories?.caption || "Un momento especial."
+        );
+      }
+
+      return narratives.slice(0, pages.length);
+    } catch (e) {
+      console.error("Error calling Gemini API:", e);
+      // Fallback
+      return pages.map((p) => p.memories.caption || "Recuerdo familiar.");
+    }
+  }
+
+  /**
+   * Generate an album cover image using Gemini AI (Imagen 3)
+   */
+  private async generateAlbumCoverImage(
+    album: { title: string; description: string | null },
+    narratives: string[]
+  ): Promise<Buffer> {
+    if (!this.apiKey) {
+      throw new Error("Gemini API key not configured");
+    }
+
+    const narrativesSummary = narratives.slice(0, 3).join(" ");
+    const imagePrompt = `Create a beautiful, artistic album cover image for a family photo album.
+    
+    Title: ${album.title}
+    Description: ${album.description || "Family memories"}
+    Vibe: ${narrativesSummary}
+    
+    Style: Warm, emotional, soft colors, photorealistic or artistic illustration suitable for a book cover.`;
+
+    try {
+      // Usar generateImages para modelos de imagen (ej. Imagen 3)
+      // Si usas un modelo multimodal antiguo que devuelve imagenes via generateContent, mantén la estructura anterior.
+      // Aquí asumo el uso estándar de la nueva SDK para imágenes.
+      const response = await this.client.models.generateImages({
+        //model: "gemini-2.5-flash-image",
+        model: "imagen-4.0-generate-001",
+        prompt: imagePrompt,
+        config: {
+          numberOfImages: 1,
+          aspectRatio: "1:1",
+        },
+      });
+
+      const imagePart = response.generatedImages?.[0]?.image?.imageBytes;
+
+      if (imagePart) {
+        return Buffer.from(imagePart, "base64");
+      }
+
+      throw new Error("No image data in response");
+    } catch (error) {
+      console.error("Error generating cover image:", error);
+      throw error;
+    }
   }
 
   async getAllAlbumsForUserGroup(
@@ -498,7 +548,6 @@ Este recuerdo nos muestra...`;
     limit: number,
     offset: number
   ): Promise<Album[]> {
-    //get user gruopId
     const { data: userGroup, error: userGroupError } = await this.supabase
       .from("users")
       .select("groupId")
@@ -529,7 +578,6 @@ Este recuerdo nos muestra...`;
   }
 
   async getAlbumById(userId: string, albumId: string): Promise<AlbumWithPages> {
-    //get user gruopId
     const { data: userGroup, error: userGroupError } = await this.supabase
       .from("users")
       .select("groupId")

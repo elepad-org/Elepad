@@ -211,6 +211,7 @@ export interface Album {
   createdBy: string;
   title: string;
   description: string | null;
+  coverImageUrl: string | null;
   status: AlbumStatus;
   createdAt: string;
   updatedAt: string | null;
@@ -243,6 +244,7 @@ export interface AlbumWithPages {
   createdBy: string;
   title: string;
   description: string;
+  coverImageUrl: string | null;
   status: AlbumWithPagesStatus;
   createdAt: string;
   updatedAt: string | null;
