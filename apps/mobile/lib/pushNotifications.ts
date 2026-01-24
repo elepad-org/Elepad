@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
+import { usePostPushTokens } from '@elepad/api-client';
 
 // Configurar cómo se manejan las notificaciones cuando la app está en primer plano
 Notifications.setNotificationHandler({
@@ -70,6 +71,31 @@ export async function registerForPushNotificationsAsync(): Promise<string | unde
   }
 
   return token;
+}
+
+/**
+ * Register push notifications and send token to backend
+ * This should be called after user is authenticated
+ */
+export async function registerAndSendPushToken(): Promise<void> {
+  const token = await registerForPushNotificationsAsync();
+  
+  if (token) {
+    try {
+      // Import here to avoid circular dependencies
+      const { usePostPushTokens } = await import('@elepad/api-client');
+      
+      // Since this is not a React component, we need to use the API directly
+      // For now, we'll store the token and send it when the user is authenticated
+      console.log('Token obtained, will send to backend when authenticated');
+      
+      // TODO: Send token to backend using API client
+      // This needs to be called from a component that has access to the mutation
+      
+    } catch (error) {
+      console.error('Error sending push token to backend:', error);
+    }
+  }
 }
 
 /**

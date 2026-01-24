@@ -1,5 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/supabase-types";
+import { PushTokensService } from "../pushTokens/service";
 
 export type EventType = "mention" | "achievement" | "activity_reminder" | "activity_assigned" | "reaction";
 export type EntityType = "memory" | "activity" | "puzzle" | "achievement";
@@ -15,7 +16,52 @@ export interface CreateNotificationParams {
 }
 
 export class NotificationsService {
-  constructor(private supabase: SupabaseClient<Database>) {}
+  private pushTokensService: PushTokensService;
+
+  constructor(private supabase: SupabaseClient<Database>) {
+    this.pushTokensService = new PushTokensService(supabase);
+  }
+
+  /**
+   * Send push notification to a user
+   */
+  private async sendPushNotification(userId: string, title: string, body?: string, data?: Record<string, any>): Promise<void> {
+    try {
+      const pushTokens = await this.pushTokensService.getPushTokensByUser(userId);
+
+      if (pushTokens.length === 0) {
+        console.log(`No push tokens found for user ${userId}`);
+        return;
+      }
+
+      const messages = pushTokens.map(token => ({
+        to: token.token,
+        title,
+        body: body || "",
+        data: data || {},
+        sound: "default" as const,
+        priority: "default" as const,
+      }));
+
+      // Send to Expo push service
+      const response = await fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(messages),
+      });
+
+      if (!response.ok) {
+        console.error('Failed to send push notification:', await response.text());
+      } else {
+        console.log(`Push notification sent to ${pushTokens.length} device(s) for user ${userId}`);
+      }
+    } catch (error) {
+      console.error('Error sending push notification:', error);
+      // Don't throw - push notifications are not critical
+    }
+  }
 
   /**
    * Create a notification for a user
@@ -39,6 +85,13 @@ export class NotificationsService {
       console.error("Error creating notification:", error);
       throw new Error("Failed to create notification");
     }
+
+    // Send push notification
+    await this.sendPushNotification(params.userId, params.title, params.body, {
+      eventType: params.eventType,
+      entityType: params.entityType,
+      entityId: params.entityId,
+    });
   }
 
   /**
@@ -67,6 +120,17 @@ export class NotificationsService {
       console.error("Error creating notifications:", error);
       throw new Error("Failed to create notifications");
     }
+
+    // Send push notifications for each notification
+    const pushPromises = notifications.map(notif =>
+      this.sendPushNotification(notif.userId, notif.title, notif.body, {
+        eventType: notif.eventType,
+        entityType: notif.entityType,
+        entityId: notif.entityId,
+      })
+    );
+
+    await Promise.all(pushPromises);
   }
 
   /**
