@@ -25,3 +25,10 @@ apps/api/cloudflare-worker.js
 web-build/
 expo-env.d.ts
 .metro-health-check*
+
+# iOS/Android native builds
+apps/ios/
+apps/mobile/ios/
+apps/mobile/android/
+apps/mobile/google-services.json
+apps/mobile/GoogleService-Info.plist
