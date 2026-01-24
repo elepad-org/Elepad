@@ -22,6 +22,7 @@ import { streaksApp } from "./modules/streaks/handler.js";
 import { withAuth } from "./middleware/auth.js";
 import { notificationsApp } from "./modules/notifications/handler.js";
 import { albumApp } from "./modules/memoriesAlbum/handler.js";
+import { pushTokensApp } from "./modules/pushTokens/handler.js";
 
 // Configurar fetch personalizado para Node.js en desarrollo
 let customFetch: typeof fetch | undefined;
@@ -134,6 +135,9 @@ app.route("/", streaksApp);
 app.use("/notifications/*", withAuth);
 app.route("/", notificationsApp);
 
+app.use("/push-tokens/*", withAuth);
+app.route("/", pushTokensApp);
+
 app.use("/shop/*", withAuth);
 app.route("/", shopApp);
 
@@ -154,6 +158,7 @@ app.doc("/openapi.json", {
     { name: "achievements" },
     { name: "streaks" },
     { name: "notifications" },
+    { name: "push-tokens" },
   ],
 });
 

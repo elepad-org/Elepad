@@ -1,10 +1,10 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "expo-router";
 import { useRef, useEffect } from "react";
-import { Animated, View, Image } from "react-native";
+import { Animated, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Text, ActivityIndicator } from "react-native-paper";
-import heroImage from "@/assets/images/ele-def3.png";
+import EleSvg from "@/assets/images/ele.svg";
 import { COLORS, STYLES } from "@/styles/base";
 
 export default function IndexRedirect() {
@@ -42,7 +42,7 @@ export default function IndexRedirect() {
     <SafeAreaView style={STYLES.safeAreaLogin}>
       <View style={STYLES.container}>
         <View style={STYLES.logoWrapWithMargin}>
-          <Image source={heroImage} style={STYLES.logo} resizeMode="contain" />
+          <EleSvg width={200} height={200} style={STYLES.logo} />
           <Text style={STYLES.brand}> Elepad </Text>
         </View>
         <View style={STYLES.separatorWrap}>

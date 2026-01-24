@@ -4,3 +4,19 @@
 
 expo-env.d.ts
 # @end expo-cli
+
+# iOS native builds
+ios/
+*.xcworkspace
+*.xcuserdata
+
+# Android native builds
+android/
+*.keystore
+*.jks
+
+
+
+# Expo
+.expo/
+.expo-shared/
