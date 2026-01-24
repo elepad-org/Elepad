@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
   },
   numberButton: {
     flex: 1,
-    minWidth: 60,
+    maxWidth: 70,
     minHeight: 48,
     justifyContent: "center",
     includeFontPadding: false,
