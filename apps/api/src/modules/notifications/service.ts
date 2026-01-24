@@ -25,7 +25,7 @@ export class NotificationsService {
   /**
    * Send push notification to a user
    */
-  private async sendPushNotification(userId: string, title: string, body?: string, data?: Record<string, any>): Promise<void> {
+  private async sendPushNotification(userId: string, title: string, body?: string, data?: Record<string, unknown>): Promise<void> {
     try {
       const pushTokens = await this.pushTokensService.getPushTokensByUser(userId);
 
