@@ -19,6 +19,12 @@ import { COLORS } from "@/styles/base";
 import { ToastProvider } from "@/components/shared/Toast";
 import * as Notifications from 'expo-notifications';
 import { registerForPushNotificationsAsync } from "@/lib/pushNotifications";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
+
+function PushNotificationsProvider({ children }: { children: React.ReactNode }) {
+  usePushNotifications();
+  return <>{children}</>;
+}
 
 const queryClient = new QueryClient();
 
@@ -97,7 +103,8 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <StreakSnackbarProvider>
           <AuthProvider>
-            <PaperProvider theme={paperTheme}>
+            <PushNotificationsProvider>
+              <PaperProvider theme={paperTheme}>
               <NavigationThemeProvider value={navTheme}>
                 <ToastProvider>
                   <Stack
@@ -186,7 +193,8 @@ export default function RootLayout() {
                   </Stack>
                 </ToastProvider>
               </NavigationThemeProvider>
-            </PaperProvider>
+              </PaperProvider>
+            </PushNotificationsProvider>
           </AuthProvider>
         </StreakSnackbarProvider>
       </QueryClientProvider>

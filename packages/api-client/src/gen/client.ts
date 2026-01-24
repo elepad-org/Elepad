@@ -866,6 +866,34 @@ export type DeleteNotificationsId200 = {
   success: boolean;
 };
 
+export type PostPushTokensBodyPlatform =
+  (typeof PostPushTokensBodyPlatform)[keyof typeof PostPushTokensBodyPlatform];
+
+export const PostPushTokensBodyPlatform = {
+  ios: "ios",
+  android: "android",
+} as const;
+
+export type PostPushTokensBody = {
+  /** @minLength 1 */
+  token: string;
+  platform: PostPushTokensBodyPlatform;
+  deviceId?: string;
+};
+
+export type PostPushTokens200 = {
+  success: boolean;
+};
+
+export type DeletePushTokensBody = {
+  /** @minLength 1 */
+  token: string;
+};
+
+export type DeletePushTokens200 = {
+  success: boolean;
+};
+
 type AwaitedInput<T> = PromiseLike<T> | T;
 
 type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
@@ -10379,6 +10407,198 @@ export const useDeleteNotificationsId = <TError = unknown, TContext = unknown>(
     getDeleteNotificationsIdMutationOptions(options),
     queryClient
   );
+};
+
+/**
+ * @summary Store or update a push token
+ */
+export type postPushTokensResponse200 = {
+  data: PostPushTokens200;
+  status: 200;
+};
+
+export type postPushTokensResponseSuccess = postPushTokensResponse200 & {
+  headers: Headers;
+};
+export type postPushTokensResponse = postPushTokensResponseSuccess;
+
+export const getPostPushTokensUrl = () => {
+  return `/push-tokens`;
+};
+
+export const postPushTokens = async (
+  postPushTokensBody: PostPushTokensBody,
+  options?: RequestInit
+): Promise<postPushTokensResponse> => {
+  return rnFetch<postPushTokensResponse>(getPostPushTokensUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(postPushTokensBody),
+  });
+};
+
+export const getPostPushTokensMutationOptions = <
+  TError = unknown,
+  TContext = unknown
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postPushTokens>>,
+    TError,
+    { data: PostPushTokensBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postPushTokens>>,
+  TError,
+  { data: PostPushTokensBody },
+  TContext
+> => {
+  const mutationKey = ["postPushTokens"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postPushTokens>>,
+    { data: PostPushTokensBody }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postPushTokens(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostPushTokensMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postPushTokens>>
+>;
+export type PostPushTokensMutationBody = PostPushTokensBody;
+export type PostPushTokensMutationError = unknown;
+
+/**
+ * @summary Store or update a push token
+ */
+export const usePostPushTokens = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postPushTokens>>,
+      TError,
+      { data: PostPushTokensBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof postPushTokens>>,
+  TError,
+  { data: PostPushTokensBody },
+  TContext
+> => {
+  return useMutation(getPostPushTokensMutationOptions(options), queryClient);
+};
+
+/**
+ * @summary Remove a push token
+ */
+export type deletePushTokensResponse200 = {
+  data: DeletePushTokens200;
+  status: 200;
+};
+
+export type deletePushTokensResponseSuccess = deletePushTokensResponse200 & {
+  headers: Headers;
+};
+export type deletePushTokensResponse = deletePushTokensResponseSuccess;
+
+export const getDeletePushTokensUrl = () => {
+  return `/push-tokens`;
+};
+
+export const deletePushTokens = async (
+  deletePushTokensBody: DeletePushTokensBody,
+  options?: RequestInit
+): Promise<deletePushTokensResponse> => {
+  return rnFetch<deletePushTokensResponse>(getDeletePushTokensUrl(), {
+    ...options,
+    method: "DELETE",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(deletePushTokensBody),
+  });
+};
+
+export const getDeletePushTokensMutationOptions = <
+  TError = unknown,
+  TContext = unknown
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deletePushTokens>>,
+    TError,
+    { data: DeletePushTokensBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deletePushTokens>>,
+  TError,
+  { data: DeletePushTokensBody },
+  TContext
+> => {
+  const mutationKey = ["deletePushTokens"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deletePushTokens>>,
+    { data: DeletePushTokensBody }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return deletePushTokens(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeletePushTokensMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deletePushTokens>>
+>;
+export type DeletePushTokensMutationBody = DeletePushTokensBody;
+export type DeletePushTokensMutationError = unknown;
+
+/**
+ * @summary Remove a push token
+ */
+export const useDeletePushTokens = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deletePushTokens>>,
+      TError,
+      { data: DeletePushTokensBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof deletePushTokens>>,
+  TError,
+  { data: DeletePushTokensBody },
+  TContext
+> => {
+  return useMutation(getDeletePushTokensMutationOptions(options), queryClient);
 };
 
 /**
