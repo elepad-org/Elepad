@@ -307,28 +307,41 @@ export default function HomeScreen() {
 
             {/* Avatar */}
             {/* Avatar with Frame */}
-            <View style={{ position: "relative" }}>
-              {userElepad?.avatarUrl ? (
-                <Avatar.Image
-                  size={55}
-                  source={{ uri: userElepad?.avatarUrl }}
-                  style={styles.avatar}
-                />
-              ) : (
-                <Avatar.Text
-                  size={55}
-                  label={getInitials(displayName)}
-                  style={[styles.avatar, { backgroundColor: COLORS.primary }]}
-                  labelStyle={{ color: COLORS.white, fontSize: 22 }}
-                />
-              )}
-              {userElepad?.activeFrameUrl && (
-                <Image
-                  source={{ uri: userElepad?.activeFrameUrl }}
-                  style={{
-                    position: "absolute",
-                    width: 55 * 1.4,
-                    height: 55 * 1.4,
+            <Pressable
+              onPress={() => {
+                router.navigate({
+                  pathname: "/(tabs)/home",
+                  params: {
+                    tab: "configuracion",
+                  },
+                });
+              }}
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.7 : 1,
+              })}
+            >
+              <View style={{ position: "relative" }}>
+                {userElepad?.avatarUrl ? (
+                  <Avatar.Image
+                    size={55}
+                    source={{ uri: userElepad?.avatarUrl }}
+                    style={styles.avatar}
+                  />
+                ) : (
+                  <Avatar.Text
+                    size={55}
+                    label={getInitials(displayName)}
+                    style={[styles.avatar, { backgroundColor: COLORS.primary }]}
+                    labelStyle={{ color: COLORS.white, fontSize: 22 }}
+                  />
+                )}
+                {userElepad?.activeFrameUrl && (
+                  <Image
+                    source={{ uri: userElepad?.activeFrameUrl }}
+                    style={{
+                      position: "absolute",
+                      width: 55 * 1.4,
+                      height: 55 * 1.4,
                     top: -55 * 0.2,
                     left: -55 * 0.2,
                     zIndex: 10,
@@ -336,7 +349,8 @@ export default function HomeScreen() {
                   resizeMode="contain"
                 />
               )}
-            </View>
+              </View>
+            </Pressable>
           </View>
         </View>
 
@@ -752,9 +766,35 @@ export default function HomeScreen() {
                   Ver estadísticas
                 </Button>
               </View>
-            )
+            </Pressable>
+          ) : (
+            <View style={styles.emptySection}>
+              <Text style={styles.emptyText}>{userElepad?.elder ? "Aún no has jugado" : "Mira quienes han jugado recientemente"}</Text>
+              <Button
+                mode="outlined"
+                onPress={() => {
+                if (userElepad?.elder) {
+                  // Si es adulto mayor, ir a la pantalla de historial completo
+                  router.push("/juegos");
+                } else {
+                  // Si es familiar, navegar al tab de estadísticas
+                  router.navigate({
+                    pathname: "/(tabs)/home",
+                    params: {
+                      tab: "juegos",
+                    },
+                  });
+                }
+              }}
+                style={styles.emptyButtonOutline}
+                labelStyle={{ color: COLORS.primary }}
+              >
+                {userElepad?.elder ? "Explorar juegos" : "Ver historial"}
+              </Button>
+            </View>
           )}
-        </View>
+          </View>
+        
 
         {/* Espacio inferior para que el contenido no quede debajo del menú */}
         <View style={{ height: 100 }} />
