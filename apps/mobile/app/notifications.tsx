@@ -100,9 +100,16 @@ interface Recuerdo {
   }[];
 }
 
+interface MemoryReaction {
+  id: string;
+  userId: string;
+  stickerId: string;
+  stickerUrl: string | null;
+}
+
 // Función auxiliar para convertir Memory a Recuerdo
 const memoryToRecuerdo = (
-  memory: Memory & { reactions?: any[] },
+  memory: Memory & { reactions?: MemoryReaction[] },
   memberNameById: Record<string, string>,
 ): Recuerdo => {
   let tipo: RecuerdoTipo = "texto";
@@ -134,7 +141,7 @@ const memoryToRecuerdo = (
     autorId: memory.createdBy,
     autorNombre: memberNameById[memory.createdBy] || undefined,
     fecha: new Date(memory.createdAt),
-    reactions: memory.reactions?.map((r: any) => ({
+    reactions: memory.reactions?.map((r: MemoryReaction) => ({
       id: r.id,
       userId: r.userId,
       stickerId: r.stickerId,
