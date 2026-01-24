@@ -11,6 +11,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "dev": "expo start --go",
+    "dev:client": "expo start --dev-client",
     "fix:mobile": "expo install --fix",
     "lint": "eslint . --ext .ts,.tsx && tsc --noEmit",
     "eject": "expo eject",

@@ -41,6 +41,8 @@ export function RecentPhotosWidget({
           <ImageWidget
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             image={imageBase64 as any}
+            imageWidth={500}
+            imageHeight={500}
             style={{
               height: "match_parent",
               width: "match_parent",
@@ -154,7 +156,7 @@ export function RecentPhotosWidget({
           {/* eslint-disable-next-line */}
           {/* @ts-ignore */}
           <ImageWidget
-            image={require("../../assets/images/ele-def-fondo-cuad.png")}
+            image={require("../assets/images/ele-def-fondo-cuad.png")}
             imageWidth={48}
             imageHeight={48}
             style={{

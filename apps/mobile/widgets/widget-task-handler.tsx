@@ -15,13 +15,30 @@ const nameToWidget = {
 
 async function urlToBase64(url: string): Promise<string | null> {
   try {
-    const response = await fetch(url);
+    let fetchUrl = url;
+    // Resize via query params to keep base64 small $(< 500KB)
+    if (url.includes("supabase.co") && !url.includes("width=")) {
+      const char = url.includes("?") ? "&" : "?";
+      fetchUrl = `${url}${char}width=500&quality=60`;
+    }
+
+    console.log("Widget: fetching base64 from", fetchUrl);
+    const response = await fetch(fetchUrl);
     const blob = await response.blob();
+
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64data = reader.result as string;
-        resolve(base64data);
+        console.log("Widget: b64 len", base64data.length);
+        if (base64data.length > 1500000) {
+          // 1.5MB Limit
+          console.log("Widget: Too big!");
+          resolve(null);
+        } else {
+          // Return full data URI
+          resolve(base64data);
+        }
       };
       reader.onerror = reject;
       reader.readAsDataURL(blob);
@@ -51,7 +68,7 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
 
   // Default props
   const widgetProps = {
-    imageBase64: "",
+    imageBase64: "", // Back to base64
     caption: "",
     date: "",
     error: "",
@@ -59,14 +76,34 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
 
   try {
     // Attempt to get session
+    // Validate token with server
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth
+      .getSession()
+      .then(({ data }) =>
+        data.session
+          ? supabase.auth.getUser()
+          : { data: { user: null }, error: null },
+      );
+
+    // Recovery if session logic was complex:
     const {
       data: { session },
     } = await supabase.auth.getSession();
 
     if (!session) {
-      widgetProps.error = "Abre la app para sincronizar";
+      widgetProps.error = "Abre la app";
     } else {
-      const userId = session.user.id;
+      // Validate token with server
+      console.log(
+        "Widget: auth.getUser:",
+        user ? "OK" : "Error",
+        userError?.message || "",
+      );
+
+      const userId = session.user.id; // Use session ID which is available even if getUser fails (though RLS might fail)
 
       // Get user's groupId
       const { data: userRow } = await supabase
@@ -75,30 +112,62 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
         .eq("id", userId)
         .single();
 
-      // Fetch recent memories with media (broad query)
-      const { data: rawMemories } = await supabase
-        .from("memories")
-        .select("id, title, caption, mediaUrl, mimeType, createdAt")
-        .eq("groupId", userRow?.groupId || "")
-        .neq("mediaUrl", null)
-        .order("createdAt", { ascending: false })
-        .limit(20);
+      console.log("Widget: groupId", userRow?.groupId);
+
+      // Fetch recent memories via API (bypassing direct RLS potential issues)
+      const apiUrl =
+        process.env.EXPO_PUBLIC_API_URL || "http://192.168.1.5:8787";
+      const token = session.access_token;
+      let rawMemories: any[] = [];
+      let queryError = null;
+
+      try {
+        console.log(`Widget: API call...`);
+        const response = await fetch(
+          `${apiUrl}/memories?limit=20&groupId=${userRow?.groupId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        if (response.ok) {
+          const json = await response.json();
+          // Handle potential pagination wrapper
+          rawMemories = Array.isArray(json) ? json : json.data || [];
+        } else {
+          queryError = { message: `Status ${response.status}` };
+          console.log(
+            "Widget: API Error",
+            response.status,
+            await response.text(),
+          );
+        }
+      } catch (e: any) {
+        queryError = e;
+        console.log("Widget: API Fetch Error", e);
+      }
+
+      if (queryError) {
+        console.log("Widget: queryError", queryError);
+      }
+      console.log("Widget: rawMemories count", rawMemories?.length);
 
       // Filter for images in JS to be robust against missing mimeTypes
       const memories = (rawMemories || [])
         .filter((m) => {
-          if (m.mimeType && m.mimeType.startsWith("image/")) return true;
-          if (m.mimeType && m.mimeType.startsWith("video/")) return false;
-
-          // If mimeType is missing, check extension allowing query params
           if (m.mediaUrl) {
-            const lower = m.mediaUrl.toLowerCase();
-            // Check for image extension, even if followed by query params
-            return /\.(jpeg|jpg|png|webp|bmp|heic)(\?.*)?$/.test(lower);
+            // Basic filtering
+            return /\.(jpeg|jpg|png|webp|bmp|heic)(\?.*)?$/.test(
+              m.mediaUrl.toLowerCase(),
+            );
           }
           return false;
         })
         .slice(0, 5);
+
+      console.log(`Widget: Found ${memories.length} photos`);
 
       if (memories && memories.length > 0) {
         // --- Logic to Pick Photo ---
@@ -110,11 +179,11 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
 
         try {
           // If we are triggered by REFRESH or normal UPDATE, cycle.
-          const lastIndexStr = await AsyncStorage.getItem(storageKey);
-          const lastIndex = lastIndexStr ? parseInt(lastIndexStr, 10) : -1;
+          const last = await AsyncStorage.getItem(storageKey);
+          const lastIdx = last ? parseInt(last, 10) : -1;
 
           // Cycle: (last + 1) % length
-          nextIndex = (lastIndex + 1) % memories.length;
+          nextIndex = (lastIdx + 1) % memories.length;
 
           await AsyncStorage.setItem(storageKey, nextIndex.toString());
         } catch (_err) {
@@ -124,31 +193,32 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
         }
 
         const memory = memories[nextIndex];
+
+        // Fetch Base64
         const b64 = await urlToBase64(memory.mediaUrl);
 
         if (b64) {
           widgetProps.imageBase64 = b64;
           widgetProps.caption = formatCaption(memory);
-
-          // Format Date
           try {
             const dateObj = new Date(memory.createdAt);
-            widgetProps.date = format(dateObj, "d 'de' MMMM 'de' yyyy", {
-              locale: es,
-            });
+            widgetProps.date = format(dateObj, "d 'de' MMMM", { locale: es });
           } catch {
             widgetProps.date = "";
           }
         } else {
-          widgetProps.error = "Error cargando imagen";
+          widgetProps.error = "Error cargando foto";
         }
       } else {
-        widgetProps.error = "Sin fotos recientes";
+        const debugMsg = queryError
+          ? `Err: ${queryError.message}`
+          : `Sin fotos (Raw: ${rawMemories.length})`;
+        widgetProps.error = debugMsg;
       }
     }
   } catch (e) {
     console.error("Widget Error:", e);
-    widgetProps.error = "Error de conexión";
+    widgetProps.error = "Error general";
   }
 
   props.renderWidget(<Widget {...widgetProps} />);

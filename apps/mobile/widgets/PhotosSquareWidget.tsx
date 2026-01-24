@@ -14,13 +14,18 @@ export function PhotosSquareWidget({
   imageBase64,
   error,
 }: PhotosSquareWidgetProps) {
+  // Dynamic background: Black for photo, White for empty state
+  const bgColor = imageBase64 ? "#000000" : "#FFFFFF";
+
   return (
     <FlexWidget
       style={{
         height: "match_parent",
         width: "match_parent",
-        backgroundColor: "#000000",
+        backgroundColor: bgColor,
         borderRadius: 16,
+        justifyContent: "center",
+        alignItems: "center",
       }}
       clickAction="OPEN_APP"
     >
@@ -29,11 +34,13 @@ export function PhotosSquareWidget({
         <ImageWidget
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           image={imageBase64 as any}
+          imageWidth={500}
+          imageHeight={500}
           style={{
             height: "match_parent",
             width: "match_parent",
           }}
-          radius={24}
+          radius={16}
           resizeMode="cover"
         />
       ) : (
@@ -44,17 +51,14 @@ export function PhotosSquareWidget({
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            backgroundColor: "#FFFFFF",
-            borderRadius: 16,
             padding: 12,
           }}
-          clickAction="OPEN_APP"
         >
           {/* Fallback Icon / Image */}
           {/* eslint-disable-next-line */}
           {/* @ts-ignore */}
           <ImageWidget
-            image={require("../../assets/images/ele-def-fondo-cuad.png")}
+            image={require("../assets/images/ele-def-fondo-cuad.png")}
             imageWidth={32}
             imageHeight={32}
             style={{
