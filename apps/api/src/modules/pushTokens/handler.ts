@@ -45,6 +45,7 @@ pushTokensApp.openapi(
           },
         },
       },
+      400: openApiErrorResponse("Validation error"),
       ...openApiErrorResponse,
     },
   },
@@ -59,7 +60,7 @@ pushTokensApp.openapi(
       deviceId: body.deviceId,
     });
 
-    return c.json({ success: true });
+    return c.json({ success: true }, 200);
   }
 );
 
@@ -90,6 +91,7 @@ pushTokensApp.openapi(
           },
         },
       },
+      400: openApiErrorResponse("Validation error"),
       ...openApiErrorResponse,
     },
   },
@@ -99,6 +101,6 @@ pushTokensApp.openapi(
 
     await c.var.pushTokensService.removePushToken(userId, body.token);
 
-    return c.json({ success: true });
+    return c.json({ success: true }, 200);
   }
 );

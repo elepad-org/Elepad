@@ -10417,10 +10417,21 @@ export type postPushTokensResponse200 = {
   status: 200;
 };
 
+export type postPushTokensResponse400 = {
+  data: Error;
+  status: 400;
+};
+
 export type postPushTokensResponseSuccess = postPushTokensResponse200 & {
   headers: Headers;
 };
-export type postPushTokensResponse = postPushTokensResponseSuccess;
+export type postPushTokensResponseError = postPushTokensResponse400 & {
+  headers: Headers;
+};
+
+export type postPushTokensResponse =
+  | postPushTokensResponseSuccess
+  | postPushTokensResponseError;
 
 export const getPostPushTokensUrl = () => {
   return `/push-tokens`;
@@ -10439,7 +10450,7 @@ export const postPushTokens = async (
 };
 
 export const getPostPushTokensMutationOptions = <
-  TError = unknown,
+  TError = Error,
   TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
@@ -10480,12 +10491,12 @@ export type PostPushTokensMutationResult = NonNullable<
   Awaited<ReturnType<typeof postPushTokens>>
 >;
 export type PostPushTokensMutationBody = PostPushTokensBody;
-export type PostPushTokensMutationError = unknown;
+export type PostPushTokensMutationError = Error;
 
 /**
  * @summary Store or update a push token
  */
-export const usePostPushTokens = <TError = unknown, TContext = unknown>(
+export const usePostPushTokens = <TError = Error, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof postPushTokens>>,
@@ -10513,10 +10524,21 @@ export type deletePushTokensResponse200 = {
   status: 200;
 };
 
+export type deletePushTokensResponse400 = {
+  data: Error;
+  status: 400;
+};
+
 export type deletePushTokensResponseSuccess = deletePushTokensResponse200 & {
   headers: Headers;
 };
-export type deletePushTokensResponse = deletePushTokensResponseSuccess;
+export type deletePushTokensResponseError = deletePushTokensResponse400 & {
+  headers: Headers;
+};
+
+export type deletePushTokensResponse =
+  | deletePushTokensResponseSuccess
+  | deletePushTokensResponseError;
 
 export const getDeletePushTokensUrl = () => {
   return `/push-tokens`;
@@ -10535,7 +10557,7 @@ export const deletePushTokens = async (
 };
 
 export const getDeletePushTokensMutationOptions = <
-  TError = unknown,
+  TError = Error,
   TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
@@ -10576,12 +10598,12 @@ export type DeletePushTokensMutationResult = NonNullable<
   Awaited<ReturnType<typeof deletePushTokens>>
 >;
 export type DeletePushTokensMutationBody = DeletePushTokensBody;
-export type DeletePushTokensMutationError = unknown;
+export type DeletePushTokensMutationError = Error;
 
 /**
  * @summary Remove a push token
  */
-export const useDeletePushTokens = <TError = unknown, TContext = unknown>(
+export const useDeletePushTokens = <TError = Error, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof deletePushTokens>>,

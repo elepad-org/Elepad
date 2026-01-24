@@ -62,9 +62,15 @@ export async function registerForPushNotificationsAsync(): Promise<string | unde
         })
       ).data;
       
-      console.log('Push token:', token);
+      console.log('Push token obtained:', token, typeof token);
+      
+      if (typeof token !== 'string' || token.trim().length === 0) {
+        console.warn('Invalid token format:', token);
+        token = undefined;
+      }
     } catch (e) {
       console.error('Error getting push token:', e);
+      token = undefined;
     }
   } else {
     console.log('Must use physical device for Push Notifications');
