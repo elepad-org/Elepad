@@ -108,12 +108,14 @@ export default function CalendarScreen() {
         setFormVisible(false);
         setEditing(null);
         // Invalidar caché para forzar actualización inmediata
-        queryClient.invalidateQueries({
-          queryKey: ["/activities/family-code/{id}/family-group"],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["/activities"],
-        });
+        // Usar la queryKey provista por el hook para invalidar exactamente esa query
+        try {
+          queryClient.invalidateQueries({ queryKey: activitiesQuery.queryKey as readonly unknown[] });
+        } catch (err) {
+          console.warn("invalidateQueries with queryKey failed, falling back:", err);
+          queryClient.invalidateQueries({ queryKey: ["/activities/family-code/{id}/family-group"] });
+          queryClient.invalidateQueries({ queryKey: ["/activities"] });
+        }
       },
       onError: (error) => {
         console.error("Error al crear actividad:", error);
@@ -139,12 +141,13 @@ export default function CalendarScreen() {
         setFormVisible(false);
         setEditing(null);
         // Invalidar caché para forzar actualización inmediata
-        queryClient.invalidateQueries({
-          queryKey: ["/activities/family-code/{id}/family-group"],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["/activities"],
-        });
+        try {
+          queryClient.invalidateQueries({ queryKey: activitiesQuery.queryKey as readonly unknown[] });
+        } catch (err) {
+          console.warn("invalidateQueries with queryKey failed, falling back:", err);
+          queryClient.invalidateQueries({ queryKey: ["/activities/family-code/{id}/family-group"] });
+          queryClient.invalidateQueries({ queryKey: ["/activities"] });
+        }
       },
       onError: (error) => {
         console.error("Error al actualizar actividad:", error);
@@ -164,12 +167,13 @@ export default function CalendarScreen() {
           type: "success",
         });
         // Invalidar caché para forzar actualización inmediata
-        queryClient.invalidateQueries({
-          queryKey: ["/activities/family-code/{id}/family-group"],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["/activities"],
-        });
+        try {
+          queryClient.invalidateQueries({ queryKey: activitiesQuery.queryKey as readonly unknown[] });
+        } catch (err) {
+          console.warn("invalidateQueries with queryKey failed, falling back:", err);
+          queryClient.invalidateQueries({ queryKey: ["/activities/family-code/{id}/family-group"] });
+          queryClient.invalidateQueries({ queryKey: ["/activities"] });
+        }
       },
       onError: (error) => {
         console.error("Error al eliminar actividad:", error);

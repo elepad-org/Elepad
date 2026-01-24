@@ -200,7 +200,50 @@ attemptsApp.openapi(
 );
 
 // Listar intentos del usuario actual O de un miembro del grupo (para supervisores)
-// @ts-expect-error - Complex type inference with Hono + Zod
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const listAttemptsHandler = async (c: any) => {
+  const { limit, offset, gameType, userId: requestedUserId, startDate, endDate, elderOnly } = c.req.valid("query");
+  const currentUserId = c.var.user.id;
+
+  // Si elderOnly está activado, necesita buscar en el grupo
+  if (elderOnly) {
+    const attempts = await c.var.attemptService.listGroupElderAttempts(
+      currentUserId,
+      limit,
+      offset,
+      gameType as "memory" | "logic" | "attention" | "reaction" | undefined,
+      startDate,
+      endDate,
+    );
+    return c.json(attempts, 200);
+  }
+
+  // Si no especifica userId, usa el usuario actual
+  let targetUserId = currentUserId;
+
+  // Si especifica userId, verificar permisos
+  if (requestedUserId && requestedUserId !== currentUserId) {
+    const familyGroupService = new FamilyGroupService(c.var.supabase);
+    const canAccess = await familyGroupService.canAccessUserData(currentUserId, requestedUserId);
+
+    if (!canAccess) {
+      return c.json({ error: { message: "No tienes permisos para ver los datos de este usuario" } }, 403);
+    }
+
+    targetUserId = requestedUserId;
+  }
+
+  const attempts = await c.var.attemptService.listUserAttempts(
+    targetUserId,
+    limit,
+    offset,
+    gameType as "memory" | "logic" | "attention" | "reaction" | undefined,
+    startDate,
+    endDate,
+  );
+  return c.json(attempts, 200);
+};
+
 attemptsApp.openapi(
   {
     method: "get",
@@ -212,6 +255,9 @@ attemptsApp.openapi(
         offset: z.coerce.number().int().min(0).optional().default(0),
         gameType: GameTypeEnum.optional(),
         userId: z.string().uuid().optional(),
+        startDate: z.string().datetime().optional(),
+        endDate: z.string().datetime().optional(),
+        elderOnly: z.coerce.boolean().optional(),
       }),
     },
     responses: {
@@ -225,33 +271,7 @@ attemptsApp.openapi(
       500: openApiErrorResponse("Error interno del servidor"),
     },
   },
-  async (c) => {
-    const { limit, offset, gameType, userId: requestedUserId } = c.req.valid("query");
-    const currentUserId = c.var.user.id;
-    
-    // Si no especifica userId, usa el usuario actual
-    let targetUserId = currentUserId;
-    
-    // Si especifica userId, verificar permisos
-    if (requestedUserId && requestedUserId !== currentUserId) {
-      const familyGroupService = new FamilyGroupService(c.var.supabase);
-      const canAccess = await familyGroupService.canAccessUserData(currentUserId, requestedUserId);
-      
-      if (!canAccess) {
-        return c.json({ error: { message: "No tienes permisos para ver los datos de este usuario" } }, 403);
-      }
-      
-      targetUserId = requestedUserId;
-    }
-    
-    const attempts = await c.var.attemptService.listUserAttempts(
-      targetUserId,
-      limit,
-      offset,
-      gameType as "memory" | "logic" | "attention" | "reaction" | undefined,
-    );
-    return c.json(attempts, 200);
-  },
+  listAttemptsHandler,
 );
 
 // Obtener estadísticas del usuario O de un miembro del grupo (para supervisores)

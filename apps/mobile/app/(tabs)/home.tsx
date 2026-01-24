@@ -20,6 +20,7 @@ import {
   useGetMemories,
   useGetFamilyGroupIdGroupMembers,
   GetFamilyGroupIdGroupMembers200,
+  AttemptWithUser,
 } from "@elepad/api-client";
 import { useRouter } from "expo-router";
 import { useMemo, useEffect } from "react";
@@ -72,12 +73,32 @@ export default function HomeScreen() {
     },
   );
 
+  // Calculate date range for last 24 hours (memoized to avoid constant recalculation)
+  const dateRange = useMemo(() => {
+    const now = new Date();
+    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    return {
+      start: twentyFourHoursAgo.toISOString(),
+      end: now.toISOString(),
+    };
+  }, []); // Empty deps - solo calcular una vez al montar
+
   // Fetch recent attempts
+  // - Si es elder: su último intento personal
+  // - Si es familiar: últimos intentos de elder del grupo en las últimas 24h
   const attemptsQuery = useGetAttempts(
-    { limit: 1 },
+    userElepad?.elder
+      ? { limit: 1 }
+      : { 
+          limit: 10, 
+          elderOnly: true,
+          startDate: dateRange.start,
+          endDate: dateRange.end,
+        },
     {
       query: {
         enabled: !!userElepad,
+        staleTime: 60000,
       },
     },
   );
@@ -164,15 +185,15 @@ export default function HomeScreen() {
       .slice(0, 3);
   }, [activitiesQuery.data]);
 
-  const lastAttempt = useMemo(() => {
+  const lastAttempt = useMemo((): AttemptWithUser | AttemptWithUser[] | null => {
     if (!attemptsQuery.data) return null;
     const data = attemptsQuery.data;
     const attempts = Array.isArray(data)
       ? data
       : (data as { data?: unknown }).data || [];
-    if (!Array.isArray(attempts)) return null;
-    return attempts[0] || null;
-  }, [attemptsQuery.data]);
+    if (!Array.isArray(attempts)) return [];
+    return userElepad?.elder ? attempts[0] || null : attempts;
+  }, [attemptsQuery.data, userElepad?.elder]);
 
   const lastMemory = useMemo(() => {
     if (!memoriesQuery.data) return null;
@@ -617,7 +638,10 @@ export default function HomeScreen() {
 
         {/* Actividad Reciente */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Actividad reciente</Text>
+          <Text style={styles.sectionTitle}>
+            {userElepad?.elder ? "Mi última actividad" : "Última actividad del grupo"}
+          </Text>
+
           {attemptsQuery.isLoading ? (
             <View style={[styles.gameCard, { marginTop: 10 }]}>
               <SkeletonBox width={60} height={60} borderRadius={30} />
@@ -627,68 +651,120 @@ export default function HomeScreen() {
               </View>
               <SkeletonBox width={70} height={60} borderRadius={14} />
             </View>
-          ) : lastAttempt ? (
-            <Pressable
-              style={styles.gameCard}
-              onPress={() => {
-                if (userElepad?.elder) {
-                  // Si es adulto mayor, ir a la pantalla de historial completo
-                  router.push("/history");
-                } else {
-                  // Si es familiar, navegar al tab de estadísticas
-                  router.navigate({
-                    pathname: "/(tabs)/home",
-                    params: {
-                      tab: "juegos",
-                    },
-                  });
-                }
-              }}
-            >
-              <View style={styles.gameIcon}>
-                <Image
-                  source={GAME_IMAGES[lastAttempt.gameType || "memory"]}
-                  style={{ width: 40, height: 40, resizeMode: "contain" }}
-                />
-              </View>
-              <View style={styles.gameInfo}>
-                <Text style={styles.gameName}>
-                  {getGameInfo(lastAttempt.gameType || "").name}
-                </Text>
-                <Text style={styles.gameTime}>
-                  {formatInUserTimezone(
-                    lastAttempt.startedAt,
-                    "d 'de' MMMM, HH:mm",
-                    userElepad?.timezone
-                  )}
-                </Text>
-                {/* Mostrar quién jugó solo si el usuario actual NO es elder (es ayudante) */}
-                {!userElepad?.elder && lastAttempt.user && (
-                  <View style={styles.playerInfo}>
-                    {lastAttempt.user.avatarUrl ? (
-                      <Avatar.Image
-                        size={20}
-                        source={{ uri: lastAttempt.user.avatarUrl }}
-                        style={styles.playerAvatar}
-                      />
-                    ) : (
-                      <Avatar.Text
-                        size={20}
-                        label={lastAttempt.user.displayName
-                          .substring(0, 2)
-                          .toUpperCase()}
-                        style={styles.playerAvatar}
-                      />
+          ) : userElepad?.elder ? (
+            // Elder: mostrar solo su último intento
+            lastAttempt && !Array.isArray(lastAttempt) ? (
+              <Pressable
+                style={styles.gameCard}
+                onPress={() => router.push("/history")}
+              >
+                <View style={styles.gameIcon}>
+                  <Image
+                    source={GAME_IMAGES[lastAttempt.gameType || "memory"]}
+                    style={{ width: 40, height: 40, resizeMode: "contain" }}
+                  />
+                </View>
+                <View style={styles.gameInfo}>
+                  <Text style={styles.gameName}>
+                    {getGameInfo(lastAttempt.gameType || "").name}
+                  </Text>
+                  <Text style={styles.gameTime}>
+                    {formatInUserTimezone(
+                      lastAttempt.startedAt,
+                      "d 'de' MMMM, HH:mm",
+                      userElepad?.timezone
                     )}
-                    <Text style={styles.playerName}>
-                      {lastAttempt.user.displayName}
-                    </Text>
-                  </View>
-                )}
+                  </Text>
+                </View>
+                <View style={styles.gameScore}>
+                  <Text style={styles.scoreLabel}>PUNTOS</Text>
+                  <Text style={styles.scoreValue}>{lastAttempt.score || 0}</Text>
+                </View>
+              </Pressable>
+            ) : (
+              <View style={styles.emptySection}>
+                <Text style={styles.emptyText}>Aún no has jugado</Text>
+                <Button
+                  mode="outlined"
+                  onPress={() => router.push("/juegos")}
+                  style={styles.emptyButtonOutline}
+                  labelStyle={{ color: COLORS.primary }}
+                >
+                  Explorar juegos
+                </Button>
               </View>
-              <View style={styles.gameScore}>
-                <Text style={styles.scoreLabel}>PUNTOS</Text>
-                <Text style={styles.scoreValue}>{lastAttempt.score || 0}</Text>
+            )
+          ) : (
+            // Familiar: mostrar múltiples intentos de elder
+            Array.isArray(lastAttempt) && lastAttempt.length > 0 ? (
+              <View style={{ gap: 10, marginTop: 10 }}>
+                {lastAttempt.map((attempt: AttemptWithUser) => (
+                  <Pressable
+                    key={attempt.id}
+                    style={styles.gameCard}
+                    onPress={() => router.push("/history")}
+                  >
+                    <View style={styles.gameIcon}>
+                      <Image
+                        source={GAME_IMAGES[attempt.gameType || "memory"]}
+                        style={{ width: 40, height: 40, resizeMode: "contain" }}
+                      />
+                    </View>
+                    <View style={styles.gameInfo}>
+                      <Text style={styles.gameName}>
+                        {getGameInfo(attempt.gameType || "").name}
+                      </Text>
+                      <Text style={styles.gameTime}>
+                        {formatInUserTimezone(
+                          attempt.startedAt,
+                          "d 'de' MMMM, HH:mm",
+                          userElepad?.timezone
+                        )}
+                      </Text>
+                      {attempt.user && (
+                        <View style={styles.playerInfo}>
+                          {attempt.user.avatarUrl ? (
+                            <Avatar.Image
+                              size={20}
+                              source={{ uri: attempt.user.avatarUrl }}
+                              style={styles.playerAvatar}
+                            />
+                          ) : (
+                            <Avatar.Text
+                              size={20}
+                              label={attempt.user.displayName
+                                .substring(0, 2)
+                                .toUpperCase()}
+                              style={styles.playerAvatar}
+                            />
+                          )}
+                          <Text style={styles.playerName}>
+                            {attempt.user.displayName}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                    <View style={styles.gameScore}>
+                      <Text style={styles.scoreLabel}>PUNTOS</Text>
+                      <Text style={styles.scoreValue}>{attempt.score || 0}</Text>
+                    </View>
+                  </Pressable>
+                ))}
+              </View>
+            ) : (
+              <View style={styles.emptySection}>
+                <Text style={styles.emptyText}>No hay actividad reciente en el grupo</Text>
+                <Button
+                  mode="outlined"
+                  onPress={() => router.navigate({
+                    pathname: "/(tabs)/home",
+                    params: { tab: "juegos" },
+                  })}
+                  style={styles.emptyButtonOutline}
+                  labelStyle={{ color: COLORS.primary }}
+                >
+                  Ver estadísticas
+                </Button>
               </View>
             </Pressable>
           ) : (

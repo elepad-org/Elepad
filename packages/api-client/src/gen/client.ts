@@ -756,6 +756,9 @@ export type GetAttemptsParams = {
   offset?: number | null;
   gameType?: GameType;
   userId?: string;
+  startDate?: string;
+  endDate?: string;
+  elderOnly?: boolean | null;
 };
 
 export type GetAttemptsStatsGameTypeParams = {

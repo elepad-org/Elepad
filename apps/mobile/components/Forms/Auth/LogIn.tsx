@@ -22,6 +22,7 @@ export default function LogIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
   const getFriendlyErrorMessage = (errorMsg: string) => {
     if (errorMsg.includes("Invalid login credentials"))
@@ -205,7 +206,7 @@ export default function LogIn() {
           placeholder="Contraseña"
           value={password}
           onChangeText={setPassword}
-          secureTextEntry
+          secureTextEntry={!passwordVisible}
           autoCapitalize="none"
           returnKeyType="done"
           style={styles.input}
@@ -217,6 +218,13 @@ export default function LogIn() {
           onSubmitEditing={handleLogin}
           disabled={loading}
           dense
+          right={
+            <TextInput.Icon
+              icon={passwordVisible ? "eye-off" : "eye"}
+              onPress={() => setPasswordVisible(!passwordVisible)}
+              disabled={loading}
+            />
+          }
         />
 
         <Link href="/forgot-password" asChild>
