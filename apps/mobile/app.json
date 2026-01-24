@@ -21,7 +21,8 @@
       "package": "com.elepadorg.elepad",
       "permissions": [
         "android.permission.POST_NOTIFICATIONS"
-      ]
+      ],
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",

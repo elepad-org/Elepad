@@ -21,11 +21,16 @@ export async function registerForPushNotificationsAsync(): Promise<string | unde
   let token;
 
   if (Platform.OS === 'android') {
+    // Crear canal de notificación para Android
     await Notifications.setNotificationChannelAsync('default', {
-      name: 'default',
+      name: 'Notificaciones predeterminadas',
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#FF231F7C',
+      sound: 'default',
+      enableVibrate: true,
+      showBadge: true,
+      lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
     });
   }
 
