@@ -15,9 +15,7 @@ android/
 *.keystore
 *.jks
 
-# Firebase
-google-services.json
-GoogleService-Info.plist
+
 
 # Expo
 .expo/
