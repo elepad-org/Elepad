@@ -7,7 +7,6 @@ import {
   List,
   Portal,
   TextInput,
-  Switch,
   Dialog,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -52,8 +51,6 @@ export default function ConfiguracionScreen() {
   const [formName, setFormName] = useState(displayName);
   const [saving, setSaving] = useState(false);
   const [photoOpen, setPhotoOpen] = useState(false);
-  const [googleCalendarEnabled, setGoogleCalendarEnabled] = useState(false);
-  const [loadingGoogleCalendar, setLoadingGoogleCalendar] = useState(false);
   const [timezone, setTimezone] = useState(userElepad?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone);
   const [timezoneDialogVisible, setTimezoneDialogVisible] = useState(false);
   const getInitials = (name: string) =>
@@ -81,30 +78,6 @@ export default function ConfiguracionScreen() {
     'Australia/Sydney',
     'Pacific/Auckland',
   ];
-
-  const handleGoogleCalendarToggle = async () => {
-    if (!userElepad?.id) return;
-
-    setLoadingGoogleCalendar(true);
-    try {
-      const newValue = !googleCalendarEnabled;
-      // TODO: Implement API call to enable/disable Google Calendar
-      // For now, just toggle the state
-      setGoogleCalendarEnabled(newValue);
-      showToast({
-        message: `Google Calendar ${newValue ? "habilitado" : "deshabilitado"}`,
-        type: "success",
-      });
-    } catch (error) {
-      console.error("Error toggling Google Calendar:", error);
-      showToast({
-        message: "Error al cambiar configuración de Google Calendar",
-        type: "error",
-      });
-    } finally {
-      setLoadingGoogleCalendar(false);
-    }
-  };
 
   const handleSaveTimezone = async (tz: string) => {
     if (!userElepad?.id) return;
@@ -162,6 +135,7 @@ export default function ConfiguracionScreen() {
                   icon={editExpanded ? "chevron-down" : "chevron-right"}
                 />
               )}
+              style={{ minHeight: 60, justifyContent: 'center' }}
               onPress={() => {
                 setFormName(displayName);
                 setEditExpanded(!editExpanded);
@@ -249,12 +223,13 @@ export default function ConfiguracionScreen() {
               title="Cambiar contraseña"
               left={(props) => <List.Icon {...props} icon="lock-reset" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              style={{ minHeight: 60, justifyContent: 'center' }}
               onPress={() => {
                 router.navigate("/change-password");
               }}
             />
             <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
-            <List.Item
+            {/* <List.Item
               title="Google Calendar"
               description="Sincronizar actividades con Google Calendar"
               left={(props) => <List.Icon {...props} icon="calendar" />}
@@ -265,13 +240,13 @@ export default function ConfiguracionScreen() {
                   disabled={loadingGoogleCalendar}
                 />
               )}
-            />
-            <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
+            /> */}
             <List.Item
               title="Zona horaria"
               description={timezone}
               left={(props) => <List.Icon {...props} icon="clock-outline" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              style={{ minHeight: 60, justifyContent: 'center' }}
               onPress={() => setTimezoneDialogVisible(true)}
             />
             <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
@@ -279,6 +254,7 @@ export default function ConfiguracionScreen() {
               title="Grupo familiar"
               left={(props) => <List.Icon {...props} icon="account-group" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              style={{ minHeight: 60, justifyContent: 'center' }}
               onPress={() => {
                 router.navigate("/familyGroup");
               }}
