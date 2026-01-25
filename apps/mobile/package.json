@@ -10,7 +10,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "dev": "expo start --dev-client",
+    "dev": "expo start --go",
     "dev:go": "expo start --go",
     "expo-go": "expo start --go",
     "fix:mobile": "expo install --fix",
