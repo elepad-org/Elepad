@@ -203,3 +203,49 @@ albumApp.openapi(
     return c.json(albumWithPages, 200);
   }
 );
+
+// POST /album/:id/export-pdf - Export album to PDF
+albumApp.openapi(
+  {
+    method: "post",
+    path: "/album/{id}/export-pdf",
+    tags: ["album"],
+    request: {
+      params: z.object({
+        id: z.uuid(),
+      }),
+    },
+    responses: {
+      200: {
+        description: "PDF export generated successfully",
+        content: {
+          "application/json": {
+            schema: z.object({
+              pdfUrl: z.string().url(),
+              message: z.string(),
+            }),
+          },
+        },
+      },
+      400: openApiErrorResponse("Album not ready for export"),
+      401: openApiErrorResponse("Unauthorized"),
+      404: openApiErrorResponse("Album not found"),
+      500: openApiErrorResponse("Internal Server Error"),
+    },
+  },
+  async (c) => {
+    const user = c.var.user;
+    if (!user) {
+      throw new ApiException(401, "User not authenticated");
+    }
+
+    const { id } = c.req.valid("param");
+
+    const pdfUrl = await c.var.memoriesAlbumService.exportAlbumToPDF(user.id, id);
+
+    return c.json({
+      pdfUrl,
+      message: "PDF generated successfully",
+    }, 200);
+  }
+);

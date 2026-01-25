@@ -3,6 +3,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 
 const AVATAR_BUCKET = "profile-avatar";
 const MEMORIES_BUCKET = "memories";
+const ALBUM_PDF_BUCKET = "album-exports";
 
 /** Turn the file name into an URL-compatible name. */
 function urlify(name: string) {
@@ -139,5 +140,34 @@ export async function uploadAlbumCoverImage(
   }
 
   const { data } = supabase.storage.from(MEMORIES_BUCKET).getPublicUrl(path);
+  return data.publicUrl;
+}
+
+/**
+ * Uploads an album PDF export to Supabase Storage and returns the public URL.
+ * Files are organized as: album-exports/{groupId}/{albumId}/{timestamp}.pdf
+ */
+export async function uploadAlbumPDF(
+  supabase: SupabaseClient<Database>,
+  groupId: string,
+  albumId: string,
+  pdfBuffer: Buffer
+): Promise<string> {
+  const timestamp = Date.now();
+  const path = `${groupId}/${albumId}/${timestamp}.pdf`;
+
+  const { error } = await supabase.storage
+    .from(ALBUM_PDF_BUCKET)
+    .upload(path, pdfBuffer, {
+      contentType: "application/pdf",
+      cacheControl: "3600",
+      upsert: false,
+    });
+
+  if (error) {
+    throw new Error(`Album PDF upload failed: ${error.message}`);
+  }
+
+  const { data } = supabase.storage.from(ALBUM_PDF_BUCKET).getPublicUrl(path);
   return data.publicUrl;
 }

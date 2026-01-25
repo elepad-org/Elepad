@@ -444,6 +444,7 @@ export type Database = {
           status: Database["public"]["Enums"]["album_status"]
           title: string
           updatedAt: string | null
+          urlPdf: string | null
         }
         Insert: {
           coverImageUrl?: string | null
@@ -455,6 +456,7 @@ export type Database = {
           status: Database["public"]["Enums"]["album_status"]
           title: string
           updatedAt?: string | null
+          urlPdf?: string | null
         }
         Update: {
           coverImageUrl?: string | null
@@ -466,6 +468,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["album_status"]
           title?: string
           updatedAt?: string | null
+          urlPdf?: string | null
         }
         Relationships: [
           {
@@ -714,6 +717,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "point_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      push_tokens: {
+        Row: {
+          created_at: string
+          device_id: string | null
+          id: string
+          platform: string
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device_id?: string | null
+          id?: string
+          platform: string
+          token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device_id?: string | null
+          id?: string
+          platform?: string
+          token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_tokens_user_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"

@@ -1,32 +1,87 @@
 import { useState } from "react";
-import { View, Image, StyleSheet } from "react-native";
+import { View, Image, StyleSheet, Linking } from "react-native";
 import { Text, Card, Portal, Dialog, Button } from "react-native-paper";
+import { useAuth } from "@/hooks/useAuth";
+import { usePostAlbumIdExportPdf } from "@elepad/api-client";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, STYLES, SHADOWS } from "@/styles/base";
+import { useToast } from "@/components/shared/Toast";
 
 interface AlbumCardProps {
   id: string;
   title: string;
   description?: string | null;
   coverImageUrl?: string | null;
+  pdfUrl?: string | null;
   createdAt: string;
   totalPages?: number;
   onPress: () => void;
 }
 
 export default function AlbumCard({
+  id,
   title,
   description,
   coverImageUrl,
+  pdfUrl,
   createdAt,
   totalPages,
   onPress,
 }: AlbumCardProps) {
   const [detailsVisible, setDetailsVisible] = useState(false);
+  const { userElepad } = useAuth();
+  const { showToast } = useToast();  
+
+  const exportPdfMutation = usePostAlbumIdExportPdf();
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("es-AR");
+  };
+
+  const handleExportPdf = () => {
+    const albumId = id;
+    const userId = userElepad?.id;
+
+    if (!userId) {
+      console.warn("User not available for PDF export");
+      return;
+    }
+
+    showToast({
+        message: "Generando PDF... recibirás una notificación cuando esté listo",
+        type: "success",
+      });
+
+    exportPdfMutation.mutate(
+      { id: albumId },
+      {
+        onSuccess: (res) => {
+          console.log("Export PDF response:", res, "userId:", userId, "albumId:", albumId);
+        },
+        onError: (err) => {
+          console.error("Export PDF error:", err);
+          showToast({
+            message: "Error generando el PDF. Intenta nuevamente",
+            type: "error",
+          });
+        },
+      },
+    );
+  };
+
+  const handleViewPdf = async () => {
+    if (pdfUrl) {
+      try {
+        await Linking.openURL(pdfUrl);
+      } catch (err) {
+        console.error("Error opening PDF:", err);
+        showToast({
+            message: "No se pudo abrir el PDF",
+            type: "error",
+          });
+      }
+    }
   };
 
   return (
@@ -94,6 +149,29 @@ export default function AlbumCard({
             <Button mode="outlined" onPress={() => setDetailsVisible(false)}>
               Cerrar
             </Button>
+
+            {pdfUrl ? (
+              <Button
+                mode="outlined"
+                icon="file-pdf-box"
+                onPress={() => {
+                  handleViewPdf();
+                  setDetailsVisible(false);
+                }}
+              >
+                Ver PDF
+              </Button>
+            ) : (
+              <Button
+                mode="outlined"
+                loading={exportPdfMutation.isPending}
+                onPress={handleExportPdf}
+                style={{ marginRight: 8 }}
+              >
+                Exportar PDF
+              </Button>
+            )}
+
             <Button
               mode="contained"
               onPress={() => {

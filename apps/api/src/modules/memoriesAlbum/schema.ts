@@ -42,6 +42,7 @@ export const AlbumSchema = z
     description: z.string().nullable(),
     coverImageUrl: z.string().nullable(),
     status: z.enum(["processing", "ready", "error"]),
+    urlPdf: z.string().nullable(),
     createdAt: z.date(),
     updatedAt: z.date().nullable(),
   })

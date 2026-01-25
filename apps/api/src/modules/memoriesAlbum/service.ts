@@ -7,7 +7,8 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/supabase-types";
 import { CreateAlbumRequest, AlbumWithPages, Album } from "./schema";
 import { NotificationsService } from "../notifications/service";
-import { uploadAlbumCoverImage } from "@/services/storage";
+import { uploadAlbumCoverImage, uploadAlbumPDF } from "@/services/storage";
+import puppeteer from "puppeteer";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -628,5 +629,299 @@ Este recuerdo nos muestra...`;
         updatedAt: p.updatedAt ? new Date(p.updatedAt) : null,
       })),
     };
+  }
+
+  /**
+   * Generate HTML template for album PDF
+   */
+  private generateAlbumHTML(
+    album: AlbumWithPages,
+    familyName: string
+  ): string {
+    const pagesHTML = album.pages
+      .map((page, index) => {
+        const imageUrl = page.imageUrl || "";
+        const title = page.title || `Página ${index + 1}`;
+        const description = page.description || "";
+
+        return `
+      <div class="page">
+        <div class="page-content">
+          <div class="image-section">
+            <img src="${imageUrl}" alt="${title}" />
+          </div>
+          <div class="text-section">
+            <h2 class="page-title">${title}</h2>
+            <p class="page-description">${description}</p>
+            <div class="page-number">Página ${index + 1} de ${album.pages.length}</div>
+          </div>
+        </div>
+      </div>
+    `;
+      })
+      .join("");
+
+    return `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${album.title}</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      background: #f5f5f5;
+    }
+
+    .cover-page {
+      width: 297mm;
+      height: 210mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      page-break-after: always;
+      padding: 40mm;
+    }
+
+    .cover-title {
+      font-size: 48pt;
+      font-weight: bold;
+      margin-bottom: 20mm;
+      text-align: center;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .cover-description {
+      font-size: 18pt;
+      text-align: center;
+      max-width: 200mm;
+      line-height: 1.6;
+      margin-bottom: 10mm;
+    }
+
+    .cover-family {
+      font-size: 14pt;
+      font-style: italic;
+      margin-top: 20mm;
+    }
+
+    .page {
+      width: 297mm;
+      height: 210mm;
+      page-break-after: always;
+      background: white;
+      position: relative;
+    }
+
+    .page-content {
+      width: 100%;
+      height: 100%;
+      display: flex;
+    }
+
+    .image-section {
+      width: 50%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f9f9f9;
+      padding: 15mm;
+    }
+
+    .image-section img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .text-section {
+      width: 50%;
+      height: 100%;
+      padding: 20mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+
+    .page-title {
+      font-size: 24pt;
+      color: #333;
+      margin-bottom: 15mm;
+      line-height: 1.3;
+    }
+
+    .page-description {
+      font-size: 14pt;
+      color: #555;
+      line-height: 1.8;
+      text-align: justify;
+    }
+
+    .page-number {
+      position: absolute;
+      bottom: 10mm;
+      right: 20mm;
+      font-size: 10pt;
+      color: #999;
+      font-style: italic;
+    }
+
+    @page {
+      size: A4 landscape;
+      margin: 0;
+    }
+
+    @media print {
+      body {
+        background: white;
+      }
+      
+      .page, .cover-page {
+        page-break-after: always;
+        page-break-inside: avoid;
+      }
+
+      .page:last-child, .cover-page:last-child {
+        page-break-after: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Cover Page -->
+  <div class="cover-page">
+    <h1 class="cover-title">${album.title}</h1>
+    <p class="cover-description">${album.description || "Un álbum de recuerdos familiares"}</p>
+    <p class="cover-family">${familyName}</p>
+  </div>
+
+  <!-- Album Pages -->
+  ${pagesHTML}
+</body>
+</html>
+    `.trim();
+  }
+
+  /**
+   * Export album to PDF
+   */
+  async exportAlbumToPDF(userId: string, albumId: string): Promise<string> {
+    // Get user's family group
+    const { data: userGroup, error: userGroupError } = await this.supabase
+      .from("users")
+      .select("groupId")
+      .eq("id", userId)
+      .single();
+
+    if (!userGroup?.groupId || userGroupError) {
+      throw new ApiException(404, "User family group not found");
+    }
+
+    // Get album with pages
+    const albumWithPages = await this.getAlbumById(userId, albumId);
+
+    if (albumWithPages.status !== "ready") {
+      throw new ApiException(400, "Album is not ready for export");
+    }
+
+    // Get family group info
+    const { data: familyGroup } = await this.supabase
+      .from("familyGroups")
+      .select("name")
+      .eq("id", userGroup.groupId)
+      .single();
+
+    const familyName = familyGroup?.name || "Tu familia";
+
+    // Generate HTML
+    const html = this.generateAlbumHTML(albumWithPages, familyName);
+
+    let browser;
+    try {
+      // Launch Puppeteer
+      browser = await puppeteer.launch({
+        headless: true,
+        args: [
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-accelerated-2d-canvas",
+          "--disable-gpu",
+        ],
+      });
+
+      const page = await browser.newPage();
+
+      // Set content and wait for images to load
+      await page.setContent(html, {
+        waitUntil: ["networkidle0", "load"],
+        timeout: 60000,
+      });
+
+      // Generate PDF
+      const pdfBuffer = await page.pdf({
+        format: "A4",
+        landscape: true,
+        printBackground: true,
+        preferCSSPageSize: true,
+        timeout: 60000,
+      });
+
+      await browser.close();
+
+      // Upload to Supabase Storage
+      const pdfUrl = await uploadAlbumPDF(
+        this.supabase,
+        userGroup.groupId,
+        albumId,
+        Buffer.from(pdfBuffer)
+      );
+
+      // Update album with PDF URL
+      const { error: updateError } = await this.supabase
+        .from("memoriesAlbums")
+        .update({
+          urlPdf: pdfUrl,
+          updatedAt: new Date().toISOString(),
+        })
+        .eq("id", albumId);
+
+      if (updateError) {
+        console.error("Error updating album with PDF URL:", updateError);
+      }
+
+      // Send notification to user
+      const notificationsService = new NotificationsService(this.supabase);
+      await notificationsService.createNotification({
+        userId,
+        eventType: "achievement",
+        entityType: "memory",
+        entityId: albumId,
+        title: "¡Tu PDF está listo!",
+        body: `Hemos generado el PDF de tu álbum "${albumWithPages.title}". Ya puedes descargarlo.`,
+      });
+
+      return pdfUrl;
+    } catch (error) {
+      if (browser) {
+        await browser.close();
+      }
+      console.error("Error generating PDF:", error);
+      throw new ApiException(500, "Error generating album PDF");
+    }
   }
 }
