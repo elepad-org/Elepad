@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { StatusBar, View, StyleSheet, ImageBackground, Platform } from "react-native";
+import { useState, useRef } from "react";
+import { StatusBar, View, StyleSheet, ImageBackground, Platform,  Animated } from "react-native";
 import {
   Button,
   TextInput,
@@ -14,6 +14,7 @@ import fondoLogin from "@/assets/images/pirotecnia.png";
 export default function ForgotPasswordScreen() {
   const router = useRouter();
   const { showToast } = useToast();
+  const fadeAnim = useRef(new Animated.Value(1)).current;
 
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);

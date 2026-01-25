@@ -15,6 +15,13 @@ export default function AuthGroupLayout() {
           animation: "slide_from_right",
         }}
       />
+      <Stack.Screen
+        name="forgot-password"
+        options={{
+          animation: "fade",
+        }}
+      />
     </Stack>
+    
   );
 }
