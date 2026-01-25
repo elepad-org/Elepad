@@ -9,7 +9,7 @@ import { useAppFonts } from "@/hooks/useAppFonts";
 import { Stack } from "expo-router";
 import { useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { configureApiClient } from "@elepad/api-client/src/runtime";
 import { Provider as PaperProvider } from "react-native-paper";
 import { lightTheme, darkTheme } from "@/styles/theme";
@@ -18,8 +18,6 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StreakSnackbarProvider } from "@/hooks/useStreakSnackbar";
 import { COLORS } from "@/styles/base";
 import { ToastProvider } from "@/components/shared/Toast";
-import * as Notifications from 'expo-notifications';
-import { registerForPushNotificationsAsync } from "@/lib/pushNotifications";
 
 
 const queryClient = new QueryClient();
@@ -30,8 +28,6 @@ let AUTH_TOKEN: string | undefined;
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useAppFonts();
-  const notificationListener = useRef<Notifications.Subscription | undefined>(undefined);
-  const responseListener = useRef<Notifications.Subscription | undefined>(undefined);
 
   // Mantener el token actualizado en AUTH_TOKEN de forma reactiva
   useEffect(() => {
@@ -48,32 +44,6 @@ export default function RootLayout() {
       },
     );
     return () => listener?.subscription?.unsubscribe?.();
-  }, []);
-
-  // Setup push notifications
-  useEffect(() => {
-    registerForPushNotificationsAsync();
-
-    // Listener para notificaciones recibidas mientras la app está en primer plano
-    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-      console.log('📬 Notification received:', notification);
-    });
-
-    // Listener para cuando el usuario interactúa con la notificación
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log('👆 Notification tapped:', response);
-      // Aquí puedes navegar a la pantalla correspondiente según el tipo de notificación
-      const data = response.notification.request.content.data;
-      if (data?.type === 'activity') {
-        // Navegar a calendar con activityId
-      } else if (data?.type === 'memory') {
-        // Navegar a memories con memoryId
-      }
-    });
-
-    return () => {
-      // Cleanup notification listeners
-    };
   }, []);
 
   if (!loaded) {
