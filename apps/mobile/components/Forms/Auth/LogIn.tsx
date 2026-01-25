@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
   },
   backText: {
     fontSize: 14,
-    color: COLORS.textSecondary,
+    color: COLORS.primary,
     fontWeight: "500",
   },
 });
