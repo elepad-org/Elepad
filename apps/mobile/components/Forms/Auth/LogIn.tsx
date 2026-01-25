@@ -254,10 +254,10 @@ export default function LogIn() {
         </View>
 
         <TouchableOpacity
-          style={[styles.googleButton, !isFormValid() || loading ? { opacity: 0.5 } : {}]}
+          style={[styles.googleButton, loading ? { opacity: 0.5 } : {}]}
           activeOpacity={0.85}
           onPress={handleGoogleLogin}
-          disabled={loading || !isFormValid()}
+          disabled={loading}
         >
           <View style={styles.googleIconWrap}>
             <Image

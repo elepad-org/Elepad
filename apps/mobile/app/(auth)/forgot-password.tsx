@@ -100,6 +100,7 @@ export default function ForgotPasswordScreen() {
       imageStyle={{ opacity: 0.60 }}
     >
       <StatusBar />
+      <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
 
       <View style={styles.formContainer}>
         <View style={styles.innerForm}>
@@ -163,6 +164,7 @@ export default function ForgotPasswordScreen() {
           </Link>
         </View>
       </View>
+      </Animated.View>
     </ImageBackground>
   );
 }
