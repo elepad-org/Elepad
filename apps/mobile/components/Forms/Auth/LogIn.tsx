@@ -227,14 +227,6 @@ export default function LogIn() {
           }
         />
 
-        <Link href="/forgot-password" asChild>
-          <TouchableOpacity style={styles.forgotPassword} disabled={loading}>
-            <Text style={styles.forgotPasswordText}>
-              ¿Olvidaste tu contraseña?
-            </Text>
-          </TouchableOpacity>
-        </Link>
-
         <Button
           mode="contained"
           contentStyle={styles.buttonContent}
@@ -246,6 +238,14 @@ export default function LogIn() {
         >
           Continuar
         </Button>
+
+        <Link href="/forgot-password" asChild>
+          <TouchableOpacity style={styles.forgotPasswordCentered} disabled={loading}>
+            <Text style={styles.forgotPasswordText}>
+              ¿Olvidaste tu contraseña?
+            </Text>
+          </TouchableOpacity>
+        </Link>
 
         <View style={styles.orRow}>
           <View style={styles.orLine} />
@@ -319,6 +319,10 @@ const styles = StyleSheet.create({
   forgotPassword: {
     alignSelf: "flex-end",
     marginBottom: 8,
+  },
+  forgotPasswordCentered: {
+    alignSelf: "center",
+    marginTop: 22,
   },
   forgotPasswordText: {
     fontSize: 14,
