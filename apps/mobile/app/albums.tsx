@@ -163,7 +163,7 @@ export default function AlbumsScreen() {
                     id={item.id}
                     title={item.title}
                     description={item.description}
-                    coverImageUrl={null}
+                    coverImageUrl={item.coverImageUrl}
                     createdAt={item.createdAt}
                     totalPages={undefined}
                     onPress={() => handleAlbumPress(item.id)}

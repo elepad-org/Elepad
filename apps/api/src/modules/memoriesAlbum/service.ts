@@ -310,7 +310,8 @@ export class MemoriesAlbumService {
       try {
         const imageBuffer = await this.generateAlbumCoverImage(
           album,
-          narratives
+          narratives,
+          pages[0]
         );
         coverImageUrl = await uploadAlbumCoverImage(
           this.supabase,
@@ -495,7 +496,8 @@ Este recuerdo nos muestra...`;
    */
   private async generateAlbumCoverImage(
     album: { title: string; description: string | null },
-    narratives: string[]
+    narratives: string[],
+    firstPage?: pageWithMemory
   ): Promise<Buffer> {
     if (!this.apiKey) {
       throw new Error("Gemini API key not configured");
@@ -511,12 +513,9 @@ Este recuerdo nos muestra...`;
     Style: Warm, emotional, soft colors, photorealistic or artistic illustration suitable for a book cover.`;
 
     try {
-      // Usar generateImages para modelos de imagen (ej. Imagen 3)
-      // Si usas un modelo multimodal antiguo que devuelve imagenes via generateContent, mantén la estructura anterior.
-      // Aquí asumo el uso estándar de la nueva SDK para imágenes.
       const response = await this.client.models.generateImages({
         //model: "gemini-2.5-flash-image",
-        model: "imagen-4.0-generate-001",
+        model: "imagen-4.0-generate-001", // Los modelos 3.0 para atras fueron dados de baja
         prompt: imagePrompt,
         config: {
           numberOfImages: 1,
@@ -533,6 +532,21 @@ Este recuerdo nos muestra...`;
       throw new Error("No image data in response");
     } catch (error) {
       console.error("Error generating cover image:", error);
+      // Fallback: use the first image of the album as cover
+      try {
+        if (firstPage) {
+          const mediaUrl = firstPage?.memories?.mediaUrl;
+          if (mediaUrl) {
+            const resp = await fetch(mediaUrl);
+            if (!resp.ok) throw new Error(`Failed to download fallback image: ${resp.status}`);
+            const buf = Buffer.from(await resp.arrayBuffer());
+            return buf;
+          }
+        }
+      } catch (fallbackErr) {
+        console.error("Error fetching fallback cover image:", fallbackErr);
+      }
+
       throw error;
     }
   }
