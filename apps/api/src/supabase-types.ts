@@ -444,6 +444,7 @@ export type Database = {
           status: Database["public"]["Enums"]["album_status"]
           title: string
           updatedAt: string | null
+          urlPdf: string | null
         }
         Insert: {
           coverImageUrl?: string | null
@@ -455,6 +456,7 @@ export type Database = {
           status: Database["public"]["Enums"]["album_status"]
           title: string
           updatedAt?: string | null
+          urlPdf?: string | null
         }
         Update: {
           coverImageUrl?: string | null
@@ -466,6 +468,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["album_status"]
           title?: string
           updatedAt?: string | null
+          urlPdf?: string | null
         }
         Relationships: [
           {

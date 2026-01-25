@@ -211,7 +211,9 @@ export interface Album {
   createdBy: string;
   title: string;
   description: string | null;
+  coverImageUrl: string | null;
   status: AlbumStatus;
+  urlPdf: string | null;
   createdAt: string;
   updatedAt: string | null;
 }
@@ -243,6 +245,7 @@ export interface AlbumWithPages {
   createdBy: string;
   title: string;
   description: string;
+  coverImageUrl: string | null;
   status: AlbumWithPagesStatus;
   createdAt: string;
   updatedAt: string | null;
@@ -654,6 +657,11 @@ export type GetAlbumParams = {
    * @minimum 0
    */
   offset?: number | null;
+};
+
+export type PostAlbumIdExportPdf200 = {
+  pdfUrl: string;
+  message: string;
 };
 
 export type GetActivityCompletionsParams = {
@@ -5838,6 +5846,129 @@ export function useGetAlbumId<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+export type postAlbumIdExportPdfResponse200 = {
+  data: PostAlbumIdExportPdf200;
+  status: 200;
+};
+
+export type postAlbumIdExportPdfResponse400 = {
+  data: Error;
+  status: 400;
+};
+
+export type postAlbumIdExportPdfResponse401 = {
+  data: Error;
+  status: 401;
+};
+
+export type postAlbumIdExportPdfResponse404 = {
+  data: Error;
+  status: 404;
+};
+
+export type postAlbumIdExportPdfResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type postAlbumIdExportPdfResponseSuccess =
+  postAlbumIdExportPdfResponse200 & {
+    headers: Headers;
+  };
+export type postAlbumIdExportPdfResponseError = (
+  | postAlbumIdExportPdfResponse400
+  | postAlbumIdExportPdfResponse401
+  | postAlbumIdExportPdfResponse404
+  | postAlbumIdExportPdfResponse500
+) & {
+  headers: Headers;
+};
+
+export type postAlbumIdExportPdfResponse =
+  | postAlbumIdExportPdfResponseSuccess
+  | postAlbumIdExportPdfResponseError;
+
+export const getPostAlbumIdExportPdfUrl = (id: string) => {
+  return `/album/${id}/export-pdf`;
+};
+
+export const postAlbumIdExportPdf = async (
+  id: string,
+  options?: RequestInit,
+): Promise<postAlbumIdExportPdfResponse> => {
+  return rnFetch<postAlbumIdExportPdfResponse>(getPostAlbumIdExportPdfUrl(id), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getPostAlbumIdExportPdfMutationOptions = <
+  TError = Error,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postAlbumIdExportPdf>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postAlbumIdExportPdf>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationKey = ["postAlbumIdExportPdf"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postAlbumIdExportPdf>>,
+    { id: string }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return postAlbumIdExportPdf(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostAlbumIdExportPdfMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postAlbumIdExportPdf>>
+>;
+
+export type PostAlbumIdExportPdfMutationError = Error;
+
+export const usePostAlbumIdExportPdf = <TError = Error, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postAlbumIdExportPdf>>,
+      TError,
+      { id: string },
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postAlbumIdExportPdf>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  return useMutation(
+    getPostAlbumIdExportPdfMutationOptions(options),
+    queryClient,
+  );
+};
 
 export type getFrequenciesResponse200 = {
   data: Frequency[];

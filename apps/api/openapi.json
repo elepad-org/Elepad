@@ -585,6 +585,10 @@
             "type": "string",
             "nullable": true
           },
+          "coverImageUrl": {
+            "type": "string",
+            "nullable": true
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -592,6 +596,10 @@
               "ready",
               "error"
             ]
+          },
+          "urlPdf": {
+            "type": "string",
+            "nullable": true
           },
           "createdAt": {
             "type": "string",
@@ -609,7 +617,9 @@
           "createdBy",
           "title",
           "description",
+          "coverImageUrl",
           "status",
+          "urlPdf",
           "createdAt",
           "updatedAt"
         ]
@@ -634,6 +644,10 @@
           },
           "description": {
             "type": "string"
+          },
+          "coverImageUrl": {
+            "type": "string",
+            "nullable": true
           },
           "status": {
             "type": "string",
@@ -665,6 +679,7 @@
           "createdBy",
           "title",
           "description",
+          "coverImageUrl",
           "status",
           "createdAt",
           "updatedAt",
@@ -3832,6 +3847,89 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AlbumWithPages"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Album not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/album/{id}/export-pdf": {
+      "post": {
+        "tags": [
+          "album"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PDF export generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "pdfUrl": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "pdfUrl",
+                    "message"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Album not ready for export",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
