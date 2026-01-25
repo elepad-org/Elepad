@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
+import { usePostPushTokens } from '@elepad/api-client';
 
 // Configurar cómo se manejan las notificaciones cuando la app está en primer plano
 Notifications.setNotificationHandler({
@@ -21,11 +22,16 @@ export async function registerForPushNotificationsAsync(): Promise<string | unde
   let token;
 
   if (Platform.OS === 'android') {
+    // Crear canal de notificación para Android
     await Notifications.setNotificationChannelAsync('default', {
-      name: 'default',
+      name: 'Notificaciones predeterminadas',
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#FF231F7C',
+      sound: 'default',
+      enableVibrate: true,
+      showBadge: true,
+      lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
     });
   }
 
@@ -56,15 +62,46 @@ export async function registerForPushNotificationsAsync(): Promise<string | unde
         })
       ).data;
       
-      console.log('Push token:', token);
+      console.log('Push token obtained:', token, typeof token);
+      
+      if (typeof token !== 'string' || token.trim().length === 0) {
+        console.warn('Invalid token format:', token);
+        token = undefined;
+      }
     } catch (e) {
       console.error('Error getting push token:', e);
+      token = undefined;
     }
   } else {
     console.log('Must use physical device for Push Notifications');
   }
 
   return token;
+}
+
+/**
+ * Register push notifications and send token to backend
+ * This should be called after user is authenticated
+ */
+export async function registerAndSendPushToken(): Promise<void> {
+  const token = await registerForPushNotificationsAsync();
+  
+  if (token) {
+    try {
+      // Import here to avoid circular dependencies
+      const { usePostPushTokens } = await import('@elepad/api-client');
+      
+      // Since this is not a React component, we need to use the API directly
+      // For now, we'll store the token and send it when the user is authenticated
+      console.log('Token obtained, will send to backend when authenticated');
+      
+      // TODO: Send token to backend using API client
+      // This needs to be called from a component that has access to the mutation
+      
+    } catch (error) {
+      console.error('Error sending push token to backend:', error);
+    }
+  }
 }
 
 /**

@@ -44,12 +44,11 @@ export default function Navbar({ variant = 'main' }: NavbarProps) {
               <Button
                 onClick={handleScrollToFeatures}
                 variant="text"
-                color="primary"
                 size="large"
                 sx={{
+                  color: '#000',
                   px: 4,
                   py: 1.5,
-                
                   boxShadow: 'none',
                   '&:hover': {
                     backgroundColor: 'rgba(154, 158, 206, 0.05)',
@@ -63,12 +62,11 @@ export default function Navbar({ variant = 'main' }: NavbarProps) {
                 component={RouterLink}
                 to="/sobre-nosotros"
                 variant="text"
-                color="primary"
                 size="large"
                 sx={{
+                  color: '#000',
                   px: 4,
                   py: 1.5,
-                
                   boxShadow: 'none',
                   '&:hover': {
                     backgroundColor: 'rgba(154, 158, 206, 0.05)',
@@ -98,9 +96,9 @@ export default function Navbar({ variant = 'main' }: NavbarProps) {
                 to="/"
                 startIcon={<ArrowBack />}
                 variant="text"
-                color="primary"
                 size="large"
                 sx={{
+                  color: '#000',
                   px: 4,
                   py: 1.5,
                   boxShadow: 'none',
