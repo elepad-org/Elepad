@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "expo-router";
 import { useRef, useEffect } from "react";
-import { Animated, View } from "react-native";
+import { Animated, View, Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Text, ActivityIndicator } from "react-native-paper";
 import EleSvg from "@/assets/images/ele.svg";
@@ -12,6 +12,12 @@ export default function IndexRedirect() {
   const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const hasRedirected = useRef(false);
+
+  // Dimensiones responsive
+  const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+  const logoSize = screenWidth * 0.5; // 50% del ancho de pantalla
+  const logoMarginTop = screenHeight * 0.12; // 12% del alto de pantalla
+  const brandFontSize = screenWidth * 0.16; // 16% del ancho de pantalla
 
   // Si hay sesión, redirigir a home una sola vez
   useEffect(() => {
@@ -41,9 +47,13 @@ export default function IndexRedirect() {
   return (
     <SafeAreaView style={STYLES.safeAreaLogin}>
       <View style={STYLES.container}>
-        <View style={STYLES.logoWrapWithMargin}>
-          <EleSvg width={200} height={200} style={STYLES.logo} />
-          <Text style={STYLES.brand}> Elepad </Text>
+        <View style={[STYLES.logoWrap, { marginTop: logoMarginTop }]}>
+          <EleSvg 
+            width={logoSize} 
+            height={logoSize} 
+            style={STYLES.logo} 
+          />
+          <Text style={[STYLES.brand, { fontSize: brandFontSize }]}> Elepad </Text>
         </View>
         <View style={STYLES.separatorWrap}>
           <View style={STYLES.separator} />

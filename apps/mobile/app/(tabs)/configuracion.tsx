@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { StatusBar, ScrollView, View, FlatList } from "react-native";
+import { StatusBar, ScrollView, View, TouchableOpacity, Text } from "react-native";
 import {
   Button,
   Card,
@@ -7,7 +7,6 @@ import {
   List,
   Portal,
   TextInput,
-  Switch,
   Dialog,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -17,7 +16,7 @@ import { UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import ProfileHeader from "@/components/ProfileHeader";
 import { LoadingProfile } from "@/components/shared";
 import { useRouter } from "expo-router";
-import { COLORS, STYLES } from "@/styles/base";
+import { COLORS, STYLES, FONT } from "@/styles/base";
 import { useToast } from "@/components/shared/Toast";
 
 export default function ConfiguracionScreen() {
@@ -38,7 +37,7 @@ export default function ConfiguracionScreen() {
           barStyle="dark-content"
           backgroundColor={COLORS.background}
         />
-        <LoadingProfile message="Cargando perfil..." />
+        <LoadingProfile />
       </SafeAreaView>
     );
   }
@@ -52,8 +51,6 @@ export default function ConfiguracionScreen() {
   const [formName, setFormName] = useState(displayName);
   const [saving, setSaving] = useState(false);
   const [photoOpen, setPhotoOpen] = useState(false);
-  const [googleCalendarEnabled, setGoogleCalendarEnabled] = useState(false);
-  const [loadingGoogleCalendar, setLoadingGoogleCalendar] = useState(false);
   const [timezone, setTimezone] = useState(userElepad?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone);
   const [timezoneDialogVisible, setTimezoneDialogVisible] = useState(false);
   const getInitials = (name: string) =>
@@ -82,29 +79,32 @@ export default function ConfiguracionScreen() {
     'Pacific/Auckland',
   ];
 
-  const handleGoogleCalendarToggle = async () => {
-    if (!userElepad?.id) return;
-
-    setLoadingGoogleCalendar(true);
-    try {
-      const newValue = !googleCalendarEnabled;
-      // TODO: Implement API call to enable/disable Google Calendar
-      // For now, just toggle the state
-      setGoogleCalendarEnabled(newValue);
-      showToast({
-        message: `Google Calendar ${newValue ? "habilitado" : "deshabilitado"}`,
-        type: "success",
-      });
-    } catch (error) {
-      console.error("Error toggling Google Calendar:", error);
-      showToast({
-        message: "Error al cambiar configuración de Google Calendar",
-        type: "error",
-      });
-    } finally {
-      setLoadingGoogleCalendar(false);
-    }
+  // Función para formatear zona horaria de manera amigable
+  const formatTimezone = (tz: string) => {
+    const timezoneNames: Record<string, string> = {
+      'America/Argentina/Buenos_Aires': 'Argentina - Buenos Aires',
+      'America/New_York': 'Estados Unidos - Nueva York',
+      'America/Los_Angeles': 'Estados Unidos - Los Ángeles',
+      'America/Mexico_City': 'México - Ciudad de México',
+      'America/Sao_Paulo': 'Brasil - São Paulo',
+      'Europe/London': 'Reino Unido - Londres',
+      'Europe/Paris': 'Francia - París',
+      'Europe/Madrid': 'España - Madrid',
+      'Europe/Berlin': 'Alemania - Berlín',
+      'Asia/Tokyo': 'Japón - Tokio',
+      'Asia/Shanghai': 'China - Shanghái',
+      'Australia/Sydney': 'Australia - Sídney',
+      'Pacific/Auckland': 'Nueva Zelanda - Auckland',
+    };
+    return timezoneNames[tz] || tz;
   };
+
+  // Ordenar timezones alfabéticamente por nombre formateado
+  const sortedTimezones = timezones.sort((a, b) => {
+    const nameA = formatTimezone(a);
+    const nameB = formatTimezone(b);
+    return nameA.localeCompare(nameB);
+  });
 
   const handleSaveTimezone = async (tz: string) => {
     if (!userElepad?.id) return;
@@ -162,6 +162,7 @@ export default function ConfiguracionScreen() {
                   icon={editExpanded ? "chevron-down" : "chevron-right"}
                 />
               )}
+              style={{ minHeight: 60, justifyContent: 'center' }}
               onPress={() => {
                 setFormName(displayName);
                 setEditExpanded(!editExpanded);
@@ -249,12 +250,13 @@ export default function ConfiguracionScreen() {
               title="Cambiar contraseña"
               left={(props) => <List.Icon {...props} icon="lock-reset" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              style={{ minHeight: 60, justifyContent: 'center' }}
               onPress={() => {
                 router.navigate("/change-password");
               }}
             />
             <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
-            <List.Item
+            {/* <List.Item
               title="Google Calendar"
               description="Sincronizar actividades con Google Calendar"
               left={(props) => <List.Icon {...props} icon="calendar" />}
@@ -265,13 +267,13 @@ export default function ConfiguracionScreen() {
                   disabled={loadingGoogleCalendar}
                 />
               )}
-            />
-            <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
+            /> */}
             <List.Item
               title="Zona horaria"
-              description={timezone}
+              description={formatTimezone(timezone)}
               left={(props) => <List.Icon {...props} icon="clock-outline" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              style={{ minHeight: 60, justifyContent: 'center' }}
               onPress={() => setTimezoneDialogVisible(true)}
             />
             <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
@@ -279,6 +281,7 @@ export default function ConfiguracionScreen() {
               title="Grupo familiar"
               left={(props) => <List.Icon {...props} icon="account-group" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
+              style={{ minHeight: 60, justifyContent: 'center' }}
               onPress={() => {
                 router.navigate("/familyGroup");
               }}
@@ -301,23 +304,38 @@ export default function ConfiguracionScreen() {
           </Button>
         </View>
         <Portal>
-          <Dialog visible={timezoneDialogVisible} onDismiss={() => setTimezoneDialogVisible(false)}>
-            <Dialog.Title>Seleccionar zona horaria</Dialog.Title>
-            <Dialog.Content style={{ maxHeight: 300 }}>
-              <FlatList
-                data={timezones}
-                keyExtractor={(item) => item}
-                renderItem={({ item }) => (
-                  <List.Item
-                    title={item}
-                    onPress={() => {
-                      setTimezone(item);
-                      setTimezoneDialogVisible(false);
-                      handleSaveTimezone(item);
+          <Dialog visible={timezoneDialogVisible} onDismiss={() => setTimezoneDialogVisible(false)} style={{ backgroundColor: COLORS.white }}>
+            <Dialog.Title style={{ textAlign: 'center' }}>Seleccionar zona horaria</Dialog.Title>
+            <Dialog.Content style={{ maxHeight: 300, paddingHorizontal: 0 }}>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {sortedTimezones.map((tz) => (
+                  <TouchableOpacity
+                    key={tz}
+                    style={{
+                      paddingVertical: 16,
+                      paddingHorizontal: 24,
+
+                      backgroundColor: timezone === tz ? COLORS.backgroundSecondary : COLORS.white,
                     }}
-                  />
-                )}
-              />
+                    onPress={() => {
+                      setTimezone(tz);
+                      setTimezoneDialogVisible(false);
+                      handleSaveTimezone(tz);
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        color: COLORS.text,
+                        fontWeight: timezone === tz ? '600' : '400',
+                        fontFamily: FONT.regular,
+                      }}
+                    >
+                      {formatTimezone(tz)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
             </Dialog.Content>
           </Dialog>
           <UpdatePhotoDialog

@@ -9,6 +9,7 @@ import {
   RefreshControl,
   Pressable,
   BackHandler,
+  Dimensions,
 } from "react-native";
 import {
   Text,
@@ -151,6 +152,11 @@ export default function RecuerdosScreen() {
   const isFocused = useIsFocused();
   const { loading: authLoading, userElepad } = useAuth();
   const { showToast } = useToast();
+
+  // Dimensiones responsive
+  const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+  const emptyLogoSize = screenWidth * 0.55; // 55% del ancho de pantalla
+  const emptyLogoTop = screenWidth * 0.25;; // 25% del alto de pantalla (más arriba que el 35% anterior)
 
   const { mutateAsync: addReaction } = useAddReaction();
 
@@ -1133,7 +1139,7 @@ export default function RecuerdosScreen() {
           </View>
         ) : books.length === 0 ? (
           <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+            style={{ flex: 1, alignItems: "center", marginTop: emptyLogoTop }}
           >
             <Image
               source={eleEmpthy}
@@ -1141,7 +1147,7 @@ export default function RecuerdosScreen() {
                 width: 180,
                 height: 180,
                 borderRadius: 18,
-                marginBottom: 16,
+                marginBottom: 16
               }}
             />
             <Text style={STYLES.heading}>Todavía no hay baúles</Text>
@@ -1601,12 +1607,12 @@ export default function RecuerdosScreen() {
             flex: 1,
             alignItems: "center",
             justifyContent: "flex-start",
-            paddingTop: "35%",
+            paddingTop: emptyLogoTop,
           }}
         >
           <Image
             source={eleEmpthy}
-            style={{ width: 220, height: 220, marginBottom: 10 }}
+            style={{ width: emptyLogoSize, height: emptyLogoSize, marginBottom: 10 }}
           />
           <Text style={STYLES.heading}>{emptyTitle}</Text>
           <Text style={STYLES.subheading}>{emptySubtitle}</Text>

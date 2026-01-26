@@ -226,7 +226,7 @@ export default function HomeScreen() {
           barStyle="dark-content"
           backgroundColor={COLORS.background}
         />
-        <LoadingProfile message="Cargando inicio..." />
+        <LoadingProfile />
       </SafeAreaView>
     );
   }
@@ -682,7 +682,7 @@ export default function HomeScreen() {
                 </View>
               </Pressable>
             ) : (
-              <View style={styles.emptySection}>
+              <View style={[styles.emptySection, { marginTop: 10 }]}>
                 <Text style={styles.emptyText}>Aún no has jugado</Text>
                 <Button
                   mode="outlined"
@@ -752,7 +752,7 @@ export default function HomeScreen() {
                 ))}
               </View>
             ) : (
-              <View style={styles.emptySection}>
+              <View style={[styles.emptySection, { marginTop: 10 }]}>
                 <Text style={styles.emptyText}>No hay actividad reciente en el grupo</Text>
                 <Button
                   mode="outlined"
