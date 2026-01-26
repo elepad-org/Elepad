@@ -69,6 +69,7 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
   // Default props
   const widgetProps = {
     imageBase64: "", // Back to base64
+    title: "", // New prop for Title
     caption: "",
     date: "",
     error: "",
@@ -199,7 +200,8 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
 
         if (b64) {
           widgetProps.imageBase64 = b64;
-          widgetProps.caption = formatCaption(memory);
+          widgetProps.title = cleanText(memory.title || "RECUERDO");
+          widgetProps.caption = cleanText(memory.caption || "");
           try {
             const dateObj = new Date(memory.createdAt);
             widgetProps.date = format(dateObj, "d 'de' MMMM", { locale: es });
@@ -224,7 +226,12 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
   props.renderWidget(<Widget {...widgetProps} />);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function formatCaption(memory: any): string {
-  return memory.caption || memory.title || "";
+// Helper to clean text
+function cleanText(text: string): string {
+  if (!text) return "";
+  // 1. Replace @[Name](id) -> Name
+  let clean = text.replace(/@\[([^\]]+)\]\([^)]+\)/g, "$1");
+  // 2. Replace <@id> -> @Usuario (Fallback if name unknown)
+  clean = clean.replace(/<@[^>]+>/g, "");
+  return clean.trim();
 }

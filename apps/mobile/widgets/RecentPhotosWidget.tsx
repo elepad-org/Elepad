@@ -8,6 +8,7 @@ import {
 
 interface RecentPhotosWidgetProps {
   imageBase64?: string;
+  title?: string;
   caption?: string;
   date?: string;
   error?: string;
@@ -15,6 +16,7 @@ interface RecentPhotosWidgetProps {
 
 export function RecentPhotosWidget({
   imageBase64,
+  title,
   caption,
   date,
   error,
@@ -41,25 +43,60 @@ export function RecentPhotosWidget({
           <ImageWidget
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             image={imageBase64 as any}
-            imageWidth={500}
-            imageHeight={500}
+            imageWidth={1000}
+            imageHeight={1000}
             style={{
               height: "match_parent",
               width: "match_parent",
             }}
-            radius={24}
+            radius={16}
             resizeMode="cover"
           />
 
-          {/* Layer 2: Gradient Overlay (Simulated with FlexWidget) */}
+          {/* Layer 2: Fake Gradient Overlay (Stacked Stripes) */}
           <FlexWidget
             style={{
               height: "match_parent",
               width: "match_parent",
-              backgroundColor: "#00000060",
-              borderRadius: 24,
+              flexDirection: "column",
+              justifyContent: "flex-end",
             }}
-          />
+          >
+            {/* Stripe 1 (Top - Transparent to faint) */}
+            <FlexWidget
+              style={{
+                height: 20,
+                width: "match_parent",
+                backgroundColor: "#00000010",
+              }}
+            />
+            {/* Stripe 2 */}
+            <FlexWidget
+              style={{
+                height: 20,
+                width: "match_parent",
+                backgroundColor: "#00000030",
+              }}
+            />
+            {/* Stripe 3 */}
+            <FlexWidget
+              style={{
+                height: 30,
+                width: "match_parent",
+                backgroundColor: "#00000060",
+              }}
+            />
+            {/* Stripe 4 (Bottom - Darkest) */}
+            <FlexWidget
+              style={{
+                height: 70,
+                width: "match_parent",
+                backgroundColor: "#00000090",
+                borderBottomLeftRadius: 16,
+                borderBottomRightRadius: 16,
+              }}
+            />
+          </FlexWidget>
 
           {/* Layer 3: Content */}
           <FlexWidget
@@ -81,7 +118,7 @@ export function RecentPhotosWidget({
             >
               <FlexWidget
                 style={{
-                  backgroundColor: "#FFFFFF40",
+                  backgroundColor: "#FFFFFF30",
                   borderRadius: 12,
                   padding: 8,
                 }}
@@ -105,13 +142,13 @@ export function RecentPhotosWidget({
               }}
             >
               <TextWidget
-                text="ÚLTIMO RECUERDO"
+                text={(title || "RECUERDO").toUpperCase()}
                 style={{
-                  color: "#FFFFFF",
+                  color: "#DDDDDD",
                   fontSize: 10,
                   fontWeight: "bold",
-                  marginBottom: 4,
-                  letterSpacing: 1,
+                  marginBottom: 6,
+                  letterSpacing: 2,
                 }}
               />
               {caption ? (
@@ -120,7 +157,7 @@ export function RecentPhotosWidget({
                   maxLines={2}
                   style={{
                     color: "#FFFFFF",
-                    fontSize: 15,
+                    fontSize: 16,
                     fontWeight: "bold",
                     marginBottom: 4,
                   }}
@@ -130,8 +167,8 @@ export function RecentPhotosWidget({
                 <TextWidget
                   text={date}
                   style={{
-                    color: "#E5E7EB",
-                    fontSize: 11,
+                    color: "#DDDDDD",
+                    fontSize: 12,
                   }}
                 />
               ) : null}
