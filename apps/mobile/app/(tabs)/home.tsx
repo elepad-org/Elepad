@@ -485,7 +485,7 @@ export default function HomeScreen() {
             ) : (
               <Pressable
                 style={styles.memoryCardEmpty}
-                onPress={() => router.push("/(tabs)/recuerdos")}
+                onPress={() => router.setParams({ tab: "recuerdos" })}
               >
                 <IconButton
                   icon="heart-outline"
@@ -498,7 +498,7 @@ export default function HomeScreen() {
                 </Text>
                 <Button
                   mode="contained"
-                  onPress={() => router.push("/(tabs)/recuerdos")}
+                  onPress={() => router.setParams({ tab: "recuerdos" })}
                   style={styles.emptyButton}
                   buttonColor={COLORS.primary}
                 >
