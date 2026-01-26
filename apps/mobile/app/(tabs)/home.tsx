@@ -235,7 +235,7 @@ export default function HomeScreen() {
           barStyle="dark-content"
           backgroundColor={COLORS.background}
         />
-        <LoadingProfile message="Cargando inicio..." />
+        <LoadingProfile />
       </SafeAreaView>
     );
   }
