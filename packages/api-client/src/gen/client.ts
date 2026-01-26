@@ -5895,7 +5895,7 @@ export const getPostAlbumIdExportPdfUrl = (id: string) => {
 
 export const postAlbumIdExportPdf = async (
   id: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postAlbumIdExportPdfResponse> => {
   return rnFetch<postAlbumIdExportPdfResponse>(getPostAlbumIdExportPdfUrl(id), {
     ...options,
@@ -5905,7 +5905,7 @@ export const postAlbumIdExportPdf = async (
 
 export const getPostAlbumIdExportPdfMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postAlbumIdExportPdf>>,
@@ -5957,7 +5957,7 @@ export const usePostAlbumIdExportPdf = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postAlbumIdExportPdf>>,
   TError,
@@ -5966,7 +5966,7 @@ export const usePostAlbumIdExportPdf = <TError = Error, TContext = unknown>(
 > => {
   return useMutation(
     getPostAlbumIdExportPdfMutationOptions(options),
-    queryClient,
+    queryClient
   );
 };
 
