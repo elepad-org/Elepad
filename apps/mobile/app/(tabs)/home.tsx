@@ -487,11 +487,6 @@ export default function HomeScreen() {
                 style={styles.memoryCardEmpty}
                 onPress={() => router.setParams({ tab: "recuerdos" })}
               >
-                <IconButton
-                  icon="heart-outline"
-                  size={48}
-                  iconColor={COLORS.textSecondary}
-                />
                 <Text style={styles.emptyTitle}>No hay recuerdos guardados</Text>
                 <Text style={styles.emptySubtitle}>
                   Comienza a crear tus momentos especiales
@@ -1198,6 +1193,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     backgroundColor: COLORS.backgroundSecondary,
     borderRadius: 16,
+    marginTop: 10,
   },
   emptyText: {
     fontSize: 15,
