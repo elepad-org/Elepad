@@ -39,7 +39,7 @@ export default function ElepadTooltip({
 
             <Button
               mode="contained"
-              onPress={handleNext}
+              onPress={isLastStep ? handleStop : handleNext}
               buttonColor={COLORS.primary}
               compact
               style={styles.nextButton}

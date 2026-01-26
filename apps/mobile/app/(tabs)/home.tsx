@@ -511,27 +511,27 @@ export default function HomeScreen() {
         </TourGuideZone>
 
         {/* Contador de Racha - Solo para usuarios elder */}
-        {userElepad?.elder && (
-          <Pressable
-            onPress={() => {
-              const newTaps = debugTaps + 1;
-              setDebugTaps(newTaps);
-              if (newTaps >= 10) {
-                console.log("🐛 Debug: Restarting tour...");
-                setDebugTaps(0);
-                restartTour();
-              }
-            }}
-            style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
-          >
-            <StreakCounter />
-          </Pressable>
-        )}
+        {userElepad?.elder && <StreakCounter />}
 
         {/* Próximos Eventos */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Próximos eventos</Text>
+            <Text style={styles.sectionTitle}>
+              Próximos{" "}
+              <Text
+                onPress={() => {
+                  const newTaps = debugTaps + 1;
+                  setDebugTaps(newTaps);
+                  if (newTaps >= 10) {
+                    setDebugTaps(0);
+                    restartTour();
+                  }
+                }}
+                suppressHighlighting={true}
+              >
+                eventos
+              </Text>
+            </Text>
             {upcomingActivities.length > 0 && (
               <Button
                 mode="text"
