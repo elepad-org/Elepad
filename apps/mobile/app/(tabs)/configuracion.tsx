@@ -16,7 +16,7 @@ import { UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import ProfileHeader from "@/components/ProfileHeader";
 import { LoadingProfile } from "@/components/shared";
 import { useRouter } from "expo-router";
-import { COLORS, STYLES, FONT, SHADOWS } from "@/styles/base";
+import { COLORS, STYLES, FONT } from "@/styles/base";
 import { useToast } from "@/components/shared/Toast";
 
 export default function ConfiguracionScreen() {
@@ -98,6 +98,13 @@ export default function ConfiguracionScreen() {
     };
     return timezoneNames[tz] || tz;
   };
+
+  // Ordenar timezones alfabéticamente por nombre formateado
+  const sortedTimezones = timezones.sort((a, b) => {
+    const nameA = formatTimezone(a);
+    const nameB = formatTimezone(b);
+    return nameA.localeCompare(nameB);
+  });
 
   const handleSaveTimezone = async (tz: string) => {
     if (!userElepad?.id) return;
@@ -301,14 +308,13 @@ export default function ConfiguracionScreen() {
             <Dialog.Title style={{ textAlign: 'center' }}>Seleccionar zona horaria</Dialog.Title>
             <Dialog.Content style={{ maxHeight: 300, paddingHorizontal: 0 }}>
               <ScrollView showsVerticalScrollIndicator={false}>
-                {timezones.map((tz) => (
+                {sortedTimezones.map((tz) => (
                   <TouchableOpacity
                     key={tz}
                     style={{
                       paddingVertical: 16,
                       paddingHorizontal: 24,
-                      borderBottomWidth: timezone === tz ? 3 : 1,
-                      borderBottomColor: timezone === tz ? SHADOWS.card.shadowColor : COLORS.gray.light,
+
                       backgroundColor: timezone === tz ? COLORS.backgroundSecondary : COLORS.white,
                     }}
                     onPress={() => {
