@@ -2,7 +2,7 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import { Text } from "react-native-paper";
 import LottieView from "lottie-react-native";
-import loadingAnimation from "@/assets/animations/loading.json";
+import loadingAnimation from "@/assets/animations/ele.json";
 import { COLORS } from "@/styles/base";
 
 interface LoadingProfileProps {
