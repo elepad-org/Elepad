@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { StatusBar, ScrollView, View, FlatList } from "react-native";
+import { StatusBar, ScrollView, View, TouchableOpacity, Text } from "react-native";
 import {
   Button,
   Card,
@@ -16,7 +16,7 @@ import { UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import ProfileHeader from "@/components/ProfileHeader";
 import { LoadingProfile } from "@/components/shared";
 import { useRouter } from "expo-router";
-import { COLORS, STYLES } from "@/styles/base";
+import { COLORS, STYLES, FONT, SHADOWS } from "@/styles/base";
 import { useToast } from "@/components/shared/Toast";
 
 export default function ConfiguracionScreen() {
@@ -78,6 +78,26 @@ export default function ConfiguracionScreen() {
     'Australia/Sydney',
     'Pacific/Auckland',
   ];
+
+  // Función para formatear zona horaria de manera amigable
+  const formatTimezone = (tz: string) => {
+    const timezoneNames: Record<string, string> = {
+      'America/Argentina/Buenos_Aires': 'Argentina - Buenos Aires',
+      'America/New_York': 'Estados Unidos - Nueva York',
+      'America/Los_Angeles': 'Estados Unidos - Los Ángeles',
+      'America/Mexico_City': 'México - Ciudad de México',
+      'America/Sao_Paulo': 'Brasil - São Paulo',
+      'Europe/London': 'Reino Unido - Londres',
+      'Europe/Paris': 'Francia - París',
+      'Europe/Madrid': 'España - Madrid',
+      'Europe/Berlin': 'Alemania - Berlín',
+      'Asia/Tokyo': 'Japón - Tokio',
+      'Asia/Shanghai': 'China - Shanghái',
+      'Australia/Sydney': 'Australia - Sídney',
+      'Pacific/Auckland': 'Nueva Zelanda - Auckland',
+    };
+    return timezoneNames[tz] || tz;
+  };
 
   const handleSaveTimezone = async (tz: string) => {
     if (!userElepad?.id) return;
@@ -243,7 +263,7 @@ export default function ConfiguracionScreen() {
             /> */}
             <List.Item
               title="Zona horaria"
-              description={timezone}
+              description={formatTimezone(timezone)}
               left={(props) => <List.Icon {...props} icon="clock-outline" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
               style={{ minHeight: 60, justifyContent: 'center' }}
@@ -277,23 +297,39 @@ export default function ConfiguracionScreen() {
           </Button>
         </View>
         <Portal>
-          <Dialog visible={timezoneDialogVisible} onDismiss={() => setTimezoneDialogVisible(false)}>
-            <Dialog.Title>Seleccionar zona horaria</Dialog.Title>
-            <Dialog.Content style={{ maxHeight: 300 }}>
-              <FlatList
-                data={timezones}
-                keyExtractor={(item) => item}
-                renderItem={({ item }) => (
-                  <List.Item
-                    title={item}
-                    onPress={() => {
-                      setTimezone(item);
-                      setTimezoneDialogVisible(false);
-                      handleSaveTimezone(item);
+          <Dialog visible={timezoneDialogVisible} onDismiss={() => setTimezoneDialogVisible(false)} style={{ backgroundColor: COLORS.white }}>
+            <Dialog.Title style={{ textAlign: 'center' }}>Seleccionar zona horaria</Dialog.Title>
+            <Dialog.Content style={{ maxHeight: 300, paddingHorizontal: 0 }}>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {timezones.map((tz) => (
+                  <TouchableOpacity
+                    key={tz}
+                    style={{
+                      paddingVertical: 16,
+                      paddingHorizontal: 24,
+                      borderBottomWidth: timezone === tz ? 3 : 1,
+                      borderBottomColor: timezone === tz ? SHADOWS.card.shadowColor : COLORS.gray.light,
+                      backgroundColor: timezone === tz ? COLORS.backgroundSecondary : COLORS.white,
                     }}
-                  />
-                )}
-              />
+                    onPress={() => {
+                      setTimezone(tz);
+                      setTimezoneDialogVisible(false);
+                      handleSaveTimezone(tz);
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        color: COLORS.text,
+                        fontWeight: timezone === tz ? '600' : '400',
+                        fontFamily: FONT.regular,
+                      }}
+                    >
+                      {formatTimezone(tz)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
             </Dialog.Content>
           </Dialog>
           <UpdatePhotoDialog
