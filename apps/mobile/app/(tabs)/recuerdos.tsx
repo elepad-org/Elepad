@@ -156,7 +156,7 @@ export default function RecuerdosScreen() {
   // Dimensiones responsive
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
   const emptyLogoSize = screenWidth * 0.55; // 55% del ancho de pantalla
-  const emptyLogoTop = screenWidth * 0.25;; // 25% del alto de pantalla (más arriba que el 35% anterior)
+  const emptyLogoTop = screenHeight * 0.25;; // 25% del alto de pantalla (más arriba que el 35% anterior)
 
   const { mutateAsync: addReaction } = useAddReaction();
 
