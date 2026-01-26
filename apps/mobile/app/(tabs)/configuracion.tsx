@@ -37,7 +37,7 @@ export default function ConfiguracionScreen() {
           barStyle="dark-content"
           backgroundColor={COLORS.background}
         />
-        <LoadingProfile message="Cargando perfil..." />
+        <LoadingProfile />
       </SafeAreaView>
     );
   }
