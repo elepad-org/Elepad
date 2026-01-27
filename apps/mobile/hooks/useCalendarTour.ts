@@ -20,9 +20,11 @@ export const useCalendarTour = () => {
         setHasSeenTour(value === 'true');
 
         if (value !== 'true') {
-          // Small delay to ensure UI is ready
+          // Wait for UI to be fully ready (2 seconds delay as requested)
           InteractionManager.runAfterInteractions(() => {
-            start();
+            setTimeout(() => {
+              start();
+            }, 2000);
           });
         }
       } catch (e) {

@@ -6,13 +6,13 @@ import { InteractionManager } from 'react-native';
 
 const TOUR_STORAGE_KEY = '@elepad_has_seen_home_tour_v2';
 
-export const useHomeTour = () => {
+export const useHomeTour = (isLoading = false) => {
   const { start, canStart, stop, eventEmitter } = useTourGuideController();
   const [hasSeenTour, setHasSeenTour] = useState<boolean | null>(null);
   const hasCheckedTour = useRef(false);
 
   useEffect(() => {
-    if (hasCheckedTour.current || !canStart) return;
+    if (hasCheckedTour.current || !canStart || isLoading) return;
 
     const checkTourStatus = async () => {
       try {
@@ -32,7 +32,7 @@ export const useHomeTour = () => {
     };
 
     checkTourStatus();
-  }, [canStart, start]);
+  }, [canStart, start, isLoading]);
 
   const handleFinishTour = async () => {
     try {

@@ -334,7 +334,7 @@ function CalendarScreenContent() {
           <Button
             mode="contained"
             onPress={() => setFormVisible(true)}
-            style={{ ...baseStyles.miniButton }}
+            style={{ ...baseStyles.miniButton, width: "auto", paddingHorizontal: 16 }}
             icon="plus"
           >
             Agregar

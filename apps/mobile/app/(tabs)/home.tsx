@@ -70,8 +70,6 @@ function HomeScreenContent() {
   const { unreadCount } = useNotifications();
   const queryClient = useQueryClient();
 
-  // Tour Guide
-  const { restartTour } = useHomeTour();
   const [debugTaps, setDebugTaps] = useState(0);
 
   // Fetch today's activities
@@ -83,6 +81,9 @@ function HomeScreenContent() {
       },
     },
   );
+
+  // Tour Guide
+  const { restartTour } = useHomeTour(userElepadLoading || activitiesQuery.isLoading);
 
   // Calculate date range for last 24 hours (memoized to avoid constant recalculation)
   const dateRange = useMemo(() => {
