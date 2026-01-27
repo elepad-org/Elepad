@@ -9,7 +9,7 @@ import {
   Dimensions,
   Image,
 } from "react-native";
-import { Text, Avatar, Button, IconButton } from "react-native-paper";
+import { Text, Avatar, Button, IconButton, Icon } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, SHADOWS } from "@/styles/base";
@@ -404,105 +404,105 @@ function HomeScreenContent() {
               </View>
             ) : lastMemory ? (
               <Animated.View entering={FadeIn.duration(800)}>
-                <Pressable
-                  style={styles.memoryCard}
-                  onPress={() =>
-                    router.navigate({
-                      pathname: "/(tabs)/recuerdos",
-                      params: {
-                        tab: "recuerdos",
-                        memoryId: lastMemory.id,
-                        bookId: lastMemory.bookId,
-                      },
-                    })
-                  }
-                >
-                  {lastMemory.mediaUrl &&
+                {(() => {
+                  const hasMedia = lastMemory.mediaUrl &&
                     lastMemory.mimeType &&
                     (lastMemory.mimeType.startsWith("image/") ||
-                      lastMemory.mimeType.startsWith("video/")) ? (
-                    <ImageBackground
-                      source={{ uri: lastMemory.mediaUrl }}
-                      style={styles.memoryImage}
-                      imageStyle={styles.memoryImageStyle}
+                      lastMemory.mimeType.startsWith("video/"));
+                  return (
+                    <Pressable
+                      style={hasMedia ? styles.memoryCard : styles.memoryCardNote}
+                      onPress={() =>
+                        router.navigate({
+                          pathname: "/(tabs)/recuerdos",
+                          params: {
+                            tab: "recuerdos",
+                            memoryId: lastMemory.id,
+                            bookId: lastMemory.bookId,
+                          },
+                        })
+                      }
                     >
-                      <LinearGradient
-                        colors={["transparent", "rgba(0,0,0,0.7)"]}
-                        style={styles.memoryGradient}
-                      >
-                        <View style={styles.memoryContent}>
-                          <Text style={styles.memoryLabel}>ÚLTIMO RECUERDO</Text>
-                          <Text style={styles.memoryTitle} numberOfLines={2}>
-                            {lastMemory.title || "Sin título"}
-                          </Text>
-                          {lastMemory.caption && (
-                            <HighlightedMentionText
-                              text={lastMemory.caption}
-                              familyMembers={groupMembers}
-                              style={styles.memoryDescription}
+                      {hasMedia ? (
+                        <ImageBackground
+                          source={{ uri: lastMemory.mediaUrl }}
+                          style={styles.memoryImage}
+                          imageStyle={styles.memoryImageStyle}
+                        >
+                          <LinearGradient
+                            colors={["transparent", "rgba(0,0,0,0.7)"]}
+                            style={styles.memoryGradient}
+                          >
+                            <View style={styles.memoryContent}>
+                              <Text style={styles.memoryLabel}>ÚLTIMO RECUERDO</Text>
+                              <Text style={styles.memoryTitle} numberOfLines={2}>
+                                {lastMemory.title || "Sin título"}
+                              </Text>
+                              {lastMemory.caption && (
+                                <HighlightedMentionText
+                                  text={lastMemory.caption}
+                                  familyMembers={groupMembers}
+                                  style={styles.memoryDescription}
+                                />
+                              )}
+                              <Text style={styles.memoryDate}>
+                                {formatInUserTimezone(
+                                  lastMemory.createdAt,
+                                  "d 'de' MMMM 'de' yyyy",
+                                  userElepad?.timezone
+                                )}
+                              </Text>
+                            </View>
+                          </LinearGradient>
+                        </ImageBackground>
+                      ) : (
+                        <View style={styles.memoryNoImage}>
+                          <View style={styles.pushpinIcon}>
+                            <Icon
+                              source="pin"
+                              size={34}
+                              color="#dc2626" // Red color for the pushpin
                             />
-                          )}
-                          <Text style={styles.memoryDate}>
-                            {formatInUserTimezone(
-                              lastMemory.createdAt,
-                              "d 'de' MMMM 'de' yyyy",
-                              userElepad?.timezone
-                            )}
-                          </Text>
-                        </View>
-                      </LinearGradient>
-                    </ImageBackground>
-                  ) : (
-                    <View style={styles.memoryNoImage}>
-                      <View style={styles.memoryNoImageIcon}>
-                        <IconButton
-                          icon="heart"
-                          size={40}
-                          iconColor={COLORS.primary}
-                        />
-                      </View>
-                      <View style={styles.memoryContent}>
-                        <Text style={styles.memoryLabelDark}>ÚLTIMO RECUERDO</Text>
-                        <Text style={styles.memoryTitleDark} numberOfLines={2}>
-                          {lastMemory.title || "Sin título"}
-                        </Text>
+                          </View>
+                          <View style={styles.memoryContent}>
+                            <Text style={styles.memoryLabelNote}>ÚLTIMO RECUERDO</Text>
+                            <Text style={styles.memoryTitleNote} numberOfLines={2}>
+                              {lastMemory.title || "Sin título"}
+                            </Text>
 
-                        {lastMemory.caption && (
-                          <HighlightedMentionText
-                            text={lastMemory.caption}
-                            familyMembers={groupMembers}
-                            style={styles.memoryDescriptionDark}
-                          />
-                        )}
-                        <Text style={styles.memoryDateDark}>
-                          {formatInUserTimezone(
-                            lastMemory.createdAt,
-                            "d 'de' MMMM 'de' yyyy",
-                            userElepad?.timezone
-                          )}
-                        </Text>
-                      </View>
-                    </View>
-                  )}
-                </Pressable>
+                            {lastMemory.caption && (
+                              <HighlightedMentionText
+                                text={lastMemory.caption}
+                                familyMembers={groupMembers}
+                                style={styles.memoryDescriptionNote}
+                              />
+                            )}
+                            <Text style={styles.memoryDateNote}>
+                              {formatInUserTimezone(
+                                lastMemory.createdAt,
+                                "d 'de' MMMM 'de' yyyy",
+                                userElepad?.timezone
+                              )}
+                            </Text>
+                          </View>
+                        </View>
+                      )}
+                    </Pressable>
+                  );
+                })()}
               </Animated.View>
             ) : (
               <Pressable
                 style={styles.memoryCardEmpty}
-                onPress={() => router.push("/(tabs)/recuerdos")}
+                onPress={() => router.setParams({ tab: "recuerdos" })}
               >
-                <IconButton
-                  icon="heart-outline"
-                  size={48}
-                  iconColor={COLORS.textSecondary}
-                />
                 <Text style={styles.emptyTitle}>No hay recuerdos guardados</Text>
                 <Text style={styles.emptySubtitle}>
                   Comienza a crear tus momentos especiales
                 </Text>
                 <Button
                   mode="contained"
-                  onPress={() => router.push("/(tabs)/recuerdos")}
+                  onPress={() => router.setParams({ tab: "recuerdos" })}
                   style={styles.emptyButton}
                   buttonColor={COLORS.primary}
                 >
@@ -668,6 +668,142 @@ function HomeScreenContent() {
           )}
         </View>
 
+        {/* Actividad Reciente */}
+        <TourGuideZone
+          zone={5}
+          text="Mantente al día con los juegos y actividades cognitivas completadas."
+          borderRadius={16}
+        >
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              {userElepad?.elder ? "Mi última actividad" : "Última actividad del grupo"}
+            </Text>
+
+            {attemptsQuery.isLoading ? (
+              <View style={[styles.gameCard, { marginTop: 22 }]}>
+                <SkeletonBox width={60} height={60} borderRadius={30} />
+                <View style={{ flex: 1, justifyContent: "center", gap: 8 }}>
+                  <SkeletonBox width="70%" height={18} borderRadius={4} />
+                  <SkeletonBox width="50%" height={14} borderRadius={4} />
+                </View>
+                <SkeletonBox width={70} height={60} borderRadius={14} />
+              </View>
+            ) : userElepad?.elder ? (
+              // Elder: mostrar solo su último intento
+              lastAttempt && !Array.isArray(lastAttempt) ? (
+                <Pressable
+                  style={[styles.gameCard, { marginTop: 22 }]}
+                  onPress={() => router.push("/history")}
+                >
+                  <View style={styles.gameIcon}>
+                    <Image
+                      source={GAME_IMAGES[lastAttempt.gameType || "memory"]}
+                      style={{ width: 40, height: 40, resizeMode: "contain" }}
+                    />
+                  </View>
+                  <View style={styles.gameInfo}>
+                    <Text style={styles.gameName}>
+                      {getGameInfo(lastAttempt.gameType || "").name}
+                    </Text>
+                    <Text style={styles.gameTime}>
+                      {formatInUserTimezone(
+                        lastAttempt.startedAt,
+                        "d 'de' MMMM, HH:mm",
+                        userElepad?.timezone
+                      )}
+                    </Text>
+                  </View>
+                  <View style={styles.gameScore}>
+                    <Text style={styles.scoreLabel}>PUNTOS</Text>
+                    <Text style={styles.scoreValue}>{lastAttempt.score || 0}</Text>
+                  </View>
+                </Pressable>
+              ) : (
+                <View style={styles.emptySection}>
+                  <Text style={styles.emptyText}>Aún no has jugado</Text>
+                  <Button
+                    mode="outlined"
+                    onPress={() => router.push("/juegos")}
+                    style={styles.emptyButtonOutline}
+                    labelStyle={{ color: COLORS.primary }}
+                  >
+                    Explorar juegos
+                  </Button>
+                </View>
+              )
+            ) : (
+              // Familiar: mostrar múltiples intentos de elder
+              Array.isArray(lastAttempt) && lastAttempt.length > 0 ? (
+                <View style={{ gap: 5, marginTop: 22 }}>
+                  {lastAttempt.map((attempt: AttemptWithUser) => (
+                    <Pressable
+                      key={attempt.id}
+                      style={styles.gameCard}
+                      onPress={() => router.push("/history")}
+                    >
+                      <View style={styles.gameIcon}>
+                        <Image
+                          source={GAME_IMAGES[attempt.gameType || "memory"]}
+                          style={{ width: 40, height: 40, resizeMode: "contain" }}
+                        />
+                      </View>
+                      <View style={styles.gameInfo}>
+                        <Text style={styles.gameName}>
+                          {getGameInfo(attempt.gameType || "").name}
+                        </Text>
+                        <Text style={styles.gameTime}>
+                          {formatInUserTimezone(
+                            attempt.startedAt,
+                            "d 'de' MMMM, HH:mm",
+                            userElepad?.timezone
+                          )}
+                        </Text>
+                        {attempt.user && (
+                          <View style={styles.playerInfo}>
+                            {attempt.user.avatarUrl ? (
+                              <Avatar.Image
+                                size={20}
+                                source={{ uri: attempt.user.avatarUrl }}
+                                style={styles.playerAvatar}
+                              />
+                            ) : (
+                              <Avatar.Text
+                                size={20}
+                                label={attempt.user.displayName
+                                  .substring(0, 2)
+                                  .toUpperCase()}
+                                style={styles.playerAvatar}
+                              />
+                            )}
+                            <Text style={styles.playerName}>
+                              {attempt.user.displayName}
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                      <View style={styles.gameScore}>
+                        <Text style={styles.scoreLabel}>PUNTOS</Text>
+                        <Text style={styles.scoreValue}>{attempt.score || 0}</Text>
+                      </View>
+                    </Pressable>
+                  ))}
+                </View>
+              ) : (
+                <View style={styles.emptySection}>
+                  <Text style={styles.emptyText}>No hay actividad reciente en el grupo</Text>
+                  <Button
+                    mode="outlined"
+                    onPress={() => router.navigate({ pathname: "/(tabs)/home", params: { tab: "juegos" } })}
+                    style={styles.emptyButtonOutline}
+                    labelStyle={{ color: COLORS.primary }}
+                  >
+                    Ver estadísticas
+                  </Button>
+                </View>
+              )
+            )}
+          </View>
+        </TourGuideZone>
 
 
         {/* Espacio inferior para que el contenido no quede debajo del menú */}
@@ -769,6 +905,11 @@ const styles = StyleSheet.create({
     height: 280,
     marginBottom: 24,
   },
+  memoryCardNote: {
+    width: SCREEN_WIDTH,
+    height: 180,
+    marginBottom: 24,
+  },
   memoryCardLoading: {
     width: SCREEN_WIDTH,
     height: 280,
@@ -800,15 +941,16 @@ const styles = StyleSheet.create({
   },
   memoryNoImage: {
     flex: 1,
-    backgroundColor: COLORS.backgroundSecondary,
-    padding: 24,
-    justifyContent: "flex-end",
-  },
-  memoryNoImageIcon: {
-    position: "absolute",
-    top: 24,
-    right: 24,
-    opacity: 0.3,
+    backgroundColor: '#fef3c7', // Warm yellow like Post-it
+    borderRadius: 5, // Square corners like real Post-its
+    margin: 16,
+    padding: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    ...SHADOWS.card,
+    transform: [{ rotate: '-2deg' }], // Slight rotation like a stuck note
+    borderWidth: 1,
+    borderColor: '#f59e0b', // Orange border for authenticity
   },
   memoryContent: {
     gap: 6,
@@ -855,11 +997,35 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginTop: 4,
   },
-  memoryDateDark: {
+  memoryLabelNote: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: '#92400e', // Dark brown for Post-it feel
+    letterSpacing: 1.5,
+    marginBottom: 4,
+  },
+  memoryTitleNote: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: '#1f2937', // Dark gray for contrast on yellow
+    lineHeight: 30,
+  },
+  memoryDescriptionNote: {
+    fontSize: 15,
+    color: '#374151', // Medium gray
+    lineHeight: 22,
+  },
+  memoryDateNote: {
     fontSize: 13,
-    color: COLORS.primary,
+    color: '#6b7280', // Light gray
     fontWeight: "600",
     marginTop: 4,
+  },
+  pushpinIcon: {
+    position: 'absolute',
+    top: 5,
+    left: 14,
+    zIndex: 1,
   },
   emptyTitle: {
     fontSize: 18,
@@ -906,7 +1072,7 @@ const styles = StyleSheet.create({
 
   // Events
   eventsContainer: {
-    gap: 10,
+    gap: 5,
   },
   eventItem: {
     flexDirection: "row",
@@ -968,7 +1134,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderRadius: 16,
     padding: 18,
-    marginTop: 10,
+    marginTop: 0,
     gap: 16,
     ...SHADOWS.card,
   },
@@ -1037,6 +1203,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     backgroundColor: COLORS.backgroundSecondary,
     borderRadius: 16,
+    marginTop: 10,
   },
   emptyText: {
     fontSize: 15,

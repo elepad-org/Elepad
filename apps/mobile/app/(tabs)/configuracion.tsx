@@ -14,7 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
 import { UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import ProfileHeader from "@/components/ProfileHeader";
-import { LoadingProfile } from "@/components/shared";
+import { LoadingProfile, ChangePasswordModal } from "@/components/shared";
 import { useRouter } from "expo-router";
 import { COLORS, STYLES, FONT } from "@/styles/base";
 import { useToast } from "@/components/shared/Toast";
@@ -53,6 +53,7 @@ export default function ConfiguracionScreen() {
   const [photoOpen, setPhotoOpen] = useState(false);
   const [timezone, setTimezone] = useState(userElepad?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone);
   const [timezoneDialogVisible, setTimezoneDialogVisible] = useState(false);
+  const [changePasswordModalVisible, setChangePasswordModalVisible] = useState(false);
   const getInitials = (name: string) =>
     name
       .split(/\s+/)
@@ -252,7 +253,7 @@ export default function ConfiguracionScreen() {
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
               style={{ minHeight: 60, justifyContent: 'center' }}
               onPress={() => {
-                router.navigate("/change-password");
+                setChangePasswordModalVisible(true);
               }}
             />
             <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
@@ -353,6 +354,11 @@ export default function ConfiguracionScreen() {
                 type: "success",
               });
             }}
+          />
+          <ChangePasswordModal
+            visible={changePasswordModalVisible}
+            onDismiss={() => setChangePasswordModalVisible(false)}
+            showToast={showToast}
           />
         </Portal>
       </ScrollView>
