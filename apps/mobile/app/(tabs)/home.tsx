@@ -9,7 +9,7 @@ import {
   Dimensions,
   Image,
 } from "react-native";
-import { Text, Avatar, Button, IconButton } from "react-native-paper";
+import { Text, Avatar, Button, IconButton, Icon } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, SHADOWS } from "@/styles/base";
@@ -400,87 +400,92 @@ export default function HomeScreen() {
               </View>
             ) : lastMemory ? (
               <Animated.View entering={FadeIn.duration(800)}>
-                <Pressable
-                  style={styles.memoryCard}
-                  onPress={() =>
-                    router.navigate({
-                      pathname: "/(tabs)/recuerdos",
-                      params: {
-                        tab: "recuerdos",
-                        memoryId: lastMemory.id,
-                        bookId: lastMemory.bookId,
-                      },
-                    })
-                  }
-                >
-                  {lastMemory.mediaUrl &&
+                {(() => {
+                  const hasMedia = lastMemory.mediaUrl &&
                     lastMemory.mimeType &&
                     (lastMemory.mimeType.startsWith("image/") ||
-                      lastMemory.mimeType.startsWith("video/")) ? (
-                    <ImageBackground
-                      source={{ uri: lastMemory.mediaUrl }}
-                      style={styles.memoryImage}
-                      imageStyle={styles.memoryImageStyle}
+                      lastMemory.mimeType.startsWith("video/"));
+                  return (
+                    <Pressable
+                      style={hasMedia ? styles.memoryCard : styles.memoryCardNote}
+                      onPress={() =>
+                        router.navigate({
+                          pathname: "/(tabs)/recuerdos",
+                          params: {
+                            tab: "recuerdos",
+                            memoryId: lastMemory.id,
+                            bookId: lastMemory.bookId,
+                          },
+                        })
+                      }
                     >
-                      <LinearGradient
-                        colors={["transparent", "rgba(0,0,0,0.7)"]}
-                        style={styles.memoryGradient}
-                      >
-                        <View style={styles.memoryContent}>
-                          <Text style={styles.memoryLabel}>ÚLTIMO RECUERDO</Text>
-                          <Text style={styles.memoryTitle} numberOfLines={2}>
-                            {lastMemory.title || "Sin título"}
-                          </Text>
-                          {lastMemory.caption && (
-                            <HighlightedMentionText
-                              text={lastMemory.caption}
-                              familyMembers={groupMembers}
-                              style={styles.memoryDescription}
+                      {hasMedia ? (
+                        <ImageBackground
+                          source={{ uri: lastMemory.mediaUrl }}
+                          style={styles.memoryImage}
+                          imageStyle={styles.memoryImageStyle}
+                        >
+                          <LinearGradient
+                            colors={["transparent", "rgba(0,0,0,0.7)"]}
+                            style={styles.memoryGradient}
+                          >
+                            <View style={styles.memoryContent}>
+                              <Text style={styles.memoryLabel}>ÚLTIMO RECUERDO</Text>
+                              <Text style={styles.memoryTitle} numberOfLines={2}>
+                                {lastMemory.title || "Sin título"}
+                              </Text>
+                              {lastMemory.caption && (
+                                <HighlightedMentionText
+                                  text={lastMemory.caption}
+                                  familyMembers={groupMembers}
+                                  style={styles.memoryDescription}
+                                />
+                              )}
+                              <Text style={styles.memoryDate}>
+                                {formatInUserTimezone(
+                                  lastMemory.createdAt,
+                                  "d 'de' MMMM 'de' yyyy",
+                                  userElepad?.timezone
+                                )}
+                              </Text>
+                            </View>
+                          </LinearGradient>
+                        </ImageBackground>
+                      ) : (
+                        <View style={styles.memoryNoImage}>
+                          <View style={styles.pushpinIcon}>
+                            <Icon
+                              source="pin"
+                              size={34}
+                              color="#dc2626" // Red color for the pushpin
                             />
-                          )}
-                          <Text style={styles.memoryDate}>
-                            {formatInUserTimezone(
-                              lastMemory.createdAt,
-                              "d 'de' MMMM 'de' yyyy",
-                              userElepad?.timezone
-                            )}
-                          </Text>
-                        </View>
-                      </LinearGradient>
-                    </ImageBackground>
-                  ) : (
-                    <View style={styles.memoryNoImage}>
-                      <View style={styles.memoryNoImageIcon}>
-                        <IconButton
-                          icon="heart"
-                          size={40}
-                          iconColor={COLORS.primary}
-                        />
-                      </View>
-                      <View style={styles.memoryContent}>
-                        <Text style={styles.memoryLabelDark}>ÚLTIMO RECUERDO</Text>
-                        <Text style={styles.memoryTitleDark} numberOfLines={2}>
-                          {lastMemory.title || "Sin título"}
-                        </Text>
+                          </View>
+                          <View style={styles.memoryContent}>
+                            <Text style={styles.memoryLabelNote}>ÚLTIMO RECUERDO</Text>
+                            <Text style={styles.memoryTitleNote} numberOfLines={2}>
+                              {lastMemory.title || "Sin título"}
+                            </Text>
 
-                        {lastMemory.caption && (
-                          <HighlightedMentionText
-                            text={lastMemory.caption}
-                            familyMembers={groupMembers}
-                            style={styles.memoryDescriptionDark}
-                          />
-                        )}
-                        <Text style={styles.memoryDateDark}>
-                          {formatInUserTimezone(
-                            lastMemory.createdAt,
-                            "d 'de' MMMM 'de' yyyy",
-                            userElepad?.timezone
-                          )}
-                        </Text>
-                      </View>
-                    </View>
-                  )}
-                </Pressable>
+                            {lastMemory.caption && (
+                              <HighlightedMentionText
+                                text={lastMemory.caption}
+                                familyMembers={groupMembers}
+                                style={styles.memoryDescriptionNote}
+                              />
+                            )}
+                            <Text style={styles.memoryDateNote}>
+                              {formatInUserTimezone(
+                                lastMemory.createdAt,
+                                "d 'de' MMMM 'de' yyyy",
+                                userElepad?.timezone
+                              )}
+                            </Text>
+                          </View>
+                        </View>
+                      )}
+                    </Pressable>
+                  );
+                })()}
               </Animated.View>
             ) : (
               <Pressable
@@ -925,6 +930,11 @@ const styles = StyleSheet.create({
     height: 280,
     marginBottom: 24,
   },
+  memoryCardNote: {
+    width: SCREEN_WIDTH,
+    height: 180,
+    marginBottom: 24,
+  },
   memoryCardLoading: {
     width: SCREEN_WIDTH,
     height: 280,
@@ -956,15 +966,16 @@ const styles = StyleSheet.create({
   },
   memoryNoImage: {
     flex: 1,
-    backgroundColor: COLORS.backgroundSecondary,
-    padding: 24,
-    justifyContent: "flex-end",
-  },
-  memoryNoImageIcon: {
-    position: "absolute",
-    top: 24,
-    right: 24,
-    opacity: 0.3,
+    backgroundColor: '#fef3c7', // Warm yellow like Post-it
+    borderRadius: 5, // Square corners like real Post-its
+    margin: 16,
+    padding: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    ...SHADOWS.card,
+    transform: [{ rotate: '-2deg' }], // Slight rotation like a stuck note
+    borderWidth: 1,
+    borderColor: '#f59e0b', // Orange border for authenticity
   },
   memoryContent: {
     gap: 6,
@@ -1011,11 +1022,35 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginTop: 4,
   },
-  memoryDateDark: {
+  memoryLabelNote: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: '#92400e', // Dark brown for Post-it feel
+    letterSpacing: 1.5,
+    marginBottom: 4,
+  },
+  memoryTitleNote: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: '#1f2937', // Dark gray for contrast on yellow
+    lineHeight: 30,
+  },
+  memoryDescriptionNote: {
+    fontSize: 15,
+    color: '#374151', // Medium gray
+    lineHeight: 22,
+  },
+  memoryDateNote: {
     fontSize: 13,
-    color: COLORS.primary,
+    color: '#6b7280', // Light gray
     fontWeight: "600",
     marginTop: 4,
+  },
+  pushpinIcon: {
+    position: 'absolute',
+    top: 5,
+    left: 14,
+    zIndex: 1,
   },
   emptyTitle: {
     fontSize: 18,
