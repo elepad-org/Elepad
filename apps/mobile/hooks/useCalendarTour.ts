@@ -1,12 +1,11 @@
-
 import { useEffect, useState, useRef } from 'react';
 import { useTourGuideController } from 'rn-tourguide';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { InteractionManager } from 'react-native';
 
-const TOUR_STORAGE_KEY = '@elepad_has_seen_home_tour_v2';
+const TOUR_STORAGE_KEY = '@elepad_has_seen_calendar_tour_v2';
 
-export const useHomeTour = () => {
+export const useCalendarTour = () => {
   const { start, canStart, stop, eventEmitter } = useTourGuideController();
   const [hasSeenTour, setHasSeenTour] = useState<boolean | null>(null);
   const hasCheckedTour = useRef(false);
@@ -57,6 +56,14 @@ export const useHomeTour = () => {
     start,
     stop,
     hasSeenTour,
-    restartTour: () => start(),
+    restartTour: async () => {
+      try {
+        await AsyncStorage.removeItem(TOUR_STORAGE_KEY);
+        hasCheckedTour.current = false; // Reset check flag
+        start();
+      } catch (e) {
+        console.error('Error restarting tour', e);
+      }
+    },
   };
 };

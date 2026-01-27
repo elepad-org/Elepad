@@ -41,6 +41,7 @@ import focusImage from "@/assets/images/focus2.png";
 import { TourGuideZone } from "rn-tourguide";
 import { useHomeTour } from "@/hooks/useHomeTour";
 import HomeEvents from "@/components/home/HomeEvents";
+import { ElepadTourProvider } from "@/components/shared/ElepadTourProvider";
 
 
 const GAME_IMAGES: Record<string, ImageSourcePropType> = {
@@ -63,7 +64,7 @@ const getGameInfo = (gameType: string) => {
   return gameMap[gameType] || { name: "Juego", emoji: "🎮" };
 };
 
-export default function HomeScreen() {
+function HomeScreenContent() {
   const { userElepad, userElepadLoading } = useAuth();
   const router = useRouter();
   const { unreadCount } = useNotifications();
@@ -1046,3 +1047,12 @@ const styles = StyleSheet.create({
     borderColor: COLORS.primary,
   },
 });
+
+export default function HomeScreen() {
+  return (
+    <ElepadTourProvider>
+      <HomeScreenContent />
+    </ElepadTourProvider>
+  );
+}
+
