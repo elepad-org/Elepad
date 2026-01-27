@@ -9,7 +9,7 @@ import {
   Dimensions,
   Image,
 } from "react-native";
-import { Text, Avatar, Button, IconButton, Icon } from "react-native-paper";
+import { Text, Avatar, Button, IconButton } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, SHADOWS } from "@/styles/base";
@@ -36,6 +36,7 @@ import memoryImage from "@/assets/images/memory2.png";
 import netImage from "@/assets/images/net2.png";
 import sudokuImage from "@/assets/images/sudoku2.png";
 import focusImage from "@/assets/images/focus2.png";
+import tapeImage from "@/assets/images/paper-transparent-sticky-tape-png.png";
 
 // Onboarding imports
 import { TourGuideZone } from "rn-tourguide";
@@ -453,13 +454,7 @@ export default function HomeScreen() {
                         </ImageBackground>
                       ) : (
                         <View style={styles.memoryNoImage}>
-                          <View style={styles.pushpinIcon}>
-                            <Icon
-                              source="pin"
-                              size={34}
-                              color="#dc2626" // Red color for the pushpin
-                            />
-                          </View>
+                          <Image source={tapeImage} style={styles.tapeIcon} />
                           <View style={styles.memoryContent}>
                             <Text style={styles.memoryLabelNote}>ÚLTIMO RECUERDO</Text>
                             <Text style={styles.memoryTitleNote} numberOfLines={2}>
@@ -966,8 +961,8 @@ const styles = StyleSheet.create({
   },
   memoryNoImage: {
     flex: 1,
-    backgroundColor: '#fef3c7', // Warm yellow like Post-it
-    borderRadius: 5, // Square corners like real Post-its
+    backgroundColor: '#ffffff', // White like paper
+    borderRadius: 5, 
     margin: 16,
     padding: 20,
     justifyContent: "center",
@@ -975,7 +970,7 @@ const styles = StyleSheet.create({
     ...SHADOWS.card,
     transform: [{ rotate: '-2deg' }], // Slight rotation like a stuck note
     borderWidth: 1,
-    borderColor: '#f59e0b', // Orange border for authenticity
+    borderColor: '#f1f1f1', // Softer beige border
   },
   memoryContent: {
     gap: 6,
@@ -1025,7 +1020,7 @@ const styles = StyleSheet.create({
   memoryLabelNote: {
     fontSize: 11,
     fontWeight: "700",
-    color: '#92400e', // Dark brown for Post-it feel
+    color: COLORS.primary, // Dark brown for Post-it feel
     letterSpacing: 1.5,
     marginBottom: 4,
   },
@@ -1046,10 +1041,13 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginTop: 4,
   },
-  pushpinIcon: {
+  tapeIcon: {
     position: 'absolute',
-    top: 5,
-    left: 14,
+    top: -10,
+    left: -10,
+    width: 70,
+    height: 75,
+    transform: [{ rotate: '-3deg' }], // Slight angle
     zIndex: 1,
   },
   emptyTitle: {
