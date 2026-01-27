@@ -32,7 +32,7 @@ export default function AlbumCard({
   const [detailsVisible, setDetailsVisible] = useState(false);
   const { userElepad } = useAuth();
   const { showToast } = useToast();
-  const { sharePdf, savePdf, findSavedPdf, isDownloading } = usePdfDownload();
+  const { sharePdf, viewLocalPdf, isDownloading } = usePdfDownload();
 
   const exportPdfMutation = usePostAlbumIdExportPdf();
 
@@ -54,6 +54,8 @@ export default function AlbumCard({
       message: "Generando PDF... recibirás una notificación cuando esté listo",
       type: "success",
     });
+
+    setDetailsVisible(false);
 
     exportPdfMutation.mutate(
       { id: albumId },
@@ -83,17 +85,18 @@ export default function AlbumCard({
     if (pdfUrl) {
       try {
         // First, try to find a saved local copy
-        const savedUri = await findSavedPdf(title);
-
-        const uriToOpen = savedUri || pdfUrl;
-
-        await Linking.openURL(uriToOpen);
+        await viewLocalPdf(pdfUrl);
       } catch (err) {
-        console.error("Error opening PDF:", err);
-        showToast({
-          message: "No se pudo abrir el PDF",
-          type: "error",
-        });
+        try {
+          console.error(err)
+          await Linking.openURL(pdfUrl);
+        } catch (error) {
+          console.error("Error opening PDF:", error);
+          showToast({
+            message: "No se pudo abrir el PDF",
+            type: "error",
+          });
+        }
       }
     }
   };
@@ -101,24 +104,6 @@ export default function AlbumCard({
   const handleDownloadAndSharePdf = async () => {
     if (pdfUrl) {
       await sharePdf(pdfUrl, title);
-    }
-  };
-
-  const handleSavePdf = async () => {
-    if (pdfUrl) {
-      const savedUri = await savePdf(pdfUrl, title);
-      if (savedUri) {
-        try {
-          await Linking.openURL(savedUri);
-        } catch (err) {
-          console.error("Error opening saved PDF:", err);
-          showToast({
-            message: "No se pudo abrir el PDF guardado",
-            type: "error",
-          });
-        }
-      }
-      setDetailsVisible(false);
     }
   };
 
@@ -189,7 +174,7 @@ export default function AlbumCard({
             </Button>
 
             {pdfUrl ? (
-              <View>
+              <View style={{ flexDirection: "row", gap: 8 }}>
                 <Button
                   mode="outlined"
                   icon="file-pdf-box"
@@ -199,15 +184,6 @@ export default function AlbumCard({
                   }}
                 >
                   Ver PDF
-                </Button>
-                <Button
-                  mode="outlined"
-                  icon="download"
-                  loading={isDownloading}
-                  disabled={isDownloading}
-                  onPress={handleSavePdf}
-                >
-                  Guardar
                 </Button>
                 <Button
                   mode="contained"
@@ -229,7 +205,7 @@ export default function AlbumCard({
                 </Button>
               </View>
             ) : (
-              <View>
+              <View style={{ flexDirection: "row", gap: 8 }}>
                 <Button
                   mode="outlined"
                   loading={exportPdfMutation.isPending}
