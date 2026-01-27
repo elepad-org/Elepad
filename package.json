@@ -45,6 +45,7 @@
     "expo-notifications": "~0.32.16",
     "react": "19.1.0",
     "react-native": "0.81.5",
+    "react-native-masonry-list": "^2.16.2",
     "react-native-pager-view": "^8.0.0",
     "react-native-paper-dates": "^0.22.57",
     "react-native-reanimated": "4.1.1",
