@@ -21,6 +21,9 @@ import { ToastProvider } from "@/components/shared/Toast";
 import { TourGuideProvider } from "rn-tourguide";
 import ElepadTooltip from "@/components/onboarding/ElepadTooltip";
 
+// Widget imports (solo para Android)
+import { registerWidgetTaskHandler } from "react-native-android-widget";
+import { widgetTaskHandler } from "@/widgets/widgetTaskHandler";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +49,18 @@ export default function RootLayout() {
       },
     );
     return () => listener?.subscription?.unsubscribe?.();
+  }, []);
+
+  // Registrar widget de Android
+  useEffect(() => {
+    if (Platform.OS === "android") {
+      console.log("📱 Registrando widget de Android...");
+
+      // Registrar el task handler
+      registerWidgetTaskHandler(widgetTaskHandler);
+
+      console.log("✅ Widget registrado correctamente");
+    }
   }, []);
 
   if (!loaded) {
@@ -78,7 +93,11 @@ export default function RootLayout() {
                     <TourGuideProvider
                       tooltipComponent={ElepadTooltip}
                       backdropColor="rgba(0, 0, 0, 0.85)"
-                      verticalOffset={Platform.OS === "android" ? (StatusBar.currentHeight ?? 0) : 0}
+                      verticalOffset={
+                        Platform.OS === "android"
+                          ? (StatusBar.currentHeight ?? 0)
+                          : 0
+                      }
                       animationDuration={400}
                       preventOutsideInteraction={true}
                       androidStatusBarVisible={false}
