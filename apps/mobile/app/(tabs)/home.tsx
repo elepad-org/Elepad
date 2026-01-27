@@ -13,7 +13,7 @@ import { Text, Avatar, Button, IconButton } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, SHADOWS } from "@/styles/base";
-import { LoadingProfile, SkeletonBox } from "@/components/shared";
+import { SkeletonBox } from "@/components/shared";
 import {
   useGetActivitiesFamilyCodeIdFamilyGroup,
   useGetAttempts,
@@ -228,17 +228,7 @@ export default function HomeScreen() {
     }
   }, [userElepad?.groupId, queryClient]);
 
-  if (userElepadLoading || !userElepad) {
-    return (
-      <SafeAreaView style={styles.safeArea} edges={["top"]}>
-        <StatusBar
-          barStyle="dark-content"
-          backgroundColor={COLORS.background}
-        />
-        <LoadingProfile />
-      </SafeAreaView>
-    );
-  }
+
 
   const displayName =
     (userElepad?.displayName as string) || userElepad?.email || "Usuario";
@@ -282,12 +272,21 @@ export default function HomeScreen() {
               <View>
                 <Text style={styles.greeting}>{getGreeting()}</Text>
                 <View style={styles.userNameContainer}>
-                  <Text style={styles.userName} numberOfLines={1}>
-                    {displayName}
-                  </Text>
-                  <Text style={styles.userRole} numberOfLines={1}>
-                    ({userRole})
-                  </Text>
+                  {userElepadLoading ? (
+                    <View style={{ gap: 4 }}>
+                      <SkeletonBox width={180} height={30} borderRadius={8} />
+                      <SkeletonBox width={100} height={16} borderRadius={4} />
+                    </View>
+                  ) : (
+                    <>
+                      <Text style={styles.userName} numberOfLines={1}>
+                        {displayName}
+                      </Text>
+                      <Text style={styles.userRole} numberOfLines={1}>
+                        ({userRole})
+                      </Text>
+                    </>
+                  )}
                 </View>
               </View>
             </TourGuideZone>
@@ -353,7 +352,9 @@ export default function HomeScreen() {
                 })}
               >
                 <View style={{ position: "relative" }}>
-                  {userElepad?.avatarUrl ? (
+                  {userElepadLoading ? (
+                    <SkeletonBox width={55} height={55} borderRadius={30} />
+                  ) : userElepad?.avatarUrl ? (
                     <Avatar.Image
                       size={55}
                       source={{ uri: userElepad?.avatarUrl }}
@@ -367,7 +368,7 @@ export default function HomeScreen() {
                       labelStyle={{ color: COLORS.white, fontSize: 22 }}
                     />
                   )}
-                  {userElepad?.activeFrameUrl && (
+                  {!userElepadLoading && userElepad?.activeFrameUrl && (
                     <Image
                       source={{ uri: userElepad?.activeFrameUrl }}
                       style={{
@@ -394,7 +395,7 @@ export default function HomeScreen() {
           borderRadius={20}
         >
           <View>
-            {memoriesQuery.isLoading ? (
+            {memoriesQuery.isLoading || userElepadLoading ? (
               <View style={styles.memoryCardLoading}>
                 <SkeletonBox width={SCREEN_WIDTH} height={280} borderRadius={0} />
               </View>
@@ -552,7 +553,7 @@ export default function HomeScreen() {
           </View>
 
           <>
-            {activitiesQuery.isLoading ? (
+            {activitiesQuery.isLoading || userElepadLoading ? (
               <View style={[styles.eventsContainer, { marginTop: 0 }]}>
                 {[1, 2, 3].map((i) => (
                   <View key={i} style={styles.eventItem}>
@@ -704,7 +705,7 @@ export default function HomeScreen() {
               {userElepad?.elder ? "Mi última actividad" : "Última actividad del grupo"}
             </Text>
 
-            {attemptsQuery.isLoading ? (
+            {attemptsQuery.isLoading || userElepadLoading ? (
               <View style={[styles.gameCard, { marginTop: 10 }]}>
                 <SkeletonBox width={60} height={60} borderRadius={30} />
                 <View style={{ flex: 1, justifyContent: "center", gap: 8 }}>
