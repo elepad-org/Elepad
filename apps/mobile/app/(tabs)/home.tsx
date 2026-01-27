@@ -705,7 +705,7 @@ export default function HomeScreen() {
             </Text>
 
             {attemptsQuery.isLoading ? (
-              <View style={[styles.gameCard, { marginTop: 10 }]}>
+              <View style={[styles.gameCard, { marginTop: 22 }]}>
                 <SkeletonBox width={60} height={60} borderRadius={30} />
                 <View style={{ flex: 1, justifyContent: "center", gap: 8 }}>
                   <SkeletonBox width="70%" height={18} borderRadius={4} />
@@ -717,7 +717,7 @@ export default function HomeScreen() {
               // Elder: mostrar solo su último intento
               lastAttempt && !Array.isArray(lastAttempt) ? (
                 <Pressable
-                  style={styles.gameCard}
+                  style={[styles.gameCard, { marginTop: 22 }]}
                   onPress={() => router.push("/history")}
                 >
                   <View style={styles.gameIcon}>
@@ -759,7 +759,7 @@ export default function HomeScreen() {
             ) : (
               // Familiar: mostrar múltiples intentos de elder
               Array.isArray(lastAttempt) && lastAttempt.length > 0 ? (
-                <View style={{ gap: 10, marginTop: 10 }}>
+                <View style={{ gap: 5, marginTop: 22 }}>
                   {lastAttempt.map((attempt: AttemptWithUser) => (
                     <Pressable
                       key={attempt.id}
@@ -1097,7 +1097,7 @@ const styles = StyleSheet.create({
 
   // Events
   eventsContainer: {
-    gap: 10,
+    gap: 5,
   },
   eventItem: {
     flexDirection: "row",
@@ -1159,7 +1159,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderRadius: 16,
     padding: 18,
-    marginTop: 10,
+    marginTop: 0,
     gap: 16,
     ...SHADOWS.card,
   },
