@@ -7,7 +7,7 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAppFonts } from "@/hooks/useAppFonts";
 import { Stack } from "expo-router";
-import { Platform, StatusBar, useColorScheme } from "react-native";
+import { useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useEffect } from "react";
 import { configureApiClient } from "@elepad/api-client/src/runtime";
@@ -18,8 +18,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StreakSnackbarProvider } from "@/hooks/useStreakSnackbar";
 import { COLORS } from "@/styles/base";
 import { ToastProvider } from "@/components/shared/Toast";
-import { TourGuideProvider } from "rn-tourguide";
-import ElepadTooltip from "@/components/onboarding/ElepadTooltip";
+
 
 
 const queryClient = new QueryClient();
@@ -75,106 +74,97 @@ export default function RootLayout() {
               <PaperProvider theme={paperTheme}>
                 <NavigationThemeProvider value={navTheme}>
                   <ToastProvider>
-                    <TourGuideProvider
-                      tooltipComponent={ElepadTooltip}
-                      backdropColor="rgba(0, 0, 0, 0.85)"
-                      verticalOffset={Platform.OS === "android" ? (StatusBar.currentHeight ?? 0) : 0}
-                      animationDuration={400}
-                      preventOutsideInteraction={true}
-                      androidStatusBarVisible={false}
+                    <Stack
+                      screenOptions={{
+                        contentStyle: { backgroundColor: COLORS.background },
+                      }}
                     >
-                      <Stack
-                        screenOptions={{
-                          contentStyle: { backgroundColor: COLORS.background },
+                      <Stack.Screen
+                        name="index"
+                        options={{ headerShown: false, animation: "fade" }}
+                      />
+                      <Stack.Screen
+                        name="(auth)"
+                        options={{ headerShown: false, animation: "fade" }}
+                      />
+                      <Stack.Screen
+                        name="(tabs)"
+                        options={{ headerShown: false, animation: "fade" }}
+                      />
+                      <Stack.Screen
+                        name="familyGroup"
+                        options={{
+                          headerShown: false,
+                          animation: "fade",
                         }}
-                      >
-                        <Stack.Screen
-                          name="index"
-                          options={{ headerShown: false, animation: "fade" }}
-                        />
-                        <Stack.Screen
-                          name="(auth)"
-                          options={{ headerShown: false, animation: "fade" }}
-                        />
-                        <Stack.Screen
-                          name="(tabs)"
-                          options={{ headerShown: false, animation: "fade" }}
-                        />
-                        <Stack.Screen
-                          name="familyGroup"
-                          options={{
-                            headerShown: false,
-                            animation: "fade",
-                          }}
-                        />
-                        <Stack.Screen
-                          name="history"
-                          options={{
-                            headerShown: false,
-                            animation: "fade",
-                          }}
-                        />
-                        <Stack.Screen
-                          name="focus-game"
-                          options={{
-                            headerShown: false,
-                            animation: "fade",
-                          }}
-                        />
-                        <Stack.Screen
-                          name="memory-game"
-                          options={{
-                            headerShown: false,
-                            animation: "fade",
-                          }}
-                        />
-                        <Stack.Screen
-                          name="net-game"
-                          options={{
-                            headerShown: false,
-                            animation: "fade",
-                          }}
-                        />
-                        <Stack.Screen
-                          name="sudoku-game"
-                          options={{
-                            headerShown: false,
-                            animation: "fade",
-                          }}
-                        />
-                        <Stack.Screen
-                          name="game-detail/[gameId]"
-                          options={{
-                            headerShown: false,
-                            animation: "fade",
-                            presentation: "card",
-                          }}
-                        />
-                        <Stack.Screen
-                          name="notifications"
-                          options={{
-                            headerShown: false,
-                            presentation: "card",
-                            animation: "fade",
-                          }}
-                        />
-                        <Stack.Screen
-                          name="shop"
-                          options={{
-                            headerShown: false,
-                            animation: "fade",
-                          }}
-                        />
-                        <Stack.Screen name="+not-found" />
-                      </Stack>
-                    </TourGuideProvider>
+                      />
+                      <Stack.Screen
+                        name="history"
+                        options={{
+                          headerShown: false,
+                          animation: "fade",
+                        }}
+                      />
+                      <Stack.Screen
+                        name="focus-game"
+                        options={{
+                          headerShown: false,
+                          animation: "fade",
+                        }}
+                      />
+                      <Stack.Screen
+                        name="memory-game"
+                        options={{
+                          headerShown: false,
+                          animation: "fade",
+                        }}
+                      />
+                      <Stack.Screen
+                        name="net-game"
+                        options={{
+                          headerShown: false,
+                          animation: "fade",
+                        }}
+                      />
+                      <Stack.Screen
+                        name="sudoku-game"
+                        options={{
+                          headerShown: false,
+                          animation: "fade",
+                        }}
+                      />
+                      <Stack.Screen
+                        name="game-detail/[gameId]"
+                        options={{
+                          headerShown: false,
+                          animation: "fade",
+                          presentation: "card",
+                        }}
+                      />
+                      <Stack.Screen
+                        name="notifications"
+                        options={{
+                          headerShown: false,
+                          presentation: "card",
+                          animation: "fade",
+                        }}
+                      />
+                      <Stack.Screen
+                        name="shop"
+                        options={{
+                          headerShown: false,
+                          animation: "fade",
+                        }}
+                      />
+                      <Stack.Screen name="+not-found" />
+                    </Stack>
                   </ToastProvider>
                 </NavigationThemeProvider>
               </PaperProvider>
             </AuthProvider>
           </StreakSnackbarProvider>
-        </QueryClientProvider>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+        </QueryClientProvider >
+      </SafeAreaProvider >
+    </GestureHandlerRootView >
   );
 }

@@ -1,4 +1,4 @@
-import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
+import Animated, { FadeIn } from "react-native-reanimated";
 import {
   StatusBar,
   ScrollView,
@@ -13,7 +13,7 @@ import { Text, Avatar, Button, IconButton, Icon } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, SHADOWS } from "@/styles/base";
-import { LoadingProfile, SkeletonBox } from "@/components/shared";
+import { SkeletonBox } from "@/components/shared";
 import {
   useGetActivitiesFamilyCodeIdFamilyGroup,
   useGetAttempts,
@@ -30,7 +30,7 @@ import StreakCounter from "@/components/StreakCounter";
 import HighlightedMentionText from "@/components/Recuerdos/HighlightedMentionText";
 import { useNotifications } from "@/hooks/useNotifications";
 import { GAMES_INFO } from "@/constants/gamesInfo";
-import { formatInUserTimezone, toUserLocalTime } from "@/lib/timezoneHelpers";
+import { formatInUserTimezone } from "@/lib/timezoneHelpers";
 import type { ImageSourcePropType } from "react-native";
 import memoryImage from "@/assets/images/memory2.png";
 import netImage from "@/assets/images/net2.png";
@@ -40,6 +40,8 @@ import focusImage from "@/assets/images/focus2.png";
 // Onboarding imports
 import { TourGuideZone } from "rn-tourguide";
 import { useHomeTour } from "@/hooks/useHomeTour";
+import HomeEvents from "@/components/home/HomeEvents";
+import { ElepadTourProvider } from "@/components/shared/ElepadTourProvider";
 
 
 const GAME_IMAGES: Record<string, ImageSourcePropType> = {
@@ -62,14 +64,12 @@ const getGameInfo = (gameType: string) => {
   return gameMap[gameType] || { name: "Juego", emoji: "🎮" };
 };
 
-export default function HomeScreen() {
+function HomeScreenContent() {
   const { userElepad, userElepadLoading } = useAuth();
   const router = useRouter();
   const { unreadCount } = useNotifications();
   const queryClient = useQueryClient();
 
-  // Tour Guide
-  const { restartTour } = useHomeTour();
   const [debugTaps, setDebugTaps] = useState(0);
 
   // Fetch today's activities
@@ -81,6 +81,9 @@ export default function HomeScreen() {
       },
     },
   );
+
+  // Tour Guide
+  const { restartTour } = useHomeTour(userElepadLoading || activitiesQuery.isLoading);
 
   // Calculate date range for last 24 hours (memoized to avoid constant recalculation)
   const dateRange = useMemo(() => {
@@ -228,17 +231,7 @@ export default function HomeScreen() {
     }
   }, [userElepad?.groupId, queryClient]);
 
-  if (userElepadLoading || !userElepad) {
-    return (
-      <SafeAreaView style={styles.safeArea} edges={["top"]}>
-        <StatusBar
-          barStyle="dark-content"
-          backgroundColor={COLORS.background}
-        />
-        <LoadingProfile />
-      </SafeAreaView>
-    );
-  }
+
 
   const displayName =
     (userElepad?.displayName as string) || userElepad?.email || "Usuario";
@@ -282,12 +275,21 @@ export default function HomeScreen() {
               <View>
                 <Text style={styles.greeting}>{getGreeting()}</Text>
                 <View style={styles.userNameContainer}>
-                  <Text style={styles.userName} numberOfLines={1}>
-                    {displayName}
-                  </Text>
-                  <Text style={styles.userRole} numberOfLines={1}>
-                    ({userRole})
-                  </Text>
+                  {userElepadLoading ? (
+                    <View style={{ gap: 4 }}>
+                      <SkeletonBox width={180} height={30} borderRadius={8} />
+                      <SkeletonBox width={100} height={16} borderRadius={4} />
+                    </View>
+                  ) : (
+                    <>
+                      <Text style={styles.userName} numberOfLines={1}>
+                        {displayName}
+                      </Text>
+                      <Text style={styles.userRole} numberOfLines={1}>
+                        ({userRole})
+                      </Text>
+                    </>
+                  )}
                 </View>
               </View>
             </TourGuideZone>
@@ -353,7 +355,9 @@ export default function HomeScreen() {
                 })}
               >
                 <View style={{ position: "relative" }}>
-                  {userElepad?.avatarUrl ? (
+                  {userElepadLoading ? (
+                    <SkeletonBox width={55} height={55} borderRadius={30} />
+                  ) : userElepad?.avatarUrl ? (
                     <Avatar.Image
                       size={55}
                       source={{ uri: userElepad?.avatarUrl }}
@@ -367,7 +371,7 @@ export default function HomeScreen() {
                       labelStyle={{ color: COLORS.white, fontSize: 22 }}
                     />
                   )}
-                  {userElepad?.activeFrameUrl && (
+                  {!userElepadLoading && userElepad?.activeFrameUrl && (
                     <Image
                       source={{ uri: userElepad?.activeFrameUrl }}
                       style={{
@@ -394,7 +398,7 @@ export default function HomeScreen() {
           borderRadius={20}
         >
           <View>
-            {memoriesQuery.isLoading ? (
+            {memoriesQuery.isLoading || userElepadLoading ? (
               <View style={styles.memoryCardLoading}>
                 <SkeletonBox width={SCREEN_WIDTH} height={280} borderRadius={0} />
               </View>
@@ -514,183 +518,154 @@ export default function HomeScreen() {
         {userElepad?.elder && <StreakCounter />}
 
         {/* Próximos Eventos */}
+        <HomeEvents
+          isLoading={activitiesQuery.isLoading || userElepadLoading}
+          events={upcomingActivities}
+          timezone={userElepad?.timezone}
+          groupMembers={groupMembers}
+          onRestartTour={restartTour}
+          debugTaps={debugTaps}
+          setDebugTaps={setDebugTaps}
+        />
+
+        {/* Actividad Reciente */}
+
         <View style={styles.section}>
-          <View style={styles.sectionHeader}>
+          <TourGuideZone
+            zone={7}
+            text="Mantente al día con los juegos y actividades completadas."
+            borderRadius={8}
+          >
             <Text style={styles.sectionTitle}>
-              Próximos{" "}
-              <Text
-                onPress={() => {
-                  const newTaps = debugTaps + 1;
-                  setDebugTaps(newTaps);
-                  if (newTaps >= 10) {
-                    setDebugTaps(0);
-                    restartTour();
-                  }
-                }}
-                suppressHighlighting={true}
-              >
-                eventos
-              </Text>
+              {userElepad?.elder
+                ? "Mi última actividad"
+                : "Última actividad del grupo"}
             </Text>
-            {upcomingActivities.length > 0 && (
-              <Button
-                mode="text"
-                onPress={() => {
-                  router.navigate({
-                    pathname: "/(tabs)/home",
-                    params: {
-                      tab: "calendar",
-                    },
-                  });
-                }}
-                labelStyle={styles.sectionLink}
-                compact
+          </TourGuideZone>
+
+          {attemptsQuery.isLoading || userElepadLoading ? (
+            <View style={[styles.gameCard, { marginTop: 10 }]}>
+              <SkeletonBox width={60} height={60} borderRadius={30} />
+              <View style={{ flex: 1, justifyContent: "center", gap: 8 }}>
+                <SkeletonBox width="70%" height={18} borderRadius={4} />
+                <SkeletonBox width="50%" height={14} borderRadius={4} />
+              </View>
+              <SkeletonBox width={70} height={60} borderRadius={14} />
+            </View>
+          ) : userElepad?.elder ? (
+            // Elder: mostrar solo su último intento
+            lastAttempt && !Array.isArray(lastAttempt) ? (
+              <Pressable
+                style={styles.gameCard}
+                onPress={() => router.push("/history")}
               >
-                Ver todos
-              </Button>
-            )}
-          </View>
-
-          <>
-            {activitiesQuery.isLoading ? (
-              <View style={[styles.eventsContainer, { marginTop: 0 }]}>
-                {[1, 2, 3].map((i) => (
-                  <View key={i} style={styles.eventItem}>
-                    <View style={styles.eventTime}>
-                      <SkeletonBox
-                        width={60}
-                        height={16}
-                        borderRadius={4}
-                        style={{ marginBottom: 8 }}
-                      />
-                      <SkeletonBox width={50} height={14} borderRadius={4} />
-                    </View>
-                    <View style={styles.eventDivider} />
-                    <View style={styles.eventContent}>
-                      <SkeletonBox
-                        width="80%"
-                        height={18}
-                        borderRadius={4}
-                        style={{ marginBottom: 8 }}
-                      />
-                      <SkeletonBox width="60%" height={14} borderRadius={4} />
-                    </View>
-                  </View>
-                ))}
-              </View>
-            ) : upcomingActivities.length > 0 ? (
-              <View style={[styles.eventsContainer, { marginTop: 0 }]}>
-                {upcomingActivities.map(
-                  (
-                    activity: {
-                      id: string;
-                      startsAt: string;
-                      title: string;
-                      description?: string;
-                    },
-                    index,
-                  ) => {
-                    const activityDate = toUserLocalTime(activity.startsAt, userElepad?.timezone);
-                    const now = toUserLocalTime(new Date(), userElepad?.timezone);
-                    const tomorrow = new Date(now);
-                    tomorrow.setDate(tomorrow.getDate() + 1);
-
-                    const isToday =
-                      activityDate.toDateString() === now.toDateString();
-                    const isTomorrow =
-                      activityDate.toDateString() === tomorrow.toDateString();
-
-                    let dateLabel = formatInUserTimezone(
-                      activity.startsAt,
-                      "d MMM",
+                <View style={styles.gameIcon}>
+                  <Image
+                    source={GAME_IMAGES[lastAttempt.gameType || "memory"]}
+                    style={{ width: 40, height: 40, resizeMode: "contain" }}
+                  />
+                </View>
+                <View style={styles.gameInfo}>
+                  <Text style={styles.gameName}>
+                    {getGameInfo(lastAttempt.gameType || "").name}
+                  </Text>
+                  <Text style={styles.gameTime}>
+                    {formatInUserTimezone(
+                      lastAttempt.startedAt,
+                      "d 'de' MMMM, HH:mm",
                       userElepad?.timezone
-                    );
-
-                    if (isToday) dateLabel = "Hoy";
-                    if (isTomorrow) dateLabel = "Mañana";
-
-                    return (
-                      <Pressable
-                        key={activity.id}
-                        onPress={() => {
-                          console.log(
-                            "🏠 Home: Navigating to calendar with activity",
-                            {
-                              activityId: activity.id,
-                              title: activity.title,
-                              startsAt: activity.startsAt,
-                            },
-                          );
-                          // Navegar al tab de calendario y abrir el detalle del evento
-                          router.navigate({
-                            pathname: "/(tabs)/home",
-                            params: {
-                              tab: "calendar",
-                              activityId: activity.id,
-                            },
-                          });
-                        }}
-                        style={({ pressed }) => ({
-                          opacity: pressed ? 0.7 : 1,
-                        })}
-                      >
-                        <Animated.View
-                          entering={ZoomIn.duration(200).delay(index * 50)}
-                          style={styles.eventItem}
-                        >
-                          <View style={styles.eventTime}>
-                            <Text style={styles.eventDate}>{dateLabel}</Text>
-                            <Text style={styles.eventHour}>
-                              {formatInUserTimezone(
-                                activity.startsAt,
-                                "HH:mm",
-                                userElepad?.timezone
-                              )}
-                            </Text>
-                          </View>
-                          <View style={styles.eventDivider} />
-                          <View style={styles.eventContent}>
-                            <Text style={styles.eventTitle} numberOfLines={1}>
-                              {activity.title}
-                            </Text>
-                            {activity.description && (
-                              <HighlightedMentionText
-                                text={activity.description}
-                                groupMembers={groupMembers}
-                                style={styles.eventDesc}
-                                numberOfLines={1}
-                              />
-                            )}
-                          </View>
-                        </Animated.View>
-                      </Pressable>
-                    );
-                  },
-                )}
-              </View>
+                    )}
+                  </Text>
+                </View>
+                <View style={styles.gameScore}>
+                  <Text style={styles.scoreLabel}>PUNTOS</Text>
+                  <Text style={styles.scoreValue}>{lastAttempt.score || 0}</Text>
+                </View>
+              </Pressable>
             ) : (
-              <View style={[styles.emptySection, { marginTop: 0 }]}>
-                <Text style={styles.emptyText}> No hay eventos próximos </Text>
+              <View style={styles.emptySection}>
+                <Text style={styles.emptyText}>Aún no has jugado</Text>
                 <Button
                   mode="outlined"
-                  onPress={() => {
-                    router.navigate({
-                      pathname: "/(tabs)/home",
-                      params: {
-                        tab: "calendar",
-                        openForm: "true",
-                      },
-                    });
-                  }}
+                  onPress={() => router.push("/juegos")}
                   style={styles.emptyButtonOutline}
-                  textColor={COLORS.primary}
-                  icon="calendar-plus"
+                  labelStyle={{ color: COLORS.primary }}
                 >
-                  Crear evento
+                  Explorar juegos
                 </Button>
               </View>
-            )}
-          </>
+            )
+          ) : (
+            // Familiar: mostrar múltiples intentos de elder
+            Array.isArray(lastAttempt) && lastAttempt.length > 0 ? (
+              <View style={{ gap: 10, marginTop: 10 }}>
+                {lastAttempt.map((attempt: AttemptWithUser) => (
+                  <Pressable
+                    key={attempt.id}
+                    style={styles.gameCard}
+                    onPress={() => router.push("/history")}
+                  >
+                    <View style={styles.gameIcon}>
+                      <Image
+                        source={GAME_IMAGES[attempt.gameType || "memory"]}
+                        style={{ width: 40, height: 40, resizeMode: "contain" }}
+                      />
+                    </View>
+                    <View style={styles.gameInfo}>
+                      <Text style={styles.gameName}>
+                        {getGameInfo(attempt.gameType || "").name}
+                      </Text>
+                      <Text style={styles.gameTime}>
+                        {formatInUserTimezone(
+                          attempt.startedAt,
+                          "d 'de' MMMM, HH:mm",
+                          userElepad?.timezone
+                        )}
+                      </Text>
+                      {attempt.user && (
+                        <View style={styles.playerInfo}>
+                          {attempt.user.avatarUrl ? (
+                            <Avatar.Image
+                              size={20}
+                              source={{ uri: attempt.user.avatarUrl }}
+                              style={styles.playerAvatar}
+                            />
+                          ) : (
+                            <Avatar.Text
+                              size={20}
+                              label={attempt.user.displayName
+                                .substring(0, 2)
+                                .toUpperCase()}
+                              style={styles.playerAvatar}
+                            />
+                          )}
+                          <Text style={styles.playerName}>
+                            {attempt.user.displayName}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                    <View style={styles.gameScore}>
+                      <Text style={styles.scoreLabel}>PUNTOS</Text>
+                      <Text style={styles.scoreValue}>{attempt.score || 0}</Text>
+                    </View>
+                  </Pressable>
+                ))}
+              </View>
+            ) : (
+              <View style={styles.emptySection}>
+                <Text style={styles.emptyText}>No hay actividad reciente en el grupo</Text>
+                <Button
+                  mode="outlined"
+                  onPress={() => router.navigate({ pathname: "/(tabs)/home", params: { tab: "juegos" } })}
+                  style={styles.emptyButtonOutline}
+                  labelStyle={{ color: COLORS.primary }}
+                >
+                  Ver estadísticas
+                </Button>
+              </View>
+            )
+          )}
         </View>
 
         {/* Actividad Reciente */}
@@ -1240,3 +1215,12 @@ const styles = StyleSheet.create({
     borderColor: COLORS.primary,
   },
 });
+
+export default function HomeScreen() {
+  return (
+    <ElepadTourProvider>
+      <HomeScreenContent />
+    </ElepadTourProvider>
+  );
+}
+

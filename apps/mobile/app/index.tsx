@@ -3,10 +3,11 @@ import { useRouter } from "expo-router";
 import { useRef, useEffect } from "react";
 import { Animated, View, Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Button, Text, ActivityIndicator } from "react-native-paper";
+import { Button, Text } from "react-native-paper";
 import EleSvg from "@/assets/images/ele.svg";
 import { COLORS, STYLES } from "@/styles/base";
 
+import HomeScreen from "./(tabs)/home";
 export default function IndexRedirect() {
   const { session, loading } = useAuth();
   const router = useRouter();
@@ -29,8 +30,8 @@ export default function IndexRedirect() {
 
   if (loading) {
     return (
-      <View style={STYLES.center}>
-        <ActivityIndicator />
+      <View style={{ flex: 1 }}>
+        <HomeScreen />
       </View>
     );
   }
@@ -38,8 +39,8 @@ export default function IndexRedirect() {
   // Si hay sesión, mostrar loading mientras redirige
   if (session) {
     return (
-      <View style={STYLES.center}>
-        <ActivityIndicator />
+      <View style={{ flex: 1 }}>
+        <HomeScreen />
       </View>
     );
   }
@@ -48,10 +49,10 @@ export default function IndexRedirect() {
     <SafeAreaView style={STYLES.safeAreaLogin}>
       <View style={STYLES.container}>
         <View style={[STYLES.logoWrap, { marginTop: logoMarginTop }]}>
-          <EleSvg 
-            width={logoSize} 
-            height={logoSize} 
-            style={STYLES.logo} 
+          <EleSvg
+            width={logoSize}
+            height={logoSize}
+            style={STYLES.logo}
           />
           <Text style={[STYLES.brand, { fontSize: brandFontSize }]}> Elepad </Text>
         </View>
