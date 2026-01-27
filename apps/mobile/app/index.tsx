@@ -3,7 +3,7 @@ import { useRouter } from "expo-router";
 import { useRef, useEffect } from "react";
 import { Animated, View, Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Button, Text, ActivityIndicator } from "react-native-paper";
+import { Button, Text } from "react-native-paper";
 import EleSvg from "@/assets/images/ele.svg";
 import { COLORS, STYLES } from "@/styles/base";
 

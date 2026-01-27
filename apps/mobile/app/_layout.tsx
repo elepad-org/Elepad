@@ -7,7 +7,7 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAppFonts } from "@/hooks/useAppFonts";
 import { Stack } from "expo-router";
-import { Platform, StatusBar, useColorScheme } from "react-native";
+import { useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useEffect } from "react";
 import { configureApiClient } from "@elepad/api-client/src/runtime";

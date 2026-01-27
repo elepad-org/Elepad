@@ -1,4 +1,4 @@
-import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
+import Animated, { FadeIn } from "react-native-reanimated";
 import {
   StatusBar,
   ScrollView,
@@ -30,7 +30,7 @@ import StreakCounter from "@/components/StreakCounter";
 import HighlightedMentionText from "@/components/Recuerdos/HighlightedMentionText";
 import { useNotifications } from "@/hooks/useNotifications";
 import { GAMES_INFO } from "@/constants/gamesInfo";
-import { formatInUserTimezone, toUserLocalTime } from "@/lib/timezoneHelpers";
+import { formatInUserTimezone } from "@/lib/timezoneHelpers";
 import type { ImageSourcePropType } from "react-native";
 import memoryImage from "@/assets/images/memory2.png";
 import netImage from "@/assets/images/net2.png";

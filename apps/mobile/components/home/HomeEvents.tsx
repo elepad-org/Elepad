@@ -16,11 +16,17 @@ interface Event {
   description?: string;
 }
 
+interface FamilyMember {
+  id: string;
+  displayName: string;
+  avatarUrl?: string | null;
+}
+
 interface HomeEventsProps {
   isLoading: boolean;
   events: Event[];
   timezone?: string;
-  groupMembers: any[];
+  groupMembers: FamilyMember[];
   onRestartTour: () => void;
   debugTaps: number;
   setDebugTaps: (taps: number) => void;
@@ -301,5 +307,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.primary,
   },
 });
+
+HomeEvents.displayName = 'HomeEvents';
 
 export default HomeEvents;
