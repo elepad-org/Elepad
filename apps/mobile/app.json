@@ -26,7 +26,9 @@
       "permissions": [
         "android.permission.POST_NOTIFICATIONS",
         "android.permission.RECORD_AUDIO",
-        "android.permission.MODIFY_AUDIO_SETTINGS"
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
       ],
       "googleServicesFile": "./google-services.json"
     },
@@ -63,6 +65,15 @@
           "icon": "./assets/images/ele-def-fondo-cuad.png",
           "color": "#8896B0",
           "sounds": []
+        }
+      ],
+      [
+        "expo-file-system",
+        {
+          "directories": [
+            "documents",
+            "cache"
+          ]
         }
       ]
     ],

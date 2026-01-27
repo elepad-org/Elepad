@@ -6,6 +6,7 @@ import { usePostAlbumIdExportPdf } from "@elepad/api-client";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, STYLES, SHADOWS } from "@/styles/base";
 import { useToast } from "@/components/shared/Toast";
+import { usePdfDownload } from "@/hooks/usePdfDownload";
 
 interface AlbumCardProps {
   id: string;
@@ -30,7 +31,8 @@ export default function AlbumCard({
 }: AlbumCardProps) {
   const [detailsVisible, setDetailsVisible] = useState(false);
   const { userElepad } = useAuth();
-  const { showToast } = useToast();  
+  const { showToast } = useToast();
+  const { sharePdf, savePdf, findSavedPdf, isDownloading } = usePdfDownload();
 
   const exportPdfMutation = usePostAlbumIdExportPdf();
 
@@ -49,15 +51,22 @@ export default function AlbumCard({
     }
 
     showToast({
-        message: "Generando PDF... recibirás una notificación cuando esté listo",
-        type: "success",
-      });
+      message: "Generando PDF... recibirás una notificación cuando esté listo",
+      type: "success",
+    });
 
     exportPdfMutation.mutate(
       { id: albumId },
       {
         onSuccess: (res) => {
-          console.log("Export PDF response:", res, "userId:", userId, "albumId:", albumId);
+          console.log(
+            "Export PDF response:",
+            res,
+            "userId:",
+            userId,
+            "albumId:",
+            albumId,
+          );
         },
         onError: (err) => {
           console.error("Export PDF error:", err);
@@ -73,19 +82,48 @@ export default function AlbumCard({
   const handleViewPdf = async () => {
     if (pdfUrl) {
       try {
-        await Linking.openURL(pdfUrl);
+        // First, try to find a saved local copy
+        const savedUri = await findSavedPdf(title);
+
+        const uriToOpen = savedUri || pdfUrl;
+
+        await Linking.openURL(uriToOpen);
       } catch (err) {
         console.error("Error opening PDF:", err);
         showToast({
-            message: "No se pudo abrir el PDF",
-            type: "error",
-          });
+          message: "No se pudo abrir el PDF",
+          type: "error",
+        });
       }
     }
   };
 
+  const handleDownloadAndSharePdf = async () => {
+    if (pdfUrl) {
+      await sharePdf(pdfUrl, title);
+    }
+  };
+
+  const handleSavePdf = async () => {
+    if (pdfUrl) {
+      const savedUri = await savePdf(pdfUrl, title);
+      if (savedUri) {
+        try {
+          await Linking.openURL(savedUri);
+        } catch (err) {
+          console.error("Error opening saved PDF:", err);
+          showToast({
+            message: "No se pudo abrir el PDF guardado",
+            type: "error",
+          });
+        }
+      }
+      setDetailsVisible(false);
+    }
+  };
+
   return (
-    <>
+    <View>
       <Card
         style={styles.card}
         onPress={() => setDetailsVisible(true)}
@@ -151,40 +189,69 @@ export default function AlbumCard({
             </Button>
 
             {pdfUrl ? (
-              <Button
-                mode="outlined"
-                icon="file-pdf-box"
-                onPress={() => {
-                  handleViewPdf();
-                  setDetailsVisible(false);
-                }}
-              >
-                Ver PDF
-              </Button>
+              <View>
+                <Button
+                  mode="outlined"
+                  icon="file-pdf-box"
+                  onPress={() => {
+                    handleViewPdf();
+                    setDetailsVisible(false);
+                  }}
+                >
+                  Ver PDF
+                </Button>
+                <Button
+                  mode="outlined"
+                  icon="download"
+                  loading={isDownloading}
+                  disabled={isDownloading}
+                  onPress={handleSavePdf}
+                >
+                  Guardar
+                </Button>
+                <Button
+                  mode="contained"
+                  icon="share-variant"
+                  loading={isDownloading}
+                  disabled={isDownloading}
+                  onPress={handleDownloadAndSharePdf}
+                >
+                  Compartir
+                </Button>
+                <Button
+                  mode="contained"
+                  onPress={() => {
+                    setDetailsVisible(false);
+                    onPress();
+                  }}
+                >
+                  Ver Álbum
+                </Button>
+              </View>
             ) : (
-              <Button
-                mode="outlined"
-                loading={exportPdfMutation.isPending}
-                onPress={handleExportPdf}
-                style={{ marginRight: 8 }}
-              >
-                Exportar PDF
-              </Button>
+              <View>
+                <Button
+                  mode="outlined"
+                  loading={exportPdfMutation.isPending}
+                  onPress={handleExportPdf}
+                >
+                  Exportar PDF
+                </Button>
+                <Button
+                  mode="contained"
+                  onPress={() => {
+                    setDetailsVisible(false);
+                    onPress();
+                  }}
+                >
+                  Ver Álbum
+                </Button>
+              </View>
             )}
-
-            <Button
-              mode="contained"
-              onPress={() => {
-                setDetailsVisible(false);
-                onPress();
-              }}
-            >
-              Ver Álbum
-            </Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>
-    </>
+    </View>
   );
 }
 
