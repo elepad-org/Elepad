@@ -30,5 +30,4 @@ expo-env.d.ts
 apps/ios/
 apps/mobile/ios/
 apps/mobile/android/
-apps/mobile/google-services.json
 apps/mobile/GoogleService-Info.plist

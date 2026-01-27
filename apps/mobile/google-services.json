@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "733944829892",
+    "project_id": "elepad-10176",
+    "storage_bucket": "elepad-10176.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:733944829892:android:7fa847c22e040de8e47691",
+        "android_client_info": {
+          "package_name": "com.elepadorg.elepad"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgqYu5sXmfiqzMoiDv37FV186Zy02T_gk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
