@@ -20,6 +20,9 @@ import { COLORS } from "@/styles/base";
 import { ToastProvider } from "@/components/shared/Toast";
 
 
+// Widget imports (solo para Android)
+import { registerWidgetTaskHandler } from "react-native-android-widget";
+import { widgetTaskHandler } from "@/widgets/widgetTaskHandler";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +48,18 @@ export default function RootLayout() {
       },
     );
     return () => listener?.subscription?.unsubscribe?.();
+  }, []);
+
+  // Registrar widget de Android
+  useEffect(() => {
+    if (Platform.OS === "android") {
+      console.log("📱 Registrando widget de Android...");
+
+      // Registrar el task handler
+      registerWidgetTaskHandler(widgetTaskHandler);
+
+      console.log("✅ Widget registrado correctamente");
+    }
   }, []);
 
   if (!loaded) {
@@ -78,7 +93,7 @@ export default function RootLayout() {
                       screenOptions={{
                         contentStyle: { backgroundColor: COLORS.background },
                       }}
-                    >
+                    />
                       <Stack.Screen
                         name="index"
                         options={{ headerShown: false, animation: "fade" }}

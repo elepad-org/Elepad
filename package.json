@@ -15,7 +15,9 @@
     "format": "prettier --write . --list-different",
     "fix:mobile": "turbo run fix:mobile",
     "gen": "turbo run gen",
-    "prepare": "husky"
+    "prepare": "husky",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "devDependencies": {
     "@types/react": "~19.1.10",
@@ -53,5 +55,6 @@
   "overrides": {
     "react-native-reanimated": "4.1.1",
     "react-native-worklets": "0.5.1"
-  }
+  },
+  "version": "1.0.0"
 }
