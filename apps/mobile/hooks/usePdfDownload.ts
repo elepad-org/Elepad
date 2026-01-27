@@ -125,7 +125,7 @@ export function usePdfDownload(options?: UsePdfDownloadOptions) {
         // Create or get target file in destination
         let destFile: File;
         try {
-          destFile = destDir.createFile(filename, "application/pdf") as any as File;
+          destFile = destDir.createFile(filename, "application/pdf") as File;
         } catch {
           // If create fails because exists, create File instance and overwrite via write
           const destUri = `${destDir.uri.replace(/\/+$/, "")}/${filename}`;
@@ -136,7 +136,7 @@ export function usePdfDownload(options?: UsePdfDownloadOptions) {
         const bytes = await downloaded.bytes();
         await destFile.write(bytes);
 
-        const savedUri = (destFile as any).contentUri || destFile.uri;
+        const savedUri = destFile.contentUri || destFile.uri;
         showToast({ message: "PDF guardado en la carpeta seleccionada", type: "success" });
         options?.onSuccess?.();
         return savedUri;
