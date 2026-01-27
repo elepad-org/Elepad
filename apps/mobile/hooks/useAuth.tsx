@@ -62,6 +62,13 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   // Ref para evitar múltiples redirects después de login
   const hasRedirectedAfterSignIn = useRef(false);
 
+  // Ref para tener acceso al estado actual de userElepad dentro de closures (listeners)
+  const userElepadRef = useRef(userElepad);
+
+  useEffect(() => {
+    userElepadRef.current = userElepad;
+  }, [userElepad]);
+
   // Obtener la fecha local del cliente en formato YYYY-MM-DD
   const getClientDate = () => {
     const now = new Date();
@@ -89,7 +96,8 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
   async function loadElepadUserById(userId: string) {
     // Solo mostrar loading si es un usuario diferente o no hay usuario cargado
-    if (userElepad?.id !== userId) {
+    // Usamos ref para evitar problemas de stale closure en los listeners
+    if (userElepadRef.current?.id !== userId) {
       setUserElepadLoading(true);
     }
     try {
