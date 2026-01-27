@@ -164,6 +164,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
           width: "92%",
           borderRadius: 20,
           backgroundColor: "#ffffff",
+          alignSelf: "center",
         }}
       >
       <Dialog.Title style={styles.title}>Cambiar contraseña</Dialog.Title>
@@ -272,6 +273,7 @@ const styles = StyleSheet.create({
   inputWrapper: {
     backgroundColor: COLORS.backgroundSecondary,
     borderRadius: 16,
+    overflow: "hidden",
     marginBottom: 16,
   },
   hint: {
