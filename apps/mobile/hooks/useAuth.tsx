@@ -25,6 +25,7 @@ type AuthContext = {
   updateUserTimezone: (timezone: string) => void;
   // Estado de racha optimista
   streak: StreakState | null;
+  streakLoading: boolean;
   markGameCompleted: () => Promise<void>;
   syncStreak: () => Promise<void>;
 };
@@ -369,6 +370,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     refreshUserElepad,
     updateUserTimezone,
     streak,
+    streakLoading: streakQuery.isLoading,
     markGameCompleted,
     syncStreak,
   };

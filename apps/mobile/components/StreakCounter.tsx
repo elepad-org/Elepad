@@ -6,9 +6,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { SkeletonBox } from "@/components/shared";
 
 export default function StreakCounter() {
-  const { streak } = useAuth();
+  const { streak, streakLoading } = useAuth();
 
-  if (!streak) {
+
+
+  // Solo mostrar skeleton si está cargando Y no hay datos
+  if (streakLoading && !streak) {
     return (
       <View style={styles.container}>
         <View style={styles.loadingContainer}>
@@ -23,6 +26,9 @@ export default function StreakCounter() {
       </View>
     );
   }
+
+  // Si no hay racha y no está cargando, no mostrar nada (o manejar error)
+  if (!streak) return null;
 
   const currentStreak = streak.currentStreak;
   const hasPlayedToday = streak.hasPlayedToday;
