@@ -88,7 +88,10 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   );
 
   async function loadElepadUserById(userId: string) {
-    setUserElepadLoading(true);
+    // Solo mostrar loading si es un usuario diferente o no hay usuario cargado
+    if (userElepad?.id !== userId) {
+      setUserElepadLoading(true);
+    }
     try {
       console.log("Cargando usuario de Elepad:", userId);
       const res = await getUsersId(userId);
@@ -241,7 +244,9 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        await loadElepadUserById(session.user.id);
+        // No esperamos a que cargue el perfil para liberar el loading inicial
+        // Esto permite que la UI navegue a home y muestre skeletons
+        loadElepadUserById(session.user.id);
       } else {
         setUserElepad(null);
         setUserElepadLoading(false);
