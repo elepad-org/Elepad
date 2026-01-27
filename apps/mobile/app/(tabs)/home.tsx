@@ -37,6 +37,7 @@ import netImage from "@/assets/images/net2.png";
 import sudokuImage from "@/assets/images/sudoku2.png";
 import focusImage from "@/assets/images/focus2.png";
 import tapeImage from "@/assets/images/paper-transparent-sticky-tape-png.png";
+import fondoRecuerdos from "@/assets/images/fondoRecuerdos.png";
 
 // Onboarding imports
 import { TourGuideZone } from "rn-tourguide";
@@ -453,7 +454,7 @@ export default function HomeScreen() {
                           </LinearGradient>
                         </ImageBackground>
                       ) : (
-                        <View style={styles.memoryNoImage}>
+                        <ImageBackground source={fondoRecuerdos} style={styles.memoryNoImage}>
                           <Image source={tapeImage} style={styles.tapeIcon} />
                           <View style={styles.memoryContent}>
                             <Text style={styles.memoryLabelNote}>ÚLTIMO RECUERDO</Text>
@@ -476,7 +477,7 @@ export default function HomeScreen() {
                               )}
                             </Text>
                           </View>
-                        </View>
+                        </ImageBackground>
                       )}
                     </Pressable>
                   );
@@ -961,14 +962,13 @@ const styles = StyleSheet.create({
   },
   memoryNoImage: {
     flex: 1,
-    backgroundColor: '#ffffff', // White like paper
-    borderRadius: 5, 
+    borderRadius: 3, 
     margin: 16,
     padding: 20,
     justifyContent: "center",
     alignItems: "center",
     ...SHADOWS.card,
-    transform: [{ rotate: '-2deg' }], // Slight rotation like a stuck note
+    transform: [{ rotate: '-1deg' }], // Slight rotation like a stuck note
     borderWidth: 1,
     borderColor: '#f1f1f1', // Softer beige border
   },
