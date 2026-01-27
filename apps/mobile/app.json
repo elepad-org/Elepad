@@ -64,6 +64,25 @@
           "color": "#8896B0",
           "sounds": []
         }
+      ],
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "RecuerdosWidget",
+              "label": "Recuerdos Recientes",
+              "description": "Muestra tus últimos recuerdos guardados",
+              "minWidth": "320dp",
+              "minHeight": "280dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 2,
+              "resizeMode": "none",
+              "widgetFeatures": "reconfigurable",
+              "updatePeriodMillis": 0
+            }
+          ]
+        }
       ]
     ],
     "experiments": {
