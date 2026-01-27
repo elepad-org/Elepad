@@ -71,7 +71,7 @@ export default function HomeScreen() {
   const queryClient = useQueryClient();
 
   // Tour Guide
-  const { restartTour } = useHomeTour();
+  const { restartTour } = useHomeTour(userElepadLoading);
   const [debugTaps, setDebugTaps] = useState(0);
 
   // Fetch today's activities
@@ -276,6 +276,7 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View style={styles.greetingContainer}>
             <TourGuideZone
+              tourKey="homeTour"
               zone={1}
               text="¡Hola! Aquí verás tu saludo y rol dentro de la familia Elepad."
               borderRadius={8}
@@ -297,6 +298,7 @@ export default function HomeScreen() {
           <View style={styles.headerRight}>
             {/* Notification Button */}
             <TourGuideZone
+              tourKey="homeTour"
               zone={3}
               text="Aquí te avisaremos de nuevas actividades, recuerdos compartidos y más."
               shape="circle"
@@ -335,6 +337,7 @@ export default function HomeScreen() {
             {/* Avatar */}
             {/* Avatar with Frame */}
             <TourGuideZone
+              tourKey="homeTour"
               zone={2}
               text="Desde aquí puedes ver y editar tu perfil o configurar la aplicación."
               borderRadius={30}
@@ -391,6 +394,7 @@ export default function HomeScreen() {
 
         {/* Último Recuerdo - DESTACADO */}
         <TourGuideZone
+          tourKey="homeTour"
           zone={4}
           text="Revive tus momentos especiales. Aquí aparecerá tu recuerdo más reciente."
           borderRadius={20}
@@ -691,6 +695,7 @@ export default function HomeScreen() {
 
         {/* Actividad Reciente */}
         <TourGuideZone
+          tourKey="homeTour"
           zone={5}
           text="Mantente al día con los juegos y actividades cognitivas completadas."
           borderRadius={16}
@@ -962,7 +967,7 @@ const styles = StyleSheet.create({
   },
   memoryNoImage: {
     flex: 1,
-    borderRadius: 3, 
+    borderRadius: 3,
     margin: 16,
     padding: 20,
     justifyContent: "center",

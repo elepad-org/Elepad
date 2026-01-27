@@ -25,7 +25,6 @@ import { useQueryClient } from "@tanstack/react-query";
 // Tour
 import { useCalendarTour } from "@/hooks/useCalendarTour";
 import { TourGuideZone } from "rn-tourguide";
-import { ElepadTourProvider } from "@/components/shared/ElepadTourProvider";
 
 function CalendarScreenContent() {
   const { userElepad } = useAuth();
@@ -306,6 +305,7 @@ function CalendarScreenContent() {
         }}
       >
         <TourGuideZone
+          tourKey="calendarTour"
           zone={1}
           text="Bienvenido a tu Calendario. Aquí podrás organizar todas tus actividades y eventos familiares."
           borderRadius={8}
@@ -327,6 +327,7 @@ function CalendarScreenContent() {
         </TourGuideZone>
 
         <TourGuideZone
+          tourKey="calendarTour"
           zone={2}
           text="Toca este botón para añadir un nuevo evento, cita médica o reunión familiar."
           borderRadius={20}
@@ -344,6 +345,7 @@ function CalendarScreenContent() {
 
       <View style={{ flex: 1 }}>
         <TourGuideZone
+          tourKey="calendarTour"
           zone={3}
           text="Aquí verás tus eventos del día. Selecciona cualquier fecha para revisar tu agenda."
           borderRadius={12}
@@ -423,10 +425,6 @@ function CalendarScreenContent() {
 }
 
 export default function CalendarScreen() {
-  return (
-    <ElepadTourProvider>
-      <CalendarScreenContent />
-    </ElepadTourProvider>
-  );
+  return <CalendarScreenContent />;
 }
 

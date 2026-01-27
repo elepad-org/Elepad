@@ -6,6 +6,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Text } from "react-native-paper";
 import EleSvg from "@/assets/images/ele.svg";
 import { COLORS, STYLES } from "@/styles/base";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useToast } from "@/components/shared/Toast";
 
 import HomeScreen from "./(tabs)/home";
 export default function IndexRedirect() {
@@ -13,6 +15,7 @@ export default function IndexRedirect() {
   const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const hasRedirected = useRef(false);
+  const { showToast } = useToast();
 
   // Dimensiones responsive
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -27,6 +30,23 @@ export default function IndexRedirect() {
       router.replace("/home");
     }
   }, [session, loading]);
+
+  const handleResetTours = async () => {
+    try {
+      await AsyncStorage.removeItem('@elepad_has_seen_home_tour_v2');
+      await AsyncStorage.removeItem('@elepad_has_seen_calendar_tour_v2');
+      showToast({
+        message: 'Tours de onboarding eliminados del storage',
+        type: 'success'
+      });
+    } catch (e) {
+      console.error('Error clearing tour storage', e);
+      showToast({
+        message: 'Error al eliminar los tours',
+        type: 'error'
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -94,6 +114,18 @@ export default function IndexRedirect() {
             accessibilityLabel="Ir a crear cuenta"
           >
             Crear Cuenta
+          </Button>
+
+          {/* Botón provisional para resetear tours */}
+          <Button
+            mode="outlined"
+            onPress={handleResetTours}
+            contentStyle={STYLES.buttonContent}
+            style={[STYLES.buttonPrimary, { marginTop: 20, borderColor: COLORS.primary, borderWidth: 1 }]}
+            labelStyle={{ color: COLORS.primary }}
+            accessibilityLabel="Resetear tours de onboarding"
+          >
+            🔄 Resetear Tours (Dev)
           </Button>
         </Animated.View>
       </View>

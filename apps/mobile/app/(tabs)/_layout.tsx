@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import SidebarNavigation from "@/components/navigation/SidebarNavigation";
 import BottomTabBar from "@/components/navigation/BottomTabBar";
 import { elderRoutes, nonElderRoutes, TabRoute } from "@/components/navigation/navigationConfig";
+import { ElepadTourProvider } from "@/components/shared/ElepadTourProvider";
 
 export default function TabLayout() {
   const layout = useWindowDimensions();
@@ -22,7 +23,7 @@ export default function TabLayout() {
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
   const isElder = userElepad?.elder === true;
-  
+
   // Detectar si es una pantalla muy grande (desktop/web)
   // Usamos 1024px como breakpoint para que tablets usen el tab bar
   // y solo pantallas de PC/desktop muestren el sidebar
@@ -95,33 +96,35 @@ export default function TabLayout() {
   };
 
   return (
-    <View
-      style={{ flex: 1, backgroundColor: COLORS.background, flexDirection: "row" }}
-    >
-      {/* Sidebar for large screens */}
-      {isLargeScreen && (
-        <SidebarNavigation
-          routes={routes}
-          activeIndex={index}
-          onIndexChange={setIndex}
-        />
-      )}
+    <ElepadTourProvider>
+      <View
+        style={{ flex: 1, backgroundColor: COLORS.background, flexDirection: "row" }}
+      >
+        {/* Sidebar for large screens */}
+        {isLargeScreen && (
+          <SidebarNavigation
+            routes={routes}
+            activeIndex={index}
+            onIndexChange={setIndex}
+          />
+        )}
 
-      {/* Content area */}
-      <View style={{ flex: 1 }}>
-        <TabView
-          navigationState={{ index, routes }}
-          renderScene={renderScene}
-          onIndexChange={setIndex}
-          initialLayout={{ width: layout.width }}
-          renderTabBar={renderTabBar}
-          tabBarPosition="bottom"
-          swipeEnabled={!isLargeScreen}
-          animationEnabled={true}
-          lazy={true}
-          lazyPreloadDistance={1}
-        />
+        {/* Content area */}
+        <View style={{ flex: 1 }}>
+          <TabView
+            navigationState={{ index, routes }}
+            renderScene={renderScene}
+            onIndexChange={setIndex}
+            initialLayout={{ width: layout.width }}
+            renderTabBar={renderTabBar}
+            tabBarPosition="bottom"
+            swipeEnabled={!isLargeScreen}
+            animationEnabled={true}
+            lazy={true}
+            lazyPreloadDistance={0}
+          />
+        </View>
       </View>
-    </View>
+    </ElepadTourProvider>
   );
 }
