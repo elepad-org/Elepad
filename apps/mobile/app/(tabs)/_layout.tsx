@@ -126,7 +126,7 @@ export default function TabLayout() {
               swipeEnabled={!isLargeScreen}
               animationEnabled={true}
               lazy={true}
-              lazyPreloadDistance={0}
+              lazyPreloadDistance={1}
             />
           </View>
         </>
