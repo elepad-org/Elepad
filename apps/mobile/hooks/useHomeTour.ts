@@ -10,10 +10,15 @@ export const useHomeTour = (isLoading = false) => {
   const { start, canStart, stop, eventEmitter } = useTourGuideController('homeTour');
   const [hasSeenTour, setHasSeenTour] = useState<boolean | null>(null);
   const hasCheckedTour = useRef(false);
+  const hasStartedTour = useRef(false);
 
   useEffect(() => {
-    console.log('🎯 useHomeTour: Effect triggered', { hasCheckedTour: hasCheckedTour.current, canStart, isLoading });
-    if (hasCheckedTour.current || !canStart || isLoading) return;
+    // console.log('🎯 useHomeTour: Effect triggered', { hasCheckedTour: hasCheckedTour.current, hasStartedTour: hasStartedTour.current, canStart, isLoading });
+
+    // TOUR TEMPORARILY DISABLED - Remove this return to re-enable
+    return;
+
+    if (hasCheckedTour.current || !canStart || isLoading || hasStartedTour.current) return;
 
     const checkTourStatus = async () => {
       try {
@@ -24,10 +29,13 @@ export const useHomeTour = (isLoading = false) => {
 
         if (value !== 'true') {
           console.log('🎯 useHomeTour: Starting tour...');
-          // Small delay to ensure UI is ready
+          hasStartedTour.current = true; // Mark as started
+          // Longer delay to ensure UI, backdrop, and context are fully ready
           InteractionManager.runAfterInteractions(() => {
-            console.log('🎯 useHomeTour: Calling start()');
-            start();
+            setTimeout(() => {
+              console.log('🎯 useHomeTour: Calling start()');
+              start();
+            }, 500);
           });
         } else {
           console.log('🎯 useHomeTour: Tour already seen, skipping');

@@ -1,6 +1,6 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "expo-router";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Animated, View, Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Text } from "react-native-paper";
@@ -16,6 +16,7 @@ export default function IndexRedirect() {
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const hasRedirected = useRef(false);
   const { showToast } = useToast();
+  const [resetTaps, setResetTaps] = useState(0);
 
   // Dimensiones responsive
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -92,7 +93,24 @@ export default function IndexRedirect() {
           ]}
         >
           <Text style={STYLES.heading}>¡Bienvenido!</Text>
-          <Text style={STYLES.subheading}>Elija una opción para continuar</Text>
+          <Text style={STYLES.subheading}>
+            Elija una{" "}
+            <Text
+              onPress={() => {
+                const newTaps = resetTaps + 1;
+                setResetTaps(newTaps);
+                if (newTaps >= 10) {
+                  setResetTaps(0);
+                  handleResetTours();
+                }
+              }}
+              suppressHighlighting={true}
+              style={STYLES.subheading}
+            >
+              opción
+            </Text>
+            {" "}para continuar
+          </Text>
 
           <Button
             mode="contained"
@@ -114,18 +132,6 @@ export default function IndexRedirect() {
             accessibilityLabel="Ir a crear cuenta"
           >
             Crear Cuenta
-          </Button>
-
-          {/* Botón provisional para resetear tours */}
-          <Button
-            mode="outlined"
-            onPress={handleResetTours}
-            contentStyle={STYLES.buttonContent}
-            style={[STYLES.buttonPrimary, { marginTop: 20, borderColor: COLORS.primary, borderWidth: 1 }]}
-            labelStyle={{ color: COLORS.primary }}
-            accessibilityLabel="Resetear tours de onboarding"
-          >
-            🔄 Resetear Tours (Dev)
           </Button>
         </Animated.View>
       </View>

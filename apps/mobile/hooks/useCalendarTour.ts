@@ -11,7 +11,11 @@ export const useCalendarTour = () => {
   const hasCheckedTour = useRef(false);
 
   useEffect(() => {
-    console.log('📅 useCalendarTour: Effect triggered', { hasCheckedTour: hasCheckedTour.current, canStart });
+    // console.log('📅 useCalendarTour: Effect triggered', { hasCheckedTour: hasCheckedTour.current, canStart });
+
+    // TOUR TEMPORARILY DISABLED - Remove this return to re-enable
+    return;
+
     if (hasCheckedTour.current || !canStart) return;
 
     const checkTourStatus = async () => {
@@ -23,10 +27,12 @@ export const useCalendarTour = () => {
 
         if (value !== 'true') {
           console.log('📅 useCalendarTour: Starting tour...');
-          // Small delay to ensure UI is ready
+          // Longer delay to ensure UI, backdrop, and context are fully ready
           InteractionManager.runAfterInteractions(() => {
-            console.log('📅 useCalendarTour: Calling start()');
-            start();
+            setTimeout(() => {
+              console.log('📅 useCalendarTour: Calling start()');
+              start();
+            }, 500);
           });
         } else {
           console.log('📅 useCalendarTour: Tour already seen, skipping');
