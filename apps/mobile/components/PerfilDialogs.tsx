@@ -11,6 +11,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { patchUsersIdAvatar } from "@elepad/api-client";
 import { uriToBlob } from "@/lib/uriToBlob";
+import { COLORS } from "@/styles/base";
 
 type EditNameDialogProps = {
   title: string;
@@ -47,7 +48,7 @@ export function EditNameDialog({
       <Dialog.Content>
         <View
           style={{
-            backgroundColor: theme.colors.surfaceVariant,
+            backgroundColor: COLORS.backgroundSecondary,
             borderRadius: 16,
             overflow: "hidden",
           }}
