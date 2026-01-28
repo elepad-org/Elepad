@@ -11,6 +11,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { patchUsersIdAvatar } from "@elepad/api-client";
 import { uriToBlob } from "@/lib/uriToBlob";
+import { COLORS } from "@/styles/base";
 
 type EditNameDialogProps = {
   title: string;
@@ -45,20 +46,30 @@ export function EditNameDialog({
         {title}
       </Dialog.Title>
       <Dialog.Content>
-        <TextInput
-          label="Nombre"
-          mode="outlined"
-          value={name}
-          onChangeText={onChange}
-          left={<TextInput.Icon icon="account" />}
-          autoFocus
-          theme={{
-            colors: {
-              primary: theme.colors.primary,
-              outline: theme.colors.outline,
-            },
+        <View
+          style={{
+            backgroundColor: COLORS.backgroundSecondary,
+            borderRadius: 16,
+            overflow: "hidden",
           }}
-        />
+        >
+          <TextInput
+            label="Nombre"
+            mode="flat"
+            value={name}
+            onChangeText={onChange}
+            left={<TextInput.Icon icon="account" />}
+            autoFocus
+            style={{ backgroundColor: "transparent" }}
+            outlineColor="transparent"
+            activeOutlineColor="transparent"
+            theme={{
+              colors: {
+                primary: theme.colors.primary,
+              },
+            }}
+          />
+        </View>
       </Dialog.Content>
       <Dialog.Actions
         style={{

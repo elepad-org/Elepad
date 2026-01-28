@@ -48,7 +48,7 @@ import { COLORS, STYLES, LAYOUT } from "@/styles/base";
 import { Platform } from "react-native";
 import { uriToBlob } from "@/lib/uriToBlob";
 
-import MasonryList from '@react-native-seoul/masonry-list';
+import MasonryList from "@react-native-seoul/masonry-list";
 import RecuerdoItemComponent from "@/components/Recuerdos/RecuerdoItemComponent";
 import NuevoRecuerdoDialogComponent from "@/components/Recuerdos/NuevoRecuerdoDialogComponent";
 import RecuerdoDetailDialog from "@/components/Recuerdos/RecuerdoDetailDialog";
@@ -155,9 +155,9 @@ export default function RecuerdosScreen() {
   const { showToast } = useToast();
 
   // Dimensiones responsive
-  const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+  const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
   const emptyLogoSize = screenWidth * 0.55; // 55% del ancho de pantalla
-  const emptyLogoTop = screenHeight * 0.12;; // 25% del alto de pantalla (más arriba que el 35% anterior)
+  const emptyLogoTop = screenHeight * 0.12; // 25% del alto de pantalla (más arriba que el 35% anterior)
 
   const { mutateAsync: addReaction } = useAddReaction();
 
@@ -883,26 +883,44 @@ export default function RecuerdosScreen() {
             {bookDialogMode === "create" ? "Nuevo baúl" : "Editar baúl"}
           </Dialog.Title>
           <Dialog.Content>
-            <TextInput
-              label="Nombre"
-              value={bookFormTitle}
-              onChangeText={setBookFormTitle}
-              mode="outlined"
-              outlineColor={COLORS.border}
-              activeOutlineColor={COLORS.primary}
-              style={{ marginBottom: 12 }}
-            />
-            <TextInput
-              label="Descripción"
-              value={bookFormDescription}
-              onChangeText={setBookFormDescription}
-              mode="outlined"
-              outlineColor={COLORS.border}
-              activeOutlineColor={COLORS.primary}
-              multiline
-              numberOfLines={3}
-              style={{ marginBottom: 12 }}
-            />
+            <View
+              style={{
+                backgroundColor: COLORS.backgroundSecondary,
+                borderRadius: 16,
+                overflow: "hidden",
+                marginBottom: 12,
+              }}
+            >
+              <TextInput
+                label="Nombre"
+                value={bookFormTitle}
+                onChangeText={setBookFormTitle}
+                mode="flat"
+                style={{ backgroundColor: "transparent" }}
+                outlineColor="transparent"
+                activeOutlineColor="transparent"
+              />
+            </View>
+            <View
+              style={{
+                backgroundColor: COLORS.backgroundSecondary,
+                borderRadius: 16,
+                overflow: "hidden",
+                marginBottom: 12,
+              }}
+            >
+              <TextInput
+                label="Descripción"
+                value={bookFormDescription}
+                onChangeText={setBookFormDescription}
+                mode="flat"
+                style={{ backgroundColor: "transparent" }}
+                outlineColor="transparent"
+                activeOutlineColor="transparent"
+                multiline
+                numberOfLines={3}
+              />
+            </View>
 
             <Text
               style={{
@@ -1148,7 +1166,7 @@ export default function RecuerdosScreen() {
                 width: 180,
                 height: 180,
                 borderRadius: 18,
-                marginBottom: 16
+                marginBottom: 16,
               }}
             />
             <Text style={STYLES.heading}>Todavía no hay baúles</Text>
@@ -1613,7 +1631,11 @@ export default function RecuerdosScreen() {
         >
           <Image
             source={eleEmpthy}
-            style={{ width: emptyLogoSize, height: emptyLogoSize, marginBottom: 10 }}
+            style={{
+              width: emptyLogoSize,
+              height: emptyLogoSize,
+              marginBottom: 10,
+            }}
           />
           <Text style={STYLES.heading}>{emptyTitle}</Text>
           <Text style={STYLES.subheading}>{emptySubtitle}</Text>
