@@ -8,12 +8,7 @@ import {
   Dimensions,
   Modal,
 } from "react-native";
-import {
-  TextInput,
-  Button,
-  Text,
-  IconButton,
-} from "react-native-paper";
+import { TextInput, Button, Text, IconButton } from "react-native-paper";
 import { Memory } from "@elepad/api-client";
 import { COLORS, STYLES } from "@/styles/base";
 import { useAlbumCreation } from "@/hooks/useAlbumCreation";
@@ -54,11 +49,11 @@ export default function CreateAlbumDialog({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedMemories, setSelectedMemories] = useState<SelectedMemory[]>(
-    []
+    [],
   );
 
   const imageMemories = memories.filter(
-    (m) => m.mimeType && m.mimeType.startsWith("image/")
+    (m) => m.mimeType && m.mimeType.startsWith("image/"),
   );
 
   const handleReset = () => {
@@ -80,7 +75,7 @@ export default function CreateAlbumDialog({
       setSelectedMemories((prev) =>
         prev
           .filter((m) => m.id !== memory.id)
-          .map((m, idx) => ({ ...m, order: idx }))
+          .map((m, idx) => ({ ...m, order: idx })),
       );
     } else {
       setSelectedMemories((prev) => [
@@ -114,7 +109,6 @@ export default function CreateAlbumDialog({
         description: description.trim() || undefined,
         memoryIds: orderedMemoryIds,
       });
-
     } catch (err) {
       console.error("Error en handleCreateAlbum:", err);
     }
@@ -160,7 +154,11 @@ export default function CreateAlbumDialog({
           activeOpacity={1}
           onPress={handleDismiss}
         />
-        <View style={step === "form" ? styles.formContainer : styles.imagesContainer}>
+        <View
+          style={
+            step === "form" ? styles.formContainer : styles.imagesContainer
+          }
+        >
           <Text style={styles.title}>
             {step === "form"
               ? "Crear Nuevo Álbum"
@@ -176,43 +174,46 @@ export default function CreateAlbumDialog({
                 : "Mantén presionado y arrastra para reordenar"}
           </Text>
 
-          <View style={step==="form" ? styles.contentFormContainer :  styles.contentImagesContainer}>
+          <View
+            style={
+              step === "form"
+                ? styles.contentFormContainer
+                : styles.contentImagesContainer
+            }
+          >
             {step === "form" && (
               <View style={{ width: "100%" }}>
-                <TextInput
-                  mode="outlined"
-                  placeholder="Título"
-                  value={title}
-                  onChangeText={setTitle}
-                  keyboardType="default"
-                  autoCapitalize="sentences"
-                  returnKeyType="next"
-                  style={styles.input}
-                  outlineStyle={styles.inputOutline}
-                  outlineColor="rgba(203, 203, 203, 0.92)"
-                  activeOutlineColor={COLORS.textLight}
-                  textColor={COLORS.text}
-                  placeholderTextColor={COLORS.textSecondary}
-                  dense
-                />
+                <View style={[styles.inputWrapper, { marginBottom: 16 }]}>
+                  <TextInput
+                    mode="flat"
+                    label="Título"
+                    placeholder="Título"
+                    value={title}
+                    onChangeText={setTitle}
+                    keyboardType="default"
+                    autoCapitalize="sentences"
+                    returnKeyType="next"
+                    style={{ backgroundColor: "transparent" }}
+                    outlineColor="transparent"
+                    activeOutlineColor="transparent"
+                  />
+                </View>
 
-                <TextInput
-                  mode="outlined"
-                  placeholder="Descripción"
-                  value={description}
-                  onChangeText={setDescription}
-                  keyboardType="default"
-                  autoCapitalize="sentences"
-                  returnKeyType="done"
-                  style={styles.input}
-                  outlineStyle={styles.inputOutline}
-                  outlineColor="rgba(203, 203, 203, 0.92)"
-                  activeOutlineColor={COLORS.textLight}
-                  textColor={COLORS.text}
-                  placeholderTextColor={COLORS.textSecondary}
-                  dense
-                />
-               
+                <View style={styles.inputWrapper}>
+                  <TextInput
+                    mode="flat"
+                    label="Descripción"
+                    placeholder="Descripción"
+                    value={description}
+                    onChangeText={setDescription}
+                    keyboardType="default"
+                    autoCapitalize="sentences"
+                    returnKeyType="done"
+                    style={{ backgroundColor: "transparent" }}
+                    outlineColor="transparent"
+                    activeOutlineColor="transparent"
+                  />
+                </View>
               </View>
             )}
 
@@ -230,7 +231,7 @@ export default function CreateAlbumDialog({
                   scrollEnabled={true}
                   renderItem={({ item }) => {
                     const isSelected = selectedMemories.some(
-                      (m) => m.id === item.id
+                      (m) => m.id === item.id,
                     );
                     const containerWidth =
                       Dimensions.get("window").width * 0.88 - 56;
@@ -470,7 +471,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   formContainer: {
-     width: "100%",
+    width: "100%",
     maxWidth: 400,
     alignItems: "center",
     backgroundColor: COLORS.backgroundSecondary,
@@ -560,5 +561,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: COLORS.text,
     marginBottom: 12,
+  },
+  inputWrapper: {
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 16,
+    overflow: "hidden",
   },
 });
