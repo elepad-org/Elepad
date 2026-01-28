@@ -39,13 +39,13 @@
     "node": ">=20"
   },
   "dependencies": {
+    "@react-native-seoul/masonry-list": "^1.4.2",
     "expo": "^54.0.30",
     "expo-constants": "~18.0.13",
     "expo-device": "~8.0.10",
     "expo-notifications": "~0.32.16",
     "react": "19.1.0",
     "react-native": "0.81.5",
-    "react-native-masonry-list": "^2.16.2",
     "react-native-pager-view": "^8.0.0",
     "react-native-paper-dates": "^0.22.57",
     "react-native-reanimated": "4.1.1",

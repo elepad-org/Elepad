@@ -48,7 +48,7 @@ import { COLORS, STYLES, LAYOUT } from "@/styles/base";
 import { Platform } from "react-native";
 import { uriToBlob } from "@/lib/uriToBlob";
 
-import RecuerdoItemComponent from "@/components/Recuerdos/RecuerdoItemComponent";
+import MasonryList from '@react-native-seoul/masonry-list';
 import NuevoRecuerdoDialogComponent from "@/components/Recuerdos/NuevoRecuerdoDialogComponent";
 import RecuerdoDetailDialog from "@/components/Recuerdos/RecuerdoDetailDialog";
 import { BackButton } from "@/components/shared/BackButton";
@@ -1618,11 +1618,11 @@ export default function RecuerdosScreen() {
           <Text style={STYLES.subheading}>{emptySubtitle}</Text>
         </View>
       ) : (
-        <FlatList
-          key={`grid-${numColumns}-${isFocused}`}
+        <MasonryList
           data={recuerdos}
-          renderItem={({ item, index }) => (
-            <Animated.View entering={ZoomIn.delay(index * 25).springify()}>
+          numColumns={numColumns}
+          renderItem={({ item, i }) => (
+            <Animated.View entering={ZoomIn.delay(i * 25).springify()}>
               <RecuerdoItemComponent
                 item={item}
                 numColumns={numColumns}
@@ -1630,15 +1630,8 @@ export default function RecuerdosScreen() {
               />
             </Animated.View>
           )}
-          keyExtractor={(item) => item.id}
-          numColumns={numColumns}
+          key={`masonry-${numColumns}-${isFocused}`}
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8 }}
-          columnWrapperStyle={{
-            justifyContent: "flex-start",
-          }}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
           ListFooterComponent={
             <>
               {memoriesLoading && recuerdos.length > 0 && (
