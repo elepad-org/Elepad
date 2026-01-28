@@ -25,6 +25,7 @@ type AuthContext = {
   updateUserTimezone: (timezone: string) => void;
   // Estado de racha optimista
   streak: StreakState | null;
+  streakLoading: boolean;
   markGameCompleted: () => Promise<void>;
   syncStreak: () => Promise<void>;
 };
@@ -62,6 +63,13 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   // Ref para evitar múltiples redirects después de login
   const hasRedirectedAfterSignIn = useRef(false);
 
+  // Ref para tener acceso al estado actual de userElepad dentro de closures (listeners)
+  const userElepadRef = useRef(userElepad);
+
+  useEffect(() => {
+    userElepadRef.current = userElepad;
+  }, [userElepad]);
+
   // Obtener la fecha local del cliente en formato YYYY-MM-DD
   const getClientDate = () => {
     const now = new Date();
@@ -88,7 +96,11 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   );
 
   async function loadElepadUserById(userId: string) {
-    setUserElepadLoading(true);
+    // Solo mostrar loading si es un usuario diferente o no hay usuario cargado
+    // Usamos ref para evitar problemas de stale closure en los listeners
+    if (userElepadRef.current?.id !== userId) {
+      setUserElepadLoading(true);
+    }
     try {
       console.log("Cargando usuario de Elepad:", userId);
       const res = await getUsersId(userId);
@@ -241,7 +253,9 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        await loadElepadUserById(session.user.id);
+        // No esperamos a que cargue el perfil para liberar el loading inicial
+        // Esto permite que la UI navegue a home y muestre skeletons
+        loadElepadUserById(session.user.id);
       } else {
         setUserElepad(null);
         setUserElepadLoading(false);
@@ -356,6 +370,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     refreshUserElepad,
     updateUserTimezone,
     streak,
+    streakLoading: streakQuery.isLoading,
     markGameCompleted,
     syncStreak,
   };

@@ -22,6 +22,7 @@ export default function LogIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
   const getFriendlyErrorMessage = (errorMsg: string) => {
     if (errorMsg.includes("Invalid login credentials"))
@@ -205,7 +206,7 @@ export default function LogIn() {
           placeholder="Contraseña"
           value={password}
           onChangeText={setPassword}
-          secureTextEntry
+          secureTextEntry={!passwordVisible}
           autoCapitalize="none"
           returnKeyType="done"
           style={styles.input}
@@ -217,15 +218,14 @@ export default function LogIn() {
           onSubmitEditing={handleLogin}
           disabled={loading}
           dense
+          right={
+            <TextInput.Icon
+              icon={passwordVisible ? "eye-off" : "eye"}
+              onPress={() => setPasswordVisible(!passwordVisible)}
+              disabled={loading}
+            />
+          }
         />
-
-        <Link href="/forgot-password" asChild>
-          <TouchableOpacity style={styles.forgotPassword} disabled={loading}>
-            <Text style={styles.forgotPasswordText}>
-              ¿Olvidaste tu contraseña?
-            </Text>
-          </TouchableOpacity>
-        </Link>
 
         <Button
           mode="contained"
@@ -239,6 +239,14 @@ export default function LogIn() {
           Continuar
         </Button>
 
+        <Link href="/forgot-password" asChild>
+          <TouchableOpacity style={styles.forgotPasswordCentered} disabled={loading}>
+            <Text style={styles.forgotPasswordText}>
+              ¿Olvidaste tu contraseña?
+            </Text>
+          </TouchableOpacity>
+        </Link>
+
         <View style={styles.orRow}>
           <View style={styles.orLine} />
           <Text style={styles.orText}>o</Text>
@@ -246,10 +254,10 @@ export default function LogIn() {
         </View>
 
         <TouchableOpacity
-          style={[styles.googleButton, !isFormValid() || loading ? { opacity: 0.5 } : {}]}
+          style={[styles.googleButton, loading ? { opacity: 0.5 } : {}]}
           activeOpacity={0.85}
           onPress={handleGoogleLogin}
-          disabled={loading || !isFormValid()}
+          disabled={loading}
         >
           <View style={styles.googleIconWrap}>
             <Image
@@ -312,6 +320,10 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
     marginBottom: 8,
   },
+  forgotPasswordCentered: {
+    alignSelf: "center",
+    marginTop: 22,
+  },
   forgotPasswordText: {
     fontSize: 14,
     color: COLORS.primary,
@@ -370,7 +382,7 @@ const styles = StyleSheet.create({
   },
   backText: {
     fontSize: 14,
-    color: COLORS.textSecondary,
+    color: COLORS.primary,
     fontWeight: "500",
   },
 });

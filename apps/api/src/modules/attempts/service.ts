@@ -171,6 +171,8 @@ export class AttemptService {
     limit = 20,
     offset = 0,
     gameType?: Database["public"]["Enums"]["game_type"],
+    startDate?: string,
+    endDate?: string,
   ) {
     let query = this.supabase
       .from("attempts")
@@ -197,6 +199,14 @@ export class AttemptService {
       query = query.is("isFocusGame", true);
     }
 
+    // Filter by date range if provided
+    if (startDate) {
+      query = query.gte("startedAt", startDate);
+    }
+    if (endDate) {
+      query = query.lte("startedAt", endDate);
+    }
+
     // Apply range for pagination
     const start = offset;
     const end = offset + limit - 1;
@@ -206,6 +216,113 @@ export class AttemptService {
 
     if (error) {
       throw new ApiException(500, "Error al listar intentos", error);
+    }
+
+    // Agregar gameType a cada attempt basado en qué puzzle tiene
+    const attemptsWithGameType = (data || []).map(attempt => {
+      let determinedGameType = 'unknown';
+      
+      if (attempt.isFocusGame) {
+        determinedGameType = 'focus';
+      } else if (attempt.memoryPuzzleId) {
+        determinedGameType = 'memory';
+      } else if (attempt.logicPuzzleId) {
+        determinedGameType = 'logic';
+      } else if (attempt.sudokuPuzzleId) {
+        determinedGameType = 'sudoku';
+      }
+      
+      return {
+        ...attempt,
+        gameType: determinedGameType,
+      };
+    });
+
+    return attemptsWithGameType;
+  }
+
+  /**
+   * Lista los intentos recientes de todos los elder del grupo familiar del usuario
+   */
+  async listGroupElderAttempts(
+    userId: string,
+    limit = 20,
+    offset = 0,
+    gameType?: Database["public"]["Enums"]["game_type"],
+    startDate?: string,
+    endDate?: string,
+  ) {
+    // Primero obtener el groupId del usuario
+    const { data: userData, error: userError } = await this.supabase
+      .from("users")
+      .select("groupId")
+      .eq("id", userId)
+      .single();
+
+    if (userError || !userData?.groupId) {
+      throw new ApiException(404, "Usuario no pertenece a un grupo familiar");
+    }
+
+    // Obtener todos los usuarios elder del grupo
+    const { data: elderUsers, error: elderError } = await this.supabase
+      .from("users")
+      .select("id")
+      .eq("groupId", userData.groupId)
+      .eq("elder", true);
+
+    if (elderError) {
+      throw new ApiException(500, "Error al obtener usuarios elder", elderError);
+    }
+
+    if (!elderUsers || elderUsers.length === 0) {
+      return [];
+    }
+
+    const elderIds = elderUsers.map(u => u.id);
+
+    // Ahora buscar los intentos de todos los elder
+    let query = this.supabase
+      .from("attempts")
+      .select(
+        `
+        *,
+        memoryPuzzle:memoryPuzzleId(puzzleId),
+        logicPuzzle:logicPuzzleId(puzzleId),
+        sudokuPuzzle:sudokuPuzzleId(puzzleId),
+        user:userId(id, displayName, avatarUrl, elder)
+      `,
+      )
+      .in("userId", elderIds)
+      .order("startedAt", { ascending: false });
+
+    // Filter by gameType if provided
+    if (gameType === "memory") {
+      query = query.not("memoryPuzzleId", "is", null);
+    } else if (gameType === "logic") {
+      query = query.not("logicPuzzleId", "is", null);
+    } else if (gameType === "attention") {
+      query = query.not("sudokuPuzzleId", "is", null);
+    } else if (gameType === "reaction") {
+      query = query.is("isFocusGame", true);
+    }
+
+    // Filter by date range if provided
+    if (startDate) {
+      query = query.gte("startedAt", startDate);
+    }
+    if (endDate) {
+      query = query.lte("startedAt", endDate);
+    }
+
+    // Apply range for pagination
+    const start = offset;
+    const end = offset + limit - 1;
+    query = query.range(start, end) as typeof query;
+
+    const { data, error } = await query;
+
+    if (error) {
+      throw new ApiException(500, "Error al listar intentos del grupo", error);
     }
 
     // Agregar gameType a cada attempt basado en qué puzzle tiene

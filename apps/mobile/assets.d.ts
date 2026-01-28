@@ -31,3 +31,11 @@ declare module "*.webp" {
   const asset: number;
   export default asset;
 }
+
+// SVG asset support (handled via react-native-svg-transformer)
+declare module "*.svg" {
+  import React from 'react';
+  import { SvgProps } from 'react-native-svg';
+  const content: React.ComponentType<SvgProps>;
+  export default content;
+}

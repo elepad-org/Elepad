@@ -22,8 +22,12 @@ import CancelButton from "@/components/shared/CancelButton";
 import { useToast } from "@/components/shared/Toast";
 import { toLocalDateString } from "@/lib/dateHelpers";
 import { useQueryClient } from "@tanstack/react-query";
+// Tour
+import { useCalendarTour } from "@/hooks/useCalendarTour";
+import { TourGuideZone } from "rn-tourguide";
+import { ElepadTourProvider } from "@/components/shared/ElepadTourProvider";
 
-export default function CalendarScreen() {
+function CalendarScreenContent() {
   const { userElepad } = useAuth();
   const params = useLocalSearchParams();
   const router = useRouter();
@@ -39,6 +43,10 @@ export default function CalendarScreen() {
   const [selectedElderId, setSelectedElderId] = useState<string | null>(null);
   const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(familyCode);
   const membersQuery = useGetFamilyGroupIdGroupMembers(familyCode);
+
+  // Tour
+  const { restartTour } = useCalendarTour();
+  const [debugTaps, setDebugTaps] = useState(0);
 
   // Normaliza la respuesta del hook (envuelta en {data} o directa)
   const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
@@ -108,12 +116,14 @@ export default function CalendarScreen() {
         setFormVisible(false);
         setEditing(null);
         // Invalidar caché para forzar actualización inmediata
-        queryClient.invalidateQueries({
-          queryKey: ["/activities/family-code/{id}/family-group"],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["/activities"],
-        });
+        // Usar la queryKey provista por el hook para invalidar exactamente esa query
+        try {
+          queryClient.invalidateQueries({ queryKey: activitiesQuery.queryKey as readonly unknown[] });
+        } catch (err) {
+          console.warn("invalidateQueries with queryKey failed, falling back:", err);
+          queryClient.invalidateQueries({ queryKey: ["/activities/family-code/{id}/family-group"] });
+          queryClient.invalidateQueries({ queryKey: ["/activities"] });
+        }
       },
       onError: (error) => {
         console.error("Error al crear actividad:", error);
@@ -139,12 +149,13 @@ export default function CalendarScreen() {
         setFormVisible(false);
         setEditing(null);
         // Invalidar caché para forzar actualización inmediata
-        queryClient.invalidateQueries({
-          queryKey: ["/activities/family-code/{id}/family-group"],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["/activities"],
-        });
+        try {
+          queryClient.invalidateQueries({ queryKey: activitiesQuery.queryKey as readonly unknown[] });
+        } catch (err) {
+          console.warn("invalidateQueries with queryKey failed, falling back:", err);
+          queryClient.invalidateQueries({ queryKey: ["/activities/family-code/{id}/family-group"] });
+          queryClient.invalidateQueries({ queryKey: ["/activities"] });
+        }
       },
       onError: (error) => {
         console.error("Error al actualizar actividad:", error);
@@ -164,12 +175,13 @@ export default function CalendarScreen() {
           type: "success",
         });
         // Invalidar caché para forzar actualización inmediata
-        queryClient.invalidateQueries({
-          queryKey: ["/activities/family-code/{id}/family-group"],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["/activities"],
-        });
+        try {
+          queryClient.invalidateQueries({ queryKey: activitiesQuery.queryKey as readonly unknown[] });
+        } catch (err) {
+          console.warn("invalidateQueries with queryKey failed, falling back:", err);
+          queryClient.invalidateQueries({ queryKey: ["/activities/family-code/{id}/family-group"] });
+          queryClient.invalidateQueries({ queryKey: ["/activities"] });
+        }
       },
       onError: (error) => {
         console.error("Error al eliminar actividad:", error);
@@ -293,32 +305,65 @@ export default function CalendarScreen() {
           alignItems: "center",
         }}
       >
-        <Text style={baseStyles.superHeading}>Calendario</Text>
-        <Button
-          mode="contained"
-          onPress={() => setFormVisible(true)}
-          style={{ ...baseStyles.miniButton }}
-          icon="plus"
+        <TourGuideZone
+          zone={1}
+          text="Bienvenido a tu Calendario. Aquí podrás organizar todas tus actividades y eventos familiares."
+          borderRadius={8}
         >
-          Agregar
-        </Button>
+          <Text
+            style={baseStyles.superHeading}
+            onPress={() => {
+              const newTaps = debugTaps + 1;
+              setDebugTaps(newTaps);
+              if (newTaps >= 10) {
+                setDebugTaps(0);
+                restartTour();
+              }
+            }}
+            suppressHighlighting={true}
+          >
+            Calendario
+          </Text>
+        </TourGuideZone>
+
+        <TourGuideZone
+          zone={2}
+          text="Toca este botón para añadir un nuevo evento, cita médica o reunión familiar."
+          borderRadius={20}
+        >
+          <Button
+            mode="contained"
+            onPress={() => setFormVisible(true)}
+            style={{ ...baseStyles.miniButton, width: "auto", paddingHorizontal: 16 }}
+            icon="plus"
+          >
+            Agregar
+          </Button>
+        </TourGuideZone>
       </View>
 
       <View style={{ flex: 1 }}>
-        <CalendarCard
-          idFamilyGroup={familyCode}
-          idUser={idUser}
-          activitiesQuery={activitiesQuery}
-          onEdit={handleEdit}
-          onDelete={handleConfirmDelete}
-          isOwnerOfGroup={isOwnerOfGroup}
-          groupInfo={groupInfo}
-          activityToView={activityToView}
-          activityDateToView={activityDateToView}
-          onActivityViewed={handleActivityViewed}
-          selectedElderId={selectedElderId}
-          onElderChange={setSelectedElderId}
-        />
+        <TourGuideZone
+          zone={3}
+          text="Aquí verás tus eventos del día. Selecciona cualquier fecha para revisar tu agenda."
+          borderRadius={12}
+          style={{ flex: 1 }}
+        >
+          <CalendarCard
+            idFamilyGroup={familyCode}
+            idUser={idUser}
+            activitiesQuery={activitiesQuery}
+            onEdit={handleEdit}
+            onDelete={handleConfirmDelete}
+            isOwnerOfGroup={isOwnerOfGroup}
+            groupInfo={groupInfo}
+            activityToView={activityToView}
+            activityDateToView={activityDateToView}
+            onActivityViewed={handleActivityViewed}
+            selectedElderId={selectedElderId}
+            onElderChange={setSelectedElderId}
+          />
+        </TourGuideZone>
       </View>
 
       <ActivityForm
@@ -376,3 +421,12 @@ export default function CalendarScreen() {
     </SafeAreaView>
   );
 }
+
+export default function CalendarScreen() {
+  return (
+    <ElepadTourProvider>
+      <CalendarScreenContent />
+    </ElepadTourProvider>
+  );
+}
+

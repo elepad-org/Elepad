@@ -275,8 +275,14 @@ export default function ActivityForm({
 
   const handleSave = async () => {
     setError(null);
-    const finalTitle =
-      title.trim() || (initial ? "Evento sin título" : "Nuevo evento");
+    
+    // Validar que el título no esté vacío
+    if (!title.trim()) {
+      setError("El título es obligatorio.");
+      return;
+    }
+
+    const finalTitle = title.trim();
 
     if (!startsAtDate) {
       setError("La fecha de inicio es obligatoria.");
@@ -533,7 +539,9 @@ export default function ActivityForm({
               <View style={{ width: 120 }}>
                 <SaveButton
                   onPress={handleSave}
-                  disabled={saving || !startsAtDate}
+                  disabled={
+                    saving || !title.trim() || !startsAtDate || (!isElder && !assignedTo)
+                  }
                   loading={saving}
                 />
               </View>

@@ -1,36 +1,121 @@
 import { useState } from "react";
-import { View, Image, StyleSheet } from "react-native";
-import { Text, Card, Portal, Dialog, Button } from "react-native-paper";
+import { View, Image, StyleSheet, Linking, Pressable, ActivityIndicator } from "react-native";
+import {
+  Text,
+  Card,
+  Portal,
+  Dialog,
+  Button,
+} from "react-native-paper";
+import { useAuth } from "@/hooks/useAuth";
+import { usePostAlbumIdExportPdf } from "@elepad/api-client";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, STYLES, SHADOWS } from "@/styles/base";
+import { useToast } from "@/components/shared/Toast";
+import { usePdfDownload } from "@/hooks/usePdfDownload";
 
 interface AlbumCardProps {
   id: string;
   title: string;
   description?: string | null;
   coverImageUrl?: string | null;
+  pdfUrl?: string | null;
   createdAt: string;
   totalPages?: number;
   onPress: () => void;
 }
 
 export default function AlbumCard({
+  id,
   title,
   description,
   coverImageUrl,
+  pdfUrl,
   createdAt,
   totalPages,
   onPress,
 }: AlbumCardProps) {
   const [detailsVisible, setDetailsVisible] = useState(false);
+  const { userElepad } = useAuth();
+  const { showToast } = useToast();
+  const { sharePdf, viewLocalPdf, isDownloading } = usePdfDownload();
+  const [actionsOpen, setActionsOpen] = useState(false);
+
+  const exportPdfMutation = usePostAlbumIdExportPdf();
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("es-AR");
   };
 
+  const handleExportPdf = () => {
+    const albumId = id;
+    const userId = userElepad?.id;
+
+    if (!userId) {
+      console.warn("User not available for PDF export");
+      return;
+    }
+
+    showToast({
+      message: "Generando PDF... recibirás una notificación cuando esté listo",
+      type: "success",
+    });
+
+    setDetailsVisible(false);
+
+    exportPdfMutation.mutate(
+      { id: albumId },
+      {
+        onSuccess: (res) => {
+          console.log(
+            "Export PDF response:",
+            res,
+            "userId:",
+            userId,
+            "albumId:",
+            albumId,
+          );
+        },
+        onError: (err) => {
+          console.error("Export PDF error:", err);
+          showToast({
+            message: "Error generando el PDF. Intenta nuevamente",
+            type: "error",
+          });
+        },
+      },
+    );
+  };
+
+  const handleViewPdf = async () => {
+    if (pdfUrl) {
+      try {
+        // First, try to find a saved local copy
+        await viewLocalPdf(pdfUrl);
+      } catch (err) {
+        try {
+          console.error(err);
+          await Linking.openURL(pdfUrl);
+        } catch (error) {
+          console.error("Error opening PDF:", error);
+          showToast({
+            message: "No se pudo abrir el PDF",
+            type: "error",
+          });
+        }
+      }
+    }
+  };
+
+  const handleDownloadAndSharePdf = async () => {
+    if (pdfUrl) {
+      await sharePdf(pdfUrl, title);
+    }
+  };
+
   return (
-    <>
+    <View>
       <Card
         style={styles.card}
         onPress={() => setDetailsVisible(true)}
@@ -94,19 +179,87 @@ export default function AlbumCard({
             <Button mode="outlined" onPress={() => setDetailsVisible(false)}>
               Cerrar
             </Button>
-            <Button
-              mode="contained"
-              onPress={() => {
-                setDetailsVisible(false);
-                onPress();
-              }}
-            >
-              Ver Álbum
-            </Button>
+
+            {pdfUrl ? (
+              <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+                <Button
+                  mode="contained"
+                  onPress={() => {
+                    setDetailsVisible(false);
+                    onPress();
+                  }}
+                >
+                  Ver Álbum
+                </Button>
+                <View style={styles.actionsDropdown}>
+                  <Pressable
+                    onPress={() => setActionsOpen((v) => !v)}
+                    style={({ pressed }) => [
+                      styles.plusButton,
+                      pressed && { opacity: 0.65 },
+                    ]}
+                    accessibilityLabel={actionsOpen ? "Cerrar acciones" : "Abrir acciones"}
+                  >
+                    <MaterialCommunityIcons name={actionsOpen ? "minus" : "plus"} size={20} color={COLORS.white} />
+                  </Pressable>
+
+                  {actionsOpen && (
+                    <View style={styles.dropdownItems}>
+                      <Pressable
+                        onPress={() => {
+                          handleViewPdf();
+                          setDetailsVisible(false);
+                          setActionsOpen(false);
+                        }}
+                        style={({ pressed }) => [styles.iconAction, pressed && { opacity: 0.7 }]}
+                        accessibilityLabel="Ver PDF"
+                      >
+                        <MaterialCommunityIcons name="file-pdf-box" size={20} color={COLORS.primary} />
+                      </Pressable>
+
+                      <Pressable
+                        onPress={async () => {
+                          await handleDownloadAndSharePdf();
+                          setActionsOpen(false);
+                        }}
+                        style={({ pressed }) => [styles.iconAction, pressed && { opacity: 0.7 }]}
+                        accessibilityLabel="Compartir PDF"
+                      >
+                        {isDownloading ? (
+                          <ActivityIndicator size="small" color={COLORS.white} />
+                        ) : (
+                          <MaterialCommunityIcons name="share-variant" size={20} color={COLORS.primary} style={{left: -5}} />
+                        )}
+                      </Pressable>
+                    </View>
+                  )}
+                </View>
+
+              </View>
+            ) : (
+              <View style={{ flexDirection: "row", gap: 8 }}>
+                <Button
+                  mode="outlined"
+                  loading={exportPdfMutation.isPending}
+                  onPress={handleExportPdf}
+                >
+                  Exportar PDF
+                </Button>
+                <Button
+                  mode="contained"
+                  onPress={() => {
+                    setDetailsVisible(false);
+                    onPress();
+                  }}
+                >
+                  Ver Álbum
+                </Button>
+              </View>
+            )}
           </Dialog.Actions>
         </Dialog>
       </Portal>
-    </>
+    </View>
   );
 }
 
@@ -149,6 +302,39 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: COLORS.text,
     textAlign: "center",
+  },
+
+  actionsDropdown: {
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  plusButton: {
+    backgroundColor: COLORS.primary,
+    width: 30,
+    height: 30,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 4,
+  },
+
+  dropdownItems: {
+    position: "absolute",
+    top: -56,
+    left: -25,
+    borderRadius: 8,
+    borderColor: COLORS.backgroundSecondary,
+    borderWidth: 2,
+    flexDirection: "row",
+    gap: 4,
+  },
+
+  iconAction: {
+    padding: 6,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   dialog: {

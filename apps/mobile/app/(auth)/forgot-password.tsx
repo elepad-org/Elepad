@@ -1,15 +1,12 @@
-import { useState } from "react";
-import { StatusBar, ScrollView, View, StyleSheet, ImageBackground, Platform } from "react-native";
+import { useState, useRef } from "react";
+import { StatusBar, View, StyleSheet, ImageBackground, Platform,  Animated } from "react-native";
 import {
   Button,
-  Card,
   TextInput,
   Text,
-  IconButton,
 } from "react-native-paper";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, Stack } from "expo-router";
-import { COLORS, STYLES } from "@/styles/base";
+import { useRouter, Link } from "expo-router";
+import { COLORS } from "@/styles/base";
 import { useToast } from "@/components/shared/Toast";
 import { supabase } from "@/lib/supabase";
 import fondoLogin from "@/assets/images/pirotecnia.png";
@@ -17,6 +14,7 @@ import fondoLogin from "@/assets/images/pirotecnia.png";
 export default function ForgotPasswordScreen() {
   const router = useRouter();
   const { showToast } = useToast();
+  const fadeAnim = useRef(new Animated.Value(1)).current;
 
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -97,148 +95,150 @@ export default function ForgotPasswordScreen() {
   return (
     <ImageBackground
       source={fondoLogin}
-      style={styles.background}
+      style={[styles.container, { backgroundColor: "#FFFFFF" }]}
       resizeMode="cover"
       imageStyle={{ opacity: 0.60 }}
     >
-      <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
-        <Stack.Screen options={{ headerShown: false }} />
-        <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <StatusBar />
+      <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
 
-        <View style={styles.header}>
-          <IconButton
-            icon="arrow-left"
-            size={24}
-            iconColor={COLORS.text}
-            onPress={() => router.back()}
-          />
-          <Text style={styles.headerTitle}>Recuperar contraseña</Text>
-          <View style={{ width: 48 }} />
+      <View style={styles.formContainer}>
+        <View style={styles.innerForm}>
+          <Text style={styles.title}>Recuperar contraseña</Text>
+          <Text style={styles.subtitle}>Ingresa tu email para recibir un enlace de recuperación</Text>
+
+          {!emailSent ? (
+            <>
+              <TextInput
+                mode="outlined"
+                placeholder="Correo electrónico"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                returnKeyType="done"
+                style={styles.input}
+                outlineStyle={styles.inputOutline}
+                outlineColor="rgba(203, 203, 203, 0.92)"
+                activeOutlineColor={COLORS.textLight}
+                textColor={COLORS.text}
+                placeholderTextColor={COLORS.textSecondary}
+                disabled={loading}
+                dense
+              />
+
+              <Button
+                mode="contained"
+                contentStyle={styles.buttonContent}
+                style={styles.primaryButton}
+                buttonColor={COLORS.primary}
+                onPress={handleSendResetEmail}
+                loading={loading}
+                disabled={loading || !email.trim()}
+              >
+                Enviar correo de recuperación
+              </Button>
+            </>
+          ) : (
+            <View style={styles.successContainer}>
+              <Text style={styles.successTitle}>
+                ✓ Correo enviado
+              </Text>
+              <Text style={styles.successText}>
+                Revisa tu bandeja de entrada. El enlace te llevará a una página
+                donde podrás establecer tu nueva contraseña.
+              </Text>
+              <Text style={[styles.successText, { marginTop: 16, fontStyle: 'italic' }]}>
+                Nota: Si no recibes el correo en unos minutos, revisa tu carpeta
+                de spam o espera unos minutos antes de intentar de nuevo.
+              </Text>
+            </View>
+          )}
+
+          <Link
+            href={{ pathname: "/login" }}
+            accessibilityRole="button"
+            style={styles.backLink}
+          >
+            <Text style={styles.backText}>Volver</Text>
+          </Link>
         </View>
-
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.container}>
-            <Card style={styles.card}>
-              <Card.Content>
-                {!emailSent ? (
-                  <>
-                    <Text variant="bodyMedium" style={styles.description}>
-                      Ingresa tu correo electrónico y te enviaremos un enlace para
-                      restablecer tu contraseña.
-                    </Text>
-
-                    <View style={styles.inputWrapper}>
-                      <TextInput
-                        label="Correo electrónico"
-                        value={email}
-                        onChangeText={setEmail}
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        mode="flat"
-                        outlineColor="transparent"
-                        activeOutlineColor="transparent"
-                        style={{ backgroundColor: "transparent" }}
-                        disabled={loading}
-                      />
-                    </View>
-
-                    <Button
-                      mode="contained"
-                      onPress={handleSendResetEmail}
-                      loading={loading}
-                      disabled={loading || !email.trim()}
-                      style={[STYLES.buttonPrimary, { width: '100%' }]}
-                      contentStyle={STYLES.buttonContent}
-                    >
-                      Enviar correo de recuperación
-                    </Button>
-                  </>
-                ) : (
-                  <View style={styles.successContainer}>
-                    <Text variant="titleMedium" style={styles.successTitle}>
-                      ✓ Correo enviado
-                    </Text>
-                    <Text variant="bodyMedium" style={styles.successText}>
-                      Revisa tu bandeja de entrada. El enlace te llevará a una página
-                      donde podrás establecer tu nueva contraseña.
-                    </Text>
-                    <Text variant="bodySmall" style={[styles.successText, { marginTop: 16, fontStyle: 'italic' }]}>
-                      Nota: Si no recibes el correo en unos minutos, revisa tu carpeta
-                      de spam o espera unos minutos antes de intentar de nuevo.
-                    </Text>
-                  </View>
-                )}
-              </Card.Content>
-            </Card>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
+      </View>
+      </Animated.View>
     </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  background: {
+  container: {
     flex: 1,
     width: "100%",
     height: "100%",
-    backgroundColor: "#FFFFFF",
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: COLORS.text,
-  },
-  scrollContent: {
-    flexGrow: 1,
+  formContainer: {
+    flex: 1,
     justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 24,
-    paddingVertical: 40,
   },
-  container: {
+  innerForm: {
     width: "100%",
     maxWidth: 400,
-    alignSelf: "center",
-  },
-  card: {
-    backgroundColor: COLORS.white,
-    borderRadius: 20,
-    elevation: 4,
-  },
-  description: {
-    marginBottom: 24,
-    color: COLORS.textSecondary,
-    lineHeight: 22,
-  },
-  inputWrapper: {
+    alignItems: "center",
     backgroundColor: COLORS.backgroundSecondary,
-    borderRadius: 16,
-    overflow: "hidden",
+    borderRadius: 20,
+    padding: 28,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: COLORS.textSecondary,
     marginBottom: 24,
+    textAlign: "center",
+  },
+  input: {
+    width: "100%",
+    marginBottom: 14,
+    backgroundColor: "transparent",
+  },
+  inputOutline: {
+    borderRadius: 12,
+  },
+  primaryButton: {
+    marginTop: 8,
+    width: "100%",
+    borderRadius: 12,
+  },
+  buttonContent: {
+    height: 50,
   },
   successContainer: {
     alignItems: "center",
-    paddingVertical: 20,
+    width: "100%",
   },
   successTitle: {
     color: COLORS.primary,
     fontWeight: "bold",
     marginBottom: 16,
     fontSize: 20,
+    textAlign: "center",
   },
   successText: {
     color: COLORS.textSecondary,
     textAlign: "center",
     lineHeight: 22,
+  },
+  backLink: {
+    marginTop: 24,
+  },
+  backText: {
+    fontSize: 14,
+    color: COLORS.primary,
+    fontWeight: "500",
   },
 });

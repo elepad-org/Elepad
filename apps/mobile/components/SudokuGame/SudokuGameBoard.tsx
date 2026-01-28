@@ -232,7 +232,7 @@ export const SudokuGameBoard: React.FC<SudokuGameBoardProps> = ({
                 labelStyle={styles.numberButtonLabel}
                 icon="backspace-outline"
               >
-                Del
+                Borrar
               </Button>
             </View>
           </View>
@@ -346,16 +346,20 @@ const styles = StyleSheet.create({
   keyboardRow: {
     flexDirection: "row",
     justifyContent: "center",
-    gap: 8,
+    gap: 6,
     marginBottom: 8,
   },
   numberButton: {
     flex: 1,
     maxWidth: 70,
+    minHeight: 48,
+    justifyContent: "center",
+    includeFontPadding: false,
   },
   numberButtonLabel: {
     fontSize: 20,
     fontWeight: "bold",
+    includeFontPadding: false,
   },
   controls: {
     flexDirection: "column",

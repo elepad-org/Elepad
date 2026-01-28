@@ -10,7 +10,13 @@
     "newArchEnabled": true,
     "jsEngine": "hermes",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.elepadorg.elepad",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIFileSharingEnabled": true,
+        "LSSupportsOpeningDocumentsInPlace": true
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -20,8 +26,13 @@
       "edgeToEdgeEnabled": true,
       "package": "com.elepadorg.elepad",
       "permissions": [
-        "android.permission.POST_NOTIFICATIONS"
-      ]
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
@@ -58,6 +69,12 @@
           "sounds": []
         }
       ],
+      [
+        "expo-file-system",
+        {
+          "directories": [
+            "documents",
+            "cache"
       "expo-build-properties",
       [
         "react-native-android-widget",

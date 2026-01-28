@@ -4,11 +4,15 @@ import { COLORS, FONT, SHADOWS } from "@/styles/base";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "@/hooks/useAuth";
 import { SkeletonBox } from "@/components/shared";
+import { TourGuideZone } from "rn-tourguide";
 
 export default function StreakCounter() {
-  const { streak } = useAuth();
+  const { streak, streakLoading } = useAuth();
 
-  if (!streak) {
+
+
+  // Solo mostrar skeleton si está cargando Y no hay datos
+  if (streakLoading && !streak) {
     return (
       <View style={styles.container}>
         <View style={styles.loadingContainer}>
@@ -24,28 +28,37 @@ export default function StreakCounter() {
     );
   }
 
+  // Si no hay racha y no está cargando, no mostrar nada (o manejar error)
+  if (!streak) return null;
+
   const currentStreak = streak.currentStreak;
   const hasPlayedToday = streak.hasPlayedToday;
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={["#7C3AED", "#A855F7"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.gradient}
+      <TourGuideZone
+        zone={5}
+        text="Aquí puedes ver tu racha actual. ¡Mantén tu progreso jugando a diario!"
+        borderRadius={16}
       >
-        <View style={styles.content}>
-          <View style={styles.textContainer}>
-            <Text style={styles.title}>¡Mantén tu racha!</Text>
-            <Text style={styles.subtitle}>Juega al menos una vez al día</Text>
+        <LinearGradient
+          colors={["#7C3AED", "#A855F7"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.gradient}
+        >
+          <View style={styles.content}>
+            <View style={styles.textContainer}>
+              <Text style={styles.title}>¡Mantén tu racha!</Text>
+              <Text style={styles.subtitle}>Juega al menos una vez al día</Text>
+            </View>
+            <View style={styles.streakContainer}>
+              <Text style={styles.fireEmoji}>{hasPlayedToday ? "🔥" : "🧊"}</Text>
+              <Text style={styles.streakNumber}>{currentStreak}</Text>
+            </View>
           </View>
-          <View style={styles.streakContainer}>
-            <Text style={styles.fireEmoji}>{hasPlayedToday ? '🔥' : '🧊'}</Text>
-            <Text style={styles.streakNumber}>{currentStreak}</Text>
-          </View>
-        </View>
-      </LinearGradient>
+        </LinearGradient>
+      </TourGuideZone>
     </View>
   );
 }

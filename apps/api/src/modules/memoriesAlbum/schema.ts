@@ -40,7 +40,9 @@ export const AlbumSchema = z
     createdBy: z.uuid(),
     title: z.string(),
     description: z.string().nullable(),
+    coverImageUrl: z.string().nullable(),
     status: z.enum(["processing", "ready", "error"]),
+    urlPdf: z.string().nullable(),
     createdAt: z.date(),
     updatedAt: z.date().nullable(),
   })
@@ -67,6 +69,7 @@ export const AlbumWithPagesSchema = z
     createdBy: z.uuid(),
     title: z.string(),
     description: z.string(),
+    coverImageUrl: z.string().nullable(),
     status: z.enum(["processing", "ready", "error"]),
     createdAt: z.date(),
     updatedAt: z.date().nullable(),

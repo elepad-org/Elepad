@@ -1,17 +1,24 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "expo-router";
 import { useRef, useEffect } from "react";
-import { Animated, View, Image } from "react-native";
+import { Animated, View, Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Button, Text, ActivityIndicator } from "react-native-paper";
-import heroImage from "@/assets/images/ele-def3.png";
+import { Button, Text } from "react-native-paper";
+import EleSvg from "@/assets/images/ele.svg";
 import { COLORS, STYLES } from "@/styles/base";
 
+import HomeScreen from "./(tabs)/home";
 export default function IndexRedirect() {
   const { session, loading } = useAuth();
   const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const hasRedirected = useRef(false);
+
+  // Dimensiones responsive
+  const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+  const logoSize = screenWidth * 0.5; // 50% del ancho de pantalla
+  const logoMarginTop = screenHeight * 0.12; // 12% del alto de pantalla
+  const brandFontSize = screenWidth * 0.16; // 16% del ancho de pantalla
 
   // Si hay sesión, redirigir a home una sola vez
   useEffect(() => {
@@ -23,8 +30,8 @@ export default function IndexRedirect() {
 
   if (loading) {
     return (
-      <View style={STYLES.center}>
-        <ActivityIndicator />
+      <View style={{ flex: 1 }}>
+        <HomeScreen />
       </View>
     );
   }
@@ -32,8 +39,8 @@ export default function IndexRedirect() {
   // Si hay sesión, mostrar loading mientras redirige
   if (session) {
     return (
-      <View style={STYLES.center}>
-        <ActivityIndicator />
+      <View style={{ flex: 1 }}>
+        <HomeScreen />
       </View>
     );
   }
@@ -41,9 +48,13 @@ export default function IndexRedirect() {
   return (
     <SafeAreaView style={STYLES.safeAreaLogin}>
       <View style={STYLES.container}>
-        <View style={STYLES.logoWrapWithMargin}>
-          <Image source={heroImage} style={STYLES.logo} resizeMode="contain" />
-          <Text style={STYLES.brand}> Elepad </Text>
+        <View style={[STYLES.logoWrap, { marginTop: logoMarginTop }]}>
+          <EleSvg
+            width={logoSize}
+            height={logoSize}
+            style={STYLES.logo}
+          />
+          <Text style={[STYLES.brand, { fontSize: brandFontSize }]}> Elepad </Text>
         </View>
         <View style={STYLES.separatorWrap}>
           <View style={STYLES.separator} />
