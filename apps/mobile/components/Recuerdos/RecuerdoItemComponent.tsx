@@ -1,6 +1,6 @@
 import { TouchableOpacity, View, Dimensions, Image, ImageBackground } from "react-native";
 import { Text, IconButton } from "react-native-paper";
-import { STYLES, COLORS } from "@/styles/base";
+import { STYLES, COLORS, SHADOWS } from "@/styles/base";
 import fondoRecuerdos from "@/assets/images/fondoRecuerdos.png";
 
 const screenWidth = Dimensions.get("window").width;
@@ -44,10 +44,11 @@ export default function RecuerdoItemComponent({
         height: itemHeight,
         marginBottom: 4, // Separación vertical más junta
         marginRight: gap,
-        padding: 0,
+        padding: item.tipo === "imagen" ? 6 : 0, // Padding solo para imágenes polaroid
         overflow: "hidden",
         borderRadius: 4,
-        backgroundColor: "#F5F5F5", // Fondo gris para todos
+        backgroundColor: item.tipo === "imagen" ? "#FFFFFF" : "#F5F5F5", // Blanco para imágenes, gris para otros
+        ...SHADOWS.light, // Sombra para polaroid
       }}
     >
       {item.tipo === "imagen" && item.miniatura ? (
@@ -56,25 +57,33 @@ export default function RecuerdoItemComponent({
             source={{ uri: item.miniatura }}
             style={{
               width: "100%",
-              height: "100%",
+              height: item.titulo ? "80%" : "100%", // Dejar espacio abajo si hay título
               resizeMode: "cover",
+              borderRadius: 2, // BorderRadius pequeño para polaroid
             }}
           />
           {item.titulo && (
             <View
               style={{
                 position: "absolute",
-                top: 8,
-                left: 8,
-                right: 8,
-                backgroundColor: "rgba(0,0,0,0.6)",
-                padding: 6,
-                borderRadius: 4,
+                bottom: 0,
+                left: 0,
+                right: 0,
+                minHeight: 30,
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "transparent", // Parte blanca abajo
               }}
             >
               <Text
                 numberOfLines={2}
-                style={{ color: "#fff", fontSize: 12, fontWeight: "500" }}
+                style={{
+                  fontSize: 11,
+                  color: COLORS.text,
+                  fontStyle: "italic",
+                  textAlign: "center",
+                  fontFamily: "Georgia", // Handwritten-like serif font
+                }}
               >
                 {item.titulo}
               </Text>
