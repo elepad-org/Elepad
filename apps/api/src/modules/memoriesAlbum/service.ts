@@ -55,7 +55,7 @@ export class MemoriesAlbumService {
     if (!file.type || !file.type.startsWith("audio/")) {
       throw new ApiException(
         415,
-        "Unsupported media type - only audio files allowed"
+        "Unsupported media type - only audio files allowed",
       );
     }
 
@@ -108,7 +108,10 @@ export class MemoriesAlbumService {
               {
                 fileData: {
                   fileUri: uploadResult.uri,
-                  mimeType: uploadResult.mimeType || file.type || "application/octet-stream",
+                  mimeType:
+                    uploadResult.mimeType ||
+                    file.type ||
+                    "application/octet-stream",
                 },
               },
             ],
@@ -116,7 +119,8 @@ export class MemoriesAlbumService {
         ],
       });
 
-      const transcription = result && typeof result.text === "string" ? result.text : "";
+      const transcription =
+        result && typeof result.text === "string" ? result.text : "";
 
       // Limpieza
       try {
@@ -164,13 +168,13 @@ export class MemoriesAlbumService {
     if (!memories || memories.length !== data.memoryIds.length) {
       throw new ApiException(
         400,
-        "Some memories not found or don't belong to your group"
+        "Some memories not found or don't belong to your group",
       );
     }
 
     // Filter only image memories
     const imageMemories = memories.filter(
-      (m) => m.mimeType && m.mimeType.startsWith("image/")
+      (m) => m.mimeType && m.mimeType.startsWith("image/"),
     );
 
     if (imageMemories.length === 0) {
@@ -228,7 +232,7 @@ export class MemoriesAlbumService {
     this.processAlbumNarratives(album.id, userId, userGroup.groupId).catch(
       (err) => {
         console.error("Error processing album narratives:", err);
-      }
+      },
     );
   }
 
@@ -238,7 +242,7 @@ export class MemoriesAlbumService {
   private async processAlbumNarratives(
     albumId: string,
     userId: string,
-    groupId: string
+    groupId: string,
   ): Promise<void> {
     try {
       // Get album pages with memory data
@@ -257,7 +261,7 @@ export class MemoriesAlbumService {
             mediaUrl,
             mimeType
           )
-        `
+        `,
         )
         .eq("albumId", albumId)
         .order("order", { ascending: true });
@@ -288,7 +292,7 @@ export class MemoriesAlbumService {
       const narratives = await this.generateNarrativesWithGemini(
         album,
         familyGroup?.name || "Tu familia",
-        pages
+        pages,
       );
 
       // Update album pages with generated narratives
@@ -312,13 +316,13 @@ export class MemoriesAlbumService {
         const imageBuffer = await this.generateAlbumCoverImage(
           album,
           narratives,
-          pages[0]
+          pages[0],
         );
         coverImageUrl = await uploadAlbumCoverImage(
           this.supabase,
           groupId,
           albumId,
-          imageBuffer
+          imageBuffer,
         );
       } catch (err) {
         console.error("Error generating or uploading album cover image:", err);
@@ -375,7 +379,7 @@ export class MemoriesAlbumService {
   private async generateNarrativesWithGemini(
     album: { title: string; description: string | null },
     familyName: string,
-    pages: pageWithMemory[]
+    pages: pageWithMemory[],
   ): Promise<string[]> {
     if (!this.apiKey) {
       throw new Error("Gemini API key not configured");
@@ -480,7 +484,7 @@ Este recuerdo nos muestra...`;
       while (narratives.length < pages.length) {
         const idx = narratives.length;
         narratives.push(
-          pages[idx]?.memories?.caption || "Un momento especial."
+          pages[idx]?.memories?.caption || "Un momento especial.",
         );
       }
 
@@ -498,7 +502,7 @@ Este recuerdo nos muestra...`;
   private async generateAlbumCoverImage(
     album: { title: string; description: string | null },
     narratives: string[],
-    firstPage?: pageWithMemory
+    firstPage?: pageWithMemory,
   ): Promise<Buffer> {
     if (!this.apiKey) {
       throw new Error("Gemini API key not configured");
@@ -539,7 +543,10 @@ Este recuerdo nos muestra...`;
           const mediaUrl = firstPage?.memories?.mediaUrl;
           if (mediaUrl) {
             const resp = await fetch(mediaUrl);
-            if (!resp.ok) throw new Error(`Failed to download fallback image: ${resp.status}`);
+            if (!resp.ok)
+              throw new Error(
+                `Failed to download fallback image: ${resp.status}`,
+              );
             const buf = Buffer.from(await resp.arrayBuffer());
             return buf;
           }
@@ -555,7 +562,7 @@ Este recuerdo nos muestra...`;
   async getAllAlbumsForUserGroup(
     userId: string,
     limit: number,
-    offset: number
+    offset: number,
   ): Promise<Album[]> {
     const { data: userGroup, error: userGroupError } = await this.supabase
       .from("users")
@@ -634,10 +641,7 @@ Este recuerdo nos muestra...`;
   /**
    * Generate HTML template for album PDF
    */
-  private generateAlbumHTML(
-    album: AlbumWithPages,
-    familyName: string
-  ): string {
+  private generateAlbumHTML(album: AlbumWithPages, familyName: string): string {
     const pagesHTML = album.pages
       .map((page, index) => {
         const imageUrl = page.imageUrl || "";
@@ -648,7 +652,10 @@ Este recuerdo nos muestra...`;
       <div class="page">
         <div class="page-content">
           <div class="image-section">
-            <img src="${imageUrl}" alt="${title}" />
+            <div class="polaroid-frame">
+              <img src="${imageUrl}" alt="${title}" />
+              <div class="polaroid-text">${title}</div>
+            </div>
           </div>
           <div class="text-section">
             <h2 class="page-title">${title}</h2>
@@ -676,7 +683,7 @@ Este recuerdo nos muestra...`;
     }
 
     body {
-      font-family: 'Georgia', 'Times New Roman', serif;
+      font-family: 'Georgia', serif;
       background: #f5f5f5;
     }
 
@@ -687,7 +694,7 @@ Este recuerdo nos muestra...`;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #9a9ece 0%, #424a70 100%);
       color: white;
       page-break-after: always;
       padding: 40mm;
@@ -719,7 +726,22 @@ Este recuerdo nos muestra...`;
       width: 297mm;
       height: 210mm;
       page-break-after: always;
-      background: white;
+      background: 
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 2px,
+          rgba(157, 145, 125, 0.03) 2px,
+          rgba(157, 145, 125, 0.03) 4px
+        ),
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(157, 145, 125, 0.03) 2px,
+          rgba(157, 145, 125, 0.03) 4px
+        ),
+        linear-gradient(180deg, #faf8f5 0%, #f5f2ed 100%);
       position: relative;
     }
 
@@ -735,22 +757,49 @@ Este recuerdo nos muestra...`;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #f9f9f9;
       padding: 15mm;
     }
 
-    .image-section img {
+    .polaroid-frame {
+      background: white;
+      padding: 12mm;
+      border-radius: 4px;
+      box-shadow: 
+        0 10px 25px rgba(0, 0, 0, 0.1),
+        0 20px 48px rgba(0, 0, 0, 0.05);
+      transform: rotate(-2deg);
       max-width: 100%;
       max-height: 100%;
-      object-fit: contain;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .image-section img {
+      width: 100%;
+      height: auto;
+      max-height: 140mm;
+      object-fit: cover;
+      border-radius: 2px;
+      display: block;
+    }
+
+    .polaroid-text {
+      margin-top: 8mm;
+      min-height: 12mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #2c2416;
+      font-size: 11pt;
+      font-weight: bold;
+      text-align: center;
+      font-family: 'Georgia', cursive;
     }
 
     .text-section {
       width: 50%;
       height: 100%;
-      padding: 20mm;
+      padding: 20mm 25mm;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -759,14 +808,15 @@ Este recuerdo nos muestra...`;
 
     .page-title {
       font-size: 24pt;
-      color: #333;
+      color: #424a70;
       margin-bottom: 15mm;
       line-height: 1.3;
+      font-weight: 600;
     }
 
     .page-description {
       font-size: 14pt;
-      color: #555;
+      color: #2c2416;
       line-height: 1.8;
       text-align: justify;
     }
@@ -776,7 +826,7 @@ Este recuerdo nos muestra...`;
       bottom: 10mm;
       right: 20mm;
       font-size: 10pt;
-      color: #999;
+      color: #7374a7;
       font-style: italic;
     }
 
@@ -888,7 +938,7 @@ Este recuerdo nos muestra...`;
         this.supabase,
         userGroup.groupId,
         albumId,
-        Buffer.from(pdfBuffer)
+        Buffer.from(pdfBuffer),
       );
 
       // Update album with PDF URL
