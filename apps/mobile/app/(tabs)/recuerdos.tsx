@@ -49,6 +49,7 @@ import { Platform } from "react-native";
 import { uriToBlob } from "@/lib/uriToBlob";
 
 import MasonryList from '@react-native-seoul/masonry-list';
+import RecuerdoItemComponent from "@/components/Recuerdos/RecuerdoItemComponent";
 import NuevoRecuerdoDialogComponent from "@/components/Recuerdos/NuevoRecuerdoDialogComponent";
 import RecuerdoDetailDialog from "@/components/Recuerdos/RecuerdoDetailDialog";
 import { BackButton } from "@/components/shared/BackButton";
@@ -1624,7 +1625,7 @@ export default function RecuerdosScreen() {
           renderItem={({ item, i }) => (
             <Animated.View entering={ZoomIn.delay(i * 25).springify()}>
               <RecuerdoItemComponent
-                item={item}
+                item={item as Recuerdo}
                 numColumns={numColumns}
                 onPress={handleRecuerdoPress}
               />
