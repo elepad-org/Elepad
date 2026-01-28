@@ -3,6 +3,7 @@ export { CustomHeader } from "./CustomHeader";
 export { GameHeader } from "./GameHeader";
 export { GameLoadingView } from "./GameLoadingView";
 export { LoadingProfile } from "./LoadingProfile";
+export { LoadingUser } from "./LoadingUser";
 export { InstructionsDialog } from "./InstructionsDialog";
 export { ChangePasswordModal } from "./ChangePasswordModal";
 export { SkeletonBox } from "./SkeletonBox";

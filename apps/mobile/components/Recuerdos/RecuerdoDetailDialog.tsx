@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { View, Dimensions, Animated } from "react-native";
+import { View, Dimensions, Animated, ImageBackground } from "react-native";
 import { Image } from "expo-image";
 import Reanimated, { ZoomIn, ZoomOut } from "react-native-reanimated";
 import {
@@ -18,6 +18,7 @@ import Slider from "@react-native-community/slider";
 import HighlightedMentionText from "./HighlightedMentionText";
 import MentionInput from "./MentionInput";
 import StickerReactionPicker from "./StickerReactionPicker";
+import fondoRecuerdos from "@/assets/images/fondoRecuerdos.png";
 
 type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
 
@@ -508,6 +509,7 @@ export default function RecuerdoDetailDialog({
               shadowRadius: 0,
               opacity: fadeAnim,
               position: "relative",
+              overflow: "hidden",
             }}
           >
             {/* Contenido principal según el tipo */}
@@ -551,9 +553,22 @@ export default function RecuerdoDetailDialog({
             )}
 
             {recuerdo.tipo === "texto" && (
-              <View>
-                {/* Información de la nota */}
-                <View style={{ paddingTop: 4 }}>{renderInfoBlock()}</View>
+              <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 0 }}>
+                <ImageBackground 
+                  source={fondoRecuerdos} 
+                  style={{
+                    borderRadius: 10, 
+                    padding: 10,
+                    justifyContent: "center",
+                    ...SHADOWS.card,
+                    borderColor: '#f1f1f1', // Softer beige border
+                    minHeight: 200,
+                    width: screenWidth * 0.92,
+                  }}
+                >
+                  {/* Información de la nota */}
+                  {renderInfoBlock()}
+                </ImageBackground>
               </View>
             )}
 

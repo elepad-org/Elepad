@@ -1,4 +1,4 @@
-import Animated, { FadeIn } from "react-native-reanimated";
+import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
 import {
   StatusBar,
   ScrollView,
@@ -9,11 +9,11 @@ import {
   Dimensions,
   Image,
 } from "react-native";
-import { Text, Avatar, Button, IconButton, Icon } from "react-native-paper";
+import { Text, Avatar, Button, IconButton } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, SHADOWS } from "@/styles/base";
-import { SkeletonBox } from "@/components/shared";
+import { LoadingProfile, SkeletonBox } from "@/components/shared";
 import {
   useGetActivitiesFamilyCodeIdFamilyGroup,
   useGetAttempts,
@@ -23,25 +23,23 @@ import {
   AttemptWithUser,
 } from "@elepad/api-client";
 import { useRouter } from "expo-router";
-import { useMemo, useEffect, useState } from "react";
+import React, { useMemo, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import StreakCounter from "@/components/StreakCounter";
 import HighlightedMentionText from "@/components/Recuerdos/HighlightedMentionText";
 import { useNotifications } from "@/hooks/useNotifications";
 import { GAMES_INFO } from "@/constants/gamesInfo";
-import { formatInUserTimezone } from "@/lib/timezoneHelpers";
+import { formatInUserTimezone, toUserLocalTime } from "@/lib/timezoneHelpers";
 import type { ImageSourcePropType } from "react-native";
 import memoryImage from "@/assets/images/memory2.png";
 import netImage from "@/assets/images/net2.png";
 import sudokuImage from "@/assets/images/sudoku2.png";
 import focusImage from "@/assets/images/focus2.png";
+import tapeImage from "@/assets/images/paper-transparent-sticky-tape-png.png";
+import fondoRecuerdos from "@/assets/images/fondoRecuerdos.png";
 
-// Onboarding imports
-import { TourGuideZone } from "rn-tourguide";
-import { useHomeTour } from "@/hooks/useHomeTour";
-import HomeEvents from "@/components/home/HomeEvents";
-import { ElepadTourProvider } from "@/components/shared/ElepadTourProvider";
+
 
 
 const GAME_IMAGES: Record<string, ImageSourcePropType> = {
@@ -64,13 +62,15 @@ const getGameInfo = (gameType: string) => {
   return gameMap[gameType] || { name: "Juego", emoji: "🎮" };
 };
 
-function HomeScreenContent() {
+const HomeScreen = () => {
+
   const { userElepad, userElepadLoading } = useAuth();
   const router = useRouter();
   const { unreadCount } = useNotifications();
   const queryClient = useQueryClient();
 
-  const [debugTaps, setDebugTaps] = useState(0);
+
+
 
   // Fetch today's activities
   const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(
@@ -81,9 +81,6 @@ function HomeScreenContent() {
       },
     },
   );
-
-  // Tour Guide
-  const { restartTour } = useHomeTour(userElepadLoading || activitiesQuery.isLoading);
 
   // Calculate date range for last 24 hours (memoized to avoid constant recalculation)
   const dateRange = useMemo(() => {
@@ -231,7 +228,17 @@ function HomeScreenContent() {
     }
   }, [userElepad?.groupId, queryClient]);
 
-
+  if (userElepadLoading || !userElepad) {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={["top"]}>
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor={COLORS.background}
+        />
+        <LoadingProfile />
+      </SafeAreaView>
+    );
+  }
 
   const displayName =
     (userElepad?.displayName as string) || userElepad?.email || "Usuario";
@@ -266,218 +273,150 @@ function HomeScreenContent() {
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.greetingContainer}>
-            <TourGuideZone
-              zone={1}
-              text="¡Hola! Aquí verás tu saludo y rol dentro de la familia Elepad."
-              borderRadius={8}
-              shape="rectangle"
-            >
-              <View>
-                <Text style={styles.greeting}>{getGreeting()}</Text>
-                <View style={styles.userNameContainer}>
-                  {userElepadLoading ? (
-                    <View style={{ gap: 4 }}>
-                      <SkeletonBox width={180} height={30} borderRadius={8} />
-                      <SkeletonBox width={100} height={16} borderRadius={4} />
-                    </View>
-                  ) : (
-                    <>
-                      <Text style={styles.userName} numberOfLines={1}>
-                        {displayName}
-                      </Text>
-                      <Text style={styles.userRole} numberOfLines={1}>
-                        ({userRole})
-                      </Text>
-                    </>
-                  )}
-                </View>
+            <View>
+              <Text style={styles.greeting}>{getGreeting()}</Text>
+              <View style={styles.userNameContainer}>
+                <Text style={styles.userName} numberOfLines={1}>
+                  {displayName}
+                </Text>
+                <Text style={styles.userRole} numberOfLines={1}>
+                  ({userRole})
+                </Text>
               </View>
-            </TourGuideZone>
+            </View>
           </View>
           <View style={styles.headerRight}>
             {/* Notification Button */}
-            <TourGuideZone
-              zone={3}
-              text="Aquí te avisaremos de nuevas actividades, recuerdos compartidos y más."
-              shape="circle"
+            <Pressable
+              style={({ pressed }) => [
+                styles.notificationContainer,
+                pressed && { opacity: 0.6 },
+              ]}
+              onPress={() => {
+                router.push("/notifications");
+              }}
+              android_ripple={{
+                color: COLORS.primary + "30",
+                borderless: true,
+                radius: 24,
+              }}
             >
-              <Pressable
-                style={({ pressed }) => [
-                  styles.notificationContainer,
-                  pressed && { opacity: 0.6 },
-                ]}
-                onPress={() => {
-                  router.push("/notifications");
-                }}
-                android_ripple={{
-                  color: COLORS.primary + "30",
-                  borderless: true,
-                  radius: 24,
-                }}
-              >
-                <IconButton
-                  icon="bell-outline"
-                  size={26}
-                  iconColor={COLORS.primary}
-                  style={styles.notificationButton}
-                />
-                {unreadCount > 0 && (
-                  <View style={styles.badge}>
-                    <Text style={styles.badgeText}>
-                      {unreadCount > 99 ? "99+" : unreadCount}
-                    </Text>
-                  </View>
-                )}
-              </Pressable>
-              {/* End Wrap Notification */}
-            </TourGuideZone>
+              <IconButton
+                icon="bell-outline"
+                size={26}
+                iconColor={COLORS.primary}
+                style={styles.notificationButton}
+              />
+              {unreadCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </Text>
+                </View>
+              )}
+            </Pressable>
+            {/* End Wrap Notification */}
 
             {/* Avatar */}
             {/* Avatar with Frame */}
-            <TourGuideZone
-              zone={2}
-              text="Desde aquí puedes ver y editar tu perfil o configurar la aplicación."
-              borderRadius={30}
-              shape="circle"
-              style={{ marginLeft: 8 }}
+            <Pressable
+              onPress={() => {
+                router.navigate({
+                  pathname: "/(tabs)/home",
+                  params: {
+                    tab: "configuracion",
+                  },
+                });
+              }}
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.7 : 1,
+                marginLeft: 8,
+              })}
             >
-              <Pressable
-                onPress={() => {
-                  router.navigate({
-                    pathname: "/(tabs)/home",
-                    params: {
-                      tab: "configuracion",
-                    },
-                  });
-                }}
-                style={({ pressed }) => ({
-                  opacity: pressed ? 0.7 : 1,
-                })}
-              >
-                <View style={{ position: "relative" }}>
-                  {userElepadLoading ? (
-                    <SkeletonBox width={55} height={55} borderRadius={30} />
-                  ) : userElepad?.avatarUrl ? (
-                    <Avatar.Image
-                      size={55}
-                      source={{ uri: userElepad?.avatarUrl }}
-                      style={styles.avatar}
-                    />
-                  ) : (
-                    <Avatar.Text
-                      size={55}
-                      label={getInitials(displayName)}
-                      style={[styles.avatar, { backgroundColor: COLORS.primary }]}
-                      labelStyle={{ color: COLORS.white, fontSize: 22 }}
-                    />
-                  )}
-                  {!userElepadLoading && userElepad?.activeFrameUrl && (
-                    <Image
-                      source={{ uri: userElepad?.activeFrameUrl }}
-                      style={{
-                        position: "absolute",
-                        width: 55 * 1.4,
-                        height: 55 * 1.4,
-                        top: -55 * 0.2,
-                        left: -55 * 0.2,
-                        zIndex: 10,
-                      }}
-                      resizeMode="contain"
-                    />
-                  )}
-                </View>
-              </Pressable>
-            </TourGuideZone>
+              <View style={{ position: "relative" }}>
+                {userElepad?.avatarUrl ? (
+                  <Avatar.Image
+                    size={55}
+                    source={{ uri: userElepad?.avatarUrl }}
+                    style={styles.avatar}
+                  />
+                ) : (
+                  <Avatar.Text
+                    size={55}
+                    label={getInitials(displayName)}
+                    style={[styles.avatar, { backgroundColor: COLORS.primary }]}
+                    labelStyle={{ color: COLORS.white, fontSize: 22 }}
+                  />
+                )}
+                {userElepad?.activeFrameUrl && (
+                  <Image
+                    source={{ uri: userElepad?.activeFrameUrl }}
+                    style={{
+                      position: "absolute",
+                      width: 55 * 1.4,
+                      height: 55 * 1.4,
+                      top: -55 * 0.2,
+                      left: -55 * 0.2,
+                      zIndex: 10,
+                    }}
+                    resizeMode="contain"
+                  />
+                )}
+              </View>
+            </Pressable>
           </View>
         </View>
 
         {/* Último Recuerdo - DESTACADO */}
-        <TourGuideZone
-          zone={4}
-          text="Revive tus momentos especiales. Aquí aparecerá tu recuerdo más reciente."
-          borderRadius={20}
-        >
-          <View>
-            {memoriesQuery.isLoading || userElepadLoading ? (
-              <View style={styles.memoryCardLoading}>
-                <SkeletonBox width={SCREEN_WIDTH} height={280} borderRadius={0} />
-              </View>
-            ) : lastMemory ? (
-              <Animated.View entering={FadeIn.duration(800)}>
-                {(() => {
-                  const hasMedia = lastMemory.mediaUrl &&
-                    lastMemory.mimeType &&
-                    (lastMemory.mimeType.startsWith("image/") ||
-                      lastMemory.mimeType.startsWith("video/"));
-                  return (
-                    <Pressable
-                      style={hasMedia ? styles.memoryCard : styles.memoryCardNote}
-                      onPress={() =>
-                        router.navigate({
-                          pathname: "/(tabs)/recuerdos",
-                          params: {
-                            tab: "recuerdos",
-                            memoryId: lastMemory.id,
-                            bookId: lastMemory.bookId,
-                          },
-                        })
-                      }
-                    >
-                      {hasMedia ? (
-                        <ImageBackground
-                          source={{ uri: lastMemory.mediaUrl }}
-                          style={styles.memoryImage}
-                          imageStyle={styles.memoryImageStyle}
+        <View>
+          {memoriesQuery.isLoading ? (
+            <View style={styles.memoryCardLoading}>
+              <SkeletonBox width={SCREEN_WIDTH} height={280} borderRadius={0} />
+            </View>
+          ) : lastMemory ? (
+            <Animated.View entering={FadeIn.duration(800)}>
+              {(() => {
+                const hasMedia = lastMemory.mediaUrl &&
+                  lastMemory.mimeType &&
+                  (lastMemory.mimeType.startsWith("image/") ||
+                    lastMemory.mimeType.startsWith("video/"));
+                return (
+                  <Pressable
+                    style={hasMedia ? styles.memoryCard : styles.memoryCardNote}
+                    onPress={() =>
+                      router.navigate({
+                        pathname: "/(tabs)/recuerdos",
+                        params: {
+                          tab: "recuerdos",
+                          memoryId: lastMemory.id,
+                          bookId: lastMemory.bookId,
+                        },
+                      })
+                    }
+                  >
+                    {hasMedia ? (
+                      <ImageBackground
+                        source={{ uri: lastMemory.mediaUrl }}
+                        style={styles.memoryImage}
+                        imageStyle={styles.memoryImageStyle}
+                      >
+                        <LinearGradient
+                          colors={["transparent", "rgba(0,0,0,0.7)"]}
+                          style={styles.memoryGradient}
                         >
-                          <LinearGradient
-                            colors={["transparent", "rgba(0,0,0,0.7)"]}
-                            style={styles.memoryGradient}
-                          >
-                            <View style={styles.memoryContent}>
-                              <Text style={styles.memoryLabel}>ÚLTIMO RECUERDO</Text>
-                              <Text style={styles.memoryTitle} numberOfLines={2}>
-                                {lastMemory.title || "Sin título"}
-                              </Text>
-                              {lastMemory.caption && (
-                                <HighlightedMentionText
-                                  text={lastMemory.caption}
-                                  familyMembers={groupMembers}
-                                  style={styles.memoryDescription}
-                                />
-                              )}
-                              <Text style={styles.memoryDate}>
-                                {formatInUserTimezone(
-                                  lastMemory.createdAt,
-                                  "d 'de' MMMM 'de' yyyy",
-                                  userElepad?.timezone
-                                )}
-                              </Text>
-                            </View>
-                          </LinearGradient>
-                        </ImageBackground>
-                      ) : (
-                        <View style={styles.memoryNoImage}>
-                          <View style={styles.pushpinIcon}>
-                            <Icon
-                              source="pin"
-                              size={34}
-                              color="#dc2626" // Red color for the pushpin
-                            />
-                          </View>
                           <View style={styles.memoryContent}>
-                            <Text style={styles.memoryLabelNote}>ÚLTIMO RECUERDO</Text>
-                            <Text style={styles.memoryTitleNote} numberOfLines={2}>
+                            <Text style={styles.memoryLabel}>ÚLTIMO RECUERDO</Text>
+                            <Text style={styles.memoryTitle} numberOfLines={2}>
                               {lastMemory.title || "Sin título"}
                             </Text>
-
                             {lastMemory.caption && (
                               <HighlightedMentionText
                                 text={lastMemory.caption}
                                 familyMembers={groupMembers}
-                                style={styles.memoryDescriptionNote}
+                                style={styles.memoryDescription}
                               />
                             )}
-                            <Text style={styles.memoryDateNote}>
+                            <Text style={styles.memoryDate}>
                               {formatInUserTimezone(
                                 lastMemory.createdAt,
                                 "d 'de' MMMM 'de' yyyy",
@@ -485,66 +424,241 @@ function HomeScreenContent() {
                               )}
                             </Text>
                           </View>
-                        </View>
-                      )}
-                    </Pressable>
-                  );
-                })()}
-              </Animated.View>
-            ) : (
-              <Pressable
-                style={styles.memoryCardEmpty}
-                onPress={() => router.setParams({ tab: "recuerdos" })}
-              >
-                <Text style={styles.emptyTitle}>No hay recuerdos guardados</Text>
-                <Text style={styles.emptySubtitle}>
-                  Comienza a crear tus momentos especiales
-                </Text>
-                <Button
-                  mode="contained"
-                  onPress={() => router.setParams({ tab: "recuerdos" })}
-                  style={styles.emptyButton}
-                  buttonColor={COLORS.primary}
-                >
-                  Crear recuerdo
-                </Button>
-              </Pressable>
+                        </LinearGradient>
+                      </ImageBackground>
+                    ) : (
+                      <ImageBackground source={fondoRecuerdos} style={styles.memoryNoImage}>
+                        <Image source={tapeImage} style={styles.tapeIcon} />
+                        <View style={styles.memoryContent}>
+                          <Text style={styles.memoryLabelNote}>ÚLTIMO RECUERDO</Text>
+                          <Text style={styles.memoryTitleNote} numberOfLines={2}>
+                            {lastMemory.title || "Sin título"}
+                          </Text>
 
-            )}
-          </View>
-        </TourGuideZone>
+                          {lastMemory.caption && (
+                            <HighlightedMentionText
+                              text={lastMemory.caption}
+                              familyMembers={groupMembers}
+                              style={styles.memoryDescriptionNote}
+                            />
+                          )}
+                          <Text style={styles.memoryDateNote}>
+                            {formatInUserTimezone(
+                              lastMemory.createdAt,
+                              "d 'de' MMMM 'de' yyyy",
+                              userElepad?.timezone
+                            )}
+                          </Text>
+                        </View>
+                      </ImageBackground>
+                    )}
+                  </Pressable>
+                );
+              })()}
+            </Animated.View>
+          ) : (
+            <Pressable
+              style={styles.memoryCardEmpty}
+              onPress={() => router.setParams({ tab: "recuerdos" })}
+            >
+              <Text style={styles.emptyTitle}>No hay recuerdos guardados</Text>
+              <Text style={styles.emptySubtitle}>
+                Comienza a crear tus momentos especiales
+              </Text>
+              <Button
+                mode="contained"
+                onPress={() => router.setParams({ tab: "recuerdos" })}
+                style={styles.emptyButton}
+                buttonColor={COLORS.primary}
+              >
+                Crear recuerdo
+              </Button>
+            </Pressable>
+
+          )}
+        </View>
 
         {/* Contador de Racha - Solo para usuarios elder */}
         {userElepad?.elder && <StreakCounter />}
 
         {/* Próximos Eventos */}
-        <HomeEvents
-          isLoading={activitiesQuery.isLoading || userElepadLoading}
-          events={upcomingActivities}
-          timezone={userElepad?.timezone}
-          groupMembers={groupMembers}
-          onRestartTour={restartTour}
-          debugTaps={debugTaps}
-          setDebugTaps={setDebugTaps}
-        />
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>
+              Próximos{" "}
+              <Text suppressHighlighting={true}>
+                eventos
+              </Text>
+            </Text>
+            {upcomingActivities.length > 0 && (
+              <Button
+                mode="text"
+                onPress={() => {
+                  router.navigate({
+                    pathname: "/(tabs)/home",
+                    params: {
+                      tab: "calendar",
+                    },
+                  });
+                }}
+                labelStyle={styles.sectionLink}
+                compact
+              >
+                Ver todos
+              </Button>
+            )}
+          </View>
+
+          <>
+            {activitiesQuery.isLoading ? (
+              <View style={[styles.eventsContainer, { marginTop: 0 }]}>
+                {[1, 2, 3].map((i) => (
+                  <View key={i} style={styles.eventItem}>
+                    <View style={styles.eventTime}>
+                      <SkeletonBox
+                        width={60}
+                        height={16}
+                        borderRadius={4}
+                        style={{ marginBottom: 8 }}
+                      />
+                      <SkeletonBox width={50} height={14} borderRadius={4} />
+                    </View>
+                    <View style={styles.eventDivider} />
+                    <View style={styles.eventContent}>
+                      <SkeletonBox
+                        width="80%"
+                        height={18}
+                        borderRadius={4}
+                        style={{ marginBottom: 8 }}
+                      />
+                      <SkeletonBox width="60%" height={14} borderRadius={4} />
+                    </View>
+                  </View>
+                ))}
+              </View>
+            ) : upcomingActivities.length > 0 ? (
+              <View style={[styles.eventsContainer, { marginTop: 0 }]}>
+                {upcomingActivities.map(
+                  (
+                    activity: {
+                      id: string;
+                      startsAt: string;
+                      title: string;
+                      description?: string;
+                    },
+                    index,
+                  ) => {
+                    const activityDate = toUserLocalTime(activity.startsAt, userElepad?.timezone);
+                    const now = toUserLocalTime(new Date(), userElepad?.timezone);
+                    const tomorrow = new Date(now);
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+
+                    const isToday =
+                      activityDate.toDateString() === now.toDateString();
+                    const isTomorrow =
+                      activityDate.toDateString() === tomorrow.toDateString();
+
+                    let dateLabel = formatInUserTimezone(
+                      activity.startsAt,
+                      "d MMM",
+                      userElepad?.timezone
+                    );
+
+                    if (isToday) dateLabel = "Hoy";
+                    if (isTomorrow) dateLabel = "Mañana";
+
+                    return (
+                      <Pressable
+                        key={activity.id}
+                        onPress={() => {
+                          console.log(
+                            "🏠 Home: Navigating to calendar with activity",
+                            {
+                              activityId: activity.id,
+                              title: activity.title,
+                              startsAt: activity.startsAt,
+                            },
+                          );
+                          // Navegar al tab de calendario y abrir el detalle del evento
+                          router.navigate({
+                            pathname: "/(tabs)/home",
+                            params: {
+                              tab: "calendar",
+                              activityId: activity.id,
+                            },
+                          });
+                        }}
+                        style={({ pressed }) => ({
+                          opacity: pressed ? 0.7 : 1,
+                        })}
+                      >
+                        <Animated.View
+                          entering={ZoomIn.duration(200).delay(index * 50)}
+                          style={styles.eventItem}
+                        >
+                          <View style={styles.eventTime}>
+                            <Text style={styles.eventDate}>{dateLabel}</Text>
+                            <Text style={styles.eventHour}>
+                              {formatInUserTimezone(
+                                activity.startsAt,
+                                "HH:mm",
+                                userElepad?.timezone
+                              )}
+                            </Text>
+                          </View>
+                          <View style={styles.eventDivider} />
+                          <View style={styles.eventContent}>
+                            <Text style={styles.eventTitle} numberOfLines={1}>
+                              {activity.title}
+                            </Text>
+                            {activity.description && (
+                              <HighlightedMentionText
+                                text={activity.description}
+                                groupMembers={groupMembers}
+                                style={styles.eventDesc}
+                                numberOfLines={1}
+                              />
+                            )}
+                          </View>
+                        </Animated.View>
+                      </Pressable>
+                    );
+                  },
+                )}
+              </View>
+            ) : (
+              <View style={[styles.emptySection, { marginTop: 0 }]}>
+                <Text style={styles.emptyText}> No hay eventos próximos </Text>
+                <Button
+                  mode="outlined"
+                  onPress={() => {
+                    router.navigate({
+                      pathname: "/(tabs)/home",
+                      params: {
+                        tab: "calendar",
+                        openForm: "true",
+                      },
+                    });
+                  }}
+                  style={styles.emptyButtonOutline}
+                  textColor={COLORS.primary}
+                  icon="calendar-plus"
+                >
+                  Crear evento
+                </Button>
+              </View>
+            )}
+          </>
+        </View>
 
         {/* Actividad Reciente */}
-
         <View style={styles.section}>
-          <TourGuideZone
-            zone={7}
-            text="Mantente al día con los juegos y actividades completadas."
-            borderRadius={8}
-          >
-            <Text style={styles.sectionTitle}>
-              {userElepad?.elder
-                ? "Mi última actividad"
-                : "Última actividad del grupo"}
-            </Text>
-          </TourGuideZone>
+          <Text style={styles.sectionTitle}>
+            {userElepad?.elder ? "Mi última actividad" : "Última actividad del grupo"}
+          </Text>
 
-          {attemptsQuery.isLoading || userElepadLoading ? (
-            <View style={[styles.gameCard, { marginTop: 10 }]}>
+          {attemptsQuery.isLoading ? (
+            <View style={[styles.gameCard, { marginTop: 22 }]}>
               <SkeletonBox width={60} height={60} borderRadius={30} />
               <View style={{ flex: 1, justifyContent: "center", gap: 8 }}>
                 <SkeletonBox width="70%" height={18} borderRadius={4} />
@@ -556,7 +670,7 @@ function HomeScreenContent() {
             // Elder: mostrar solo su último intento
             lastAttempt && !Array.isArray(lastAttempt) ? (
               <Pressable
-                style={styles.gameCard}
+                style={[styles.gameCard, { marginTop: 22 }]}
                 onPress={() => router.push("/history")}
               >
                 <View style={styles.gameIcon}>
@@ -598,7 +712,7 @@ function HomeScreenContent() {
           ) : (
             // Familiar: mostrar múltiples intentos de elder
             Array.isArray(lastAttempt) && lastAttempt.length > 0 ? (
-              <View style={{ gap: 10, marginTop: 10 }}>
+              <View style={{ gap: 5, marginTop: 22 }}>
                 {lastAttempt.map((attempt: AttemptWithUser) => (
                   <Pressable
                     key={attempt.id}
@@ -667,143 +781,6 @@ function HomeScreenContent() {
             )
           )}
         </View>
-
-        {/* Actividad Reciente */}
-        <TourGuideZone
-          zone={5}
-          text="Mantente al día con los juegos y actividades cognitivas completadas."
-          borderRadius={16}
-        >
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>
-              {userElepad?.elder ? "Mi última actividad" : "Última actividad del grupo"}
-            </Text>
-
-            {attemptsQuery.isLoading ? (
-              <View style={[styles.gameCard, { marginTop: 22 }]}>
-                <SkeletonBox width={60} height={60} borderRadius={30} />
-                <View style={{ flex: 1, justifyContent: "center", gap: 8 }}>
-                  <SkeletonBox width="70%" height={18} borderRadius={4} />
-                  <SkeletonBox width="50%" height={14} borderRadius={4} />
-                </View>
-                <SkeletonBox width={70} height={60} borderRadius={14} />
-              </View>
-            ) : userElepad?.elder ? (
-              // Elder: mostrar solo su último intento
-              lastAttempt && !Array.isArray(lastAttempt) ? (
-                <Pressable
-                  style={[styles.gameCard, { marginTop: 22 }]}
-                  onPress={() => router.push("/history")}
-                >
-                  <View style={styles.gameIcon}>
-                    <Image
-                      source={GAME_IMAGES[lastAttempt.gameType || "memory"]}
-                      style={{ width: 40, height: 40, resizeMode: "contain" }}
-                    />
-                  </View>
-                  <View style={styles.gameInfo}>
-                    <Text style={styles.gameName}>
-                      {getGameInfo(lastAttempt.gameType || "").name}
-                    </Text>
-                    <Text style={styles.gameTime}>
-                      {formatInUserTimezone(
-                        lastAttempt.startedAt,
-                        "d 'de' MMMM, HH:mm",
-                        userElepad?.timezone
-                      )}
-                    </Text>
-                  </View>
-                  <View style={styles.gameScore}>
-                    <Text style={styles.scoreLabel}>PUNTOS</Text>
-                    <Text style={styles.scoreValue}>{lastAttempt.score || 0}</Text>
-                  </View>
-                </Pressable>
-              ) : (
-                <View style={styles.emptySection}>
-                  <Text style={styles.emptyText}>Aún no has jugado</Text>
-                  <Button
-                    mode="outlined"
-                    onPress={() => router.push("/juegos")}
-                    style={styles.emptyButtonOutline}
-                    labelStyle={{ color: COLORS.primary }}
-                  >
-                    Explorar juegos
-                  </Button>
-                </View>
-              )
-            ) : (
-              // Familiar: mostrar múltiples intentos de elder
-              Array.isArray(lastAttempt) && lastAttempt.length > 0 ? (
-                <View style={{ gap: 5, marginTop: 22 }}>
-                  {lastAttempt.map((attempt: AttemptWithUser) => (
-                    <Pressable
-                      key={attempt.id}
-                      style={styles.gameCard}
-                      onPress={() => router.push("/history")}
-                    >
-                      <View style={styles.gameIcon}>
-                        <Image
-                          source={GAME_IMAGES[attempt.gameType || "memory"]}
-                          style={{ width: 40, height: 40, resizeMode: "contain" }}
-                        />
-                      </View>
-                      <View style={styles.gameInfo}>
-                        <Text style={styles.gameName}>
-                          {getGameInfo(attempt.gameType || "").name}
-                        </Text>
-                        <Text style={styles.gameTime}>
-                          {formatInUserTimezone(
-                            attempt.startedAt,
-                            "d 'de' MMMM, HH:mm",
-                            userElepad?.timezone
-                          )}
-                        </Text>
-                        {attempt.user && (
-                          <View style={styles.playerInfo}>
-                            {attempt.user.avatarUrl ? (
-                              <Avatar.Image
-                                size={20}
-                                source={{ uri: attempt.user.avatarUrl }}
-                                style={styles.playerAvatar}
-                              />
-                            ) : (
-                              <Avatar.Text
-                                size={20}
-                                label={attempt.user.displayName
-                                  .substring(0, 2)
-                                  .toUpperCase()}
-                                style={styles.playerAvatar}
-                              />
-                            )}
-                            <Text style={styles.playerName}>
-                              {attempt.user.displayName}
-                            </Text>
-                          </View>
-                        )}
-                      </View>
-                      <View style={styles.gameScore}>
-                        <Text style={styles.scoreLabel}>PUNTOS</Text>
-                        <Text style={styles.scoreValue}>{attempt.score || 0}</Text>
-                      </View>
-                    </Pressable>
-                  ))}
-                </View>
-              ) : (
-                <View style={styles.emptySection}>
-                  <Text style={styles.emptyText}>No hay actividad reciente en el grupo</Text>
-                  <Button
-                    mode="outlined"
-                    onPress={() => router.navigate({ pathname: "/(tabs)/home", params: { tab: "juegos" } })}
-                    style={styles.emptyButtonOutline}
-                    labelStyle={{ color: COLORS.primary }}
-                  >
-                    Ver estadísticas
-                  </Button>
-                </View>
-              )
-            )}
-          </View>
-        </TourGuideZone>
 
 
         {/* Espacio inferior para que el contenido no quede debajo del menú */}
@@ -941,16 +918,15 @@ const styles = StyleSheet.create({
   },
   memoryNoImage: {
     flex: 1,
-    backgroundColor: '#fef3c7', // Warm yellow like Post-it
-    borderRadius: 5, // Square corners like real Post-its
+    borderRadius: 3,
     margin: 16,
     padding: 20,
     justifyContent: "center",
     alignItems: "center",
     ...SHADOWS.card,
-    transform: [{ rotate: '-2deg' }], // Slight rotation like a stuck note
+    transform: [{ rotate: '-1deg' }], // Slight rotation like a stuck note
     borderWidth: 1,
-    borderColor: '#f59e0b', // Orange border for authenticity
+    borderColor: '#f1f1f1', // Softer beige border
   },
   memoryContent: {
     gap: 6,
@@ -1000,7 +976,7 @@ const styles = StyleSheet.create({
   memoryLabelNote: {
     fontSize: 11,
     fontWeight: "700",
-    color: '#92400e', // Dark brown for Post-it feel
+    color: COLORS.primary, // Dark brown for Post-it feel
     letterSpacing: 1.5,
     marginBottom: 4,
   },
@@ -1021,10 +997,13 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginTop: 4,
   },
-  pushpinIcon: {
+  tapeIcon: {
     position: 'absolute',
-    top: 5,
-    left: 14,
+    top: -10,
+    left: -10,
+    width: 70,
+    height: 75,
+    transform: [{ rotate: '-3deg' }], // Slight angle
     zIndex: 1,
   },
   emptyTitle: {
@@ -1216,11 +1195,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function HomeScreen() {
-  return (
-    <ElepadTourProvider>
-      <HomeScreenContent />
-    </ElepadTourProvider>
-  );
-}
-
+export default React.memo(HomeScreen);

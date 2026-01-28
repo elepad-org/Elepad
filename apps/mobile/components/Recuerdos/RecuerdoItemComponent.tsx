@@ -1,6 +1,7 @@
-import { TouchableOpacity, View, Dimensions, Image } from "react-native";
+import { TouchableOpacity, View, Dimensions, Image, ImageBackground } from "react-native";
 import { Text, IconButton } from "react-native-paper";
 import { STYLES, COLORS } from "@/styles/base";
+import fondoRecuerdos from "@/assets/images/fondoRecuerdos.png";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -31,12 +32,16 @@ export default function RecuerdoItemComponent({
   const itemSize =
     (screenWidth - spacing * 2 - gap * (numColumns - 1)) / numColumns;
 
+  // Factor de altura variable para estética Pinterest-like
+  const heightFactor = item.tipo === "texto" ? 0.6 : 0.8 + (item.id.length % 5) * 0.08; // 0.8 a 1.16 para imágenes/videos, 0.6 para texto
+  const itemHeight = itemSize * heightFactor;
+
   return (
     <TouchableOpacity
       onPress={() => onPress(item)}
       style={{
         width: itemSize,
-        height: itemSize,
+        height: itemHeight,
         marginBottom: 4, // Separación vertical más junta
         marginRight: gap,
         padding: 0,
@@ -138,20 +143,37 @@ export default function RecuerdoItemComponent({
           )}
         </View>
       ) : item.tipo === "texto" ? (
-        <View
-          style={[
-            STYLES.center,
-            { backgroundColor: COLORS.backgroundSecondary, flex: 1, padding: 12 },
-          ]}
+        <ImageBackground
+          source={fondoRecuerdos}
+          style={{
+            flex: 1,
+            padding: 12,
+            justifyContent: "center",
+            alignItems: "center",
+            borderRadius: 4,
+          }}
         >
-          <IconButton icon="text" size={32} iconColor={COLORS.primary} />
-          <Text
-            numberOfLines={3}
-            style={[STYLES.footerText, { textAlign: "center", marginTop: 4 }]}
-          >
-            {item.titulo || "Nota de texto"}
-          </Text>
-        </View>
+          {item.titulo && (
+            <View
+              style={{
+                position: "absolute",
+                top: 8,
+                left: 8,
+                right: 8,
+                backgroundColor: "rgba(0,0,0,0.6)",
+                padding: 6,
+                borderRadius: 4,
+              }}
+            >
+              <Text
+                numberOfLines={2}
+                style={{ color: "#fff", fontSize: 12, fontWeight: "500" }}
+              >
+                {item.titulo}
+              </Text>
+            </View>
+          )}
+        </ImageBackground>
       ) : (
         <View
           style={[
