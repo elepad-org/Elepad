@@ -1,6 +1,12 @@
 import { useState } from "react";
-import { View, Image, StyleSheet, Linking } from "react-native";
-import { Text, Card, Portal, Dialog, Button } from "react-native-paper";
+import { View, Image, StyleSheet, Linking, Pressable, ActivityIndicator } from "react-native";
+import {
+  Text,
+  Card,
+  Portal,
+  Dialog,
+  Button,
+} from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { usePostAlbumIdExportPdf } from "@elepad/api-client";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -32,7 +38,8 @@ export default function AlbumCard({
   const [detailsVisible, setDetailsVisible] = useState(false);
   const { userElepad } = useAuth();
   const { showToast } = useToast();
-  const { sharePdf, savePdf, findSavedPdf, isDownloading } = usePdfDownload();
+  const { sharePdf, viewLocalPdf, isDownloading } = usePdfDownload();
+  const [actionsOpen, setActionsOpen] = useState(false);
 
   const exportPdfMutation = usePostAlbumIdExportPdf();
 
@@ -54,6 +61,8 @@ export default function AlbumCard({
       message: "Generando PDF... recibirás una notificación cuando esté listo",
       type: "success",
     });
+
+    setDetailsVisible(false);
 
     exportPdfMutation.mutate(
       { id: albumId },
@@ -83,17 +92,18 @@ export default function AlbumCard({
     if (pdfUrl) {
       try {
         // First, try to find a saved local copy
-        const savedUri = await findSavedPdf(title);
-
-        const uriToOpen = savedUri || pdfUrl;
-
-        await Linking.openURL(uriToOpen);
+        await viewLocalPdf(pdfUrl);
       } catch (err) {
-        console.error("Error opening PDF:", err);
-        showToast({
-          message: "No se pudo abrir el PDF",
-          type: "error",
-        });
+        try {
+          console.error(err);
+          await Linking.openURL(pdfUrl);
+        } catch (error) {
+          console.error("Error opening PDF:", error);
+          showToast({
+            message: "No se pudo abrir el PDF",
+            type: "error",
+          });
+        }
       }
     }
   };
@@ -101,24 +111,6 @@ export default function AlbumCard({
   const handleDownloadAndSharePdf = async () => {
     if (pdfUrl) {
       await sharePdf(pdfUrl, title);
-    }
-  };
-
-  const handleSavePdf = async () => {
-    if (pdfUrl) {
-      const savedUri = await savePdf(pdfUrl, title);
-      if (savedUri) {
-        try {
-          await Linking.openURL(savedUri);
-        } catch (err) {
-          console.error("Error opening saved PDF:", err);
-          showToast({
-            message: "No se pudo abrir el PDF guardado",
-            type: "error",
-          });
-        }
-      }
-      setDetailsVisible(false);
     }
   };
 
@@ -189,35 +181,7 @@ export default function AlbumCard({
             </Button>
 
             {pdfUrl ? (
-              <View>
-                <Button
-                  mode="outlined"
-                  icon="file-pdf-box"
-                  onPress={() => {
-                    handleViewPdf();
-                    setDetailsVisible(false);
-                  }}
-                >
-                  Ver PDF
-                </Button>
-                <Button
-                  mode="outlined"
-                  icon="download"
-                  loading={isDownloading}
-                  disabled={isDownloading}
-                  onPress={handleSavePdf}
-                >
-                  Guardar
-                </Button>
-                <Button
-                  mode="contained"
-                  icon="share-variant"
-                  loading={isDownloading}
-                  disabled={isDownloading}
-                  onPress={handleDownloadAndSharePdf}
-                >
-                  Compartir
-                </Button>
+              <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
                 <Button
                   mode="contained"
                   onPress={() => {
@@ -227,9 +191,53 @@ export default function AlbumCard({
                 >
                   Ver Álbum
                 </Button>
+                <View style={styles.actionsDropdown}>
+                  <Pressable
+                    onPress={() => setActionsOpen((v) => !v)}
+                    style={({ pressed }) => [
+                      styles.plusButton,
+                      pressed && { opacity: 0.65 },
+                    ]}
+                    accessibilityLabel={actionsOpen ? "Cerrar acciones" : "Abrir acciones"}
+                  >
+                    <MaterialCommunityIcons name={actionsOpen ? "minus" : "plus"} size={20} color={COLORS.white} />
+                  </Pressable>
+
+                  {actionsOpen && (
+                    <View style={styles.dropdownItems}>
+                      <Pressable
+                        onPress={() => {
+                          handleViewPdf();
+                          setDetailsVisible(false);
+                          setActionsOpen(false);
+                        }}
+                        style={({ pressed }) => [styles.iconAction, pressed && { opacity: 0.7 }]}
+                        accessibilityLabel="Ver PDF"
+                      >
+                        <MaterialCommunityIcons name="file-pdf-box" size={20} color={COLORS.primary} />
+                      </Pressable>
+
+                      <Pressable
+                        onPress={async () => {
+                          await handleDownloadAndSharePdf();
+                          setActionsOpen(false);
+                        }}
+                        style={({ pressed }) => [styles.iconAction, pressed && { opacity: 0.7 }]}
+                        accessibilityLabel="Compartir PDF"
+                      >
+                        {isDownloading ? (
+                          <ActivityIndicator size="small" color={COLORS.white} />
+                        ) : (
+                          <MaterialCommunityIcons name="share-variant" size={20} color={COLORS.primary} style={{left: -5}} />
+                        )}
+                      </Pressable>
+                    </View>
+                  )}
+                </View>
+
               </View>
             ) : (
-              <View>
+              <View style={{ flexDirection: "row", gap: 8 }}>
                 <Button
                   mode="outlined"
                   loading={exportPdfMutation.isPending}
@@ -294,6 +302,39 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: COLORS.text,
     textAlign: "center",
+  },
+
+  actionsDropdown: {
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  plusButton: {
+    backgroundColor: COLORS.primary,
+    width: 30,
+    height: 30,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 4,
+  },
+
+  dropdownItems: {
+    position: "absolute",
+    top: -56,
+    left: -25,
+    borderRadius: 8,
+    borderColor: COLORS.backgroundSecondary,
+    borderWidth: 2,
+    flexDirection: "row",
+    gap: 4,
+  },
+
+  iconAction: {
+    padding: 6,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   dialog: {
