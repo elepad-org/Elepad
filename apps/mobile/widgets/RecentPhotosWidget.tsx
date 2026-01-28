@@ -5,6 +5,7 @@ import {
   ImageWidget,
   OverlapWidget,
 } from "react-native-android-widget";
+import itemPlaceholder from "../assets/images/ele-def-fondo-cuad.png";
 
 interface RecentPhotosWidgetProps {
   imageBase64?: string;
@@ -39,7 +40,7 @@ export function RecentPhotosWidget({
           }}
         >
           {/* Layer 1: Background Image */}
-          {/* @ts-ignore */}
+
           <ImageWidget
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             image={imageBase64 as any}
@@ -50,6 +51,7 @@ export function RecentPhotosWidget({
               width: "match_parent",
             }}
             radius={16}
+            // @ts-expect-error Library types missing resizeMode
             resizeMode="cover"
           />
 
@@ -193,7 +195,7 @@ export function RecentPhotosWidget({
           {/* eslint-disable-next-line */}
           {/* @ts-ignore */}
           <ImageWidget
-            image={require("../assets/images/ele-def-fondo-cuad.png")}
+            image={itemPlaceholder}
             imageWidth={48}
             imageHeight={48}
             style={{

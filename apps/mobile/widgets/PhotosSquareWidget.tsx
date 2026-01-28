@@ -4,6 +4,7 @@ import {
   ImageWidget,
   TextWidget,
 } from "react-native-android-widget";
+import itemPlaceholder from "../assets/images/ele-def-fondo-cuad.png";
 
 interface PhotosSquareWidgetProps {
   imageBase64?: string;
@@ -30,7 +31,6 @@ export function PhotosSquareWidget({
       clickAction="OPEN_APP"
     >
       {imageBase64 ? (
-        // @ts-ignore
         <ImageWidget
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           image={imageBase64 as any}
@@ -41,6 +41,7 @@ export function PhotosSquareWidget({
             width: "match_parent",
           }}
           radius={16}
+          // @ts-expect-error Library types missing resizeMode
           resizeMode="cover"
         />
       ) : (
@@ -58,7 +59,7 @@ export function PhotosSquareWidget({
           {/* eslint-disable-next-line */}
           {/* @ts-ignore */}
           <ImageWidget
-            image={require("../assets/images/ele-def-fondo-cuad.png")}
+            image={itemPlaceholder}
             imageWidth={32}
             imageHeight={32}
             style={{

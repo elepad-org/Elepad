@@ -13,6 +13,13 @@ const nameToWidget = {
   PhotosSquare: PhotosSquareWidget,
 };
 
+interface WidgetMemory {
+  mediaUrl?: string;
+  title?: string;
+  caption?: string;
+  createdAt: string | number | Date;
+}
+
 async function urlToBase64(url: string): Promise<string | null> {
   try {
     let fetchUrl = url;
@@ -77,22 +84,18 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
 
   try {
     // Attempt to get session
-    // Validate token with server
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth
-      .getSession()
-      .then(({ data }) =>
-        data.session
-          ? supabase.auth.getUser()
-          : { data: { user: null }, error: null },
-      );
-
-    // Recovery if session logic was complex:
     const {
       data: { session },
     } = await supabase.auth.getSession();
+
+    let user = null;
+    let userError = null;
+
+    if (session) {
+      const userRes = await supabase.auth.getUser();
+      user = userRes.data.user;
+      userError = userRes.error;
+    }
 
     if (!session) {
       widgetProps.error = "Abre la app";
@@ -119,8 +122,8 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
       const apiUrl =
         process.env.EXPO_PUBLIC_API_URL || "http://192.168.1.5:8787";
       const token = session.access_token;
-      let rawMemories: any[] = [];
-      let queryError = null;
+      let rawMemories: WidgetMemory[] = [];
+      let queryError: { message: string } | null | unknown = null;
 
       try {
         console.log(`Widget: API call...`);
@@ -145,7 +148,7 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
             await response.text(),
           );
         }
-      } catch (e: any) {
+      } catch (e: unknown) {
         queryError = e;
         console.log("Widget: API Fetch Error", e);
       }
@@ -193,15 +196,15 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
           nextIndex = Math.floor(Math.random() * memories.length);
         }
 
-        const memory = memories[nextIndex];
+        const memory = memories[nextIndex]!;
 
         // Fetch Base64
-        const b64 = await urlToBase64(memory.mediaUrl);
+        const b64 = await urlToBase64(memory.mediaUrl!);
 
         if (b64) {
           widgetProps.imageBase64 = b64;
-          widgetProps.title = cleanText(memory.title || "RECUERDO");
-          widgetProps.caption = cleanText(memory.caption || "");
+          widgetProps.title = cleanText(memory.title ?? "RECUERDO");
+          widgetProps.caption = cleanText(memory.caption ?? "");
           try {
             const dateObj = new Date(memory.createdAt);
             widgetProps.date = format(dateObj, "d 'de' MMMM", { locale: es });
@@ -213,7 +216,7 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
         }
       } else {
         const debugMsg = queryError
-          ? `Err: ${queryError.message}`
+          ? `Err: ${(queryError as { message?: string })?.message || String(queryError)}`
           : `Sin fotos (Raw: ${rawMemories.length})`;
         widgetProps.error = debugMsg;
       }
