@@ -6,7 +6,10 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "environment": "development"
+      "environment": "development",
+      "android": {
+        "buildType": "apk"
+      }
     },
     "development-agustinbravop": {
       "developmentClient": true,
@@ -16,7 +19,10 @@
       }
     },
     "preview": {
-      "environment": "preview"
+      "environment": "preview",
+      "android": {
+        "buildType": "apk"
+      }
     },
     "production": {
       "autoIncrement": true,
