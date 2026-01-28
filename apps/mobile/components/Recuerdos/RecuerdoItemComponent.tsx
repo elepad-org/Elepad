@@ -154,24 +154,17 @@ export default function RecuerdoItemComponent({
           }}
         >
           {item.titulo && (
-            <View
+            <Text
+              numberOfLines={3}
               style={{
-                position: "absolute",
-                top: 8,
-                left: 8,
-                right: 8,
-                backgroundColor: "rgba(0,0,0,0.6)",
-                padding: 6,
-                borderRadius: 4,
+                color: COLORS.primary,
+                fontSize: 14,
+                fontWeight: "600",
+                textAlign: "center",
               }}
             >
-              <Text
-                numberOfLines={2}
-                style={{ color: "#fff", fontSize: 12, fontWeight: "500" }}
-              >
-                {item.titulo}
-              </Text>
-            </View>
+              {item.titulo}
+            </Text>
           )}
         </ImageBackground>
       ) : (
