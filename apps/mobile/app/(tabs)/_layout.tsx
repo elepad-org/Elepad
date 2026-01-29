@@ -15,33 +15,39 @@ import { elderRoutes, nonElderRoutes, TabRoute } from "@/components/navigation/n
 
 import { LoadingUser } from "@/components/shared";
 
-export default function TabLayout() {
+import { TabProvider, useTabContext } from "@/context/TabContext";
+
+// Inner component to consume context and handle tabs
+function TabsContent() {
   const layout = useWindowDimensions();
   const params = useLocalSearchParams();
   const router = useRouter();
   const [index, setIndex] = useState(0);
   const { userElepad, userElepadLoading } = useAuth();
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
-
-
+  const { setActiveTab } = useTabContext();
 
   const isElder = userElepad?.elder === true;
-
-  // Detectar si es una pantalla muy grande (desktop/web)
-  // Usamos 1024px como breakpoint para que tablets usen el tab bar
-  // y solo pantallas de PC/desktop muestren el sidebar
   const isLargeScreen = layout.width >= 1024;
 
   const routes = useMemo(() =>
     isElder ? elderRoutes : nonElderRoutes
     , [isElder]);
 
+  // Handle internal index change with logging and context update
+  const handleIndexChange = (newIndex: number) => {
+    const routeKey = routes[newIndex].key;
+    console.log(`📱 Tab changed to: ${routeKey} (Index: ${newIndex})`);
+    setActiveTab(routeKey);
+    setIndex(newIndex);
+  };
+
   // Escuchar cambios en el parámetro 'tab' para cambiar de tab programáticamente
   useEffect(() => {
     if (params.tab) {
       const tabIndex = routes.findIndex((route) => route.key === params.tab);
       if (tabIndex !== -1) {
-        setIndex(tabIndex);
+        handleIndexChange(tabIndex);
       }
       // Limpiar el parámetro después de cambiar el tab
       setTimeout(() => {
@@ -49,8 +55,6 @@ export default function TabLayout() {
       }, 100);
     }
   }, [params.tab, routes]);
-
-
 
   const renderScene = useMemo(() => SceneMap({
     home: HomeScreen,
@@ -80,10 +84,7 @@ export default function TabLayout() {
     position: Animated.AnimatedInterpolation<number>;
     jumpTo: (key: string) => void;
   }) => {
-    // Don't render tab bar for large screens (sidebar is used instead)
     if (isLargeScreen) return null;
-
-    // If keyboard is open on mobile, do not render the tab bar
     if (isKeyboardVisible) return null;
 
     return (
@@ -96,30 +97,26 @@ export default function TabLayout() {
   };
 
   return (
-
     <View
       style={{ flex: 1, backgroundColor: COLORS.background, flexDirection: "row" }}
     >
       {userElepadLoading || !userElepad ? (
-        // Mostrar loading fullscreen mientras se carga el usuario o si no hay usuario
         <LoadingUser />
       ) : (
         <>
-          {/* Sidebar for large screens */}
           {isLargeScreen && (
             <SidebarNavigation
               routes={routes}
               activeIndex={index}
-              onIndexChange={setIndex}
+              onIndexChange={handleIndexChange}
             />
           )}
 
-          {/* Content area */}
           <View style={{ flex: 1 }}>
             <TabView
               navigationState={{ index, routes }}
               renderScene={renderScene}
-              onIndexChange={setIndex}
+              onIndexChange={handleIndexChange}
               initialLayout={{ width: layout.width }}
               renderTabBar={renderTabBar}
               tabBarPosition="bottom"
@@ -132,6 +129,13 @@ export default function TabLayout() {
         </>
       )}
     </View>
+  );
+}
 
+export default function TabLayout() {
+  return (
+    <TabProvider>
+      <TabsContent />
+    </TabProvider>
   );
 }
