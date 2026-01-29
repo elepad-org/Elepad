@@ -89,7 +89,7 @@ export function EditNameDialog({
         <Button
           mode="contained"
           loading={!!saving}
-          disabled={!!disabled}
+          disabled={!!disabled || !name.trim()}
           onPress={onSubmit}
           buttonColor={theme.colors.primary}
           textColor={theme.colors.onPrimary}
