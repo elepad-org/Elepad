@@ -4,7 +4,6 @@ import { COLORS, FONT, SHADOWS } from "@/styles/base";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "@/hooks/useAuth";
 import { SkeletonBox } from "@/components/shared";
-import { TourGuideZone } from "rn-tourguide";
 
 export default function StreakCounter() {
   const { streak, streakLoading } = useAuth();
@@ -36,29 +35,23 @@ export default function StreakCounter() {
 
   return (
     <View style={styles.container}>
-      <TourGuideZone
-        zone={5}
-        text="Aquí puedes ver tu racha actual. ¡Mantén tu progreso jugando a diario!"
-        borderRadius={16}
+      <LinearGradient
+        colors={["#7C3AED", "#A855F7"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.gradient}
       >
-        <LinearGradient
-          colors={["#7C3AED", "#A855F7"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.gradient}
-        >
-          <View style={styles.content}>
-            <View style={styles.textContainer}>
-              <Text style={styles.title}>¡Mantén tu racha!</Text>
-              <Text style={styles.subtitle}>Juega al menos una vez al día</Text>
-            </View>
-            <View style={styles.streakContainer}>
-              <Text style={styles.fireEmoji}>{hasPlayedToday ? "🔥" : "🧊"}</Text>
-              <Text style={styles.streakNumber}>{currentStreak}</Text>
-            </View>
+        <View style={styles.content}>
+          <View style={styles.textContainer}>
+            <Text style={styles.title}>¡Mantén tu racha!</Text>
+            <Text style={styles.subtitle}>Juega al menos una vez al día</Text>
           </View>
-        </LinearGradient>
-      </TourGuideZone>
+          <View style={styles.streakContainer}>
+            <Text style={styles.fireEmoji}>{hasPlayedToday ? "🔥" : "🧊"}</Text>
+            <Text style={styles.streakNumber}>{currentStreak}</Text>
+          </View>
+        </View>
+      </LinearGradient>
     </View>
   );
 }

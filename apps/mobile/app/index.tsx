@@ -1,13 +1,11 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "expo-router";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 import { Animated, View, Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Text } from "react-native-paper";
 import EleSvg from "@/assets/images/ele.svg";
 import { COLORS, STYLES } from "@/styles/base";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useToast } from "@/components/shared/Toast";
 
 import HomeScreen from "./(tabs)/home";
 export default function IndexRedirect() {
@@ -15,8 +13,6 @@ export default function IndexRedirect() {
   const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const hasRedirected = useRef(false);
-  const { showToast } = useToast();
-  const [resetTaps, setResetTaps] = useState(0);
 
   // Dimensiones responsive
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -32,22 +28,6 @@ export default function IndexRedirect() {
     }
   }, [session, loading]);
 
-  const handleResetTours = async () => {
-    try {
-      await AsyncStorage.removeItem('@elepad_has_seen_home_tour_v2');
-      await AsyncStorage.removeItem('@elepad_has_seen_calendar_tour_v2');
-      showToast({
-        message: 'Tours de onboarding eliminados del storage',
-        type: 'success'
-      });
-    } catch (e) {
-      console.error('Error clearing tour storage', e);
-      showToast({
-        message: 'Error al eliminar los tours',
-        type: 'error'
-      });
-    }
-  };
 
   if (loading) {
     return (
@@ -94,22 +74,7 @@ export default function IndexRedirect() {
         >
           <Text style={STYLES.heading}>¡Bienvenido!</Text>
           <Text style={STYLES.subheading}>
-            Elija una{" "}
-            <Text
-              onPress={() => {
-                const newTaps = resetTaps + 1;
-                setResetTaps(newTaps);
-                if (newTaps >= 10) {
-                  setResetTaps(0);
-                  handleResetTours();
-                }
-              }}
-              suppressHighlighting={true}
-              style={STYLES.subheading}
-            >
-              opción
-            </Text>
-            {" "}para continuar
+            Elija una opción para continuar
           </Text>
 
           <Button
