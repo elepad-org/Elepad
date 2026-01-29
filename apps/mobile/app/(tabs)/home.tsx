@@ -9,6 +9,7 @@ import {
   Dimensions,
   Image,
 } from "react-native";
+import React, { useEffect, useRef, useMemo } from "react";
 import { Text, Avatar, Button, IconButton } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -23,7 +24,6 @@ import {
   AttemptWithUser,
 } from "@elepad/api-client";
 import { useRouter } from "expo-router";
-import React, { useMemo, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import StreakCounter from "@/components/StreakCounter";
@@ -38,6 +38,8 @@ import sudokuImage from "@/assets/images/sudoku2.png";
 import focusImage from "@/assets/images/focus2.png";
 import tapeImage from "@/assets/images/paper-transparent-sticky-tape-png.png";
 import fondoRecuerdos from "@/assets/images/fondoRecuerdos.png";
+import { useTour } from "@/hooks/useTour";
+import { useTourStep } from "@/hooks/useTourStep";
 
 
 
@@ -68,6 +70,36 @@ const HomeScreen = () => {
   const router = useRouter();
   const { unreadCount } = useNotifications();
   const queryClient = useQueryClient();
+
+  // Tour setup
+  const tour = useTour({ tourId: 'home' });
+
+  // Local ref to store measurements (tourState is empty before tour starts!)
+  const tourLayoutsRef = useRef<Record<string, { x: number; y: number; width: number; height: number }>>({});
+
+  // Tour steps - now returns {ref, measure, step}
+  const greetingStep = useTourStep({
+    tourId: 'home',
+    stepId: 'greeting',
+    order: 1,
+    text: 'Aquí puedes ver tu nombre de usuario y tu rol en la familia. ¡Bienvenido!',
+  });
+
+  const streakStep = useTourStep({
+    tourId: 'home',
+    stepId: 'streak-counter',
+    order: 2,
+    text: '¡Este es tu contador de racha! Juega al menos una vez al día para mantener tu racha activa y ganar puntos extra.',
+  });
+
+  const activityStep = useTourStep({
+    tourId: 'home',
+    stepId: 'recent-activity',
+    order: 3,
+    text: userElepad?.elder
+      ? 'Aquí puedes ver tu último juego completado con tu puntaje. ¡Toca para ver más detalles!'
+      : 'Aquí verás la actividad reciente de los adultos mayores en tu grupo familiar.',
+  });
 
 
 
@@ -228,6 +260,79 @@ const HomeScreen = () => {
     }
   }, [userElepad?.groupId, queryClient]);
 
+  // Auto-start tour after data loads AND component has rendered
+  useEffect(() => {
+    const startHomeTour = async () => {
+      if (!userElepadLoading && userElepad && !tour.isActive) {
+        const dataLoaded = !activitiesQuery.isLoading && !attemptsQuery.isLoading && !memoriesQuery.isLoading;
+
+        if (dataLoaded) {
+          const completed = await tour.isTourCompleted('home');
+
+          if (!completed) {
+            console.log('🏠 Home: Data loaded, waiting for UI to settle...');
+
+            // Wait longer to ensure all components are fully rendered and positioned
+            setTimeout(() => {
+              console.log('🏠 Home: Measuring elements...');
+
+              // Track measurement completion
+              let measurementsComplete = 0;
+              const totalMeasurements = 3;
+
+              const checkAndStart = () => {
+                measurementsComplete++;
+                console.log(`📍 Measurements: ${measurementsComplete}/${totalMeasurements}`);
+
+                if (measurementsComplete === totalMeasurements) {
+                  console.log('🏠 Home: All measurements complete, building steps and starting tour...');
+
+                  // Build steps array with layouts from LOCAL ref
+                  const steps = [
+                    { ...greetingStep.step, ref: greetingStep.ref, layout: tourLayoutsRef.current['greeting'] },
+                    { ...streakStep.step, ref: streakStep.ref, layout: tourLayoutsRef.current['streak-counter'] },
+                    { ...activityStep.step, ref: activityStep.ref, layout: tourLayoutsRef.current['recent-activity'] },
+                  ];
+
+                  console.log('🏠 Home: Steps built with layouts:', steps.map(s => ({ id: s.stepId, layout: s.layout })));
+                  tour.startTour(steps);
+                }
+              };
+
+              // Measure all positions - save to LOCAL ref (not provider state)
+              setTimeout(() => {
+                greetingStep.ref.current?.measureInWindow((x: number, y: number, w: number, h: number) => {
+                  console.log(`📍 Greeting measured: {x: ${x}, y: ${y}, w: ${w}, h: ${h}}`);
+                  tourLayoutsRef.current['greeting'] = { x, y, width: w, height: h };
+                  checkAndStart();
+                });
+              }, 50);
+
+              setTimeout(() => {
+                streakStep.ref.current?.measureInWindow((x: number, y: number, w: number, h: number) => {
+                  console.log(`📍 Streak measured: {x: ${x}, y: ${y}, w: ${w}, h: ${h}}`);
+                  tourLayoutsRef.current['streak-counter'] = { x, y, width: w, height: h };
+                  checkAndStart();
+                });
+              }, 100);
+
+              setTimeout(() => {
+                activityStep.ref.current?.measureInWindow((x: number, y: number, w: number, h: number) => {
+                  console.log(`📍 Activity measured: {x: ${x}, y: ${y}, w: ${w}, h: ${h}}`);
+                  tourLayoutsRef.current['recent-activity'] = { x, y, width: w, height: h };
+                  checkAndStart();
+                });
+              }, 150);
+            }, 2000); // Longer initial delay to ensure layout is stable
+          }
+        }
+      }
+    };
+
+    startHomeTour();
+  }, [userElepadLoading, userElepad, activitiesQuery.isLoading, attemptsQuery.isLoading, memoriesQuery.isLoading]);
+
+
   if (userElepadLoading || !userElepad) {
     return (
       <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -272,7 +377,7 @@ const HomeScreen = () => {
       >
         {/* Header */}
         <View style={styles.header}>
-          <View style={styles.greetingContainer}>
+          <View style={styles.greetingContainer} ref={greetingStep.ref}>
             <View>
               <Text style={styles.greeting}>{getGreeting()}</Text>
               <View style={styles.userNameContainer}>
@@ -479,7 +584,11 @@ const HomeScreen = () => {
         </View>
 
         {/* Contador de Racha - Solo para usuarios elder */}
-        {userElepad?.elder && <StreakCounter />}
+        {userElepad?.elder && (
+          <View ref={streakStep.ref}>
+            <StreakCounter />
+          </View>
+        )}
 
         {/* Próximos Eventos */}
         <View style={styles.section}>
@@ -652,7 +761,7 @@ const HomeScreen = () => {
         </View>
 
         {/* Actividad Reciente */}
-        <View style={styles.section}>
+        <View style={styles.section} ref={activityStep.ref}>
           <Text style={styles.sectionTitle}>
             {userElepad?.elder ? "Mi última actividad" : "Última actividad del grupo"}
           </Text>

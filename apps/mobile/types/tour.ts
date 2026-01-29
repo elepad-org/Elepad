@@ -1,0 +1,34 @@
+import React from 'react';
+import { View } from 'react-native';
+
+export interface TourStep {
+  tourId: string;      // ID del tour (ej: 'home', 'calendar')
+  stepId: string;      // ID único del paso
+  order: number;       // Orden del paso (1, 2, 3...)
+  text: string;        // Texto explicativo
+  title?: string;      // Título opcional
+}
+
+export interface TourStepPosition extends TourStep {
+  ref: React.RefObject<View | null>;  // Referencia al componente
+  layout?: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+}
+
+export interface TourState {
+  isActive: boolean;
+  currentTourId: string | null;
+  currentStepIndex: number;
+  steps: TourStepPosition[];
+}
+
+export type TourAction =
+  | { type: 'START_TOUR'; tourId: string; steps: TourStepPosition[] }
+  | { type: 'NEXT_STEP' }
+  | { type: 'PREV_STEP' }
+  | { type: 'STOP_TOUR' }
+  | { type: 'UPDATE_LAYOUT'; stepId: string; layout: TourStepPosition['layout'] };

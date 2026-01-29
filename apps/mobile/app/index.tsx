@@ -1,11 +1,13 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "expo-router";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Animated, View, Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Text } from "react-native-paper";
 import EleSvg from "@/assets/images/ele.svg";
 import { COLORS, STYLES } from "@/styles/base";
+import { useTour } from "@/hooks/useTour";
+import { useToast } from "@/components/shared/Toast";
 
 import HomeScreen from "./(tabs)/home";
 export default function IndexRedirect() {
@@ -13,6 +15,9 @@ export default function IndexRedirect() {
   const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const hasRedirected = useRef(false);
+  const [resetTaps, setResetTaps] = useState(0);
+  const { resetAllTours } = useTour({ tourId: 'home' });
+  const { showToast } = useToast();
 
   // Dimensiones responsive
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -74,7 +79,26 @@ export default function IndexRedirect() {
         >
           <Text style={STYLES.heading}>¡Bienvenido!</Text>
           <Text style={STYLES.subheading}>
-            Elija una opción para continuar
+            Elija una{" "}
+            <Text
+              onPress={async () => {
+                const newTaps = resetTaps + 1;
+                setResetTaps(newTaps);
+                if (newTaps >= 5) {
+                  setResetTaps(0);
+                  await resetAllTours();
+                  showToast({
+                    message: 'Tours reseteados correctamente',
+                    type: 'success'
+                  });
+                }
+              }}
+              suppressHighlighting={true}
+              style={STYLES.subheading}
+            >
+              opción
+            </Text>
+            {" "}para continuar
           </Text>
 
           <Button
