@@ -42,6 +42,14 @@ export const StyledTextInput = React.forwardRef<any, StyledTextInputProps>(
           activeOutlineColor="transparent"
           underlineColor="transparent"
           activeUnderlineColor="transparent"
+          theme={{
+            colors: {
+              primary: COLORS.primary,
+              background: "transparent",
+            },
+          }}
+          selectionColor={COLORS.primary}
+          cursorColor={COLORS.primary}
           {...props}
         />
       </View>
