@@ -138,6 +138,9 @@ app.route("/", notificationsApp);
 app.use("/push-tokens/*", withAuth);
 app.route("/", pushTokensApp);
 
+app.use("/devices/*", withAuth);
+app.route("/", pushTokensApp);
+
 app.use("/shop/*", withAuth);
 app.route("/", shopApp);
 

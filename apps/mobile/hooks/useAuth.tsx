@@ -11,6 +11,7 @@ import {
   useState,
   useRef,
 } from "react";
+import { usePushNotifications } from './usePushNotifications';
 import { useStreakSnackbar } from "./useStreakSnackbar";
 import { getTodayLocal, isSameLocalDate } from "@/lib/dateHelpers";
 
@@ -48,6 +49,9 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [streak, setStreak] = useState<StreakState | null>(null);
   const router = useRouter();
   const { showStreakExtended } = useStreakSnackbar();
+
+  // Register push notifications when user is authenticated
+  usePushNotifications(user?.id);
   const segments = useSegments();
   const segmentsRef = useRef(segments);
 

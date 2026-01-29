@@ -12,19 +12,19 @@ declare module "hono" {
 }
 
 // Middleware para inyectar el PushTokensService en cada request
-pushTokensApp.use("/push-tokens/*", async (c, next) => {
+pushTokensApp.use("/devices/*", async (c, next) => {
   const pushTokensService = new PushTokensService(c.var.supabase);
   c.set("pushTokensService", pushTokensService);
   await next();
 });
 
-// POST /push-tokens - Upsert a push token
+// POST /devices/register - Register a device token
 pushTokensApp.openapi(
   {
     method: "post",
-    path: "/push-tokens",
-    tags: ["push-tokens"],
-    summary: "Store or update a push token",
+    path: "/devices/register",
+    tags: ["devices"],
+    summary: "Register a device for push notifications",
     request: {
       body: {
         content: {
@@ -55,9 +55,9 @@ pushTokensApp.openapi(
 
     await c.var.pushTokensService.upsertPushToken({
       userId,
-      token: body.token,
+      token: body.expo_push_token,
       platform: body.platform,
-      deviceId: body.deviceId,
+      deviceId: body.device_id,
     });
 
     return c.json({ success: true }, 200);

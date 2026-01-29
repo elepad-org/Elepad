@@ -54,8 +54,25 @@ export class NotificationsService {
 
       if (!response.ok) {
         console.error('Failed to send push notification:', await response.text());
-      } else {
-        console.log(`Push notification sent to ${pushTokens.length} device(s) for user ${userId}`);
+        return;
+      }
+
+      const result = await response.json();
+      console.log(`Push notification sent to ${pushTokens.length} device(s) for user ${userId}`);
+
+      // Handle errors per token
+      if (result.data && Array.isArray(result.data)) {
+        for (let i = 0; i < result.data.length; i++) {
+          const ticket = result.data[i];
+          const token = pushTokens[i].token;
+
+          if (ticket.status === 'error' && ticket.details?.error === 'DeviceNotRegistered') {
+            console.log(`Deactivating invalid token: ${token}`);
+            await this.pushTokensService.removePushToken(userId, token);
+          } else if (ticket.status === 'error') {
+            console.error(`Push notification error for token ${token}:`, ticket.details);
+          }
+        }
       }
     } catch (error) {
       console.error('Error sending push notification:', error);
