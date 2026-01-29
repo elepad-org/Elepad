@@ -27,8 +27,8 @@ export default function RecuerdoItemComponent({
   numColumns,
   onPress,
 }: RecuerdoItemProps) {
-  const spacing = 16; // Espacio total horizontal
-  const gap = 4; // Espacio entre items
+  const spacing = 19; // Espacio total horizontal
+  const gap = 5; // Espacio entre items
   const itemSize =
     (screenWidth - spacing * 2 - gap * (numColumns - 1)) / numColumns;
 
@@ -42,11 +42,11 @@ export default function RecuerdoItemComponent({
       style={{
         width: itemSize,
         height: itemHeight,
-        marginBottom: 4, // Separación vertical más junta
+        marginBottom: gap, // Separación vertical
         marginRight: gap,
         padding: item.tipo === "imagen" ? 6 : 0, // Padding solo para imágenes polaroid
         overflow: "hidden",
-        borderRadius: 4,
+        borderRadius: 15,
         backgroundColor: item.tipo === "imagen" ? "#FFFFFF" : "#F5F5F5", // Blanco para imágenes, gris para otros
         borderWidth: 1,
         borderColor: "rgba(0,0,0,0.05)", // Borde sutil sombreado
@@ -67,13 +67,12 @@ export default function RecuerdoItemComponent({
           {item.titulo && (
             <View
               style={{
-                position: "absolute",
                 bottom: 0,
                 left: 0,
                 right: 0,
                 minHeight: 30,
                 justifyContent: "center",
-                alignItems: "center",
+                alignItems: "flex-start",
                 backgroundColor: "transparent", // Parte blanca abajo
               }}
             >
@@ -82,8 +81,10 @@ export default function RecuerdoItemComponent({
                 style={{
                   fontSize: 11,
                   color: COLORS.primary,
-                  textAlign: "center",
+                  textAlign: "left",
+                  paddingHorizontal: 10,
                   fontFamily: "Montserrat", // Fuente principal de la app
+                  fontWeight: "600",
                 }}
               >
                 {item.titulo}
@@ -159,23 +160,36 @@ export default function RecuerdoItemComponent({
             flex: 1,
             padding: 12,
             justifyContent: "center",
-            alignItems: "center",
+            alignItems: "flex-start",
             borderRadius: 4,
           }}
         >
-          {item.titulo && (
-            <Text
-              numberOfLines={3}
+         {item.titulo && (
+            <View
               style={{
-                color: COLORS.primary,
-                fontSize: 14,
-                fontWeight: "600",
-                textAlign: "center",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                minHeight: 30,
+                justifyContent: "center",
+                alignItems: "flex-start",
+                backgroundColor: "transparent", // Parte blanca abajo
               }}
             >
-              {item.titulo}
-            </Text>
-          )}
+              <Text
+                numberOfLines={2}
+                style={{
+                  fontSize: 12,
+                  color: COLORS.primary,
+                  paddingHorizontal: 5,
+                  textAlign: "left",
+                  fontFamily: "Montserrat", // Fuente principal de la app
+                  fontWeight: "600",
+                }}
+              >
+                {item.titulo}
+              </Text>
+            </View>)}
         </ImageBackground>
       ) : (
         <View
@@ -200,24 +214,6 @@ export default function RecuerdoItemComponent({
           </Text>
         </View>
       )}
-      <View
-        style={{
-          position: "absolute",
-          bottom: 8,
-          right: 8,
-          backgroundColor: "rgba(0,0,0,0.6)",
-          paddingHorizontal: 6,
-          paddingVertical: 4,
-          borderRadius: 4,
-        }}
-      >
-        <Text style={{ color: "#fff", fontSize: 10, fontWeight: "500" }}>
-          {item.fecha.toLocaleDateString("es-ES", {
-            day: "2-digit",
-            month: "short",
-          })}
-        </Text>
-      </View>
     </TouchableOpacity>
   );
 }
