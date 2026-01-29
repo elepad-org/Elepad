@@ -1,15 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { View, StyleSheet, ScrollView, Animated, Platform } from "react-native";
 import { useRef } from "react";
-import {
-  TextInput,
-  Button,
-  Text,
-  Menu,
-  Dialog,
-  Portal,
-} from "react-native-paper";
+import { Button, Dialog, Portal, Text, Menu } from "react-native-paper";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { StyledTextInput } from "../shared";
 import {
   DatePickerInput,
   TimePickerModal,
@@ -361,19 +355,14 @@ export default function ActivityForm({
         >
           <Animated.View style={{ opacity: fadeAnim }}>
             <Dialog.Content style={{ paddingBottom: 15 }}>
-              <View style={styles.inputWrapper}>
-                <TextInput
-                  label="Título"
-                  value={title}
-                  onChangeText={setTitle}
-                  placeholder={initial ? "Agregar evento" : "Nuevo evento"}
-                  mode="flat"
-                  outlineColor="transparent"
-                  activeOutlineColor="transparent"
-                  style={{ backgroundColor: "transparent" }}
-                  autoFocus={!initial}
-                />
-              </View>
+              <StyledTextInput
+                label="Título"
+                value={title}
+                onChangeText={setTitle}
+                placeholder={initial ? "Agregar evento" : "Nuevo evento"}
+                marginBottom={16}
+                autoFocus={!initial}
+              />
 
               {/* Selector de destinatario - solo visible para familiares (no elders) */}
               {!isElder && elders.length > 0 && (

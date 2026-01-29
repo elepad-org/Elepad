@@ -10,3 +10,4 @@ export { SkeletonBox } from "./SkeletonBox";
 export { default as CancelButton } from "./CancelButton";
 export { default as SuccessSnackbar } from "./SuccessSnackbar";
 export { default as ErrorSnackbar } from "./ErrorSnackbar";
+export { StyledTextInput } from "./StyledTextInput";

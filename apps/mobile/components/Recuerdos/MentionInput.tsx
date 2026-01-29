@@ -157,8 +157,17 @@ export default function MentionInput({
         multiline={multiline}
         numberOfLines={numberOfLines}
         disabled={disabled}
-        selectionColor={COLORS.primary + "40"}
-        style={inputStyle}
+        selectionColor={COLORS.primary}
+        cursorColor={COLORS.primary}
+        theme={{
+          colors: {
+            primary: COLORS.primary,
+            background: "transparent",
+            onSurfaceVariant: COLORS.primary,
+            placeholder: COLORS.textSecondary,
+          },
+        }}
+        style={[{ backgroundColor: "transparent" }, inputStyle]}
       />
 
       <PickerModal

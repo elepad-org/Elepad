@@ -8,12 +8,13 @@ import {
   Dimensions,
   Modal,
 } from "react-native";
-import { TextInput, Button, Text, IconButton } from "react-native-paper";
+import { Button, Text, IconButton } from "react-native-paper";
 import { Memory } from "@elepad/api-client";
 import { COLORS, STYLES } from "@/styles/base";
 import { useAlbumCreation } from "@/hooks/useAlbumCreation";
 import SaveButton from "../shared/SaveButton";
 import CancelButton from "../shared/CancelButton";
+import { StyledTextInput } from "../shared";
 import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,
@@ -183,37 +184,26 @@ export default function CreateAlbumDialog({
           >
             {step === "form" && (
               <View style={{ width: "100%" }}>
-                <View style={[styles.inputWrapper, { marginBottom: 16 }]}>
-                  <TextInput
-                    mode="flat"
-                    label="Título"
-                    placeholder="Título"
-                    value={title}
-                    onChangeText={setTitle}
-                    keyboardType="default"
-                    autoCapitalize="sentences"
-                    returnKeyType="next"
-                    style={{ backgroundColor: "transparent" }}
-                    outlineColor="transparent"
-                    activeOutlineColor="transparent"
-                  />
-                </View>
+                <StyledTextInput
+                  label="Título"
+                  placeholder="Título"
+                  value={title}
+                  onChangeText={setTitle}
+                  keyboardType="default"
+                  autoCapitalize="sentences"
+                  returnKeyType="next"
+                  marginBottom={16}
+                />
 
-                <View style={styles.inputWrapper}>
-                  <TextInput
-                    mode="flat"
-                    label="Descripción"
-                    placeholder="Descripción"
-                    value={description}
-                    onChangeText={setDescription}
-                    keyboardType="default"
-                    autoCapitalize="sentences"
-                    returnKeyType="done"
-                    style={{ backgroundColor: "transparent" }}
-                    outlineColor="transparent"
-                    activeOutlineColor="transparent"
-                  />
-                </View>
+                <StyledTextInput
+                  label="Descripción"
+                  placeholder="Descripción"
+                  value={description}
+                  onChangeText={setDescription}
+                  keyboardType="default"
+                  autoCapitalize="sentences"
+                  returnKeyType="done"
+                />
               </View>
             )}
 

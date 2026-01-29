@@ -1,12 +1,6 @@
 import { useState } from "react";
 import { StatusBar, ScrollView, View, StyleSheet } from "react-native";
-import {
-  Button,
-  Card,
-  TextInput,
-  Text,
-  IconButton,
-} from "react-native-paper";
+import { Button, Card, TextInput, Text, IconButton } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { COLORS, STYLES } from "@/styles/base";
@@ -79,7 +73,7 @@ export default function ChangePasswordScreen() {
     try {
       // Primero verificamos la contraseña actual intentando hacer signIn
       const { data: user } = await supabase.auth.getUser();
-      
+
       if (!user.user?.email) {
         throw new Error("No se pudo obtener el email del usuario");
       }
@@ -143,20 +137,13 @@ export default function ChangePasswordScreen() {
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
       <View style={styles.header}>
-        <IconButton
-          icon="arrow-left"
-          size={24}
-          onPress={() => router.back()}
-        />
+        <IconButton icon="arrow-left" size={24} onPress={() => router.back()} />
         <Text style={styles.headerTitle}>Cambiar contraseña</Text>
         <View style={{ width: 48 }} />
       </View>
 
       <ScrollView
-        contentContainerStyle={[
-          STYLES.contentContainer,
-          { paddingBottom: 40 },
-        ]}
+        contentContainerStyle={[STYLES.contentContainer, { paddingBottom: 40 }]}
         showsVerticalScrollIndicator={false}
       >
         <Card style={[STYLES.menuCard, { backgroundColor: COLORS.white }]}>
@@ -234,7 +221,14 @@ export default function ChangePasswordScreen() {
             mode="contained"
             onPress={handleChangePassword}
             loading={loading}
-            disabled={loading}
+            disabled={
+              loading ||
+              !currentPassword.trim() ||
+              !newPassword.trim() ||
+              !confirmPassword.trim() ||
+              newPassword.length < 6 ||
+              newPassword !== confirmPassword
+            }
             style={STYLES.buttonPrimary}
             contentStyle={STYLES.buttonContent}
           >
