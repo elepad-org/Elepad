@@ -136,8 +136,6 @@ app.use("/notifications/*", withAuth);
 app.route("/", notificationsApp);
 
 app.use("/push-tokens/*", withAuth);
-app.route("/", pushTokensApp);
-
 app.use("/devices/*", withAuth);
 app.route("/", pushTokensApp);
 
