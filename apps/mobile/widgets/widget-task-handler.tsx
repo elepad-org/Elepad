@@ -23,10 +23,10 @@ interface WidgetMemory {
 async function urlToBase64(url: string): Promise<string | null> {
   try {
     let fetchUrl = url;
-    // Resize via query params to keep base64 small $(< 500KB)
+    // Resize via query params to keep base64 manageable while maintaining quality
     if (url.includes("supabase.co") && !url.includes("width=")) {
       const char = url.includes("?") ? "&" : "?";
-      fetchUrl = `${url}${char}width=500&quality=60`;
+      fetchUrl = `${url}${char}width=800&quality=75`;
     }
 
     console.log("Widget: fetching base64 from", fetchUrl);
@@ -38,14 +38,10 @@ async function urlToBase64(url: string): Promise<string | null> {
       reader.onloadend = () => {
         const base64data = reader.result as string;
         console.log("Widget: b64 len", base64data.length);
-        if (base64data.length > 1500000) {
-          // 1.5MB Limit
-          console.log("Widget: Too big!");
-          resolve(null);
-        } else {
-          // Return full data URI
-          resolve(base64data);
-        }
+        
+        // Return full data URI
+        resolve(base64data);
+        
       };
       reader.onerror = reject;
       reader.readAsDataURL(blob);
@@ -59,12 +55,6 @@ async function urlToBase64(url: string): Promise<string | null> {
 export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
   const widgetInfo = props.widgetInfo;
 
-  // Handle Refresh Action
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if (props.widgetAction === ("REFRESH" as any)) {
-    // Force update or just proceed to re-fetch
-  }
-
   const Widget =
     nameToWidget[widgetInfo.widgetName as keyof typeof nameToWidget];
 
@@ -72,6 +62,29 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
     console.error(`Widget name ${widgetInfo.widgetName} not found`);
     return;
   }
+
+  // Handle Refresh Action: render an immediate 'loading' state so the user
+  // gets feedback, then continue with the normal update flow below.
+  if (props.widgetAction === "WIDGET_UPDATE") {
+    if (Widget) {
+      try {
+        const loadingProps = {
+          imageBase64: "",
+          title: "",
+          caption: "",
+          date: "",
+          error: "",
+          isLoading: true,
+        } as const;
+
+        // Render a quick feedback UI while the handler continues to fetch
+        props.renderWidget(<Widget {...(loadingProps as any)} />);
+      } catch (e) {
+        console.log("Widget: failed to render loading state", e);
+      }
+    }
+  }
+
 
   // Default props
   const widgetProps = {
@@ -98,7 +111,7 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
     }
 
     if (!session) {
-      widgetProps.error = "Abre la app";
+      widgetProps.error = "Toca para iniciar sesión";
     } else {
       // Validate token with server
       console.log(
@@ -128,7 +141,7 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
       try {
         console.log(`Widget: API call...`);
         const response = await fetch(
-          `${apiUrl}/memories?limit=20&groupId=${userRow?.groupId}`,
+          `${apiUrl}/memories?limit=10&groupId=${userRow?.groupId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -212,18 +225,21 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
             widgetProps.date = "";
           }
         } else {
-          widgetProps.error = "Error cargando foto";
+          widgetProps.error = "Toca para actualizar";
         }
       } else {
-        const debugMsg = queryError
-          ? `Err: ${(queryError as { message?: string })?.message || String(queryError)}`
-          : `Sin fotos (Raw: ${rawMemories.length})`;
-        widgetProps.error = debugMsg;
+        if (queryError) {
+          widgetProps.error = "Toca para actualizar";
+        } else {
+          widgetProps.error = rawMemories.length === 0
+            ? "Aún no hay recuerdos en tu grupo.\n¡Sé el primero en agregar uno!"
+            : "Toca para actualizar";
+        }
       }
     }
   } catch (e) {
     console.error("Widget Error:", e);
-    widgetProps.error = "Error general";
+    widgetProps.error = "Toca para actualizar";
   }
 
   props.renderWidget(<Widget {...widgetProps} />);

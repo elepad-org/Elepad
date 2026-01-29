@@ -13,218 +13,184 @@ interface RecentPhotosWidgetProps {
   caption?: string;
   date?: string;
   error?: string;
+  isLoading?: boolean;
 }
 
 export function RecentPhotosWidget({
   imageBase64,
   title,
-  caption,
   date,
   error,
+  isLoading,
 }: RecentPhotosWidgetProps) {
   return (
     <FlexWidget
       style={{
-        height: "match_parent",
-        width: "match_parent",
-        backgroundColor: "#000000",
-        borderRadius: 16,
+        padding: 20, // Marco blanco uniforme (Polaroid style)
+        flexDirection: "column",
       }}
       clickAction="OPEN_APP"
     >
+    <FlexWidget
+      style={{
+        height: "wrap_content",
+        width: "wrap_content",
+        backgroundColor: "#FFFFFF",
+        
+        padding: 12, // Marco blanco uniforme (Polaroid style)
+        flexDirection: "column",
+      }}
+    >
       {imageBase64 ? (
-        <OverlapWidget
-          style={{
-            height: "match_parent",
-            width: "match_parent",
-          }}
-        >
-          {/* Layer 1: Background Image */}
-
-          <ImageWidget
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            image={imageBase64 as any}
-            imageWidth={1000}
-            imageHeight={1000}
-            style={{
-              height: "match_parent",
-              width: "match_parent",
-            }}
-            radius={16}
-            // @ts-expect-error Library types missing resizeMode
-            resizeMode="cover"
-          />
-
-          {/* Layer 2: Fake Gradient Overlay (Stacked Stripes) */}
+        <FlexWidget>
+          {/* 1. ÁREA DE LA FOTO (Ocupa la mayor parte) */}
           <FlexWidget
             style={{
-              height: "match_parent",
+              flex: 1,
+              width: "match_parent",
+              backgroundColor: "#F0F0F0", // Fondo gris suave mientras carga la imagen
+              borderRadius: 4, // Un radio muy sutil a la foto interna queda mejor
+              marginBottom: 10, // Separación entre foto y texto
+            }}
+          >
+            <OverlapWidget
+              style={{
+                height: "match_parent",
+                width: "match_parent",
+              }}
+            >
+              <ImageWidget
+                image={imageBase64 as any}
+                imageWidth={800}
+                imageHeight={800}
+                radius={4}
+                style={{
+                  height: "match_parent",
+                  width: "match_parent",
+                }}
+                // Importante: 'cover' recorta la imagen para llenar el cuadro sin deformar
+                // @ts-ignore
+                contentFit="cover" 
+              />
+
+              {/* Botón de Refrescar (Discreto en la esquina) */}
+              <FlexWidget
+                style={{
+                  height: "match_parent",
+                  width: "match_parent",
+                  justifyContent: "flex-end", // Alinear a la derecha
+                  alignItems: "flex-start",   // Alinear arriba
+                  flexDirection: "row",
+                  padding: 6,
+                }}
+              >
+                <FlexWidget
+                  style={{
+                    backgroundColor: "#FFFFFFCC", // Blanco semitransparente
+                    borderRadius: 12,
+                    
+                  }}
+                  clickAction="WIDGET_UPDATE"
+                >
+                  <TextWidget
+                    text="↻"
+                    style={{
+                      color: "#333333",
+                    }}
+                  />
+                </FlexWidget>
+              </FlexWidget>
+            </OverlapWidget>
+          </FlexWidget>
+
+          {/* 2. ÁREA DE TEXTO (Pie de foto) */}
+          <FlexWidget
+            style={{
               width: "match_parent",
               flexDirection: "column",
               justifyContent: "flex-end",
             }}
           >
-            {/* Stripe 1 (Top - Transparent to faint) */}
-            <FlexWidget
-              style={{
-                height: 20,
-                width: "match_parent",
-                backgroundColor: "#00000010",
-              }}
-            />
-            {/* Stripe 2 */}
-            <FlexWidget
-              style={{
-                height: 20,
-                width: "match_parent",
-                backgroundColor: "#00000030",
-              }}
-            />
-            {/* Stripe 3 */}
-            <FlexWidget
-              style={{
-                height: 30,
-                width: "match_parent",
-                backgroundColor: "#00000060",
-              }}
-            />
-            {/* Stripe 4 (Bottom - Darkest) */}
-            <FlexWidget
-              style={{
-                height: 70,
-                width: "match_parent",
-                backgroundColor: "#00000090",
-                borderBottomLeftRadius: 16,
-                borderBottomRightRadius: 16,
-              }}
-            />
-          </FlexWidget>
-
-          {/* Layer 3: Content */}
-          <FlexWidget
-            style={{
-              height: "match_parent",
-              width: "match_parent",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              padding: 16,
-            }}
-          >
-            {/* Top Row: Refresh Button */}
-            <FlexWidget
-              style={{
-                width: "match_parent",
-                flexDirection: "row",
-                justifyContent: "flex-end",
-              }}
-            >
-              <FlexWidget
-                style={{
-                  backgroundColor: "#FFFFFF30",
-                  borderRadius: 12,
-                  padding: 8,
-                }}
-                clickAction="REFRESH"
-              >
-                <TextWidget
-                  text="↻"
-                  style={{
-                    color: "#FFFFFF",
-                    fontSize: 16,
-                    fontWeight: "bold",
-                  }}
-                />
-              </FlexWidget>
-            </FlexWidget>
-
-            {/* Bottom: Text Info */}
-            <FlexWidget
-              style={{
-                flexDirection: "column",
-              }}
-            >
+            {title ? (
               <TextWidget
-                text={(title || "RECUERDO").toUpperCase()}
+                text={title}
+                maxLines={1}
                 style={{
-                  color: "#DDDDDD",
-                  fontSize: 10,
+                  color: "#222222", // Negro suave, más elegante
+                  fontSize: 15,
                   fontWeight: "bold",
-                  marginBottom: 6,
-                  letterSpacing: 2,
+                  marginBottom: 4,
+                  fontFamily: "sans-serif-medium",
                 }}
               />
-              {caption ? (
-                <TextWidget
-                  text={caption}
-                  maxLines={2}
-                  style={{
-                    color: "#FFFFFF",
-                    fontSize: 16,
-                    fontWeight: "bold",
-                    marginBottom: 4,
-                  }}
-                />
-              ) : null}
-              {date ? (
-                <TextWidget
-                  text={date}
-                  style={{
-                    color: "#DDDDDD",
-                    fontSize: 12,
-                  }}
-                />
-              ) : null}
-            </FlexWidget>
+            ) : null}
+            
+            {date ? (
+              <TextWidget
+                text={date}
+                style={{
+                  color: "#666666", // Gris para información secundaria
+                  fontSize: 12,
+                  fontWeight: "normal",
+                }}
+              />
+            ) : null}
           </FlexWidget>
-        </OverlapWidget>
+        </FlexWidget>
       ) : (
+        /* ESTADO DE CARGA / ERROR / VACÍO */
         <FlexWidget
           style={{
             height: "match_parent",
             width: "match_parent",
-            flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            backgroundColor: "#FFFFFF",
+            backgroundColor: "#FAFAFA",
             borderRadius: 16,
-            padding: 16,
           }}
-          clickAction="OPEN_APP"
+          clickAction="WIDGET_UPDATE"
         >
-          {/* Fallback Icon / Image */}
-          {/* eslint-disable-next-line */}
-          {/* @ts-ignore */}
-          <ImageWidget
-            image={itemPlaceholder}
-            imageWidth={48}
-            imageHeight={48}
-            style={{
-              width: 48,
-              height: 48,
-              marginBottom: 12,
-            }}
-            radius={8}
-          />
-
-          <TextWidget
-            text={error || "Sin fotos recientes"}
-            style={{
-              fontSize: 14,
-              color: "#333333",
-              fontWeight: "bold",
-              textAlign: "center",
-            }}
-          />
-          <TextWidget
-            text="Toca para abrir Elepad"
-            style={{
-              fontSize: 11,
-              color: "#666666",
-              marginTop: 6,
-            }}
-          />
+          {isLoading ? (
+            <FlexWidget>
+              <TextWidget
+                text="↻"
+                style={{
+                  fontSize: 24,
+                  color: "#AAAAAA",
+                  marginBottom: 8,
+                }}
+              />
+              <TextWidget
+                text="Cargando recuerdo..."
+                style={{ fontSize: 12, color: "#888888" }}
+              />
+            </FlexWidget>
+          ) : (
+            <FlexWidget>
+              <ImageWidget
+                image={itemPlaceholder}
+                imageWidth={64}
+                imageHeight={64}
+                style={{ width: 48, height: 48, marginBottom: 12}}
+              />
+              <TextWidget
+                text={error || "Sin fotos"}
+                style={{
+                  fontSize: 14,
+                  color: "#444444",
+                  fontWeight: "bold",
+                  marginBottom: 4,
+                }}
+              />
+              <TextWidget
+                text="Toca para actualizar"
+                style={{ fontSize: 10, color: "#999999" }}
+              />
+            </FlexWidget>
+          )}
         </FlexWidget>
       )}
     </FlexWidget>
+  </FlexWidget>
   );
 }

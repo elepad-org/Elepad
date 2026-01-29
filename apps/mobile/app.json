@@ -85,15 +85,15 @@
           "widgets": [
             {
               "name": "RecentPhotos",
-              "label": "Elepad - Recuerdos (Tarjeta)",
+              "label": "Recuerdos",
               "minWidth": "250dp", 
               "minHeight": "100dp",
               "description": "Muestra la foto más reciente estilo tarjeta",
               "previewImage": "./assets/images/ele-def-fondo-cuad.png",
-              "targetCellWidth": 5,
-              "targetCellHeight": 2,
-              "updatePeriodMillis": 60000,
-              "resizeMode": "horizontal|vertical"
+              "targetCellWidth": 3,
+              "targetCellHeight": 3,
+              "updatePeriodMillis": 1800000
+              
             },
             {
               "name": "PhotosSquare",
@@ -104,8 +104,7 @@
               "previewImage": "./assets/images/ele-def-fondo-cuad.png",
               "targetCellWidth": 2,
               "targetCellHeight": 2,
-              "updatePeriodMillis": 60000,
-              "resizeMode": "horizontal|vertical"
+              "updatePeriodMillis": 1800000
             }
           ]
         }
