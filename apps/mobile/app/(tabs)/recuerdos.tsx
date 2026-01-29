@@ -60,6 +60,10 @@ import BookCover from "@/components/Recuerdos/BookCover";
 import eleEmpthy from "@/assets/images/ele-fotografiando.png";
 import { useToast } from "@/components/shared/Toast";
 
+import { useTour } from "@/hooks/useTour";
+import { useTourStep } from "@/hooks/useTourStep";
+import { useTabContext } from "@/context/TabContext";
+
 // Tipos de recuerdos
 type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
 
@@ -96,7 +100,7 @@ const memoryToRecuerdo = (
     miniatura:
       (memory.mimeType?.startsWith("image/") ||
         memory.mimeType?.startsWith("video/")) &&
-      memory.mediaUrl
+        memory.mediaUrl
         ? memory.mediaUrl
         : undefined,
     titulo: memory.title || undefined,
@@ -160,6 +164,7 @@ export default function RecuerdosScreen() {
   const emptyLogoTop = screenHeight * 0.12; // 25% del alto de pantalla (más arriba que el 35% anterior)
 
   const { mutateAsync: addReaction } = useAddReaction();
+  const { activeTab } = useTabContext();
 
   const groupId = userElepad?.groupId || "";
 
@@ -267,6 +272,92 @@ export default function RecuerdosScreen() {
   const [memberFilterId, setMemberFilterId] = useState<string | null>(null);
   const [memberMenuMounted] = useState(true);
 
+  // --- Tour Setup ---
+  const tour = useTour({ tourId: 'memories' });
+  const tourLayoutsRef = useRef<Record<string, { x: number; y: number; width: number; height: number }>>({});
+
+  const headerStep = useTourStep({
+    tourId: 'memories',
+    stepId: 'memories-header',
+    order: 1,
+    text: 'Aquí guardarás tus tesoros más preciados: fotos, videos y relatos de tu vida.',
+  });
+
+  const addButtonStep = useTourStep({
+    tourId: 'memories',
+    stepId: 'memories-add',
+    order: 2,
+    text: 'Crea un nuevo "Baúl" para organizar tus recuerdos por temas, como "Viajes" o "Cumpleaños".',
+  });
+
+  const listStep = useTourStep({
+    tourId: 'memories',
+    stepId: 'memories-list',
+    order: 3,
+    text: 'Tus baúles aparecerán aquí. ¡Entra en uno para empezar a guardar recuerdos!',
+  });
+
+  // Auto-start tour when tab becomes active
+  useEffect(() => {
+    if (activeTab === 'recuerdos') {
+      const checkAndStartTour = async () => {
+        // Wait for books to load to ensure UI is stable
+        if (authLoading) return;
+
+        if (tour.isActive) return;
+
+        // Don't start if a book is selected (navigation depth)
+        if (selectedBook) return;
+
+        const completed = await tour.isTourCompleted('memories');
+
+        if (!completed) {
+          setTimeout(() => {
+            const steps = [
+              { ...headerStep.step, ref: headerStep.ref, layout: undefined },
+              { ...addButtonStep.step, ref: addButtonStep.ref, layout: undefined },
+              { ...listStep.step, ref: listStep.ref, layout: undefined },
+            ];
+
+            let measurementsComplete = 0;
+            const totalMeasurements = 3;
+
+            const checkStart = () => {
+              measurementsComplete++;
+              if (measurementsComplete === totalMeasurements) {
+                const finalSteps = steps.map(s => ({
+                  ...s,
+                  layout: tourLayoutsRef.current[s.stepId]
+                }));
+                tour.startTour(finalSteps);
+              }
+            };
+
+            const measureStep = (step: typeof headerStep, id: string) => {
+              if (step.ref.current) {
+                step.ref.current.measureInWindow((x: number, y: number, w: number, h: number) => {
+                  tourLayoutsRef.current[id] = { x, y, width: w, height: h };
+                  checkStart();
+                });
+              } else {
+                console.log(`Skipping measurement for ${id}`);
+                checkStart();
+              }
+            };
+
+            // Stagger measurements
+            setTimeout(() => measureStep(headerStep, 'memories-header'), 100);
+            setTimeout(() => measureStep(addButtonStep, 'memories-add'), 200);
+            setTimeout(() => measureStep(listStep, 'memories-list'), 300);
+
+          }, 1000);
+        }
+      };
+
+      checkAndStartTour();
+    }
+  }, [activeTab, authLoading, tour.isActive, selectedBook]);
+
   const {
     data: booksResponse,
     isLoading: booksLoading,
@@ -315,9 +406,8 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al crear el baúl: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al crear el baúl: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -334,9 +424,8 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al actualizar el baúl: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al actualizar el baúl: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -353,9 +442,8 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al eliminar el baúl: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al eliminar el baúl: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -385,9 +473,8 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al actualizar el recuerdo: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al actualizar el recuerdo: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -407,9 +494,8 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al eliminar el recuerdo: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al eliminar el recuerdo: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -468,9 +554,8 @@ export default function RecuerdosScreen() {
     onError: (error) => {
       console.error("Upload mutation onError:", error);
       showToast({
-        message: `Error al subir el recuerdo: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al subir el recuerdo: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -519,9 +604,8 @@ export default function RecuerdosScreen() {
     onError: (error) => {
       console.error("Create note mutation onError:", error);
       showToast({
-        message: `Error al crear la nota: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al crear la nota: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -555,8 +639,8 @@ export default function RecuerdosScreen() {
     const memoriesData = Array.isArray(memoriesPayload)
       ? memoriesPayload
       : memoriesPayload &&
-          typeof memoriesPayload === "object" &&
-          "data" in (memoriesPayload as Record<string, unknown>)
+        typeof memoriesPayload === "object" &&
+        "data" in (memoriesPayload as Record<string, unknown>)
         ? (memoriesPayload as { data: unknown }).data
         : [];
 
@@ -639,9 +723,8 @@ export default function RecuerdosScreen() {
     deleteMemoryMutation.isPending;
 
   const emptyTitle = memberFilterId
-    ? `${
-        memberNameById[memberFilterId] || "Este miembro"
-      } aún no ha subido recuerdos`
+    ? `${memberNameById[memberFilterId] || "Este miembro"
+    } aún no ha subido recuerdos`
     : "No hay recuerdos aún";
 
   const emptySubtitle = memberFilterId
@@ -835,9 +918,8 @@ export default function RecuerdosScreen() {
       }
     } catch (error) {
       showToast({
-        message: `Error al preparar el archivo: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al preparar el archivo: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     }
@@ -1084,8 +1166,8 @@ export default function RecuerdosScreen() {
   const booksData = Array.isArray(booksPayload)
     ? booksPayload
     : booksPayload &&
-        typeof booksPayload === "object" &&
-        "data" in (booksPayload as Record<string, unknown>)
+      typeof booksPayload === "object" &&
+      "data" in (booksPayload as Record<string, unknown>)
       ? (booksPayload as { data: unknown }).data
       : [];
 
@@ -1119,19 +1201,23 @@ export default function RecuerdosScreen() {
               alignItems: "center",
             }}
           >
-            <Text style={STYLES.superHeading}>Recuerdos</Text>
-            <Button
-              mode="contained"
-              onPress={openCreateBookDialog}
-              style={{
-                borderRadius: 12,
-                backgroundColor: COLORS.primary,
-              }}
-              icon="plus"
-              disabled={!groupId}
-            >
-              Agregar
-            </Button>
+            <View ref={headerStep.ref}>
+              <Text style={STYLES.superHeading}>Recuerdos</Text>
+            </View>
+            <View ref={addButtonStep.ref}>
+              <Button
+                mode="contained"
+                onPress={openCreateBookDialog}
+                style={{
+                  borderRadius: 12,
+                  backgroundColor: COLORS.primary,
+                }}
+                icon="plus"
+                disabled={!groupId}
+              >
+                Agregar
+              </Button>
+            </View>
           </View>
           <Button
             mode="outlined"
@@ -1159,6 +1245,7 @@ export default function RecuerdosScreen() {
         ) : books.length === 0 ? (
           <View
             style={{ flex: 1, alignItems: "center", marginTop: emptyLogoTop }}
+            ref={listStep.ref}
           >
             <Image
               source={eleEmpthy}
@@ -1184,88 +1271,90 @@ export default function RecuerdosScreen() {
             </Button>
           </View>
         ) : (
-          <FlatList
-            data={books}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={{
-              paddingHorizontal: 24,
-              paddingTop: 2,
-              paddingBottom: LAYOUT.bottomNavHeight,
-            }}
-            numColumns={2}
-            columnWrapperStyle={{ justifyContent: "space-between" }}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
-            renderItem={({ item }) => {
-              const title = item.title || "(Sin nombre)";
-              const color = item.color || COLORS.primary;
-              return (
-                <View
-                  style={{
-                    width: "48%",
-                    marginBottom: 16,
-                  }}
-                >
-                  <Pressable
-                    onPress={() => {
-                      setSelectedBook(item);
-                      setMemberFilterId(null);
+          <View style={{ flex: 1 }} ref={listStep.ref}>
+            <FlatList
+              data={books}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={{
+                paddingHorizontal: 24,
+                paddingTop: 2,
+                paddingBottom: LAYOUT.bottomNavHeight,
+              }}
+              numColumns={2}
+              columnWrapperStyle={{ justifyContent: "space-between" }}
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }
+              renderItem={({ item }) => {
+                const title = item.title || "(Sin nombre)";
+                const color = item.color || COLORS.primary;
+                return (
+                  <View
+                    style={{
+                      width: "48%",
+                      marginBottom: 16,
                     }}
                   >
-                    <View
-                      style={{
-                        backgroundColor: COLORS.backgroundSecondary,
-                        borderRadius: 18,
-                        aspectRatio: 1,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        overflow: "hidden",
+                    <Pressable
+                      onPress={() => {
+                        setSelectedBook(item);
+                        setMemberFilterId(null);
                       }}
                     >
-                      <BookCover
-                        bookId={item.id}
-                        groupId={groupId}
-                        color={color}
-                      />
                       <View
                         style={{
-                          position: "absolute",
-                          top: 6,
-                          right: 6,
-                          flexDirection: "row",
+                          backgroundColor: COLORS.backgroundSecondary,
+                          borderRadius: 18,
+                          aspectRatio: 1,
+                          alignItems: "center",
+                          justifyContent: "center",
+                          overflow: "hidden",
                         }}
                       >
-                        <IconButton
-                          icon="pencil"
-                          size={18}
-                          onPress={() => openEditBookDialog(item)}
-                          style={{ margin: 0 }}
+                        <BookCover
+                          bookId={item.id}
+                          groupId={groupId}
+                          color={color}
                         />
-                        <IconButton
-                          icon="trash-can"
-                          size={18}
-                          onPress={() => setBookToDelete(item)}
-                          style={{ margin: 0 }}
-                        />
+                        <View
+                          style={{
+                            position: "absolute",
+                            top: 6,
+                            right: 6,
+                            flexDirection: "row",
+                          }}
+                        >
+                          <IconButton
+                            icon="pencil"
+                            size={18}
+                            onPress={() => openEditBookDialog(item)}
+                            style={{ margin: 0 }}
+                          />
+                          <IconButton
+                            icon="trash-can"
+                            size={18}
+                            onPress={() => setBookToDelete(item)}
+                            style={{ margin: 0 }}
+                          />
+                        </View>
                       </View>
-                    </View>
-                    <Text
-                      style={{
-                        ...STYLES.heading,
-                        fontSize: 14,
-                        textAlign: "center",
-                        marginTop: 10,
-                      }}
-                      numberOfLines={2}
-                    >
-                      {title}
-                    </Text>
-                  </Pressable>
-                </View>
-              );
-            }}
-          />
+                      <Text
+                        style={{
+                          ...STYLES.heading,
+                          fontSize: 14,
+                          textAlign: "center",
+                          marginTop: 10,
+                        }}
+                        numberOfLines={2}
+                      >
+                        {title}
+                      </Text>
+                    </Pressable>
+                  </View>
+                );
+              }}
+            />
+          </View>
         )}
 
         {renderBookDialogs()}
