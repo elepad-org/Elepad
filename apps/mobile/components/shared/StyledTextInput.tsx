@@ -40,12 +40,12 @@ export const StyledTextInput = React.forwardRef<any, StyledTextInputProps>(
           style={[{ backgroundColor: "transparent" }, style]}
           outlineColor="transparent"
           activeOutlineColor="transparent"
-          underlineColor="transparent"
-          activeUnderlineColor="transparent"
           theme={{
             colors: {
               primary: COLORS.primary,
               background: "transparent",
+              onSurfaceVariant: COLORS.primary,
+              placeholder: COLORS.textSecondary,
             },
           }}
           selectionColor={COLORS.primary}
