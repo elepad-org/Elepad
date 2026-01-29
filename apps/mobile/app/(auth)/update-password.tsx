@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { StatusBar, ScrollView, View, StyleSheet, Platform } from "react-native";
 import {
-  Button,
-  Card,
-  TextInput,
-  Text,
-  IconButton,
-} from "react-native-paper";
+  StatusBar,
+  ScrollView,
+  View,
+  StyleSheet,
+  Platform,
+} from "react-native";
+import { Button, Card, TextInput, Text, IconButton } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
 import { COLORS, STYLES } from "@/styles/base";
@@ -27,16 +27,25 @@ export default function UpdatePasswordScreen() {
 
   // Escuchar cambios en el estado de autenticación
   useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('🔐 Auth event en update-password:', event, 'Session:', !!session);
-      
-      // Si el usuario inició sesión y estamos esperando validar el token, marcarlo como válido
-      if (event === 'SIGNED_IN' && session && checkingToken) {
-        console.log('✅ Sesión detectada vía onAuthStateChange, mostrando formulario');
-        setTokenValid(true);
-        setCheckingToken(false);
-      }
-    });
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log(
+          "🔐 Auth event en update-password:",
+          event,
+          "Session:",
+          !!session,
+        );
+
+        // Si el usuario inició sesión y estamos esperando validar el token, marcarlo como válido
+        if (event === "SIGNED_IN" && session && checkingToken) {
+          console.log(
+            "✅ Sesión detectada vía onAuthStateChange, mostrando formulario",
+          );
+          setTokenValid(true);
+          setCheckingToken(false);
+        }
+      },
+    );
 
     return () => {
       authListener?.subscription?.unsubscribe?.();
@@ -46,31 +55,35 @@ export default function UpdatePasswordScreen() {
   // Verificar si hay un token válido en la URL (solo una vez)
   useEffect(() => {
     const checkToken = async () => {
-      console.log('🔍 Iniciando verificación de token...');
+      console.log("🔍 Iniciando verificación de token...");
       try {
         // En web, los tokens vienen en el hash
-        let accessToken = '';
-        let refreshToken = '';
-        let type = '';
+        let accessToken = "";
+        let refreshToken = "";
+        let type = "";
 
-        if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        if (Platform.OS === "web" && typeof window !== "undefined") {
           // Parsear el hash de la URL
           const hash = window.location.hash.substring(1);
           const params = new URLSearchParams(hash);
-          accessToken = params.get('access_token') || '';
-          refreshToken = params.get('refresh_token') || '';
-          type = params.get('type') || '';
-          
-          console.log('📝 Hash parseado:', { 
-            hasAccessToken: !!accessToken, 
+          accessToken = params.get("access_token") || "";
+          refreshToken = params.get("refresh_token") || "";
+          type = params.get("type") || "";
+
+          console.log("📝 Hash parseado:", {
+            hasAccessToken: !!accessToken,
             hasRefreshToken: !!refreshToken,
-            type 
+            type,
           });
 
           // LOGIC: Redirigir a la app nativa si estamos en un dispositivo móvil
-          const isMobile = /iPhone|iPad|iPod|Android/i.test(window.navigator.userAgent);
+          const isMobile = /iPhone|iPad|iPod|Android/i.test(
+            window.navigator.userAgent,
+          );
           if (isMobile && accessToken) {
-            console.log("📱 Dispositivo móvil detectado en Web, intentando abrir App...");
+            console.log(
+              "📱 Dispositivo móvil detectado en Web, intentando abrir App...",
+            );
             // Intentar abrir la app usando el esquema personalizado
             // Se usa el hash original que contiene los tokens
             const deepLink = `elepad://(auth)/update-password#${hash}`;
@@ -78,37 +91,45 @@ export default function UpdatePasswordScreen() {
           }
         }
 
-        if (accessToken && type === 'recovery') {
-          console.log('🔑 Token de recuperación encontrado, estableciendo sesión...');
-          
+        if (accessToken && type === "recovery") {
+          console.log(
+            "🔑 Token de recuperación encontrado, estableciendo sesión...",
+          );
+
           // Establecer la sesión con el token de recuperación
           // No esperamos la respuesta, el onAuthStateChange lo manejará
-          supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          }).then(({ data, error }) => {
-            console.log('📊 Resultado de setSession:', { hasData: !!data, hasError: !!error });
-            
-            if (error) {
-              console.error('❌ Error setting session:', error);
-              showToast({
-                message: "El enlace de recuperación no es válido o ha expirado",
-                type: "error",
+          supabase.auth
+            .setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            })
+            .then(({ data, error }) => {
+              console.log("📊 Resultado de setSession:", {
+                hasData: !!data,
+                hasError: !!error,
               });
+
+              if (error) {
+                console.error("❌ Error setting session:", error);
+                showToast({
+                  message:
+                    "El enlace de recuperación no es válido o ha expirado",
+                  type: "error",
+                });
+                setTokenValid(false);
+                setCheckingToken(false);
+              } else {
+                console.log("✅ setSession completó exitosamente");
+                // El onAuthStateChange manejará el resto
+              }
+            })
+            .catch((err) => {
+              console.error("💥 Exception en setSession:", err);
               setTokenValid(false);
               setCheckingToken(false);
-            } else {
-              console.log('✅ setSession completó exitosamente');
-              // El onAuthStateChange manejará el resto
-            }
-          }).catch((err) => {
-            console.error('💥 Exception en setSession:', err);
-            setTokenValid(false);
-            setCheckingToken(false);
-          });
-          
+            });
         } else {
-          console.log('⚠️ No se encontró token válido');
+          console.log("⚠️ No se encontró token válido");
           showToast({
             message: "No se encontró un enlace de recuperación válido",
             type: "error",
@@ -117,7 +138,7 @@ export default function UpdatePasswordScreen() {
           setCheckingToken(false);
         }
       } catch (error) {
-        console.error('💥 Error in checkToken:', error);
+        console.error("💥 Error in checkToken:", error);
         setTokenValid(false);
         setCheckingToken(false);
       }
@@ -155,29 +176,29 @@ export default function UpdatePasswordScreen() {
   };
 
   const handleUpdatePassword = async () => {
-    console.log('🔄 handleUpdatePassword iniciado');
-    
+    console.log("🔄 handleUpdatePassword iniciado");
+
     if (!validatePasswords()) {
-      console.log('❌ Validación fallida');
+      console.log("❌ Validación fallida");
       return;
     }
 
-    console.log('✅ Validación exitosa, actualizando contraseña...');
+    console.log("✅ Validación exitosa, actualizando contraseña...");
     setLoading(true);
-    
+
     try {
-      console.log('📡 Llamando a supabase.auth.updateUser...');
+      console.log("📡 Llamando a supabase.auth.updateUser...");
       const { error } = await supabase.auth.updateUser({
         password: newPassword,
       });
 
-      console.log('📊 Respuesta de updateUser:', { hasError: !!error });
+      console.log("📊 Respuesta de updateUser:", { hasError: !!error });
 
       if (error) {
         throw error;
       }
 
-      console.log('✅ Contraseña actualizada correctamente');
+      console.log("✅ Contraseña actualizada correctamente");
       showToast({
         message: "Contraseña actualizada correctamente",
         type: "success",
@@ -189,7 +210,7 @@ export default function UpdatePasswordScreen() {
 
       // Redirigir al login después de un momento
       setTimeout(() => {
-        console.log('🔀 Redirigiendo a login...');
+        console.log("🔀 Redirigiendo a login...");
         router.replace("/(auth)/login");
       }, 2000);
     } catch (error: unknown) {
@@ -203,17 +224,20 @@ export default function UpdatePasswordScreen() {
         type: "error",
       });
     } finally {
-      console.log('🏁 Finalizando, setLoading(false)');
+      console.log("🏁 Finalizando, setLoading(false)");
       setLoading(false);
     }
   };
 
   if (checkingToken) {
-    console.log('⏳ Estado: Verificando token...');
+    console.log("⏳ Estado: Verificando token...");
     return (
       <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
         <Stack.Screen options={{ headerShown: false }} />
-        <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor={COLORS.background}
+        />
         <View style={styles.centerContainer}>
           <Text variant="bodyLarge">Verificando enlace...</Text>
         </View>
@@ -222,12 +246,15 @@ export default function UpdatePasswordScreen() {
   }
 
   if (!tokenValid) {
-    console.log('❌ Estado: Token inválido');
+    console.log("❌ Estado: Token inválido");
     return (
       <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
         <Stack.Screen options={{ headerShown: false }} />
-        <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
-        
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor={COLORS.background}
+        />
+
         <View style={styles.header}>
           <IconButton
             icon="arrow-left"
@@ -245,8 +272,8 @@ export default function UpdatePasswordScreen() {
                 Enlace no válido
               </Text>
               <Text variant="bodyMedium" style={styles.errorText}>
-                El enlace de recuperación no es válido o ha expirado.
-                Por favor, solicita uno nuevo.
+                El enlace de recuperación no es válido o ha expirado. Por favor,
+                solicita uno nuevo.
               </Text>
               <Button
                 mode="contained"
@@ -263,7 +290,7 @@ export default function UpdatePasswordScreen() {
     );
   }
 
-  console.log('✅ Estado: Mostrando formulario de cambio de contraseña');
+  console.log("✅ Estado: Mostrando formulario de cambio de contraseña");
   return (
     <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
       <Stack.Screen options={{ headerShown: false }} />
@@ -280,10 +307,7 @@ export default function UpdatePasswordScreen() {
       </View>
 
       <ScrollView
-        contentContainerStyle={[
-          STYLES.contentContainer,
-          { paddingBottom: 40 },
-        ]}
+        contentContainerStyle={[STYLES.contentContainer, { paddingBottom: 40 }]}
         showsVerticalScrollIndicator={false}
       >
         <Card style={[STYLES.menuCard, { backgroundColor: COLORS.white }]}>
@@ -341,8 +365,14 @@ export default function UpdatePasswordScreen() {
             mode="contained"
             onPress={handleUpdatePassword}
             loading={loading}
-            disabled={loading}
-            style={[STYLES.buttonPrimary, { width: '100%' }]}
+            disabled={
+              loading ||
+              !newPassword.trim() ||
+              !confirmPassword.trim() ||
+              newPassword.length < 6 ||
+              newPassword !== confirmPassword
+            }
+            style={[STYLES.buttonPrimary, { width: "100%" }]}
             contentStyle={STYLES.buttonContent}
           >
             Actualizar contraseña
