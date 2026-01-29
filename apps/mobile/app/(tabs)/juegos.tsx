@@ -5,6 +5,10 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
+import { useRef, useEffect } from "react";
+import { useTour } from "@/hooks/useTour";
+import { useTourStep } from "@/hooks/useTourStep";
+import { useTabContext } from "@/context/TabContext";
 import { ActivityIndicator, Text, Button, Icon } from "react-native-paper";
 import { Image } from "react-native";
 import { useAuth } from "@/hooks/useAuth";
@@ -83,6 +87,88 @@ function GameCard({
 
 export default function JuegosScreen() {
   const { loading, userElepad } = useAuth();
+  const { activeTab } = useTabContext();
+
+  // --- Tour Setup ---
+  const tour = useTour({ tourId: 'games' });
+  const tourLayoutsRef = useRef<Record<string, { x: number; y: number; width: number; height: number }>>({});
+
+  const headerStep = useTourStep({
+    tourId: 'games',
+    stepId: 'games-header',
+    order: 1,
+    text: '¡Bienvenido a la zona de juegos! Aquí podrás divertirte y ejercitar tu mente.',
+  });
+
+  const actionsStep = useTourStep({
+    tourId: 'games',
+    stepId: 'games-actions',
+    order: 2,
+    text: 'Visita la tienda para canjear tus puntos o revisa tu historial de partidas.',
+  });
+
+  const gamesListStep = useTourStep({
+    tourId: 'games',
+    stepId: 'games-list',
+    order: 3,
+    text: 'Elige entre una variedad de juegos diseñados para ti. ¡Toca uno para empezar!',
+  });
+
+  // Auto-start tour when tab becomes active
+  useEffect(() => {
+    if (activeTab === 'juegos') {
+      const checkAndStartTour = async () => {
+        if (loading) return;
+
+        if (tour.isActive) return;
+
+        const completed = await tour.isTourCompleted('games');
+        
+        if (!completed) {
+          setTimeout(() => {
+            const steps = [
+              { ...headerStep.step, ref: headerStep.ref, layout: undefined },
+              { ...actionsStep.step, ref: actionsStep.ref, layout: undefined },
+              { ...gamesListStep.step, ref: gamesListStep.ref, layout: undefined },
+            ];
+
+            let measurementsComplete = 0;
+            const totalMeasurements = 3;
+
+            const checkStart = () => {
+              measurementsComplete++;
+              if (measurementsComplete === totalMeasurements) {
+                const finalSteps = steps.map(s => ({
+                  ...s,
+                  layout: tourLayoutsRef.current[s.stepId]
+                }));
+                tour.startTour(finalSteps);
+              }
+            };
+
+            const measureStep = (step: typeof headerStep, id: string) => {
+              if (step.ref.current) {
+                step.ref.current.measureInWindow((x: number, y: number, w: number, h: number) => {
+                  tourLayoutsRef.current[id] = { x, y, width: w, height: h };
+                  checkStart();
+                });
+              } else {
+                checkStart();
+              }
+            };
+
+            // Stagger measurements slightly to ensure layout is ready
+            setTimeout(() => measureStep(headerStep, 'games-header'), 50);
+            setTimeout(() => measureStep(actionsStep, 'games-actions'), 100);
+            setTimeout(() => measureStep(gamesListStep, 'games-list'), 150);
+
+          }, 500); // Small delay to allow transition animation
+        }
+      };
+
+      checkAndStartTour();
+    }
+  }, [activeTab, loading, tour.isActive]);
 
   if (loading) {
     return (
@@ -112,9 +198,9 @@ export default function JuegosScreen() {
       >
         <View style={STYLES.container}>
           {/* Header */}
-          <View style={styles.header}>
+          <View style={styles.header} ref={headerStep.ref}>
             <Text style={STYLES.superHeading}>Juegos</Text>
-            <View style={{ flexDirection: "row", gap: 8 }}>
+            <View style={{ flexDirection: "row", gap: 8 }} ref={actionsStep.ref}>
               <Button
                 mode="contained"
                 onPress={() => router.push("/shop")}
@@ -141,7 +227,7 @@ export default function JuegosScreen() {
           </View>
 
           {/* Games List */}
-          <View style={styles.gamesContainer}>
+          <View style={styles.gamesContainer} ref={gamesListStep.ref}>
             <GameCard
               imageName="memory"
               title="Memoria"
