@@ -261,7 +261,12 @@ export default function ConfiguracionScreen() {
                       }
                     }}
                     loading={saving}
-                    disabled={saving}
+                    disabled={
+                      saving ||
+                      !formName.trim() ||
+                      formName.trim() === displayName ||
+                      !userElepad?.id
+                    }
                     style={[STYLES.buttonPrimary, { width: "40%" }]}
                   >
                     Guardar
