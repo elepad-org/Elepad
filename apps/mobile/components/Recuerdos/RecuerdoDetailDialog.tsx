@@ -553,15 +553,21 @@ export default function RecuerdoDetailDialog({
             )}
 
             {recuerdo.tipo === "texto" && (
-              <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 0 }}>
-                <ImageBackground 
-                  source={fondoRecuerdos} 
+              <View
+                style={{
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingVertical: 0,
+                }}
+              >
+                <ImageBackground
+                  source={fondoRecuerdos}
                   style={{
-                    borderRadius: 10, 
+                    borderRadius: 10,
                     padding: 10,
                     justifyContent: "center",
                     ...SHADOWS.card,
-                    borderColor: '#f1f1f1', // Softer beige border
+                    borderColor: "#f1f1f1", // Softer beige border
                     minHeight: 200,
                     width: screenWidth * 0.92,
                   }}
@@ -706,27 +712,45 @@ export default function RecuerdoDetailDialog({
             Modificar recuerdo
           </Dialog.Title>
           <Dialog.Content>
-            <TextInput
-              label="Título"
-              value={editTitle}
-              onChangeText={setEditTitle}
-              mode="outlined"
-              outlineColor={COLORS.border}
-              activeOutlineColor={COLORS.primary}
-              style={{ marginBottom: 12 }}
-            />
-            <MentionInput
-              label="Descripción"
-              value={editDescription}
-              onChangeText={setEditDescription}
-              mode="outlined"
-              outlineColor={COLORS.border}
-              activeOutlineColor={COLORS.primary}
-              multiline
-              numberOfLines={3}
-              familyMembers={familyMembers}
-              currentUserId={currentUserId}
-            />
+            <View
+              style={{
+                backgroundColor: COLORS.backgroundSecondary,
+                borderRadius: 16,
+                overflow: "hidden",
+                marginBottom: 16,
+              }}
+            >
+              <TextInput
+                label="Título"
+                value={editTitle}
+                onChangeText={setEditTitle}
+                mode="flat"
+                style={{ backgroundColor: "transparent" }}
+                outlineColor="transparent"
+                activeOutlineColor="transparent"
+              />
+            </View>
+            <View
+              style={{
+                backgroundColor: COLORS.backgroundSecondary,
+                borderRadius: 16,
+                overflow: "hidden",
+              }}
+            >
+              <MentionInput
+                label="Descripción"
+                value={editDescription}
+                onChangeText={setEditDescription}
+                mode="flat"
+                inputStyle={{ backgroundColor: "transparent" }}
+                outlineColor="transparent"
+                activeOutlineColor="transparent"
+                multiline
+                numberOfLines={3}
+                familyMembers={familyMembers}
+                currentUserId={currentUserId}
+              />
+            </View>
           </Dialog.Content>
           <Dialog.Actions style={{ paddingBottom: 12, paddingRight: 16 }}>
             <Button onPress={() => setEditVisible(false)} disabled={isMutating}>

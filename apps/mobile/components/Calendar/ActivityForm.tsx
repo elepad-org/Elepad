@@ -275,7 +275,7 @@ export default function ActivityForm({
 
   const handleSave = async () => {
     setError(null);
-    
+
     // Validar que el título no esté vacío
     if (!title.trim()) {
       setError("El título es obligatorio.");
@@ -415,7 +415,7 @@ export default function ActivityForm({
                   mode="flat"
                   outlineColor="transparent"
                   activeOutlineColor="transparent"
-                  style={{ backgroundColor: "transparent" }}
+                  inputStyle={{ backgroundColor: "transparent" }}
                 />
               </View>
 
@@ -540,7 +540,10 @@ export default function ActivityForm({
                 <SaveButton
                   onPress={handleSave}
                   disabled={
-                    saving || !title.trim() || !startsAtDate || (!isElder && !assignedTo)
+                    saving ||
+                    !title.trim() ||
+                    !startsAtDate ||
+                    (!isElder && !assignedTo)
                   }
                   loading={saving}
                 />

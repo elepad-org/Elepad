@@ -1,5 +1,11 @@
 import { useMemo, useState } from "react";
-import { StatusBar, ScrollView, View, TouchableOpacity, Text } from "react-native";
+import {
+  StatusBar,
+  ScrollView,
+  View,
+  TouchableOpacity,
+  Text,
+} from "react-native";
 import {
   Button,
   Card,
@@ -23,8 +29,13 @@ export default function ConfiguracionScreen() {
   const router = useRouter();
   const { showToast } = useToast();
 
-  const { userElepad, refreshUserElepad, signOut, userElepadLoading, updateUserTimezone } =
-    useAuth();
+  const {
+    userElepad,
+    refreshUserElepad,
+    signOut,
+    userElepadLoading,
+    updateUserTimezone,
+  } = useAuth();
 
   // Mostrar loading si está cargando o si no hay usuario aún
   const showLoading = userElepadLoading || !userElepad;
@@ -51,9 +62,12 @@ export default function ConfiguracionScreen() {
   const [formName, setFormName] = useState(displayName);
   const [saving, setSaving] = useState(false);
   const [photoOpen, setPhotoOpen] = useState(false);
-  const [timezone, setTimezone] = useState(userElepad?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone);
+  const [timezone, setTimezone] = useState(
+    userElepad?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+  );
   const [timezoneDialogVisible, setTimezoneDialogVisible] = useState(false);
-  const [changePasswordModalVisible, setChangePasswordModalVisible] = useState(false);
+  const [changePasswordModalVisible, setChangePasswordModalVisible] =
+    useState(false);
   const getInitials = (name: string) =>
     name
       .split(/\s+/)
@@ -65,37 +79,37 @@ export default function ConfiguracionScreen() {
   const initials = useMemo(() => getInitials(displayName), [displayName]);
 
   const timezones = [
-    'America/Argentina/Buenos_Aires',
-    'America/New_York',
-    'America/Los_Angeles',
-    'America/Mexico_City',
-    'America/Sao_Paulo',
-    'Europe/London',
-    'Europe/Paris',
-    'Europe/Madrid',
-    'Europe/Berlin',
-    'Asia/Tokyo',
-    'Asia/Shanghai',
-    'Australia/Sydney',
-    'Pacific/Auckland',
+    "America/Argentina/Buenos_Aires",
+    "America/New_York",
+    "America/Los_Angeles",
+    "America/Mexico_City",
+    "America/Sao_Paulo",
+    "Europe/London",
+    "Europe/Paris",
+    "Europe/Madrid",
+    "Europe/Berlin",
+    "Asia/Tokyo",
+    "Asia/Shanghai",
+    "Australia/Sydney",
+    "Pacific/Auckland",
   ];
 
   // Función para formatear zona horaria de manera amigable
   const formatTimezone = (tz: string) => {
     const timezoneNames: Record<string, string> = {
-      'America/Argentina/Buenos_Aires': 'Argentina - Buenos Aires',
-      'America/New_York': 'Estados Unidos - Nueva York',
-      'America/Los_Angeles': 'Estados Unidos - Los Ángeles',
-      'America/Mexico_City': 'México - Ciudad de México',
-      'America/Sao_Paulo': 'Brasil - São Paulo',
-      'Europe/London': 'Reino Unido - Londres',
-      'Europe/Paris': 'Francia - París',
-      'Europe/Madrid': 'España - Madrid',
-      'Europe/Berlin': 'Alemania - Berlín',
-      'Asia/Tokyo': 'Japón - Tokio',
-      'Asia/Shanghai': 'China - Shanghái',
-      'Australia/Sydney': 'Australia - Sídney',
-      'Pacific/Auckland': 'Nueva Zelanda - Auckland',
+      "America/Argentina/Buenos_Aires": "Argentina - Buenos Aires",
+      "America/New_York": "Estados Unidos - Nueva York",
+      "America/Los_Angeles": "Estados Unidos - Los Ángeles",
+      "America/Mexico_City": "México - Ciudad de México",
+      "America/Sao_Paulo": "Brasil - São Paulo",
+      "Europe/London": "Reino Unido - Londres",
+      "Europe/Paris": "Francia - París",
+      "Europe/Madrid": "España - Madrid",
+      "Europe/Berlin": "Alemania - Berlín",
+      "Asia/Tokyo": "Japón - Tokio",
+      "Asia/Shanghai": "China - Shanghái",
+      "Australia/Sydney": "Australia - Sídney",
+      "Pacific/Auckland": "Nueva Zelanda - Auckland",
     };
     return timezoneNames[tz] || tz;
   };
@@ -109,10 +123,10 @@ export default function ConfiguracionScreen() {
 
   const handleSaveTimezone = async (tz: string) => {
     if (!userElepad?.id) return;
-    
+
     // Actualizar optimísticamente el timezone en el estado sin loading
     updateUserTimezone(tz);
-    
+
     try {
       await patchUsersId(userElepad.id, { timezone: tz });
       showToast({
@@ -121,11 +135,11 @@ export default function ConfiguracionScreen() {
       });
     } catch (e: unknown) {
       // Si falla, revertir al timezone original
-      updateUserTimezone(userElepad.timezone || 'America/Argentina/Buenos_Aires');
+      updateUserTimezone(
+        userElepad.timezone || "America/Argentina/Buenos_Aires",
+      );
       const msg =
-        e instanceof Error
-          ? e.message
-          : "Error al actualizar zona horaria";
+        e instanceof Error ? e.message : "Error al actualizar zona horaria";
       showToast({
         message: msg,
         type: "error",
@@ -163,7 +177,7 @@ export default function ConfiguracionScreen() {
                   icon={editExpanded ? "chevron-down" : "chevron-right"}
                 />
               )}
-              style={{ minHeight: 60, justifyContent: 'center' }}
+              style={{ minHeight: 60, justifyContent: "center" }}
               onPress={() => {
                 setFormName(displayName);
                 setEditExpanded(!editExpanded);
@@ -173,14 +187,24 @@ export default function ConfiguracionScreen() {
             {/* Campo de texto desplegable */}
             {editExpanded && (
               <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
-                <TextInput
-                  value={formName}
-                  onChangeText={setFormName}
-                  style={STYLES.input}
-                  underlineColor="transparent"
-                  activeUnderlineColor={COLORS.primary}
-                  autoFocus
-                />
+                <View
+                  style={{
+                    backgroundColor: COLORS.white,
+                    borderRadius: 16,
+                    overflow: "hidden",
+                  }}
+                >
+                  <TextInput
+                    label="Nombre"
+                    value={formName}
+                    onChangeText={setFormName}
+                    mode="flat"
+                    style={{ backgroundColor: "transparent" }}
+                    outlineColor="transparent"
+                    activeOutlineColor="transparent"
+                    autoFocus
+                  />
+                </View>
                 <View
                   style={{
                     flexDirection: "row",
@@ -251,7 +275,7 @@ export default function ConfiguracionScreen() {
               title="Cambiar contraseña"
               left={(props) => <List.Icon {...props} icon="lock-reset" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
-              style={{ minHeight: 60, justifyContent: 'center' }}
+              style={{ minHeight: 60, justifyContent: "center" }}
               onPress={() => {
                 setChangePasswordModalVisible(true);
               }}
@@ -274,7 +298,7 @@ export default function ConfiguracionScreen() {
               description={formatTimezone(timezone)}
               left={(props) => <List.Icon {...props} icon="clock-outline" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
-              style={{ minHeight: 60, justifyContent: 'center' }}
+              style={{ minHeight: 60, justifyContent: "center" }}
               onPress={() => setTimezoneDialogVisible(true)}
             />
             <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
@@ -282,7 +306,7 @@ export default function ConfiguracionScreen() {
               title="Grupo familiar"
               left={(props) => <List.Icon {...props} icon="account-group" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
-              style={{ minHeight: 60, justifyContent: 'center' }}
+              style={{ minHeight: 60, justifyContent: "center" }}
               onPress={() => {
                 router.navigate("/familyGroup");
               }}
@@ -305,8 +329,14 @@ export default function ConfiguracionScreen() {
           </Button>
         </View>
         <Portal>
-          <Dialog visible={timezoneDialogVisible} onDismiss={() => setTimezoneDialogVisible(false)} style={{ backgroundColor: COLORS.white }}>
-            <Dialog.Title style={{ textAlign: 'center' }}>Seleccionar zona horaria</Dialog.Title>
+          <Dialog
+            visible={timezoneDialogVisible}
+            onDismiss={() => setTimezoneDialogVisible(false)}
+            style={{ backgroundColor: COLORS.white }}
+          >
+            <Dialog.Title style={{ textAlign: "center" }}>
+              Seleccionar zona horaria
+            </Dialog.Title>
             <Dialog.Content style={{ maxHeight: 300, paddingHorizontal: 0 }}>
               <ScrollView showsVerticalScrollIndicator={false}>
                 {sortedTimezones.map((tz) => (
@@ -316,7 +346,10 @@ export default function ConfiguracionScreen() {
                       paddingVertical: 16,
                       paddingHorizontal: 24,
 
-                      backgroundColor: timezone === tz ? COLORS.backgroundSecondary : COLORS.white,
+                      backgroundColor:
+                        timezone === tz
+                          ? COLORS.backgroundSecondary
+                          : COLORS.white,
                     }}
                     onPress={() => {
                       setTimezone(tz);
@@ -328,7 +361,7 @@ export default function ConfiguracionScreen() {
                       style={{
                         fontSize: 16,
                         color: COLORS.text,
-                        fontWeight: timezone === tz ? '600' : '400',
+                        fontWeight: timezone === tz ? "600" : "400",
                         fontFamily: FONT.regular,
                       }}
                     >

@@ -554,14 +554,24 @@ export default function FamilyGroup() {
             >
               <Dialog.Title>Editar nombre del grupo</Dialog.Title>
               <Dialog.Content>
-                <TextInput
-                  style={[STYLES.input, { marginTop: 0 }]}
-                  value={newGroupName}
-                  underlineColor="transparent"
-                  activeUnderlineColor={COLORS.primary}
-                  onChangeText={setNewGroupName}
-                  autoFocus
-                />
+                <View
+                  style={{
+                    backgroundColor: COLORS.backgroundSecondary,
+                    borderRadius: 16,
+                    overflow: "hidden",
+                  }}
+                >
+                  <TextInput
+                    style={[{ backgroundColor: "transparent" }]}
+                    value={newGroupName}
+                    mode="flat"
+                    label="Nombre del grupo"
+                    outlineColor="transparent"
+                    activeOutlineColor="transparent"
+                    onChangeText={setNewGroupName}
+                    autoFocus
+                  />
+                </View>
               </Dialog.Content>
               <Dialog.Actions
                 style={{
