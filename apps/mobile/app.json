@@ -93,7 +93,6 @@
               "targetCellWidth": 3,
               "targetCellHeight": 3,
               "updatePeriodMillis": 1800000
-              
             },
             {
               "name": "PhotosSquare",
@@ -104,6 +103,18 @@
               "previewImage": "./assets/images/ele-def-fondo-cuad.png",
               "targetCellWidth": 2,
               "targetCellHeight": 2,
+              "updatePeriodMillis": 1800000
+            },
+            {
+              "name": "DailyActivities",
+              "label": "Actividades de Hoy",
+              "minWidth": "260dp",
+              "minHeight": "110dp",
+              "description": "Muestra la agenda del día del grupo familiar",
+              "previewImage": "./assets/images/ele-def-fondo-cuad.png",
+              "targetCellWidth": 3,
+              "targetCellHeight": 2,
+              "resizeMode": "vertical",
               "updatePeriodMillis": 1800000
             }
           ]

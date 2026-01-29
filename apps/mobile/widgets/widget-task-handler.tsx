@@ -2,6 +2,7 @@ import React from "react";
 import type { WidgetTaskHandlerProps } from "react-native-android-widget";
 import { RecentPhotosWidget } from "./RecentPhotosWidget";
 import { PhotosSquareWidget } from "./PhotosSquareWidget";
+import { DailyActivitiesWidget } from "./DailyActivitiesWidget";
 import { supabase } from "../lib/supabase";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -11,6 +12,7 @@ const nameToWidget = {
   // This name must match the one in app.json configuration
   RecentPhotos: RecentPhotosWidget,
   PhotosSquare: PhotosSquareWidget,
+  DailyActivities: DailyActivitiesWidget,
 };
 
 interface WidgetMemory {
@@ -18,6 +20,28 @@ interface WidgetMemory {
   title?: string;
   caption?: string;
   createdAt: string | number | Date;
+}
+
+interface Activity {
+  id: string;
+  title: string;
+  startsAt: string;
+  createdBy: string;
+  assignedTo: string | null;
+  completed: boolean;
+}
+
+interface ActivityWithName extends Activity {
+  assignedToName: string | null | undefined;
+}
+
+interface User {
+  id: string;
+  displayName: string;
+}
+
+interface FamilyGroupMembersResponse {
+  members: User[];
 }
 
 async function urlToBase64(url: string): Promise<string | null> {
@@ -38,10 +62,9 @@ async function urlToBase64(url: string): Promise<string | null> {
       reader.onloadend = () => {
         const base64data = reader.result as string;
         console.log("Widget: b64 len", base64data.length);
-        
+
         // Return full data URI
         resolve(base64data);
-        
       };
       reader.onerror = reject;
       reader.readAsDataURL(blob);
@@ -62,6 +85,209 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
     console.error(`Widget name ${widgetInfo.widgetName} not found`);
     return;
   }
+
+  // Handle different widgets
+  if (widgetInfo.widgetName === "DailyActivities") {
+    await handleDailyActivitiesWidget(props, Widget);
+  } else {
+    // Handle photo widgets (RecentPhotos, PhotosSquare)
+    await handlePhotoWidgets(props, Widget);
+  }
+}
+
+// Handle DailyActivities Widget
+async function handleDailyActivitiesWidget(
+  props: WidgetTaskHandlerProps,
+  Widget: React.ComponentType<Record<string, unknown>>,
+) {
+
+  // Handle Refresh Action: render loading state
+  if (props.widgetAction === "WIDGET_UPDATE") {
+    try {
+      const loadingProps = {
+        activities: [],
+        error: "",
+        isLoading: true,
+      } as const;
+      props.renderWidget(<Widget {...loadingProps} />);
+    } catch (e) {
+      console.log("Widget: failed to render loading state", e);
+    }
+  }
+
+  const widgetProps: {
+    activities?: ActivityWithName[];
+    error?: string;
+    isLoading?: boolean;
+    isElder?: boolean;
+  } = {
+    activities: [],
+    error: "",
+    isLoading: false,
+    isElder: false,
+  };
+
+  try {
+    // Get session
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      widgetProps.error = "Toca para iniciar sesión";
+      props.renderWidget(<Widget {...widgetProps} />);
+      return;
+    }
+
+    const userId = session.user.id;
+
+    // Get user's groupId and elder status
+    const { data: userRow } = await supabase
+      .from("users")
+      .select("groupId, elder")
+      .eq("id", userId)
+      .single();
+
+    if (!userRow?.groupId) {
+      widgetProps.error = "No se encontró el grupo familiar";
+      props.renderWidget(<Widget {...widgetProps} />);
+      return;
+    }
+
+    console.log(
+      "Widget DailyActivities: groupId",
+      userRow.groupId,
+      "elder:",
+      userRow.elder,
+    );
+
+    // Set isElder in props
+    widgetProps.isElder = userRow.elder;
+
+    // Fetch activities from API
+    const apiUrl = process.env.EXPO_PUBLIC_API_URL || "http://192.168.1.5:8787";
+    const token = session.access_token;
+
+    try {
+      console.log(`Widget DailyActivities: API call...`);
+      const response = await fetch(
+        `${apiUrl}/activities/familyCode/${userRow.groupId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (response.ok) {
+        const allActivities: Activity[] = await response.json();
+        console.log(
+          "Widget DailyActivities: fetched",
+          allActivities.length,
+          "activities",
+        );
+
+        // Get today's date range (start and end of day)
+        const now = new Date();
+        const startOfToday = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+          0,
+          0,
+          0,
+        );
+        const endOfToday = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+          23,
+          59,
+          59,
+        );
+
+        // Filter activities for today
+        let todayActivities = allActivities.filter((activity) => {
+          const startsAt = new Date(activity.startsAt);
+          return startsAt >= startOfToday && startsAt <= endOfToday;
+        });
+
+        console.log(
+          "Widget DailyActivities: today's activities before filter:",
+          todayActivities.length,
+        );
+
+        // Filter by role if user is elder
+        if (userRow.elder === true) {
+          todayActivities = todayActivities.filter((activity) => {
+            return (
+              activity.createdBy === userId || activity.assignedTo === userId
+            );
+          });
+          console.log(
+            "Widget DailyActivities: filtered for elder:",
+            todayActivities.length,
+          );
+        }
+
+        // Sort by startsAt ascending
+        todayActivities.sort((a, b) => {
+          return (
+            new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime()
+          );
+        });
+
+        const res = await fetch(
+          `${apiUrl}/familyGroup/${userRow.groupId}/members`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        const data: FamilyGroupMembersResponse = await res.json();
+
+        console.log(data);
+
+        // Create a map of user IDs to names
+        const userNamesMap: { [key: string]: string } = {};
+        if (data.members) {
+          data.members.forEach((user) => {
+            userNamesMap[user.id] = user.displayName;
+          });
+        }
+        
+        // Add assignedToName to activities
+        const activitiesWithNames = todayActivities.map((activity) => ({
+          ...activity,
+          assignedToName: activity.assignedTo
+            ? userNamesMap[activity.assignedTo]
+            : null,
+        })) as ActivityWithName[];
+
+        widgetProps.activities = activitiesWithNames;
+      } else {
+        console.log("Widget DailyActivities: API Error", response.status);
+        widgetProps.error = "Toca para actualizar";
+      }
+    } catch (e: unknown) {
+      console.log("Widget DailyActivities: API Fetch Error", e);
+      widgetProps.error = "Toca para actualizar";
+    }
+  } catch (e) {
+    console.error("Widget DailyActivities Error:", e);
+    widgetProps.error = "Toca para actualizar";
+  }
+
+  props.renderWidget(<Widget {...widgetProps} />);
+}
+
+// Handle Photo Widgets (RecentPhotos, PhotosSquare)
+async function handlePhotoWidgets(
+  props: WidgetTaskHandlerProps,
+  Widget: React.ComponentType<Record<string, unknown>>,
+) {
+  const { widgetInfo } = props;
 
   // Handle Refresh Action: render an immediate 'loading' state so the user
   // gets feedback, then continue with the normal update flow below.
@@ -84,7 +310,6 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
       }
     }
   }
-
 
   // Default props
   const widgetProps = {
@@ -231,9 +456,10 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
         if (queryError) {
           widgetProps.error = "Toca para actualizar";
         } else {
-          widgetProps.error = rawMemories.length === 0
-            ? "Aún no hay recuerdos en tu grupo.\n¡Sé el primero en agregar uno!"
-            : "Toca para actualizar";
+          widgetProps.error =
+            rawMemories.length === 0
+              ? "Aún no hay recuerdos en tu grupo.\n¡Sé el primero en agregar uno!"
+              : "Toca para actualizar";
         }
       }
     }
