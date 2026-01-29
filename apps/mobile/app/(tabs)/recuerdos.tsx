@@ -60,8 +60,7 @@ import BookCover from "@/components/Recuerdos/BookCover";
 import eleEmpthy from "@/assets/images/ele-fotografiando.png";
 import { useToast } from "@/components/shared/Toast";
 
-import { useTour } from "@/hooks/useTour";
-import { useTourStep } from "@/hooks/useTourStep";
+import { useRecuerdosTour } from "@/hooks/tours/useRecuerdosTour";
 import { useTabContext } from "@/context/TabContext";
 
 // Tipos de recuerdos
@@ -273,90 +272,7 @@ export default function RecuerdosScreen() {
   const [memberMenuMounted] = useState(true);
 
   // --- Tour Setup ---
-  const tour = useTour({ tourId: 'memories' });
-  const tourLayoutsRef = useRef<Record<string, { x: number; y: number; width: number; height: number }>>({});
-
-  const headerStep = useTourStep({
-    tourId: 'memories',
-    stepId: 'memories-header',
-    order: 1,
-    text: 'Aquí guardarás tus tesoros más preciados: fotos, videos y relatos de tu vida.',
-  });
-
-  const addButtonStep = useTourStep({
-    tourId: 'memories',
-    stepId: 'memories-add',
-    order: 2,
-    text: 'Crea un nuevo "Baúl" para organizar tus recuerdos por temas, como "Viajes" o "Cumpleaños".',
-  });
-
-  const listStep = useTourStep({
-    tourId: 'memories',
-    stepId: 'memories-list',
-    order: 3,
-    text: 'Tus baúles aparecerán aquí. ¡Entra en uno para empezar a guardar recuerdos!',
-  });
-
-  // Auto-start tour when tab becomes active
-  useEffect(() => {
-    if (activeTab === 'recuerdos') {
-      const checkAndStartTour = async () => {
-        // Wait for books to load to ensure UI is stable
-        if (authLoading) return;
-
-        if (tour.isActive) return;
-
-        // Don't start if a book is selected (navigation depth)
-        if (selectedBook) return;
-
-        const completed = await tour.isTourCompleted('memories');
-
-        if (!completed) {
-          setTimeout(() => {
-            const steps = [
-              { ...headerStep.step, ref: headerStep.ref, layout: undefined },
-              { ...addButtonStep.step, ref: addButtonStep.ref, layout: undefined },
-              { ...listStep.step, ref: listStep.ref, layout: undefined },
-            ];
-
-            let measurementsComplete = 0;
-            const totalMeasurements = 3;
-
-            const checkStart = () => {
-              measurementsComplete++;
-              if (measurementsComplete === totalMeasurements) {
-                const finalSteps = steps.map(s => ({
-                  ...s,
-                  layout: tourLayoutsRef.current[s.stepId]
-                }));
-                tour.startTour(finalSteps);
-              }
-            };
-
-            const measureStep = (step: typeof headerStep, id: string) => {
-              if (step.ref.current) {
-                step.ref.current.measureInWindow((x: number, y: number, w: number, h: number) => {
-                  tourLayoutsRef.current[id] = { x, y, width: w, height: h };
-                  checkStart();
-                });
-              } else {
-                console.log(`Skipping measurement for ${id}`);
-                checkStart();
-              }
-            };
-
-            // Stagger measurements
-            setTimeout(() => measureStep(headerStep, 'memories-header'), 100);
-            setTimeout(() => measureStep(addButtonStep, 'memories-add'), 200);
-            setTimeout(() => measureStep(listStep, 'memories-list'), 300);
-
-          }, 1000);
-        }
-      };
-
-      checkAndStartTour();
-    }
-  }, [activeTab, authLoading, tour.isActive, selectedBook]);
+  const { headerRef, addButtonRef, listRef } = useRecuerdosTour({ activeTab, authLoading, selectedBook });
 
   const {
     data: booksResponse,
@@ -1201,10 +1117,10 @@ export default function RecuerdosScreen() {
               alignItems: "center",
             }}
           >
-            <View ref={headerStep.ref}>
+            <View ref={headerRef}>
               <Text style={STYLES.superHeading}>Recuerdos</Text>
             </View>
-            <View ref={addButtonStep.ref}>
+            <View ref={addButtonRef}>
               <Button
                 mode="contained"
                 onPress={openCreateBookDialog}
@@ -1245,7 +1161,7 @@ export default function RecuerdosScreen() {
         ) : books.length === 0 ? (
           <View
             style={{ flex: 1, alignItems: "center", marginTop: emptyLogoTop }}
-            ref={listStep.ref}
+            ref={listRef}
           >
             <Image
               source={eleEmpthy}
@@ -1271,7 +1187,7 @@ export default function RecuerdosScreen() {
             </Button>
           </View>
         ) : (
-          <View style={{ flex: 1 }} ref={listStep.ref}>
+          <View style={{ flex: 1 }} ref={listRef}>
             <FlatList
               data={books}
               keyExtractor={(item) => item.id}
