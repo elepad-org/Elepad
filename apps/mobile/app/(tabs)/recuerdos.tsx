@@ -1018,6 +1018,7 @@ export default function RecuerdosScreen() {
                 }
                 disabled={
                   !groupId ||
+                  !bookFormTitle.trim() ||
                   createBookMutation.isPending ||
                   updateBookMutation.isPending ||
                   deleteBookMutation.isPending
