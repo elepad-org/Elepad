@@ -33,7 +33,7 @@ export default function RecuerdoItemComponent({
     (screenWidth - spacing * 2 - gap * (numColumns - 1)) / numColumns;
 
   // Factor de altura variable para estética Pinterest-like
-  const heightFactor = item.tipo === "texto" ? 0.6 : 0.8 + (item.id.length % 5) * 0.08; // 0.8 a 1.16 para imágenes/videos, 0.6 para texto
+  const heightFactor = item.tipo === "texto" ? 0.45 : item.tipo === "imagen" ? 1.0 + (item.id.length % 3) * 0.05 : 0.8 + (item.id.length % 5) * 0.08; // 1.0 a 1.1 para imágenes, 0.5 para texto, 0.8 a 1.16 para videos/audio
   const itemHeight = itemSize * heightFactor;
 
   return (
@@ -48,6 +48,8 @@ export default function RecuerdoItemComponent({
         overflow: "hidden",
         borderRadius: 4,
         backgroundColor: item.tipo === "imagen" ? "#FFFFFF" : "#F5F5F5", // Blanco para imágenes, gris para otros
+        borderWidth: 1,
+        borderColor: "rgba(0,0,0,0.05)", // Borde sutil sombreado
         ...SHADOWS.light, // Sombra para polaroid
       }}
     >
@@ -79,10 +81,9 @@ export default function RecuerdoItemComponent({
                 numberOfLines={2}
                 style={{
                   fontSize: 11,
-                  color: COLORS.text,
-                  fontStyle: "italic",
+                  color: COLORS.primary,
                   textAlign: "center",
-                  fontFamily: "Georgia", // Handwritten-like serif font
+                  fontFamily: "Montserrat", // Fuente principal de la app
                 }}
               >
                 {item.titulo}
