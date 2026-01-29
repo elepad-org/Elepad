@@ -248,7 +248,14 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             <SaveButton
               onPress={handleChangePassword}
               loading={loading}
-              disabled={loading}
+              disabled={
+                loading ||
+                !currentPassword.trim() ||
+                !newPassword.trim() ||
+                !confirmPassword.trim() ||
+                newPassword.length < 6 ||
+                newPassword !== confirmPassword
+              }
               text="Cambiar"
             />
           </View>
