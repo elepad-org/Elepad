@@ -78,7 +78,7 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
         } as const;
 
         // Render a quick feedback UI while the handler continues to fetch
-        props.renderWidget(<Widget {...(loadingProps as any)} />);
+        props.renderWidget(<Widget {...loadingProps} />);
       } catch (e) {
         console.log("Widget: failed to render loading state", e);
       }

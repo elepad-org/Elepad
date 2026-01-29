@@ -4,6 +4,7 @@ import {
   TextWidget,
   ImageWidget,
   OverlapWidget,
+  ImageWidgetSource,
 } from "react-native-android-widget";
 import itemPlaceholder from "../assets/images/ele-def-fondo-cuad.png";
 
@@ -60,7 +61,7 @@ export function RecentPhotosWidget({
               }}
             >
               <ImageWidget
-                image={imageBase64 as any}
+                image={imageBase64 as ImageWidgetSource}
                 imageWidth={800}
                 imageHeight={800}
                 radius={4}
@@ -68,9 +69,6 @@ export function RecentPhotosWidget({
                   height: "match_parent",
                   width: "match_parent",
                 }}
-                // Importante: 'cover' recorta la imagen para llenar el cuadro sin deformar
-                // @ts-ignore
-                contentFit="cover" 
               />
 
               {/* Botón de Refrescar (Discreto en la esquina) */}
