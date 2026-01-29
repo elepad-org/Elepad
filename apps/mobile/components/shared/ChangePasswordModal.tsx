@@ -5,6 +5,7 @@ import { COLORS } from "@/styles/base";
 import { supabase } from "@/lib/supabase";
 import CancelButton from "./CancelButton";
 import SaveButton from "./SaveButton";
+import { StyledTextInput } from "./StyledTextInput";
 
 interface ChangePasswordModalProps {
   visible: boolean;
@@ -172,62 +173,46 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             utilizar.
           </Text>
 
-          <View style={styles.inputWrapper}>
-            <TextInput
-              label="Contraseña actual"
-              value={currentPassword}
-              onChangeText={setCurrentPassword}
-              secureTextEntry={!showCurrentPassword}
-              mode="flat"
-              outlineColor="transparent"
-              activeOutlineColor="transparent"
-              style={{ backgroundColor: "transparent" }}
-              right={
-                <TextInput.Icon
-                  icon={showCurrentPassword ? "eye-off" : "eye"}
-                  onPress={() => setShowCurrentPassword(!showCurrentPassword)}
-                />
-              }
-            />
-          </View>
+          <StyledTextInput
+            label="Contraseña actual"
+            value={currentPassword}
+            onChangeText={setCurrentPassword}
+            secureTextEntry={!showCurrentPassword}
+            marginBottom={16}
+            right={
+              <TextInput.Icon
+                icon={showCurrentPassword ? "eye-off" : "eye"}
+                onPress={() => setShowCurrentPassword(!showCurrentPassword)}
+              />
+            }
+          />
 
-          <View style={styles.inputWrapper}>
-            <TextInput
-              label="Nueva contraseña"
-              value={newPassword}
-              onChangeText={setNewPassword}
-              secureTextEntry={!showNewPassword}
-              mode="flat"
-              outlineColor="transparent"
-              activeOutlineColor="transparent"
-              style={{ backgroundColor: "transparent" }}
-              right={
-                <TextInput.Icon
-                  icon={showNewPassword ? "eye-off" : "eye"}
-                  onPress={() => setShowNewPassword(!showNewPassword)}
-                />
-              }
-            />
-          </View>
+          <StyledTextInput
+            label="Nueva contraseña"
+            value={newPassword}
+            onChangeText={setNewPassword}
+            secureTextEntry={!showNewPassword}
+            marginBottom={16}
+            right={
+              <TextInput.Icon
+                icon={showNewPassword ? "eye-off" : "eye"}
+                onPress={() => setShowNewPassword(!showNewPassword)}
+              />
+            }
+          />
 
-          <View style={styles.inputWrapper}>
-            <TextInput
-              label="Confirmar nueva contraseña"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry={!showConfirmPassword}
-              mode="flat"
-              outlineColor="transparent"
-              activeOutlineColor="transparent"
-              style={{ backgroundColor: "transparent" }}
-              right={
-                <TextInput.Icon
-                  icon={showConfirmPassword ? "eye-off" : "eye"}
-                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                />
-              }
-            />
-          </View>
+          <StyledTextInput
+            label="Confirmar nueva contraseña"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry={!showConfirmPassword}
+            right={
+              <TextInput.Icon
+                icon={showConfirmPassword ? "eye-off" : "eye"}
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+              />
+            }
+          />
 
           <Text variant="bodySmall" style={styles.hint}>
             • La contraseña debe tener al menos 6 caracteres

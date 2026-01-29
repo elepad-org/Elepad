@@ -9,11 +9,11 @@ import {
   IconButton,
   Menu,
   Button,
-  TextInput,
 } from "react-native-paper";
 import { COLORS, STYLES, FONT, SHADOWS } from "@/styles/base";
 import { useAudioPlayer } from "expo-audio";
 import { VideoView, useVideoPlayer } from "expo-video";
+import { StyledTextInput } from "../shared";
 import Slider from "@react-native-community/slider";
 import HighlightedMentionText from "./HighlightedMentionText";
 import MentionInput from "./MentionInput";
@@ -712,24 +712,12 @@ export default function RecuerdoDetailDialog({
             Modificar recuerdo
           </Dialog.Title>
           <Dialog.Content>
-            <View
-              style={{
-                backgroundColor: COLORS.backgroundSecondary,
-                borderRadius: 16,
-                overflow: "hidden",
-                marginBottom: 16,
-              }}
-            >
-              <TextInput
-                label="Título"
-                value={editTitle}
-                onChangeText={setEditTitle}
-                mode="flat"
-                style={{ backgroundColor: "transparent" }}
-                outlineColor="transparent"
-                activeOutlineColor="transparent"
-              />
-            </View>
+            <StyledTextInput
+              label="Título"
+              value={editTitle}
+              onChangeText={setEditTitle}
+              marginBottom={16}
+            />
             <View
               style={{
                 backgroundColor: COLORS.backgroundSecondary,

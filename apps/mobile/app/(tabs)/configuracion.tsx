@@ -12,9 +12,9 @@ import {
   Divider,
   List,
   Portal,
-  TextInput,
   Dialog,
 } from "react-native-paper";
+import { StyledTextInput } from "@/components/shared";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/hooks/useAuth";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
@@ -187,24 +187,13 @@ export default function ConfiguracionScreen() {
             {/* Campo de texto desplegable */}
             {editExpanded && (
               <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
-                <View
-                  style={{
-                    backgroundColor: COLORS.white,
-                    borderRadius: 16,
-                    overflow: "hidden",
-                  }}
-                >
-                  <TextInput
-                    label="Nombre"
-                    value={formName}
-                    onChangeText={setFormName}
-                    mode="flat"
-                    style={{ backgroundColor: "transparent" }}
-                    outlineColor="transparent"
-                    activeOutlineColor="transparent"
-                    autoFocus
-                  />
-                </View>
+                <StyledTextInput
+                  label="Nombre"
+                  value={formName}
+                  onChangeText={setFormName}
+                  autoFocus
+                  backgroundColor={COLORS.white}
+                />
                 <View
                   style={{
                     flexDirection: "row",

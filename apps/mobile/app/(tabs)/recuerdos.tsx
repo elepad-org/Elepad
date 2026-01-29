@@ -20,7 +20,6 @@ import {
   IconButton,
   Menu,
   SegmentedButtons,
-  TextInput,
 } from "react-native-paper";
 import DropdownSelect from "@/components/shared/DropdownSelect";
 import { useAuth } from "@/hooks/useAuth";
@@ -59,6 +58,7 @@ import CancelButton from "@/components/shared/CancelButton";
 import BookCover from "@/components/Recuerdos/BookCover";
 import eleEmpthy from "@/assets/images/ele-fotografiando.png";
 import { useToast } from "@/components/shared/Toast";
+import { StyledTextInput } from "@/components/shared";
 
 // Tipos de recuerdos
 type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
@@ -883,44 +883,20 @@ export default function RecuerdosScreen() {
             {bookDialogMode === "create" ? "Nuevo baúl" : "Editar baúl"}
           </Dialog.Title>
           <Dialog.Content>
-            <View
-              style={{
-                backgroundColor: COLORS.backgroundSecondary,
-                borderRadius: 16,
-                overflow: "hidden",
-                marginBottom: 12,
-              }}
-            >
-              <TextInput
-                label="Nombre"
-                value={bookFormTitle}
-                onChangeText={setBookFormTitle}
-                mode="flat"
-                style={{ backgroundColor: "transparent" }}
-                outlineColor="transparent"
-                activeOutlineColor="transparent"
-              />
-            </View>
-            <View
-              style={{
-                backgroundColor: COLORS.backgroundSecondary,
-                borderRadius: 16,
-                overflow: "hidden",
-                marginBottom: 12,
-              }}
-            >
-              <TextInput
-                label="Descripción"
-                value={bookFormDescription}
-                onChangeText={setBookFormDescription}
-                mode="flat"
-                style={{ backgroundColor: "transparent" }}
-                outlineColor="transparent"
-                activeOutlineColor="transparent"
-                multiline
-                numberOfLines={3}
-              />
-            </View>
+            <StyledTextInput
+              label="Nombre"
+              value={bookFormTitle}
+              onChangeText={setBookFormTitle}
+              marginBottom={12}
+            />
+            <StyledTextInput
+              label="Descripción"
+              value={bookFormDescription}
+              onChangeText={setBookFormDescription}
+              multiline
+              numberOfLines={3}
+              marginBottom={12}
+            />
 
             <Text
               style={{
