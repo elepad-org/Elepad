@@ -1,0 +1,96 @@
+import { useRef, useEffect } from "react";
+import { useTour } from "@/hooks/useTour";
+import { useTourStep } from "@/hooks/useTourStep";
+
+interface UseCalendarTourProps {
+  activeTab: string;
+  activitiesLoading: boolean;
+}
+
+export const useCalendarTour = ({
+  activeTab,
+  activitiesLoading,
+}: UseCalendarTourProps) => {
+  const tour = useTour({ tourId: 'calendar' });
+  const tourLayoutsRef = useRef<Record<string, { x: number; y: number; width: number; height: number }>>({});
+
+  const headerStep = useTourStep({
+    tourId: 'calendar',
+    stepId: 'calendar-header',
+    order: 1,
+    text: 'Aquí podrás ver y gestionar todos los eventos de tu familia. ¡Organízate mejor!',
+  });
+
+  const addButtonStep = useTourStep({
+    tourId: 'calendar',
+    stepId: 'add-button',
+    order: 2,
+    text: 'Toca aquí para agregar nuevos eventos, citas médicas o recordatorios importantes.',
+  });
+
+  const calendarCardStep = useTourStep({
+    tourId: 'calendar',
+    stepId: 'calendar-card',
+    order: 3,
+    text: 'Usa el calendario para navegar entre fechas y ver qué tienes planeado para cada día.',
+  });
+
+  useEffect(() => {
+    if (activeTab === 'calendar') {
+      const checkAndStartTour = async () => {
+        if (activitiesLoading) return;
+        if (tour.isActive) return;
+
+        const completed = await tour.isTourCompleted('calendar');
+
+        if (!completed) {
+          setTimeout(() => {
+            const steps = [
+              { ...headerStep.step, ref: headerStep.ref, layout: undefined },
+              { ...addButtonStep.step, ref: addButtonStep.ref, layout: undefined },
+              { ...calendarCardStep.step, ref: calendarCardStep.ref, layout: undefined },
+            ];
+
+            let measurementsComplete = 0;
+            const totalMeasurements = 3;
+
+            const checkStart = () => {
+              measurementsComplete++;
+              if (measurementsComplete === totalMeasurements) {
+                const finalSteps = steps.map(s => ({
+                  ...s,
+                  layout: tourLayoutsRef.current[s.stepId]
+                }));
+                tour.startTour(finalSteps);
+              }
+            };
+
+            const measureStep = (step: typeof headerStep, id: string) => {
+              if (step.ref.current) {
+                step.ref.current.measureInWindow((x: number, y: number, w: number, h: number) => {
+                  tourLayoutsRef.current[id] = { x, y, width: w, height: h };
+                  checkStart();
+                });
+              } else {
+                checkStart();
+              }
+            };
+
+            setTimeout(() => measureStep(headerStep, 'calendar-header'), 50);
+            setTimeout(() => measureStep(addButtonStep, 'add-button'), 100);
+            setTimeout(() => measureStep(calendarCardStep, 'calendar-card'), 150);
+
+          }, 1000);
+        }
+      };
+
+      checkAndStartTour();
+    }
+  }, [activeTab, activitiesLoading, tour.isActive]);
+
+  return {
+    headerRef: headerStep.ref,
+    addButtonRef: addButtonStep.ref,
+    calendarCardRef: calendarCardStep.ref,
+  };
+};

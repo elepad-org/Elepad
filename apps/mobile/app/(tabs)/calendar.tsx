@@ -1,9 +1,8 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { View, StatusBar } from "react-native";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useTour } from "@/hooks/useTour";
-import { useTourStep } from "@/hooks/useTourStep";
+import { useCalendarTour } from "@/hooks/tours/useCalendarTour";
 import { useTabContext } from "@/context/TabContext";
 import CalendarCard from "@/components/Calendar/CalendarCard";
 import ActivityForm from "@/components/Calendar/ActivityForm";
@@ -44,112 +43,13 @@ function CalendarScreenContent() {
   const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(familyCode);
   const membersQuery = useGetFamilyGroupIdGroupMembers(familyCode);
 
-  // --- Tour Setup ---
-  const tour = useTour({ tourId: 'calendar' });
-  const tourLayoutsRef = useRef<Record<string, { x: number; y: number; width: number; height: number }>>({});
-
-  const headerStep = useTourStep({
-    tourId: 'calendar',
-    stepId: 'calendar-header',
-    order: 1,
-    text: 'Aquí podrás ver y gestionar todos los eventos de tu familia. ¡Organízate mejor!',
-  });
-
-  const addButtonStep = useTourStep({
-    tourId: 'calendar',
-    stepId: 'add-button',
-    order: 2,
-    text: 'Toca aquí para agregar nuevos eventos, citas médicas o recordatorios importantes.',
-  });
-
-  const calendarCardStep = useTourStep({
-    tourId: 'calendar',
-    stepId: 'calendar-card',
-    order: 3,
-    text: 'Usa el calendario para navegar entre fechas y ver qué tienes planeado para cada día.',
-  });
-
-  // Tour Context trigger
   const { activeTab } = useTabContext();
 
-  // Clean up unused hooks once confirmed working
-  // const segments = useSegments(); 
-  // const navigation = useNavigation();
-
-  // Auto-start tour when tab becomes active
-  useEffect(() => {
-    console.log('👀 Calendar: activeTab changed to:', activeTab);
-
-    // Only proceed if this is crucial 
-    if (activeTab === 'calendar') {
-      const checkAndStartTour = async () => {
-        if (activitiesQuery.isLoading) {
-          console.log('⏳ Calendar: Waiting for activities to load...');
-          return;
-        }
-
-        if (tour.isActive) {
-          console.log('🚫 Calendar: Tour already active.');
-          return;
-        }
-
-        const completed = await tour.isTourCompleted('calendar');
-        console.log('   Calendar Tour completed status:', completed);
-
-        if (!completed) {
-          console.log('🚀 Calendar: Tab active. Preparing tour...');
-
-          setTimeout(() => {
-            console.log('📏 Calendar: Measuring elements...');
-
-            const steps = [
-              { ...headerStep.step, ref: headerStep.ref, layout: undefined },
-              { ...addButtonStep.step, ref: addButtonStep.ref, layout: undefined },
-              { ...calendarCardStep.step, ref: calendarCardStep.ref, layout: undefined },
-            ];
-
-            // Verify refs are attached
-            if (!headerStep.ref.current) console.warn('⚠️ Header ref invalid');
-            if (!addButtonStep.ref.current) console.warn('⚠️ Add button ref invalid');
-
-            let measurementsComplete = 0;
-            const totalMeasurements = 3;
-
-            const checkStart = () => {
-              measurementsComplete++;
-              if (measurementsComplete === totalMeasurements) {
-                const finalSteps = steps.map(s => ({
-                  ...s,
-                  layout: tourLayoutsRef.current[s.stepId]
-                }));
-                console.log('✅ Calendar: All measured. Starting tour now.');
-                tour.startTour(finalSteps);
-              }
-            };
-
-            const measureStep = (step: typeof headerStep, id: string) => {
-              if (step.ref.current) {
-                step.ref.current.measureInWindow((x: number, y: number, w: number, h: number) => {
-                  tourLayoutsRef.current[id] = { x, y, width: w, height: h };
-                  checkStart();
-                });
-              } else {
-                console.warn(`   Skipping measurement for ${id}: ref null`);
-                checkStart();
-              }
-            };
-
-            setTimeout(() => measureStep(headerStep, 'calendar-header'), 50);
-            setTimeout(() => measureStep(addButtonStep, 'add-button'), 100);
-            setTimeout(() => measureStep(calendarCardStep, 'calendar-card'), 150);
-
-          }, 1000);
-        }
-      };
-
-      checkAndStartTour();
-    }
-  }, [activeTab, activitiesQuery.isLoading, tour.isActive]);
+  //  // Tour hook
+  const { headerRef, addButtonRef, calendarCardRef } = useCalendarTour({
+    activeTab,
+    activitiesLoading: activitiesQuery.isLoading,
+  });
   // ------------------
 
 
@@ -411,7 +311,7 @@ function CalendarScreenContent() {
           alignItems: "center",
         }}
       >
-        <View ref={headerStep.ref}>
+        <View ref={headerRef}>
           <Text
             style={baseStyles.superHeading}
             suppressHighlighting={true}
@@ -420,7 +320,7 @@ function CalendarScreenContent() {
           </Text>
         </View>
 
-        <View ref={addButtonStep.ref}>
+        <View ref={addButtonRef}>
           <Button
             mode="contained"
             onPress={() => setFormVisible(true)}
@@ -432,7 +332,7 @@ function CalendarScreenContent() {
         </View>
       </View>
 
-      <View style={{ flex: 1 }} ref={calendarCardStep.ref}>
+      <View style={{ flex: 1 }} ref={calendarCardRef}>
         <CalendarCard
           idFamilyGroup={familyCode}
           idUser={idUser}
