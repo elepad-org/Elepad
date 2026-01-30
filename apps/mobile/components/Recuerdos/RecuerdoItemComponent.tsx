@@ -53,7 +53,7 @@ export default function RecuerdoItemComponent({
         ...SHADOWS.light, // Sombra para polaroid
       }}
     >
-      {item.tipo === "imagen" && item.miniatura ? (
+      {(item.tipo === "imagen" || item.tipo === "video") && item.miniatura ? (
         <View style={{ flex: 1, width: "100%", height: "100%" }}>
           <Image
             source={{ uri: item.miniatura }}
@@ -64,6 +64,38 @@ export default function RecuerdoItemComponent({
               borderRadius: 2, // BorderRadius pequeño para polaroid
             }}
           />
+          {item.tipo === "video" && (
+            /* Ícono de play para indicar que es un video */
+            <View
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <View
+                style={{
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  borderRadius: 40,
+                  width: 60,
+                  height: 60,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <IconButton
+                  icon="play"
+                  size={30}
+                  iconColor="#fff"
+                  style={{ margin: 0 }}
+                />
+              </View>
+            </View>
+          )}
           {item.titulo && (
             <View
               style={{
@@ -86,67 +118,6 @@ export default function RecuerdoItemComponent({
                   fontFamily: "Montserrat", // Fuente principal de la app
                   fontWeight: "600",
                 }}
-              >
-                {item.titulo}
-              </Text>
-            </View>
-          )}
-        </View>
-      ) : item.tipo === "video" && item.miniatura ? (
-        <View style={{ flex: 1, width: "100%", height: "100%" }}>
-          <Image
-            source={{ uri: item.miniatura }}
-            style={{
-              width: "100%",
-              height: "100%",
-              resizeMode: "cover",
-            }}
-          />
-          {/* Ícono de play para indicar que es un video */}
-          <View
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <View
-              style={{
-                backgroundColor: "rgba(0,0,0,0.5)",
-                borderRadius: 40,
-                width: 60,
-                height: 60,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <IconButton
-                icon="play"
-                size={30}
-                iconColor="#fff"
-                style={{ margin: 0 }}
-              />
-            </View>
-          </View>
-          {item.titulo && (
-            <View
-              style={{
-                position: "absolute",
-                top: 8,
-                left: 8,
-                right: 8,
-                backgroundColor: "rgba(0,0,0,0.6)",
-                padding: 6,
-                borderRadius: 4,
-              }}
-            >
-              <Text
-                numberOfLines={2}
-                style={{ color: "#fff", fontSize: 12, fontWeight: "500" }}
               >
                 {item.titulo}
               </Text>
