@@ -410,39 +410,6 @@ const HomeScreen = () => {
                             allowsPictureInPicture={false}
                             contentFit="cover"
                           />
-                          <LinearGradient
-                            colors={["transparent", "rgba(0,0,0,0.7)"]}
-                            style={[styles.memoryGradient, { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }]}
-                          >
-                            <View style={styles.memoryContent}>
-                              <Text style={styles.memoryLabel}>ÚLTIMO RECUERDO</Text>
-                              <Text style={styles.memoryTitle} numberOfLines={2}>
-                                {lastMemory.title || "Sin título"}
-                              </Text>
-                              {lastMemory.caption && (
-                                <HighlightedMentionText
-                                  text={lastMemory.caption}
-                                  familyMembers={groupMembers}
-                                  style={styles.memoryDescription}
-                                />
-                              )}
-                              <Text style={styles.memoryDate}>
-                                {formatInUserTimezone(
-                                  lastMemory.createdAt,
-                                  "d 'de' MMMM 'de' yyyy",
-                                  userElepad?.timezone
-                                )}
-                              </Text>
-                            </View>
-                            <View style={{ position: "absolute", top: "50%", left: "50%", transform: [{ translateX: -30 }, { translateY: -30 }] }}>
-                              <IconButton
-                                icon="play"
-                                size={60}
-                                iconColor="#fff"
-                                style={{ margin: 0 }}
-                              />
-                            </View>
-                          </LinearGradient>
                         </View>
                       ) : (
                         <ImageBackground
