@@ -85,15 +85,14 @@
           "widgets": [
             {
               "name": "RecentPhotos",
-              "label": "Elepad - Recuerdos (Tarjeta)",
+              "label": "Recuerdos del grupo",
               "minWidth": "250dp", 
               "minHeight": "100dp",
-              "description": "Muestra la foto más reciente estilo tarjeta",
-              "previewImage": "./assets/images/ele-def-fondo-cuad.png",
-              "targetCellWidth": 5,
-              "targetCellHeight": 2,
-              "updatePeriodMillis": 60000,
-              "resizeMode": "horizontal|vertical"
+              "description": "Muestra las fotos más recientes del grupo familiar",
+              "previewImage": "./assets/images/elepad-polaroid.png",
+              "targetCellWidth": 3,
+              "targetCellHeight": 3,
+              "updatePeriodMillis": 1800000
             },
             {
               "name": "PhotosSquare",
@@ -104,8 +103,19 @@
               "previewImage": "./assets/images/ele-def-fondo-cuad.png",
               "targetCellWidth": 2,
               "targetCellHeight": 2,
-              "updatePeriodMillis": 60000,
-              "resizeMode": "horizontal|vertical"
+              "updatePeriodMillis": 1800000
+            },
+            {
+              "name": "DailyActivities",
+              "label": "Actividades de Hoy",
+              "minWidth": "260dp",
+              "minHeight": "110dp",
+              "description": "Muestra la agenda del día del grupo familiar",
+              "previewImage": "./assets/images/elepad-task-list.png",
+              "targetCellWidth": 3,
+              "targetCellHeight": 2,
+              "resizeMode": "vertical",
+              "updatePeriodMillis": 1800000
             }
           ]
         }
