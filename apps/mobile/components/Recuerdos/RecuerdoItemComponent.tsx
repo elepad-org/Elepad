@@ -1,6 +1,6 @@
 import { TouchableOpacity, View, Dimensions, Image, ImageBackground } from "react-native";
 import { Text, IconButton } from "react-native-paper";
-import { STYLES, COLORS, SHADOWS } from "@/styles/base";
+import { COLORS, SHADOWS } from "@/styles/base";
 import fondoRecuerdos from "@/assets/images/fondoRecuerdos.png";
 
 const screenWidth = Dimensions.get("window").width;
@@ -33,7 +33,7 @@ export default function RecuerdoItemComponent({
     (screenWidth - spacing * 2 - gap * (numColumns - 1)) / numColumns;
 
   // Factor de altura variable para estética Pinterest-like
-  const heightFactor = item.tipo === "texto" ? 0.45 : item.tipo === "imagen" ? 1.0 + (item.id.length % 3) * 0.05 : 0.8 + (item.id.length % 5) * 0.08; // 1.0 a 1.1 para imágenes, 0.5 para texto, 0.8 a 1.16 para videos/audio
+  const heightFactor = (item.tipo === "texto" || item.tipo === "audio") ? 0.4 : item.tipo === "imagen" ? 1.0 + (item.id.length % 3) * 0.05 : 0.8 + (item.id.length % 5) * 0.08; // 0.4 para texto y audio, 1.0 a 1.1 para imágenes, 0.8 a 1.16 para videos
   const itemHeight = itemSize * heightFactor;
 
   return (
@@ -53,7 +53,7 @@ export default function RecuerdoItemComponent({
         ...SHADOWS.light, // Sombra para polaroid
       }}
     >
-      {item.tipo === "imagen" && item.miniatura ? (
+      {(item.tipo === "imagen" || item.tipo === "video") && item.miniatura ? (
         <View style={{ flex: 1, width: "100%", height: "100%" }}>
           <Image
             source={{ uri: item.miniatura }}
@@ -64,6 +64,38 @@ export default function RecuerdoItemComponent({
               borderRadius: 2, // BorderRadius pequeño para polaroid
             }}
           />
+          {item.tipo === "video" && (
+            /* Ícono de play para indicar que es un video */
+            <View
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <View
+                style={{
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  borderRadius: 40,
+                  width: 60,
+                  height: 60,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <IconButton
+                  icon="play"
+                  size={30}
+                  iconColor="#fff"
+                  style={{ margin: 0 }}
+                />
+              </View>
+            </View>
+          )}
           {item.titulo && (
             <View
               style={{
@@ -92,68 +124,7 @@ export default function RecuerdoItemComponent({
             </View>
           )}
         </View>
-      ) : item.tipo === "video" && item.miniatura ? (
-        <View style={{ flex: 1, width: "100%", height: "100%" }}>
-          <Image
-            source={{ uri: item.miniatura }}
-            style={{
-              width: "100%",
-              height: "100%",
-              resizeMode: "cover",
-            }}
-          />
-          {/* Ícono de play para indicar que es un video */}
-          <View
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <View
-              style={{
-                backgroundColor: "rgba(0,0,0,0.5)",
-                borderRadius: 40,
-                width: 60,
-                height: 60,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <IconButton
-                icon="play"
-                size={30}
-                iconColor="#fff"
-                style={{ margin: 0 }}
-              />
-            </View>
-          </View>
-          {item.titulo && (
-            <View
-              style={{
-                position: "absolute",
-                top: 8,
-                left: 8,
-                right: 8,
-                backgroundColor: "rgba(0,0,0,0.6)",
-                padding: 6,
-                borderRadius: 4,
-              }}
-            >
-              <Text
-                numberOfLines={2}
-                style={{ color: "#fff", fontSize: 12, fontWeight: "500" }}
-              >
-                {item.titulo}
-              </Text>
-            </View>
-          )}
-        </View>
-      ) : item.tipo === "texto" ? (
+      ) : item.tipo === "texto" || item.tipo === "audio" ? (
         <ImageBackground
           source={fondoRecuerdos}
           style={{
@@ -164,7 +135,7 @@ export default function RecuerdoItemComponent({
             borderRadius: 4,
           }}
         >
-         {item.titulo && (
+         {((item.tipo === "texto" && item.titulo) || item.tipo === "audio") && (
             <View
               style={{
                 bottom: 0,
@@ -187,33 +158,19 @@ export default function RecuerdoItemComponent({
                   fontWeight: "600",
                 }}
               >
-                {item.titulo}
+                {item.tipo === "audio" ? (item.titulo || "Nota de voz") : item.titulo}
               </Text>
             </View>)}
+          {item.tipo === "audio" && (
+            <IconButton
+              icon="microphone"
+              size={24}
+              iconColor={COLORS.primary}
+              style={{ position: "absolute", top: 12, right: 12, margin: 0 }}
+            />
+          )}
         </ImageBackground>
-      ) : (
-        <View
-          style={[
-            STYLES.center,
-            { backgroundColor: COLORS.backgroundSecondary, flex: 1, padding: 12 },
-          ]}
-        >
-          <IconButton
-            icon="microphone"
-            size={32}
-            iconColor={COLORS.primary}
-          />
-          <Text
-            numberOfLines={2}
-            style={[
-              STYLES.footerText,
-              { textAlign: "center", marginTop: 4, color: COLORS.textLight },
-            ]}
-          >
-            {item.titulo || "Nota de voz"}
-          </Text>
-        </View>
-      )}
+      ) : null}
     </TouchableOpacity>
   );
 }
