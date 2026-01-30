@@ -1,7 +1,6 @@
 import React from "react";
 import type { WidgetTaskHandlerProps } from "react-native-android-widget";
 import { RecentPhotosWidget } from "./RecentPhotosWidget";
-import { PhotosSquareWidget } from "./PhotosSquareWidget";
 import { DailyActivitiesWidget } from "./DailyActivitiesWidget";
 import { supabase } from "../lib/supabase";
 import { format } from "date-fns";
@@ -11,11 +10,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const nameToWidget = {
   // This name must match the one in app.json configuration
   RecentPhotos: RecentPhotosWidget,
-  PhotosSquare: PhotosSquareWidget,
   DailyActivities: DailyActivitiesWidget,
 };
 
 interface WidgetMemory {
+  id: string; // Add id field for deep linking
   mediaUrl?: string;
   title?: string;
   caption?: string;
@@ -301,6 +300,7 @@ async function handlePhotoWidgets(
           date: "",
           error: "",
           isLoading: true,
+          memoryId: "", // New prop for deep link
         } as const;
 
         // Render a quick feedback UI while the handler continues to fetch
@@ -318,6 +318,7 @@ async function handlePhotoWidgets(
     caption: "",
     date: "",
     error: "",
+    memoryId: "", // New prop for deep link to memory
   };
 
   try {
@@ -443,6 +444,7 @@ async function handlePhotoWidgets(
           widgetProps.imageBase64 = b64;
           widgetProps.title = cleanText(memory.title ?? "RECUERDO");
           widgetProps.caption = cleanText(memory.caption ?? "");
+          widgetProps.memoryId = memory.id; // Set memoryId for deep link
           try {
             const dateObj = new Date(memory.createdAt);
             widgetProps.date = format(dateObj, "d 'de' MMMM", { locale: es });
