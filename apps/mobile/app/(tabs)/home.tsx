@@ -618,6 +618,11 @@ const HomeScreen = () => {
                       userElepad?.timezone,
                     );
 
+                    // Capitalize month (e.g., "30 ene" -> "30 Ene")
+                    dateLabel = dateLabel.replace(/ [a-z]/, (c) =>
+                      c.toUpperCase(),
+                    );
+
                     if (isToday) dateLabel = "Hoy";
                     if (isTomorrow) dateLabel = "Mañana";
 
