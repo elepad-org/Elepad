@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { View, useWindowDimensions, Keyboard, Animated } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { TabView, SceneMap } from "react-native-tab-view";
@@ -13,24 +13,28 @@ import SidebarNavigation from "@/components/navigation/SidebarNavigation";
 import BottomTabBar from "@/components/navigation/BottomTabBar";
 import { elderRoutes, nonElderRoutes, TabRoute } from "@/components/navigation/navigationConfig";
 
+import { LoadingUser } from "@/components/shared";
+
 export default function TabLayout() {
   const layout = useWindowDimensions();
   const params = useLocalSearchParams();
   const router = useRouter();
   const [index, setIndex] = useState(0);
-  const { userElepad } = useAuth();
+  const { userElepad, userElepadLoading } = useAuth();
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
+
+
   const isElder = userElepad?.elder === true;
-  
+
   // Detectar si es una pantalla muy grande (desktop/web)
   // Usamos 1024px como breakpoint para que tablets usen el tab bar
   // y solo pantallas de PC/desktop muestren el sidebar
   const isLargeScreen = layout.width >= 1024;
 
-  const [routes, setRoutes] = useState<TabRoute[]>(
+  const routes = useMemo(() =>
     isElder ? elderRoutes : nonElderRoutes
-  );
+    , [isElder]);
 
   // Escuchar cambios en el parámetro 'tab' para cambiar de tab programáticamente
   useEffect(() => {
@@ -46,18 +50,15 @@ export default function TabLayout() {
     }
   }, [params.tab, routes]);
 
-  // Update routes when user elder status changes
-  useEffect(() => {
-    setRoutes(isElder ? elderRoutes : nonElderRoutes);
-  }, [isElder]);
 
-  const renderScene = SceneMap({
+
+  const renderScene = useMemo(() => SceneMap({
     home: HomeScreen,
     calendar: CalendarScreen,
     juegos: JuegosScreen,
     recuerdos: RecuerdosScreen,
     configuracion: ConfiguracionScreen,
-  });
+  }), []);
 
   // Detect global keyboard visibility to hide tab bar
   useEffect(() => {
@@ -95,33 +96,42 @@ export default function TabLayout() {
   };
 
   return (
+
     <View
       style={{ flex: 1, backgroundColor: COLORS.background, flexDirection: "row" }}
     >
-      {/* Sidebar for large screens */}
-      {isLargeScreen && (
-        <SidebarNavigation
-          routes={routes}
-          activeIndex={index}
-          onIndexChange={setIndex}
-        />
-      )}
+      {userElepadLoading || !userElepad ? (
+        // Mostrar loading fullscreen mientras se carga el usuario o si no hay usuario
+        <LoadingUser />
+      ) : (
+        <>
+          {/* Sidebar for large screens */}
+          {isLargeScreen && (
+            <SidebarNavigation
+              routes={routes}
+              activeIndex={index}
+              onIndexChange={setIndex}
+            />
+          )}
 
-      {/* Content area */}
-      <View style={{ flex: 1 }}>
-        <TabView
-          navigationState={{ index, routes }}
-          renderScene={renderScene}
-          onIndexChange={setIndex}
-          initialLayout={{ width: layout.width }}
-          renderTabBar={renderTabBar}
-          tabBarPosition="bottom"
-          swipeEnabled={!isLargeScreen}
-          animationEnabled={true}
-          lazy={true}
-          lazyPreloadDistance={1}
-        />
-      </View>
+          {/* Content area */}
+          <View style={{ flex: 1 }}>
+            <TabView
+              navigationState={{ index, routes }}
+              renderScene={renderScene}
+              onIndexChange={setIndex}
+              initialLayout={{ width: layout.width }}
+              renderTabBar={renderTabBar}
+              tabBarPosition="bottom"
+              swipeEnabled={!isLargeScreen}
+              animationEnabled={true}
+              lazy={true}
+              lazyPreloadDistance={1}
+            />
+          </View>
+        </>
+      )}
     </View>
+
   );
 }

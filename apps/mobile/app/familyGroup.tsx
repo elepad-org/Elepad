@@ -38,6 +38,7 @@ import { BackButton } from "@/components/shared/BackButton";
 import CancelButton from "@/components/shared/CancelButton";
 import SaveButton from "@/components/shared/SaveButton";
 import { useToast } from "@/components/shared/Toast";
+import { StyledTextInput } from "@/components/shared";
 
 export default function FamilyGroup() {
   const { userElepad, refreshUserElepad } = useAuth();
@@ -554,11 +555,9 @@ export default function FamilyGroup() {
             >
               <Dialog.Title>Editar nombre del grupo</Dialog.Title>
               <Dialog.Content>
-                <TextInput
-                  style={[STYLES.input, { marginTop: 0 }]}
+                <StyledTextInput
                   value={newGroupName}
-                  underlineColor="transparent"
-                  activeUnderlineColor={COLORS.primary}
+                  label="Nombre del grupo"
                   onChangeText={setNewGroupName}
                   autoFocus
                 />

@@ -305,7 +305,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
           ) {
             console.log("✅ Redirigiendo a home después de login");
             hasRedirectedAfterSignIn.current = true;
-            router.replace("/home");
+            router.replace("/(tabs)/home");
           }
         } else {
           setUserElepad(null);

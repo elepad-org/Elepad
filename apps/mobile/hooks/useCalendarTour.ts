@@ -6,26 +6,36 @@ import { InteractionManager } from 'react-native';
 const TOUR_STORAGE_KEY = '@elepad_has_seen_calendar_tour_v2';
 
 export const useCalendarTour = () => {
-  const { start, canStart, stop, eventEmitter } = useTourGuideController();
+  const { start, canStart, stop, eventEmitter } = useTourGuideController('calendarTour');
   const [hasSeenTour, setHasSeenTour] = useState<boolean | null>(null);
   const hasCheckedTour = useRef(false);
 
   useEffect(() => {
+    // console.log('📅 useCalendarTour: Effect triggered', { hasCheckedTour: hasCheckedTour.current, canStart });
+
+    // TOUR TEMPORARILY DISABLED - Remove this return to re-enable
+    return;
+
     if (hasCheckedTour.current || !canStart) return;
 
     const checkTourStatus = async () => {
       try {
         hasCheckedTour.current = true; // Mark as checked to prevent loops
         const value = await AsyncStorage.getItem(TOUR_STORAGE_KEY);
+        console.log('📅 useCalendarTour: Storage value', value);
         setHasSeenTour(value === 'true');
 
         if (value !== 'true') {
-          // Wait for UI to be fully ready (2 seconds delay as requested)
+          console.log('📅 useCalendarTour: Starting tour...');
+          // Longer delay to ensure UI, backdrop, and context are fully ready
           InteractionManager.runAfterInteractions(() => {
             setTimeout(() => {
+              console.log('📅 useCalendarTour: Calling start()');
               start();
-            }, 2000);
+            }, 500);
           });
+        } else {
+          console.log('📅 useCalendarTour: Tour already seen, skipping');
         }
       } catch (e) {
         console.error('Error checking tour status', e);

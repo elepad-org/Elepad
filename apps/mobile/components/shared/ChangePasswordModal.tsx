@@ -1,15 +1,11 @@
 import React, { useState } from "react";
 import { View, StyleSheet } from "react-native";
-import {
-  Dialog,
-  Text,
-  TextInput,
-  Portal,
-} from "react-native-paper";
+import { Dialog, Text, TextInput, Portal } from "react-native-paper";
 import { COLORS } from "@/styles/base";
 import { supabase } from "@/lib/supabase";
 import CancelButton from "./CancelButton";
 import SaveButton from "./SaveButton";
+import { StyledTextInput } from "./StyledTextInput";
 
 interface ChangePasswordModalProps {
   visible: boolean;
@@ -22,7 +18,10 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
   onDismiss,
   showToast: showToastProp,
 }) => {
-  const defaultShowToast = (options: { message: string; type: "success" | "error" }) => {
+  const defaultShowToast = (options: {
+    message: string;
+    type: "success" | "error";
+  }) => {
     console.log(`Toast: ${options.type} - ${options.message}`);
   };
 
@@ -167,23 +166,19 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
           alignSelf: "center",
         }}
       >
-      <Dialog.Title style={styles.title}>Cambiar contraseña</Dialog.Title>
-      <Dialog.Content style={{ paddingBottom: 15 }}>
-        <Text variant="bodyMedium" style={styles.description}>
-          Ingresa tu contraseña actual y la nueva contraseña que deseas
-          utilizar.
-        </Text>
+        <Dialog.Title style={styles.title}>Cambiar contraseña</Dialog.Title>
+        <Dialog.Content style={{ paddingBottom: 15 }}>
+          <Text variant="bodyMedium" style={styles.description}>
+            Ingresa tu contraseña actual y la nueva contraseña que deseas
+            utilizar.
+          </Text>
 
-        <View style={styles.inputWrapper}>
-          <TextInput
+          <StyledTextInput
             label="Contraseña actual"
             value={currentPassword}
             onChangeText={setCurrentPassword}
             secureTextEntry={!showCurrentPassword}
-            mode="flat"
-            outlineColor="transparent"
-            activeOutlineColor="transparent"
-            style={{ backgroundColor: "transparent" }}
+            marginBottom={16}
             right={
               <TextInput.Icon
                 icon={showCurrentPassword ? "eye-off" : "eye"}
@@ -191,18 +186,13 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               />
             }
           />
-        </View>
 
-        <View style={styles.inputWrapper}>
-          <TextInput
+          <StyledTextInput
             label="Nueva contraseña"
             value={newPassword}
             onChangeText={setNewPassword}
             secureTextEntry={!showNewPassword}
-            mode="flat"
-            outlineColor="transparent"
-            activeOutlineColor="transparent"
-            style={{ backgroundColor: "transparent" }}
+            marginBottom={16}
             right={
               <TextInput.Icon
                 icon={showNewPassword ? "eye-off" : "eye"}
@@ -210,18 +200,12 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               />
             }
           />
-        </View>
 
-        <View style={styles.inputWrapper}>
-          <TextInput
+          <StyledTextInput
             label="Confirmar nueva contraseña"
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             secureTextEntry={!showConfirmPassword}
-            mode="flat"
-            outlineColor="transparent"
-            activeOutlineColor="transparent"
-            style={{ backgroundColor: "transparent" }}
             right={
               <TextInput.Icon
                 icon={showConfirmPassword ? "eye-off" : "eye"}
@@ -229,46 +213,52 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
               />
             }
           />
-        </View>
 
-        <Text variant="bodySmall" style={styles.hint}>
-          • La contraseña debe tener al menos 6 caracteres
-        </Text>
-      </Dialog.Content>
-      <Dialog.Actions
-        style={{
-          paddingBottom: 30,
-          paddingHorizontal: 24,
-          paddingTop: 10,
-          justifyContent: "space-between",
-        }}
-      >
-        <View style={{ width: 120 }}>
-          <CancelButton onPress={handleDismiss} disabled={loading} />
-        </View>
-        <View style={{ width: 120 }}>
-          <SaveButton
-            onPress={handleChangePassword}
-            loading={loading}
-            disabled={loading}
-            text="Cambiar"
-          />
-        </View>
-      </Dialog.Actions>
-    </Dialog>
+          <Text variant="bodySmall" style={styles.hint}>
+            • La contraseña debe tener al menos 6 caracteres
+          </Text>
+        </Dialog.Content>
+        <Dialog.Actions
+          style={{
+            paddingBottom: 30,
+            paddingHorizontal: 24,
+            paddingTop: 10,
+            justifyContent: "space-between",
+          }}
+        >
+          <View style={{ width: 120 }}>
+            <CancelButton onPress={handleDismiss} disabled={loading} />
+          </View>
+          <View style={{ width: 120 }}>
+            <SaveButton
+              onPress={handleChangePassword}
+              loading={loading}
+              disabled={
+                loading ||
+                !currentPassword.trim() ||
+                !newPassword.trim() ||
+                !confirmPassword.trim() ||
+                newPassword.length < 6 ||
+                newPassword !== confirmPassword
+              }
+              text="Cambiar"
+            />
+          </View>
+        </Dialog.Actions>
+      </Dialog>
     </Portal>
   );
 };
 
 const styles = StyleSheet.create({
   title: {
-    textAlign: 'center',
+    textAlign: "center",
   },
   description: {
     marginBottom: 16,
     color: COLORS.textSecondary,
     lineHeight: 22,
-    textAlign: 'center',
+    textAlign: "center",
   },
   inputWrapper: {
     backgroundColor: COLORS.backgroundSecondary,
@@ -281,7 +271,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     color: COLORS.textSecondary,
     lineHeight: 20,
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 12,
   },
 });

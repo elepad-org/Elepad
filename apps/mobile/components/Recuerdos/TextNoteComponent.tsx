@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { View } from "react-native";
-import { TextInput, Text } from "react-native-paper";
+import { Text } from "react-native-paper";
 import { STYLES, COLORS } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
 import SaveButton from "../shared/SaveButton";
+import { StyledTextInput } from "../shared";
 import MentionInput from "./MentionInput";
 
 interface FamilyMember {
@@ -50,30 +51,39 @@ export default function TextNoteComponent({
         Agrega un título y descripción
       </Text>
 
-      <TextInput
+      <StyledTextInput
         label="Título"
         value={title}
         onChangeText={setTitle}
-        style={{ marginBottom: 12 }}
-        mode="outlined"
-        outlineColor={COLORS.border}
-        activeOutlineColor={COLORS.primary}
         placeholder="Ej: Recordatorio importante"
         disabled={isUploading}
+        marginBottom={12}
       />
 
-      <MentionInput
-        label="Descripción"
-        value={content}
-        onChangeText={setContent}
-        placeholder="Describe tu recuerdo... Usa @ para mencionar"
-        multiline
-        numberOfLines={3}
-        disabled={isUploading}
-        familyMembers={familyMembers}
-        currentUserId={currentUserId}
-        style={{ marginBottom: 20 }}
-      />
+      <View
+        style={{
+          backgroundColor: COLORS.backgroundSecondary,
+          borderRadius: 16,
+          overflow: "hidden",
+          marginBottom: 20,
+        }}
+      >
+        <MentionInput
+          label="Descripción"
+          value={content}
+          onChangeText={setContent}
+          placeholder="Describe tu recuerdo... Usa @ para mencionar"
+          multiline
+          numberOfLines={3}
+          disabled={isUploading}
+          familyMembers={familyMembers}
+          currentUserId={currentUserId}
+          mode="flat"
+          outlineColor="transparent"
+          activeOutlineColor="transparent"
+          inputStyle={{ backgroundColor: "transparent" }}
+        />
+      </View>
 
       <View
         style={{

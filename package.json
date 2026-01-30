@@ -10,6 +10,7 @@
     "start": "turbo run start",
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "dev:client": "turbo run dev:client",
     "lint": "turbo run lint",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write . --list-different",

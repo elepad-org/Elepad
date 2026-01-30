@@ -20,7 +20,6 @@ import {
   IconButton,
   Menu,
   SegmentedButtons,
-  TextInput,
 } from "react-native-paper";
 import DropdownSelect from "@/components/shared/DropdownSelect";
 import { useAuth } from "@/hooks/useAuth";
@@ -48,7 +47,7 @@ import { COLORS, STYLES, LAYOUT } from "@/styles/base";
 import { Platform } from "react-native";
 import { uriToBlob } from "@/lib/uriToBlob";
 
-import MasonryList from '@react-native-seoul/masonry-list';
+import MasonryList from "@react-native-seoul/masonry-list";
 import RecuerdoItemComponent from "@/components/Recuerdos/RecuerdoItemComponent";
 import NuevoRecuerdoDialogComponent from "@/components/Recuerdos/NuevoRecuerdoDialogComponent";
 import RecuerdoDetailDialog from "@/components/Recuerdos/RecuerdoDetailDialog";
@@ -59,6 +58,7 @@ import CancelButton from "@/components/shared/CancelButton";
 import BookCover from "@/components/Recuerdos/BookCover";
 import eleEmpthy from "@/assets/images/ele-fotografiando.png";
 import { useToast } from "@/components/shared/Toast";
+import { StyledTextInput } from "@/components/shared";
 
 // Tipos de recuerdos
 type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
@@ -155,9 +155,9 @@ export default function RecuerdosScreen() {
   const { showToast } = useToast();
 
   // Dimensiones responsive
-  const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+  const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
   const emptyLogoSize = screenWidth * 0.55; // 55% del ancho de pantalla
-  const emptyLogoTop = screenHeight * 0.12;; // 25% del alto de pantalla (más arriba que el 35% anterior)
+  const emptyLogoTop = screenHeight * 0.12; // 25% del alto de pantalla (más arriba que el 35% anterior)
 
   const { mutateAsync: addReaction } = useAddReaction();
 
@@ -883,25 +883,19 @@ export default function RecuerdosScreen() {
             {bookDialogMode === "create" ? "Nuevo baúl" : "Editar baúl"}
           </Dialog.Title>
           <Dialog.Content>
-            <TextInput
+            <StyledTextInput
               label="Nombre"
               value={bookFormTitle}
               onChangeText={setBookFormTitle}
-              mode="outlined"
-              outlineColor={COLORS.border}
-              activeOutlineColor={COLORS.primary}
-              style={{ marginBottom: 12 }}
+              marginBottom={12}
             />
-            <TextInput
+            <StyledTextInput
               label="Descripción"
               value={bookFormDescription}
               onChangeText={setBookFormDescription}
-              mode="outlined"
-              outlineColor={COLORS.border}
-              activeOutlineColor={COLORS.primary}
               multiline
               numberOfLines={3}
-              style={{ marginBottom: 12 }}
+              marginBottom={12}
             />
 
             <Text
@@ -1000,6 +994,7 @@ export default function RecuerdosScreen() {
                 }
                 disabled={
                   !groupId ||
+                  !bookFormTitle.trim() ||
                   createBookMutation.isPending ||
                   updateBookMutation.isPending ||
                   deleteBookMutation.isPending
@@ -1148,7 +1143,7 @@ export default function RecuerdosScreen() {
                 width: 180,
                 height: 180,
                 borderRadius: 18,
-                marginBottom: 16
+                marginBottom: 16,
               }}
             />
             <Text style={STYLES.heading}>Todavía no hay baúles</Text>
@@ -1613,7 +1608,11 @@ export default function RecuerdosScreen() {
         >
           <Image
             source={eleEmpthy}
-            style={{ width: emptyLogoSize, height: emptyLogoSize, marginBottom: 10 }}
+            style={{
+              width: emptyLogoSize,
+              height: emptyLogoSize,
+              marginBottom: 10,
+            }}
           />
           <Text style={STYLES.heading}>{emptyTitle}</Text>
           <Text style={STYLES.subheading}>{emptySubtitle}</Text>

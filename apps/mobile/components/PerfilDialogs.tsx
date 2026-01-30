@@ -11,6 +11,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { patchUsersIdAvatar } from "@elepad/api-client";
 import { uriToBlob } from "@/lib/uriToBlob";
+import { StyledTextInput } from "./shared";
 
 type EditNameDialogProps = {
   title: string;
@@ -45,9 +46,8 @@ export function EditNameDialog({
         {title}
       </Dialog.Title>
       <Dialog.Content>
-        <TextInput
+        <StyledTextInput
           label="Nombre"
-          mode="outlined"
           value={name}
           onChangeText={onChange}
           left={<TextInput.Icon icon="account" />}
@@ -55,7 +55,6 @@ export function EditNameDialog({
           theme={{
             colors: {
               primary: theme.colors.primary,
-              outline: theme.colors.outline,
             },
           }}
         />
@@ -78,7 +77,7 @@ export function EditNameDialog({
         <Button
           mode="contained"
           loading={!!saving}
-          disabled={!!disabled}
+          disabled={!!disabled || !name.trim()}
           onPress={onSubmit}
           buttonColor={theme.colors.primary}
           textColor={theme.colors.onPrimary}

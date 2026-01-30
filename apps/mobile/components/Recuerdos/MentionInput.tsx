@@ -41,7 +41,8 @@ export default function MentionInput({
   outlineColor = COLORS.border,
   activeOutlineColor = COLORS.primary,
   style = {},
-}: MentionInputProps) {
+  inputStyle = {},
+}: MentionInputProps & { inputStyle?: object }) {
   const [showMentionMenu, setShowMentionMenu] = useState(false);
   const [mentionSearch, setMentionSearch] = useState("");
   const [mentionStartPos, setMentionStartPos] = useState(0);
@@ -156,7 +157,17 @@ export default function MentionInput({
         multiline={multiline}
         numberOfLines={numberOfLines}
         disabled={disabled}
-        selectionColor={COLORS.primary + "40"}
+        selectionColor={COLORS.primary}
+        cursorColor={COLORS.primary}
+        theme={{
+          colors: {
+            primary: COLORS.primary,
+            background: "transparent",
+            onSurfaceVariant: COLORS.primary,
+            placeholder: COLORS.textSecondary,
+          },
+        }}
+        style={[{ backgroundColor: "transparent" }, inputStyle]}
       />
 
       <PickerModal

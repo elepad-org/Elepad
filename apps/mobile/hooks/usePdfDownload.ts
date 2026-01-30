@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Platform } from "react-native";
-import * as FileSystem from "expo-file-system";
-import { File, Directory } from "expo-file-system";
+import { File, Directory, Paths } from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
+import * as IntentLauncher from 'expo-intent-launcher';
 import * as Sharing from "expo-sharing";
 import { useToast } from "@/components/shared/Toast";
 
@@ -23,7 +23,8 @@ export function usePdfDownload(options?: UsePdfDownloadOptions) {
   const ensureDownloadParam = (url: string) => {
     try {
       const u = new URL(url);
-      if (!u.searchParams.has("download")) u.searchParams.set("download", "true");
+      if (!u.searchParams.has("download"))
+        u.searchParams.set("download", "true");
       return u.toString();
     } catch {
       return url;
@@ -31,50 +32,52 @@ export function usePdfDownload(options?: UsePdfDownloadOptions) {
   };
 
   const getCacheDir = () => {
-    const cache = FileSystem.Paths.cache || "";
+    const cache = Paths.cache || "";
     if (!cache) throw new Error("Cache directory not available");
     return new Directory(cache);
   };
 
-  const downloadToCacheWithFileApi = async (pdfUrl: string, filename: string) => {
+  const downloadToCacheWithFileApi = async (
+    pdfUrl: string,
+    filename: string,
+  ) => {
     const cacheDir = getCacheDir();
 
-    // Create cache directory if it doesn't already exist (idempotent)
     try {
-      if (!cacheDir.exists) cacheDir.create({ intermediates: true, idempotent: true });
+      if (!cacheDir.exists)
+        cacheDir.create({ intermediates: true, idempotent: true });
     } catch (err) {
-      // rethrow permission-like errors with helpful message
-      const msg = err instanceof Error ? err.message : String(err);
-      if (msg.toLowerCase().includes("permission") || msg.includes("WRITE")) {
-        throw new Error("No se poseen permisos para escribir en el almacenamiento de la app.");
-      }
+      console.log(err)
       throw err as Error;
     }
 
     const targetUri = `${cacheDir.uri.replace(/\/+$/, "")}/${filename}`;
     const targetFile = new File(targetUri);
 
-    // If exists, try to delete to ensure clean download
     try {
       const info = targetFile.info();
       if (info.exists) {
         try {
           targetFile.delete();
         } catch {
-          // ignore deletion failure and attempt idempotent download
+          // ignore
         }
       }
     } catch {
       // ignore
     }
 
-    // Download into the target file (idempotent to allow overwrite)
-    const downloaded = await File.downloadFileAsync(ensureDownloadParam(pdfUrl), targetFile, {
-      idempotent: true,
-    });
+    const downloaded = await File.downloadFileAsync(
+      ensureDownloadParam(pdfUrl),
+      targetFile,
+      {
+        idempotent: true,
+      },
+    );
 
     const downloadedInfo = downloaded.info();
-    if (!downloadedInfo.exists) throw new Error("El archivo no fue descargado correctamente");
+    if (!downloadedInfo.exists)
+      throw new Error("El archivo no fue descargado correctamente");
 
     return downloaded;
   };
@@ -83,9 +86,12 @@ export function usePdfDownload(options?: UsePdfDownloadOptions) {
     if (!pdfUrl) return;
     setIsDownloading(true);
     try {
-      if (!(await Sharing.isAvailableAsync())) throw new Error("Compartir no está disponible en este dispositivo");
+      if (!(await Sharing.isAvailableAsync())) {
+        showToast({message: "Compartir no está disponible en este dispositivo", type: "error"});
+        throw new Error;
+      }
 
-      showToast({ message: "Preparando PDF...", type: "info" });
+      showToast({ message: "Preparando álbum...", type: "info" });
 
       const filename = `${sanitizeFilename(albumTitle)}.pdf`;
       const downloaded = await downloadToCacheWithFileApi(pdfUrl, filename);
@@ -100,58 +106,44 @@ export function usePdfDownload(options?: UsePdfDownloadOptions) {
 
       options?.onSuccess?.();
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      showToast({ message: msg, type: "error" });
-      options?.onError?.(err instanceof Error ? err : new Error(msg));
+      console.log(err)
+      showToast({ message: "Error al intentar compartir el álbum", type: "error" });
+      options?.onError?.(err instanceof Error ? err : new Error);
     } finally {
       setIsDownloading(false);
     }
   };
 
-  const savePdf = async (pdfUrl: string, albumTitle: string): Promise<string | undefined> => {
+  const viewLocalPdf = async (
+    pdfUrl: string,
+  ): Promise<void> => {
     if (!pdfUrl) return;
     setIsDownloading(true);
     try {
-      const filename = `${sanitizeFilename(albumTitle)}.pdf`;
-      showToast({ message: "Descargando...", type: "info" });
+      showToast({ message: "Cargando archivo...", type: "info" });
 
-      const downloaded = await downloadToCacheWithFileApi(pdfUrl, filename);
 
-      if (Platform.OS === "android") {
-        // Ask user for destination directory (SAF via Directory picker)
-        const destDir = await Directory.pickDirectoryAsync();
-        if (!destDir) throw new Error("No se seleccionó carpeta de destino");
+      const destDir = new Directory(Paths.cache);
+      destDir.create({ idempotent: true, intermediates: true });
 
-        // Create or get target file in destination
-        let destFile: File;
-        try {
-          destFile = destDir.createFile(filename, "application/pdf") as File;
-        } catch {
-          // If create fails because exists, create File instance and overwrite via write
-          const destUri = `${destDir.uri.replace(/\/+$/, "")}/${filename}`;
-          destFile = new File(destUri);
-        }
+      const output = await File.downloadFileAsync(pdfUrl, destDir, {idempotent: true});
+      console.log(output)
 
-        // Get bytes from downloaded file and write
-        const bytes = await downloaded.bytes();
-        await destFile.write(bytes);
 
-        const savedUri = destFile.contentUri || destFile.uri;
-        showToast({ message: "PDF guardado en la carpeta seleccionada", type: "success" });
-        options?.onSuccess?.();
-        return savedUri;
-      } else {
-        // iOS and others: use share sheet to allow saving to Files
-        await Sharing.shareAsync(downloaded.uri, {
-          mimeType: "application/pdf",
-          UTI: "com.adobe.pdf",
+      const savedUri = await FileSystem.getContentUriAsync(output.uri);
+
+      await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
+        data: savedUri,
+        flags: 1, // FLAG_GRANT_READ_URI_PERMISSION
+        type: 'application/pdf', // Para apps que lean pdf
         });
-        options?.onSuccess?.();
-        return downloaded.uri;
-      }
+      options?.onSuccess?.();
+      setIsDownloading(false);
+      
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      showToast({ message: msg, type: "error" });
+      console.log(err);
+      showToast({ message: "No se pudo abrir el PDF. Intenta nuevamente", type: "error" });
       options?.onError?.(err instanceof Error ? err : new Error(msg));
     } finally {
       setIsDownloading(false);
@@ -184,35 +176,9 @@ export function usePdfDownload(options?: UsePdfDownloadOptions) {
     }
   };
 
-  const findSavedPdf = async (albumTitle: string): Promise<string | undefined> => {
-    try {
-      const cacheDir = getCacheDir();
-      if (!cacheDir.exists) return undefined;
-
-      const filename = `${sanitizeFilename(albumTitle)}.pdf`;
-      const contents = FileSystem.Paths.document.list();
-      console.log(contents)
-
-      for (const item of contents) {
-        if (item instanceof File && item.uri.endsWith(filename)) {
-          const info = item.info();
-          if (info.exists) {
-            console.log(info)
-            return item.uri || item.contentUri;
-          }
-        }
-      }
-      return undefined;
-    } catch (e) {
-      console.warn("Error finding saved PDF", e);
-      return undefined;
-    }
-  };
-
   return {
     sharePdf,
-    savePdf,
-    findSavedPdf,
+    viewLocalPdf,
     isDownloading,
     cleanupCache,
   };

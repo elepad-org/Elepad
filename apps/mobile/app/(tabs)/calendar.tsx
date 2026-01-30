@@ -22,10 +22,7 @@ import CancelButton from "@/components/shared/CancelButton";
 import { useToast } from "@/components/shared/Toast";
 import { toLocalDateString } from "@/lib/dateHelpers";
 import { useQueryClient } from "@tanstack/react-query";
-// Tour
-import { useCalendarTour } from "@/hooks/useCalendarTour";
-import { TourGuideZone } from "rn-tourguide";
-import { ElepadTourProvider } from "@/components/shared/ElepadTourProvider";
+
 
 function CalendarScreenContent() {
   const { userElepad } = useAuth();
@@ -44,9 +41,7 @@ function CalendarScreenContent() {
   const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(familyCode);
   const membersQuery = useGetFamilyGroupIdGroupMembers(familyCode);
 
-  // Tour
-  const { restartTour } = useCalendarTour();
-  const [debugTaps, setDebugTaps] = useState(0);
+
 
   // Normaliza la respuesta del hook (envuelta en {data} o directa)
   const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
@@ -305,65 +300,38 @@ function CalendarScreenContent() {
           alignItems: "center",
         }}
       >
-        <TourGuideZone
-          zone={1}
-          text="Bienvenido a tu Calendario. Aquí podrás organizar todas tus actividades y eventos familiares."
-          borderRadius={8}
+        <Text
+          style={baseStyles.superHeading}
+          suppressHighlighting={true}
         >
-          <Text
-            style={baseStyles.superHeading}
-            onPress={() => {
-              const newTaps = debugTaps + 1;
-              setDebugTaps(newTaps);
-              if (newTaps >= 10) {
-                setDebugTaps(0);
-                restartTour();
-              }
-            }}
-            suppressHighlighting={true}
-          >
-            Calendario
-          </Text>
-        </TourGuideZone>
+          Calendario
+        </Text>
 
-        <TourGuideZone
-          zone={2}
-          text="Toca este botón para añadir un nuevo evento, cita médica o reunión familiar."
-          borderRadius={20}
+        <Button
+          mode="contained"
+          onPress={() => setFormVisible(true)}
+          style={{ ...baseStyles.miniButton, width: "auto", paddingHorizontal: 16 }}
+          icon="plus"
         >
-          <Button
-            mode="contained"
-            onPress={() => setFormVisible(true)}
-            style={{ ...baseStyles.miniButton, width: "auto", paddingHorizontal: 16 }}
-            icon="plus"
-          >
-            Agregar
-          </Button>
-        </TourGuideZone>
+          Agregar
+        </Button>
       </View>
 
       <View style={{ flex: 1 }}>
-        <TourGuideZone
-          zone={3}
-          text="Aquí verás tus eventos del día. Selecciona cualquier fecha para revisar tu agenda."
-          borderRadius={12}
-          style={{ flex: 1 }}
-        >
-          <CalendarCard
-            idFamilyGroup={familyCode}
-            idUser={idUser}
-            activitiesQuery={activitiesQuery}
-            onEdit={handleEdit}
-            onDelete={handleConfirmDelete}
-            isOwnerOfGroup={isOwnerOfGroup}
-            groupInfo={groupInfo}
-            activityToView={activityToView}
-            activityDateToView={activityDateToView}
-            onActivityViewed={handleActivityViewed}
-            selectedElderId={selectedElderId}
-            onElderChange={setSelectedElderId}
-          />
-        </TourGuideZone>
+        <CalendarCard
+          idFamilyGroup={familyCode}
+          idUser={idUser}
+          activitiesQuery={activitiesQuery}
+          onEdit={handleEdit}
+          onDelete={handleConfirmDelete}
+          isOwnerOfGroup={isOwnerOfGroup}
+          groupInfo={groupInfo}
+          activityToView={activityToView}
+          activityDateToView={activityDateToView}
+          onActivityViewed={handleActivityViewed}
+          selectedElderId={selectedElderId}
+          onElderChange={setSelectedElderId}
+        />
       </View>
 
       <ActivityForm
@@ -423,10 +391,6 @@ function CalendarScreenContent() {
 }
 
 export default function CalendarScreen() {
-  return (
-    <ElepadTourProvider>
-      <CalendarScreenContent />
-    </ElepadTourProvider>
-  );
+  return <CalendarScreenContent />;
 }
 

@@ -13,7 +13,9 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.elepadorg.elepad",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIFileSharingEnabled": true,
+        "LSSupportsOpeningDocumentsInPlace": true
       }
     },
     "android": {
@@ -73,6 +75,38 @@
           "directories": [
             "documents",
             "cache"
+          ]
+        }
+      ],
+      "expo-build-properties",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "RecentPhotos",
+              "label": "Elepad - Recuerdos (Tarjeta)",
+              "minWidth": "250dp", 
+              "minHeight": "100dp",
+              "description": "Muestra la foto más reciente estilo tarjeta",
+              "previewImage": "./assets/images/ele-def-fondo-cuad.png",
+              "targetCellWidth": 5,
+              "targetCellHeight": 2,
+              "updatePeriodMillis": 60000,
+              "resizeMode": "horizontal|vertical"
+            },
+            {
+              "name": "PhotosSquare",
+              "label": "Elepad - Foto Cuadrada",
+              "minWidth": "100dp",
+              "minHeight": "100dp",
+              "description": "Muestra solo la foto (sin texto)",
+              "previewImage": "./assets/images/ele-def-fondo-cuad.png",
+              "targetCellWidth": 2,
+              "targetCellHeight": 2,
+              "updatePeriodMillis": 60000,
+              "resizeMode": "horizontal|vertical"
+            }
           ]
         }
       ]
