@@ -17,7 +17,7 @@ import { LoadingUser } from "@/components/shared";
 import { TabProvider, useTabContext } from "@/context/TabContext";
 
 // Component strictly for syncing state to context to avoid re-rendering the layout
-const TabStateSyncer = memo(({ index, routes }: { index: number; routes: TabRoute[] }) => {
+const TabStateSyncer = memo(function TabStateSyncer({ index, routes }: { index: number; routes: TabRoute[] }) {
   const { setActiveTab } = useTabContext();
 
   useEffect(() => {
