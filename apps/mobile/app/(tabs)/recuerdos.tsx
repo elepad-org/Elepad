@@ -269,6 +269,7 @@ export default function RecuerdosScreen() {
   const [selectedMimeType, setSelectedMimeType] = useState<string | null>(null);
 
   const [memberFilterId, setMemberFilterId] = useState<string | null>(null);
+  const [typeFilter, setTypeFilter] = useState<RecuerdoTipo | "all">("all");
   const [memberMenuMounted] = useState(true);
 
   // --- Tour Setup ---
@@ -297,6 +298,7 @@ export default function RecuerdosScreen() {
       groupId,
       bookId: selectedBook?.id,
       createdBy: memberFilterId || undefined,
+      tipo: typeFilter === "all" ? undefined : typeFilter,
       limit: 20,
     },
     {
@@ -566,6 +568,7 @@ export default function RecuerdosScreen() {
 
     return memories
       .map((memory) => memoryToRecuerdo(memory, memberNameById))
+      .filter((recuerdo) => typeFilter === "all" || recuerdo.tipo === typeFilter)
       .sort((a, b) => {
         if (sortOrder === "desc") {
           return b.fecha.getTime() - a.fecha.getTime();
@@ -573,7 +576,7 @@ export default function RecuerdosScreen() {
           return a.fecha.getTime() - b.fecha.getTime();
         }
       });
-  }, [memoriesResponse, memberNameById, sortOrder]);
+  }, [memoriesResponse, memberNameById, sortOrder, typeFilter]);
 
   const params = useLocalSearchParams();
   const { memoryId, bookId } = params;
@@ -1564,6 +1567,26 @@ export default function RecuerdosScreen() {
               showLabel={false}
             />
           )}
+        </View>
+
+        {/* Segunda fila: Filtro de Tipo */}
+        <View style={{ marginBottom: 8 }}>
+          <DropdownSelect
+            label="Tipo"
+            value={typeFilter}
+            options={[
+              { key: "all", label: "Todos los tipos", icon: "file-multiple" },
+              { key: "imagen", label: "Imágenes", icon: "image" },
+              { key: "video", label: "Videos", icon: "video" },
+              { key: "audio", label: "Audios", icon: "microphone" },
+              { key: "texto", label: "Notas", icon: "text" },
+            ]}
+            onSelect={(value) => {
+              setTypeFilter(value as RecuerdoTipo | "all");
+            }}
+            placeholder="Todos los tipos"
+            showLabel={false}
+          />
         </View>
 
         {/* Segunda fila: Ordenar y Vista */}

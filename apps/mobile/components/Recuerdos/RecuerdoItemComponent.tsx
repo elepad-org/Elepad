@@ -170,9 +170,9 @@ export default function RecuerdoItemComponent({
           {item.tipo === "audio" && (
             <IconButton
               icon="microphone"
-              size={24 * scale}
+              size={21 * scale}
               iconColor={COLORS.primary}
-              style={{ position: "absolute", top: 12 * scale, right: 12 * scale, margin: 0 }}
+              style={{ position: "absolute", top: '50%', right: 12 * scale, transform: [{ translateY: -9 * scale }], margin: 0 }}
             />
           )}
         </ImageBackground>
