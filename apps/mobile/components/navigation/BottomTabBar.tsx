@@ -26,14 +26,14 @@ export default function BottomTabBar({
   jumpTo,
 }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
-  
+
   // Calculate bottom position: base padding + safe area inset for navigation buttons
   const bottomPosition = Platform.select({
     ios: insets.bottom,
     android: 14 + insets.bottom,
     default: 14 + insets.bottom,
   });
-  
+
   return (
     <View
       style={{
