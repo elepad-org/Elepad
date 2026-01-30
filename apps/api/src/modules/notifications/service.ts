@@ -64,13 +64,15 @@ export class NotificationsService {
       if (result.data && Array.isArray(result.data)) {
         for (let i = 0; i < result.data.length; i++) {
           const ticket = result.data[i];
-          const token = pushTokens[i].token;
+          if (i < pushTokens.length) {
+            const token = pushTokens[i]!.token;
 
-          if (ticket.status === 'error' && ticket.details?.error === 'DeviceNotRegistered') {
-            console.log(`Deactivating invalid token: ${token}`);
-            await this.pushTokensService.removePushToken(userId, token);
-          } else if (ticket.status === 'error') {
-            console.error(`Push notification error for token ${token}:`, ticket.details);
+            if (ticket.status === 'error' && ticket.details?.error === 'DeviceNotRegistered') {
+              console.log(`Deactivating invalid token: ${token}`);
+              await this.pushTokensService.removePushToken(userId, token);
+            } else if (ticket.status === 'error') {
+              console.error(`Push notification error for token ${token}:`, ticket.details);
+            }
           }
         }
       }
