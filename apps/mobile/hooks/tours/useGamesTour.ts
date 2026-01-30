@@ -18,18 +18,39 @@ export const useGamesTour = ({ activeTab, loading }: UseGamesTourProps) => {
     text: '¡Bienvenido a la zona de juegos! Aquí podrás divertirte y ejercitar tu mente.',
   });
 
-  const actionsStep = useTourStep({
+  const shopStep = useTourStep({
     tourId: 'games',
-    stepId: 'games-actions',
+    stepId: 'games-shop',
     order: 2,
-    text: 'Visita la tienda para canjear tus puntos o revisa tu historial de partidas.',
+    text: 'Visita la tienda para canjear tus puntos por divertidos elementos.',
+  });
+
+  const historyStep = useTourStep({
+    tourId: 'games',
+    stepId: 'games-history',
+    order: 3,
+    text: 'Revisa tu historial de partidas y progreso.',
   });
 
   const gamesListStep = useTourStep({
     tourId: 'games',
     stepId: 'games-list',
-    order: 3,
-    text: 'Elige entre una variedad de juegos diseñados para ti. ¡Toca uno para empezar!',
+    order: 4,
+    text: 'Elige entre una variedad de juegos diseñados para ti.',
+  });
+
+  const gameDetailsStep = useTourStep({
+    tourId: 'games',
+    stepId: 'game-details-memory',
+    order: 5,
+    text: 'Toca aquí para ver más detalles sobre este juego.',
+  });
+
+  const gamePlayStep = useTourStep({
+    tourId: 'games',
+    stepId: 'game-play-memory',
+    order: 6,
+    text: 'O toca el botón de Play para empezar a jugar directamente.',
   });
 
   useEffect(() => {
@@ -44,12 +65,15 @@ export const useGamesTour = ({ activeTab, loading }: UseGamesTourProps) => {
           setTimeout(() => {
             const steps = [
               { ...headerStep.step, ref: headerStep.ref, layout: undefined },
-              { ...actionsStep.step, ref: actionsStep.ref, layout: undefined },
+              { ...shopStep.step, ref: shopStep.ref, layout: undefined },
+              { ...historyStep.step, ref: historyStep.ref, layout: undefined },
               { ...gamesListStep.step, ref: gamesListStep.ref, layout: undefined },
+              { ...gameDetailsStep.step, ref: gameDetailsStep.ref, layout: undefined },
+              { ...gamePlayStep.step, ref: gamePlayStep.ref, layout: undefined },
             ];
 
             let measurementsComplete = 0;
-            const totalMeasurements = 3;
+            const totalMeasurements = 6;
 
             const checkStart = () => {
               measurementsComplete++;
@@ -74,8 +98,11 @@ export const useGamesTour = ({ activeTab, loading }: UseGamesTourProps) => {
             };
 
             setTimeout(() => measureStep(headerStep, 'games-header'), 50);
-            setTimeout(() => measureStep(actionsStep, 'games-actions'), 100);
-            setTimeout(() => measureStep(gamesListStep, 'games-list'), 150);
+            setTimeout(() => measureStep(shopStep, 'games-shop'), 100);
+            setTimeout(() => measureStep(historyStep, 'games-history'), 150);
+            setTimeout(() => measureStep(gamesListStep, 'games-list'), 200);
+            setTimeout(() => measureStep(gameDetailsStep, 'game-details-memory'), 250);
+            setTimeout(() => measureStep(gamePlayStep, 'game-play-memory'), 300);
 
           }, 1000);
         }
@@ -87,7 +114,10 @@ export const useGamesTour = ({ activeTab, loading }: UseGamesTourProps) => {
 
   return {
     headerRef: headerStep.ref,
-    actionsRef: actionsStep.ref,
+    shopRef: shopStep.ref,
+    historyRef: historyStep.ref,
     gamesListRef: gamesListStep.ref,
+    gameDetailsRef: gameDetailsStep.ref,
+    gamePlayRef: gamePlayStep.ref,
   };
 };
