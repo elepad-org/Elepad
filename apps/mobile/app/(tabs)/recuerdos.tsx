@@ -272,7 +272,7 @@ export default function RecuerdosScreen() {
   const [memberMenuMounted] = useState(true);
 
   // --- Tour Setup ---
-  const { headerRef, addButtonRef, listRef } = useRecuerdosTour({ activeTab, authLoading, selectedBook });
+  const { headerRef, addButtonRef, listRef, albumRef } = useRecuerdosTour({ activeTab, authLoading, selectedBook });
 
   const {
     data: booksResponse,
@@ -1135,20 +1135,21 @@ export default function RecuerdosScreen() {
               </Button>
             </View>
           </View>
-          <Button
-            mode="outlined"
-            onPress={() => router.push("../albums")}
-            style={{
-              borderRadius: 12,
-              borderColor: COLORS.primary,
-              marginTop: 24,
-            }}
-            icon="book-multiple"
-            textColor={COLORS.primary}
-            disabled={!groupId}
-          >
-            Álbumes
-          </Button>
+          <View ref={albumRef} style={{ marginTop: 24 }}>
+            <Button
+              mode="outlined"
+              onPress={() => router.push("../albums")}
+              style={{
+                borderRadius: 12,
+                borderColor: COLORS.primary,
+              }}
+              icon="book-multiple"
+              textColor={COLORS.primary}
+              disabled={!groupId}
+            >
+              Álbumes
+            </Button>
+          </View>
         </View>
 
         {isBooksLoading && books.length === 0 ? (

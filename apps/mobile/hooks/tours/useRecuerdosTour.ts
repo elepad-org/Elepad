@@ -34,6 +34,13 @@ export const useRecuerdosTour = ({ activeTab, authLoading, selectedBook }: UseRe
     text: 'Tus baúles aparecerán aquí. ¡Entra en uno para empezar a guardar recuerdos!',
   });
 
+  const albumStep = useTourStep({
+    tourId: 'memories',
+    stepId: 'memories-album',
+    order: 4,
+    text: 'Descubre historias mágicas creadas por IA con tus fotos y recuerdos favoritos.',
+  });
+
   useEffect(() => {
     // Only verify if we are in the memories tab
     if (activeTab !== 'recuerdos') return;
@@ -56,10 +63,11 @@ export const useRecuerdosTour = ({ activeTab, authLoading, selectedBook }: UseRe
             { ...headerStep.step, ref: headerStep.ref, layout: undefined },
             { ...addButtonStep.step, ref: addButtonStep.ref, layout: undefined },
             { ...listStep.step, ref: listStep.ref, layout: undefined },
+            { ...albumStep.step, ref: albumStep.ref, layout: undefined },
           ];
 
           let measurementsComplete = 0;
-          const totalMeasurements = 3;
+          const totalMeasurements = 4;
 
           const checkStart = () => {
             measurementsComplete++;
@@ -87,6 +95,7 @@ export const useRecuerdosTour = ({ activeTab, authLoading, selectedBook }: UseRe
           setTimeout(() => measureStep(headerStep, 'memories-header'), 100);
           setTimeout(() => measureStep(addButtonStep, 'memories-add'), 200);
           setTimeout(() => measureStep(listStep, 'memories-list'), 300);
+          setTimeout(() => measureStep(albumStep, 'memories-album'), 400);
 
         }, 1000);
       }
@@ -99,5 +108,6 @@ export const useRecuerdosTour = ({ activeTab, authLoading, selectedBook }: UseRe
     headerRef: headerStep.ref,
     addButtonRef: addButtonStep.ref,
     listRef: listStep.ref,
+    albumRef: albumStep.ref,
   };
 };
