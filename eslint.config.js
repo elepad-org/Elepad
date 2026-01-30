@@ -8,7 +8,7 @@ import gitignore from "eslint-config-flat-gitignore";
 export default defineConfig([
   gitignore(),
   {
-    ignores: ["**/.expo/**", "**/node_modules/**", "**/dist/**", "**/.turbo/**"],
+    ignores: ["**/.expo/**", "**/node_modules/**", "**/dist/**", "**/.turbo/**", "apps/api/cloudflare-worker.js"],
   },
   {
     files: ["**/*.{ts,tsx}"],

@@ -298,7 +298,6 @@ export default function RecuerdosScreen() {
       groupId,
       bookId: selectedBook?.id,
       createdBy: memberFilterId || undefined,
-      tipo: typeFilter === "all" ? undefined : typeFilter,
       limit: 20,
     },
     {
