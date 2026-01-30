@@ -32,6 +32,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { GAMES_INFO } from "@/constants/gamesInfo";
 import { formatInUserTimezone, toUserLocalTime } from "@/lib/timezoneHelpers";
 import type { ImageSourcePropType } from "react-native";
+import { useVideoPlayer, VideoView } from 'expo-video';
 import memoryImage from "@/assets/images/memory2.png";
 import netImage from "@/assets/images/net2.png";
 import sudokuImage from "@/assets/images/sudoku2.png";
@@ -214,6 +215,8 @@ const HomeScreen = () => {
     return memories[0] || null;
   }, [memoriesQuery.data]);
 
+  const player = useVideoPlayer(lastMemory?.mediaUrl || '');
+
   // Invalidar queries cuando cambia el groupId
   useEffect(() => {
     if (userElepad?.groupId) {
@@ -383,49 +386,97 @@ const HomeScreen = () => {
                 return (
                   <Pressable
                     style={hasMedia ? styles.memoryCard : styles.memoryCardNote}
-                    onPress={() =>
-                      router.navigate({
-                        pathname: "/(tabs)/recuerdos",
-                        params: {
-                          tab: "recuerdos",
-                          memoryId: lastMemory.id,
-                          bookId: lastMemory.bookId,
-                        },
-                      })
+                    onPress={
+                      lastMemory.mimeType.startsWith("video/")
+                        ? () => {}
+                        : () =>
+                            router.navigate({
+                              pathname: "/(tabs)/recuerdos",
+                              params: {
+                                tab: "recuerdos",
+                                memoryId: lastMemory.id,
+                                bookId: lastMemory.bookId,
+                              },
+                            })
                     }
                   >
                     {hasMedia ? (
-                      <ImageBackground
-                        source={{ uri: lastMemory.mediaUrl }}
-                        style={styles.memoryImage}
-                        imageStyle={styles.memoryImageStyle}
-                      >
-                        <LinearGradient
-                          colors={["transparent", "rgba(0,0,0,0.7)"]}
-                          style={styles.memoryGradient}
-                        >
-                          <View style={styles.memoryContent}>
-                            <Text style={styles.memoryLabel}>ÚLTIMO RECUERDO</Text>
-                            <Text style={styles.memoryTitle} numberOfLines={2}>
-                              {lastMemory.title || "Sin título"}
-                            </Text>
-                            {lastMemory.caption && (
-                              <HighlightedMentionText
-                                text={lastMemory.caption}
-                                familyMembers={groupMembers}
-                                style={styles.memoryDescription}
-                              />
-                            )}
-                            <Text style={styles.memoryDate}>
-                              {formatInUserTimezone(
-                                lastMemory.createdAt,
-                                "d 'de' MMMM 'de' yyyy",
-                                userElepad?.timezone
+                      lastMemory.mimeType.startsWith("video/") ? (
+                        <View style={styles.memoryImage}>
+                          <VideoView
+                            player={player}
+                            style={{ width: "100%", height: "100%" }}
+                            allowsFullscreen={false}
+                            allowsPictureInPicture={false}
+                            contentFit="cover"
+                          />
+                          <LinearGradient
+                            colors={["transparent", "rgba(0,0,0,0.7)"]}
+                            style={[styles.memoryGradient, { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }]}
+                          >
+                            <View style={styles.memoryContent}>
+                              <Text style={styles.memoryLabel}>ÚLTIMO RECUERDO</Text>
+                              <Text style={styles.memoryTitle} numberOfLines={2}>
+                                {lastMemory.title || "Sin título"}
+                              </Text>
+                              {lastMemory.caption && (
+                                <HighlightedMentionText
+                                  text={lastMemory.caption}
+                                  familyMembers={groupMembers}
+                                  style={styles.memoryDescription}
+                                />
                               )}
-                            </Text>
-                          </View>
-                        </LinearGradient>
-                      </ImageBackground>
+                              <Text style={styles.memoryDate}>
+                                {formatInUserTimezone(
+                                  lastMemory.createdAt,
+                                  "d 'de' MMMM 'de' yyyy",
+                                  userElepad?.timezone
+                                )}
+                              </Text>
+                            </View>
+                            <View style={{ position: "absolute", top: "50%", left: "50%", transform: [{ translateX: -30 }, { translateY: -30 }] }}>
+                              <IconButton
+                                icon="play"
+                                size={60}
+                                iconColor="#fff"
+                                style={{ margin: 0 }}
+                              />
+                            </View>
+                          </LinearGradient>
+                        </View>
+                      ) : (
+                        <ImageBackground
+                          source={{ uri: lastMemory.mediaUrl }}
+                          style={styles.memoryImage}
+                          imageStyle={styles.memoryImageStyle}
+                        >
+                          <LinearGradient
+                            colors={["transparent", "rgba(0,0,0,0.7)"]}
+                            style={styles.memoryGradient}
+                          >
+                            <View style={styles.memoryContent}>
+                              <Text style={styles.memoryLabel}>ÚLTIMO RECUERDO</Text>
+                              <Text style={styles.memoryTitle} numberOfLines={2}>
+                                {lastMemory.title || "Sin título"}
+                              </Text>
+                              {lastMemory.caption && (
+                                <HighlightedMentionText
+                                  text={lastMemory.caption}
+                                  familyMembers={groupMembers}
+                                  style={styles.memoryDescription}
+                                />
+                              )}
+                              <Text style={styles.memoryDate}>
+                                {formatInUserTimezone(
+                                  lastMemory.createdAt,
+                                  "d 'de' MMMM 'de' yyyy",
+                                  userElepad?.timezone
+                                )}
+                              </Text>
+                            </View>
+                          </LinearGradient>
+                        </ImageBackground>
+                      )
                     ) : (
                       <ImageBackground source={fondoRecuerdos} style={styles.memoryNoImage}>
                         <Image source={tapeImage} style={styles.tapeIcon} />
