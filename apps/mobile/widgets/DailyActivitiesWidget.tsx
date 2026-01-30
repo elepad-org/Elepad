@@ -2,6 +2,7 @@ import React from "react";
 import {
   FlexWidget,
   TextWidget,
+  ListWidget,
 } from "react-native-android-widget";
 
 interface Activity {
@@ -131,16 +132,19 @@ export function DailyActivitiesWidget({
           />
         </FlexWidget>
       ) : (
-        <FlexWidget
+        <ListWidget
           style={{
-            width: "match_parent",
-            flexDirection: "column",
+            height: 'match_parent',
+            width: 'match_parent',
+            
           }}
         >
+          
           {activities.map((activity, index) => (
             <ActivityCard key={activity.id} activity={activity} isFirst={index === 0} isElder={isElder} />
           ))}
-        </FlexWidget>
+          
+        </ListWidget>
       )}
     </FlexWidget>
   );
