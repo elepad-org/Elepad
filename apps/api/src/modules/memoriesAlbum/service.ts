@@ -7,8 +7,8 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/supabase-types";
 import { CreateAlbumRequest, AlbumWithPages, Album } from "./schema";
 import { NotificationsService } from "../notifications/service";
-import { uploadAlbumCoverImage, uploadAlbumPDF } from "@/services/storage";
-import puppeteer from "puppeteer";
+import { uploadAlbumCoverImage } from "@/services/storage";
+//import puppeteer from "puppeteer";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -641,7 +641,8 @@ Este recuerdo nos muestra...`;
   /**
    * Generate HTML template for album PDF
    */
-  private generateAlbumHTML(album: AlbumWithPages, familyName: string): string {
+  //Comentado por ahora para poder realizar el deploy
+  /* private generateAlbumHTML(album: AlbumWithPages, familyName: string): string {
     const pagesHTML = album.pages
       .map((page, index) => {
         const imageUrl = page.imageUrl || "";
@@ -864,11 +865,12 @@ Este recuerdo nos muestra...`;
 </body>
 </html>
     `.trim();
-  }
+  } */
 
   /**
    * Export album to PDF
    */
+/* 
   async exportAlbumToPDF(userId: string, albumId: string): Promise<string> {
     // Get user's family group
     const { data: userGroup, error: userGroupError } = await this.supabase
@@ -974,4 +976,5 @@ Este recuerdo nos muestra...`;
       throw new ApiException(500, "Error generating album PDF");
     }
   }
+   */
 }
