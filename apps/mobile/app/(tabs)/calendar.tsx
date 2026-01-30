@@ -46,7 +46,8 @@ function CalendarScreenContent() {
   const { activeTab } = useTabContext();
 
   //  // Tour hook
-  const { headerRef, addButtonRef, calendarCardRef } = useCalendarTour({
+  //  // Tour hook
+  const { headerRef, addButtonRef, calendarViewRef, taskListRef } = useCalendarTour({
     activeTab,
     activitiesLoading: activitiesQuery.isLoading,
   });
@@ -332,7 +333,7 @@ function CalendarScreenContent() {
         </View>
       </View>
 
-      <View style={{ flex: 1 }} ref={calendarCardRef}>
+      <View style={{ flex: 1 }}>
         <CalendarCard
           idFamilyGroup={familyCode}
           idUser={idUser}
@@ -346,6 +347,8 @@ function CalendarScreenContent() {
           onActivityViewed={handleActivityViewed}
           selectedElderId={selectedElderId}
           onElderChange={setSelectedElderId}
+          calendarViewRef={calendarViewRef}
+          taskListRef={taskListRef}
         />
       </View>
 

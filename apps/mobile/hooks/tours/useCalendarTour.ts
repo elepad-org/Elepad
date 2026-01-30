@@ -28,11 +28,18 @@ export const useCalendarTour = ({
     text: 'Toca aquí para agregar nuevos eventos, citas médicas o recordatorios importantes.',
   });
 
-  const calendarCardStep = useTourStep({
+  const calendarViewStep = useTourStep({
     tourId: 'calendar',
-    stepId: 'calendar-card',
+    stepId: 'calendar-view',
     order: 3,
-    text: 'Usa el calendario para navegar entre fechas y ver qué tienes planeado para cada día.',
+    text: 'Usa el calendario para navegar entre fechas y ver rápidamente qué días tienen actividades.',
+  });
+
+  const taskListStep = useTourStep({
+    tourId: 'calendar',
+    stepId: 'task-list',
+    order: 4,
+    text: 'Aquí abajo verás el detalle de tus eventos y tareas del día seleccionado. Toca uno para ver más información.',
   });
 
   useEffect(() => {
@@ -48,11 +55,12 @@ export const useCalendarTour = ({
             const steps = [
               { ...headerStep.step, ref: headerStep.ref, layout: undefined },
               { ...addButtonStep.step, ref: addButtonStep.ref, layout: undefined },
-              { ...calendarCardStep.step, ref: calendarCardStep.ref, layout: undefined },
+              { ...calendarViewStep.step, ref: calendarViewStep.ref, layout: undefined },
+              { ...taskListStep.step, ref: taskListStep.ref, layout: undefined },
             ];
 
             let measurementsComplete = 0;
-            const totalMeasurements = 3;
+            const totalMeasurements = 4;
 
             const checkStart = () => {
               measurementsComplete++;
@@ -78,7 +86,8 @@ export const useCalendarTour = ({
 
             setTimeout(() => measureStep(headerStep, 'calendar-header'), 50);
             setTimeout(() => measureStep(addButtonStep, 'add-button'), 100);
-            setTimeout(() => measureStep(calendarCardStep, 'calendar-card'), 150);
+            setTimeout(() => measureStep(calendarViewStep, 'calendar-view'), 150);
+            setTimeout(() => measureStep(taskListStep, 'task-list'), 200);
 
           }, 1000);
         }
@@ -91,6 +100,7 @@ export const useCalendarTour = ({
   return {
     headerRef: headerStep.ref,
     addButtonRef: addButtonStep.ref,
-    calendarCardRef: calendarCardStep.ref,
+    calendarViewRef: calendarViewStep.ref,
+    taskListRef: taskListStep.ref,
   };
 };
