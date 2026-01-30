@@ -7,8 +7,10 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/supabase-types";
 import { CreateAlbumRequest, AlbumWithPages, Album } from "./schema";
 import { NotificationsService } from "../notifications/service";
-import { uploadAlbumCoverImage } from "@/services/storage";
-//import puppeteer from "puppeteer";
+import { uploadAlbumCoverImage, uploadAlbumPDF } from "@/services/storage";
+import { pdf } from "@react-pdf/renderer";
+import { AlbumPDF } from "./AlbumPdf";
+
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -40,6 +42,34 @@ export class MemoriesAlbumService {
     // Inicialización única del cliente para toda la clase
     this.client = new GoogleGenAI({ apiKey: this.apiKey });
     this.supabase = supabase;
+  }
+
+  //Helper funciton to convert ReadableStream to Buffer
+  async streamToBuffer(
+    stream: ReadableStream | NodeJS.ReadableStream,
+  ): Promise<Buffer> {
+    // Web ReadableStream
+    if ("getReader" in stream) {
+      const reader = stream.getReader();
+      const chunks: Uint8Array[] = [];
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+      }
+
+      return Buffer.concat(chunks);
+    }
+
+    // Node Readable
+    return new Promise((resolve, reject) => {
+      const chunks: Buffer[] = [];
+      (stream as NodeJS.ReadableStream)
+        .on("data", (chunk) => chunks.push(Buffer.from(chunk)))
+        .on("end", () => resolve(Buffer.concat(chunks)))
+        .on("error", reject);
+    });
   }
 
   async transcribeAudio(file: File): Promise<string> {
@@ -639,238 +669,12 @@ Este recuerdo nos muestra...`;
   }
 
   /**
-   * Generate HTML template for album PDF
+   * Generate PDF Document component for album using react-pdf
    */
-  //Comentado por ahora para poder realizar el deploy
-  /* private generateAlbumHTML(album: AlbumWithPages, familyName: string): string {
-    const pagesHTML = album.pages
-      .map((page, index) => {
-        const imageUrl = page.imageUrl || "";
-        const title = page.title || `Página ${index + 1}`;
-        const description = page.description || "";
-
-        return `
-      <div class="page">
-        <div class="page-content">
-          <div class="image-section">
-            <div class="polaroid-frame">
-              <img src="${imageUrl}" alt="${title}" />
-              <div class="polaroid-text">${title}</div>
-            </div>
-          </div>
-          <div class="text-section">
-            <h2 class="page-title">${title}</h2>
-            <p class="page-description">${description}</p>
-            <div class="page-number">Página ${index + 1} de ${album.pages.length}</div>
-          </div>
-        </div>
-      </div>
-    `;
-      })
-      .join("");
-
-    return `
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${album.title}</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Georgia', serif;
-      background: #f5f5f5;
-    }
-
-    .cover-page {
-      width: 297mm;
-      height: 210mm;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(135deg, #9a9ece 0%, #424a70 100%);
-      color: white;
-      page-break-after: always;
-      padding: 40mm;
-    }
-
-    .cover-title {
-      font-size: 48pt;
-      font-weight: bold;
-      margin-bottom: 20mm;
-      text-align: center;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    }
-
-    .cover-description {
-      font-size: 18pt;
-      text-align: center;
-      max-width: 200mm;
-      line-height: 1.6;
-      margin-bottom: 10mm;
-    }
-
-    .cover-family {
-      font-size: 14pt;
-      font-style: italic;
-      margin-top: 20mm;
-    }
-
-    .page {
-      width: 297mm;
-      height: 210mm;
-      page-break-after: always;
-      background: 
-        repeating-linear-gradient(
-          90deg,
-          transparent,
-          transparent 2px,
-          rgba(157, 145, 125, 0.03) 2px,
-          rgba(157, 145, 125, 0.03) 4px
-        ),
-        repeating-linear-gradient(
-          0deg,
-          transparent,
-          transparent 2px,
-          rgba(157, 145, 125, 0.03) 2px,
-          rgba(157, 145, 125, 0.03) 4px
-        ),
-        linear-gradient(180deg, #faf8f5 0%, #f5f2ed 100%);
-      position: relative;
-    }
-
-    .page-content {
-      width: 100%;
-      height: 100%;
-      display: flex;
-    }
-
-    .image-section {
-      width: 50%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 15mm;
-    }
-
-    .polaroid-frame {
-      background: white;
-      padding: 12mm;
-      border-radius: 4px;
-      box-shadow: 
-        0 10px 25px rgba(0, 0, 0, 0.1),
-        0 20px 48px rgba(0, 0, 0, 0.05);
-      transform: rotate(-2deg);
-      max-width: 100%;
-      max-height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .image-section img {
-      width: 100%;
-      height: auto;
-      max-height: 140mm;
-      object-fit: cover;
-      border-radius: 2px;
-      display: block;
-    }
-
-    .polaroid-text {
-      margin-top: 8mm;
-      min-height: 12mm;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #2c2416;
-      font-size: 11pt;
-      font-weight: bold;
-      text-align: center;
-      font-family: 'Georgia', cursive;
-    }
-
-    .text-section {
-      width: 50%;
-      height: 100%;
-      padding: 20mm 25mm;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      position: relative;
-    }
-
-    .page-title {
-      font-size: 24pt;
-      color: #424a70;
-      margin-bottom: 15mm;
-      line-height: 1.3;
-      font-weight: 600;
-    }
-
-    .page-description {
-      font-size: 14pt;
-      color: #2c2416;
-      line-height: 1.8;
-      text-align: justify;
-    }
-
-    .page-number {
-      position: absolute;
-      bottom: 10mm;
-      right: 20mm;
-      font-size: 10pt;
-      color: #7374a7;
-      font-style: italic;
-    }
-
-    @page {
-      size: A4 landscape;
-      margin: 0;
-    }
-
-    @media print {
-      body {
-        background: white;
-      }
-      
-      .page, .cover-page {
-        page-break-after: always;
-        page-break-inside: avoid;
-      }
-
-      .page:last-child, .cover-page:last-child {
-        page-break-after: auto;
-      }
-    }
-  </style>
-</head>
-<body>
-  <!-- Cover Page -->
-  <div class="cover-page">
-    <h1 class="cover-title">${album.title}</h1>
-    <p class="cover-description">${album.description || "Un álbum de recuerdos familiares"}</p>
-    <p class="cover-family">${familyName}</p>
-  </div>
-
-  <!-- Album Pages -->
-  ${pagesHTML}
-</body>
-</html>
-    `.trim();
-  } */
 
   /**
-   * Export album to PDF
+   * Export album to PDF using react-pdf/renderer
    */
-/* 
   async exportAlbumToPDF(userId: string, albumId: string): Promise<string> {
     // Get user's family group
     const { data: userGroup, error: userGroupError } = await this.supabase
@@ -899,48 +703,22 @@ Este recuerdo nos muestra...`;
 
     const familyName = familyGroup?.name || "Tu familia";
 
-    // Generate HTML
-    const html = this.generateAlbumHTML(albumWithPages, familyName);
-
-    let browser;
     try {
-      // Launch Puppeteer
-      browser = await puppeteer.launch({
-        headless: true,
-        args: [
-          "--no-sandbox",
-          "--disable-setuid-sandbox",
-          "--disable-dev-shm-usage",
-          "--disable-accelerated-2d-canvas",
-          "--disable-gpu",
-        ],
-      });
+      // Generate PDF Document component
+      const pdfStream = await pdf(
+        AlbumPDF({ album: albumWithPages, familyName }),
+      ).toBuffer();
 
-      const page = await browser.newPage();
-
-      // Set content and wait for images to load
-      await page.setContent(html, {
-        waitUntil: ["networkidle0", "load"],
-        timeout: 60000,
-      });
-
-      // Generate PDF
-      const pdfBuffer = await page.pdf({
-        format: "A4",
-        landscape: true,
-        printBackground: true,
-        preferCSSPageSize: true,
-        timeout: 60000,
-      });
-
-      await browser.close();
+      const pdfBuffer = Buffer.isBuffer(pdfStream)
+        ? pdfStream
+        : await this.streamToBuffer(pdfStream);
 
       // Upload to Supabase Storage
       const pdfUrl = await uploadAlbumPDF(
         this.supabase,
         userGroup.groupId,
         albumId,
-        Buffer.from(pdfBuffer),
+        pdfBuffer,
       );
 
       // Update album with PDF URL
@@ -969,12 +747,8 @@ Este recuerdo nos muestra...`;
 
       return pdfUrl;
     } catch (error) {
-      if (browser) {
-        await browser.close();
-      }
       console.error("Error generating PDF:", error);
       throw new ApiException(500, "Error generating album PDF");
     }
   }
-   */
 }
