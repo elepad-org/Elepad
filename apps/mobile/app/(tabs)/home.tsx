@@ -136,7 +136,15 @@ const HomeScreen = () => {
   );
 
   // Tour hook
-  const { greetingRef, streakRef, activityRef } = useHomeTour({
+  const {
+    greetingRef,
+    streakRef,
+    activityRef,
+    profileRef,
+    notificationRef,
+    lastMemoryRef,
+    eventsRef
+  } = useHomeTour({
     userElepad,
     userElepadLoading,
     activitiesLoading: activitiesQuery.isLoading,
@@ -303,6 +311,7 @@ const HomeScreen = () => {
           <View style={styles.headerRight}>
             {/* Notification Button */}
             <Pressable
+              ref={notificationRef}
               style={({ pressed }) => [
                 styles.notificationContainer,
                 pressed && { opacity: 0.6 },
@@ -335,6 +344,7 @@ const HomeScreen = () => {
             {/* Avatar */}
             {/* Avatar with Frame */}
             <Pressable
+              ref={profileRef}
               onPress={() => {
                 router.navigate({
                   pathname: "/(tabs)/home",
@@ -383,7 +393,7 @@ const HomeScreen = () => {
         </View>
 
         {/* Último Recuerdo - DESTACADO */}
-        <View>
+        <View ref={lastMemoryRef}>
           {memoriesQuery.isLoading ? (
             <View style={styles.memoryCardLoading}>
               <SkeletonBox width={SCREEN_WIDTH} height={280} borderRadius={0} />
@@ -501,7 +511,7 @@ const HomeScreen = () => {
         )}
 
         {/* Próximos Eventos */}
-        <View style={styles.section}>
+        <View style={styles.section} ref={eventsRef}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>
               Próximos{" "}

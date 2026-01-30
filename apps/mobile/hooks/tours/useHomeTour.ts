@@ -28,17 +28,45 @@ export const useHomeTour = ({
     text: 'Aquí puedes ver tu nombre de usuario y tu rol en la familia. ¡Bienvenido!',
   });
 
+  const profileStep = useTourStep({
+    tourId: 'home',
+    stepId: 'profile',
+    order: 2,
+    text: 'Toca aquí para ver tu perfil y configuración.',
+  });
+
+  const notificationStep = useTourStep({
+    tourId: 'home',
+    stepId: 'notifications',
+    order: 3,
+    text: 'Recibe notificaciones importantes sobre la actividad familiar aquí.',
+  });
+
+  const lastMemoryStep = useTourStep({
+    tourId: 'home',
+    stepId: 'last-memory',
+    order: 4,
+    text: 'Tu recuerdo más reciente aparecerá aquí. ¡Revive tus momentos favoritos!',
+  });
+
   const streakStep = useTourStep({
     tourId: 'home',
     stepId: 'streak-counter',
-    order: 2,
+    order: 5,
     text: '¡Este es tu contador de racha! Juega al menos una vez al día para mantener tu racha activa y ganar puntos extra.',
+  });
+
+  const eventsStep = useTourStep({
+    tourId: 'home',
+    stepId: 'events',
+    order: 6,
+    text: 'Consulta aquí tus próximos eventos y la agenda familiar.',
   });
 
   const activityStep = useTourStep({
     tourId: 'home',
     stepId: 'recent-activity',
-    order: 3,
+    order: 7,
     text: userElepad?.elder
       ? 'Aquí puedes ver tu último juego completado con tu puntaje. ¡Toca para ver más detalles!'
       : 'Aquí verás la actividad reciente de los adultos mayores en tu grupo familiar.',
@@ -58,51 +86,50 @@ export const useHomeTour = ({
             setTimeout(() => {
               console.log('🏠 Home: Measuring elements...');
 
+              // Determine which steps are active based on role
+              const stepsToMeasure = [
+                greetingStep,
+                profileStep,
+                notificationStep,
+                lastMemoryStep,
+                ...(userElepad.elder ? [streakStep] : []),
+                eventsStep,
+                activityStep
+              ];
+
               let measurementsComplete = 0;
-              const totalMeasurements = 3;
+              const totalMeasurements = stepsToMeasure.length;
 
               const checkAndStart = () => {
                 measurementsComplete++;
                 if (measurementsComplete === totalMeasurements) {
-                  const steps = [
-                    { ...greetingStep.step, ref: greetingStep.ref, layout: tourLayoutsRef.current['greeting'] },
-                    { ...streakStep.step, ref: streakStep.ref, layout: tourLayoutsRef.current['streak-counter'] },
-                    { ...activityStep.step, ref: activityStep.ref, layout: tourLayoutsRef.current['recent-activity'] },
-                  ];
-                  tour.startTour(steps);
+                  const finalSteps = stepsToMeasure.map(s => ({
+                    ...s.step,
+                    ref: s.ref,
+                    layout: tourLayoutsRef.current[s.step.stepId]
+                  }));
+                  tour.startTour(finalSteps);
                 }
               };
 
-
-
-              // We need to use setTimeout as in the original code to stagger or just wait a bit? 
-              // The original used 50ms gaps. Let's replicate that for safety.
-              setTimeout(() => {
-                if (greetingStep.ref.current) {
-                  greetingStep.ref.current.measureInWindow((x, y, w, h) => {
-                    tourLayoutsRef.current['greeting'] = { x, y, width: w, height: h };
+              const measureStep = (step: typeof greetingStep, delay: number) => {
+                setTimeout(() => {
+                  if (step.ref.current) {
+                    step.ref.current.measureInWindow((x, y, w, h) => {
+                      tourLayoutsRef.current[step.step.stepId] = { x, y, width: w, height: h };
+                      checkAndStart();
+                    });
+                  } else {
+                    // If ref is missing, just proceed so we don't hang
                     checkAndStart();
-                  });
-                } else checkAndStart();
-              }, 50);
+                  }
+                }, delay);
+              };
 
-              setTimeout(() => {
-                if (streakStep.ref.current) {
-                  streakStep.ref.current.measureInWindow((x, y, w, h) => {
-                    tourLayoutsRef.current['streak-counter'] = { x, y, width: w, height: h };
-                    checkAndStart();
-                  });
-                } else checkAndStart();
-              }, 100);
-
-              setTimeout(() => {
-                if (activityStep.ref.current) {
-                  activityStep.ref.current.measureInWindow((x, y, w, h) => {
-                    tourLayoutsRef.current['recent-activity'] = { x, y, width: w, height: h };
-                    checkAndStart();
-                  });
-                } else checkAndStart();
-              }, 150);
+              // Measure sequentially with delays
+              stepsToMeasure.forEach((step, index) => {
+                measureStep(step, 50 * (index + 1));
+              });
 
             }, 2000);
           }
@@ -115,7 +142,11 @@ export const useHomeTour = ({
 
   return {
     greetingRef: greetingStep.ref,
+    profileRef: profileStep.ref,
+    notificationRef: notificationStep.ref,
+    lastMemoryRef: lastMemoryStep.ref,
     streakRef: streakStep.ref,
+    eventsRef: eventsStep.ref,
     activityRef: activityStep.ref,
   };
 };
