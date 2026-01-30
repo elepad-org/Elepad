@@ -206,7 +206,7 @@ albumApp.openapi(
 
 // POST /album/:id/export-pdf - Export album to PDF
 // Re-implementar
-/* albumApp.openapi(
+albumApp.openapi(
   {
     method: "post",
     path: "/album/{id}/export-pdf",
@@ -249,4 +249,4 @@ albumApp.openapi(
       message: "PDF generated successfully",
     }, 200);
   }
-); */
+);
