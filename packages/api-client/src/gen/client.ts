@@ -874,22 +874,22 @@ export type DeleteNotificationsId200 = {
   success: boolean;
 };
 
-export type PostPushTokensBodyPlatform =
-  (typeof PostPushTokensBodyPlatform)[keyof typeof PostPushTokensBodyPlatform];
+export type PostDevicesRegisterBodyPlatform =
+  (typeof PostDevicesRegisterBodyPlatform)[keyof typeof PostDevicesRegisterBodyPlatform];
 
-export const PostPushTokensBodyPlatform = {
+export const PostDevicesRegisterBodyPlatform = {
   ios: "ios",
   android: "android",
 } as const;
 
-export type PostPushTokensBody = {
+export type PostDevicesRegisterBody = {
   /** @minLength 1 */
-  token: string;
-  platform: PostPushTokensBodyPlatform;
-  deviceId?: string;
+  expo_push_token: string;
+  platform: PostDevicesRegisterBodyPlatform;
+  device_id?: string;
 };
 
-export type PostPushTokens200 = {
+export type PostDevicesRegister200 = {
   success: boolean;
 };
 
@@ -10541,63 +10541,65 @@ export const useDeleteNotificationsId = <TError = unknown, TContext = unknown>(
 };
 
 /**
- * @summary Store or update a push token
+ * @summary Register a device for push notifications
  */
-export type postPushTokensResponse200 = {
-  data: PostPushTokens200;
+export type postDevicesRegisterResponse200 = {
+  data: PostDevicesRegister200;
   status: 200;
 };
 
-export type postPushTokensResponse400 = {
+export type postDevicesRegisterResponse400 = {
   data: Error;
   status: 400;
 };
 
-export type postPushTokensResponseSuccess = postPushTokensResponse200 & {
-  headers: Headers;
-};
-export type postPushTokensResponseError = postPushTokensResponse400 & {
-  headers: Headers;
+export type postDevicesRegisterResponseSuccess =
+  postDevicesRegisterResponse200 & {
+    headers: Headers;
+  };
+export type postDevicesRegisterResponseError =
+  postDevicesRegisterResponse400 & {
+    headers: Headers;
+  };
+
+export type postDevicesRegisterResponse =
+  | postDevicesRegisterResponseSuccess
+  | postDevicesRegisterResponseError;
+
+export const getPostDevicesRegisterUrl = () => {
+  return `/devices/register`;
 };
 
-export type postPushTokensResponse =
-  | postPushTokensResponseSuccess
-  | postPushTokensResponseError;
-
-export const getPostPushTokensUrl = () => {
-  return `/push-tokens`;
-};
-
-export const postPushTokens = async (
-  postPushTokensBody: PostPushTokensBody,
-  options?: RequestInit,
-): Promise<postPushTokensResponse> => {
-  return rnFetch<postPushTokensResponse>(getPostPushTokensUrl(), {
+export const postDevicesRegister = async (
+  postDevicesRegisterBody: PostDevicesRegisterBody,
+  options?: RequestInit
+): Promise<postDevicesRegisterResponse> => {
+  return rnFetch<postDevicesRegisterResponse>(getPostDevicesRegisterUrl(), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(postPushTokensBody),
+    body: JSON.stringify(postDevicesRegisterBody),
   });
 };
 
-export const getPostPushTokensMutationOptions = <
+export const getPostDevicesRegisterMutationOptions = <
   TError = Error,
   TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof postPushTokens>>,
+    Awaited<ReturnType<typeof postDevicesRegister>>,
     TError,
-    { data: PostPushTokensBody },
+    { data: PostDevicesRegisterBody },
     TContext
   >;
   request?: SecondParameter<typeof rnFetch>;
 }): UseMutationOptions<
-  Awaited<ReturnType<typeof postPushTokens>>,
+  Awaited<ReturnType<typeof postDevicesRegister>>,
   TError,
-  { data: PostPushTokensBody },
+  { data: PostDevicesRegisterBody },
   TContext
 > => {
-  const mutationKey = ["postPushTokens"];
+  const mutationKey = ["postDevicesRegister"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -10607,44 +10609,47 @@ export const getPostPushTokensMutationOptions = <
     : { mutation: { mutationKey }, request: undefined };
 
   const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof postPushTokens>>,
-    { data: PostPushTokensBody }
+    Awaited<ReturnType<typeof postDevicesRegister>>,
+    { data: PostDevicesRegisterBody }
   > = (props) => {
     const { data } = props ?? {};
 
-    return postPushTokens(data, requestOptions);
+    return postDevicesRegister(data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
 };
 
-export type PostPushTokensMutationResult = NonNullable<
-  Awaited<ReturnType<typeof postPushTokens>>
+export type PostDevicesRegisterMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postDevicesRegister>>
 >;
-export type PostPushTokensMutationBody = PostPushTokensBody;
-export type PostPushTokensMutationError = Error;
+export type PostDevicesRegisterMutationBody = PostDevicesRegisterBody;
+export type PostDevicesRegisterMutationError = Error;
 
 /**
- * @summary Store or update a push token
+ * @summary Register a device for push notifications
  */
-export const usePostPushTokens = <TError = Error, TContext = unknown>(
+export const usePostDevicesRegister = <TError = Error, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof postPushTokens>>,
+      Awaited<ReturnType<typeof postDevicesRegister>>,
       TError,
-      { data: PostPushTokensBody },
+      { data: PostDevicesRegisterBody },
       TContext
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
 ): UseMutationResult<
-  Awaited<ReturnType<typeof postPushTokens>>,
+  Awaited<ReturnType<typeof postDevicesRegister>>,
   TError,
-  { data: PostPushTokensBody },
+  { data: PostDevicesRegisterBody },
   TContext
 > => {
-  return useMutation(getPostPushTokensMutationOptions(options), queryClient);
+  return useMutation(
+    getPostDevicesRegisterMutationOptions(options),
+    queryClient
+  );
 };
 
 /**
