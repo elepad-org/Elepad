@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { View } from "react-native";
-import { TextInput, Text } from "react-native-paper";
+import { Text } from "react-native-paper";
 import { STYLES, COLORS } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
 import SaveButton from "../shared/SaveButton";
 import MentionInput from "./MentionInput";
+import { StyledTextInput } from "../shared";
 
 interface FamilyMember {
   id: string;
@@ -48,26 +49,14 @@ export default function MetadataInputComponent({
         Agrega un título y descripción (opcional)
       </Text>
 
-      <View
-        style={{
-          backgroundColor: COLORS.backgroundSecondary,
-          borderRadius: 16,
-          overflow: "hidden",
-          marginBottom: 12,
-        }}
-      >
-        <TextInput
-          label="Título"
-          value={title}
-          onChangeText={setTitle}
-          mode="flat"
-          style={{ backgroundColor: "transparent" }}
-          outlineColor="transparent"
-          activeOutlineColor="transparent"
-          placeholder="Ej: Día en la playa"
-          disabled={isUploading}
-        />
-      </View>
+      <StyledTextInput
+        label="Título"
+        value={title}
+        onChangeText={setTitle}
+        placeholder="Ej: Día en la playa"
+        disabled={isUploading}
+        marginBottom={12}
+      />
 
       <View
         style={{

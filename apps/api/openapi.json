@@ -5728,19 +5728,19 @@
         }
       }
     },
-    "/push-tokens": {
+    "/devices/register": {
       "post": {
         "tags": [
-          "push-tokens"
+          "devices"
         ],
-        "summary": "Store or update a push token",
+        "summary": "Register a device for push notifications",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "token": {
+                  "expo_push_token": {
                     "type": "string",
                     "minLength": 1
                   },
@@ -5751,12 +5751,12 @@
                       "android"
                     ]
                   },
-                  "deviceId": {
+                  "device_id": {
                     "type": "string"
                   }
                 },
                 "required": [
-                  "token",
+                  "expo_push_token",
                   "platform"
                 ]
               }
@@ -5793,7 +5793,9 @@
             }
           }
         }
-      },
+      }
+    },
+    "/push-tokens": {
       "delete": {
         "tags": [
           "push-tokens"
