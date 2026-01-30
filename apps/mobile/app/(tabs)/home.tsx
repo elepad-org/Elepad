@@ -9,6 +9,7 @@ import {
   Dimensions,
   Image,
 } from "react-native";
+import React, { useEffect, useMemo } from "react";
 import { Text, Avatar, Button, IconButton } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -23,7 +24,6 @@ import {
   AttemptWithUser,
 } from "@elepad/api-client";
 import { useRouter } from "expo-router";
-import React, { useMemo, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import StreakCounter from "@/components/StreakCounter";
@@ -38,6 +38,7 @@ import sudokuImage from "@/assets/images/sudoku2.png";
 import focusImage from "@/assets/images/focus2.png";
 import tapeImage from "@/assets/images/paper-transparent-sticky-tape-png.png";
 import fondoRecuerdos from "@/assets/images/fondoRecuerdos.png";
+import { useHomeTour } from "@/hooks/tours/useHomeTour";
 
 
 
@@ -68,6 +69,8 @@ const HomeScreen = () => {
   const router = useRouter();
   const { unreadCount } = useNotifications();
   const queryClient = useQueryClient();
+
+
 
 
 
@@ -131,6 +134,23 @@ const HomeScreen = () => {
       },
     },
   );
+
+  // Tour hook
+  const {
+    greetingRef,
+    streakRef,
+    activityRef,
+    profileRef,
+    notificationRef,
+    lastMemoryRef,
+    eventsRef
+  } = useHomeTour({
+    userElepad,
+    userElepadLoading,
+    activitiesLoading: activitiesQuery.isLoading,
+    attemptsLoading: attemptsQuery.isLoading,
+    memoriesLoading: memoriesQuery.isLoading,
+  });
 
   const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
     const resp = membersQuery.data as
@@ -228,6 +248,9 @@ const HomeScreen = () => {
     }
   }, [userElepad?.groupId, queryClient]);
 
+
+
+
   if (userElepadLoading || !userElepad) {
     return (
       <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -272,7 +295,7 @@ const HomeScreen = () => {
       >
         {/* Header */}
         <View style={styles.header}>
-          <View style={styles.greetingContainer}>
+          <View style={styles.greetingContainer} ref={greetingRef}>
             <View>
               <Text style={styles.greeting}>{getGreeting()}</Text>
               <View style={styles.userNameContainer}>
@@ -288,6 +311,7 @@ const HomeScreen = () => {
           <View style={styles.headerRight}>
             {/* Notification Button */}
             <Pressable
+              ref={notificationRef}
               style={({ pressed }) => [
                 styles.notificationContainer,
                 pressed && { opacity: 0.6 },
@@ -320,6 +344,7 @@ const HomeScreen = () => {
             {/* Avatar */}
             {/* Avatar with Frame */}
             <Pressable
+              ref={profileRef}
               onPress={() => {
                 router.navigate({
                   pathname: "/(tabs)/home",
@@ -368,7 +393,7 @@ const HomeScreen = () => {
         </View>
 
         {/* Último Recuerdo - DESTACADO */}
-        <View>
+        <View ref={lastMemoryRef}>
           {memoriesQuery.isLoading ? (
             <View style={styles.memoryCardLoading}>
               <SkeletonBox width={SCREEN_WIDTH} height={280} borderRadius={0} />
@@ -479,10 +504,14 @@ const HomeScreen = () => {
         </View>
 
         {/* Contador de Racha - Solo para usuarios elder */}
-        {userElepad?.elder && <StreakCounter />}
+        {userElepad?.elder && (
+          <View ref={streakRef}>
+            <StreakCounter />
+          </View>
+        )}
 
         {/* Próximos Eventos */}
-        <View style={styles.section}>
+        <View style={styles.section} ref={eventsRef}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>
               Próximos{" "}
@@ -652,7 +681,7 @@ const HomeScreen = () => {
         </View>
 
         {/* Actividad Reciente */}
-        <View style={styles.section}>
+        <View style={styles.section} ref={activityRef}>
           <Text style={styles.sectionTitle}>
             {userElepad?.elder ? "Mi última actividad" : "Última actividad del grupo"}
           </Text>
