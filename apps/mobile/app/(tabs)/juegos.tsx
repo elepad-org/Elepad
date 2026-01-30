@@ -5,6 +5,10 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
+import { RefObject } from "react";
+
+import { useGamesTour } from "@/hooks/tours/useGamesTour";
+import { useTabContext } from "@/context/TabContext";
 import { ActivityIndicator, Text, Button, Icon } from "react-native-paper";
 import { Image } from "react-native";
 import { useAuth } from "@/hooks/useAuth";
@@ -26,6 +30,8 @@ interface GameCardProps {
   description: string;
   onPlay: () => void;
   onDetails: () => void;
+  contentRef?: RefObject<View | null>;
+  playButtonRef?: RefObject<View | null>;
 }
 
 const GAME_IMAGES: Record<string, ImageSourcePropType> = {
@@ -41,8 +47,11 @@ function GameCard({
   imageName,
   title,
   description,
+
   onPlay,
   onDetails,
+  contentRef,
+  playButtonRef,
 }: GameCardProps) {
   return (
     <TouchableOpacity
@@ -63,7 +72,8 @@ function GameCard({
             <Text style={styles.gameEmoji}>{emoji}</Text>
           )}
         </View>
-        <View style={styles.gameInfo}>
+
+        <View style={styles.gameInfo} ref={contentRef}>
           <Text style={styles.gameTitle}>{title}</Text>
           <Text style={styles.gameDescription} numberOfLines={2}>
             {description}
@@ -73,16 +83,25 @@ function GameCard({
           style={styles.playButton}
           onPress={onPlay}
           activeOpacity={0.7}
+          ref={playButtonRef}
         >
           <Icon source="play" size={20} color={COLORS.white} />
         </TouchableOpacity>
       </View>
-    </TouchableOpacity>
+    </TouchableOpacity >
   );
 }
 
 export default function JuegosScreen() {
   const { loading, userElepad } = useAuth();
+  const { activeTab } = useTabContext();
+
+  // --- Tour Setup ---
+
+  const { headerRef, shopRef, historyRef, gamesListRef, gameDetailsRef, gamePlayRef } = useGamesTour({
+    activeTab,
+    loading,
+  });
 
   if (loading) {
     return (
@@ -113,41 +132,49 @@ export default function JuegosScreen() {
         <View style={STYLES.container}>
           {/* Header */}
           <View style={styles.header}>
-            <Text style={STYLES.superHeading}>Juegos</Text>
+            <View ref={headerRef}>
+              <Text style={STYLES.superHeading}>Juegos</Text>
+            </View>
             <View style={{ flexDirection: "row", gap: 8 }}>
-              <Button
-                mode="contained"
-                onPress={() => router.push("/shop")}
-                style={{
-                  borderRadius: 12,
-                  backgroundColor: COLORS.primary,
-                }}
-                icon="store"
-              >
-                Tienda
-              </Button>
-              <Button
-                mode="contained"
-                onPress={() => router.navigate("/history")}
-                style={{
-                  borderRadius: 12,
-                  backgroundColor: COLORS.primary,
-                }}
-                icon="history"
-              >
-                Historial
-              </Button>
+              <View ref={shopRef}>
+                <Button
+                  mode="contained"
+                  onPress={() => router.push("/shop")}
+                  style={{
+                    borderRadius: 12,
+                    backgroundColor: COLORS.primary,
+                  }}
+                  icon="store"
+                >
+                  Tienda
+                </Button>
+              </View>
+              <View ref={historyRef}>
+                <Button
+                  mode="contained"
+                  onPress={() => router.navigate("/history")}
+                  style={{
+                    borderRadius: 12,
+                    backgroundColor: COLORS.primary,
+                  }}
+                  icon="history"
+                >
+                  Historial
+                </Button>
+              </View>
             </View>
           </View>
 
           {/* Games List */}
-          <View style={styles.gamesContainer}>
+          <View style={styles.gamesContainer} ref={gamesListRef}>
             <GameCard
               imageName="memory"
               title="Memoria"
               description="Encuentra parejas de cartas y entrena tu memoria"
               onPlay={() => router.push("/memory-game")}
               onDetails={() => router.push("/game-detail/memory")}
+              contentRef={gameDetailsRef}
+              playButtonRef={gamePlayRef}
             />
 
             <GameCard

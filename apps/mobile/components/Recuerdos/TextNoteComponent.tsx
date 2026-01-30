@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { View } from "react-native";
-import { TextInput, Text } from "react-native-paper";
+import { Text } from "react-native-paper";
 import { STYLES, COLORS } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
 import SaveButton from "../shared/SaveButton";
+import { StyledTextInput } from "../shared";
 import MentionInput from "./MentionInput";
 
 interface FamilyMember {
@@ -50,26 +51,14 @@ export default function TextNoteComponent({
         Agrega un título y descripción
       </Text>
 
-      <View
-        style={{
-          backgroundColor: COLORS.backgroundSecondary,
-          borderRadius: 16,
-          overflow: "hidden",
-          marginBottom: 12,
-        }}
-      >
-        <TextInput
-          label="Título"
-          value={title}
-          onChangeText={setTitle}
-          mode="flat"
-          style={{ backgroundColor: "transparent" }}
-          outlineColor="transparent"
-          activeOutlineColor="transparent"
-          placeholder="Ej: Recordatorio importante"
-          disabled={isUploading}
-        />
-      </View>
+      <StyledTextInput
+        label="Título"
+        value={title}
+        onChangeText={setTitle}
+        placeholder="Ej: Recordatorio importante"
+        disabled={isUploading}
+        marginBottom={12}
+      />
 
       <View
         style={{

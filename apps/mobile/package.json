@@ -76,8 +76,7 @@
     "react-native-svg": "15.12.1",
     "react-native-url-polyfill": "^2.0.0",
     "react-native-web": "^0.21.0",
-    "react-native-worklets": "0.5.1",
-    "rn-tourguide": "^3.3.2"
+    "react-native-worklets": "0.5.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

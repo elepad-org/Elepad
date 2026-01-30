@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, RefObject } from "react";
 import { View, StyleSheet, FlatList } from "react-native";
 import { Text, IconButton } from "react-native-paper";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
@@ -146,6 +146,8 @@ interface CalendarCardProps {
   onActivityViewed?: () => void;
   selectedElderId: string | null;
   onElderChange: (elderId: string | null) => void;
+  calendarViewRef?: RefObject<View | null>;
+  taskListRef?: RefObject<View | null>;
 }
 
 // Configuración de calendario en español
@@ -205,6 +207,8 @@ export default function CalendarCard(props: CalendarCardProps) {
     onActivityViewed,
     selectedElderId,
     onElderChange,
+    calendarViewRef,
+    taskListRef,
   } = props;
   const { userElepad } = useAuth();
   const today = getTodayLocal();
@@ -532,7 +536,7 @@ export default function CalendarCard(props: CalendarCardProps) {
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        <View style={styles.calendarWrapper}>
+        <View style={styles.calendarWrapper} ref={calendarViewRef}>
           <Calendar
             onDayPress={(d: DateData) => setSelectedDay(d.dateString)}
             markedDates={marked}
@@ -592,6 +596,7 @@ export default function CalendarCard(props: CalendarCardProps) {
         </View>
       </View>
 
+
       {activitiesQuery.isLoading && <Text>Cargando...</Text>}
       {!!activitiesQuery.error && (
         <Text style={{ color: "red" }}>
@@ -600,53 +605,56 @@ export default function CalendarCard(props: CalendarCardProps) {
             : String(activitiesQuery.error)}
         </Text>
       )}
-      {dayEvents.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>
-            {selectedElderId
-              ? `No hay actividades programadas para ${elders.find((e) => e.id === selectedElderId)?.displayName || "este usuario"} ${selectedDay === today ? "hoy" : "en este día"}.`
-              : selectedDay === today
-                ? "No hay eventos para hoy."
-                : "No hay eventos para este día."}
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={dayEvents}
-          keyExtractor={(i) => {
-            const key = `${i.id}_${selectedDay}`;
-            const completed = completionsByDateMap[key] || false;
-            return `${i.id}-${completed}`;
-          }}
-          renderItem={({ item, index }) => (
-            <Animated.View
-              key={`${item.id}-${selectedDay}`}
-              layout={LinearTransition.duration(400)}
-              entering={ZoomIn.delay(index * 50).duration(200)}
-            >
-              <ActivityItem
-                item={item}
-                idUser={idUser}
-                onEdit={onEdit}
-                onDelete={onDelete}
-                onToggleComplete={() => handleToggleCompletion(item)}
-                isOwnerOfGroup={isOwnerOfGroup}
-                groupInfo={groupInfo}
-                completed={(() => {
-                  const key = `${item.id}_${selectedDay}`;
-                  return completionsByDateMap[key] || false;
-                })()}
-                familyMembers={familyMembers}
-                shouldOpen={activityToView === item.id}
-                onOpened={onActivityViewed}
-                showTargetUser={!selectedElderId}
-              />
-            </Animated.View>
-          )}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-        />
-      )}
+
+      <View style={{ flex: 1 }} ref={taskListRef}>
+        {dayEvents.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>
+              {selectedElderId
+                ? `No hay actividades programadas para ${elders.find((e) => e.id === selectedElderId)?.displayName || "este usuario"} ${selectedDay === today ? "hoy" : "en este día"}.`
+                : selectedDay === today
+                  ? "No hay eventos para hoy."
+                  : "No hay eventos para este día."}
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={dayEvents}
+            keyExtractor={(i) => {
+              const key = `${i.id}_${selectedDay}`;
+              const completed = completionsByDateMap[key] || false;
+              return `${i.id}-${completed}`;
+            }}
+            renderItem={({ item, index }) => (
+              <Animated.View
+                key={`${item.id}-${selectedDay}`}
+                layout={LinearTransition.duration(400)}
+                entering={ZoomIn.delay(index * 50).duration(200)}
+              >
+                <ActivityItem
+                  item={item}
+                  idUser={idUser}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  onToggleComplete={() => handleToggleCompletion(item)}
+                  isOwnerOfGroup={isOwnerOfGroup}
+                  groupInfo={groupInfo}
+                  completed={(() => {
+                    const key = `${item.id}_${selectedDay}`;
+                    return completionsByDateMap[key] || false;
+                  })()}
+                  familyMembers={familyMembers}
+                  shouldOpen={activityToView === item.id}
+                  onOpened={onActivityViewed}
+                  showTargetUser={!selectedElderId}
+                />
+              </Animated.View>
+            )}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
+      </View>
 
       <ErrorSnackbar
         visible={errorSnackbar.visible}

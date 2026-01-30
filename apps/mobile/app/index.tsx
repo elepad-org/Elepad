@@ -6,7 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Text } from "react-native-paper";
 import EleSvg from "@/assets/images/ele.svg";
 import { COLORS, STYLES } from "@/styles/base";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTour } from "@/hooks/useTour";
 import { useToast } from "@/components/shared/Toast";
 
 import HomeScreen from "./(tabs)/home";
@@ -15,8 +15,9 @@ export default function IndexRedirect() {
   const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const hasRedirected = useRef(false);
-  const { showToast } = useToast();
   const [resetTaps, setResetTaps] = useState(0);
+  const { resetAllTours } = useTour({ tourId: 'home' });
+  const { showToast } = useToast();
 
   // Dimensiones responsive
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -32,22 +33,6 @@ export default function IndexRedirect() {
     }
   }, [session, loading]);
 
-  const handleResetTours = async () => {
-    try {
-      await AsyncStorage.removeItem('@elepad_has_seen_home_tour_v2');
-      await AsyncStorage.removeItem('@elepad_has_seen_calendar_tour_v2');
-      showToast({
-        message: 'Tours de onboarding eliminados del storage',
-        type: 'success'
-      });
-    } catch (e) {
-      console.error('Error clearing tour storage', e);
-      showToast({
-        message: 'Error al eliminar los tours',
-        type: 'error'
-      });
-    }
-  };
 
   if (loading) {
     return (
@@ -96,12 +81,16 @@ export default function IndexRedirect() {
           <Text style={STYLES.subheading}>
             Elija una{" "}
             <Text
-              onPress={() => {
+              onPress={async () => {
                 const newTaps = resetTaps + 1;
                 setResetTaps(newTaps);
-                if (newTaps >= 10) {
+                if (newTaps >= 5) {
                   setResetTaps(0);
-                  handleResetTours();
+                  await resetAllTours();
+                  showToast({
+                    message: 'Tours reseteados correctamente',
+                    type: 'success'
+                  });
                 }
               }}
               suppressHighlighting={true}

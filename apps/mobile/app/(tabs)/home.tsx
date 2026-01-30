@@ -9,6 +9,7 @@ import {
   Dimensions,
   Image,
 } from "react-native";
+import React, { useEffect, useMemo } from "react";
 import { Text, Avatar, Button, IconButton } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -23,7 +24,6 @@ import {
   AttemptWithUser,
 } from "@elepad/api-client";
 import { useRouter } from "expo-router";
-import React, { useMemo, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import StreakCounter from "@/components/StreakCounter";
@@ -32,12 +32,14 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { GAMES_INFO } from "@/constants/gamesInfo";
 import { formatInUserTimezone, toUserLocalTime } from "@/lib/timezoneHelpers";
 import type { ImageSourcePropType } from "react-native";
+import { useVideoPlayer, VideoView } from 'expo-video';
 import memoryImage from "@/assets/images/memory2.png";
 import netImage from "@/assets/images/net2.png";
 import sudokuImage from "@/assets/images/sudoku2.png";
 import focusImage from "@/assets/images/focus2.png";
 import tapeImage from "@/assets/images/paper-transparent-sticky-tape-png.png";
 import fondoRecuerdos from "@/assets/images/fondoRecuerdos.png";
+import { useHomeTour } from "@/hooks/tours/useHomeTour";
 
 
 
@@ -68,6 +70,8 @@ const HomeScreen = () => {
   const router = useRouter();
   const { unreadCount } = useNotifications();
   const queryClient = useQueryClient();
+
+
 
 
 
@@ -131,6 +135,23 @@ const HomeScreen = () => {
       },
     },
   );
+
+  // Tour hook
+  const {
+    greetingRef,
+    streakRef,
+    activityRef,
+    profileRef,
+    notificationRef,
+    lastMemoryRef,
+    eventsRef
+  } = useHomeTour({
+    userElepad,
+    userElepadLoading,
+    activitiesLoading: activitiesQuery.isLoading,
+    attemptsLoading: attemptsQuery.isLoading,
+    memoriesLoading: memoriesQuery.isLoading,
+  });
 
   const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
     const resp = membersQuery.data as
@@ -214,6 +235,8 @@ const HomeScreen = () => {
     return memories[0] || null;
   }, [memoriesQuery.data]);
 
+  const player = useVideoPlayer(lastMemory?.mediaUrl || '');
+
   // Invalidar queries cuando cambia el groupId
   useEffect(() => {
     if (userElepad?.groupId) {
@@ -227,6 +250,9 @@ const HomeScreen = () => {
       });
     }
   }, [userElepad?.groupId, queryClient]);
+
+
+
 
   if (userElepadLoading || !userElepad) {
     return (
@@ -272,7 +298,7 @@ const HomeScreen = () => {
       >
         {/* Header */}
         <View style={styles.header}>
-          <View style={styles.greetingContainer}>
+          <View style={styles.greetingContainer} ref={greetingRef}>
             <View>
               <Text style={styles.greeting}>{getGreeting()}</Text>
               <View style={styles.userNameContainer}>
@@ -288,6 +314,7 @@ const HomeScreen = () => {
           <View style={styles.headerRight}>
             {/* Notification Button */}
             <Pressable
+              ref={notificationRef}
               style={({ pressed }) => [
                 styles.notificationContainer,
                 pressed && { opacity: 0.6 },
@@ -320,6 +347,7 @@ const HomeScreen = () => {
             {/* Avatar */}
             {/* Avatar with Frame */}
             <Pressable
+              ref={profileRef}
               onPress={() => {
                 router.navigate({
                   pathname: "/(tabs)/home",
@@ -368,7 +396,7 @@ const HomeScreen = () => {
         </View>
 
         {/* Último Recuerdo - DESTACADO */}
-        <View>
+        <View ref={lastMemoryRef}>
           {memoriesQuery.isLoading ? (
             <View style={styles.memoryCardLoading}>
               <SkeletonBox width={SCREEN_WIDTH} height={280} borderRadius={0} />
@@ -383,49 +411,64 @@ const HomeScreen = () => {
                 return (
                   <Pressable
                     style={hasMedia ? styles.memoryCard : styles.memoryCardNote}
-                    onPress={() =>
-                      router.navigate({
-                        pathname: "/(tabs)/recuerdos",
-                        params: {
-                          tab: "recuerdos",
-                          memoryId: lastMemory.id,
-                          bookId: lastMemory.bookId,
-                        },
-                      })
+                    onPress={
+                      lastMemory.mimeType.startsWith("video/")
+                        ? () => {}
+                        : () =>
+                            router.navigate({
+                              pathname: "/(tabs)/recuerdos",
+                              params: {
+                                tab: "recuerdos",
+                                memoryId: lastMemory.id,
+                                bookId: lastMemory.bookId,
+                              },
+                            })
                     }
                   >
                     {hasMedia ? (
-                      <ImageBackground
-                        source={{ uri: lastMemory.mediaUrl }}
-                        style={styles.memoryImage}
-                        imageStyle={styles.memoryImageStyle}
-                      >
-                        <LinearGradient
-                          colors={["transparent", "rgba(0,0,0,0.7)"]}
-                          style={styles.memoryGradient}
+                      lastMemory.mimeType.startsWith("video/") ? (
+                        <View style={styles.memoryImage}>
+                          <VideoView
+                            player={player}
+                            style={{ width: "100%", height: "100%" }}
+                            allowsFullscreen={false}
+                            allowsPictureInPicture={false}
+                            contentFit="cover"
+                          />
+                        </View>
+                      ) : (
+                        <ImageBackground
+                          source={{ uri: lastMemory.mediaUrl }}
+                          style={styles.memoryImage}
+                          imageStyle={styles.memoryImageStyle}
                         >
-                          <View style={styles.memoryContent}>
-                            <Text style={styles.memoryLabel}>ÚLTIMO RECUERDO</Text>
-                            <Text style={styles.memoryTitle} numberOfLines={2}>
-                              {lastMemory.title || "Sin título"}
-                            </Text>
-                            {lastMemory.caption && (
-                              <HighlightedMentionText
-                                text={lastMemory.caption}
-                                familyMembers={groupMembers}
-                                style={styles.memoryDescription}
-                              />
-                            )}
-                            <Text style={styles.memoryDate}>
-                              {formatInUserTimezone(
-                                lastMemory.createdAt,
-                                "d 'de' MMMM 'de' yyyy",
-                                userElepad?.timezone
+                          <LinearGradient
+                            colors={["transparent", "rgba(0,0,0,0.7)"]}
+                            style={styles.memoryGradient}
+                          >
+                            <View style={styles.memoryContent}>
+                              <Text style={styles.memoryLabel}>ÚLTIMO RECUERDO</Text>
+                              <Text style={styles.memoryTitle} numberOfLines={2}>
+                                {lastMemory.title || "Sin título"}
+                              </Text>
+                              {lastMemory.caption && (
+                                <HighlightedMentionText
+                                  text={lastMemory.caption}
+                                  familyMembers={groupMembers}
+                                  style={styles.memoryDescription}
+                                />
                               )}
-                            </Text>
-                          </View>
-                        </LinearGradient>
-                      </ImageBackground>
+                              <Text style={styles.memoryDate}>
+                                {formatInUserTimezone(
+                                  lastMemory.createdAt,
+                                  "d 'de' MMMM 'de' yyyy",
+                                  userElepad?.timezone
+                                )}
+                              </Text>
+                            </View>
+                          </LinearGradient>
+                        </ImageBackground>
+                      )
                     ) : (
                       <ImageBackground source={fondoRecuerdos} style={styles.memoryNoImage}>
                         <Image source={tapeImage} style={styles.tapeIcon} />
@@ -479,10 +522,14 @@ const HomeScreen = () => {
         </View>
 
         {/* Contador de Racha - Solo para usuarios elder */}
-        {userElepad?.elder && <StreakCounter />}
+        {userElepad?.elder && (
+          <View ref={streakRef}>
+            <StreakCounter />
+          </View>
+        )}
 
         {/* Próximos Eventos */}
-        <View style={styles.section}>
+        <View style={styles.section} ref={eventsRef}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>
               Próximos{" "}
@@ -652,7 +699,7 @@ const HomeScreen = () => {
         </View>
 
         {/* Actividad Reciente */}
-        <View style={styles.section}>
+        <View style={styles.section} ref={activityRef}>
           <Text style={styles.sectionTitle}>
             {userElepad?.elder ? "Mi última actividad" : "Última actividad del grupo"}
           </Text>

@@ -20,7 +20,6 @@ import {
   IconButton,
   Menu,
   SegmentedButtons,
-  TextInput,
 } from "react-native-paper";
 import DropdownSelect from "@/components/shared/DropdownSelect";
 import { useAuth } from "@/hooks/useAuth";
@@ -59,6 +58,10 @@ import CancelButton from "@/components/shared/CancelButton";
 import BookCover from "@/components/Recuerdos/BookCover";
 import eleEmpthy from "@/assets/images/ele-fotografiando.png";
 import { useToast } from "@/components/shared/Toast";
+import { StyledTextInput } from "@/components/shared";
+
+import { useRecuerdosTour } from "@/hooks/tours/useRecuerdosTour";
+import { useTabContext } from "@/context/TabContext";
 
 // Tipos de recuerdos
 type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
@@ -96,7 +99,7 @@ const memoryToRecuerdo = (
     miniatura:
       (memory.mimeType?.startsWith("image/") ||
         memory.mimeType?.startsWith("video/")) &&
-      memory.mediaUrl
+        memory.mediaUrl
         ? memory.mediaUrl
         : undefined,
     titulo: memory.title || undefined,
@@ -160,6 +163,7 @@ export default function RecuerdosScreen() {
   const emptyLogoTop = screenHeight * 0.12; // 25% del alto de pantalla (más arriba que el 35% anterior)
 
   const { mutateAsync: addReaction } = useAddReaction();
+  const { activeTab } = useTabContext();
 
   const groupId = userElepad?.groupId || "";
 
@@ -267,6 +271,9 @@ export default function RecuerdosScreen() {
   const [memberFilterId, setMemberFilterId] = useState<string | null>(null);
   const [memberMenuMounted] = useState(true);
 
+  // --- Tour Setup ---
+  const { headerRef, addButtonRef, listRef, albumRef } = useRecuerdosTour({ activeTab, authLoading, selectedBook });
+
   const {
     data: booksResponse,
     isLoading: booksLoading,
@@ -315,9 +322,8 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al crear el baúl: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al crear el baúl: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -334,9 +340,8 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al actualizar el baúl: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al actualizar el baúl: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -353,9 +358,8 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al eliminar el baúl: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al eliminar el baúl: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -385,9 +389,8 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al actualizar el recuerdo: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al actualizar el recuerdo: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -407,9 +410,8 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al eliminar el recuerdo: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al eliminar el recuerdo: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -468,9 +470,8 @@ export default function RecuerdosScreen() {
     onError: (error) => {
       console.error("Upload mutation onError:", error);
       showToast({
-        message: `Error al subir el recuerdo: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al subir el recuerdo: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -519,9 +520,8 @@ export default function RecuerdosScreen() {
     onError: (error) => {
       console.error("Create note mutation onError:", error);
       showToast({
-        message: `Error al crear la nota: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al crear la nota: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -555,8 +555,8 @@ export default function RecuerdosScreen() {
     const memoriesData = Array.isArray(memoriesPayload)
       ? memoriesPayload
       : memoriesPayload &&
-          typeof memoriesPayload === "object" &&
-          "data" in (memoriesPayload as Record<string, unknown>)
+        typeof memoriesPayload === "object" &&
+        "data" in (memoriesPayload as Record<string, unknown>)
         ? (memoriesPayload as { data: unknown }).data
         : [];
 
@@ -639,9 +639,8 @@ export default function RecuerdosScreen() {
     deleteMemoryMutation.isPending;
 
   const emptyTitle = memberFilterId
-    ? `${
-        memberNameById[memberFilterId] || "Este miembro"
-      } aún no ha subido recuerdos`
+    ? `${memberNameById[memberFilterId] || "Este miembro"
+    } aún no ha subido recuerdos`
     : "No hay recuerdos aún";
 
   const emptySubtitle = memberFilterId
@@ -835,9 +834,8 @@ export default function RecuerdosScreen() {
       }
     } catch (error) {
       showToast({
-        message: `Error al preparar el archivo: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al preparar el archivo: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     }
@@ -883,44 +881,20 @@ export default function RecuerdosScreen() {
             {bookDialogMode === "create" ? "Nuevo baúl" : "Editar baúl"}
           </Dialog.Title>
           <Dialog.Content>
-            <View
-              style={{
-                backgroundColor: COLORS.backgroundSecondary,
-                borderRadius: 16,
-                overflow: "hidden",
-                marginBottom: 12,
-              }}
-            >
-              <TextInput
-                label="Nombre"
-                value={bookFormTitle}
-                onChangeText={setBookFormTitle}
-                mode="flat"
-                style={{ backgroundColor: "transparent" }}
-                outlineColor="transparent"
-                activeOutlineColor="transparent"
-              />
-            </View>
-            <View
-              style={{
-                backgroundColor: COLORS.backgroundSecondary,
-                borderRadius: 16,
-                overflow: "hidden",
-                marginBottom: 12,
-              }}
-            >
-              <TextInput
-                label="Descripción"
-                value={bookFormDescription}
-                onChangeText={setBookFormDescription}
-                mode="flat"
-                style={{ backgroundColor: "transparent" }}
-                outlineColor="transparent"
-                activeOutlineColor="transparent"
-                multiline
-                numberOfLines={3}
-              />
-            </View>
+            <StyledTextInput
+              label="Nombre"
+              value={bookFormTitle}
+              onChangeText={setBookFormTitle}
+              marginBottom={12}
+            />
+            <StyledTextInput
+              label="Descripción"
+              value={bookFormDescription}
+              onChangeText={setBookFormDescription}
+              multiline
+              numberOfLines={3}
+              marginBottom={12}
+            />
 
             <Text
               style={{
@@ -1018,6 +992,7 @@ export default function RecuerdosScreen() {
                 }
                 disabled={
                   !groupId ||
+                  !bookFormTitle.trim() ||
                   createBookMutation.isPending ||
                   updateBookMutation.isPending ||
                   deleteBookMutation.isPending
@@ -1084,8 +1059,8 @@ export default function RecuerdosScreen() {
   const booksData = Array.isArray(booksPayload)
     ? booksPayload
     : booksPayload &&
-        typeof booksPayload === "object" &&
-        "data" in (booksPayload as Record<string, unknown>)
+      typeof booksPayload === "object" &&
+      "data" in (booksPayload as Record<string, unknown>)
       ? (booksPayload as { data: unknown }).data
       : [];
 
@@ -1119,34 +1094,39 @@ export default function RecuerdosScreen() {
               alignItems: "center",
             }}
           >
-            <Text style={STYLES.superHeading}>Recuerdos</Text>
+            <View ref={headerRef}>
+              <Text style={STYLES.superHeading}>Recuerdos</Text>
+            </View>
+            <View ref={addButtonRef}>
+              <Button
+                mode="contained"
+                onPress={openCreateBookDialog}
+                style={{
+                  borderRadius: 12,
+                  backgroundColor: COLORS.primary,
+                }}
+                icon="plus"
+                disabled={!groupId}
+              >
+                Agregar
+              </Button>
+            </View>
+          </View>
+          <View ref={albumRef} style={{ marginTop: 24 }}>
             <Button
-              mode="contained"
-              onPress={openCreateBookDialog}
+              mode="outlined"
+              onPress={() => router.push("../albums")}
               style={{
                 borderRadius: 12,
-                backgroundColor: COLORS.primary,
+                borderColor: COLORS.primary,
               }}
-              icon="plus"
+              icon="book-multiple"
+              textColor={COLORS.primary}
               disabled={!groupId}
             >
-              Agregar
+              Álbumes
             </Button>
           </View>
-          <Button
-            mode="outlined"
-            onPress={() => router.push("../albums")}
-            style={{
-              borderRadius: 12,
-              borderColor: COLORS.primary,
-              marginTop: 24,
-            }}
-            icon="book-multiple"
-            textColor={COLORS.primary}
-            disabled={!groupId}
-          >
-            Álbumes
-          </Button>
         </View>
 
         {isBooksLoading && books.length === 0 ? (
@@ -1159,6 +1139,7 @@ export default function RecuerdosScreen() {
         ) : books.length === 0 ? (
           <View
             style={{ flex: 1, alignItems: "center", marginTop: emptyLogoTop }}
+            ref={listRef}
           >
             <Image
               source={eleEmpthy}
@@ -1184,88 +1165,90 @@ export default function RecuerdosScreen() {
             </Button>
           </View>
         ) : (
-          <FlatList
-            data={books}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={{
-              paddingHorizontal: 24,
-              paddingTop: 2,
-              paddingBottom: LAYOUT.bottomNavHeight,
-            }}
-            numColumns={2}
-            columnWrapperStyle={{ justifyContent: "space-between" }}
-            refreshControl={
-              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-            }
-            renderItem={({ item }) => {
-              const title = item.title || "(Sin nombre)";
-              const color = item.color || COLORS.primary;
-              return (
-                <View
-                  style={{
-                    width: "48%",
-                    marginBottom: 16,
-                  }}
-                >
-                  <Pressable
-                    onPress={() => {
-                      setSelectedBook(item);
-                      setMemberFilterId(null);
+          <View style={{ flex: 1 }} ref={listRef}>
+            <FlatList
+              data={books}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={{
+                paddingHorizontal: 24,
+                paddingTop: 2,
+                paddingBottom: LAYOUT.bottomNavHeight,
+              }}
+              numColumns={2}
+              columnWrapperStyle={{ justifyContent: "space-between" }}
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }
+              renderItem={({ item }) => {
+                const title = item.title || "(Sin nombre)";
+                const color = item.color || COLORS.primary;
+                return (
+                  <View
+                    style={{
+                      width: "48%",
+                      marginBottom: 16,
                     }}
                   >
-                    <View
-                      style={{
-                        backgroundColor: COLORS.backgroundSecondary,
-                        borderRadius: 18,
-                        aspectRatio: 1,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        overflow: "hidden",
+                    <Pressable
+                      onPress={() => {
+                        setSelectedBook(item);
+                        setMemberFilterId(null);
                       }}
                     >
-                      <BookCover
-                        bookId={item.id}
-                        groupId={groupId}
-                        color={color}
-                      />
                       <View
                         style={{
-                          position: "absolute",
-                          top: 6,
-                          right: 6,
-                          flexDirection: "row",
+                          backgroundColor: COLORS.backgroundSecondary,
+                          borderRadius: 18,
+                          aspectRatio: 1,
+                          alignItems: "center",
+                          justifyContent: "center",
+                          overflow: "hidden",
                         }}
                       >
-                        <IconButton
-                          icon="pencil"
-                          size={18}
-                          onPress={() => openEditBookDialog(item)}
-                          style={{ margin: 0 }}
+                        <BookCover
+                          bookId={item.id}
+                          groupId={groupId}
+                          color={color}
                         />
-                        <IconButton
-                          icon="trash-can"
-                          size={18}
-                          onPress={() => setBookToDelete(item)}
-                          style={{ margin: 0 }}
-                        />
+                        <View
+                          style={{
+                            position: "absolute",
+                            top: 6,
+                            right: 6,
+                            flexDirection: "row",
+                          }}
+                        >
+                          <IconButton
+                            icon="pencil"
+                            size={18}
+                            onPress={() => openEditBookDialog(item)}
+                            style={{ margin: 0 }}
+                          />
+                          <IconButton
+                            icon="trash-can"
+                            size={18}
+                            onPress={() => setBookToDelete(item)}
+                            style={{ margin: 0 }}
+                          />
+                        </View>
                       </View>
-                    </View>
-                    <Text
-                      style={{
-                        ...STYLES.heading,
-                        fontSize: 14,
-                        textAlign: "center",
-                        marginTop: 10,
-                      }}
-                      numberOfLines={2}
-                    >
-                      {title}
-                    </Text>
-                  </Pressable>
-                </View>
-              );
-            }}
-          />
+                      <Text
+                        style={{
+                          ...STYLES.heading,
+                          fontSize: 14,
+                          textAlign: "center",
+                          marginTop: 10,
+                        }}
+                        numberOfLines={2}
+                      >
+                        {title}
+                      </Text>
+                    </Pressable>
+                  </View>
+                );
+              }}
+            />
+          </View>
         )}
 
         {renderBookDialogs()}

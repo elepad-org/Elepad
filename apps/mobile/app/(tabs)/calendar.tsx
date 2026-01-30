@@ -2,6 +2,8 @@ import { useState, useMemo, useEffect } from "react";
 import { View, StatusBar } from "react-native";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useCalendarTour } from "@/hooks/tours/useCalendarTour";
+import { useTabContext } from "@/context/TabContext";
 import CalendarCard from "@/components/Calendar/CalendarCard";
 import ActivityForm from "@/components/Calendar/ActivityForm";
 import {
@@ -40,6 +42,16 @@ function CalendarScreenContent() {
   const [selectedElderId, setSelectedElderId] = useState<string | null>(null);
   const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(familyCode);
   const membersQuery = useGetFamilyGroupIdGroupMembers(familyCode);
+
+  const { activeTab } = useTabContext();
+
+  //  // Tour hook
+  //  // Tour hook
+  const { headerRef, addButtonRef, calendarViewRef, taskListRef } = useCalendarTour({
+    activeTab,
+    activitiesLoading: activitiesQuery.isLoading,
+  });
+  // ------------------
 
 
 
@@ -300,21 +312,25 @@ function CalendarScreenContent() {
           alignItems: "center",
         }}
       >
-        <Text
-          style={baseStyles.superHeading}
-          suppressHighlighting={true}
-        >
-          Calendario
-        </Text>
+        <View ref={headerRef}>
+          <Text
+            style={baseStyles.superHeading}
+            suppressHighlighting={true}
+          >
+            Calendario
+          </Text>
+        </View>
 
-        <Button
-          mode="contained"
-          onPress={() => setFormVisible(true)}
-          style={{ ...baseStyles.miniButton, width: "auto", paddingHorizontal: 16 }}
-          icon="plus"
-        >
-          Agregar
-        </Button>
+        <View ref={addButtonRef}>
+          <Button
+            mode="contained"
+            onPress={() => setFormVisible(true)}
+            style={{ ...baseStyles.miniButton, width: "auto", paddingHorizontal: 16 }}
+            icon="plus"
+          >
+            Agregar
+          </Button>
+        </View>
       </View>
 
       <View style={{ flex: 1 }}>
@@ -331,6 +347,8 @@ function CalendarScreenContent() {
           onActivityViewed={handleActivityViewed}
           selectedElderId={selectedElderId}
           onElderChange={setSelectedElderId}
+          calendarViewRef={calendarViewRef}
+          taskListRef={taskListRef}
         />
       </View>
 
