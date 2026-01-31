@@ -21,7 +21,6 @@ import {
   Menu,
   SegmentedButtons,
 } from "react-native-paper";
-import DropdownSelect from "@/components/shared/DropdownSelect";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -237,19 +236,13 @@ export default function RecuerdosScreen() {
   const [selectedBook, setSelectedBook] = useState<MemoriesBook | null>(null);
   const [editingBook, setEditingBook] = useState<MemoriesBook | null>(null);
   const [bookMenuVisible, setBookMenuVisible] = useState(false);
-  const [menuMounted, setMenuMounted] = useState(true);
 
-  const handleOpenBookMenu = useCallback(() => {
-    setBookMenuVisible(true);
-  }, []);
+
 
   const handleCloseBookMenu = useCallback(() => {
     setBookMenuVisible(false);
-    // Desmontar y volver a montar el menú para resetear completamente su estado
-    setMenuMounted(false);
-    setTimeout(() => {
-      setMenuMounted(true);
-    }, 50);
+    setMenuMode("main");
+    setFilterSubMode("none");
   }, []);
 
   const [bookDialogVisible, setBookDialogVisible] = useState(false);
@@ -270,7 +263,8 @@ export default function RecuerdosScreen() {
 
   const [memberFilterId, setMemberFilterId] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<RecuerdoTipo | "all">("all");
-  const [filterDialogVisible, setFilterDialogVisible] = useState(false);
+  const [menuMode, setMenuMode] = useState<"main" | "filter">("main");
+  const [filterSubMode, setFilterSubMode] = useState<"none" | "person" | "type">("none");
 
   // --- Tour Setup ---
   const { headerRef, addButtonRef, listRef, albumRef } = useRecuerdosTour({ activeTab, authLoading, selectedBook });
@@ -1052,89 +1046,6 @@ export default function RecuerdosScreen() {
     );
   };
 
-  const renderFilterDialog = () => {
-    if (!filterDialogVisible) return null;
-
-    return (
-      <Portal>
-        <Dialog
-          visible={filterDialogVisible}
-          onDismiss={() => setFilterDialogVisible(false)}
-          style={{
-            backgroundColor: COLORS.background,
-            width: "92%",
-            alignSelf: "center",
-            borderRadius: 16,
-          }}
-        >
-          <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
-            Filtros
-          </Dialog.Title>
-          <Dialog.Content>
-            <Text style={{ ...STYLES.subheading, marginBottom: 8 }}>
-              Filtrar por persona
-            </Text>
-            <DropdownSelect
-              label="Filtrar"
-              value={memberFilterId || "all"}
-              options={[
-                { key: "all", label: "Todos", icon: "account-group" },
-                ...groupMembers.map((m) => ({
-                  key: m.id,
-                  label: m.displayName,
-                  avatarUrl: m.avatarUrl || null,
-                  frameUrl: m.activeFrameUrl || null,
-                })),
-              ]}
-              onSelect={(value) => {
-                setMemberFilterId(value === "all" ? null : value);
-              }}
-              placeholder="Todos"
-              showLabel={false}
-            />
-            <Text style={{ ...STYLES.subheading, marginTop: 16, marginBottom: 8 }}>
-              Filtrar por tipo
-            </Text>
-            <DropdownSelect
-              label="Tipo"
-              value={typeFilter}
-              options={[
-                { key: "all", label: "Todos los tipos", icon: "file-multiple" },
-                { key: "imagen", label: "Imágenes", icon: "image" },
-                { key: "video", label: "Videos", icon: "video" },
-                { key: "audio", label: "Audios", icon: "microphone" },
-                { key: "texto", label: "Notas", icon: "text" },
-              ]}
-              onSelect={(value) => {
-                setTypeFilter(value as RecuerdoTipo | "all");
-              }}
-              placeholder="Todos los tipos"
-              showLabel={false}
-            />
-          </Dialog.Content>
-          <Dialog.Actions
-            style={{
-              paddingBottom: 30,
-              paddingHorizontal: 24,
-              paddingTop: 10,
-              justifyContent: "center",
-            }}
-          >
-            <Button
-              onPress={() => setFilterDialogVisible(false)}
-              mode="contained"
-              buttonColor={COLORS.primary}
-              textColor={COLORS.white}
-              style={{ borderRadius: 12 }}
-            >
-              Cerrar
-            </Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
-    );
-  };
-
   // -------- Vista: Lista de baúles --------
   const booksPayload =
     booksResponse && "data" in booksResponse
@@ -1337,7 +1248,6 @@ export default function RecuerdosScreen() {
         )}
 
         {renderBookDialogs()}
-        {renderFilterDialog()}
       </SafeAreaView>
     );
   }
@@ -1415,20 +1325,23 @@ export default function RecuerdosScreen() {
                 </Text>
               )}
             </View>
-            {menuMounted && (
-              <Menu
-                visible={bookMenuVisible}
-                onDismiss={handleCloseBookMenu}
-                contentStyle={{
-                  backgroundColor: COLORS.background,
-                  borderRadius: 12,
-                }}
-                anchor={
+            <Menu
+              visible={bookMenuVisible}
+              onDismiss={handleCloseBookMenu}
+              contentStyle={{
+                backgroundColor: COLORS.background,
+                borderRadius: 12,
+              }}
+              anchor={
                   <IconButton
                     icon="dots-horizontal"
                     size={22}
                     style={{ margin: 0 }}
-                    onPress={handleOpenBookMenu}
+                    onPress={() => {
+                      setBookMenuVisible(true);
+                      setMenuMode("main");
+                      setFilterSubMode("none");
+                    }}
                   />
                 }
               >
@@ -1449,7 +1362,6 @@ export default function RecuerdosScreen() {
                   title="Eliminar baúl"
                 />
               </Menu>
-            )}
           </View>
         </View>
 
@@ -1587,49 +1499,181 @@ export default function RecuerdosScreen() {
               </Text>
             )}
           </View>
-          {menuMounted && (
-            <Menu
-              visible={bookMenuVisible}
-              onDismiss={handleCloseBookMenu}
-              contentStyle={{
-                backgroundColor: COLORS.background,
-                borderRadius: 12,
-              }}
-              anchor={
-                <IconButton
-                  icon="dots-horizontal"
-                  size={22}
-                  style={{ margin: 0 }}
-                  onPress={handleOpenBookMenu}
-                />
-              }
+          <Menu
+            key={bookMenuVisible ? 'open' : 'closed'}
+            visible={bookMenuVisible}
+            onDismiss={handleCloseBookMenu}
+            contentStyle={{
+              backgroundColor: COLORS.background,
+              borderRadius: 12,
+              width: 215,
+            }}
+            style={{ alignSelf: 'flex-end', marginRight: 0, marginTop: -8 }}
+            anchor={
+              <IconButton
+                icon="dots-horizontal"
+                size={22}
+                style={{ margin: 0 }}
+                onPress={() => {
+                  setBookMenuVisible(true);
+                  setMenuMode("main");
+                  setFilterSubMode("none");
+                }}
+              />
+            }
             >
-              <Menu.Item
-                leadingIcon="pencil"
-                onPress={() => {
-                  setBookMenuVisible(false);
-                  openEditBookDialog(selectedBook);
-                }}
-                title="Modificar baúl"
-              />
-              <Menu.Item
-                leadingIcon="trash-can"
-                onPress={() => {
-                  setBookMenuVisible(false);
-                  setBookToDelete(selectedBook);
-                }}
-                title="Eliminar baúl"
-              />
-              <Menu.Item
-                leadingIcon="filter-variant"
-                onPress={() => {
-                  setBookMenuVisible(false);
-                  setFilterDialogVisible(true);
-                }}
-                title="Filtrar"
-              />
+              {(() => {
+                switch (menuMode) {
+                  case "main":
+                    return (
+                      <>
+                        <Menu.Item
+                          leadingIcon="pencil"
+                          onPress={() => {
+                            setBookMenuVisible(false);
+                            openEditBookDialog(selectedBook);
+                          }}
+                          title="Modificar baúl"
+                        />
+                        <Menu.Item
+                          leadingIcon="trash-can"
+                          onPress={() => {
+                            setBookMenuVisible(false);
+                            setBookToDelete(selectedBook);
+                          }}
+                          title="Eliminar baúl"
+                        />
+                        <Menu.Item
+                          leadingIcon="filter-variant"
+                          onPress={() => {
+                            setMenuMode("filter");
+                            setFilterSubMode("none");
+                          }}
+                          title="Filtrar"
+                        />
+                      </>
+                    );
+                  case "filter":
+                    if (filterSubMode === "none") {
+                      return (
+                        <>
+                          <Menu.Item
+                            leadingIcon="arrow-left"
+                            onPress={() => setMenuMode("main")}
+                            title="Atrás"
+                          />
+                          <Menu.Item
+                            leadingIcon="account-group"
+                            onPress={() => setFilterSubMode("person")}
+                            title="Filtrar por persona"
+                          />
+                          <Menu.Item
+                            leadingIcon="file-multiple"
+                            onPress={() => setFilterSubMode("type")}
+                            title="Filtrar por tipo"
+                          />
+                        </>
+                      );
+                    } else if (filterSubMode === "person") {
+                      return (
+                        <>
+                          <Menu.Item
+                            leadingIcon="arrow-left"
+                            onPress={() => setFilterSubMode("none")}
+                            title="Atrás"
+                          />
+                          <Menu.Item
+                            leadingIcon="account-group"
+                            onPress={() => {
+                              setMemberFilterId(null);
+                              setBookMenuVisible(false);
+                              setMenuMode("main");
+                              setFilterSubMode("none");
+                            }}
+                            title="Todos"
+                          />
+                          {groupMembers.map((m) => (
+                            <Menu.Item
+                              key={m.id}
+                              leadingIcon="account"
+                              onPress={() => {
+                                setMemberFilterId(m.id);
+                                setBookMenuVisible(false);
+                                setMenuMode("main");
+                                setFilterSubMode("none");
+                              }}
+                              title={m.displayName}
+                            />
+                          ))}
+                        </>
+                      );
+                    } else if (filterSubMode === "type") {
+                      return (
+                        <>
+                          <Menu.Item
+                            leadingIcon="arrow-left"
+                            onPress={() => setFilterSubMode("none")}
+                            title="Atrás"
+                          />
+                          <Menu.Item
+                            leadingIcon="file-multiple"
+                            onPress={() => {
+                              setTypeFilter("all");
+                              setBookMenuVisible(false);
+                              setMenuMode("main");
+                              setFilterSubMode("none");
+                            }}
+                            title="Todos los tipos"
+                          />
+                          <Menu.Item
+                            leadingIcon="image"
+                            onPress={() => {
+                              setTypeFilter("imagen");
+                              setBookMenuVisible(false);
+                              setMenuMode("main");
+                              setFilterSubMode("none");
+                            }}
+                            title="Imágenes"
+                          />
+                          <Menu.Item
+                            leadingIcon="video"
+                            onPress={() => {
+                              setTypeFilter("video");
+                              setBookMenuVisible(false);
+                              setMenuMode("main");
+                              setFilterSubMode("none");
+                            }}
+                            title="Videos"
+                          />
+                          <Menu.Item
+                            leadingIcon="microphone"
+                            onPress={() => {
+                              setTypeFilter("audio");
+                              setBookMenuVisible(false);
+                              setMenuMode("main");
+                              setFilterSubMode("none");
+                            }}
+                            title="Audios"
+                          />
+                          <Menu.Item
+                            leadingIcon="text"
+                            onPress={() => {
+                              setTypeFilter("texto");
+                              setBookMenuVisible(false);
+                              setMenuMode("main");
+                              setFilterSubMode("none");
+                            }}
+                            title="Notas"
+                          />
+                        </>
+                      );
+                    }
+                    break;
+                  default:
+                    return null;
+                }
+              })()}
             </Menu>
-          )}
         </View>
       </View>
 
@@ -1752,7 +1796,6 @@ export default function RecuerdosScreen() {
       </Portal>
 
       {renderBookDialogs()}
-      {renderFilterDialog()}
 
       {/* Diálogo de detalle del recuerdo */}
       {/* Diálogo de detalle del recuerdo */}
