@@ -19,6 +19,7 @@ import {
   ActivityIndicator,
   IconButton,
   Menu,
+  Avatar,
   SegmentedButtons,
 } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
@@ -1368,53 +1369,45 @@ export default function RecuerdosScreen() {
         {/* Controles de ordenamiento y vista */}
         <View
           style={{
-            paddingHorizontal: 24,
-            paddingVertical: 12,
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
+            paddingHorizontal: 16,
+            paddingVertical: 8,
           }}
         >
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text
-              style={{
-                fontSize: 14,
-                color: COLORS.textSecondary,
-                marginRight: 8,
-              }}
-            >
-              Ordenar:
-            </Text>
+          {/* Ordenar y Vista */}
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
+            }}
+          >
+            {/* Botón de Ordenar */}
             <IconButton
               icon={sortOrder === "desc" ? "arrow-down" : "arrow-up"}
               size={20}
-              onPress={() =>
-                setSortOrder(sortOrder === "desc" ? "asc" : "desc")
-              }
+              onPress={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
               mode="contained-tonal"
+              style={{ margin: 0 }}
+            />
+
+            {/* Toggle de Vistas */}
+            <SegmentedButtons
+              value={numColumns.toString()}
+              onValueChange={(value) => setNumColumns(parseInt(value))}
+              buttons={[
+                { value: "2", icon: "view-grid" },
+                { value: "3", icon: "view-comfy" },
+              ]}
+              density="small"
+              style={{ maxWidth: 80 }}
+              theme={{
+                colors: {
+                  secondaryContainer: COLORS.primary,
+                  onSecondaryContainer: COLORS.white,
+                },
+              }}
             />
           </View>
-          <SegmentedButtons
-            value={numColumns.toString()}
-            onValueChange={(value) => setNumColumns(parseInt(value))}
-            buttons={[
-              {
-                value: "2",
-                icon: "view-module",
-              },
-              {
-                value: "3",
-                icon: "view-comfy",
-              },
-            ]}
-            style={{ width: 140 }}
-            theme={{
-              colors: {
-                secondaryContainer: COLORS.primary,
-                onSecondaryContainer: COLORS.white,
-              },
-            }}
-          />
         </View>
 
         <View
@@ -1591,11 +1584,20 @@ export default function RecuerdosScreen() {
                               setFilterSubMode("none");
                             }}
                             title="Todos"
+                            style={{
+                              backgroundColor: memberFilterId === null ? COLORS.primary + "20" : "transparent"
+                            }}
                           />
                           {groupMembers.map((m) => (
                             <Menu.Item
                               key={m.id}
-                              leadingIcon="account"
+                              leadingIcon={() => (
+                                m.avatarUrl ? (
+                                  <Avatar.Image size={24} source={{ uri: m.avatarUrl }} />
+                                ) : (
+                                  <Avatar.Text size={24} label={m.displayName.charAt(0).toUpperCase()} />
+                                )
+                              )}
                               onPress={() => {
                                 setMemberFilterId(m.id);
                                 setBookMenuVisible(false);
@@ -1603,6 +1605,9 @@ export default function RecuerdosScreen() {
                                 setFilterSubMode("none");
                               }}
                               title={m.displayName}
+                              style={{
+                                backgroundColor: memberFilterId === m.id ? COLORS.primary + "20" : "transparent"
+                              }}
                             />
                           ))}
                         </>
@@ -1624,6 +1629,9 @@ export default function RecuerdosScreen() {
                               setFilterSubMode("none");
                             }}
                             title="Todos los tipos"
+                            style={{
+                              backgroundColor: typeFilter === "all" ? COLORS.primary + "20" : "transparent"
+                            }}
                           />
                           <Menu.Item
                             leadingIcon="image"
@@ -1634,6 +1642,9 @@ export default function RecuerdosScreen() {
                               setFilterSubMode("none");
                             }}
                             title="Imágenes"
+                            style={{
+                              backgroundColor: typeFilter === "imagen" ? COLORS.primary + "20" : "transparent"
+                            }}
                           />
                           <Menu.Item
                             leadingIcon="video"
@@ -1644,6 +1655,9 @@ export default function RecuerdosScreen() {
                               setFilterSubMode("none");
                             }}
                             title="Videos"
+                            style={{
+                              backgroundColor: typeFilter === "video" ? COLORS.primary + "20" : "transparent"
+                            }}
                           />
                           <Menu.Item
                             leadingIcon="microphone"
@@ -1654,6 +1668,9 @@ export default function RecuerdosScreen() {
                               setFilterSubMode("none");
                             }}
                             title="Audios"
+                            style={{
+                              backgroundColor: typeFilter === "audio" ? COLORS.primary + "20" : "transparent"
+                            }}
                           />
                           <Menu.Item
                             leadingIcon="text"
@@ -1664,6 +1681,9 @@ export default function RecuerdosScreen() {
                               setFilterSubMode("none");
                             }}
                             title="Notas"
+                            style={{
+                              backgroundColor: typeFilter === "texto" ? COLORS.primary + "20" : "transparent"
+                            }}
                           />
                         </>
                       );
