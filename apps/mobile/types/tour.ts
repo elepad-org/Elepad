@@ -7,6 +7,7 @@ export interface TourStep {
   order: number;       // Orden del paso (1, 2, 3...)
   text: string;        // Texto explicativo
   title?: string;      // Título opcional
+  side?: 'top' | 'bottom'; // Preferencia de posición
 }
 
 export interface TourStepPosition extends TourStep {

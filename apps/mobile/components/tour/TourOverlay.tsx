@@ -59,9 +59,19 @@ export const TourOverlay: React.FC = () => {
   const tooltipY = highlightY + highlightHeight + 20;
   const tooltipX = SCREEN_WIDTH / 2;
 
-  // If tooltip would be off-screen, position it above
+  // Logic to determine Y position
+  let finalTooltipY = tooltipY;
   const tooltipFitsBelow = tooltipY + 300 < CANVAS_HEIGHT;
-  const finalTooltipY = tooltipFitsBelow ? tooltipY : Math.max(20, highlightY - 320);
+  const positionAbove = Math.max(20, highlightY - 320);
+
+  if (currentStep.side === 'top') {
+    finalTooltipY = positionAbove;
+  } else if (currentStep.side === 'bottom') {
+    finalTooltipY = tooltipY;
+  } else {
+    // Auto (default)
+    finalTooltipY = tooltipFitsBelow ? tooltipY : positionAbove;
+  }
 
   return (
     <Modal
