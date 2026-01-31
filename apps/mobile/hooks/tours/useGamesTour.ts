@@ -1,5 +1,6 @@
 import { useRef, useEffect } from "react";
 import { useTour } from "@/hooks/useTour";
+import { useTourContext } from "@/components/tour/TourProvider";
 import { useTourStep } from "@/hooks/useTourStep";
 
 interface UseGamesTourProps {
@@ -9,6 +10,7 @@ interface UseGamesTourProps {
 
 export const useGamesTour = ({ activeTab, loading }: UseGamesTourProps) => {
   const tour = useTour({ tourId: 'games' });
+  const { setPreparing } = useTourContext();
   const tourLayoutsRef = useRef<Record<string, { x: number; y: number; width: number; height: number }>>({});
 
   const headerStep = useTourStep({
@@ -62,6 +64,7 @@ export const useGamesTour = ({ activeTab, loading }: UseGamesTourProps) => {
         const completed = await tour.isTourCompleted('games');
 
         if (!completed) {
+          setPreparing(true);
           setTimeout(() => {
             const steps = [
               { ...headerStep.step, ref: headerStep.ref, layout: undefined },
@@ -83,6 +86,7 @@ export const useGamesTour = ({ activeTab, loading }: UseGamesTourProps) => {
                   layout: tourLayoutsRef.current[s.stepId]
                 }));
                 tour.startTour(finalSteps);
+                setPreparing(false);
               }
             };
 
@@ -104,7 +108,7 @@ export const useGamesTour = ({ activeTab, loading }: UseGamesTourProps) => {
             setTimeout(() => measureStep(gameDetailsStep, 'game-details-memory'), 250);
             setTimeout(() => measureStep(gamePlayStep, 'game-play-memory'), 300);
 
-          }, 1000);
+          }, 500);
         }
       };
 

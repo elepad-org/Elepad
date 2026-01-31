@@ -1,5 +1,6 @@
 import { useRef, useEffect } from "react";
 import { useTour } from "@/hooks/useTour";
+import { useTourContext } from "@/components/tour/TourProvider";
 import { useTourStep } from "@/hooks/useTourStep";
 
 interface UseCalendarTourProps {
@@ -12,6 +13,7 @@ export const useCalendarTour = ({
   activitiesLoading,
 }: UseCalendarTourProps) => {
   const tour = useTour({ tourId: 'calendar' });
+  const { setPreparing } = useTourContext();
   const tourLayoutsRef = useRef<Record<string, { x: number; y: number; width: number; height: number }>>({});
 
   const headerStep = useTourStep({
@@ -51,6 +53,7 @@ export const useCalendarTour = ({
         const completed = await tour.isTourCompleted('calendar');
 
         if (!completed) {
+          setPreparing(true);
           setTimeout(() => {
             const steps = [
               { ...headerStep.step, ref: headerStep.ref, layout: undefined },
@@ -70,6 +73,7 @@ export const useCalendarTour = ({
                   layout: tourLayoutsRef.current[s.stepId]
                 }));
                 tour.startTour(finalSteps);
+                setPreparing(false);
               }
             };
 
@@ -89,7 +93,7 @@ export const useCalendarTour = ({
             setTimeout(() => measureStep(calendarViewStep, 'calendar-view'), 150);
             setTimeout(() => measureStep(taskListStep, 'task-list'), 200);
 
-          }, 1000);
+          }, 500);
         }
       };
 

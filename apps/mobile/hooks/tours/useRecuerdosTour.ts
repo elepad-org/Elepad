@@ -1,5 +1,6 @@
 import { useRef, useEffect } from "react";
 import { useTour } from "@/hooks/useTour";
+import { useTourContext } from "@/components/tour/TourProvider";
 import { useTourStep } from "@/hooks/useTourStep";
 import { MemoriesBook } from "@elepad/api-client";
 
@@ -11,6 +12,7 @@ interface UseRecuerdosTourProps {
 
 export const useRecuerdosTour = ({ activeTab, authLoading, selectedBook }: UseRecuerdosTourProps) => {
   const tour = useTour({ tourId: 'memories' });
+  const { setPreparing } = useTourContext();
   const tourLayoutsRef = useRef<Record<string, { x: number; y: number; width: number; height: number }>>({});
 
   const headerStep = useTourStep({
@@ -58,6 +60,7 @@ export const useRecuerdosTour = ({ activeTab, authLoading, selectedBook }: UseRe
       const completed = await tour.isTourCompleted('memories');
       if (!completed) {
         // Wait for UI to render
+        setPreparing(true);
         setTimeout(() => {
           const steps = [
             { ...headerStep.step, ref: headerStep.ref, layout: undefined },
@@ -77,6 +80,7 @@ export const useRecuerdosTour = ({ activeTab, authLoading, selectedBook }: UseRe
                 layout: tourLayoutsRef.current[s.stepId]
               }));
               tour.startTour(finalSteps);
+              setPreparing(false);
             }
           };
 
@@ -97,7 +101,7 @@ export const useRecuerdosTour = ({ activeTab, authLoading, selectedBook }: UseRe
           setTimeout(() => measureStep(listStep, 'memories-list'), 300);
           setTimeout(() => measureStep(albumStep, 'memories-album'), 400);
 
-        }, 1000);
+        }, 500);
       }
     };
 
