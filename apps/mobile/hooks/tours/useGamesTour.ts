@@ -1,4 +1,5 @@
 import { useRef, useEffect } from "react";
+import { useRouter } from "expo-router";
 import { useTour } from "@/hooks/useTour";
 import { useTourContext } from "@/components/tour/TourProvider";
 import { useTourStep } from "@/hooks/useTourStep";
@@ -9,8 +10,9 @@ interface UseGamesTourProps {
 }
 
 export const useGamesTour = ({ activeTab, loading }: UseGamesTourProps) => {
+  const router = useRouter();
   const tour = useTour({ tourId: 'games' });
-  const { setPreparing } = useTourContext();
+  const { setPreparing, state: tourState } = useTourContext();
   const tourLayoutsRef = useRef<Record<string, { x: number; y: number; width: number; height: number }>>({});
 
   const headerStep = useTourStep({
@@ -60,53 +62,62 @@ export const useGamesTour = ({ activeTab, loading }: UseGamesTourProps) => {
       const checkAndStartTour = async () => {
         if (loading) return;
         if (tour.isActive) return;
+        if (tourState.isPreparing) return;
 
         const completed = await tour.isTourCompleted('games');
 
         if (!completed) {
           setPreparing(true);
           setTimeout(() => {
-            const steps = [
-              { ...headerStep.step, ref: headerStep.ref, layout: undefined },
-              { ...shopStep.step, ref: shopStep.ref, layout: undefined },
-              { ...historyStep.step, ref: historyStep.ref, layout: undefined },
-              { ...gamesListStep.step, ref: gamesListStep.ref, layout: undefined },
-              { ...gameDetailsStep.step, ref: gameDetailsStep.ref, layout: undefined },
-              { ...gamePlayStep.step, ref: gamePlayStep.ref, layout: undefined },
-            ];
 
-            let measurementsComplete = 0;
-            const totalMeasurements = 6;
+            // Forzar navegación
+            router.setParams({ tab: 'juegos' });
 
-            const checkStart = () => {
-              measurementsComplete++;
-              if (measurementsComplete === totalMeasurements) {
-                const finalSteps = steps.map(s => ({
-                  ...s,
-                  layout: tourLayoutsRef.current[s.stepId]
-                }));
-                tour.startTour(finalSteps);
-                setPreparing(false);
-              }
-            };
+            setTimeout(() => {
 
-            const measureStep = (step: typeof headerStep, id: string) => {
-              if (step.ref.current) {
-                step.ref.current.measureInWindow((x: number, y: number, w: number, h: number) => {
-                  tourLayoutsRef.current[id] = { x, y, width: w, height: h };
+              const steps = [
+                { ...headerStep.step, ref: headerStep.ref, layout: undefined },
+                { ...shopStep.step, ref: shopStep.ref, layout: undefined },
+                { ...historyStep.step, ref: historyStep.ref, layout: undefined },
+                { ...gamesListStep.step, ref: gamesListStep.ref, layout: undefined },
+                { ...gameDetailsStep.step, ref: gameDetailsStep.ref, layout: undefined },
+                { ...gamePlayStep.step, ref: gamePlayStep.ref, layout: undefined },
+              ];
+
+              let measurementsComplete = 0;
+              const totalMeasurements = 6;
+
+              const checkStart = () => {
+                measurementsComplete++;
+                if (measurementsComplete === totalMeasurements) {
+                  const finalSteps = steps.map(s => ({
+                    ...s,
+                    layout: tourLayoutsRef.current[s.stepId]
+                  }));
+                  tour.startTour(finalSteps);
+                  setPreparing(false);
+                }
+              };
+
+              const measureStep = (step: typeof headerStep, id: string) => {
+                if (step.ref.current) {
+                  step.ref.current.measureInWindow((x: number, y: number, w: number, h: number) => {
+                    tourLayoutsRef.current[id] = { x, y, width: w, height: h };
+                    checkStart();
+                  });
+                } else {
                   checkStart();
-                });
-              } else {
-                checkStart();
-              }
-            };
+                }
+              };
 
-            setTimeout(() => measureStep(headerStep, 'games-header'), 50);
-            setTimeout(() => measureStep(shopStep, 'games-shop'), 100);
-            setTimeout(() => measureStep(historyStep, 'games-history'), 150);
-            setTimeout(() => measureStep(gamesListStep, 'games-list'), 200);
-            setTimeout(() => measureStep(gameDetailsStep, 'game-details-memory'), 250);
-            setTimeout(() => measureStep(gamePlayStep, 'game-play-memory'), 300);
+              setTimeout(() => measureStep(headerStep, 'games-header'), 50);
+              setTimeout(() => measureStep(shopStep, 'games-shop'), 100);
+              setTimeout(() => measureStep(historyStep, 'games-history'), 150);
+              setTimeout(() => measureStep(gamesListStep, 'games-list'), 200);
+              setTimeout(() => measureStep(gameDetailsStep, 'game-details-memory'), 250);
+              setTimeout(() => measureStep(gamePlayStep, 'game-play-memory'), 300);
+
+            }, 100);
 
           }, 500);
         }
@@ -114,7 +125,7 @@ export const useGamesTour = ({ activeTab, loading }: UseGamesTourProps) => {
 
       checkAndStartTour();
     }
-  }, [activeTab, loading, tour.isActive]);
+  }, [activeTab, loading, tour.isActive, tourState.isPreparing]);
 
   return {
     headerRef: headerStep.ref,
