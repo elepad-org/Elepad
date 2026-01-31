@@ -67,7 +67,9 @@ export const useRecuerdosTour = ({ activeTab, authLoading, selectedBook }: UseRe
         setTimeout(() => {
 
           // Forzar navegación
-          router.setParams({ tab: 'recuerdos' });
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          router.navigate({ pathname: '/(tabs)', params: { tab: 'recuerdos' } });
 
           setTimeout(() => {
 
