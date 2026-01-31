@@ -1378,19 +1378,10 @@ export default function RecuerdosScreen() {
             style={{
               flexDirection: "row",
               alignItems: "center",
-              gap: 12,
+              justifyContent: "space-between",
             }}
           >
-            {/* Botón de Ordenar */}
-            <IconButton
-              icon={sortOrder === "desc" ? "arrow-down" : "arrow-up"}
-              size={20}
-              onPress={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
-              mode="contained-tonal"
-              style={{ margin: 0 }}
-            />
-
-            {/* Toggle de Vistas */}
+            {/* Toggle de Vistas - Izquierda */}
             <SegmentedButtons
               value={numColumns.toString()}
               onValueChange={(value) => setNumColumns(parseInt(value))}
@@ -1406,6 +1397,15 @@ export default function RecuerdosScreen() {
                   onSecondaryContainer: COLORS.white,
                 },
               }}
+            />
+
+            {/* Botón de Ordenar - Derecha */}
+            <IconButton
+              icon={sortOrder === "desc" ? "arrow-down" : "arrow-up"}
+              size={20}
+              onPress={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
+              mode="contained-tonal"
+              style={{ margin: 0 }}
             />
           </View>
         </View>
@@ -1709,19 +1709,10 @@ export default function RecuerdosScreen() {
           style={{
             flexDirection: "row",
             alignItems: "center",
-            gap: 12,
+            justifyContent: "space-between",
           }}
         >
-          {/* Botón de Ordenar */}
-          <IconButton
-            icon={sortOrder === "desc" ? "arrow-down" : "arrow-up"}
-            size={20}
-            onPress={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
-            mode="contained-tonal"
-            style={{ margin: 0 }}
-          />
-
-          {/* Toggle de Vistas */}
+          {/* Toggle de Vistas - Izquierda */}
           <SegmentedButtons
             value={numColumns.toString()}
             onValueChange={(value) => setNumColumns(parseInt(value))}
@@ -1737,6 +1728,15 @@ export default function RecuerdosScreen() {
                 onSecondaryContainer: COLORS.white,
               },
             }}
+          />
+
+          {/* Botón de Ordenar - Derecha */}
+          <IconButton
+            icon={sortOrder === "desc" ? "arrow-down" : "arrow-up"}
+            size={20}
+            onPress={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
+            mode="contained-tonal"
+            style={{ paddingRight: 0}}
           />
         </View>
       </View>
@@ -1774,7 +1774,7 @@ export default function RecuerdosScreen() {
               />
             </Animated.View>
           )}
-          key={`masonry-${numColumns}-${isFocused}`}
+          key={`masonry-${numColumns}-${sortOrder}-${isFocused}`}
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8 }}
           ListFooterComponent={
             <>
