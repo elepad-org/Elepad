@@ -131,29 +131,47 @@ export default function ImagePickerComponent({
         </View>
       ) : (
         <View style={{ alignItems: "center" }}>
-          <Button
-            mode="contained"
-            onPress={pickImage}
-            style={{ ...STYLES.buttonPrimary, marginBottom: 12 }}
-            icon="image"
-            disabled={isUploading}
-          >
-            Seleccionar de galería
-          </Button>
-          <Button
-            mode="contained"
-            onPress={takePhoto}
-            style={{ ...STYLES.buttonPrimary, marginBottom: 20 }}
-            icon="camera"
-            disabled={isUploading}
-          >
-            Tomar foto
-          </Button>
-          <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 8 }}>
-            <View style={{ width: 120 }}>
-              <CancelButton onPress={onCancel} disabled={isUploading} />
-            </View>
+          <View style={{ flexDirection: "row", gap: 12, marginBottom: 20 }}>
+            <Button
+              mode="contained"
+              onPress={pickImage}
+              style={{
+                ...STYLES.buttonPrimary,
+                flex: 1,
+                aspectRatio: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                paddingVertical: 16,
+              }}
+              contentStyle={{ height: 60 }}
+              icon="image"
+              disabled={isUploading}
+            >
+              Seleccionar de galería
+            </Button>
+            <Button
+              mode="contained"
+              onPress={takePhoto}
+              style={{
+                ...STYLES.buttonPrimary,
+                flex: 1,
+                aspectRatio: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                paddingVertical: 16,
+              }}
+              contentStyle={{ height: 60 }}
+              icon="camera"
+              disabled={isUploading}
+            >
+              Tomar foto
+            </Button>
           </View>
+          <CancelButton
+            onPress={onCancel}
+            disabled={isUploading}
+            style={{ width: "100%", maxWidth: 200 }}
+          />
         </View>
       )}
     </View>
