@@ -15,6 +15,7 @@ import { elderRoutes, nonElderRoutes, TabRoute } from "@/components/navigation/n
 
 import { LoadingUser } from "@/components/shared";
 import { TabProvider, useTabContext } from "@/context/TabContext";
+import { useTourContext } from "@/components/tour/TourProvider";
 
 // Component strictly for syncing state to context to avoid re-rendering the layout
 const TabStateSyncer = memo(function TabStateSyncer({ index, routes }: { index: number; routes: TabRoute[] }) {
@@ -42,6 +43,7 @@ function TabLayoutContent() {
   const [index, setIndex] = useState(0);
   const { userElepad, userElepadLoading } = useAuth();
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const { state: tourState } = useTourContext();
   // Removed useTabContext from here to prevent re-renders
 
   const isElder = userElepad?.elder === true;
@@ -153,6 +155,20 @@ function TabLayoutContent() {
             />
           </View>
         </>
+      )}
+      {tourState.isPreparing && (
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'transparent',
+            zIndex: 9999,
+          }}
+          pointerEvents="auto"
+        />
       )}
     </View>
 

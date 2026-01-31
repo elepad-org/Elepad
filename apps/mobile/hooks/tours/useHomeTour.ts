@@ -1,5 +1,6 @@
 import { useRef, useEffect } from "react";
 import { useTour } from "@/hooks/useTour";
+import { useTourContext } from "@/components/tour/TourProvider";
 import { useTourStep } from "@/hooks/useTourStep";
 import { ElepadUser } from "@/hooks/useAuth";
 
@@ -19,6 +20,7 @@ export const useHomeTour = ({
   memoriesLoading,
 }: UseHomeTourProps) => {
   const tour = useTour({ tourId: 'home' });
+  const { setPreparing } = useTourContext();
   const tourLayoutsRef = useRef<Record<string, { x: number; y: number; width: number; height: number }>>({});
 
   const greetingStep = useTourStep({
@@ -83,6 +85,9 @@ export const useHomeTour = ({
           if (!completed) {
             console.log('🏠 Home: Data loaded, waiting for UI to settle...');
 
+            // Bloquear interacciones mientras se prepara
+            setPreparing(true);
+
             setTimeout(() => {
               console.log('🏠 Home: Measuring elements...');
 
@@ -109,6 +114,8 @@ export const useHomeTour = ({
                     layout: tourLayoutsRef.current[s.step.stepId]
                   }));
                   tour.startTour(finalSteps);
+                  // Desbloquear interacciones una vez iniciado
+                  setPreparing(false);
                 }
               };
 
@@ -131,7 +138,7 @@ export const useHomeTour = ({
                 measureStep(step, 50 * (index + 1));
               });
 
-            }, 2000);
+            }, 500);
           }
         }
       }
