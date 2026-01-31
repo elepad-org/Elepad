@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { View, Alert } from "react-native";
-import { Button, Text, ActivityIndicator } from "react-native-paper";
+import { Button, Text, ActivityIndicator, Icon } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import { STYLES, COLORS } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
@@ -141,13 +141,18 @@ export default function ImagePickerComponent({
                 aspectRatio: 1,
                 justifyContent: "center",
                 alignItems: "center",
-                paddingVertical: 16,
+                paddingVertical: 8,
+                borderRadius: 30,
               }}
-              contentStyle={{ height: 60 }}
-              icon="image"
+              contentStyle={{ height: 90 }}
               disabled={isUploading}
             >
-              Seleccionar de galería
+              <View style={{ alignItems: 'center' }}>
+                <Icon source="image" size={28} color="white" />
+                <Text style={{ fontSize: 12, textAlign: 'center', color: 'white', marginTop: 4 }}>
+                  Seleccionar imagen
+                </Text>
+              </View>
             </Button>
             <Button
               mode="contained"
@@ -158,19 +163,23 @@ export default function ImagePickerComponent({
                 aspectRatio: 1,
                 justifyContent: "center",
                 alignItems: "center",
-                paddingVertical: 16,
+                paddingVertical: 8,
+                borderRadius: 30,
               }}
-              contentStyle={{ height: 60 }}
-              icon="camera"
+              contentStyle={{ height: 90 }}
               disabled={isUploading}
             >
-              Tomar foto
+              <View style={{ alignItems: 'center' }}>
+                <Icon source="camera" size={28} color="white" />
+                <Text style={{ fontSize: 12, textAlign: 'center', color: 'white', marginTop: 4 }}>
+                  Tomar foto
+                </Text>
+              </View>
             </Button>
           </View>
           <CancelButton
             onPress={onCancel}
             disabled={isUploading}
-            style={{ width: "100%", maxWidth: 200 }}
           />
         </View>
       )}
