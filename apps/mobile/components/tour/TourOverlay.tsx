@@ -5,7 +5,9 @@ import { useTourContext } from './TourProvider';
 import { TourTooltip } from './TourTooltip';
 import { COLORS } from '@/styles/base';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: WINDOW_HEIGHT } = Dimensions.get('window');
+const STATUS_BAR_HEIGHT = StatusBar.currentHeight || 0;
+const CANVAS_HEIGHT = WINDOW_HEIGHT + STATUS_BAR_HEIGHT;
 
 export const TourOverlay: React.FC = () => {
   const { state, nextStep, prevStep, stopTour } = useTourContext();
@@ -34,12 +36,8 @@ export const TourOverlay: React.FC = () => {
     return null;
   }
 
-  // Get status bar height - this is the offset we need to add
-  const statusBarHeight = StatusBar.currentHeight || 0;
-
-  // Calculate spotlight position
   // Border needs status bar offset to match screen coordinates correctly in the absolute view
-  const spotlightY = (layout?.y || 0) + statusBarHeight;
+  const spotlightY = (layout?.y || 0) + STATUS_BAR_HEIGHT;
 
   const spotlightX = layout?.x || 0;
   const spotlightWidth = layout?.width || 0;
@@ -54,16 +52,26 @@ export const TourOverlay: React.FC = () => {
   // Calculate specific Y for Border and SVG
   // Border uses status bar offset because View coordinates include status bar area
   const highlightY = Math.max(0, spotlightY - padding);
-  // SVG appears to need exactly half the status bar offset (empirically determined)
-  const highlightY_SVG = Math.max(0, (layout?.y || 0) + (statusBarHeight / 2) - padding);
+  // SVG should match the border position
+  const highlightY_SVG = Math.max(0, spotlightY - padding);
 
   // Calculate tooltip position (below spotlight by default)
   const tooltipY = highlightY + highlightHeight + 20;
   const tooltipX = SCREEN_WIDTH / 2;
 
-  // If tooltip would be off-screen, position it above
-  const tooltipFitsBelow = tooltipY + 300 < SCREEN_HEIGHT;
-  const finalTooltipY = tooltipFitsBelow ? tooltipY : Math.max(20, highlightY - 320);
+  // Logic to determine Y position
+  let finalTooltipY = tooltipY;
+  const tooltipFitsBelow = tooltipY + 300 < CANVAS_HEIGHT;
+  const positionAbove = Math.max(20, highlightY - 320);
+
+  if (currentStep.side === 'top') {
+    finalTooltipY = positionAbove;
+  } else if (currentStep.side === 'bottom') {
+    finalTooltipY = tooltipY;
+  } else {
+    // Auto (default)
+    finalTooltipY = tooltipFitsBelow ? tooltipY : positionAbove;
+  }
 
   return (
     <Modal
@@ -75,7 +83,7 @@ export const TourOverlay: React.FC = () => {
       <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
         {/* SVG Mask Layer */}
         <View style={StyleSheet.absoluteFill}>
-          <Svg height="100%" width="100%" viewBox={`0 0 ${SCREEN_WIDTH} ${SCREEN_HEIGHT}`}>
+          <Svg height="100%" width="100%" viewBox={`0 0 ${SCREEN_WIDTH} ${CANVAS_HEIGHT}`}>
             <Defs>
               <Mask id="mask" x="0" y="0" width="100%" height="100%">
                 {/* White rect covers everything (visible) */}

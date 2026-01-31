@@ -972,14 +972,14 @@ export function useGetHealth<
     query: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getHealth>>, TError, TData>
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getHealth>>,
-          TError,
-          Awaited<ReturnType<typeof getHealth>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getHealth>>,
+        TError,
+        Awaited<ReturnType<typeof getHealth>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -994,14 +994,14 @@ export function useGetHealth<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getHealth>>, TError, TData>
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getHealth>>,
-          TError,
-          Awaited<ReturnType<typeof getHealth>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getHealth>>,
+        TError,
+        Awaited<ReturnType<typeof getHealth>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -1132,14 +1132,14 @@ export function useGetUsersId<
     query: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getUsersId>>,
-          TError,
-          Awaited<ReturnType<typeof getUsersId>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getUsersId>>,
+        TError,
+        Awaited<ReturnType<typeof getUsersId>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -1155,14 +1155,14 @@ export function useGetUsersId<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getUsersId>>,
-          TError,
-          Awaited<ReturnType<typeof getUsersId>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getUsersId>>,
+        TError,
+        Awaited<ReturnType<typeof getUsersId>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -1763,7 +1763,7 @@ export const getGetFamilyGroupIdGroupInviteQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>
   > = ({ signal }) =>
-    getFamilyGroupIdGroupInvite(idGroup, { signal, ...requestOptions });
+      getFamilyGroupIdGroupInvite(idGroup, { signal, ...requestOptions });
 
   return {
     queryKey,
@@ -1795,14 +1795,14 @@ export function useGetFamilyGroupIdGroupInvite<
         TData
       >
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>,
-          TError,
-          Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>,
+        TError,
+        Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -1822,14 +1822,14 @@ export function useGetFamilyGroupIdGroupInvite<
         TData
       >
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>,
-          TError,
-          Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>,
+        TError,
+        Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -1969,7 +1969,7 @@ export const getGetFamilyGroupIdGroupMembersQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>
   > = ({ signal }) =>
-    getFamilyGroupIdGroupMembers(idGroup, { signal, ...requestOptions });
+      getFamilyGroupIdGroupMembers(idGroup, { signal, ...requestOptions });
 
   return {
     queryKey,
@@ -2001,14 +2001,14 @@ export function useGetFamilyGroupIdGroupMembers<
         TData
       >
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>,
-          TError,
-          Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>,
+        TError,
+        Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -2028,14 +2028,14 @@ export function useGetFamilyGroupIdGroupMembers<
         TData
       >
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>,
-          TError,
-          Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>,
+        TError,
+        Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -2621,14 +2621,14 @@ export function useGetActivitiesId<
         TData
       >
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getActivitiesId>>,
-          TError,
-          Awaited<ReturnType<typeof getActivitiesId>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getActivitiesId>>,
+        TError,
+        Awaited<ReturnType<typeof getActivitiesId>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -2648,14 +2648,14 @@ export function useGetActivitiesId<
         TData
       >
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getActivitiesId>>,
-          TError,
-          Awaited<ReturnType<typeof getActivitiesId>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getActivitiesId>>,
+        TError,
+        Awaited<ReturnType<typeof getActivitiesId>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -3018,10 +3018,10 @@ export const getGetActivitiesFamilyCodeIdFamilyGroupQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>
   > = ({ signal }) =>
-    getActivitiesFamilyCodeIdFamilyGroup(idFamilyGroup, {
-      signal,
-      ...requestOptions,
-    });
+      getActivitiesFamilyCodeIdFamilyGroup(idFamilyGroup, {
+        signal,
+        ...requestOptions,
+      });
 
   return {
     queryKey,
@@ -3053,14 +3053,14 @@ export function useGetActivitiesFamilyCodeIdFamilyGroup<
         TData
       >
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>,
-          TError,
-          Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>,
+        TError,
+        Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -3080,14 +3080,14 @@ export function useGetActivitiesFamilyCodeIdFamilyGroup<
         TData
       >
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>,
-          TError,
-          Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>,
+        TError,
+        Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -3553,7 +3553,7 @@ export const getGetActivitiesGoogleCalendarStatusQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>
   > = ({ signal }) =>
-    getActivitiesGoogleCalendarStatus({ signal, ...requestOptions });
+      getActivitiesGoogleCalendarStatus({ signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
@@ -3579,14 +3579,14 @@ export function useGetActivitiesGoogleCalendarStatus<
         TData
       >
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
-          TError,
-          Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+        TError,
+        Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -3605,14 +3605,14 @@ export function useGetActivitiesGoogleCalendarStatus<
         TData
       >
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
-          TError,
-          Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
+        TError,
+        Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -3767,14 +3767,14 @@ export function useGetMemories<
     query: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getMemories>>, TError, TData>
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getMemories>>,
-          TError,
-          Awaited<ReturnType<typeof getMemories>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getMemories>>,
+        TError,
+        Awaited<ReturnType<typeof getMemories>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -3790,14 +3790,14 @@ export function useGetMemories<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getMemories>>, TError, TData>
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getMemories>>,
-          TError,
-          Awaited<ReturnType<typeof getMemories>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getMemories>>,
+        TError,
+        Awaited<ReturnType<typeof getMemories>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -3968,14 +3968,14 @@ export function useGetMemoriesBooks<
         TData
       >
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getMemoriesBooks>>,
-          TError,
-          Awaited<ReturnType<typeof getMemoriesBooks>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getMemoriesBooks>>,
+        TError,
+        Awaited<ReturnType<typeof getMemoriesBooks>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -3995,14 +3995,14 @@ export function useGetMemoriesBooks<
         TData
       >
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getMemoriesBooks>>,
-          TError,
-          Awaited<ReturnType<typeof getMemoriesBooks>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getMemoriesBooks>>,
+        TError,
+        Awaited<ReturnType<typeof getMemoriesBooks>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -4543,14 +4543,14 @@ export function useGetMemoriesId<
     query: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getMemoriesId>>, TError, TData>
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getMemoriesId>>,
-          TError,
-          Awaited<ReturnType<typeof getMemoriesId>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getMemoriesId>>,
+        TError,
+        Awaited<ReturnType<typeof getMemoriesId>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -4566,14 +4566,14 @@ export function useGetMemoriesId<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getMemoriesId>>, TError, TData>
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getMemoriesId>>,
-          TError,
-          Awaited<ReturnType<typeof getMemoriesId>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getMemoriesId>>,
+        TError,
+        Awaited<ReturnType<typeof getMemoriesId>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -5592,14 +5592,14 @@ export function useGetAlbum<
     query: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getAlbum>>, TError, TData>
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAlbum>>,
-          TError,
-          Awaited<ReturnType<typeof getAlbum>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getAlbum>>,
+        TError,
+        Awaited<ReturnType<typeof getAlbum>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -5615,14 +5615,14 @@ export function useGetAlbum<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getAlbum>>, TError, TData>
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAlbum>>,
-          TError,
-          Awaited<ReturnType<typeof getAlbum>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getAlbum>>,
+        TError,
+        Awaited<ReturnType<typeof getAlbum>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -5769,14 +5769,14 @@ export function useGetAlbumId<
     query: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getAlbumId>>, TError, TData>
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAlbumId>>,
-          TError,
-          Awaited<ReturnType<typeof getAlbumId>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getAlbumId>>,
+        TError,
+        Awaited<ReturnType<typeof getAlbumId>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -5792,14 +5792,14 @@ export function useGetAlbumId<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getAlbumId>>, TError, TData>
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAlbumId>>,
-          TError,
-          Awaited<ReturnType<typeof getAlbumId>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getAlbumId>>,
+        TError,
+        Awaited<ReturnType<typeof getAlbumId>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -6045,14 +6045,14 @@ export function useGetFrequencies<
     query: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getFrequencies>>, TError, TData>
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getFrequencies>>,
-          TError,
-          Awaited<ReturnType<typeof getFrequencies>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getFrequencies>>,
+        TError,
+        Awaited<ReturnType<typeof getFrequencies>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -6067,14 +6067,14 @@ export function useGetFrequencies<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getFrequencies>>, TError, TData>
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getFrequencies>>,
-          TError,
-          Awaited<ReturnType<typeof getFrequencies>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getFrequencies>>,
+        TError,
+        Awaited<ReturnType<typeof getFrequencies>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -6330,14 +6330,14 @@ export function useGetFrequenciesId<
         TData
       >
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getFrequenciesId>>,
-          TError,
-          Awaited<ReturnType<typeof getFrequenciesId>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getFrequenciesId>>,
+        TError,
+        Awaited<ReturnType<typeof getFrequenciesId>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -6357,14 +6357,14 @@ export function useGetFrequenciesId<
         TData
       >
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getFrequenciesId>>,
-          TError,
-          Awaited<ReturnType<typeof getFrequenciesId>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getFrequenciesId>>,
+        TError,
+        Awaited<ReturnType<typeof getFrequenciesId>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -6507,7 +6507,7 @@ export const getGetActivityCompletionsQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getActivityCompletions>>
   > = ({ signal }) =>
-    getActivityCompletions(params, { signal, ...requestOptions });
+      getActivityCompletions(params, { signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getActivityCompletions>>,
@@ -6534,14 +6534,14 @@ export function useGetActivityCompletions<
         TData
       >
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getActivityCompletions>>,
-          TError,
-          Awaited<ReturnType<typeof getActivityCompletions>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getActivityCompletions>>,
+        TError,
+        Awaited<ReturnType<typeof getActivityCompletions>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -6561,14 +6561,14 @@ export function useGetActivityCompletions<
         TData
       >
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getActivityCompletions>>,
-          TError,
-          Awaited<ReturnType<typeof getActivityCompletions>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getActivityCompletions>>,
+        TError,
+        Awaited<ReturnType<typeof getActivityCompletions>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -6820,14 +6820,14 @@ export function useGetGames<
     query: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getGames>>, TError, TData>
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getGames>>,
-          TError,
-          Awaited<ReturnType<typeof getGames>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getGames>>,
+        TError,
+        Awaited<ReturnType<typeof getGames>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -6842,14 +6842,14 @@ export function useGetGames<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getGames>>, TError, TData>
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getGames>>,
-          TError,
-          Awaited<ReturnType<typeof getGames>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getGames>>,
+        TError,
+        Awaited<ReturnType<typeof getGames>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -6997,14 +6997,14 @@ export function useGetGamesGameName<
         TData
       >
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getGamesGameName>>,
-          TError,
-          Awaited<ReturnType<typeof getGamesGameName>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getGamesGameName>>,
+        TError,
+        Awaited<ReturnType<typeof getGamesGameName>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -7024,14 +7024,14 @@ export function useGetGamesGameName<
         TData
       >
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getGamesGameName>>,
-          TError,
-          Awaited<ReturnType<typeof getGamesGameName>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getGamesGameName>>,
+        TError,
+        Awaited<ReturnType<typeof getGamesGameName>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -7612,7 +7612,7 @@ export const getGetPuzzlesRecentGameTypeQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getPuzzlesRecentGameType>>
   > = ({ signal }) =>
-    getPuzzlesRecentGameType(gameType, params, { signal, ...requestOptions });
+      getPuzzlesRecentGameType(gameType, params, { signal, ...requestOptions });
 
   return {
     queryKey,
@@ -7645,14 +7645,14 @@ export function useGetPuzzlesRecentGameType<
         TData
       >
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getPuzzlesRecentGameType>>,
-          TError,
-          Awaited<ReturnType<typeof getPuzzlesRecentGameType>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getPuzzlesRecentGameType>>,
+        TError,
+        Awaited<ReturnType<typeof getPuzzlesRecentGameType>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -7673,14 +7673,14 @@ export function useGetPuzzlesRecentGameType<
         TData
       >
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getPuzzlesRecentGameType>>,
-          TError,
-          Awaited<ReturnType<typeof getPuzzlesRecentGameType>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getPuzzlesRecentGameType>>,
+        TError,
+        Awaited<ReturnType<typeof getPuzzlesRecentGameType>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -8058,7 +8058,7 @@ export const getGetAttemptsAttemptIdQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getAttemptsAttemptId>>
   > = ({ signal }) =>
-    getAttemptsAttemptId(attemptId, { signal, ...requestOptions });
+      getAttemptsAttemptId(attemptId, { signal, ...requestOptions });
 
   return {
     queryKey,
@@ -8090,14 +8090,14 @@ export function useGetAttemptsAttemptId<
         TData
       >
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAttemptsAttemptId>>,
-          TError,
-          Awaited<ReturnType<typeof getAttemptsAttemptId>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getAttemptsAttemptId>>,
+        TError,
+        Awaited<ReturnType<typeof getAttemptsAttemptId>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -8117,14 +8117,14 @@ export function useGetAttemptsAttemptId<
         TData
       >
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAttemptsAttemptId>>,
-          TError,
-          Awaited<ReturnType<typeof getAttemptsAttemptId>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getAttemptsAttemptId>>,
+        TError,
+        Awaited<ReturnType<typeof getAttemptsAttemptId>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -8280,14 +8280,14 @@ export function useGetAttempts<
     query: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getAttempts>>, TError, TData>
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAttempts>>,
-          TError,
-          Awaited<ReturnType<typeof getAttempts>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getAttempts>>,
+        TError,
+        Awaited<ReturnType<typeof getAttempts>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -8303,14 +8303,14 @@ export function useGetAttempts<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getAttempts>>, TError, TData>
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAttempts>>,
-          TError,
-          Awaited<ReturnType<typeof getAttempts>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getAttempts>>,
+        TError,
+        Awaited<ReturnType<typeof getAttempts>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -8454,7 +8454,7 @@ export const getGetAttemptsStatsGameTypeQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getAttemptsStatsGameType>>
   > = ({ signal }) =>
-    getAttemptsStatsGameType(gameType, params, { signal, ...requestOptions });
+      getAttemptsStatsGameType(gameType, params, { signal, ...requestOptions });
 
   return {
     queryKey,
@@ -8487,14 +8487,14 @@ export function useGetAttemptsStatsGameType<
         TData
       >
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAttemptsStatsGameType>>,
-          TError,
-          Awaited<ReturnType<typeof getAttemptsStatsGameType>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getAttemptsStatsGameType>>,
+        TError,
+        Awaited<ReturnType<typeof getAttemptsStatsGameType>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -8515,14 +8515,14 @@ export function useGetAttemptsStatsGameType<
         TData
       >
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAttemptsStatsGameType>>,
-          TError,
-          Awaited<ReturnType<typeof getAttemptsStatsGameType>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getAttemptsStatsGameType>>,
+        TError,
+        Awaited<ReturnType<typeof getAttemptsStatsGameType>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -8676,10 +8676,10 @@ export const getGetAttemptsLeaderboardGameTypeQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getAttemptsLeaderboardGameType>>
   > = ({ signal }) =>
-    getAttemptsLeaderboardGameType(gameType, params, {
-      signal,
-      ...requestOptions,
-    });
+      getAttemptsLeaderboardGameType(gameType, params, {
+        signal,
+        ...requestOptions,
+      });
 
   return {
     queryKey,
@@ -8712,14 +8712,14 @@ export function useGetAttemptsLeaderboardGameType<
         TData
       >
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAttemptsLeaderboardGameType>>,
-          TError,
-          Awaited<ReturnType<typeof getAttemptsLeaderboardGameType>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getAttemptsLeaderboardGameType>>,
+        TError,
+        Awaited<ReturnType<typeof getAttemptsLeaderboardGameType>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -8740,14 +8740,14 @@ export function useGetAttemptsLeaderboardGameType<
         TData
       >
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAttemptsLeaderboardGameType>>,
-          TError,
-          Awaited<ReturnType<typeof getAttemptsLeaderboardGameType>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getAttemptsLeaderboardGameType>>,
+        TError,
+        Awaited<ReturnType<typeof getAttemptsLeaderboardGameType>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -8877,7 +8877,7 @@ export const getGetAchievementsGameTypeQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getAchievementsGameType>>
   > = ({ signal }) =>
-    getAchievementsGameType(gameType, { signal, ...requestOptions });
+      getAchievementsGameType(gameType, { signal, ...requestOptions });
 
   return {
     queryKey,
@@ -8909,14 +8909,14 @@ export function useGetAchievementsGameType<
         TData
       >
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAchievementsGameType>>,
-          TError,
-          Awaited<ReturnType<typeof getAchievementsGameType>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getAchievementsGameType>>,
+        TError,
+        Awaited<ReturnType<typeof getAchievementsGameType>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -8936,14 +8936,14 @@ export function useGetAchievementsGameType<
         TData
       >
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAchievementsGameType>>,
-          TError,
-          Awaited<ReturnType<typeof getAchievementsGameType>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getAchievementsGameType>>,
+        TError,
+        Awaited<ReturnType<typeof getAchievementsGameType>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -9070,7 +9070,7 @@ export const getGetAchievementsUserGameTypeQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getAchievementsUserGameType>>
   > = ({ signal }) =>
-    getAchievementsUserGameType(gameType, { signal, ...requestOptions });
+      getAchievementsUserGameType(gameType, { signal, ...requestOptions });
 
   return {
     queryKey,
@@ -9102,14 +9102,14 @@ export function useGetAchievementsUserGameType<
         TData
       >
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAchievementsUserGameType>>,
-          TError,
-          Awaited<ReturnType<typeof getAchievementsUserGameType>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getAchievementsUserGameType>>,
+        TError,
+        Awaited<ReturnType<typeof getAchievementsUserGameType>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -9129,14 +9129,14 @@ export function useGetAchievementsUserGameType<
         TData
       >
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAchievementsUserGameType>>,
-          TError,
-          Awaited<ReturnType<typeof getAchievementsUserGameType>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getAchievementsUserGameType>>,
+        TError,
+        Awaited<ReturnType<typeof getAchievementsUserGameType>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -9266,7 +9266,7 @@ export const getGetAchievementsProgressGameTypeQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getAchievementsProgressGameType>>
   > = ({ signal }) =>
-    getAchievementsProgressGameType(gameType, { signal, ...requestOptions });
+      getAchievementsProgressGameType(gameType, { signal, ...requestOptions });
 
   return {
     queryKey,
@@ -9298,14 +9298,14 @@ export function useGetAchievementsProgressGameType<
         TData
       >
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
-          TError,
-          Awaited<ReturnType<typeof getAchievementsProgressGameType>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
+        TError,
+        Awaited<ReturnType<typeof getAchievementsProgressGameType>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -9325,14 +9325,14 @@ export function useGetAchievementsProgressGameType<
         TData
       >
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
-          TError,
-          Awaited<ReturnType<typeof getAchievementsProgressGameType>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
+        TError,
+        Awaited<ReturnType<typeof getAchievementsProgressGameType>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -9600,14 +9600,14 @@ export function useGetStreaksMe<
     query: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getStreaksMe>>, TError, TData>
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getStreaksMe>>,
-          TError,
-          Awaited<ReturnType<typeof getStreaksMe>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getStreaksMe>>,
+        TError,
+        Awaited<ReturnType<typeof getStreaksMe>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -9623,14 +9623,14 @@ export function useGetStreaksMe<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getStreaksMe>>, TError, TData>
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getStreaksMe>>,
-          TError,
-          Awaited<ReturnType<typeof getStreaksMe>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getStreaksMe>>,
+        TError,
+        Awaited<ReturnType<typeof getStreaksMe>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -9781,14 +9781,14 @@ export function useGetStreaksHistory<
         TData
       >
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getStreaksHistory>>,
-          TError,
-          Awaited<ReturnType<typeof getStreaksHistory>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getStreaksHistory>>,
+        TError,
+        Awaited<ReturnType<typeof getStreaksHistory>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -9808,14 +9808,14 @@ export function useGetStreaksHistory<
         TData
       >
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getStreaksHistory>>,
-          TError,
-          Awaited<ReturnType<typeof getStreaksHistory>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getStreaksHistory>>,
+        TError,
+        Awaited<ReturnType<typeof getStreaksHistory>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -9966,14 +9966,14 @@ export function useGetNotifications<
         TData
       >
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getNotifications>>,
-          TError,
-          Awaited<ReturnType<typeof getNotifications>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getNotifications>>,
+        TError,
+        Awaited<ReturnType<typeof getNotifications>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -9993,14 +9993,14 @@ export function useGetNotifications<
         TData
       >
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getNotifications>>,
-          TError,
-          Awaited<ReturnType<typeof getNotifications>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getNotifications>>,
+        TError,
+        Awaited<ReturnType<typeof getNotifications>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -10115,7 +10115,7 @@ export const getGetNotificationsUnreadCountQueryOptions = <
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getNotificationsUnreadCount>>
   > = ({ signal }) =>
-    getNotificationsUnreadCount({ signal, ...requestOptions });
+      getNotificationsUnreadCount({ signal, ...requestOptions });
 
   return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
     Awaited<ReturnType<typeof getNotificationsUnreadCount>>,
@@ -10141,14 +10141,14 @@ export function useGetNotificationsUnreadCount<
         TData
       >
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getNotificationsUnreadCount>>,
-          TError,
-          Awaited<ReturnType<typeof getNotificationsUnreadCount>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getNotificationsUnreadCount>>,
+        TError,
+        Awaited<ReturnType<typeof getNotificationsUnreadCount>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -10167,14 +10167,14 @@ export function useGetNotificationsUnreadCount<
         TData
       >
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getNotificationsUnreadCount>>,
-          TError,
-          Awaited<ReturnType<typeof getNotificationsUnreadCount>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getNotificationsUnreadCount>>,
+        TError,
+        Awaited<ReturnType<typeof getNotificationsUnreadCount>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -10837,14 +10837,14 @@ export function useGetShopItems<
     query: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getShopItems>>, TError, TData>
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getShopItems>>,
-          TError,
-          Awaited<ReturnType<typeof getShopItems>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getShopItems>>,
+        TError,
+        Awaited<ReturnType<typeof getShopItems>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -10859,14 +10859,14 @@ export function useGetShopItems<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getShopItems>>, TError, TData>
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getShopItems>>,
-          TError,
-          Awaited<ReturnType<typeof getShopItems>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getShopItems>>,
+        TError,
+        Awaited<ReturnType<typeof getShopItems>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -10997,14 +10997,14 @@ export function useGetShopInventory<
         TData
       >
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getShopInventory>>,
-          TError,
-          Awaited<ReturnType<typeof getShopInventory>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getShopInventory>>,
+        TError,
+        Awaited<ReturnType<typeof getShopInventory>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -11023,14 +11023,14 @@ export function useGetShopInventory<
         TData
       >
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getShopInventory>>,
-          TError,
-          Awaited<ReturnType<typeof getShopInventory>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getShopInventory>>,
+        TError,
+        Awaited<ReturnType<typeof getShopInventory>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -11292,14 +11292,14 @@ export function useGetShopBalance<
     query: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getShopBalance>>, TError, TData>
     > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getShopBalance>>,
-          TError,
-          Awaited<ReturnType<typeof getShopBalance>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      DefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getShopBalance>>,
+        TError,
+        Awaited<ReturnType<typeof getShopBalance>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,
@@ -11314,14 +11314,14 @@ export function useGetShopBalance<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof getShopBalance>>, TError, TData>
     > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getShopBalance>>,
-          TError,
-          Awaited<ReturnType<typeof getShopBalance>>
-        >,
-        "initialData"
-      >;
+    Pick<
+      UndefinedInitialDataOptions<
+        Awaited<ReturnType<typeof getShopBalance>>,
+        TError,
+        Awaited<ReturnType<typeof getShopBalance>>
+      >,
+      "initialData"
+    >;
     request?: SecondParameter<typeof rnFetch>;
   },
   queryClient?: QueryClient,

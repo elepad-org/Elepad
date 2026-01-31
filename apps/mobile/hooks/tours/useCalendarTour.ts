@@ -1,5 +1,7 @@
 import { useRef, useEffect } from "react";
+import { useRouter } from "expo-router";
 import { useTour } from "@/hooks/useTour";
+import { useTourContext } from "@/components/tour/TourProvider";
 import { useTourStep } from "@/hooks/useTourStep";
 
 interface UseCalendarTourProps {
@@ -11,7 +13,9 @@ export const useCalendarTour = ({
   activeTab,
   activitiesLoading,
 }: UseCalendarTourProps) => {
+  const router = useRouter();
   const tour = useTour({ tourId: 'calendar' });
+  const { setPreparing, state: tourState } = useTourContext();
   const tourLayoutsRef = useRef<Record<string, { x: number; y: number; width: number; height: number }>>({});
 
   const headerStep = useTourStep({
@@ -47,55 +51,65 @@ export const useCalendarTour = ({
       const checkAndStartTour = async () => {
         if (activitiesLoading) return;
         if (tour.isActive) return;
+        if (tourState.isPreparing) return;
 
         const completed = await tour.isTourCompleted('calendar');
 
         if (!completed) {
+          setPreparing(true);
           setTimeout(() => {
-            const steps = [
-              { ...headerStep.step, ref: headerStep.ref, layout: undefined },
-              { ...addButtonStep.step, ref: addButtonStep.ref, layout: undefined },
-              { ...calendarViewStep.step, ref: calendarViewStep.ref, layout: undefined },
-              { ...taskListStep.step, ref: taskListStep.ref, layout: undefined },
-            ];
 
-            let measurementsComplete = 0;
-            const totalMeasurements = 4;
+            // Forzar navegación al tab correspondiente
+            router.setParams({ tab: 'calendar' });
 
-            const checkStart = () => {
-              measurementsComplete++;
-              if (measurementsComplete === totalMeasurements) {
-                const finalSteps = steps.map(s => ({
-                  ...s,
-                  layout: tourLayoutsRef.current[s.stepId]
-                }));
-                tour.startTour(finalSteps);
-              }
-            };
+            setTimeout(() => {
+              const steps = [
+                { ...headerStep.step, ref: headerStep.ref, layout: undefined },
+                { ...addButtonStep.step, ref: addButtonStep.ref, layout: undefined },
+                { ...calendarViewStep.step, ref: calendarViewStep.ref, layout: undefined },
+                { ...taskListStep.step, ref: taskListStep.ref, layout: undefined },
+              ];
 
-            const measureStep = (step: typeof headerStep, id: string) => {
-              if (step.ref.current) {
-                step.ref.current.measureInWindow((x: number, y: number, w: number, h: number) => {
-                  tourLayoutsRef.current[id] = { x, y, width: w, height: h };
+              let measurementsComplete = 0;
+              const totalMeasurements = 4;
+
+              const checkStart = () => {
+                measurementsComplete++;
+                if (measurementsComplete === totalMeasurements) {
+                  const finalSteps = steps.map(s => ({
+                    ...s,
+                    layout: tourLayoutsRef.current[s.stepId]
+                  }));
+                  tour.startTour(finalSteps);
+                  setPreparing(false);
+                }
+              };
+
+              const measureStep = (step: typeof headerStep, id: string) => {
+                if (step.ref.current) {
+                  step.ref.current.measureInWindow((x: number, y: number, w: number, h: number) => {
+                    tourLayoutsRef.current[id] = { x, y, width: w, height: h };
+                    checkStart();
+                  });
+                } else {
                   checkStart();
-                });
-              } else {
-                checkStart();
-              }
-            };
+                }
+              };
 
-            setTimeout(() => measureStep(headerStep, 'calendar-header'), 50);
-            setTimeout(() => measureStep(addButtonStep, 'add-button'), 100);
-            setTimeout(() => measureStep(calendarViewStep, 'calendar-view'), 150);
-            setTimeout(() => measureStep(taskListStep, 'task-list'), 200);
+              setTimeout(() => measureStep(headerStep, 'calendar-header'), 50);
+              setTimeout(() => measureStep(addButtonStep, 'add-button'), 100);
+              setTimeout(() => measureStep(calendarViewStep, 'calendar-view'), 150);
+              setTimeout(() => measureStep(taskListStep, 'task-list'), 200);
 
-          }, 1000);
+            }, 100); // Esperar a que la navegación ocurra
+
+          }, 500);
         }
       };
 
       checkAndStartTour();
     }
-  }, [activeTab, activitiesLoading, tour.isActive]);
+  }, [activeTab, activitiesLoading, tour.isActive, tourState.isPreparing]);
 
   return {
     headerRef: headerStep.ref,

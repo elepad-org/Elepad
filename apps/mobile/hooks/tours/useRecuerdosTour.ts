@@ -1,5 +1,7 @@
 import { useRef, useEffect } from "react";
+import { useRouter } from "expo-router";
 import { useTour } from "@/hooks/useTour";
+import { useTourContext } from "@/components/tour/TourProvider";
 import { useTourStep } from "@/hooks/useTourStep";
 import { MemoriesBook } from "@elepad/api-client";
 
@@ -10,7 +12,9 @@ interface UseRecuerdosTourProps {
 }
 
 export const useRecuerdosTour = ({ activeTab, authLoading, selectedBook }: UseRecuerdosTourProps) => {
+  const router = useRouter();
   const tour = useTour({ tourId: 'memories' });
+  const { setPreparing, state: tourState } = useTourContext();
   const tourLayoutsRef = useRef<Record<string, { x: number; y: number; width: number; height: number }>>({});
 
   const headerStep = useTourStep({
@@ -50,6 +54,7 @@ export const useRecuerdosTour = ({ activeTab, authLoading, selectedBook }: UseRe
 
     // Check if tour should run
     if (tour.isActive) return;
+    if (tourState.isPreparing) return;
 
     // Don't start if a book is selected (navigation depth)
     if (selectedBook) return;
@@ -58,51 +63,61 @@ export const useRecuerdosTour = ({ activeTab, authLoading, selectedBook }: UseRe
       const completed = await tour.isTourCompleted('memories');
       if (!completed) {
         // Wait for UI to render
+        setPreparing(true);
         setTimeout(() => {
-          const steps = [
-            { ...headerStep.step, ref: headerStep.ref, layout: undefined },
-            { ...addButtonStep.step, ref: addButtonStep.ref, layout: undefined },
-            { ...listStep.step, ref: listStep.ref, layout: undefined },
-            { ...albumStep.step, ref: albumStep.ref, layout: undefined },
-          ];
 
-          let measurementsComplete = 0;
-          const totalMeasurements = 4;
+          // Forzar navegación
+          router.setParams({ tab: 'recuerdos' });
 
-          const checkStart = () => {
-            measurementsComplete++;
-            if (measurementsComplete === totalMeasurements) {
-              const finalSteps = steps.map(s => ({
-                ...s,
-                layout: tourLayoutsRef.current[s.stepId]
-              }));
-              tour.startTour(finalSteps);
-            }
-          };
+          setTimeout(() => {
 
-          const measureStep = (step: typeof headerStep, id: string) => {
-            if (step.ref.current) {
-              step.ref.current.measureInWindow((x: number, y: number, w: number, h: number) => {
-                tourLayoutsRef.current[id] = { x, y, width: w, height: h };
+            const steps = [
+              { ...headerStep.step, ref: headerStep.ref, layout: undefined },
+              { ...addButtonStep.step, ref: addButtonStep.ref, layout: undefined },
+              { ...listStep.step, ref: listStep.ref, layout: undefined },
+              { ...albumStep.step, ref: albumStep.ref, layout: undefined },
+            ];
+
+            let measurementsComplete = 0;
+            const totalMeasurements = 4;
+
+            const checkStart = () => {
+              measurementsComplete++;
+              if (measurementsComplete === totalMeasurements) {
+                const finalSteps = steps.map(s => ({
+                  ...s,
+                  layout: tourLayoutsRef.current[s.stepId]
+                }));
+                tour.startTour(finalSteps);
+                setPreparing(false);
+              }
+            };
+
+            const measureStep = (step: typeof headerStep, id: string) => {
+              if (step.ref.current) {
+                step.ref.current.measureInWindow((x: number, y: number, w: number, h: number) => {
+                  tourLayoutsRef.current[id] = { x, y, width: w, height: h };
+                  checkStart();
+                });
+              } else {
                 checkStart();
-              });
-            } else {
-              checkStart();
-            }
-          };
+              }
+            };
 
-          // Staggered measurement to ensure layout stability
-          setTimeout(() => measureStep(headerStep, 'memories-header'), 100);
-          setTimeout(() => measureStep(addButtonStep, 'memories-add'), 200);
-          setTimeout(() => measureStep(listStep, 'memories-list'), 300);
-          setTimeout(() => measureStep(albumStep, 'memories-album'), 400);
+            // Staggered measurement to ensure layout stability
+            setTimeout(() => measureStep(headerStep, 'memories-header'), 100);
+            setTimeout(() => measureStep(addButtonStep, 'memories-add'), 200);
+            setTimeout(() => measureStep(listStep, 'memories-list'), 300);
+            setTimeout(() => measureStep(albumStep, 'memories-album'), 400);
 
-        }, 1000);
+          }, 100);
+
+        }, 500);
       }
     };
 
     checkAndStartTour();
-  }, [activeTab, tour.isActive, authLoading, selectedBook]);
+  }, [activeTab, tour.isActive, authLoading, selectedBook, tourState.isPreparing]);
 
   return {
     headerRef: headerStep.ref,

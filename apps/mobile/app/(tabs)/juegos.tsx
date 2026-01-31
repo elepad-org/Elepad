@@ -97,10 +97,12 @@ export default function JuegosScreen() {
   const { activeTab } = useTabContext();
 
   // --- Tour Setup ---
+  const isElder = userElepad?.elder === true;
 
   const { headerRef, shopRef, historyRef, gamesListRef, gameDetailsRef, gamePlayRef } = useGamesTour({
     activeTab,
     loading,
+    isElder,
   });
 
   if (loading) {
@@ -111,11 +113,10 @@ export default function JuegosScreen() {
     );
   }
 
-  const isElder = userElepad?.elder === true;
 
   // Si es ayudante, mostrar las estadísticas dentro de las tabs
   if (!isElder) {
-    return <HistoryScreen />;
+    return <HistoryScreen activeTab={activeTab} />;
   }
 
   return (
