@@ -356,8 +356,9 @@ export default function ActivityForm({
           <Animated.View style={{ opacity: fadeAnim }}>
             <Dialog.Content style={{ paddingBottom: 15 }}>
               <StyledTextInput
+                key={`title-${visible}-${initial?.id || "new"}`}
                 label="Título"
-                value={title}
+                defaultValue={title}
                 onChangeText={setTitle}
                 placeholder={initial ? "Agregar evento" : "Nuevo evento"}
                 marginBottom={16}
