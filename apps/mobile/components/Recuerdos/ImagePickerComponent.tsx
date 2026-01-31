@@ -131,25 +131,25 @@ export default function ImagePickerComponent({
         </View>
       ) : (
         <View style={{ alignItems: "center" }}>
-          <View style={{ flexDirection: "row", gap: 12, marginBottom: 20 }}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 20 }}>
             <Button
               mode="contained"
               onPress={pickImage}
               style={{
                 ...STYLES.buttonPrimary,
-                flex: 1,
-                aspectRatio: 1,
+                width: '48%',
                 justifyContent: "center",
                 alignItems: "center",
-                paddingVertical: 8,
-                borderRadius: 30,
+                paddingVertical: 24,
+                borderRadius: 40,
+                marginRight: 8,
               }}
-              contentStyle={{ height: 90 }}
+              contentStyle={{ height: 80 }}
               disabled={isUploading}
             >
               <View style={{ alignItems: 'center' }}>
                 <Icon source="image" size={28} color="white" />
-                <Text style={{ fontSize: 12, textAlign: 'center', color: 'white', marginTop: 4 }}>
+                <Text style={{ fontSize: 12, textAlign: 'center', color: 'white', marginTop: 12 }}>
                   Seleccionar imagen
                 </Text>
               </View>
@@ -159,19 +159,19 @@ export default function ImagePickerComponent({
               onPress={takePhoto}
               style={{
                 ...STYLES.buttonPrimary,
-                flex: 1,
-                aspectRatio: 1,
+                width: '48%',
                 justifyContent: "center",
                 alignItems: "center",
-                paddingVertical: 8,
-                borderRadius: 30,
+                paddingVertical: 24,
+                borderRadius: 40,
+                marginLeft: 8,
               }}
-              contentStyle={{ height: 90 }}
+              contentStyle={{ height: 80 }}
               disabled={isUploading}
             >
               <View style={{ alignItems: 'center' }}>
                 <Icon source="camera" size={28} color="white" />
-                <Text style={{ fontSize: 12, textAlign: 'center', color: 'white', marginTop: 4 }}>
+                <Text style={{ fontSize: 12, textAlign: 'center', color: 'white', marginTop: 12 }}>
                   Tomar foto
                 </Text>
               </View>
