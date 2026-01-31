@@ -12,6 +12,7 @@ await build({
   platform: "neutral", // not Nodejs
   // These packages are ESM-only and use bare specifiers, or have Node.js dependencies, so we need to mark them as external.
   external: [
+    "@react-pdf/renderer",
     "@supabase/supabase-js",
     "@hono/zod-openapi",
     "googleapis",

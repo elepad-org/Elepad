@@ -19,9 +19,9 @@ import {
   ActivityIndicator,
   IconButton,
   Menu,
+  Avatar,
   SegmentedButtons,
 } from "react-native-paper";
-import DropdownSelect from "@/components/shared/DropdownSelect";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -237,19 +237,13 @@ export default function RecuerdosScreen() {
   const [selectedBook, setSelectedBook] = useState<MemoriesBook | null>(null);
   const [editingBook, setEditingBook] = useState<MemoriesBook | null>(null);
   const [bookMenuVisible, setBookMenuVisible] = useState(false);
-  const [menuMounted, setMenuMounted] = useState(true);
 
-  const handleOpenBookMenu = useCallback(() => {
-    setBookMenuVisible(true);
-  }, []);
+
 
   const handleCloseBookMenu = useCallback(() => {
     setBookMenuVisible(false);
-    // Desmontar y volver a montar el menú para resetear completamente su estado
-    setMenuMounted(false);
-    setTimeout(() => {
-      setMenuMounted(true);
-    }, 50);
+    setMenuMode("main");
+    setFilterSubMode("none");
   }, []);
 
   const [bookDialogVisible, setBookDialogVisible] = useState(false);
@@ -270,7 +264,8 @@ export default function RecuerdosScreen() {
 
   const [memberFilterId, setMemberFilterId] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<RecuerdoTipo | "all">("all");
-  const [memberMenuMounted] = useState(true);
+  const [menuMode, setMenuMode] = useState<"main" | "filter">("main");
+  const [filterSubMode, setFilterSubMode] = useState<"none" | "person" | "type">("none");
 
   // --- Tour Setup ---
   const { headerRef, addButtonRef, listRef, albumRef } = useRecuerdosTour({ activeTab, authLoading, selectedBook });
@@ -1310,113 +1305,109 @@ export default function RecuerdosScreen() {
               >
                 Agregar
               </Button>
-              {menuMounted && (
-                <Menu
-                  visible={bookMenuVisible}
-                  onDismiss={handleCloseBookMenu}
-                  contentStyle={{
-                    backgroundColor: COLORS.background,
-                    borderRadius: 12,
-                  }}
-                  anchor={
-                    <IconButton
-                      icon="dots-horizontal"
-                      size={22}
-                      style={{ margin: 0 }}
-                      onPress={handleOpenBookMenu}
-                    />
-                  }
-                >
-                  <Menu.Item
-                    leadingIcon="pencil"
-                    onPress={() => {
-                      setBookMenuVisible(false);
-                      openEditBookDialog(selectedBook);
-                    }}
-                    title="Modificar baúl"
-                  />
-                  <Menu.Item
-                    leadingIcon="trash-can"
-                    onPress={() => {
-                      setBookMenuVisible(false);
-                      setBookToDelete(selectedBook);
-                    }}
-                    title="Eliminar baúl"
-                  />
-                </Menu>
-              )}
             </View>
           </View>
 
-          <View style={{ paddingTop: 10 }}>
-            <Text style={{ ...STYLES.superHeading, textAlign: "left" }}>
-              {selectedBook.title || "Baúl"}
-            </Text>
-            {!!selectedBook.description && (
-              <Text
-                style={{
-                  ...STYLES.subheading,
-                  marginTop: 6,
-                  color: COLORS.textSecondary,
-                  textAlign: "left",
-                }}
-              >
-                {selectedBook.description}
+          <View style={{ paddingTop: 10, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ ...STYLES.superHeading, textAlign: "left" }}>
+                {selectedBook.title || "Baúl"}
               </Text>
-            )}
+              {!!selectedBook.description && (
+                <Text
+                  style={{
+                    ...STYLES.subheading,
+                    marginTop: 6,
+                    color: COLORS.textSecondary,
+                    textAlign: "left",
+                  }}
+                >
+                  {selectedBook.description}
+                </Text>
+              )}
+            </View>
+            <Menu
+              visible={bookMenuVisible}
+              onDismiss={handleCloseBookMenu}
+              contentStyle={{
+                backgroundColor: COLORS.background,
+                borderRadius: 12,
+              }}
+              anchor={
+                  <IconButton
+                    icon="dots-horizontal"
+                    size={22}
+                    style={{ margin: 0 }}
+                    onPress={() => {
+                      setBookMenuVisible(true);
+                      setMenuMode("main");
+                      setFilterSubMode("none");
+                    }}
+                  />
+                }
+              >
+                <Menu.Item
+                  leadingIcon="pencil"
+                  onPress={() => {
+                    setBookMenuVisible(false);
+                    openEditBookDialog(selectedBook);
+                  }}
+                  title="Modificar baúl"
+                />
+                <Menu.Item
+                  leadingIcon="trash-can"
+                  onPress={() => {
+                    setBookMenuVisible(false);
+                    setBookToDelete(selectedBook);
+                  }}
+                  title="Eliminar baúl"
+                />
+              </Menu>
           </View>
         </View>
 
         {/* Controles de ordenamiento y vista */}
         <View
           style={{
-            paddingHorizontal: 24,
-            paddingVertical: 12,
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
+            paddingHorizontal: 16,
+            paddingVertical: 8,
           }}
         >
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text
-              style={{
-                fontSize: 14,
-                color: COLORS.textSecondary,
-                marginRight: 8,
+          {/* Ordenar y Vista */}
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            {/* Toggle de Vistas - Izquierda */}
+            <SegmentedButtons
+              value={numColumns.toString()}
+              onValueChange={(value) => setNumColumns(parseInt(value))}
+              buttons={[
+                { value: "2", icon: "view-grid" },
+                { value: "3", icon: "view-comfy" },
+              ]}
+              density="small"
+              style={{ maxWidth: 80 }}
+              theme={{
+                colors: {
+                  secondaryContainer: COLORS.primary,
+                  onSecondaryContainer: COLORS.white,
+                },
               }}
-            >
-              Ordenar:
-            </Text>
+            />
+
+            {/* Botón de Ordenar - Derecha */}
             <IconButton
               icon={sortOrder === "desc" ? "arrow-down" : "arrow-up"}
               size={20}
-              onPress={() =>
-                setSortOrder(sortOrder === "desc" ? "asc" : "desc")
-              }
+              onPress={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
               mode="contained-tonal"
+              style={{ margin: 0 }}
             />
           </View>
-          <SegmentedButtons
-            value={numColumns.toString()}
-            onValueChange={(value) => setNumColumns(parseInt(value))}
-            buttons={[
-              {
-                value: "2",
-                icon: "view-module",
-              },
-              {
-                value: "3",
-                icon: "view-comfy",
-              },
-            ]}
-            style={{ width: 140 }}
-            theme={{
-              colors: {
-                secondaryContainer: COLORS.primary,
-                onSecondaryContainer: COLORS.white,
-              },
-            }}
-          />
         </View>
 
         <View
@@ -1480,60 +1471,229 @@ export default function RecuerdosScreen() {
             >
               Agregar
             </Button>
-            {menuMounted && (
-              <Menu
-                visible={bookMenuVisible}
-                onDismiss={handleCloseBookMenu}
-                contentStyle={{
-                  backgroundColor: COLORS.background,
-                  borderRadius: 12,
-                }}
-                anchor={
-                  <IconButton
-                    icon="dots-horizontal"
-                    size={22}
-                    style={{ margin: 0 }}
-                    onPress={handleOpenBookMenu}
-                  />
-                }
-              >
-                <Menu.Item
-                  leadingIcon="pencil"
-                  onPress={() => {
-                    setBookMenuVisible(false);
-                    openEditBookDialog(selectedBook);
-                  }}
-                  title="Modificar baúl"
-                />
-                <Menu.Item
-                  leadingIcon="trash-can"
-                  onPress={() => {
-                    setBookMenuVisible(false);
-                    setBookToDelete(selectedBook);
-                  }}
-                  title="Eliminar baúl"
-                />
-              </Menu>
-            )}
           </View>
         </View>
 
-        <View style={{ paddingTop: 10 }}>
-          <Text style={{ ...STYLES.superHeading, textAlign: "left" }}>
-            {selectedBook.title || "Baúl"}
-          </Text>
-          {!!selectedBook.description && (
-            <Text
-              style={{
-                ...STYLES.subheading,
-                marginTop: 6,
-                color: COLORS.textSecondary,
-                textAlign: "left",
-              }}
-            >
-              {selectedBook.description}
+        <View style={{ paddingTop: 10, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ ...STYLES.superHeading, textAlign: "left" }}>
+              {selectedBook.title || "Baúl"}
             </Text>
-          )}
+            {!!selectedBook.description && (
+              <Text
+                style={{
+                  ...STYLES.subheading,
+                  marginTop: 6,
+                  color: COLORS.textSecondary,
+                  textAlign: "left",
+                }}
+              >
+                {selectedBook.description}
+              </Text>
+            )}
+          </View>
+          <Menu
+            key={bookMenuVisible ? 'open' : 'closed'}
+            visible={bookMenuVisible}
+            onDismiss={handleCloseBookMenu}
+            contentStyle={{
+              backgroundColor: COLORS.background,
+              borderRadius: 12,
+              width: 215,
+            }}
+            style={{ alignSelf: 'flex-end', marginRight: 0, marginTop: -8 }}
+            anchor={
+              <IconButton
+                icon="dots-horizontal"
+                size={22}
+                style={{ margin: 0 }}
+                onPress={() => {
+                  setBookMenuVisible(true);
+                  setMenuMode("main");
+                  setFilterSubMode("none");
+                }}
+              />
+            }
+            >
+              {(() => {
+                switch (menuMode) {
+                  case "main":
+                    return (
+                      <>
+                        <Menu.Item
+                          leadingIcon="pencil"
+                          onPress={() => {
+                            setBookMenuVisible(false);
+                            openEditBookDialog(selectedBook);
+                          }}
+                          title="Modificar baúl"
+                        />
+                        <Menu.Item
+                          leadingIcon="trash-can"
+                          onPress={() => {
+                            setBookMenuVisible(false);
+                            setBookToDelete(selectedBook);
+                          }}
+                          title="Eliminar baúl"
+                        />
+                        <Menu.Item
+                          leadingIcon="filter-variant"
+                          onPress={() => {
+                            setMenuMode("filter");
+                            setFilterSubMode("none");
+                          }}
+                          title="Filtrar"
+                        />
+                      </>
+                    );
+                  case "filter":
+                    if (filterSubMode === "none") {
+                      return (
+                        <>
+                          <Menu.Item
+                            leadingIcon="arrow-left"
+                            onPress={() => setMenuMode("main")}
+                            title="Atrás"
+                          />
+                          <Menu.Item
+                            leadingIcon="account-group"
+                            onPress={() => setFilterSubMode("person")}
+                            title="Filtrar por persona"
+                          />
+                          <Menu.Item
+                            leadingIcon="file-multiple"
+                            onPress={() => setFilterSubMode("type")}
+                            title="Filtrar por tipo"
+                          />
+                        </>
+                      );
+                    } else if (filterSubMode === "person") {
+                      return (
+                        <>
+                          <Menu.Item
+                            leadingIcon="arrow-left"
+                            onPress={() => setFilterSubMode("none")}
+                            title="Atrás"
+                          />
+                          <Menu.Item
+                            leadingIcon="account-group"
+                            onPress={() => {
+                              setMemberFilterId(null);
+                              setBookMenuVisible(false);
+                              setMenuMode("main");
+                              setFilterSubMode("none");
+                            }}
+                            title="Todos"
+                            style={{
+                              backgroundColor: memberFilterId === null ? COLORS.primary + "20" : "transparent"
+                            }}
+                          />
+                          {groupMembers.map((m) => (
+                            <Menu.Item
+                              key={m.id}
+                              leadingIcon={() => (
+                                m.avatarUrl ? (
+                                  <Avatar.Image size={24} source={{ uri: m.avatarUrl }} />
+                                ) : (
+                                  <Avatar.Text size={24} label={m.displayName.charAt(0).toUpperCase()} />
+                                )
+                              )}
+                              onPress={() => {
+                                setMemberFilterId(m.id);
+                                setBookMenuVisible(false);
+                                setMenuMode("main");
+                                setFilterSubMode("none");
+                              }}
+                              title={m.displayName}
+                              style={{
+                                backgroundColor: memberFilterId === m.id ? COLORS.primary + "20" : "transparent"
+                              }}
+                            />
+                          ))}
+                        </>
+                      );
+                    } else if (filterSubMode === "type") {
+                      return (
+                        <>
+                          <Menu.Item
+                            leadingIcon="arrow-left"
+                            onPress={() => setFilterSubMode("none")}
+                            title="Atrás"
+                          />
+                          <Menu.Item
+                            leadingIcon="file-multiple"
+                            onPress={() => {
+                              setTypeFilter("all");
+                              setBookMenuVisible(false);
+                              setMenuMode("main");
+                              setFilterSubMode("none");
+                            }}
+                            title="Todos los tipos"
+                            style={{
+                              backgroundColor: typeFilter === "all" ? COLORS.primary + "20" : "transparent"
+                            }}
+                          />
+                          <Menu.Item
+                            leadingIcon="image"
+                            onPress={() => {
+                              setTypeFilter("imagen");
+                              setBookMenuVisible(false);
+                              setMenuMode("main");
+                              setFilterSubMode("none");
+                            }}
+                            title="Imágenes"
+                            style={{
+                              backgroundColor: typeFilter === "imagen" ? COLORS.primary + "20" : "transparent"
+                            }}
+                          />
+                          <Menu.Item
+                            leadingIcon="video"
+                            onPress={() => {
+                              setTypeFilter("video");
+                              setBookMenuVisible(false);
+                              setMenuMode("main");
+                              setFilterSubMode("none");
+                            }}
+                            title="Videos"
+                            style={{
+                              backgroundColor: typeFilter === "video" ? COLORS.primary + "20" : "transparent"
+                            }}
+                          />
+                          <Menu.Item
+                            leadingIcon="microphone"
+                            onPress={() => {
+                              setTypeFilter("audio");
+                              setBookMenuVisible(false);
+                              setMenuMode("main");
+                              setFilterSubMode("none");
+                            }}
+                            title="Audios"
+                            style={{
+                              backgroundColor: typeFilter === "audio" ? COLORS.primary + "20" : "transparent"
+                            }}
+                          />
+                          <Menu.Item
+                            leadingIcon="text"
+                            onPress={() => {
+                              setTypeFilter("texto");
+                              setBookMenuVisible(false);
+                              setMenuMode("main");
+                              setFilterSubMode("none");
+                            }}
+                            title="Notas"
+                            style={{
+                              backgroundColor: typeFilter === "texto" ? COLORS.primary + "20" : "transparent"
+                            }}
+                          />
+                        </>
+                      );
+                    }
+                    break;
+                  default:
+                    return null;
+                }
+              })()}
+            </Menu>
         </View>
       </View>
 
@@ -1544,68 +1704,15 @@ export default function RecuerdosScreen() {
           paddingVertical: 8,
         }}
       >
-        {/* Primera fila: Filtro de Persona */}
-        <View style={{ marginBottom: 8 }}>
-          {memberMenuMounted && (
-            <DropdownSelect
-              label="Filtrar"
-              value={memberFilterId || "all"}
-              options={[
-                { key: "all", label: "Todos", icon: "account-group" },
-                ...groupMembers.map((m) => ({
-                  key: m.id,
-                  label: m.displayName,
-                  avatarUrl: m.avatarUrl || null,
-                  frameUrl: m.activeFrameUrl || null,
-                })),
-              ]}
-              onSelect={(value) => {
-                setMemberFilterId(value === "all" ? null : value);
-              }}
-              placeholder="Todos"
-              showLabel={false}
-            />
-          )}
-        </View>
-
-        {/* Segunda fila: Filtro de Tipo */}
-        <View style={{ marginBottom: 8 }}>
-          <DropdownSelect
-            label="Tipo"
-            value={typeFilter}
-            options={[
-              { key: "all", label: "Todos los tipos", icon: "file-multiple" },
-              { key: "imagen", label: "Imágenes", icon: "image" },
-              { key: "video", label: "Videos", icon: "video" },
-              { key: "audio", label: "Audios", icon: "microphone" },
-              { key: "texto", label: "Notas", icon: "text" },
-            ]}
-            onSelect={(value) => {
-              setTypeFilter(value as RecuerdoTipo | "all");
-            }}
-            placeholder="Todos los tipos"
-            showLabel={false}
-          />
-        </View>
-
-        {/* Segunda fila: Ordenar y Vista */}
+        {/* Ordenar y Vista */}
         <View
           style={{
             flexDirection: "row",
             alignItems: "center",
-            gap: 12,
+            justifyContent: "space-between",
           }}
         >
-          {/* Botón de Ordenar */}
-          <IconButton
-            icon={sortOrder === "desc" ? "arrow-down" : "arrow-up"}
-            size={20}
-            onPress={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
-            mode="contained-tonal"
-            style={{ margin: 0 }}
-          />
-
-          {/* Toggle de Vistas */}
+          {/* Toggle de Vistas - Izquierda */}
           <SegmentedButtons
             value={numColumns.toString()}
             onValueChange={(value) => setNumColumns(parseInt(value))}
@@ -1621,6 +1728,15 @@ export default function RecuerdosScreen() {
                 onSecondaryContainer: COLORS.white,
               },
             }}
+          />
+
+          {/* Botón de Ordenar - Derecha */}
+          <IconButton
+            icon={sortOrder === "desc" ? "arrow-down" : "arrow-up"}
+            size={20}
+            onPress={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
+            mode="contained-tonal"
+            style={{ paddingRight: 0}}
           />
         </View>
       </View>
@@ -1658,7 +1774,7 @@ export default function RecuerdosScreen() {
               />
             </Animated.View>
           )}
-          key={`masonry-${numColumns}-${isFocused}`}
+          key={`masonry-${numColumns}-${sortOrder}-${isFocused}`}
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8 }}
           ListFooterComponent={
             <>

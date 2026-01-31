@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { View, Image, StyleSheet } from "react-native";
-//import { View, Image, StyleSheet, Linking, Pressable, ActivityIndicator } from "react-native";
+import { View, Image, StyleSheet, Linking, Pressable, ActivityIndicator } from "react-native";
 import {
   Text,
   Card,
@@ -8,12 +7,12 @@ import {
   Dialog,
   Button,
 } from "react-native-paper";
-//import { useAuth } from "@/hooks/useAuth";
-//import { usePostAlbumIdExportPdf } from "@elepad/api-client";
+import { useAuth } from "@/hooks/useAuth";
+import { usePostAlbumIdExportPdf } from "@elepad/api-client";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, STYLES, SHADOWS } from "@/styles/base";
-//import { useToast } from "@/components/shared/Toast";
-//import { usePdfDownload } from "@/hooks/usePdfDownload";
+import { useToast } from "@/components/shared/Toast";
+import { usePdfDownload } from "@/hooks/usePdfDownload";
 
 interface AlbumCardProps {
   id: string;
@@ -27,7 +26,7 @@ interface AlbumCardProps {
 }
 
 export default function AlbumCard({
-  //id,
+  id,
   title,
   description,
   coverImageUrl,
@@ -37,19 +36,19 @@ export default function AlbumCard({
   onPress,
 }: AlbumCardProps) {
   const [detailsVisible, setDetailsVisible] = useState(false);
-  /* const { userElepad } = useAuth();
+  const { userElepad } = useAuth();
   const { showToast } = useToast();
   const { sharePdf, viewLocalPdf, isDownloading } = usePdfDownload();
-  const [actionsOpen, setActionsOpen] = useState(false); */
+  const [actionsOpen, setActionsOpen] = useState(false);
 
-  //const exportPdfMutation = usePostAlbumIdExportPdf();
+  const exportPdfMutation = usePostAlbumIdExportPdf();
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("es-AR");
   };
 
-  /* const handleExportPdf = () => {
+  const handleExportPdf = () => {
     const albumId = id;
     const userId = userElepad?.id;
 
@@ -87,9 +86,9 @@ export default function AlbumCard({
         },
       },
     );
-  }; */
+  };
 
-  /* const handleViewPdf = async () => {
+  const handleViewPdf = async () => {
     if (pdfUrl) {
       try {
         // First, try to find a saved local copy
@@ -107,13 +106,13 @@ export default function AlbumCard({
         }
       }
     }
-  }; */
+  };
 
-  /* const handleDownloadAndSharePdf = async () => {
+  const handleDownloadAndSharePdf = async () => {
     if (pdfUrl) {
       await sharePdf(pdfUrl, title);
     }
-  }; */
+  };
 
   return (
     <View>
@@ -192,7 +191,7 @@ export default function AlbumCard({
                 >
                   Ver Álbum
                 </Button>
-                {/* <View style={styles.actionsDropdown}>
+                <View style={styles.actionsDropdown}>
                   <Pressable
                     onPress={() => setActionsOpen((v) => !v)}
                     style={({ pressed }) => [
@@ -234,18 +233,18 @@ export default function AlbumCard({
                       </Pressable>
                     </View>
                   )}
-                </View> */}
+                </View>
 
               </View>
             ) : (
               <View style={{ flexDirection: "row", gap: 8 }}>
-                {/* <Button
+                <Button
                   mode="outlined"
                   loading={exportPdfMutation.isPending}
                   onPress={handleExportPdf}
                 >
                   Exportar PDF
-                </Button> */}
+                </Button>
                 <Button
                   mode="contained"
                   onPress={() => {

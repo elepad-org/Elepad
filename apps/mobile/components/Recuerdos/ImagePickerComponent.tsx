@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { View, Alert } from "react-native";
-import { Button, Text, ActivityIndicator } from "react-native-paper";
+import { Button, Text, ActivityIndicator, Icon } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import { STYLES, COLORS } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
@@ -131,29 +131,56 @@ export default function ImagePickerComponent({
         </View>
       ) : (
         <View style={{ alignItems: "center" }}>
-          <Button
-            mode="contained"
-            onPress={pickImage}
-            style={{ ...STYLES.buttonPrimary, marginBottom: 12 }}
-            icon="image"
-            disabled={isUploading}
-          >
-            Seleccionar de galería
-          </Button>
-          <Button
-            mode="contained"
-            onPress={takePhoto}
-            style={{ ...STYLES.buttonPrimary, marginBottom: 20 }}
-            icon="camera"
-            disabled={isUploading}
-          >
-            Tomar foto
-          </Button>
-          <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 8 }}>
-            <View style={{ width: 120 }}>
-              <CancelButton onPress={onCancel} disabled={isUploading} />
-            </View>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 20 }}>
+            <Button
+              mode="contained"
+              onPress={pickImage}
+              style={{
+                ...STYLES.buttonPrimary,
+                width: '48%',
+                justifyContent: "center",
+                alignItems: "center",
+                paddingVertical: 24,
+                borderRadius: 40,
+                marginRight: 8,
+              }}
+              contentStyle={{ height: 80 }}
+              disabled={isUploading}
+            >
+              <View style={{ alignItems: 'center' }}>
+                <Icon source="image" size={28} color="white" />
+                <Text style={{ fontSize: 12, textAlign: 'center', color: 'white', marginTop: 12 }}>
+                  Seleccionar imagen
+                </Text>
+              </View>
+            </Button>
+            <Button
+              mode="contained"
+              onPress={takePhoto}
+              style={{
+                ...STYLES.buttonPrimary,
+                width: '48%',
+                justifyContent: "center",
+                alignItems: "center",
+                paddingVertical: 24,
+                borderRadius: 40,
+                marginLeft: 8,
+              }}
+              contentStyle={{ height: 80 }}
+              disabled={isUploading}
+            >
+              <View style={{ alignItems: 'center' }}>
+                <Icon source="camera" size={28} color="white" />
+                <Text style={{ fontSize: 12, textAlign: 'center', color: 'white', marginTop: 12 }}>
+                  Tomar foto
+                </Text>
+              </View>
+            </Button>
           </View>
+          <CancelButton
+            onPress={onCancel}
+            disabled={isUploading}
+          />
         </View>
       )}
     </View>

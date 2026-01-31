@@ -151,14 +151,14 @@ export async function uploadAlbumPDF(
   supabase: SupabaseClient<Database>,
   groupId: string,
   albumId: string,
-  pdfBuffer: Buffer
+  buffer: Buffer
 ): Promise<string> {
   const timestamp = Date.now();
   const path = `${groupId}/${albumId}/${timestamp}.pdf`;
 
   const { error } = await supabase.storage
     .from(ALBUM_PDF_BUCKET)
-    .upload(path, pdfBuffer, {
+    .upload(path, buffer, {
       contentType: "application/pdf",
       cacheControl: "3600",
       upsert: false,

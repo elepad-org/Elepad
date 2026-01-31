@@ -50,6 +50,7 @@ export function formatInUserTimezone(
   
   return format(localDate, formatString, {
     timeZone: userTz,
+    locale: es,
   });
 }
 
