@@ -1,5 +1,5 @@
-import { TouchableOpacity } from "react-native";
-import { Dialog, Text, IconButton, Divider } from "react-native-paper";
+import { Pressable, View } from "react-native";
+import { Dialog, Text, Divider, Icon } from "react-native-paper";
 import { STYLES, COLORS } from "@/styles/base";
 import ImagePickerComponent from "./ImagePickerComponent";
 import TextNoteComponent from "./TextNoteComponent";
@@ -161,43 +161,84 @@ export default function NuevoRecuerdoDialogComponent({
         <Text style={{ ...STYLES.subheading, marginBottom: 14 }}>
           Selecciona el tipo de recuerdo que quieres subir
         </Text>
-        <TouchableOpacity
-          style={{
+        <Pressable
+          style={({ pressed }) => ({
             flexDirection: "row",
             alignItems: "center",
-            paddingVertical: 6,
-          }}
+            paddingVertical: 12,
+            paddingHorizontal: 8,
+            borderRadius: 8,
+            backgroundColor: pressed
+              ? COLORS.backgroundSecondary
+              : "transparent",
+            opacity: pressed ? 0.8 : 1,
+            marginBottom: 4,
+          })}
           onPress={() => onSelectTipo("imagen")}
         >
-          <IconButton icon="image" size={24} iconColor={COLORS.primary} />
+          <View style={{ marginRight: 12 }}>
+            <Icon source="image" size={24} color={COLORS.primary} />
+          </View>
           <Text style={STYLES.paragraphText}>Imagen o Video</Text>
-        </TouchableOpacity>
-        <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
-        <TouchableOpacity
-          style={{
+        </Pressable>
+
+        <Divider
+          style={{ backgroundColor: COLORS.textPlaceholder, opacity: 0.2 }}
+        />
+
+        <Pressable
+          style={({ pressed }) => ({
             flexDirection: "row",
             alignItems: "center",
-            paddingVertical: 6,
-          }}
+            paddingVertical: 12,
+            paddingHorizontal: 8,
+            borderRadius: 8,
+            backgroundColor: pressed
+              ? COLORS.backgroundSecondary
+              : "transparent",
+            opacity: pressed ? 0.8 : 1,
+            marginVertical: 4,
+          })}
           onPress={() => onSelectTipo("texto")}
         >
-          <IconButton icon="text" size={24} iconColor={COLORS.primary} />
+          <View style={{ marginRight: 12 }}>
+            <Icon source="text" size={24} color={COLORS.primary} />
+          </View>
           <Text style={STYLES.paragraphText}>Nota</Text>
-        </TouchableOpacity>
-        <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
-        <TouchableOpacity
-          style={{
+        </Pressable>
+
+        <Divider
+          style={{ backgroundColor: COLORS.textPlaceholder, opacity: 0.2 }}
+        />
+
+        <Pressable
+          style={({ pressed }) => ({
             flexDirection: "row",
             alignItems: "center",
-            paddingVertical: 6,
-          }}
+            paddingVertical: 12,
+            paddingHorizontal: 8,
+            borderRadius: 8,
+            backgroundColor: pressed
+              ? COLORS.backgroundSecondary
+              : "transparent",
+            opacity: pressed ? 0.8 : 1,
+            marginTop: 4,
+          })}
           onPress={() => onSelectTipo("audio")}
         >
-          <IconButton icon="microphone" size={24} iconColor={COLORS.primary} />
+          <View style={{ marginRight: 12 }}>
+            <Icon source="microphone" size={24} color={COLORS.primary} />
+          </View>
           <Text style={STYLES.paragraphText}>Audio</Text>
-        </TouchableOpacity>
+        </Pressable>
       </Dialog.Content>
-      <Dialog.Actions style={{ paddingBottom: 12, paddingHorizontal: 24, justifyContent: "center" }}>
+      <Dialog.Actions
+        style={{
+          paddingBottom: 12,
+          paddingHorizontal: 24,
+          justifyContent: "center",
+        }}
+      >
         <CancelButton onPress={hideDialog} />
       </Dialog.Actions>
     </Dialog>
