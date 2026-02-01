@@ -774,29 +774,54 @@ const HomeScreen = () => {
               </View>
             )
           ) : // Familiar: mostrar múltiples intentos de elder
-            Array.isArray(lastAttempt) && lastAttempt.length > 0 ? (
-              <View style={{ gap: 5, marginTop: 22 }}>
-                {lastAttempt.map((attempt: AttemptWithUser) => (
-                  <Pressable
-                    key={attempt.id}
-                    style={styles.gameCard}
-                    onPress={() => router.push("/history")}
-                  >
-                    <View style={styles.gameIcon}>
-                      <Image
-                        source={GAME_IMAGES[attempt.gameType || "memory"]}
-                        style={{ width: 40, height: 40, resizeMode: "contain" }}
-                      />
-                    </View>
-                    <View style={styles.gameInfo}>
-                      <Text style={styles.gameName}>
-                        {getGameInfo(attempt.gameType || "").name}
-                      </Text>
-                      <Text style={styles.gameTime}>
-                        {formatInUserTimezone(
-                          attempt.startedAt,
-                          "d 'de' MMMM, HH:mm",
-                          userElepad?.timezone,
+          Array.isArray(lastAttempt) && lastAttempt.length > 0 ? (
+            <View style={{ gap: 5, marginTop: 22 }}>
+              {lastAttempt.map((attempt: AttemptWithUser) => (
+                <Pressable
+                  key={attempt.id}
+                  style={styles.gameCard}
+                  onPress={() => {
+                    router.navigate({
+                      pathname: "/(tabs)/home",
+                      params: {
+                        tab: "juegos",
+                      },
+                    });
+                  }}
+                >
+                  <View style={styles.gameIcon}>
+                    <Image
+                      source={GAME_IMAGES[attempt.gameType || "memory"]}
+                      style={{ width: 40, height: 40, resizeMode: "contain" }}
+                    />
+                  </View>
+                  <View style={styles.gameInfo}>
+                    <Text style={styles.gameName}>
+                      {getGameInfo(attempt.gameType || "").name}
+                    </Text>
+                    <Text style={styles.gameTime}>
+                      {formatInUserTimezone(
+                        attempt.startedAt,
+                        "d 'de' MMMM, HH:mm",
+                        userElepad?.timezone,
+                      )}
+                    </Text>
+                    {attempt.user && (
+                      <View style={styles.playerInfo}>
+                        {attempt.user.avatarUrl ? (
+                          <Avatar.Image
+                            size={20}
+                            source={{ uri: attempt.user.avatarUrl }}
+                            style={styles.playerAvatar}
+                          />
+                        ) : (
+                          <Avatar.Text
+                            size={20}
+                            label={attempt.user.displayName
+                              .substring(0, 2)
+                              .toUpperCase()}
+                            style={styles.playerAvatar}
+                          />
                         )}
                       </Text>
                       {attempt.user && (
@@ -844,15 +869,20 @@ const HomeScreen = () => {
                   No hay actividad reciente en el grupo
                 </Text>
                 <Button
-                  mode="outlined"
-                  onPress={() =>
-                    router.navigate({
-                      pathname: "/(tabs)/home",
-                      params: { tab: "juegos" },
-                    })
-                  }
-                  style={styles.emptyButtonOutline}
-                  labelStyle={{ color: COLORS.primary }}
+                  mode="text"
+                  onPress={() => {
+                    if (userElepad?.elder) {
+                      router.push("/history");
+                    } else {
+                      router.navigate({
+                        pathname: "/(tabs)/home",
+                        params: {
+                          tab: "juegos",
+                        },
+                      });
+                    }
+                  }}
+                  textColor={COLORS.primary}
                 >
                   Ver estadísticas
                 </Button>

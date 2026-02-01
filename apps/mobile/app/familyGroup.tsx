@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import Animated, { FadeInRight } from "react-native-reanimated";
 import {
-  SafeAreaView,
   StatusBar,
   ScrollView,
   View,
@@ -10,6 +9,7 @@ import {
   Alert,
   Pressable,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   Button,
   Portal,
@@ -458,8 +458,10 @@ export default function FamilyGroup() {
     }
   };
 
+  const insets = useSafeAreaInsets();
+
   return (
-    <SafeAreaView style={STYLES.safeArea}>
+    <View style={[STYLES.safeArea, { paddingTop: insets.top }]}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
       <ScrollView
@@ -1466,7 +1468,7 @@ export default function FamilyGroup() {
           </Dialog>
         </Portal>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

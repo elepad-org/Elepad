@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { View, Alert } from "react-native";
-import { Button, Text, ActivityIndicator, Icon } from "react-native-paper";
+import { View, Alert, Pressable } from "react-native";
+import { Text, ActivityIndicator, Icon } from "react-native-paper";
 import * as ImagePicker from "expo-image-picker";
 import { STYLES, COLORS } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
@@ -23,7 +23,7 @@ export default function ImagePickerComponent({
     if (status !== "granted") {
       Alert.alert(
         "Permisos insuficientes",
-        "Necesitamos permisos para acceder a tu galería."
+        "Necesitamos permisos para acceder a tu galería.",
       );
       return false;
     }
@@ -70,7 +70,7 @@ export default function ImagePickerComponent({
     if (status !== "granted") {
       Alert.alert(
         "Permisos insuficientes",
-        "Necesitamos permisos para acceder a tu cámara."
+        "Necesitamos permisos para acceder a tu cámara.",
       );
       return;
     }
@@ -131,56 +131,81 @@ export default function ImagePickerComponent({
         </View>
       ) : (
         <View style={{ alignItems: "center" }}>
-          <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 20 }}>
-            <Button
-              mode="contained"
+          <View style={{ flexDirection: "row", gap: 16, marginBottom: 20 }}>
+            <Pressable
               onPress={pickImage}
-              style={{
-                ...STYLES.buttonPrimary,
-                width: '48%',
-                justifyContent: "center",
-                alignItems: "center",
-                paddingVertical: 24,
-                borderRadius: 40,
-                marginRight: 8,
-              }}
-              contentStyle={{ height: 80 }}
               disabled={isUploading}
+              style={({ pressed }) => ({
+                flex: 1,
+                backgroundColor: COLORS.primary,
+                borderRadius: 24, // More rounded for modern feel
+                paddingVertical: 24,
+                paddingHorizontal: 12,
+                alignItems: "center",
+                justifyContent: "center",
+                opacity: pressed ? 0.8 : 1,
+                transform: [{ scale: pressed ? 0.98 : 1 }],
+                // Shadow for depth
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.1,
+                shadowRadius: 8,
+                elevation: 4,
+              })}
             >
-              <View style={{ alignItems: 'center' }}>
-                <Icon source="image" size={28} color="white" />
-                <Text style={{ fontSize: 12, textAlign: 'center', color: 'white', marginTop: 12 }}>
-                  Seleccionar imagen
-                </Text>
-              </View>
-            </Button>
-            <Button
-              mode="contained"
+              <Icon source="image" size={32} color="white" />
+              <Text
+                style={{
+                  color: "white",
+                  marginTop: 12,
+                  textAlign: "center",
+                  fontSize: 14,
+                  fontWeight: "600",
+                  // Ensure text wraps if needed
+                  flexWrap: "wrap",
+                }}
+              >
+                Seleccionar imagen
+              </Text>
+            </Pressable>
+
+            <Pressable
               onPress={takePhoto}
-              style={{
-                ...STYLES.buttonPrimary,
-                width: '48%',
-                justifyContent: "center",
-                alignItems: "center",
-                paddingVertical: 24,
-                borderRadius: 40,
-                marginLeft: 8,
-              }}
-              contentStyle={{ height: 80 }}
               disabled={isUploading}
+              style={({ pressed }) => ({
+                flex: 1,
+                backgroundColor: COLORS.primary,
+                borderRadius: 24,
+                paddingVertical: 24,
+                paddingHorizontal: 12,
+                alignItems: "center",
+                justifyContent: "center",
+                opacity: pressed ? 0.8 : 1,
+                transform: [{ scale: pressed ? 0.98 : 1 }],
+                // Shadow for depth
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.1,
+                shadowRadius: 8,
+                elevation: 4,
+              })}
             >
-              <View style={{ alignItems: 'center' }}>
-                <Icon source="camera" size={28} color="white" />
-                <Text style={{ fontSize: 12, textAlign: 'center', color: 'white', marginTop: 12 }}>
-                  Tomar foto
-                </Text>
-              </View>
-            </Button>
+              <Icon source="camera" size={32} color="white" />
+              <Text
+                style={{
+                  color: "white",
+                  marginTop: 12,
+                  textAlign: "center",
+                  fontSize: 14,
+                  fontWeight: "600",
+                  flexWrap: "wrap",
+                }}
+              >
+                Tomar foto
+              </Text>
+            </Pressable>
           </View>
-          <CancelButton
-            onPress={onCancel}
-            disabled={isUploading}
-          />
+          <CancelButton onPress={onCancel} disabled={isUploading} />
         </View>
       )}
     </View>
