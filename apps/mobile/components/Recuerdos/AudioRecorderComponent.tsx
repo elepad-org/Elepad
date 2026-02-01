@@ -175,46 +175,97 @@ export default function AudioRecorderComponent({
   return (
     <View
       style={{
-        backgroundColor: COLORS.background,
+        backgroundColor: "#1a1a1a",
         padding: 20,
         borderRadius: 20,
+        borderWidth: 3,
+        borderColor: "#0a0a0a",
       }}
     >
-      <Text style={STYLES.heading}>Grabar audio</Text>
+      <View
+        style={{
+          backgroundColor: "#e8e8e8",
+          padding: 10,
+          borderRadius: 4,
+          marginBottom: 16,
+          borderWidth: 1,
+          borderColor: "#c0c0c0",
+        }}
+      >
+        <Text
+          style={{
+            ...STYLES.heading,
+            color: "#1a1a1a",
+            textAlign: "center",
+          }}
+        >
+          Grabar audio
+        </Text>
+      </View>
 
-      <Text style={{ ...STYLES.subheading, marginBottom: 16 }}>
-        {recorderState.isRecording
-          ? `Grabando... ${formatTime(
-            Math.floor(recorderState.durationMillis / 1000)
-          )}`
-          : audioUri
-            ? `Audio grabado (${formatTime(duration)}) - ${isPlaying ? "Reproduciendo..." : "Presiona play para escuchar"
-            }`
-            : "Presiona el botón para comenzar a grabar"}
-      </Text>
+      {/* Display LCD estilo vintage */}
+      <View
+        style={{
+          backgroundColor: "#3d3d3d",
+          padding: 12,
+          borderRadius: 6,
+          marginBottom: 16,
+          borderWidth: 2,
+          borderColor: "#2a2a2a",
+        }}
+      >
+        <Text
+          style={{
+            color: "#ff6b35",
+            fontSize: 14,
+            fontFamily: "monospace",
+            fontWeight: "bold",
+            textAlign: "center",
+          }}
+        >
+          {recorderState.isRecording
+            ? `⬤ REC ${formatTime(
+                Math.floor(recorderState.durationMillis / 1000)
+              )}`
+            : audioUri
+              ? `${isPlaying ? "▶ PLAY" : "⏸ PAUSE"} ${formatTime(duration)}`
+              : "⏹ READY"}
+        </Text>
+      </View>
 
       <View style={{ alignItems: "center", marginVertical: 20 }}>
         {audioUri && !recorderState.isRecording ? (
-          <IconButton
-            icon={isPlaying ? "pause" : "play"}
-            size={50}
-            iconColor={COLORS.primary}
+          <TouchableOpacity
             onPress={playSound}
-            style={{ backgroundColor: COLORS.accent }}
-          />
+            style={{
+              width: 80,
+              height: 80,
+              borderRadius: 40,
+              backgroundColor: "#ff6b35",
+              justifyContent: "center",
+              alignItems: "center",
+              borderWidth: 3,
+              borderColor: "#d85a2a",
+            }}
+          >
+            <IconButton
+              icon={isPlaying ? "pause" : "play"}
+              size={40}
+              iconColor="#1a1a1a"
+              style={{ margin: 0 }}
+            />
+          </TouchableOpacity>
         ) : (
           <TouchableOpacity
             style={{
               width: 80,
               height: 80,
               borderRadius: 40,
-              backgroundColor: COLORS.accent,
+              backgroundColor: "#4a4a4a",
               justifyContent: "center",
               alignItems: "center",
-              borderWidth: 2,
-              borderColor: recorderState.isRecording
-                ? COLORS.error
-                : COLORS.primary,
+              borderWidth: 3,
+              borderColor: recorderState.isRecording ? "#ff6b35" : "#2a2a2a",
             }}
             onPress={recorderState.isRecording ? stopRecording : startRecording}
           >
@@ -224,8 +275,8 @@ export default function AudioRecorderComponent({
                 height: recorderState.isRecording ? 30 : 50,
                 borderRadius: recorderState.isRecording ? 5 : 25,
                 backgroundColor: recorderState.isRecording
-                  ? COLORS.error
-                  : COLORS.primary,
+                  ? "#ff6b35"
+                  : "#d0d0d0",
               }}
             />
           </TouchableOpacity>

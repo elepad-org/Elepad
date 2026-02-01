@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { View, Dimensions, Animated, ImageBackground } from "react-native";
+import { View, Dimensions, Animated, ImageBackground, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import Reanimated, { ZoomIn, ZoomOut } from "react-native-reanimated";
 import {
@@ -580,74 +580,358 @@ export default function RecuerdoDetailDialog({
 
             {recuerdo.tipo === "audio" && (
               <View>
+                {/* Reproductor vintage estilo cassette/walkman */}
                 <View
                   style={{
-                    backgroundColor: COLORS.backgroundSecondary,
-                    paddingTop: 50,
-                    paddingBottom: 10,
+                    backgroundColor: "#1a1a1a",
+                    paddingTop: 35,
+                    paddingBottom: 20,
                     paddingHorizontal: 20,
-                    borderTopLeftRadius: 10,
-                    borderTopRightRadius: 10,
-                    minHeight: 220,
+                    borderRadius: 15,
+                    minHeight: 400,
+                    borderWidth: 3,
+                    borderColor: "#0a0a0a",
+                    ...SHADOWS.medium,
                   }}
                 >
-                  {/* Botón de play/pause centrado */}
-                  <View style={{ alignItems: "center", marginBottom: 15 }}>
-                    <IconButton
-                      icon={isPlaying ? "pause-circle" : "play-circle"}
-                      size={70}
-                      iconColor={COLORS.primary}
-                      onPress={playAudio}
-                      style={{ margin: 0 }}
-                    />
-                  </View>
-
-                  {/* Barra de progreso */}
-                  <View style={{ paddingHorizontal: 10 }}>
-                    <Slider
-                      style={{ width: "100%", height: 40 }}
-                      minimumValue={0}
-                      maximumValue={duration || 1}
-                      value={currentTime}
-                      onSlidingComplete={handleSliderChange}
-                      minimumTrackTintColor={COLORS.primary}
-                      maximumTrackTintColor={COLORS.textSecondary + "40"}
-                      thumbTintColor={COLORS.primary}
-                    />
-                  </View>
-
-                  {/* Tiempos: actual y duración */}
+                  {/* Etiqueta superior estilo cassette con título */}
                   <View
                     style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      paddingHorizontal: 20,
-                      marginTop: -10,
+                      backgroundColor: "#e8e8e8",
+                      padding: 12,
+                      borderRadius: 4,
+                      marginBottom: 15,
+                      borderWidth: 1,
+                      borderColor: "#c0c0c0",
+                      ...SHADOWS.light,
                     }}
                   >
                     <Text
+                      numberOfLines={2}
                       style={{
-                        color: COLORS.textSecondary,
-                        fontSize: 12,
+                        fontSize: 14,
+                        color: "#1a1a1a",
+                        textAlign: "center",
                         fontFamily: FONT.regular,
+                        fontWeight: "600",
                       }}
                     >
-                      {formatTime(currentTime)}
-                    </Text>
-                    <Text
-                      style={{
-                        color: COLORS.textSecondary,
-                        fontSize: 12,
-                        fontFamily: FONT.regular,
-                      }}
-                    >
-                      {formatTime(duration)}
+                      {recuerdo.titulo || "Nota de voz"}
                     </Text>
                   </View>
-                </View>
 
-                {/* Información debajo del audio */}
-                {renderInfoBlock()}
+                  {/* Display LCD estilo vintage */}
+                  <View
+                    style={{
+                      backgroundColor: "#3d3d3d",
+                      padding: 10,
+                      borderRadius: 6,
+                      marginBottom: 20,
+                      borderWidth: 2,
+                      borderColor: "#2a2a2a",
+                    }}
+                  >
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          color: "#ff6b35",
+                          fontSize: 18,
+                          fontFamily: "monospace",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {formatTime(currentTime)}
+                      </Text>
+                      {/* Indicador de reproducción estilo cassette */}
+                      <View style={{ flexDirection: "row", gap: 3 }}>
+                        {[...Array(5)].map((_, i) => (
+                          <View
+                            key={i}
+                            style={{
+                              width: 4,
+                              height: isPlaying && i <= (currentTime % 5) ? 16 : 8,
+                              backgroundColor: isPlaying ? "#ff6b35" : "#666",
+                              borderRadius: 2,
+                              transition: "height 0.3s",
+                            }}
+                          />
+                        ))}
+                      </View>
+                      <Text
+                        style={{
+                          color: "#ff6b35",
+                          fontSize: 18,
+                          fontFamily: "monospace",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {formatTime(duration)}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Controles estilo botones de cassette */}
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      gap: 15,
+                      marginBottom: 20,
+                    }}
+                  >
+                    {/* Botón stop */}
+                    <TouchableOpacity
+                      onPress={stopAudio}
+                      style={{
+                        width: 45,
+                        height: 45,
+                        backgroundColor: "#4a4a4a",
+                        borderRadius: 4,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        borderWidth: 2,
+                        borderColor: "#2a2a2a",
+                        ...SHADOWS.small,
+                      }}
+                    >
+                      <View
+                        style={{
+                          width: 18,
+                          height: 18,
+                          backgroundColor: "#d0d0d0",
+                        }}
+                      />
+                    </TouchableOpacity>
+
+                    {/* Botón play/pause principal */}
+                    <TouchableOpacity
+                      onPress={playAudio}
+                      style={{
+                        width: 60,
+                        height: 60,
+                        backgroundColor: "#ff6b35",
+                        borderRadius: 30,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        borderWidth: 3,
+                        borderColor: "#d85a2a",
+                        ...SHADOWS.medium,
+                      }}
+                    >
+                      <IconButton
+                        icon={isPlaying ? "pause" : "play"}
+                        size={30}
+                        iconColor="#1a1a1a"
+                        style={{ margin: 0 }}
+                      />
+                    </TouchableOpacity>
+
+                    {/* Botón rewind */}
+                    <TouchableOpacity
+                      onPress={() => handleSliderChange(Math.max(0, currentTime - 10))}
+                      style={{
+                        width: 45,
+                        height: 45,
+                        backgroundColor: "#4a4a4a",
+                        borderRadius: 4,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        borderWidth: 2,
+                        borderColor: "#2a2a2a",
+                        ...SHADOWS.small,
+                      }}
+                    >
+                      <IconButton
+                        icon="rewind"
+                        size={24}
+                        iconColor="#d0d0d0"
+                        style={{ margin: 0 }}
+                      />
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Barra de progreso estilo cinta de cassette */}
+                  <View style={{ paddingHorizontal: 10, marginBottom: 20 }}>
+                    <View
+                      style={{
+                        backgroundColor: "#0a0a0a",
+                        borderRadius: 8,
+                        padding: 8,
+                        borderWidth: 2,
+                        borderColor: "#000",
+                      }}
+                    >
+                      <Slider
+                        style={{ width: "100%", height: 30 }}
+                        minimumValue={0}
+                        maximumValue={duration || 1}
+                        value={currentTime}
+                        onSlidingComplete={handleSliderChange}
+                        minimumTrackTintColor="#ff6b35"
+                        maximumTrackTintColor="#3a3a3a"
+                        thumbTintColor="#e0e0e0"
+                      />
+                    </View>
+                  </View>
+
+                  {/* Información dentro del dispositivo */}
+                  <View
+                    style={{
+                      backgroundColor: "#2a2a2a",
+                      padding: 15,
+                      borderRadius: 8,
+                      borderWidth: 1,
+                      borderColor: "#3a3a3a",
+                    }}
+                  >
+                    {/* Descripción y fecha en una fila */}
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        marginBottom: recuerdo.reactions && recuerdo.reactions.length > 0 ? 12 : 0,
+                      }}
+                    >
+                      {/* Descripción a la izquierda */}
+                      <View style={{ flex: 1, marginRight: 12 }}>
+                        {recuerdo.caption ? (
+                          <HighlightedMentionText
+                            text={recuerdo.caption}
+                            familyMembers={familyMembers}
+                            style={{
+                              fontSize: 13,
+                              color: "#d0d0d0",
+                              fontFamily: FONT.regular,
+                              lineHeight: 18,
+                            }}
+                          />
+                        ) : (
+                          <Text
+                            style={{
+                              fontSize: 11,
+                              color: "#999",
+                              fontFamily: FONT.regular,
+                            }}
+                          >
+                            {recuerdo.autor}
+                          </Text>
+                        )}
+                      </View>
+
+                      {/* Fecha a la derecha */}
+                      <View style={{ alignItems: "flex-end" }}>
+                        <Text
+                          style={{
+                            fontSize: 11,
+                            color: "#999",
+                            fontFamily: FONT.regular,
+                          }}
+                        >
+                          {new Date(recuerdo.fecha).toLocaleDateString()}
+                        </Text>
+                        {recuerdo.caption && (
+                          <Text
+                            style={{
+                              fontSize: 10,
+                              color: "#777",
+                              fontFamily: FONT.regular,
+                              marginTop: 4,
+                            }}
+                          >
+                            {recuerdo.autor}
+                          </Text>
+                        )}
+                      </View>
+                    </View>
+
+                    {/* Reacciones si existen */}
+                    {recuerdo.reactions && recuerdo.reactions.length > 0 && (
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          flexWrap: "wrap",
+                          gap: 8,
+                          paddingTop: 12,
+                          borderTopWidth: 1,
+                          borderTopColor: "#3a3a3a",
+                        }}
+                      >
+                        {recuerdo.reactions.map((reaction, idx) => {
+                          const member = familyMembers.find(
+                            (m) => m.id === reaction.userId,
+                          );
+                          return (
+                            <Reanimated.View
+                              key={`${reaction.userId}-${idx}`}
+                              entering={ZoomIn.delay(idx * 50)}
+                              style={{
+                                position: "relative",
+                                width: 32,
+                                height: 32,
+                              }}
+                            >
+                              {member?.avatarUrl ? (
+                                <Image
+                                  source={{ uri: member.avatarUrl }}
+                                  style={{
+                                    width: 32,
+                                    height: 32,
+                                    borderRadius: 16,
+                                    borderWidth: 2,
+                                    borderColor: "#ff6b35",
+                                  }}
+                                />
+                              ) : (
+                                <View
+                                  style={{
+                                    width: 32,
+                                    height: 32,
+                                    borderRadius: 16,
+                                    backgroundColor: "#ff6b35",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    borderWidth: 2,
+                                    borderColor: "#d85a2a",
+                                  }}
+                                >
+                                  <Text
+                                    style={{
+                                      color: "#1a1a1a",
+                                      fontSize: 12,
+                                      fontWeight: "bold",
+                                    }}
+                                  >
+                                    {member?.displayName?.charAt(0).toUpperCase()}
+                                  </Text>
+                                </View>
+                              )}
+                              {reaction.stickerUrl && (
+                                <Image
+                                  source={{ uri: reaction.stickerUrl }}
+                                  style={{
+                                    width: 16,
+                                    height: 16,
+                                    position: "absolute",
+                                    bottom: -4,
+                                    right: -4,
+                                  }}
+                                />
+                              )}
+                            </Reanimated.View>
+                          );
+                        })}
+                      </View>
+                    )}
+                  </View>
+                </View>
               </View>
             )}
             {/* Visual Feedback for Reaction */}
