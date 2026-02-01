@@ -8,7 +8,7 @@ import { Database } from "@/supabase-types";
 import { CreateAlbumRequest, AlbumWithPages, Album } from "./schema";
 import { NotificationsService } from "../notifications/service";
 import { uploadAlbumCoverImage, uploadAlbumPDF } from "@/services/storage";
-import { PDFDocument, PDFPage, rgb, StandardFonts } from "pdf-lib";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -720,7 +720,6 @@ Este recuerdo nos muestra...`;
    */
   private calculateCenteredX(
     text: string,
-    font: any,
     fontSize: number,
     containerWidth: number,
   ): number {
@@ -775,7 +774,7 @@ Este recuerdo nos muestra...`;
     });
 
     // Title
-    const titleX = this.calculateCenteredX(album.title, titleFont, 42, pageWidth);
+    const titleX = this.calculateCenteredX(album.title, 42, pageWidth);
     coverPage.drawText(album.title, {
       x: titleX,
       y: pageHeight - 150,
@@ -789,7 +788,6 @@ Este recuerdo nos muestra...`;
     if (album.description) {
       const descX = this.calculateCenteredX(
         album.description,
-        bodyFont,
         16,
         pageWidth,
       );
@@ -807,7 +805,6 @@ Este recuerdo nos muestra...`;
     // Family name
     const familyX = this.calculateCenteredX(
       familyName,
-      lightFont,
       14,
       pageWidth,
     );
@@ -922,7 +919,7 @@ Este recuerdo nos muestra...`;
       if (cleanedTitle) {
         // Calculate centered position for title at bottom of polaroid
         const innerWidth = frameWidth - 20;
-        const centeredOffset = this.calculateCenteredX(cleanedTitle, titleFont, 11, innerWidth);
+        const centeredOffset = this.calculateCenteredX(cleanedTitle, 11, innerWidth);
         const titleX = frameCenterX + 10 + centeredOffset;
         const titleY = frameCenterY + 30; // small bottom margin inside polaroid
 
