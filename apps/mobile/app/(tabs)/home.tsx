@@ -779,7 +779,14 @@ const HomeScreen = () => {
                 <Pressable
                   key={attempt.id}
                   style={styles.gameCard}
-                  onPress={() => router.push("/history")}
+                  onPress={() => {
+                    router.navigate({
+                      pathname: "/(tabs)/home",
+                      params: {
+                        tab: "juegos",
+                      },
+                    });
+                  }}
                 >
                   <View style={styles.gameIcon}>
                     <Image
@@ -830,7 +837,18 @@ const HomeScreen = () => {
               <View style={{ alignItems: "center", marginTop: 8 }}>
                 <Button
                   mode="text"
-                  onPress={() => router.push("/history")}
+                  onPress={() => {
+                    if (userElepad?.elder) {
+                      router.push("/history");
+                    } else {
+                      router.navigate({
+                        pathname: "/(tabs)/home",
+                        params: {
+                          tab: "juegos",
+                        },
+                      });
+                    }
+                  }}
                   textColor={COLORS.primary}
                 >
                   Ver historial completo
