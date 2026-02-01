@@ -10,7 +10,6 @@ import { COLORS, STYLES } from "@/styles/base";
 import { useTour } from "@/hooks/useTour";
 import { useToast } from "@/components/shared/Toast";
 
-import HomeScreen from "./(tabs)/home";
 export default function IndexRedirect() {
   const { session, loading } = useAuth();
   const router = useRouter();
