@@ -1,4 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
+import { LoadingUser } from "@/components/shared";
 import { useRouter } from "expo-router";
 import { useRef, useEffect, useState } from "react";
 import { Animated, View, Dimensions } from "react-native";
@@ -37,7 +38,7 @@ export default function IndexRedirect() {
   if (loading) {
     return (
       <View style={{ flex: 1 }}>
-        <HomeScreen />
+        <LoadingUser />
       </View>
     );
   }
@@ -46,7 +47,7 @@ export default function IndexRedirect() {
   if (session) {
     return (
       <View style={{ flex: 1 }}>
-        <HomeScreen />
+        <LoadingUser />
       </View>
     );
   }
