@@ -14,7 +14,7 @@ import { Text, Avatar, Button, IconButton } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, SHADOWS } from "@/styles/base";
-import { LoadingProfile, SkeletonBox } from "@/components/shared";
+import { SkeletonBox } from "@/components/shared";
 import {
   useGetActivitiesFamilyCodeIdFamilyGroup,
   useGetAttempts,
@@ -32,7 +32,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { GAMES_INFO } from "@/constants/gamesInfo";
 import { formatInUserTimezone, toUserLocalTime } from "@/lib/timezoneHelpers";
 import type { ImageSourcePropType } from "react-native";
-import { useVideoPlayer, VideoView } from 'expo-video';
+import { useVideoPlayer, VideoView } from "expo-video";
 import memoryImage from "@/assets/images/memory2.png";
 import netImage from "@/assets/images/net2.png";
 import sudokuImage from "@/assets/images/sudoku2.png";
@@ -40,9 +40,6 @@ import focusImage from "@/assets/images/focus2.png";
 import tapeImage from "@/assets/images/paper-transparent-sticky-tape-png.png";
 import fondoRecuerdos from "@/assets/images/fondoRecuerdos.png";
 import { useHomeTour } from "@/hooks/tours/useHomeTour";
-
-
-
 
 const GAME_IMAGES: Record<string, ImageSourcePropType> = {
   memory: memoryImage,
@@ -65,16 +62,11 @@ const getGameInfo = (gameType: string) => {
 };
 
 const HomeScreen = () => {
-
   const { userElepad, userElepadLoading } = useAuth();
+  const isLoading = userElepadLoading || !userElepad;
   const router = useRouter();
   const { unreadCount } = useNotifications();
   const queryClient = useQueryClient();
-
-
-
-
-
 
   // Fetch today's activities
   const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(
@@ -144,7 +136,7 @@ const HomeScreen = () => {
     profileRef,
     notificationRef,
     lastMemoryRef,
-    eventsRef
+    eventsRef,
   } = useHomeTour({
     userElepad,
     userElepadLoading,
@@ -215,7 +207,10 @@ const HomeScreen = () => {
       .slice(0, 3);
   }, [activitiesQuery.data]);
 
-  const lastAttempt = useMemo((): AttemptWithUser | AttemptWithUser[] | null => {
+  const lastAttempt = useMemo(():
+    | AttemptWithUser
+    | AttemptWithUser[]
+    | null => {
     if (!attemptsQuery.data) return null;
     const data = attemptsQuery.data;
     const attempts = Array.isArray(data)
@@ -235,7 +230,7 @@ const HomeScreen = () => {
     return memories[0] || null;
   }, [memoriesQuery.data]);
 
-  const player = useVideoPlayer(lastMemory?.mediaUrl || '');
+  const player = useVideoPlayer(lastMemory?.mediaUrl || "");
 
   // Invalidar queries cuando cambia el groupId
   useEffect(() => {
@@ -252,19 +247,6 @@ const HomeScreen = () => {
   }, [userElepad?.groupId, queryClient]);
 
 
-
-
-  if (userElepadLoading || !userElepad) {
-    return (
-      <SafeAreaView style={styles.safeArea} edges={["top"]}>
-        <StatusBar
-          barStyle="dark-content"
-          backgroundColor={COLORS.background}
-        />
-        <LoadingProfile />
-      </SafeAreaView>
-    );
-  }
 
   const displayName =
     (userElepad?.displayName as string) || userElepad?.email || "Usuario";
@@ -301,14 +283,21 @@ const HomeScreen = () => {
           <View style={styles.greetingContainer} ref={greetingRef}>
             <View>
               <Text style={styles.greeting}>{getGreeting()}</Text>
-              <View style={styles.userNameContainer}>
-                <Text style={styles.userName} numberOfLines={1}>
-                  {displayName}
-                </Text>
-                <Text style={styles.userRole} numberOfLines={1}>
-                  ({userRole})
-                </Text>
-              </View>
+              {isLoading ? (
+                <View style={{ gap: 4, marginTop: 4 }}>
+                  <SkeletonBox width={150} height={24} borderRadius={4} />
+                  <SkeletonBox width={100} height={16} borderRadius={4} />
+                </View>
+              ) : (
+                <View style={styles.userNameContainer}>
+                  <Text style={styles.userName} numberOfLines={1}>
+                    {displayName}
+                  </Text>
+                  <Text style={styles.userRole} numberOfLines={1}>
+                    ({userRole})
+                  </Text>
+                </View>
+              )}
             </View>
           </View>
           <View style={styles.headerRight}>
@@ -349,6 +338,7 @@ const HomeScreen = () => {
             <Pressable
               ref={profileRef}
               onPress={() => {
+                if (isLoading) return;
                 router.navigate({
                   pathname: "/(tabs)/home",
                   params: {
@@ -362,10 +352,12 @@ const HomeScreen = () => {
               })}
             >
               <View style={{ position: "relative" }}>
-                {userElepad?.avatarUrl ? (
+                {isLoading ? (
+                  <SkeletonBox width={55} height={55} borderRadius={30} />
+                ) : userElepad?.avatarUrl ? (
                   <Avatar.Image
                     size={55}
-                    source={{ uri: userElepad?.avatarUrl }}
+                    source={{ uri: userElepad.avatarUrl }}
                     style={styles.avatar}
                   />
                 ) : (
@@ -376,9 +368,9 @@ const HomeScreen = () => {
                     labelStyle={{ color: COLORS.white, fontSize: 22 }}
                   />
                 )}
-                {userElepad?.activeFrameUrl && (
+                {!isLoading && userElepad?.activeFrameUrl && (
                   <Image
-                    source={{ uri: userElepad?.activeFrameUrl }}
+                    source={{ uri: userElepad.activeFrameUrl }}
                     style={{
                       position: "absolute",
                       width: 55 * 1.4,
@@ -397,14 +389,15 @@ const HomeScreen = () => {
 
         {/* Último Recuerdo - DESTACADO */}
         <View ref={lastMemoryRef}>
-          {memoriesQuery.isLoading ? (
+          {memoriesQuery.isLoading || isLoading ? (
             <View style={styles.memoryCardLoading}>
               <SkeletonBox width={SCREEN_WIDTH} height={280} borderRadius={0} />
             </View>
           ) : lastMemory ? (
             <Animated.View entering={FadeIn.duration(800)}>
               {(() => {
-                const hasMedia = lastMemory.mediaUrl &&
+                const hasMedia =
+                  lastMemory.mediaUrl &&
                   lastMemory.mimeType &&
                   (lastMemory.mimeType.startsWith("image/") ||
                     lastMemory.mimeType.startsWith("video/"));
@@ -413,16 +406,16 @@ const HomeScreen = () => {
                     style={hasMedia ? styles.memoryCard : styles.memoryCardNote}
                     onPress={
                       lastMemory.mimeType.startsWith("video/")
-                        ? () => {}
+                        ? () => { }
                         : () =>
-                            router.navigate({
-                              pathname: "/(tabs)/recuerdos",
-                              params: {
-                                tab: "recuerdos",
-                                memoryId: lastMemory.id,
-                                bookId: lastMemory.bookId,
-                              },
-                            })
+                          router.navigate({
+                            pathname: "/(tabs)/recuerdos",
+                            params: {
+                              tab: "recuerdos",
+                              memoryId: lastMemory.id,
+                              bookId: lastMemory.bookId,
+                            },
+                          })
                     }
                   >
                     {hasMedia ? (
@@ -447,8 +440,13 @@ const HomeScreen = () => {
                             style={styles.memoryGradient}
                           >
                             <View style={styles.memoryContent}>
-                              <Text style={styles.memoryLabel}>ÚLTIMO RECUERDO</Text>
-                              <Text style={styles.memoryTitle} numberOfLines={2}>
+                              <Text style={styles.memoryLabel}>
+                                ÚLTIMO RECUERDO
+                              </Text>
+                              <Text
+                                style={styles.memoryTitle}
+                                numberOfLines={2}
+                              >
                                 {lastMemory.title || "Sin título"}
                               </Text>
                               {lastMemory.caption && (
@@ -462,7 +460,7 @@ const HomeScreen = () => {
                                 {formatInUserTimezone(
                                   lastMemory.createdAt,
                                   "d 'de' MMMM 'de' yyyy",
-                                  userElepad?.timezone
+                                  userElepad?.timezone,
                                 )}
                               </Text>
                             </View>
@@ -470,11 +468,19 @@ const HomeScreen = () => {
                         </ImageBackground>
                       )
                     ) : (
-                      <ImageBackground source={fondoRecuerdos} style={styles.memoryNoImage}>
+                      <ImageBackground
+                        source={fondoRecuerdos}
+                        style={styles.memoryNoImage}
+                      >
                         <Image source={tapeImage} style={styles.tapeIcon} />
                         <View style={styles.memoryContent}>
-                          <Text style={styles.memoryLabelNote}>ÚLTIMO RECUERDO</Text>
-                          <Text style={styles.memoryTitleNote} numberOfLines={2}>
+                          <Text style={styles.memoryLabelNote}>
+                            ÚLTIMO RECUERDO
+                          </Text>
+                          <Text
+                            style={styles.memoryTitleNote}
+                            numberOfLines={2}
+                          >
                             {lastMemory.title || "Sin título"}
                           </Text>
 
@@ -489,7 +495,7 @@ const HomeScreen = () => {
                             {formatInUserTimezone(
                               lastMemory.createdAt,
                               "d 'de' MMMM 'de' yyyy",
-                              userElepad?.timezone
+                              userElepad?.timezone,
                             )}
                           </Text>
                         </View>
@@ -517,7 +523,6 @@ const HomeScreen = () => {
                 Crear recuerdo
               </Button>
             </Pressable>
-
           )}
         </View>
 
@@ -532,10 +537,7 @@ const HomeScreen = () => {
         <View style={styles.section} ref={eventsRef}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>
-              Próximos{" "}
-              <Text suppressHighlighting={true}>
-                eventos
-              </Text>
+              Próximos <Text suppressHighlighting={true}>eventos</Text>
             </Text>
             {upcomingActivities.length > 0 && (
               <Button
@@ -557,7 +559,7 @@ const HomeScreen = () => {
           </View>
 
           <>
-            {activitiesQuery.isLoading ? (
+            {activitiesQuery.isLoading || isLoading ? (
               <View style={[styles.eventsContainer, { marginTop: 0 }]}>
                 {[1, 2, 3].map((i) => (
                   <View key={i} style={styles.eventItem}>
@@ -595,8 +597,14 @@ const HomeScreen = () => {
                     },
                     index,
                   ) => {
-                    const activityDate = toUserLocalTime(activity.startsAt, userElepad?.timezone);
-                    const now = toUserLocalTime(new Date(), userElepad?.timezone);
+                    const activityDate = toUserLocalTime(
+                      activity.startsAt,
+                      userElepad?.timezone,
+                    );
+                    const now = toUserLocalTime(
+                      new Date(),
+                      userElepad?.timezone,
+                    );
                     const tomorrow = new Date(now);
                     tomorrow.setDate(tomorrow.getDate() + 1);
 
@@ -608,7 +616,12 @@ const HomeScreen = () => {
                     let dateLabel = formatInUserTimezone(
                       activity.startsAt,
                       "d MMM",
-                      userElepad?.timezone
+                      userElepad?.timezone,
+                    );
+
+                    // Capitalize month (e.g., "30 ene" -> "30 Ene")
+                    dateLabel = dateLabel.replace(/ [a-z]/, (c) =>
+                      c.toUpperCase(),
                     );
 
                     if (isToday) dateLabel = "Hoy";
@@ -636,7 +649,7 @@ const HomeScreen = () => {
                           });
                         }}
                         style={({ pressed }) => ({
-                          opacity: pressed ? 0.7 : 1,
+                          transform: [{ scale: pressed ? 0.98 : 1 }],
                         })}
                       >
                         <Animated.View
@@ -649,7 +662,7 @@ const HomeScreen = () => {
                               {formatInUserTimezone(
                                 activity.startsAt,
                                 "HH:mm",
-                                userElepad?.timezone
+                                userElepad?.timezone,
                               )}
                             </Text>
                           </View>
@@ -701,10 +714,12 @@ const HomeScreen = () => {
         {/* Actividad Reciente */}
         <View style={styles.section} ref={activityRef}>
           <Text style={styles.sectionTitle}>
-            {userElepad?.elder ? "Mi última actividad" : "Última actividad del grupo"}
+            {userElepad?.elder
+              ? "Mi última actividad"
+              : "Última actividad del grupo"}
           </Text>
 
-          {attemptsQuery.isLoading ? (
+          {attemptsQuery.isLoading || isLoading ? (
             <View style={[styles.gameCard, { marginTop: 22 }]}>
               <SkeletonBox width={60} height={60} borderRadius={30} />
               <View style={{ flex: 1, justifyContent: "center", gap: 8 }}>
@@ -734,13 +749,15 @@ const HomeScreen = () => {
                     {formatInUserTimezone(
                       lastAttempt.startedAt,
                       "d 'de' MMMM, HH:mm",
-                      userElepad?.timezone
+                      userElepad?.timezone,
                     )}
                   </Text>
                 </View>
                 <View style={styles.gameScore}>
                   <Text style={styles.scoreLabel}>PUNTOS</Text>
-                  <Text style={styles.scoreValue}>{lastAttempt.score || 0}</Text>
+                  <Text style={styles.scoreValue}>
+                    {lastAttempt.score || 0}
+                  </Text>
                 </View>
               </Pressable>
             ) : (
@@ -756,15 +773,21 @@ const HomeScreen = () => {
                 </Button>
               </View>
             )
-          ) : (
-            // Familiar: mostrar múltiples intentos de elder
+          ) : // Familiar: mostrar múltiples intentos de elder
             Array.isArray(lastAttempt) && lastAttempt.length > 0 ? (
               <View style={{ gap: 5, marginTop: 22 }}>
                 {lastAttempt.map((attempt: AttemptWithUser) => (
                   <Pressable
                     key={attempt.id}
                     style={styles.gameCard}
-                    onPress={() => router.push("/history")}
+                    onPress={() => {
+                      router.navigate({
+                        pathname: "/(tabs)/home",
+                        params: {
+                          tab: "juegos",
+                        },
+                      });
+                    }}
                   >
                     <View style={styles.gameIcon}>
                       <Image
@@ -780,7 +803,7 @@ const HomeScreen = () => {
                         {formatInUserTimezone(
                           attempt.startedAt,
                           "d 'de' MMMM, HH:mm",
-                          userElepad?.timezone
+                          userElepad?.timezone,
                         )}
                       </Text>
                       {attempt.user && (
@@ -812,30 +835,49 @@ const HomeScreen = () => {
                     </View>
                   </Pressable>
                 ))}
+                <View style={{ alignItems: "center", marginTop: 8 }}>
+                  <Button
+                    mode="text"
+                    onPress={() => router.push("/history")}
+                    textColor={COLORS.primary}
+                  >
+                    Ver historial completo
+                  </Button>
+                </View>
               </View>
             ) : (
               <View style={styles.emptySection}>
-                <Text style={styles.emptyText}>No hay actividad reciente en el grupo</Text>
+                <Text style={styles.emptyText}>
+                  No hay actividad reciente en el grupo
+                </Text>
                 <Button
-                  mode="outlined"
-                  onPress={() => router.navigate({ pathname: "/(tabs)/home", params: { tab: "juegos" } })}
-                  style={styles.emptyButtonOutline}
-                  labelStyle={{ color: COLORS.primary }}
+                  mode="text"
+                  onPress={() => {
+                    if (userElepad?.elder) {
+                      router.push("/history");
+                    } else {
+                      router.navigate({
+                        pathname: "/(tabs)/home",
+                        params: {
+                          tab: "juegos",
+                        },
+                      });
+                    }
+                  }}
+                  textColor={COLORS.primary}
                 >
                   Ver estadísticas
                 </Button>
               </View>
-            )
-          )}
+            )}
         </View>
-
 
         {/* Espacio inferior para que el contenido no quede debajo del menú */}
         <View style={{ height: 100 }} />
-      </ScrollView >
-    </SafeAreaView >
+      </ScrollView>
+    </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -971,9 +1013,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     ...SHADOWS.card,
-    transform: [{ rotate: '-1deg' }], // Slight rotation like a stuck note
+    transform: [{ rotate: "-1deg" }], // Slight rotation like a stuck note
     borderWidth: 1,
-    borderColor: '#f1f1f1', // Softer beige border
+    borderColor: "#f1f1f1", // Softer beige border
   },
   memoryContent: {
     gap: 6,
@@ -1030,27 +1072,27 @@ const styles = StyleSheet.create({
   memoryTitleNote: {
     fontSize: 24,
     fontWeight: "bold",
-    color: '#1f2937', // Dark gray for contrast on yellow
+    color: "#1f2937", // Dark gray for contrast on yellow
     lineHeight: 30,
   },
   memoryDescriptionNote: {
     fontSize: 15,
-    color: '#374151', // Medium gray
+    color: "#374151", // Medium gray
     lineHeight: 22,
   },
   memoryDateNote: {
     fontSize: 13,
-    color: '#6b7280', // Light gray
+    color: "#6b7280", // Light gray
     fontWeight: "600",
     marginTop: 4,
   },
   tapeIcon: {
-    position: 'absolute',
+    position: "absolute",
     top: -10,
     left: -10,
     width: 70,
     height: 75,
-    transform: [{ rotate: '-3deg' }], // Slight angle
+    transform: [{ rotate: "-3deg" }], // Slight angle
     zIndex: 1,
   },
   emptyTitle: {

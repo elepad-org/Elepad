@@ -1,4 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
+import { LoadingUser } from "@/components/shared";
 import { useRouter } from "expo-router";
 import { useRef, useEffect, useState } from "react";
 import { Animated, View, Dimensions } from "react-native";
@@ -9,7 +10,6 @@ import { COLORS, STYLES } from "@/styles/base";
 import { useTour } from "@/hooks/useTour";
 import { useToast } from "@/components/shared/Toast";
 
-import HomeScreen from "./(tabs)/home";
 export default function IndexRedirect() {
   const { session, loading } = useAuth();
   const router = useRouter();
@@ -37,7 +37,7 @@ export default function IndexRedirect() {
   if (loading) {
     return (
       <View style={{ flex: 1 }}>
-        <HomeScreen />
+        <LoadingUser />
       </View>
     );
   }
@@ -46,7 +46,7 @@ export default function IndexRedirect() {
   if (session) {
     return (
       <View style={{ flex: 1 }}>
-        <HomeScreen />
+        <LoadingUser />
       </View>
     );
   }

@@ -37,13 +37,7 @@ export default function AudioRecorderComponent({
   });
   const hasValidAudio = !!audioUri;
 
-  // Watch for recording completion and set audioUri
-  useEffect(() => {
-    if (recorderState.url && !audioUri) {
-      console.log("Recording finished, URL:", recorderState.url);
-      setAudioUri(recorderState.url);
-    }
-  }, [recorderState.url, audioUri]);
+
 
   // Sincronizar estado del player
   useEffect(() => {
@@ -102,6 +96,8 @@ export default function AudioRecorderComponent({
 
   const stopRecording = async () => {
     try {
+      // Guardar URL actual antes de parar, por si el estado se limpia
+      const lastUrl = recorderState.url;
       const result = await recorder.stop();
       console.log("Recording stopped, result:", result);
 
@@ -111,6 +107,12 @@ export default function AudioRecorderComponent({
         uri = result;
       } else if (result !== undefined && result !== null && typeof result === "object" && "url" in result) {
         uri = (result as { url: string }).url;
+      }
+
+      // Fallback para iOS: si no viene en el result, usar el que teníamos antes de parar
+      if (!uri && lastUrl) {
+        console.log("Using lastUrl fallback:", lastUrl);
+        uri = lastUrl;
       }
 
       console.log("Extracted URI:", uri);
@@ -183,13 +185,12 @@ export default function AudioRecorderComponent({
       <Text style={{ ...STYLES.subheading, marginBottom: 16 }}>
         {recorderState.isRecording
           ? `Grabando... ${formatTime(
-              Math.floor(recorderState.durationMillis / 1000)
-            )}`
+            Math.floor(recorderState.durationMillis / 1000)
+          )}`
           : audioUri
-          ? `Audio grabado (${formatTime(duration)}) - ${
-              isPlaying ? "Reproduciendo..." : "Presiona play para escuchar"
+            ? `Audio grabado (${formatTime(duration)}) - ${isPlaying ? "Reproduciendo..." : "Presiona play para escuchar"
             }`
-          : "Presiona el botón para comenzar a grabar"}
+            : "Presiona el botón para comenzar a grabar"}
       </Text>
 
       <View style={{ alignItems: "center", marginVertical: 20 }}>

@@ -33,7 +33,11 @@ export default function MetadataInputComponent({
   const [caption, setCaption] = useState("");
 
   const handleSubmit = () => {
-    onSave(title.trim() || undefined, caption.trim() || undefined);
+    if (!title.trim()) {
+      // No debería llegar aquí si el botón está deshabilitado, pero por seguridad
+      return;
+    }
+    onSave(title.trim(), caption.trim() || undefined);
   };
 
   return (
@@ -46,14 +50,14 @@ export default function MetadataInputComponent({
     >
       <Text style={STYLES.heading}>Detalles del recuerdo</Text>
       <Text style={{ ...STYLES.subheading, marginBottom: 16 }}>
-        Agrega un título y descripción (opcional)
+        Agrega un título obligatorio y descripción (opcional)
       </Text>
 
       <StyledTextInput
         label="Título"
         value={title}
         onChangeText={setTitle}
-        placeholder="Ej: Día en la playa"
+        placeholder="Título obligatorio (Ej: Día en la playa)"
         disabled={isUploading}
         marginBottom={12}
       />
@@ -97,7 +101,7 @@ export default function MetadataInputComponent({
           <SaveButton
             onPress={handleSubmit}
             text={isUploading ? "Subiendo..." : "Guardar"}
-            disabled={isUploading}
+            disabled={isUploading || !title.trim()}
             loading={isUploading}
           />
         </View>

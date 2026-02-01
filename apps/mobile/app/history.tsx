@@ -23,6 +23,7 @@ import { useAuth } from "@/hooks/useAuth";
 import DropdownSelect from "@/components/shared/DropdownSelect";
 import { BackButton } from "@/components/shared/BackButton";
 import { formatInUserTimezone } from "@/lib/timezoneHelpers";
+import { useStatisticsTour } from "@/hooks/tours/useStatisticsTour";
 
 const PAGE_SIZE = 50;
 
@@ -31,7 +32,7 @@ interface Attempt {
   memoryPuzzleId?: string;
   logicPuzzleId?: string;
   sudokuPuzzleId?: string;
-  isFocusGame: boolean; 
+  isFocusGame: boolean;
   success?: boolean;
   score?: number;
   startedAt?: string;
@@ -40,6 +41,7 @@ interface Attempt {
 
 type Props = {
   initialAttempts?: Attempt[];
+  activeTab?: string;
 };
 
 // Inline AttemptCard component for consistency
@@ -47,10 +49,12 @@ function AttemptItem({
   attempt,
   gameType,
   userTimezone,
+  viewRef,
 }: {
   attempt: Attempt;
   gameType: string;
   userTimezone?: string;
+  viewRef?: React.Ref<View>;
 }) {
   // Mapeo de colores por tipo de juego
   const gameColors: Record<string, string> = {
@@ -87,6 +91,7 @@ function AttemptItem({
         styles.attemptCard,
         { backgroundColor: COLORS.backgroundSecondary },
       ]}
+      ref={viewRef}
     >
       <View style={[styles.statusStrip, { backgroundColor: gameColor }]} />
       <View style={styles.attemptContent}>
@@ -102,7 +107,7 @@ function AttemptItem({
           </View>
         </View>
         <View style={styles.attemptRight}>
-          <Text style={[styles.attemptScore, { color: statusColor }]}> 
+          <Text style={[styles.attemptScore, { color: statusColor }]}>
             {score} pts
           </Text>
           <View style={styles.attemptMeta}>
@@ -119,9 +124,9 @@ function AttemptItem({
   );
 }
 
-export default function HistoryScreen({ initialAttempts = [] }: Props) {
+export default function HistoryScreen({ initialAttempts = [], activeTab = "" }: Props) {
   const { userElepad } = useAuth();
-  
+
   const [selectedGame, setSelectedGame] = useState("all");
   const [timeRange, setTimeRange] = useState<"week" | "month" | "year">("week");
   const [selectedElderId, setSelectedElderId] = useState<string | null>(null);
@@ -134,7 +139,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
 
   const isHelper = !userElepad?.elder;
   const groupId = userElepad?.groupId;
-  
+
   // Determine the title based on view parameter
   const getTitle = () => {
     if (isHelper) {
@@ -151,20 +156,20 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
   // Get elders from family group
   const elders = useMemo(() => {
     if (!isHelper || !membersQuery.data) return [];
-    
+
     interface GroupMember {
       id: string;
       displayName: string;
       elder: boolean;
       avatarUrl?: string | null;
     }
-    
+
     const groupInfo = membersQuery.data as { members?: GroupMember[]; owner?: GroupMember };
     const allMembers = [
       ...(groupInfo.members || []),
       ...(groupInfo.owner ? [groupInfo.owner] : [])
     ];
-    
+
     return allMembers.filter((member: GroupMember) => member.elder === true);
   }, [membersQuery.data, isHelper]);
 
@@ -213,15 +218,15 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
     }
 
     // For helpers, ALWAYS calculate stats from filtered attempts
-    const filteredAttempts = gameType === "all" 
-      ? attempts 
+    const filteredAttempts = gameType === "all"
+      ? attempts
       : attempts.filter(attempt => {
-          if (gameType === GameType.memory) return !!attempt.memoryPuzzleId;
-          if (gameType === GameType.logic) return !!attempt.logicPuzzleId;
-          if (gameType === GameType.attention) return !!attempt.sudokuPuzzleId;
-          if (gameType === GameType.reaction) return !!attempt.isFocusGame;
-          return false;
-        });
+        if (gameType === GameType.memory) return !!attempt.memoryPuzzleId;
+        if (gameType === GameType.logic) return !!attempt.logicPuzzleId;
+        if (gameType === GameType.attention) return !!attempt.sudokuPuzzleId;
+        if (gameType === GameType.reaction) return !!attempt.isFocusGame;
+        return false;
+      });
 
     return {
       totalAttempts: filteredAttempts.length,
@@ -231,6 +236,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
   }, [attempts, isHelper, statsQueries, gameTypes]);
 
   const statsLoading = statsQueries.some((q) => q.isLoading);
+  const isLoading = loading || statsLoading;
   const globalLoading = loading || statsLoading;
 
   const detectGameType = (a: Attempt): string => {
@@ -238,6 +244,12 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
       (a.memoryPuzzleId && "Memoria") || (a.logicPuzzleId && "NET") || (a.sudokuPuzzleId && "Sudoku") || (a.isFocusGame && "Focus") || ""
     );
   };
+
+  const { headerRef, filtersRef, chartRef, summaryRef, historyRef } = useStatisticsTour({
+    activeTab,
+    loading: isLoading, // Using isLoading from auth/stats logic combination ideally, but using statsQueries loading state + global loading
+    isHelper,
+  });
 
   const fetchPage = useCallback(
     async (pageOffset: number, append = true) => {
@@ -256,9 +268,9 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
           gameType?: GameType;
           userId?: string;
         } = { limit: PAGE_SIZE, offset: pageOffset };
-        
+
         if (selectedGame !== "all") params.gameType = selectedGame as GameType;
-        
+
         // If helper, filter by selected elder's attempts
         if (isHelper && selectedElderId) {
           params.userId = selectedElderId;
@@ -368,9 +380,13 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
               <Text style={[styles.title, styles.titleWithBack]}>{getTitle()}</Text>
             </View>
           ) : (
-            <Text style={[styles.title]}>
-              {getTitle()}
-            </Text>
+            <View style={{ paddingHorizontal: 24, paddingTop: 20, paddingBottom: 16 }}>
+              <View ref={headerRef} style={{ alignSelf: 'flex-start' }}>
+                <Text style={{ fontSize: 26, fontFamily: FONT.bold, color: COLORS.text }}>
+                  {getTitle()}
+                </Text>
+              </View>
+            </View>
           )}
 
           {/* Elder selector for helpers */}
@@ -378,10 +394,10 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
             <>
               {elders.length === 0 ? (
                 <View style={styles.noEldersCard}>
-                  <MaterialCommunityIcons 
-                    name="account-alert" 
-                    size={48} 
-                    color={COLORS.textSecondary} 
+                  <MaterialCommunityIcons
+                    name="account-alert"
+                    size={48}
+                    color={COLORS.textSecondary}
                   />
                   <Text style={styles.noEldersTitle}>
                     No hay adultos mayores
@@ -391,7 +407,7 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
                   </Text>
                 </View>
               ) : (
-                <View style={styles.filterContainer}>
+                <View style={styles.filterContainer} ref={filtersRef}>
                   <View style={{ width: "48%", minWidth: 170 }}>
                     <DropdownSelect
                       label="Estadísticas de"
@@ -416,9 +432,9 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
                         ...gameTypes.map((gt) => ({
                           key: gt,
                           label: gameTypesRender[gt],
-                          icon: gt === GameType.memory ? "brain" : 
-                                gt === GameType.logic ? "puzzle" : 
-                                gt === GameType.attention ? "eye" : "lightning-bolt"
+                          icon: gt === GameType.memory ? "brain" :
+                            gt === GameType.logic ? "puzzle" :
+                              gt === GameType.attention ? "eye" : "lightning-bolt"
                         }))
                       ]}
                       onSelect={setSelectedGame}
@@ -433,119 +449,122 @@ export default function HistoryScreen({ initialAttempts = [] }: Props) {
           {isHelper && elders.length === 0 ? null : (
             <>
 
-          {/* Filter Dropdown for elders only */}
-          {!isHelper && (
-          <View style={styles.filterContainer}>
-            <View style={{ width: "50%", minWidth: 170, alignSelf: "flex-start" }}>
-              <DropdownSelect
-                label="Tipo de juego"
-                value={selectedGame}
-                showLabel={false}
-                options={[
-                  { key: "all", label: "Todos los juegos", icon: "gamepad-variant" },
-                  ...gameTypes.map((gt) => ({
-                    key: gt,
-                    label: gameTypesRender[gt],
-                    icon: gt === GameType.memory ? "brain" : 
-                          gt === GameType.logic ? "puzzle" : 
-                          gt === GameType.attention ? "eye" : "lightning-bolt"       
-                  }))
-                ]}
-                onSelect={setSelectedGame}
-              />
-            </View>
-          </View>
-          )}
+              {/* Filter Dropdown for elders only */}
+              {!isHelper && (
+                <View style={styles.filterContainer}>
+                  <View style={{ width: "50%", minWidth: 170, alignSelf: "flex-start" }}>
+                    <DropdownSelect
+                      label="Tipo de juego"
+                      value={selectedGame}
+                      showLabel={false}
+                      options={[
+                        { key: "all", label: "Todos los juegos", icon: "gamepad-variant" },
+                        ...gameTypes.map((gt) => ({
+                          key: gt,
+                          label: gameTypesRender[gt],
+                          icon: gt === GameType.memory ? "brain" :
+                            gt === GameType.logic ? "puzzle" :
+                              gt === GameType.attention ? "eye" : "lightning-bolt"
+                        }))
+                      ]}
+                      onSelect={setSelectedGame}
+                    />
+                  </View>
+                </View>
+              )}
 
-          {globalLoading && !loadingMore ? (
-            <View style={STYLES.center}>
-              <ActivityIndicator />
-            </View>
-          ) : (
-            <FlatList
-              data={attempts}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <AttemptItem 
-                  attempt={item} 
-                  gameType={detectGameType(item)}
-                  userTimezone={userElepad?.timezone}
+              {globalLoading && !loadingMore ? (
+                <View style={STYLES.center}>
+                  <ActivityIndicator />
+                </View>
+              ) : (
+                <FlatList
+                  data={attempts}
+                  keyExtractor={(item) => item.id}
+                  renderItem={({ item, index }) => (
+                    <AttemptItem
+                      attempt={item}
+                      gameType={detectGameType(item)}
+                      userTimezone={userElepad?.timezone}
+                      viewRef={index === 0 ? historyRef : undefined}
+                    />
+                  )}
+                  ListHeaderComponent={
+                    <>
+                      {/* Sección de Estadísticas */}
+                      <View ref={chartRef}>
+                        <StatisticsChart
+                          attempts={attempts}
+                          timeRange={timeRange}
+                          onTimeRangeChange={setTimeRange}
+                        />
+                      </View>
+
+                      {/* Tarjeta de Rendimiento */}
+                      <Card style={styles.statsCard} ref={summaryRef}>
+                        <Card.Content>
+                          <View style={styles.statsHeader}>
+                            <MaterialCommunityIcons
+                              name="chart-box-outline"
+                              size={20}
+                              color={COLORS.primary}
+                            />
+                            <Text style={styles.statsTitle}>Rendimiento </Text>
+                          </View>
+
+                          <View style={styles.kpiContainer}>
+                            <View style={styles.kpiItem}>
+                              <Text style={styles.kpiValue}>{total}</Text>
+                              <Text style={styles.kpiLabel}>Partidas</Text>
+                            </View>
+                            <View style={styles.kpiItem}>
+                              <Text style={[styles.kpiValue, { color: COLORS.primary }]}>
+                                {best}
+                              </Text>
+                              <Text style={styles.kpiLabel}>Récord</Text>
+                            </View>
+                            <View style={styles.kpiItem}>
+                              <Text
+                                style={[
+                                  styles.kpiValue,
+                                  {
+                                    color:
+                                      successRate > 0.5
+                                        ? COLORS.success
+                                        : COLORS.error,
+                                  },
+                                ]}
+                              >
+                                {successPercentage}%
+                              </Text>
+                              <Text style={styles.kpiLabel}>Éxito</Text>
+                            </View>
+                          </View>
+
+                          <Divider style={{ marginVertical: 12 }} />
+
+                          <View style={styles.progressRow}>
+                            <Text style={styles.progressLabel}>
+                              Tasa de victorias
+                            </Text>
+                            <Text style={styles.progressLabel}>
+                              {success}/{total}
+                            </Text>
+                          </View>
+                          <ProgressBar
+                            progress={successRate}
+                            color={successRate > 0.5 ? COLORS.success : COLORS.error}
+                            style={styles.progressBar}
+                          />
+                        </Card.Content>
+                      </Card>
+                    </>
+                  }
+                  ListFooterComponent={renderFooter}
+                  contentContainerStyle={styles.listContent}
                 />
               )}
-              ListHeaderComponent={
-                <>
-                  {/* Sección de Estadísticas */}
-                  <StatisticsChart
-                    attempts={attempts}
-                    timeRange={timeRange}
-                    onTimeRangeChange={setTimeRange}
-                  />
-
-                  {/* Tarjeta de Rendimiento */}
-                  <Card style={styles.statsCard}>
-                    <Card.Content>
-                      <View style={styles.statsHeader}>
-                        <MaterialCommunityIcons
-                          name="chart-box-outline"
-                          size={20}
-                          color={COLORS.primary}
-                        />
-                        <Text style={styles.statsTitle}>Rendimiento </Text>
-                      </View>
-
-                      <View style={styles.kpiContainer}>
-                        <View style={styles.kpiItem}>
-                          <Text style={styles.kpiValue}>{total}</Text>
-                          <Text style={styles.kpiLabel}>Partidas</Text>
-                        </View>
-                        <View style={styles.kpiItem}>
-                          <Text style={[styles.kpiValue, { color: COLORS.primary }]}>
-                            {best}
-                          </Text>
-                          <Text style={styles.kpiLabel}>Récord</Text>
-                        </View>
-                        <View style={styles.kpiItem}>
-                          <Text
-                            style={[
-                              styles.kpiValue,
-                              {
-                                color:
-                                  successRate > 0.5
-                                    ? COLORS.success
-                                    : COLORS.error,
-                              },
-                            ]}
-                          >
-                            {successPercentage}%
-                          </Text>
-                          <Text style={styles.kpiLabel}>Éxito</Text>
-                        </View>
-                      </View>
-
-                      <Divider style={{ marginVertical: 12 }} />
-
-                      <View style={styles.progressRow}>
-                        <Text style={styles.progressLabel}>
-                          Tasa de victorias
-                        </Text>
-                        <Text style={styles.progressLabel}>
-                          {success}/{total}
-                        </Text>
-                      </View>
-                      <ProgressBar
-                        progress={successRate}
-                        color={successRate > 0.5 ? COLORS.success : COLORS.error}
-                        style={styles.progressBar}
-                      />
-                    </Card.Content>
-                  </Card>
-                </>
-              }
-              ListFooterComponent={renderFooter}
-              contentContainerStyle={styles.listContent}
-            />
-          )}
-          </>
+            </>
           )}
         </View>
       </SafeAreaView>

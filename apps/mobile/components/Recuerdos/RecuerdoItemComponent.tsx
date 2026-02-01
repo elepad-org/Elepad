@@ -1,4 +1,6 @@
-import { TouchableOpacity, View, Dimensions, Image, ImageBackground } from "react-native";
+import React from "react";
+import { TouchableOpacity, View, Dimensions, ImageBackground } from "react-native";
+import { Image } from "expo-image";
 import { Text, IconButton } from "react-native-paper";
 import { COLORS, SHADOWS } from "@/styles/base";
 import fondoRecuerdos from "@/assets/images/fondoRecuerdos.png";
@@ -23,11 +25,11 @@ interface RecuerdoItemProps {
   onPress: (item: Recuerdo) => void;
 }
 
-export default function RecuerdoItemComponent({
+const RecuerdoItemComponent = React.memo(({
   item,
   numColumns,
   onPress,
-}: RecuerdoItemProps) {
+}: RecuerdoItemProps) => {
   const spacing = 19; // Espacio total horizontal
   const gap = 5; // Espacio entre items
   const itemSize =
@@ -40,27 +42,30 @@ export default function RecuerdoItemComponent({
   const heightFactor = (item.tipo === "texto" || item.tipo === "audio") ? 0.4 : (item.tipo === "imagen" || item.tipo === "video") ? 1.05 + (item.id.length % 3) * 0.05 : 0.8 + (item.id.length % 5) * 0.08; // 0.4 para texto y audio, 1.05 a 1.1 para imágenes y videos
   const itemHeight = itemSize * heightFactor;
 
+  const isMedia = item.tipo === "imagen" || item.tipo === "video";
+
   return (
     <TouchableOpacity
       onPress={() => onPress(item)}
+      activeOpacity={0.8}
       style={{
         width: itemSize,
         height: itemHeight,
         marginBottom: gap, // Separación vertical
         marginRight: gap,
-        paddingTop: (item.tipo === "imagen" || item.tipo === "video") ? 6 : 0,
-        paddingLeft: (item.tipo === "imagen" || item.tipo === "video") ? 6 : 0,
-        paddingRight: (item.tipo === "imagen" || item.tipo === "video") ? 6 : 0,
+        paddingTop: isMedia ? 6 : 0,
+        paddingLeft: isMedia ? 6 : 0,
+        paddingRight: isMedia ? 6 : 0,
         paddingBottom: 0, // No padding abajo
         overflow: "hidden",
         borderRadius: 8,
-        backgroundColor: (item.tipo === "imagen" || item.tipo === "video") ? "#FFFFFF" : "#F5F5F5", // Blanco para imágenes y videos, gris para otros
+        backgroundColor: isMedia ? "#FFFFFF" : "#F5F5F5", // Blanco para imágenes y videos, gris para otros
         borderWidth: 1,
         borderColor: "rgba(0,0,0,0.05)", // Borde sutil sombreado
         ...SHADOWS.light, // Sombra para polaroid
       }}
     >
-      {(item.tipo === "imagen" || item.tipo === "video") && item.miniatura ? (
+      {isMedia && item.miniatura ? (
         <View style={{ flex: 1, width: "100%", height: "100%" }}>
           <View style={{ position: 'relative', flex: item.titulo ? 4 : 1 }}>
             <Image
@@ -68,9 +73,11 @@ export default function RecuerdoItemComponent({
               style={{
                 width: "100%",
                 height: "100%",
-                resizeMode: "cover",
                 borderRadius: 2, // BorderRadius pequeño para polaroid
               }}
+              contentFit="cover"
+              transition={200}
+              cachePolicy="memory-disk"
             />
             {item.tipo === "video" && (
               /* Ícono de play para indicar que es un video */
@@ -140,8 +147,9 @@ export default function RecuerdoItemComponent({
             alignItems: "flex-start",
             borderRadius: 4,
           }}
+          resizeMode="cover"
         >
-         {((item.tipo === "texto" && item.titulo) || item.tipo === "audio") && (
+          {((item.tipo === "texto" && item.titulo) || item.tipo === "audio") && (
             <View
               style={{
                 bottom: 0,
@@ -179,4 +187,15 @@ export default function RecuerdoItemComponent({
       ) : null}
     </TouchableOpacity>
   );
-}
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.item.id === nextProps.item.id &&
+    prevProps.numColumns === nextProps.numColumns &&
+    prevProps.item.titulo === nextProps.item.titulo &&
+    prevProps.item.miniatura === nextProps.item.miniatura
+  );
+});
+
+RecuerdoItemComponent.displayName = "RecuerdoItemComponent";
+
+export default RecuerdoItemComponent;

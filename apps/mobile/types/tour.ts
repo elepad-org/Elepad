@@ -7,6 +7,7 @@ export interface TourStep {
   order: number;       // Orden del paso (1, 2, 3...)
   text: string;        // Texto explicativo
   title?: string;      // Título opcional
+  side?: 'top' | 'bottom'; // Preferencia de posición
 }
 
 export interface TourStepPosition extends TourStep {
@@ -24,6 +25,7 @@ export interface TourState {
   currentTourId: string | null;
   currentStepIndex: number;
   steps: TourStepPosition[];
+  isPreparing: boolean;
 }
 
 export type TourAction =
@@ -31,4 +33,5 @@ export type TourAction =
   | { type: 'NEXT_STEP' }
   | { type: 'PREV_STEP' }
   | { type: 'STOP_TOUR' }
-  | { type: 'UPDATE_LAYOUT'; stepId: string; layout: TourStepPosition['layout'] };
+  | { type: 'UPDATE_LAYOUT'; stepId: string; layout: TourStepPosition['layout'] }
+  | { type: 'SET_PREPARING'; isPreparing: boolean };

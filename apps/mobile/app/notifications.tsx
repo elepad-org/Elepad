@@ -48,8 +48,8 @@ import {
   Dialog,
   Divider,
 } from "react-native-paper";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Stack, useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import {
   useGetNotifications,
   usePatchNotificationsIdRead,
@@ -151,6 +151,7 @@ const memoryToRecuerdo = (
 };
 
 export default function NotificationsScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { userElepad } = useAuth();
@@ -651,8 +652,14 @@ export default function NotificationsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      <Stack.Screen options={{ headerShown: false }} />
+    <View
+      style={[
+        styles.safeArea,
+        {
+          paddingTop: insets.top,
+        },
+      ]}
+    >
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
       {/* Manual Header */}
@@ -1132,7 +1139,7 @@ export default function NotificationsScreen() {
           </Animated.View>
         </Dialog>
       </Portal>
-    </SafeAreaView>
+    </View>
   );
 }
 

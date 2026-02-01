@@ -1,5 +1,7 @@
 import { useRef, useEffect } from "react";
+import { useRouter } from "expo-router";
 import { useTour } from "@/hooks/useTour";
+import { useTourContext } from "@/components/tour/TourProvider";
 import { useTourStep } from "@/hooks/useTourStep";
 import { ElepadUser } from "@/hooks/useAuth";
 
@@ -18,7 +20,9 @@ export const useHomeTour = ({
   attemptsLoading,
   memoriesLoading,
 }: UseHomeTourProps) => {
+  const router = useRouter();
   const tour = useTour({ tourId: 'home' });
+  const { setPreparing, state: tourState } = useTourContext();
   const tourLayoutsRef = useRef<Record<string, { x: number; y: number; width: number; height: number }>>({});
 
   const greetingStep = useTourStep({
@@ -74,7 +78,7 @@ export const useHomeTour = ({
 
   useEffect(() => {
     const startHomeTour = async () => {
-      if (!userElepadLoading && userElepad && !tour.isActive) {
+      if (!userElepadLoading && userElepad && !tour.isActive && !tourState.isPreparing) {
         const dataLoaded = !activitiesLoading && !attemptsLoading && !memoriesLoading;
 
         if (dataLoaded) {
@@ -83,62 +87,77 @@ export const useHomeTour = ({
           if (!completed) {
             console.log('🏠 Home: Data loaded, waiting for UI to settle...');
 
+            // Bloquear interacciones mientras se prepara
+            setPreparing(true);
+
             setTimeout(() => {
               console.log('🏠 Home: Measuring elements...');
 
-              // Determine which steps are active based on role
-              const stepsToMeasure = [
-                greetingStep,
-                profileStep,
-                notificationStep,
-                lastMemoryStep,
-                ...(userElepad.elder ? [streakStep] : []),
-                eventsStep,
-                activityStep
-              ];
+              // Forzar navegación al home por si el usuario cambió de tab
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              router.navigate({ pathname: '/(tabs)', params: { tab: 'home' } });
 
-              let measurementsComplete = 0;
-              const totalMeasurements = stepsToMeasure.length;
+              // Esperar un frame/tiempo extra para asegurar que el layout se actualizó tras la navegación
+              setTimeout(() => {
 
-              const checkAndStart = () => {
-                measurementsComplete++;
-                if (measurementsComplete === totalMeasurements) {
-                  const finalSteps = stepsToMeasure.map(s => ({
-                    ...s.step,
-                    ref: s.ref,
-                    layout: tourLayoutsRef.current[s.step.stepId]
-                  }));
-                  tour.startTour(finalSteps);
-                }
-              };
+                // Determine which steps are active based on role
+                const stepsToMeasure = [
+                  greetingStep,
+                  profileStep,
+                  notificationStep,
+                  lastMemoryStep,
+                  ...(userElepad.elder ? [streakStep] : []),
+                  eventsStep,
+                  activityStep
+                ];
 
-              const measureStep = (step: typeof greetingStep, delay: number) => {
-                setTimeout(() => {
-                  if (step.ref.current) {
-                    step.ref.current.measureInWindow((x, y, w, h) => {
-                      tourLayoutsRef.current[step.step.stepId] = { x, y, width: w, height: h };
-                      checkAndStart();
-                    });
-                  } else {
-                    // If ref is missing, just proceed so we don't hang
-                    checkAndStart();
+                let measurementsComplete = 0;
+                const totalMeasurements = stepsToMeasure.length;
+
+                const checkAndStart = () => {
+                  measurementsComplete++;
+                  if (measurementsComplete === totalMeasurements) {
+                    const finalSteps = stepsToMeasure.map(s => ({
+                      ...s.step,
+                      ref: s.ref,
+                      layout: tourLayoutsRef.current[s.step.stepId]
+                    }));
+                    tour.startTour(finalSteps);
+                    // Desbloquear interacciones una vez iniciado
+                    setPreparing(false);
                   }
-                }, delay);
-              };
+                };
 
-              // Measure sequentially with delays
-              stepsToMeasure.forEach((step, index) => {
-                measureStep(step, 50 * (index + 1));
-              });
+                const measureStep = (step: typeof greetingStep, delay: number) => {
+                  setTimeout(() => {
+                    if (step.ref.current) {
+                      step.ref.current.measureInWindow((x, y, w, h) => {
+                        tourLayoutsRef.current[step.step.stepId] = { x, y, width: w, height: h };
+                        checkAndStart();
+                      });
+                    } else {
+                      // If ref is missing, just proceed so we don't hang
+                      checkAndStart();
+                    }
+                  }, delay);
+                };
 
-            }, 2000);
+                // Measure sequentially with delays
+                stepsToMeasure.forEach((step, index) => {
+                  measureStep(step, 50 * (index + 1));
+                });
+
+              }, 100); // Pequeña espera tras forzar navegación
+
+            }, 500);
           }
         }
       }
     };
 
     startHomeTour();
-  }, [userElepadLoading, userElepad, activitiesLoading, attemptsLoading, memoriesLoading, tour.isActive]);
+  }, [userElepadLoading, userElepad, activitiesLoading, attemptsLoading, memoriesLoading, tour.isActive, tourState.isPreparing]);
 
   return {
     greetingRef: greetingStep.ref,

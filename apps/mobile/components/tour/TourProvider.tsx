@@ -14,6 +14,7 @@ interface TourContextValue {
   markTourComplete: (tourId: string) => Promise<void>;
   isTourCompleted: (tourId: string) => Promise<boolean>;
   resetAllTours: () => Promise<void>;
+  setPreparing: (isPreparing: boolean) => void;
 }
 
 const TourContext = createContext<TourContextValue | undefined>(undefined);
@@ -23,6 +24,7 @@ const initialState: TourState = {
   currentTourId: null,
   currentStepIndex: 0,
   steps: [],
+  isPreparing: false,
 };
 
 function tourReducer(state: TourState, action: TourAction): TourState {
@@ -34,6 +36,7 @@ function tourReducer(state: TourState, action: TourAction): TourState {
         currentTourId: action.tourId,
         currentStepIndex: 0,
         steps: action.steps,
+        isPreparing: false,
       };
     case 'NEXT_STEP':
       if (state.currentStepIndex < state.steps.length - 1) {
@@ -55,6 +58,11 @@ function tourReducer(state: TourState, action: TourAction): TourState {
             ? { ...step, layout: action.layout }
             : step
         ),
+      };
+    case 'SET_PREPARING':
+      return {
+        ...state,
+        isPreparing: action.isPreparing,
       };
     default:
       return state;
@@ -137,6 +145,10 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  const setPreparing = useCallback((isPreparing: boolean) => {
+    dispatch({ type: 'SET_PREPARING', isPreparing });
+  }, []);
+
   const value: TourContextValue = {
     state,
     startTour,
@@ -147,6 +159,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     markTourComplete,
     isTourCompleted,
     resetAllTours,
+    setPreparing,
   };
 
   return <TourContext.Provider value={value}>{children}</TourContext.Provider>;

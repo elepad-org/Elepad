@@ -15,10 +15,10 @@ const CancelButton = ({
       mode="outlined"
       style={{
         borderRadius: 12,
-        borderColor: COLORS.secondary,
+        borderColor: COLORS.primary,
         width: "100%",
       }}
-      textColor={COLORS.secondary}
+      textColor={COLORS.primary}
       onPress={onPress}
       disabled={disabled}
     >

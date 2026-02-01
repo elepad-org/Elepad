@@ -259,7 +259,7 @@ export class MemoriesAlbumService {
     }
 
     // Process in background (async without await usually, but logic kept as provided)
-    this.processAlbumNarratives(album.id, userId, userGroup.groupId).catch(
+    await this.processAlbumNarratives(album.id, userId, userGroup.groupId).catch(
       (err) => {
         console.error("Error processing album narratives:", err);
       },

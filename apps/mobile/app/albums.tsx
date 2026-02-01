@@ -1,15 +1,16 @@
 import { useState, useCallback } from "react";
 import Animated, { ZoomIn } from "react-native-reanimated";
 import {
-  StatusBar,
   View,
   StyleSheet,
   FlatList,
   RefreshControl,
+  Image,
+  StatusBar,
 } from "react-native";
 import { Text, ActivityIndicator, Button } from "react-native-paper";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Stack, useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { COLORS, STYLES, LAYOUT } from "@/styles/base";
 import { useAuth } from "@/hooks/useAuth";
 import { useGetMemories, Album } from "@elepad/api-client";
@@ -18,7 +19,6 @@ import AlbumCard from "@/components/shared/AlbumCard";
 import { useAlbumCreation } from "@/hooks/useAlbumCreation";
 import { BackButton } from "@/components/shared/BackButton";
 import eleEmpthy from "@/assets/images/ele-idea.png";
-import { Image } from "react-native";
 
 const unwrapAlbums = (response: unknown): Album[] => {
   let cursor: unknown = response;
@@ -51,6 +51,7 @@ export default function AlbumsScreen() {
 
   // Fetch albums using the custom hook
   const { albumsQuery } = useAlbumCreation();
+  const insets = useSafeAreaInsets();
 
   // Fetch memories for the album creation
   const { data: memoriesResponse } = useGetMemories(
@@ -86,12 +87,16 @@ export default function AlbumsScreen() {
   }, [albumsQuery]);
 
   return (
-    <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
-      <Stack.Screen
-        options={{
-          headerShown: false,
-        }}
-      />
+    <View
+      style={[
+        STYLES.safeArea,
+        {
+          paddingTop: insets.top,
+          paddingLeft: insets.left,
+          paddingRight: insets.right,
+        },
+      ]}
+    >
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
       {/* Header */}
@@ -185,7 +190,7 @@ export default function AlbumsScreen() {
         onDismiss={() => setAlbumDialogVisible(false)}
         memories={memories}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
