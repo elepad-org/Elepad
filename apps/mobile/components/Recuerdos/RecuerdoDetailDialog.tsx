@@ -587,7 +587,7 @@ export default function RecuerdoDetailDialog({
                     paddingTop: 35,
                     paddingBottom: 20,
                     paddingHorizontal: 20,
-                    borderRadius: 15,
+                    borderRadius: 10,
                     minHeight: 400,
                     borderWidth: 3,
                     borderColor: "#0a0a0a",
@@ -791,65 +791,52 @@ export default function RecuerdoDetailDialog({
                       borderColor: "#3a3a3a",
                     }}
                   >
-                    {/* Descripción y fecha en una fila */}
+                    {/* Descripción si existe */}
+                    {recuerdo.descripcion && (
+                      <View style={{ marginBottom: 12 }}>
+                        <HighlightedMentionText
+                          text={recuerdo.descripcion}
+                          familyMembers={familyMembers}
+                          style={{
+                            fontSize: 13,
+                            color: "#d0d0d0",
+                            fontFamily: FONT.regular,
+                            lineHeight: 18,
+                          }}
+                        />
+                      </View>
+                    )}
+
+                    {/* Autor y fecha siempre en la misma línea */}
                     <View
                       style={{
                         flexDirection: "row",
                         justifyContent: "space-between",
-                        alignItems: "flex-start",
-                        marginBottom: recuerdo.reactions && recuerdo.reactions.length > 0 ? 12 : 0,
+                        alignItems: "center",
+                        paddingTop: recuerdo.descripcion ? 12 : 0,
+                        borderTopWidth: recuerdo.descripcion ? 1 : 0,
+                        borderTopColor: "#3a3a3a",
+                        marginBottom: recuerdo.reactions && recuerdo.reactions.length > 0 ? 0 : 0,
                       }}
                     >
-                      {/* Descripción a la izquierda */}
-                      <View style={{ flex: 1, marginRight: 12 }}>
-                        {recuerdo.caption ? (
-                          <HighlightedMentionText
-                            text={recuerdo.caption}
-                            familyMembers={familyMembers}
-                            style={{
-                              fontSize: 13,
-                              color: "#d0d0d0",
-                              fontFamily: FONT.regular,
-                              lineHeight: 18,
-                            }}
-                          />
-                        ) : (
-                          <Text
-                            style={{
-                              fontSize: 11,
-                              color: "#999",
-                              fontFamily: FONT.regular,
-                            }}
-                          >
-                            {recuerdo.autor}
-                          </Text>
-                        )}
-                      </View>
-
-                      {/* Fecha a la derecha */}
-                      <View style={{ alignItems: "flex-end" }}>
-                        <Text
-                          style={{
-                            fontSize: 11,
-                            color: "#999",
-                            fontFamily: FONT.regular,
-                          }}
-                        >
-                          {new Date(recuerdo.fecha).toLocaleDateString()}
-                        </Text>
-                        {recuerdo.caption && (
-                          <Text
-                            style={{
-                              fontSize: 10,
-                              color: "#777",
-                              fontFamily: FONT.regular,
-                              marginTop: 4,
-                            }}
-                          >
-                            {recuerdo.autor}
-                          </Text>
-                        )}
-                      </View>
+                      <Text
+                        style={{
+                          fontSize: 11,
+                          color: "#999",
+                          fontFamily: FONT.regular,
+                        }}
+                      >
+                        {recuerdo.autorNombre || "Desconocido"}
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: 11,
+                          color: "#999",
+                          fontFamily: FONT.regular,
+                        }}
+                      >
+                        {new Date(recuerdo.fecha).toLocaleDateString()}
+                      </Text>
                     </View>
 
                     {/* Reacciones si existen */}
@@ -860,8 +847,6 @@ export default function RecuerdoDetailDialog({
                           flexWrap: "wrap",
                           gap: 8,
                           paddingTop: 12,
-                          borderTopWidth: 1,
-                          borderTopColor: "#3a3a3a",
                         }}
                       >
                         {recuerdo.reactions.map((reaction, idx) => {
