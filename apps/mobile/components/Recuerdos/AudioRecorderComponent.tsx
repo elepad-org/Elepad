@@ -175,65 +175,94 @@ export default function AudioRecorderComponent({
   return (
     <View
       style={{
-        backgroundColor: "#1a1a1a",
+        backgroundColor: COLORS.background,
         padding: 20,
         borderRadius: 20,
-        borderWidth: 3,
-        borderColor: "#0a0a0a",
       }}
     >
-      <View
-        style={{
-          backgroundColor: "#e8e8e8",
-          padding: 10,
-          borderRadius: 4,
-          marginBottom: 16,
-          borderWidth: 1,
-          borderColor: "#c0c0c0",
-        }}
-      >
-        <Text
+      <Text style={STYLES.heading}>Grabar audio</Text>
+
+      <Text style={{ ...STYLES.subheading, marginBottom: 8 }}>
+        {recorderState.isRecording
+          ? `Grabando... ${formatTime(
+              Math.floor(recorderState.durationMillis / 1000)
+            )}`
+          : audioUri
+            ? `Audio grabado (${formatTime(duration)}) - ${isPlaying ? "Reproduciendo..." : "Presiona play para escuchar"
+            }`
+            : "Presiona el botón para comenzar a grabar"}
+      </Text>
+
+      {/* Visualización de onda cuando está grabando */}
+      {recorderState.isRecording && (
+        <View
           style={{
-            ...STYLES.heading,
-            color: "#1a1a1a",
-            textAlign: "center",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            height: 60,
+            gap: 3,
+            marginBottom: 12,
+            backgroundColor: COLORS.backgroundSecondary,
+            borderRadius: 12,
+            paddingHorizontal: 20,
           }}
         >
-          Grabar audio
-        </Text>
-      </View>
+          {[...Array(20)].map((_, i) => {
+            const baseHeight = 10 + (Math.sin(Date.now() / 100 + i) * 20);
+            const height = Math.max(8, Math.abs(baseHeight));
+            return (
+              <View
+                key={i}
+                style={{
+                  width: 4,
+                  height: height,
+                  backgroundColor: COLORS.primary,
+                  borderRadius: 2,
+                }}
+              />
+            );
+          })}
+        </View>
+      )}
 
-      {/* Display LCD estilo vintage */}
-      <View
-        style={{
-          backgroundColor: "#3d3d3d",
-          padding: 12,
-          borderRadius: 6,
-          marginBottom: 16,
-          borderWidth: 2,
-          borderColor: "#2a2a2a",
-        }}
-      >
-        <Text
+      {/* Visualización de waveform cuando el audio está grabado */}
+      {audioUri && !recorderState.isRecording && (
+        <View
           style={{
-            color: "#ff6b35",
-            fontSize: 14,
-            fontFamily: "monospace",
-            fontWeight: "bold",
-            textAlign: "center",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            height: 60,
+            gap: 2,
+            marginBottom: 12,
+            backgroundColor: COLORS.backgroundSecondary,
+            borderRadius: 12,
+            paddingHorizontal: 20,
           }}
         >
-          {recorderState.isRecording
-            ? `⬤ REC ${formatTime(
-                Math.floor(recorderState.durationMillis / 1000)
-              )}`
-            : audioUri
-              ? `${isPlaying ? "▶ PLAY" : "⏸ PAUSE"} ${formatTime(duration)}`
-              : "⏹ READY"}
-        </Text>
-      </View>
+          {[...Array(30)].map((_, i) => {
+            // Generar alturas variadas para simular waveform
+            const heights = [15, 30, 25, 40, 35, 20, 45, 30, 25, 35, 40, 30, 20, 35, 40, 25, 30, 45, 35, 20, 40, 30, 25, 35, 30, 20, 40, 35, 25, 30];
+            const height = heights[i % heights.length];
+            const progress = isPlaying && duration > 0 ? (player.currentTime / duration) * 30 : 0;
+            const isPlayed = i < progress;
+            return (
+              <View
+                key={i}
+                style={{
+                  width: 3,
+                  height: height,
+                  backgroundColor: isPlayed ? COLORS.primary : "#d0d0d0",
+                  borderRadius: 2,
+                }}
+              />
+            );
+          })}
+        </View>
+      )}
 
-      <View style={{ alignItems: "center", marginVertical: 20 }}>
+      <View style={{ alignItems: "center", marginVertical: 12 }}>
         {audioUri && !recorderState.isRecording ? (
           <TouchableOpacity
             onPress={playSound}
@@ -241,17 +270,17 @@ export default function AudioRecorderComponent({
               width: 80,
               height: 80,
               borderRadius: 40,
-              backgroundColor: "#ff6b35",
+              backgroundColor: "#f0f0f0",
               justifyContent: "center",
               alignItems: "center",
-              borderWidth: 3,
-              borderColor: "#d85a2a",
+              borderWidth: 2,
+              borderColor: "#e0e0e0",
             }}
           >
             <IconButton
               icon={isPlaying ? "pause" : "play"}
-              size={40}
-              iconColor="#1a1a1a"
+              size={50}
+              iconColor={COLORS.primary}
               style={{ margin: 0 }}
             />
           </TouchableOpacity>
@@ -261,11 +290,13 @@ export default function AudioRecorderComponent({
               width: 80,
               height: 80,
               borderRadius: 40,
-              backgroundColor: "#4a4a4a",
+              backgroundColor: "#f0f0f0",
               justifyContent: "center",
               alignItems: "center",
-              borderWidth: 3,
-              borderColor: recorderState.isRecording ? "#ff6b35" : "#2a2a2a",
+              borderWidth: 2,
+              borderColor: recorderState.isRecording
+                ? COLORS.error
+                : "#e0e0e0",
             }}
             onPress={recorderState.isRecording ? stopRecording : startRecording}
           >
@@ -275,8 +306,8 @@ export default function AudioRecorderComponent({
                 height: recorderState.isRecording ? 30 : 50,
                 borderRadius: recorderState.isRecording ? 5 : 25,
                 backgroundColor: recorderState.isRecording
-                  ? "#ff6b35"
-                  : "#d0d0d0",
+                  ? COLORS.error
+                  : COLORS.primary,
               }}
             />
           </TouchableOpacity>

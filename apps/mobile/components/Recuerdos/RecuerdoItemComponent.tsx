@@ -39,7 +39,7 @@ const RecuerdoItemComponent = React.memo(({
   const scale = 2 / numColumns; // 1 para 2 columnas, ~0.67 para 3 columnas
 
   // Factor de altura variable para estética Pinterest-like
-  const heightFactor = (item.tipo === "texto" || item.tipo === "audio") ? 0.4 : (item.tipo === "imagen" || item.tipo === "video") ? 1.05 + (item.id.length % 3) * 0.05 : 0.8 + (item.id.length % 5) * 0.08; // 0.4 para texto y audio, 1.05 a 1.1 para imágenes y videos
+  const heightFactor = item.tipo === "audio" ? 0.54 : item.tipo === "texto" ? 0.4 : (item.tipo === "imagen" || item.tipo === "video") ? 1.05 + (item.id.length % 3) * 0.05 : 0.8 + (item.id.length % 5) * 0.08; // 0.85 para audio (cassette completo), 0.4 para texto, 1.05 a 1.1 para imágenes y videos
   const itemHeight = itemSize * heightFactor;
 
   const isMedia = item.tipo === "imagen" || item.tipo === "video";
