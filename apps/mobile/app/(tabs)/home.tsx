@@ -838,7 +838,12 @@ const HomeScreen = () => {
                 <View style={{ alignItems: "center", marginTop: 8 }}>
                   <Button
                     mode="text"
-                    onPress={() => router.push("/history")}
+                    onPress={() =>
+                      router.navigate({
+                        pathname: "/(tabs)/home",
+                        params: { tab: "juegos" },
+                      })
+                    }
                     textColor={COLORS.primary}
                   >
                     Ver historial completo
