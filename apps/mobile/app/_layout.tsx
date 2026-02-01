@@ -21,8 +21,6 @@ import { ToastProvider } from "@/components/shared/Toast";
 import { TourProvider } from "@/components/tour/TourProvider";
 import { TourOverlay } from "@/components/tour/TourOverlay";
 
-
-
 const queryClient = new QueryClient();
 
 // Caché en memoria del token para cumplir con la firma síncrona de getToken
@@ -159,6 +157,20 @@ export default function RootLayout() {
                             animation: "fade",
                           }}
                         />
+                        <Stack.Screen
+                          name="albums"
+                          options={{
+                            headerShown: false,
+                            animation: "fade",
+                          }}
+                        />
+                        <Stack.Screen
+                          name="album-viewer"
+                          options={{
+                            headerShown: false,
+                            animation: "fade",
+                          }}
+                        />
                         <Stack.Screen name="+not-found" />
                       </Stack>
                       <TourOverlay />
@@ -168,8 +180,8 @@ export default function RootLayout() {
               </PaperProvider>
             </AuthProvider>
           </StreakSnackbarProvider>
-        </QueryClientProvider >
-      </SafeAreaProvider >
-    </GestureHandlerRootView >
+        </QueryClientProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
