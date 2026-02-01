@@ -26,17 +26,14 @@ export function RecentPhotosWidget({
   isLoading,
   memoryId,
 }: RecentPhotosWidgetProps) {
-  const deepLink = memoryId
-    ? `elepad://(tabs)/recuerdos?memoryId=${memoryId}`
-    : undefined;
   return (
     <FlexWidget
       style={{
         padding: 20, // Marco blanco uniforme (Polaroid style)
         flexDirection: "column",
       }}
-      clickAction={deepLink ? "OPEN_URI" : "OPEN_APP"}
-      clickActionData={deepLink ? { uri: deepLink } : undefined}
+      clickAction="OPEN_URI"
+      clickActionData={{  uri: `elepad://(tabs)/recuerdos?memoryId=${memoryId}` }}
     >
     <FlexWidget
       style={{
