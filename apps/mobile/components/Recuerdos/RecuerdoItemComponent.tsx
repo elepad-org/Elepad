@@ -67,7 +67,7 @@ const RecuerdoItemComponent = React.memo(({
     >
       {isMedia && item.miniatura ? (
         <View style={{ flex: 1, width: "100%", height: "100%" }}>
-          <View style={{ position: 'relative', flex: item.titulo ? 4 : 1 }}>
+          <View style={{ position: 'relative', flex: 4 }}>
             <Image
               source={item.tipo === "video" ? eleDef : { uri: item.miniatura }}
               style={{
@@ -112,15 +112,15 @@ const RecuerdoItemComponent = React.memo(({
               </View>
             )}
           </View>
-          {item.titulo && (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "flex-start",
-                backgroundColor: "transparent", // Parte blanca abajo
-              }}
-            >
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "flex-start",
+              backgroundColor: "transparent", // Parte blanca abajo
+            }}
+          >
+            {item.titulo && (
               <Text
                 numberOfLines={1}
                 style={{
@@ -134,8 +134,8 @@ const RecuerdoItemComponent = React.memo(({
               >
                 {item.titulo}
               </Text>
-            </View>
-          )}
+            )}
+          </View>
         </View>
       ) : item.tipo === "texto" || item.tipo === "audio" ? (
         <ImageBackground
