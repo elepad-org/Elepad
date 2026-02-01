@@ -823,25 +823,6 @@ const HomeScreen = () => {
                               style={styles.playerAvatar}
                             />
                           )}
-                        </View>
-                      )}
-                      {attempt.user && (
-                        <View style={styles.playerInfo}>
-                          {attempt.user.avatarUrl ? (
-                            <Avatar.Image
-                              size={20}
-                              source={{ uri: attempt.user.avatarUrl }}
-                              style={styles.playerAvatar}
-                            />
-                          ) : (
-                            <Avatar.Text
-                              size={20}
-                              label={attempt.user.displayName
-                                .substring(0, 2)
-                                .toUpperCase()}
-                              style={styles.playerAvatar}
-                            />
-                          )}
                           <Text style={styles.playerName}>
                             {attempt.user.displayName}
                           </Text>
