@@ -73,7 +73,9 @@ export const useGamesTour = ({ activeTab, loading, isElder }: UseGamesTourProps)
           setTimeout(() => {
 
             // Forzar navegación
-            router.setParams({ tab: 'juegos' });
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            router.navigate({ pathname: '/(tabs)', params: { tab: 'juegos' } });
 
             setTimeout(() => {
 

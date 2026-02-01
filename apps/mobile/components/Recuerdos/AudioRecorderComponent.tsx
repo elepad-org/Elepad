@@ -37,13 +37,7 @@ export default function AudioRecorderComponent({
   });
   const hasValidAudio = !!audioUri;
 
-  // Watch for recording completion and set audioUri
-  useEffect(() => {
-    if (recorderState.url && !audioUri) {
-      console.log("Recording finished, URL:", recorderState.url);
-      setAudioUri(recorderState.url);
-    }
-  }, [recorderState.url, audioUri]);
+
 
   // Sincronizar estado del player
   useEffect(() => {
@@ -183,13 +177,12 @@ export default function AudioRecorderComponent({
       <Text style={{ ...STYLES.subheading, marginBottom: 16 }}>
         {recorderState.isRecording
           ? `Grabando... ${formatTime(
-              Math.floor(recorderState.durationMillis / 1000)
-            )}`
+            Math.floor(recorderState.durationMillis / 1000)
+          )}`
           : audioUri
-          ? `Audio grabado (${formatTime(duration)}) - ${
-              isPlaying ? "Reproduciendo..." : "Presiona play para escuchar"
+            ? `Audio grabado (${formatTime(duration)}) - ${isPlaying ? "Reproduciendo..." : "Presiona play para escuchar"
             }`
-          : "Presiona el botón para comenzar a grabar"}
+            : "Presiona el botón para comenzar a grabar"}
       </Text>
 
       <View style={{ alignItems: "center", marginVertical: 20 }}>

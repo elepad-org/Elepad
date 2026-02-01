@@ -94,7 +94,9 @@ export const useHomeTour = ({
               console.log('🏠 Home: Measuring elements...');
 
               // Forzar navegación al home por si el usuario cambió de tab
-              router.navigate('/(tabs)/home');
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              router.navigate({ pathname: '/(tabs)', params: { tab: 'home' } });
 
               // Esperar un frame/tiempo extra para asegurar que el layout se actualizó tras la navegación
               setTimeout(() => {

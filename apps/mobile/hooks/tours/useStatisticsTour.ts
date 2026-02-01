@@ -67,7 +67,9 @@ export const useStatisticsTour = ({ activeTab, loading, isHelper }: UseStatistic
           setTimeout(() => {
 
             // Forzar navegación al tab de juegos (que renderiza Stats para helpers)
-            router.setParams({ tab: 'juegos' });
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            router.navigate({ pathname: '/(tabs)', params: { tab: 'juegos' } });
 
             setTimeout(() => {
 

@@ -60,7 +60,9 @@ export const useCalendarTour = ({
           setTimeout(() => {
 
             // Forzar navegación al tab correspondiente
-            router.setParams({ tab: 'calendar' });
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            router.navigate({ pathname: '/(tabs)', params: { tab: 'calendar' } });
 
             setTimeout(() => {
               const steps = [

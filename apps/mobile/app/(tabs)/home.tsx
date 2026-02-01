@@ -14,7 +14,7 @@ import { Text, Avatar, Button, IconButton } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, SHADOWS } from "@/styles/base";
-import { LoadingProfile, SkeletonBox } from "@/components/shared";
+import { SkeletonBox } from "@/components/shared";
 import {
   useGetActivitiesFamilyCodeIdFamilyGroup,
   useGetAttempts,
@@ -63,6 +63,7 @@ const getGameInfo = (gameType: string) => {
 
 const HomeScreen = () => {
   const { userElepad, userElepadLoading } = useAuth();
+  const isLoading = userElepadLoading || !userElepad;
   const router = useRouter();
   const { unreadCount } = useNotifications();
   const queryClient = useQueryClient();
@@ -94,11 +95,11 @@ const HomeScreen = () => {
     userElepad?.elder
       ? { limit: 1 }
       : {
-          limit: 10,
-          elderOnly: true,
-          startDate: dateRange.start,
-          endDate: dateRange.end,
-        },
+        limit: 10,
+        elderOnly: true,
+        startDate: dateRange.start,
+        endDate: dateRange.end,
+      },
     {
       query: {
         enabled: !!userElepad,
@@ -245,17 +246,7 @@ const HomeScreen = () => {
     }
   }, [userElepad?.groupId, queryClient]);
 
-  if (userElepadLoading || !userElepad) {
-    return (
-      <SafeAreaView style={styles.safeArea} edges={["top"]}>
-        <StatusBar
-          barStyle="dark-content"
-          backgroundColor={COLORS.background}
-        />
-        <LoadingProfile />
-      </SafeAreaView>
-    );
-  }
+
 
   const displayName =
     (userElepad?.displayName as string) || userElepad?.email || "Usuario";
@@ -292,14 +283,21 @@ const HomeScreen = () => {
           <View style={styles.greetingContainer} ref={greetingRef}>
             <View>
               <Text style={styles.greeting}>{getGreeting()}</Text>
-              <View style={styles.userNameContainer}>
-                <Text style={styles.userName} numberOfLines={1}>
-                  {displayName}
-                </Text>
-                <Text style={styles.userRole} numberOfLines={1}>
-                  ({userRole})
-                </Text>
-              </View>
+              {isLoading ? (
+                <View style={{ gap: 4, marginTop: 4 }}>
+                  <SkeletonBox width={150} height={24} borderRadius={4} />
+                  <SkeletonBox width={100} height={16} borderRadius={4} />
+                </View>
+              ) : (
+                <View style={styles.userNameContainer}>
+                  <Text style={styles.userName} numberOfLines={1}>
+                    {displayName}
+                  </Text>
+                  <Text style={styles.userRole} numberOfLines={1}>
+                    ({userRole})
+                  </Text>
+                </View>
+              )}
             </View>
           </View>
           <View style={styles.headerRight}>
@@ -340,6 +338,7 @@ const HomeScreen = () => {
             <Pressable
               ref={profileRef}
               onPress={() => {
+                if (isLoading) return;
                 router.navigate({
                   pathname: "/(tabs)/home",
                   params: {
@@ -353,10 +352,12 @@ const HomeScreen = () => {
               })}
             >
               <View style={{ position: "relative" }}>
-                {userElepad?.avatarUrl ? (
+                {isLoading ? (
+                  <SkeletonBox width={55} height={55} borderRadius={30} />
+                ) : userElepad?.avatarUrl ? (
                   <Avatar.Image
                     size={55}
-                    source={{ uri: userElepad?.avatarUrl }}
+                    source={{ uri: userElepad.avatarUrl }}
                     style={styles.avatar}
                   />
                 ) : (
@@ -367,9 +368,9 @@ const HomeScreen = () => {
                     labelStyle={{ color: COLORS.white, fontSize: 22 }}
                   />
                 )}
-                {userElepad?.activeFrameUrl && (
+                {!isLoading && userElepad?.activeFrameUrl && (
                   <Image
-                    source={{ uri: userElepad?.activeFrameUrl }}
+                    source={{ uri: userElepad.activeFrameUrl }}
                     style={{
                       position: "absolute",
                       width: 55 * 1.4,
@@ -388,7 +389,7 @@ const HomeScreen = () => {
 
         {/* Último Recuerdo - DESTACADO */}
         <View ref={lastMemoryRef}>
-          {memoriesQuery.isLoading ? (
+          {memoriesQuery.isLoading || isLoading ? (
             <View style={styles.memoryCardLoading}>
               <SkeletonBox width={SCREEN_WIDTH} height={280} borderRadius={0} />
             </View>
@@ -405,16 +406,16 @@ const HomeScreen = () => {
                     style={hasMedia ? styles.memoryCard : styles.memoryCardNote}
                     onPress={
                       lastMemory.mimeType.startsWith("video/")
-                        ? () => {}
+                        ? () => { }
                         : () =>
-                            router.navigate({
-                              pathname: "/(tabs)/recuerdos",
-                              params: {
-                                tab: "recuerdos",
-                                memoryId: lastMemory.id,
-                                bookId: lastMemory.bookId,
-                              },
-                            })
+                          router.navigate({
+                            pathname: "/(tabs)/recuerdos",
+                            params: {
+                              tab: "recuerdos",
+                              memoryId: lastMemory.id,
+                              bookId: lastMemory.bookId,
+                            },
+                          })
                     }
                   >
                     {hasMedia ? (
@@ -558,7 +559,7 @@ const HomeScreen = () => {
           </View>
 
           <>
-            {activitiesQuery.isLoading ? (
+            {activitiesQuery.isLoading || isLoading ? (
               <View style={[styles.eventsContainer, { marginTop: 0 }]}>
                 {[1, 2, 3].map((i) => (
                   <View key={i} style={styles.eventItem}>
@@ -718,7 +719,7 @@ const HomeScreen = () => {
               : "Última actividad del grupo"}
           </Text>
 
-          {attemptsQuery.isLoading ? (
+          {attemptsQuery.isLoading || isLoading ? (
             <View style={[styles.gameCard, { marginTop: 22 }]}>
               <SkeletonBox width={60} height={60} borderRadius={30} />
               <View style={{ flex: 1, justifyContent: "center", gap: 8 }}>
@@ -822,19 +823,51 @@ const HomeScreen = () => {
                             style={styles.playerAvatar}
                           />
                         )}
-                        <Text style={styles.playerName}>
-                          {attempt.user.displayName}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                  <View style={styles.gameScore}>
-                    <Text style={styles.scoreLabel}>PUNTOS</Text>
-                    <Text style={styles.scoreValue}>{attempt.score || 0}</Text>
-                  </View>
-                </Pressable>
-              ))}
-              <View style={{ alignItems: "center", marginTop: 8 }}>
+                      </Text>
+                      {attempt.user && (
+                        <View style={styles.playerInfo}>
+                          {attempt.user.avatarUrl ? (
+                            <Avatar.Image
+                              size={20}
+                              source={{ uri: attempt.user.avatarUrl }}
+                              style={styles.playerAvatar}
+                            />
+                          ) : (
+                            <Avatar.Text
+                              size={20}
+                              label={attempt.user.displayName
+                                .substring(0, 2)
+                                .toUpperCase()}
+                              style={styles.playerAvatar}
+                            />
+                          )}
+                          <Text style={styles.playerName}>
+                            {attempt.user.displayName}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                    <View style={styles.gameScore}>
+                      <Text style={styles.scoreLabel}>PUNTOS</Text>
+                      <Text style={styles.scoreValue}>{attempt.score || 0}</Text>
+                    </View>
+                  </Pressable>
+                ))}
+                <View style={{ alignItems: "center", marginTop: 8 }}>
+                  <Button
+                    mode="text"
+                    onPress={() => router.push("/history")}
+                    textColor={COLORS.primary}
+                  >
+                    Ver historial completo
+                  </Button>
+                </View>
+              </View>
+            ) : (
+              <View style={styles.emptySection}>
+                <Text style={styles.emptyText}>
+                  No hay actividad reciente en el grupo
+                </Text>
                 <Button
                   mode="text"
                   onPress={() => {
@@ -851,30 +884,10 @@ const HomeScreen = () => {
                   }}
                   textColor={COLORS.primary}
                 >
-                  Ver historial completo
+                  Ver estadísticas
                 </Button>
               </View>
-            </View>
-          ) : (
-            <View style={styles.emptySection}>
-              <Text style={styles.emptyText}>
-                No hay actividad reciente en el grupo
-              </Text>
-              <Button
-                mode="outlined"
-                onPress={() =>
-                  router.navigate({
-                    pathname: "/(tabs)/home",
-                    params: { tab: "juegos" },
-                  })
-                }
-                style={styles.emptyButtonOutline}
-                labelStyle={{ color: COLORS.primary }}
-              >
-                Ver estadísticas
-              </Button>
-            </View>
-          )}
+            )}
         </View>
 
         {/* Espacio inferior para que el contenido no quede debajo del menú */}
