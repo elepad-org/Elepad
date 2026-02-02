@@ -673,7 +673,7 @@ export class MemoriesService {
               eventType: "reaction",
               entityType: "memory",
               entityId: memoryId,
-              title: `<@${userId}> reaccionó a tu recuerdo`,
+              title: `${actor.displayName || 'Alguien'} reaccionó a tu recuerdo`,
               body: memory.title || "Un recuerdo tuyo",
             })
           );
@@ -699,7 +699,7 @@ export class MemoriesService {
               eventType: "reaction",
               entityType: "memory",
               entityId: memoryId,
-              title: `<@${userId}> reaccionó a un recuerdo donde apareces`,
+              title: `${actor.displayName || 'Alguien'} reaccionó a un recuerdo donde apareces`,
               body: memory.title || "Un recuerdo donde fuiste mencionado",
             })
           );
