@@ -675,85 +675,98 @@ export default function RecuerdoDetailDialog({
                     </View>
                   </View>
 
-                  {/* Controles estilo botones de cassette */}
+                  {/* Diseño estilo cassette con ruedas */}
                   <View
                     style={{
-                      flexDirection: "row",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      gap: 15,
+                      paddingVertical: 15,
                       marginBottom: 20,
+                      alignItems: "center",
                     }}
                   >
-                    {/* Botón stop */}
-                    <TouchableOpacity
-                      onPress={stopAudio}
+                    {/* Rectángulo que conecta las ruedas (ventana del cassette) */}
+                    <View
                       style={{
-                        width: 45,
-                        height: 45,
-                        backgroundColor: "#4a4a4a",
-                        borderRadius: 4,
-                        justifyContent: "center",
+                        width: "85%",
+                        height: 80,
+                        backgroundColor: "#2a2a2a",
+                        borderRadius: 40,
+                        borderWidth: 3,
+                        borderColor: "#4a4a4a",
+                        flexDirection: "row",
                         alignItems: "center",
-                        borderWidth: 2,
-                        borderColor: "#2a2a2a",
-                        ...SHADOWS.light,
+                        justifyContent: "space-between",
+                        paddingHorizontal: 8,
                       }}
                     >
+                      {/* Rueda izquierda */}
                       <View
                         style={{
-                          width: 18,
-                          height: 18,
-                          backgroundColor: "#d0d0d0",
+                          width: 68,
+                          height: 68,
+                          borderRadius: 34,
+                          borderWidth: 4,
+                          borderColor: "#4a4a4a",
+                          backgroundColor: "#0a0a0a",
+                          justifyContent: "center",
+                          alignItems: "center",
                         }}
-                      />
-                    </TouchableOpacity>
+                      >
+                        <View
+                          style={{
+                            width: 30,
+                            height: 30,
+                            borderRadius: 15,
+                            backgroundColor: "#d0d0d0",
+                          }}
+                        />
+                      </View>
 
-                    {/* Botón play/pause principal */}
-                    <TouchableOpacity
-                      onPress={playAudio}
-                      style={{
-                        width: 60,
-                        height: 60,
-                        backgroundColor: "#ff6b35",
-                        borderRadius: 30,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        borderWidth: 3,
-                        borderColor: "#d85a2a",
-                        ...SHADOWS.medium,
-                      }}
-                    >
-                      <IconButton
-                        icon={isPlaying ? "pause" : "play"}
-                        size={30}
-                        iconColor="#1a1a1a"
-                        style={{ margin: 0 }}
-                      />
-                    </TouchableOpacity>
+                      {/* Botón play/pause central */}
+                      <TouchableOpacity
+                        onPress={playAudio}
+                        style={{
+                          width: 70,
+                          height: 70,
+                          borderRadius: 35,
+                          backgroundColor: "#ff6b35",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          borderWidth: 3,
+                          borderColor: "#d85a2a",
+                          ...SHADOWS.medium,
+                        }}
+                      >
+                        <IconButton
+                          icon={isPlaying ? "pause" : "play"}
+                          size={35}
+                          iconColor="#1a1a1a"
+                          style={{ margin: 0 }}
+                        />
+                      </TouchableOpacity>
 
-                    {/* Botón rewind */}
-                    <TouchableOpacity
-                      onPress={() => handleSliderChange(Math.max(0, currentTime - 10))}
-                      style={{
-                        width: 45,
-                        height: 45,
-                        backgroundColor: "#4a4a4a",
-                        borderRadius: 4,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        borderWidth: 2,
-                        borderColor: "#2a2a2a",
-                        ...SHADOWS.light,
-                      }}
-                    >
-                      <IconButton
-                        icon="rewind"
-                        size={24}
-                        iconColor="#d0d0d0"
-                        style={{ margin: 0 }}
-                      />
-                    </TouchableOpacity>
+                      {/* Rueda derecha */}
+                      <View
+                        style={{
+                          width: 68,
+                          height: 68,
+                          borderRadius: 34,
+                          borderWidth: 4,
+                          borderColor: "#4a4a4a",
+                          backgroundColor: "#0a0a0a",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        <View
+                          style={{
+                            width: 30,
+                            height: 30,
+                            borderRadius: 15,
+                            backgroundColor: "#d0d0d0",
+                          }}
+                        />
+                      </View>
+                    </View>
                   </View>
 
                   {/* Barra de progreso estilo cinta de cassette */}

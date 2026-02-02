@@ -197,9 +197,9 @@ const RecuerdoItemComponent = React.memo(({
               {/* Rueda izquierda */}
               <View
                 style={{
-                  width: 28 * scale,
-                  height: 28 * scale,
-                  borderRadius: 14 * scale,
+                  width: 32 * scale,
+                  height: 32 * scale,
+                  borderRadius: 16 * scale,
                   borderWidth: 2 * scale,
                   borderColor: "#4a4a4a",
                   backgroundColor: "#0a0a0a",
@@ -209,9 +209,9 @@ const RecuerdoItemComponent = React.memo(({
               >
                 <View
                   style={{
-                    width: 8 * scale,
-                    height: 8 * scale,
-                    borderRadius: 4 * scale,
+                    width: 12 * scale,
+                    height: 12 * scale,
+                    borderRadius: 6 * scale,
                     backgroundColor: "#d0d0d0",
                   }}
                 />
@@ -220,9 +220,9 @@ const RecuerdoItemComponent = React.memo(({
               {/* Ícono de play central */}
               <View
                 style={{
-                  width: 20 * scale,
-                  height: 20 * scale,
-                  borderRadius: 10 * scale,
+                  width: 22 * scale,
+                  height: 22 * scale,
+                  borderRadius: 12 * scale,
                   backgroundColor: "#ff6b35",
                   justifyContent: "center",
                   alignItems: "center",
@@ -230,7 +230,7 @@ const RecuerdoItemComponent = React.memo(({
               >
                 <IconButton
                   icon="play"
-                  size={12 * scale}
+                  size={14 * scale}
                   iconColor="#1a1a1a"
                   style={{ margin: 0 }}
                 />
@@ -239,9 +239,9 @@ const RecuerdoItemComponent = React.memo(({
               {/* Rueda derecha */}
               <View
                 style={{
-                  width: 28 * scale,
-                  height: 28 * scale,
-                  borderRadius: 14 * scale,
+                  width: 32 * scale,
+                  height: 32 * scale,
+                  borderRadius: 16   * scale,
                   borderWidth: 2 * scale,
                   borderColor: "#4a4a4a",
                   backgroundColor: "#0a0a0a",
@@ -251,9 +251,9 @@ const RecuerdoItemComponent = React.memo(({
               >
                 <View
                   style={{
-                    width: 8 * scale,
-                    height: 8 * scale,
-                    borderRadius: 4 * scale,
+                    width: 12 * scale,
+                    height: 12 * scale,
+                    borderRadius: 6 * scale,
                     backgroundColor: "#d0d0d0",
                   }}
                 />
