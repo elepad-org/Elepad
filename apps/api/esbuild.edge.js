@@ -25,6 +25,7 @@ await build({
     "puppeteer",
     "puppeteer-core",
     "@puppeteer/browsers",
+    "pdf-lib",
     "node:os",
     "node:path",
     "node:fs",
