@@ -82,18 +82,11 @@ export default function CompactAudioPlayer({
         borderWidth: 3,
         borderColor: "#0a0a0a",
         ...SHADOWS.medium,
+        marginBottom: 30,
+        width: "96%",
+        alignSelf: "center",
       }}
     >
-      <Image source={tapeImage} style={{ 
-        position: "absolute",
-        top: -15,
-        left: "50%",
-        marginLeft: -60,
-        width: 120,
-        height: 40,
-        zIndex: 10,
-      }} />
-
       {/* Etiqueta superior */}
       <View
         style={{
@@ -131,7 +124,7 @@ export default function CompactAudioPlayer({
         </Text>
       </View>
 
-      {/* Display LCD */}
+      {/* Display LCD - Con waveform integrado */}
       <View
         style={{
           backgroundColor: "#3d3d3d",
@@ -159,19 +152,28 @@ export default function CompactAudioPlayer({
           >
             {formatTime(currentTime)}
           </Text>
-          <View style={{ flexDirection: "row", gap: 3 }}>
-            {[...Array(5)].map((_, i) => (
-              <View
-                key={i}
-                style={{
-                  width: 4,
-                  height: isPlaying && i <= (currentTime % 5) ? 16 : 8,
-                  backgroundColor: isPlaying ? "#ff6b35" : "#666",
-                  borderRadius: 2,
-                }}
-              />
-            ))}
-          </View>
+          
+          {/* Waveform en el centro */}
+          {waveformData.length > 0 && (
+            <View style={{ flexDirection: "row", gap: 2, alignItems: "center" }}>
+              {waveformData.map((height, i) => {
+                const progress = isPlaying && duration > 0 ? (currentTime / duration) * waveformData.length : 0;
+                const isPlayed = i < progress;
+                return (
+                  <View
+                    key={i}
+                    style={{
+                      width: 2,
+                      height: Math.max(6, height * 0.4),
+                      backgroundColor: isPlayed ? "#ff6b35" : "#666",
+                      borderRadius: 1,
+                    }}
+                  />
+                );
+              })}
+            </View>
+          )}
+          
           <Text
             style={{
               color: "#ff6b35",
@@ -184,39 +186,6 @@ export default function CompactAudioPlayer({
           </Text>
         </View>
       </View>
-
-      {/* Waveform */}
-      {waveformData.length > 0 && (
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            height: 50,
-            gap: 2,
-            marginBottom: 15,
-            backgroundColor: "#2a2a2a",
-            borderRadius: 8,
-            paddingHorizontal: 10,
-          }}
-        >
-          {waveformData.map((height, i) => {
-            const progress = isPlaying && duration > 0 ? (currentTime / duration) * waveformData.length : 0;
-            const isPlayed = i < progress;
-            return (
-              <View
-                key={i}
-                style={{
-                  width: 3,
-                  height: height,
-                  backgroundColor: isPlayed ? "#8B5CF6" : "#666",
-                  borderRadius: 2,
-                }}
-              />
-            );
-          })}
-        </View>
-      )}
 
       {/* Botón de play/pause */}
       <View
