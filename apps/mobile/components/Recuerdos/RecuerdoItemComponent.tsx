@@ -39,7 +39,7 @@ const RecuerdoItemComponent = React.memo(({
   const scale = 2 / numColumns; // 1 para 2 columnas, ~0.67 para 3 columnas
 
   // Factor de altura variable para estética Pinterest-like
-  const heightFactor = (item.tipo === "texto" || item.tipo === "audio") ? 0.4 : (item.tipo === "imagen" || item.tipo === "video") ? 1.05 + (item.id.length % 3) * 0.05 : 0.8 + (item.id.length % 5) * 0.08; // 0.4 para texto y audio, 1.05 a 1.1 para imágenes y videos
+  const heightFactor = item.tipo === "audio" ? 0.54 : item.tipo === "texto" ? 0.4 : (item.tipo === "imagen" || item.tipo === "video") ? 1.05 + (item.id.length % 3) * 0.05 : 0.8 + (item.id.length % 5) * 0.08; // 0.85 para audio (cassette completo), 0.4 para texto, 1.05 a 1.1 para imágenes y videos
   const itemHeight = itemSize * heightFactor;
 
   const isMedia = item.tipo === "imagen" || item.tipo === "video";
@@ -137,7 +137,131 @@ const RecuerdoItemComponent = React.memo(({
             )}
           </View>
         </View>
-      ) : item.tipo === "texto" || item.tipo === "audio" ? (
+      ) : item.tipo === "audio" ? (
+        // Diseño tipo cassette vintage para audio
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "#1a1a1a",
+            borderRadius: 4,
+            padding: 8 * scale,
+            justifyContent: "space-between",
+          }}
+        >
+          {/* Etiqueta superior estilo cassette */}
+          <View
+            style={{
+              backgroundColor: "#e8e8e8",
+              borderRadius: 2,
+              padding: 6 * scale,
+              borderWidth: 1,
+              borderColor: "#c0c0c0",
+            }}
+          >
+            <Text
+              numberOfLines={2}
+              style={{
+                fontSize: 9 * scale,
+                color: "#1a1a1a",
+                textAlign: "center",
+                fontFamily: "Montserrat",
+                fontWeight: "600",
+              }}
+            >
+              {item.titulo || "Nota de voz"}
+            </Text>
+          </View>
+
+          {/* Ruedas del cassette conectadas */}
+          <View
+            style={{
+              paddingVertical: 8 * scale,
+              alignItems: "center",
+            }}
+          >
+            {/* Rectángulo que conecta las ruedas (ventana del cassette) */}
+            <View
+              style={{
+                width: "85%",
+                height: 40 * scale,
+                backgroundColor: "#2a2a2a",
+                borderRadius: 20 * scale,
+                borderWidth: 1.5 * scale,
+                borderColor: "#4a4a4a",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                paddingHorizontal: 8 * scale,
+              }}
+            >
+              {/* Rueda izquierda */}
+              <View
+                style={{
+                  width: 28 * scale,
+                  height: 28 * scale,
+                  borderRadius: 14 * scale,
+                  borderWidth: 2 * scale,
+                  borderColor: "#4a4a4a",
+                  backgroundColor: "#0a0a0a",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <View
+                  style={{
+                    width: 8 * scale,
+                    height: 8 * scale,
+                    borderRadius: 4 * scale,
+                    backgroundColor: "#d0d0d0",
+                  }}
+                />
+              </View>
+
+              {/* Ícono de play central */}
+              <View
+                style={{
+                  width: 20 * scale,
+                  height: 20 * scale,
+                  borderRadius: 10 * scale,
+                  backgroundColor: "#ff6b35",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <IconButton
+                  icon="play"
+                  size={12 * scale}
+                  iconColor="#1a1a1a"
+                  style={{ margin: 0 }}
+                />
+              </View>
+
+              {/* Rueda derecha */}
+              <View
+                style={{
+                  width: 28 * scale,
+                  height: 28 * scale,
+                  borderRadius: 14 * scale,
+                  borderWidth: 2 * scale,
+                  borderColor: "#4a4a4a",
+                  backgroundColor: "#0a0a0a",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <View
+                  style={{
+                    width: 8 * scale,
+                    height: 8 * scale,
+                    borderRadius: 4 * scale,
+                    backgroundColor: "#d0d0d0",
+                  }}
+                />
+              </View>
+            </View>
+          </View>
+        </View>
+      ) : item.tipo === "texto" ? (
         <ImageBackground
           source={fondoRecuerdos}
           style={{
@@ -149,7 +273,7 @@ const RecuerdoItemComponent = React.memo(({
           }}
           resizeMode="cover"
         >
-          {((item.tipo === "texto" && item.titulo) || item.tipo === "audio") && (
+          {item.titulo && (
             <View
               style={{
                 bottom: 0,
@@ -158,7 +282,7 @@ const RecuerdoItemComponent = React.memo(({
                 minHeight: 30,
                 justifyContent: "center",
                 alignItems: "flex-start",
-                backgroundColor: "transparent", // Parte blanca abajo
+                backgroundColor: "transparent",
               }}
             >
               <Text
@@ -168,20 +292,13 @@ const RecuerdoItemComponent = React.memo(({
                   color: COLORS.primary,
                   paddingHorizontal: 5 * scale,
                   textAlign: "left",
-                  fontFamily: "Montserrat", // Fuente principal de la app
+                  fontFamily: "Montserrat",
                   fontWeight: "600",
                 }}
               >
-                {item.tipo === "audio" ? (item.titulo || "Nota de voz") : item.titulo}
+                {item.titulo}
               </Text>
-            </View>)}
-          {item.tipo === "audio" && (
-            <IconButton
-              icon="microphone"
-              size={21 * scale}
-              iconColor={COLORS.primary}
-              style={{ position: "absolute", top: '50%', right: 12 * scale, transform: [{ translateY: -9 * scale }], margin: 0 }}
-            />
+            </View>
           )}
         </ImageBackground>
       ) : null}

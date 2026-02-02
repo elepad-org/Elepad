@@ -28,6 +28,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import StreakCounter from "@/components/StreakCounter";
 import HighlightedMentionText from "@/components/Recuerdos/HighlightedMentionText";
+import CompactAudioPlayer from "@/components/Recuerdos/CompactAudioPlayer";
 import { useNotifications } from "@/hooks/useNotifications";
 import { GAMES_INFO } from "@/constants/gamesInfo";
 import { formatInUserTimezone, toUserLocalTime } from "@/lib/timezoneHelpers";
@@ -396,11 +397,59 @@ const HomeScreen = () => {
           ) : lastMemory ? (
             <Animated.View entering={FadeIn.duration(800)}>
               {(() => {
+                const isAudio = lastMemory.mimeType?.startsWith("audio/");
                 const hasMedia =
                   lastMemory.mediaUrl &&
                   lastMemory.mimeType &&
                   (lastMemory.mimeType.startsWith("image/") ||
                     lastMemory.mimeType.startsWith("video/"));
+                
+                // Si es audio, mostrar reproductor
+                if (isAudio && lastMemory.mediaUrl) {
+                  // Generar waveform data consistente
+                  let seed = 0;
+                  for (let i = 0; i < lastMemory.mediaUrl.length; i++) {
+                    seed += lastMemory.mediaUrl.charCodeAt(i);
+                  }
+                  const waveformData = Array.from({ length: 30 }, (_, i) => {
+                    const t = i / 30;
+                    const wave1 = Math.sin(t * Math.PI * 2 + seed * 0.1) * 12;
+                    const wave2 = Math.sin(t * Math.PI * 4 + seed * 0.2) * 8;
+                    const wave3 = Math.sin(t * Math.PI * 8 + seed * 0.3) * 4;
+                    const noise = ((seed + i * 123) % 100) / 100 * 6;
+                    const envelope = Math.sin(t * Math.PI);
+                    const amplitude = Math.abs(wave1 + wave2 + wave3 + noise) * envelope;
+                    return Math.max(10, Math.min(35, 12 + amplitude));
+                  });
+
+                  return (
+                    <Pressable
+                      onPress={() =>
+                        router.navigate({
+                          pathname: "/(tabs)/recuerdos",
+                          params: {
+                            tab: "recuerdos",
+                            memoryId: lastMemory.id,
+                            bookId: lastMemory.bookId,
+                          },
+                        })
+                      }
+                    >
+                      <CompactAudioPlayer
+                        audioUri={lastMemory.mediaUrl}
+                        title={lastMemory.title || "Sin título"}
+                        caption={lastMemory.caption || undefined}
+                        date={formatInUserTimezone(
+                          lastMemory.createdAt,
+                          "d 'de' MMMM 'de' yyyy",
+                          userElepad?.timezone,
+                        )}
+                        waveformData={waveformData}
+                      />
+                    </Pressable>
+                  );
+                }
+                
                 return (
                   <Pressable
                     style={hasMedia ? styles.memoryCard : styles.memoryCardNote}
@@ -838,7 +887,12 @@ const HomeScreen = () => {
                 <View style={{ alignItems: "center", marginTop: 8 }}>
                   <Button
                     mode="text"
-                    onPress={() => router.push("/history")}
+                    onPress={() =>
+                      router.navigate({
+                        pathname: "/(tabs)/home",
+                        params: { tab: "juegos" },
+                      })
+                    }
                     textColor={COLORS.primary}
                   >
                     Ver historial completo
