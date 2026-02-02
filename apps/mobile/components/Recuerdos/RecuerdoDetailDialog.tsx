@@ -658,7 +658,6 @@ export default function RecuerdoDetailDialog({
                               height: isPlaying && i <= (currentTime % 5) ? 16 : 8,
                               backgroundColor: isPlaying ? "#ff6b35" : "#666",
                               borderRadius: 2,
-                              transition: "height 0.3s",
                             }}
                           />
                         ))}
@@ -698,7 +697,7 @@ export default function RecuerdoDetailDialog({
                         alignItems: "center",
                         borderWidth: 2,
                         borderColor: "#2a2a2a",
-                        ...SHADOWS.small,
+                        ...SHADOWS.light,
                       }}
                     >
                       <View
@@ -745,7 +744,7 @@ export default function RecuerdoDetailDialog({
                         alignItems: "center",
                         borderWidth: 2,
                         borderColor: "#2a2a2a",
-                        ...SHADOWS.small,
+                        ...SHADOWS.light,
                       }}
                     >
                       <IconButton
