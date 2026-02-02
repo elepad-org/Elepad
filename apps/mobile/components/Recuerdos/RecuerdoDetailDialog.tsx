@@ -695,15 +695,15 @@ export default function RecuerdoDetailDialog({
                         flexDirection: "row",
                         alignItems: "center",
                         justifyContent: "space-between",
-                        paddingHorizontal: 15,
+                        paddingHorizontal: 8,
                       }}
                     >
                       {/* Rueda izquierda */}
                       <View
                         style={{
-                          width: 56,
-                          height: 56,
-                          borderRadius: 28,
+                          width: 68,
+                          height: 68,
+                          borderRadius: 34,
                           borderWidth: 4,
                           borderColor: "#4a4a4a",
                           backgroundColor: "#0a0a0a",
@@ -713,9 +713,9 @@ export default function RecuerdoDetailDialog({
                       >
                         <View
                           style={{
-                            width: 24,
-                            height: 24,
-                            borderRadius: 12,
+                            width: 30,
+                            height: 30,
+                            borderRadius: 15,
                             backgroundColor: "#d0d0d0",
                           }}
                         />
@@ -747,9 +747,9 @@ export default function RecuerdoDetailDialog({
                       {/* Rueda derecha */}
                       <View
                         style={{
-                          width: 56,
-                          height: 56,
-                          borderRadius: 28,
+                          width: 68,
+                          height: 68,
+                          borderRadius: 34,
                           borderWidth: 4,
                           borderColor: "#4a4a4a",
                           backgroundColor: "#0a0a0a",
@@ -759,9 +759,9 @@ export default function RecuerdoDetailDialog({
                       >
                         <View
                           style={{
-                            width: 24,
-                            height: 24,
-                            borderRadius: 12,
+                            width: 30,
+                            height: 30,
+                            borderRadius: 15,
                             backgroundColor: "#d0d0d0",
                           }}
                         />
