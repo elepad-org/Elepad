@@ -95,17 +95,6 @@
               "updatePeriodMillis": 1800000
             },
             {
-              "name": "PhotosSquare",
-              "label": "Elepad - Foto Cuadrada",
-              "minWidth": "100dp",
-              "minHeight": "100dp",
-              "description": "Muestra solo la foto (sin texto)",
-              "previewImage": "./assets/images/ele-def-fondo-cuad.png",
-              "targetCellWidth": 2,
-              "targetCellHeight": 2,
-              "updatePeriodMillis": 1800000
-            },
-            {
               "name": "DailyActivities",
               "label": "Actividades de Hoy",
               "minWidth": "260dp",

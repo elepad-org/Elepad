@@ -37,7 +37,8 @@ export function DailyActivitiesWidget({
         padding: 12,
         flexDirection: "column",
       }}
-      clickAction="OPEN_APP"
+      clickAction="OPEN_URI"
+      clickActionData={{ uri: "elepad://(tabs)/calendar" }}
     >
       {/* Header con título y botón de refrescar */}
       <FlexWidget
@@ -193,6 +194,8 @@ function ActivityCard({ activity, isFirst, isElder }: ActivityCardProps) {
         borderTopWidth: isFirst ? 0 : 1,
         borderTopColor: "#E0E0E0",
       }}
+      clickAction="OPEN_URI"
+      clickActionData={{ uri: `elepad://(tabs)/calendar?activityId=${activity.id}` }}
     >
       {/* Título */}
       <TextWidget
