@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import { View, TouchableOpacity, ImageBackground, Image } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { Text, IconButton } from "react-native-paper";
 import { useAudioPlayer } from "expo-audio";
-import { COLORS, FONT, SHADOWS } from "@/styles/base";
-import tapeImage from "@/assets/images/paper-transparent-sticky-tape-png.png";
+import { FONT, SHADOWS } from "@/styles/base";
 
 interface CompactAudioPlayerProps {
   audioUri: string;

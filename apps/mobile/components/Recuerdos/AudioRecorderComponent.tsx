@@ -9,7 +9,6 @@ import {
   requestRecordingPermissionsAsync,
   setAudioModeAsync,
 } from "expo-audio";
-import * as FileSystem from "expo-file-system";
 import { STYLES, COLORS } from "@/styles/base";
 import CancelButton from "../shared/CancelButton";
 import SaveButton from "../shared/SaveButton";
@@ -49,8 +48,6 @@ export default function AudioRecorderComponent({
         seed += uri.charCodeAt(i);
       }
 
-      // Usar la duración del audio si está disponible
-      const audioDuration = duration || 5;
       const samples = 40;
       const data: number[] = [];
 
