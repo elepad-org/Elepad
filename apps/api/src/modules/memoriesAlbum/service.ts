@@ -8,9 +8,7 @@ import { Database } from "@/supabase-types";
 import { CreateAlbumRequest, AlbumWithPages, Album } from "./schema";
 import { NotificationsService } from "../notifications/service";
 import { uploadAlbumCoverImage, uploadAlbumPDF } from "@/services/storage";
-import { pdf } from "@react-pdf/renderer";
-import { AlbumPDF } from "./AlbumPdf";
-
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -42,34 +40,6 @@ export class MemoriesAlbumService {
     // Inicialización única del cliente para toda la clase
     this.client = new GoogleGenAI({ apiKey: this.apiKey });
     this.supabase = supabase;
-  }
-
-  //Helper funciton to convert ReadableStream to Buffer
-  async streamToBuffer(
-    stream: ReadableStream | NodeJS.ReadableStream,
-  ): Promise<Buffer> {
-    // Web ReadableStream
-    if ("getReader" in stream) {
-      const reader = stream.getReader();
-      const chunks: Uint8Array[] = [];
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        chunks.push(value);
-      }
-
-      return Buffer.concat(chunks);
-    }
-
-    // Node Readable
-    return new Promise((resolve, reject) => {
-      const chunks: Buffer[] = [];
-      (stream as NodeJS.ReadableStream)
-        .on("data", (chunk) => chunks.push(Buffer.from(chunk)))
-        .on("end", () => resolve(Buffer.concat(chunks)))
-        .on("error", reject);
-    });
   }
 
   async transcribeAudio(file: File): Promise<string> {
@@ -669,11 +639,7 @@ Este recuerdo nos muestra...`;
   }
 
   /**
-   * Generate PDF Document component for album using react-pdf
-   */
-
-  /**
-   * Export album to PDF using react-pdf/renderer
+   * Export album to PDF using pdf-lib
    */
   async exportAlbumToPDF(userId: string, albumId: string): Promise<string> {
     // Get user's family group
@@ -704,14 +670,11 @@ Este recuerdo nos muestra...`;
     const familyName = familyGroup?.name || "Tu familia";
 
     try {
-      // Generate PDF Document component
-      const pdfStream = await pdf(
-        AlbumPDF({ album: albumWithPages, familyName }),
-      ).toBuffer();
-
-      const pdfBuffer = Buffer.isBuffer(pdfStream)
-        ? pdfStream
-        : await this.streamToBuffer(pdfStream);
+      // Generate PDF using pdf-lib
+      const pdfBuffer = await this.generateAlbumPDFBuffer(
+        albumWithPages,
+        familyName,
+      );
 
       // Upload to Supabase Storage
       const pdfUrl = await uploadAlbumPDF(
@@ -750,5 +713,267 @@ Este recuerdo nos muestra...`;
       console.error("Error generating PDF:", error);
       throw new ApiException(500, "Error generating album PDF");
     }
+  }
+
+  /**
+   * Calculate X position to center text
+   */
+  private calculateCenteredX(
+    text: string,
+    fontSize: number,
+    containerWidth: number,
+  ): number {
+    // Approximate calculation: average character width is roughly 0.5 * fontSize
+    const approximateWidth = text.length * fontSize * 0.5;
+    return Math.max(0, (containerWidth - approximateWidth) / 2);
+  }
+
+  /**
+   * Remove emojis from text to avoid WinAnsi encoding issues
+   */
+  private removeEmojis(text: string): string {
+    // Remove emojis and other non-ASCII characters that StandardFonts can't encode
+    return text
+      .replace(/[\u{1F300}-\u{1F9FF}]/gu, "") // Emojis
+      .replace(/[\u{2600}-\u{27BF}]/gu, "") // Miscellaneous Symbols
+      .replace(/[\u{1F600}-\u{1F64F}]/gu, "") // Emoticons
+      .replace(/[^\x00-\x7F]/g, "") // Remove non-ASCII
+      .trim();
+  }
+
+  /**
+   * Generate PDF buffer for album using pdf-lib
+   */
+  private async generateAlbumPDFBuffer(
+    album: AlbumWithPages,
+    familyName: string,
+  ): Promise<Buffer> {
+    // Create a new PDF document in landscape
+    const pdfDoc = await PDFDocument.create();
+
+    // Embed fonts
+    const titleFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const bodyFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const lightFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
+
+    // Page dimensions (A4 landscape)
+    const pageWidth = 842;
+    const pageHeight = 595;
+
+    // Cover page
+    const coverPage = pdfDoc.addPage([pageWidth, pageHeight]);
+    const coverColor = rgb(66 / 255, 74 / 255, 112 / 255); // #424a70
+
+    // Draw background
+    coverPage.drawRectangle({
+      x: 0,
+      y: 0,
+      width: pageWidth,
+      height: pageHeight,
+      color: coverColor,
+    });
+
+    // Title
+    const titleX = this.calculateCenteredX(album.title, 42, pageWidth);
+    coverPage.drawText(album.title, {
+      x: titleX,
+      y: pageHeight - 150,
+      size: 42,
+      font: titleFont,
+      color: rgb(1, 1, 1),
+      maxWidth: pageWidth - 100,
+    });
+
+    // Description
+    if (album.description) {
+      const descX = this.calculateCenteredX(
+        album.description,
+        16,
+        pageWidth,
+      );
+      coverPage.drawText(album.description, {
+        x: descX,
+        y: pageHeight - 280,
+        size: 16,
+        font: bodyFont,
+        color: rgb(1, 1, 1),
+        maxWidth: pageWidth - 200,
+        lineHeight: 24,
+      });
+    }
+
+    // Family name
+    const familyX = this.calculateCenteredX(
+      familyName,
+      14,
+      pageWidth,
+    );
+    coverPage.drawText(familyName, {
+      x: familyX,
+      y: 80,
+      size: 14,
+      font: lightFont,
+      color: rgb(1, 1, 1),
+      maxWidth: pageWidth - 100,
+    });
+
+    // Content pages
+    for (let i = 0; i < album.pages.length; i++) {
+      const page = album.pages[i];
+      if (!page) continue;
+
+      const contentPage = pdfDoc.addPage([pageWidth, pageHeight]);
+      const backgroundColor = rgb(250 / 255, 248 / 255, 245 / 255); // #faf8f5
+
+      // Draw background
+      contentPage.drawRectangle({
+        x: 0,
+        y: 0,
+        width: pageWidth,
+        height: pageHeight,
+        color: backgroundColor,
+      });
+
+      // Image section (left half)
+      const imageX = 30;
+      const imageY = 150;
+      const imageMaxWidth = (pageWidth / 2) - 60;
+      const imageMaxHeight = 330;
+
+      // Draw polaroid frame
+      const frameWidth = Math.min(imageMaxWidth, 300);
+      const frameHeight = frameWidth + 60;
+      const frameBg = rgb(1, 1, 1);
+      const frameCenterX = imageX + (imageMaxWidth - frameWidth) / 2;
+      const frameCenterY = imageY + (imageMaxHeight - frameHeight) / 2;
+
+      // Draw shadow behind polaroid (draw shadow first so it's behind)
+      contentPage.drawRectangle({
+        x: frameCenterX - 5,
+        y: frameCenterY - 10,
+        width: frameWidth,
+        height: frameHeight,
+        color: rgb(0.95, 0.95, 0.95),
+      });
+
+      // Draw polaroid frame on top of the shadow
+      contentPage.drawRectangle({
+        x: frameCenterX,
+        y: frameCenterY,
+        width: frameWidth,
+        height: frameHeight,
+        color: frameBg,
+      });
+
+      // Draw image if available (at the top of the polaroid)
+      if (page.imageUrl) {
+        try {
+          const imageResponse = await fetch(page.imageUrl);
+          if (!imageResponse.ok) {
+            console.warn(
+              `Failed to fetch image for page ${i + 1}: ${imageResponse.status}`,
+            );
+          } else {
+            const imageBuffer = await imageResponse.arrayBuffer();
+            const imageBytes = new Uint8Array(imageBuffer);
+            let image;
+
+            // Embed image based on URL or try JPEG first as fallback
+            if (page.imageUrl.includes(".png")) {
+              image = await pdfDoc.embedPng(imageBytes);
+            } else if (page.imageUrl.includes(".gif")) {
+              image = await pdfDoc.embedPng(imageBytes);
+            } else {
+              try {
+                image = await pdfDoc.embedJpg(imageBytes);
+              } catch {
+                image = await pdfDoc.embedPng(imageBytes);
+              }
+            }
+
+            // Calculate scaled dimensions for image (top part of polaroid)
+            const imageWidth = frameWidth - 40;
+            const imageHeight = frameWidth - 40;
+
+            // Position image at the top of the polaroid with a small margin
+            const imageTopY = frameCenterY + frameHeight - 20; // top inner margin
+            const imageYPos = imageTopY - imageHeight; // place image so its top is imageTopY
+
+            contentPage.drawImage(image, {
+              x: frameCenterX + 20,
+              y: imageYPos,
+              width: imageWidth,
+              height: imageHeight,
+            });
+          }
+        } catch (error) {
+          console.error(
+            `Error loading image for page ${i + 1}:`,
+            error,
+          );
+        }
+      }
+      // Draw image title (polaroid text - at the bottom, centered)
+      // Clean title to remove emojis and non-ASCII characters
+      const cleanedTitle = page.title ? this.removeEmojis(page.title) : "";
+      if (cleanedTitle) {
+        // Calculate centered position for title at bottom of polaroid
+        const innerWidth = frameWidth - 20;
+        const centeredOffset = this.calculateCenteredX(cleanedTitle, 11, innerWidth);
+        const titleX = frameCenterX + 10 + centeredOffset;
+        const titleY = frameCenterY + 30; // small bottom margin inside polaroid
+
+        contentPage.drawText(cleanedTitle, {
+          x: titleX,
+          y: titleY,
+          size: 11,
+          font: titleFont,
+          color: rgb(44 / 255, 36 / 255, 22 / 255), // #2c2416
+          maxWidth: innerWidth,
+        });
+      }
+
+      // Text section (right half)
+      const textX = pageWidth / 2 + 20;
+      const textWidth = (pageWidth / 2) - 50;
+
+      // Page title (clean emojis for proper rendering)
+      const pageTitleText = this.removeEmojis(page.title || "");
+      contentPage.drawText(pageTitleText, {
+        x: textX,
+        y: pageHeight - 100,
+        size: 22,
+        font: titleFont,
+        color: rgb(66 / 255, 74 / 255, 112 / 255), // #424a70
+        maxWidth: textWidth,
+        lineHeight: 28,
+      });
+
+      // Page description
+      if (page.description) {
+        contentPage.drawText(page.description, {
+          x: textX,
+          y: pageHeight - 250,
+          size: 13,
+          font: bodyFont,
+          color: rgb(44 / 255, 36 / 255, 22 / 255), // #2c2416
+          maxWidth: textWidth,
+          lineHeight: 20,
+        });
+      }
+
+      // Page number
+      contentPage.drawText(`Página ${i + 1} de ${album.pages.length}`, {
+        x: pageWidth - 150,
+        y: 30,
+        size: 10,
+        font: lightFont,
+        color: rgb(115 / 255, 116 / 255, 167 / 255), // #7374a7
+      });
+    }
+
+    // Save PDF to buffer
+    const pdfBytes = await pdfDoc.save();
+    return Buffer.from(pdfBytes);
   }
 }

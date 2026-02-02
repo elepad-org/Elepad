@@ -15,6 +15,7 @@ interface RecentPhotosWidgetProps {
   date?: string;
   error?: string;
   isLoading?: boolean;
+  memoryId?: string;
 }
 
 export function RecentPhotosWidget({
@@ -23,6 +24,7 @@ export function RecentPhotosWidget({
   date,
   error,
   isLoading,
+  memoryId,
 }: RecentPhotosWidgetProps) {
   return (
     <FlexWidget
@@ -30,7 +32,8 @@ export function RecentPhotosWidget({
         padding: 20, // Marco blanco uniforme (Polaroid style)
         flexDirection: "column",
       }}
-      clickAction="OPEN_APP"
+      clickAction="OPEN_URI"
+      clickActionData={{  uri: `elepad://(tabs)/recuerdos?memoryId=${memoryId}` }}
     >
     <FlexWidget
       style={{
