@@ -113,7 +113,7 @@ const Toast = ({
   if (!visible && !isVisible) return null;
 
   // Calculate dynamic bottom position based on navbar presence
-  const bottomPosition = effectiveWithNavbar ? LAYOUT.bottomNavHeight + 10 : 30;
+  const bottomPosition = effectiveWithNavbar ? LAYOUT.bottomNavHeight + 20 : 30;
 
   return (
     <Animated.View
@@ -252,9 +252,10 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    left: 20,
-    right: 20,
     zIndex: 9999,
+    alignSelf: "center",
+    width: "90%",
+    maxWidth: 420,
     // Add shadow properties to the animated container
     ...SHADOWS.medium,
     borderRadius: 16,

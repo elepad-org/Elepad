@@ -67,6 +67,7 @@ export default function FamilyGroup() {
   const [selectedAvatarUrl, setSelectedAvatarUrl] = useState<string | null>(
     null,
   );
+  const [selectedFrameUrl, setSelectedFrameUrl] = useState<string | null>(null);
   const [selectedMemberName, setSelectedMemberName] = useState<string>("");
 
   const patchFamilyGroup = usePatchFamilyGroupIdGroup(); // Este hook ya maneja la mutación
@@ -159,8 +160,13 @@ export default function FamilyGroup() {
     }
   };
 
-  const openAvatarModal = (avatarUrl: string, memberName: string) => {
+  const openAvatarModal = (
+    avatarUrl: string,
+    memberName: string,
+    frameUrl?: string | null,
+  ) => {
     setSelectedAvatarUrl(avatarUrl);
+    setSelectedFrameUrl(frameUrl || null);
     setSelectedMemberName(memberName);
     setAvatarModalVisible(true);
   };
@@ -168,6 +174,7 @@ export default function FamilyGroup() {
   const closeAvatarModal = () => {
     setAvatarModalVisible(false);
     setSelectedAvatarUrl(null);
+    setSelectedFrameUrl(null);
     setSelectedMemberName("");
   };
 
@@ -652,7 +659,11 @@ export default function FamilyGroup() {
                             {o.avatarUrl ? (
                               <Pressable
                                 onPress={() =>
-                                  openAvatarModal(o.avatarUrl!, o.displayName)
+                                  openAvatarModal(
+                                    o.avatarUrl!,
+                                    o.displayName,
+                                    o.activeFrameUrl,
+                                  )
                                 }
                               >
                                 <Image
@@ -753,7 +764,11 @@ export default function FamilyGroup() {
                             {m.avatarUrl ? (
                               <Pressable
                                 onPress={() =>
-                                  openAvatarModal(m.avatarUrl!, m.displayName)
+                                  openAvatarModal(
+                                    m.avatarUrl!,
+                                    m.displayName,
+                                    m.activeFrameUrl,
+                                  )
                                 }
                               >
                                 <Image
@@ -1182,6 +1197,7 @@ export default function FamilyGroup() {
                               openAvatarModal(
                                 member.avatarUrl!,
                                 member.displayName,
+                                member.activeFrameUrl,
                               )
                             }
                           >
@@ -1337,12 +1353,44 @@ export default function FamilyGroup() {
             </Dialog.Title>
             <Dialog.Content>
               <View style={styles.avatarModalContent}>
-                {selectedAvatarUrl && (
-                  <Image
-                    source={{ uri: selectedAvatarUrl }}
-                    style={styles.avatarModalImage}
-                  />
-                )}
+                <View
+                  style={{
+                    position: "relative",
+                    width: 210,
+                    height: 210,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {/* Avatar Base */}
+                  {selectedAvatarUrl && (
+                    <Image
+                      source={{ uri: selectedAvatarUrl }}
+                      style={styles.avatarModalImage}
+                    />
+                  )}
+
+                  {/* Frame Overlay */}
+                  {selectedFrameUrl && (
+                    <View
+                      pointerEvents="none"
+                      style={{
+                        position: "absolute",
+                        width: 210 * 1.4, // Frame scaling relative to avatar
+                        height: 210 * 1.4,
+                        top: -210 * 0.2, // Offset to center frame
+                        left: -210 * 0.2,
+                        zIndex: 10,
+                      }}
+                    >
+                      <Image
+                        source={{ uri: selectedFrameUrl }}
+                        style={{ width: "100%", height: "100%" }}
+                        resizeMode="contain"
+                      />
+                    </View>
+                  )}
+                </View>
               </View>
             </Dialog.Content>
             <Dialog.Actions style={{ justifyContent: "center" }}>

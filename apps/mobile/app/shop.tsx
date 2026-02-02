@@ -631,18 +631,19 @@ export default function ShopScreen() {
                   )}
                 </View>
 
-                {(balanceData?.pointsBalance ?? 0) < selectedItem.cost && (
-                  <View style={styles.errorBanner}>
-                    <MaterialCommunityIcons
-                      name="alert-circle"
-                      size={16}
-                      color={COLORS.error}
-                    />
-                    <Text style={styles.insufficientPoints}>
-                      No tienes suficientes puntos para este item.
-                    </Text>
-                  </View>
-                )}
+                {(balanceData?.pointsBalance ?? 0) < selectedItem.cost &&
+                  !isOwned(selectedItem.id) && (
+                    <View style={styles.errorBanner}>
+                      <MaterialCommunityIcons
+                        name="alert-circle"
+                        size={16}
+                        color={COLORS.error}
+                      />
+                      <Text style={styles.insufficientPoints}>
+                        No tienes suficientes puntos para este item.
+                      </Text>
+                    </View>
+                  )}
               </View>
             </View>
           )}
