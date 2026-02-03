@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, View, StyleSheet, Dimensions, Animated, StatusBar, Platform, useWindowDimensions, ActivityIndicator } from 'react-native';
+import { Modal, View, StyleSheet, Animated, StatusBar, ActivityIndicator } from 'react-native';
 import { Text } from 'react-native-paper';
 import Svg, { Defs, Mask, Rect } from 'react-native-svg';
 import { useTourContext } from './TourProvider';

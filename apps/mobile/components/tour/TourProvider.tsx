@@ -25,6 +25,7 @@ const initialState: TourState = {
   currentStepIndex: 0,
   steps: [],
   isPreparing: false,
+  completedTours: {},
 };
 
 function tourReducer(state: TourState, action: TourAction): TourState {
@@ -132,6 +133,18 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     dispatch({ type: 'START_TOUR', tourId, steps });
   }, [state.completedTours]);
 
+  const markTourComplete = useCallback(async (tourId: string) => {
+    try {
+      // Optimistic update
+      dispatch({ type: 'MARK_COMPLETED', tourId });
+
+      await AsyncStorage.setItem(`${TOUR_STORAGE_PREFIX}${tourId}`, 'true');
+      console.log('🎯 Tour: Marked as completed:', tourId);
+    } catch (error) {
+      console.error('Error marking tour complete:', error);
+    }
+  }, []);
+
   const nextStep = useCallback(() => {
     console.log('🎯 Tour: Next step');
     const isLastStep = state.currentStepIndex === state.steps.length - 1;
@@ -162,17 +175,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     dispatch({ type: 'UPDATE_LAYOUT', stepId, layout });
   }, []);
 
-  const markTourComplete = useCallback(async (tourId: string) => {
-    try {
-      // Optimistic update
-      dispatch({ type: 'MARK_COMPLETED', tourId });
 
-      await AsyncStorage.setItem(`${TOUR_STORAGE_PREFIX}${tourId}`, 'true');
-      console.log('🎯 Tour: Marked as completed:', tourId);
-    } catch (error) {
-      console.error('Error marking tour complete:', error);
-    }
-  }, []);
 
   const isTourCompleted = useCallback(async (tourId: string): Promise<boolean> => {
     // Instant return from state, safe check

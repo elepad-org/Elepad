@@ -26,6 +26,7 @@ export interface TourState {
   currentStepIndex: number;
   steps: TourStepPosition[];
   isPreparing: boolean;
+  completedTours: Record<string, boolean>;
 }
 
 export type TourAction =
