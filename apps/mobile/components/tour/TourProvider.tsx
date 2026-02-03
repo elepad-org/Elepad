@@ -49,7 +49,11 @@ function tourReducer(state: TourState, action: TourAction): TourState {
       }
       return state;
     case 'STOP_TOUR':
-      return initialState;
+      return {
+        ...initialState,
+        // Crucial: Preserve completed tours or we forget what we just did!
+        completedTours: state.completedTours,
+      };
     case 'UPDATE_LAYOUT':
       return {
         ...state,
@@ -64,6 +68,19 @@ function tourReducer(state: TourState, action: TourAction): TourState {
         ...state,
         isPreparing: action.isPreparing,
       };
+    case 'HYDRATE_COMPLETED':
+      return {
+        ...state,
+        completedTours: action.completedTours,
+      };
+    case 'MARK_COMPLETED':
+      return {
+        ...state,
+        completedTours: {
+          ...state.completedTours,
+          [action.tourId]: true,
+        },
+      };
     default:
       return state;
   }
@@ -72,18 +89,48 @@ function tourReducer(state: TourState, action: TourAction): TourState {
 export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(tourReducer, initialState);
 
+  // Load completed tours on mount
+  React.useEffect(() => {
+    const hydrate = async () => {
+      try {
+        const keys = await AsyncStorage.getAllKeys();
+        const tourKeys = keys.filter(key => key.startsWith(TOUR_STORAGE_PREFIX));
+        const completedMap: Record<string, boolean> = {};
+
+        // We know keys starting with prefix exist, so we can just mark them true
+        // If we needed values we'd use multiGet, but existence is enough for now logic?
+        // Actually legacy logic used values 'true'. Let's follow that pattern or just assume keys match.
+        // Let's safe bet: map keys to IDs.
+
+        tourKeys.forEach(key => {
+          const id = key.replace(TOUR_STORAGE_PREFIX, '');
+          completedMap[id] = true;
+        });
+
+        dispatch({ type: 'HYDRATE_COMPLETED', completedTours: completedMap });
+        console.log('🎯 Tour: Hydrated status for:', Object.keys(completedMap));
+      } catch (error) {
+        console.error('Error hydrating tours:', error);
+      }
+    };
+    hydrate();
+  }, []);
+
   const startTour = useCallback(async (tourId: string, steps: TourStepPosition[]) => {
     console.log('🎯 Tour: Starting tour:', tourId);
 
-    // Check if tour was already completed
-    const completed = await isTourCompleted(tourId);
-    if (completed) {
-      console.log('🎯 Tour: Already completed, skipping');
+    // Check if tour was already completed (Now sync via state!)
+    // Safe check against undefined state during hot reload/init
+    if (state.completedTours && state.completedTours[tourId]) {
+      console.log('🎯 Tour: Already completed (cached), skipping');
       return;
     }
 
+    // Double check storage just in case hydration missed? No, trust state for speed.
+    // If state says no, proceed.
+
     dispatch({ type: 'START_TOUR', tourId, steps });
-  }, []);
+  }, [state.completedTours]);
 
   const nextStep = useCallback(() => {
     console.log('🎯 Tour: Next step');
@@ -96,7 +143,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } else {
       dispatch({ type: 'NEXT_STEP' });
     }
-  }, [state.currentStepIndex, state.steps.length, state.currentTourId]);
+  }, [state.currentStepIndex, state.steps.length, state.currentTourId, markTourComplete]);
 
   const prevStep = useCallback(() => {
     console.log('🎯 Tour: Previous step');
@@ -109,7 +156,7 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
       markTourComplete(state.currentTourId);
     }
     dispatch({ type: 'STOP_TOUR' });
-  }, [state.currentTourId]);
+  }, [state.currentTourId, markTourComplete]);
 
   const updateStepLayout = useCallback((stepId: string, layout: TourStepPosition['layout']) => {
     dispatch({ type: 'UPDATE_LAYOUT', stepId, layout });
@@ -117,6 +164,9 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const markTourComplete = useCallback(async (tourId: string) => {
     try {
+      // Optimistic update
+      dispatch({ type: 'MARK_COMPLETED', tourId });
+
       await AsyncStorage.setItem(`${TOUR_STORAGE_PREFIX}${tourId}`, 'true');
       console.log('🎯 Tour: Marked as completed:', tourId);
     } catch (error) {
@@ -125,20 +175,19 @@ export const TourProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const isTourCompleted = useCallback(async (tourId: string): Promise<boolean> => {
-    try {
-      const value = await AsyncStorage.getItem(`${TOUR_STORAGE_PREFIX}${tourId}`);
-      return value === 'true';
-    } catch (error) {
-      console.error('Error checking tour completion:', error);
-      return false;
-    }
-  }, []);
+    // Instant return from state, safe check
+    return !!(state.completedTours && state.completedTours[tourId]);
+  }, [state.completedTours]);
 
   const resetAllTours = useCallback(async () => {
     try {
       const keys = await AsyncStorage.getAllKeys();
       const tourKeys = keys.filter(key => key.startsWith(TOUR_STORAGE_PREFIX));
       await AsyncStorage.multiRemove(tourKeys);
+
+      // We'd need a RESET_COMPLETED action ideally, or just hack hydration to empty
+      dispatch({ type: 'HYDRATE_COMPLETED', completedTours: {} });
+
       console.log('🎯 Tour: All tours reset');
     } catch (error) {
       console.error('Error resetting tours:', error);
