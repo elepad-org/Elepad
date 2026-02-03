@@ -250,3 +250,46 @@ albumApp.openapi(
     }, 200);
   }
 );
+
+// DELETE /album/:id - Delete an album
+albumApp.openapi(
+  {
+    method: "delete",
+    path: "/album/{id}",
+    tags: ["album"],
+    request: {
+      params: z.object({
+        id: z.uuid(),
+      }),
+    },
+    responses: {
+      200: {
+        description: "Album deleted successfully",
+        content: {
+          "application/json": {
+            schema: z.object({
+              message: z.string(),
+            }),
+          },
+        },
+      },
+      401: openApiErrorResponse("Unauthorized"),
+      404: openApiErrorResponse("Album not found or you don't have access to it"),
+      500: openApiErrorResponse("Internal Server Error"),
+    },
+  },
+  async (c) => {
+    const user = c.var.user;
+    if (!user) {
+      throw new ApiException(401, "User not authenticated");
+    }
+
+    const { id } = c.req.valid("param");
+
+    await c.var.memoriesAlbumService.deleteAlbum(user.id, id);
+
+    return c.json({
+      message: "Album deleted successfully",
+    }, 200);
+  }
+);

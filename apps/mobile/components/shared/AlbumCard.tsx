@@ -8,11 +8,12 @@ import {
   Button,
 } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
-import { usePostAlbumIdExportPdf } from "@elepad/api-client";
+import { usePostAlbumIdExportPdf, useDeleteAlbumId } from "@elepad/api-client";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, STYLES, SHADOWS } from "@/styles/base";
 import { useToast } from "@/components/shared/Toast";
 import { usePdfDownload } from "@/hooks/usePdfDownload";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface AlbumCardProps {
   id: string;
@@ -23,6 +24,7 @@ interface AlbumCardProps {
   createdAt: string;
   totalPages?: number;
   onPress: () => void;
+  onDelete?: () => void;
 }
 
 export default function AlbumCard({
@@ -34,14 +36,18 @@ export default function AlbumCard({
   createdAt,
   totalPages,
   onPress,
+  onDelete,
 }: AlbumCardProps) {
   const [detailsVisible, setDetailsVisible] = useState(false);
+  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   const { userElepad } = useAuth();
   const { showToast } = useToast();
   const { sharePdf, viewLocalPdf, isDownloading } = usePdfDownload();
   const [actionsOpen, setActionsOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const exportPdfMutation = usePostAlbumIdExportPdf();
+  const deleteAlbumMutation = useDeleteAlbumId({}, queryClient);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -114,6 +120,27 @@ export default function AlbumCard({
     }
   };
 
+  const handleDeleteAlbum = () => {
+    deleteAlbumMutation.mutate(
+      { id },
+      {
+        onSuccess: () => {
+          showToast({ message: "Álbum eliminado correctamente", type: "success" });
+          setDeleteConfirmVisible(false);
+          setDetailsVisible(false);
+          // Invalidar la query de álbumes para refrescar la lista
+          queryClient.invalidateQueries({ queryKey: ["getAlbum"] });
+          onDelete?.();
+        },
+        onError: (error) => {
+          console.error("Error deleting album:", error);
+          showToast({ message: "Error al eliminar el álbum", type: "error" });
+          setDeleteConfirmVisible(false);
+        },
+      }
+    );
+  };
+
   return (
     <View>
       <Card
@@ -176,6 +203,22 @@ export default function AlbumCard({
           </Dialog.Content>
 
           <Dialog.Actions style={styles.dialogActions}>
+            <Pressable
+              onPress={() => setDeleteConfirmVisible(true)}
+              style={({ pressed }) => [
+                styles.deleteButton,
+                pressed && { opacity: 0.7 },
+              ]}
+              accessibilityLabel="Eliminar álbum"
+            >
+              <MaterialCommunityIcons
+                name="delete"
+                size={24}
+                color={COLORS.error}
+              />
+            </Pressable>
+
+            <View style={{ flex: 1 }} />
             <Button mode="outlined" onPress={() => setDetailsVisible(false)}>
               Cerrar
             </Button>
@@ -256,6 +299,41 @@ export default function AlbumCard({
                 </Button>
               </View>
             )}
+          </Dialog.Actions>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog
+          visible={deleteConfirmVisible}
+          onDismiss={() => setDeleteConfirmVisible(false)}
+          style={styles.dialog}
+        >
+          <Dialog.Title style={{ fontWeight: "bold", color: COLORS.text }}>
+            ¿Eliminar álbum?
+          </Dialog.Title>
+
+          <Dialog.Content>
+            <Text style={STYLES.paragraphText}>
+              ¿Estás seguro de que deseas eliminar el álbum "{title}"? Esta acción no se puede deshacer.
+            </Text>
+          </Dialog.Content>
+
+          <Dialog.Actions style={styles.dialogActions}>
+            <Button
+              mode="outlined"
+              onPress={() => setDeleteConfirmVisible(false)}
+              disabled={deleteAlbumMutation.isPending}
+            >
+              Cancelar
+            </Button>
+            <Button
+              mode="contained"
+              onPress={handleDeleteAlbum}
+              loading={deleteAlbumMutation.isPending}
+              buttonColor={COLORS.error}
+            >
+              Eliminar
+            </Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>
@@ -350,5 +428,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 12,
     gap: 8,
+  },
+
+  deleteButton: {
+    padding: 8,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

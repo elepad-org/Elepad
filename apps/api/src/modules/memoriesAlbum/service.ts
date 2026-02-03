@@ -976,4 +976,43 @@ Este recuerdo nos muestra...`;
     const pdfBytes = await pdfDoc.save();
     return Buffer.from(pdfBytes);
   }
+
+  /**
+   * Delete an album by ID
+   * Verifies the user has access to the album before deleting
+   */
+  async deleteAlbum(userId: string, albumId: string): Promise<void> {
+    // First, verify the album exists and user has access to it
+    const { data: userGroup } = await this.supabase
+      .from("users")
+      .select("groupId")
+      .eq("id", userId)
+      .single();
+
+    if (!userGroup?.groupId) {
+      throw new ApiException(404, "User is not part of any family group");
+    }
+
+    const { data: album, error: albumError } = await this.supabase
+      .from("memoriesAlbums")
+      .select("id, groupId")
+      .eq("id", albumId)
+      .eq("groupId", userGroup.groupId)
+      .single();
+
+    if (albumError || !album) {
+      throw new ApiException(404, "Album not found or you don't have access to it");
+    }
+
+    // Delete the album
+    const { error: deleteError } = await this.supabase
+      .from("memoriesAlbums")
+      .delete()
+      .eq("id", albumId);
+
+    if (deleteError) {
+      console.error("Error deleting album:", deleteError);
+      throw new ApiException(500, "Error deleting album");
+    }
+  }
 }
