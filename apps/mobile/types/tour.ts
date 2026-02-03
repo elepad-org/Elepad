@@ -26,6 +26,7 @@ export interface TourState {
   currentStepIndex: number;
   steps: TourStepPosition[];
   isPreparing: boolean;
+  completedTours: Record<string, boolean>;
 }
 
 export type TourAction =
@@ -34,4 +35,6 @@ export type TourAction =
   | { type: 'PREV_STEP' }
   | { type: 'STOP_TOUR' }
   | { type: 'UPDATE_LAYOUT'; stepId: string; layout: TourStepPosition['layout'] }
-  | { type: 'SET_PREPARING'; isPreparing: boolean };
+  | { type: 'SET_PREPARING'; isPreparing: boolean }
+  | { type: 'HYDRATE_COMPLETED'; completedTours: Record<string, boolean> }
+  | { type: 'MARK_COMPLETED'; tourId: string };
