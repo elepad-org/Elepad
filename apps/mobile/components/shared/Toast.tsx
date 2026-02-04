@@ -7,9 +7,16 @@ import React, {
   useState,
   ReactNode,
 } from "react";
-import { Animated, StyleSheet, TouchableOpacity, View } from "react-native";
+import {
+  Animated,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Dimensions,
+} from "react-native";
 import { Text, Icon } from "react-native-paper";
 import { useSegments } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { COLORS, SHADOWS, FONT, LAYOUT } from "@/styles/base";
 
 export type ToastType = "success" | "error" | "info" | "warning";
@@ -53,9 +60,13 @@ const Toast = ({
   withNavbar,
 }: ToastProps) => {
   const segments = useSegments();
+  const insets = useSafeAreaInsets();
   const scale = useRef(new Animated.Value(0.8)).current;
   const opacity = useRef(new Animated.Value(0)).current;
   const [isVisible, setIsVisible] = useState(false);
+
+  // Get screen dimensions
+  const { width: screenWidth } = Dimensions.get("window");
 
   // Determine if we should account for navbar height
   // If withNavbar is manually passed, use it.
@@ -112,8 +123,20 @@ const Toast = ({
 
   if (!visible && !isVisible) return null;
 
-  // Calculate dynamic bottom position based on navbar presence
-  const bottomPosition = effectiveWithNavbar ? LAYOUT.bottomNavHeight + 20 : 30;
+  // Calculate dynamic bottom position based on navbar presence and safe area
+  // Use safe area bottom inset + additional spacing + navbar height if present
+  const baseBottomSpacing = 16;
+  const navbarOffset = effectiveWithNavbar ? LAYOUT.bottomNavHeight : 0;
+  const bottomPosition = insets.bottom + baseBottomSpacing + navbarOffset;
+
+  // Calculate responsive width and horizontal margins
+  // For smaller screens (< 360px), use more width
+  // For medium screens (360-600px), use 90%
+  // For larger screens, cap at maxWidth
+  const horizontalMargin = screenWidth < 360 ? 12 : 20;
+  const calculatedWidth = screenWidth - horizontalMargin * 2;
+  const maxWidth = 420;
+  const toastWidth = Math.min(calculatedWidth, maxWidth);
 
   return (
     <Animated.View
@@ -123,6 +146,8 @@ const Toast = ({
           bottom: bottomPosition,
           opacity,
           transform: [{ scale }],
+          width: toastWidth,
+          left: (screenWidth - toastWidth) / 2, // Center horizontally
         },
       ]}
     >
@@ -253,9 +278,7 @@ const styles = StyleSheet.create({
   container: {
     position: "absolute",
     zIndex: 9999,
-    alignSelf: "center",
-    width: "90%",
-    maxWidth: 420,
+    // Width and left are now set dynamically in the component
     // Add shadow properties to the animated container
     ...SHADOWS.medium,
     borderRadius: 16,
