@@ -79,7 +79,7 @@ export default function CompactAudioPlayer({
         borderRadius: 10,
         minHeight: 280,
         borderWidth: 3,
-        borderColor: "#0a0a0a",
+        borderColor: "#1a1a1a",
         ...SHADOWS.medium,
         marginBottom: 30,
         width: "96%",
