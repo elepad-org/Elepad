@@ -191,7 +191,7 @@ const RecuerdoItemComponent = React.memo(({
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "space-between",
-                paddingHorizontal: 8 * scale,
+                paddingHorizontal: 4 * scale,
               }}
             >
               {/* Rueda izquierda */}
