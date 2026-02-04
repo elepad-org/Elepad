@@ -686,10 +686,10 @@ export default function RecuerdoDetailDialog({
                     {/* Rectángulo que conecta las ruedas (ventana del cassette) */}
                     <View
                       style={{
-                        width: "85%",
-                        height: 80,
+                        width: "95%",
+                        height: 85,
                         backgroundColor: "#2a2a2a",
-                        borderRadius: 40,
+                        borderRadius: 42.5,
                         borderWidth: 3,
                         borderColor: "#4a4a4a",
                         flexDirection: "row",
@@ -725,9 +725,9 @@ export default function RecuerdoDetailDialog({
                       <TouchableOpacity
                         onPress={playAudio}
                         style={{
-                          width: 70,
-                          height: 70,
-                          borderRadius: 35,
+                          width: 50,
+                          height: 50,
+                          borderRadius: 25,
                           backgroundColor: "#ff6b35",
                           justifyContent: "center",
                           alignItems: "center",
@@ -738,7 +738,7 @@ export default function RecuerdoDetailDialog({
                       >
                         <IconButton
                           icon={isPlaying ? "pause" : "play"}
-                          size={35}
+                          size={28}
                           iconColor="#1a1a1a"
                           style={{ margin: 0 }}
                         />
