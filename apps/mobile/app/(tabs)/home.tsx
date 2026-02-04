@@ -247,12 +247,13 @@ const HomeScreen = () => {
     }
   }, [userElepad?.groupId, queryClient]);
 
+  const { refetch: refetchAttempts } = attemptsQuery;
   useFocusEffect(
     useCallback(() => {
       if (userElepad?.groupId) {
-        attemptsQuery.refetch();
+        refetchAttempts();
       }
-    }, [userElepad?.groupId, attemptsQuery])
+    }, [userElepad?.groupId, refetchAttempts])
   );
 
 
