@@ -202,7 +202,7 @@ const RecuerdoItemComponent = React.memo(({
                   borderRadius: 16 * scale,
                   borderWidth: 2 * scale,
                   borderColor: "#4a4a4a",
-                  backgroundColor: "#0a0a0a",
+                  backgroundColor: "#1a1a1a",
                   justifyContent: "center",
                   alignItems: "center",
                 }}
@@ -244,7 +244,7 @@ const RecuerdoItemComponent = React.memo(({
                   borderRadius: 16   * scale,
                   borderWidth: 2 * scale,
                   borderColor: "#4a4a4a",
-                  backgroundColor: "#0a0a0a",
+                  backgroundColor: "#1a1a1a",
                   justifyContent: "center",
                   alignItems: "center",
                 }}
