@@ -9,7 +9,7 @@ import {
   Dimensions,
   Image,
 } from "react-native";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useCallback } from "react";
 import { Text, Avatar, Button, IconButton } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -23,7 +23,7 @@ import {
   GetFamilyGroupIdGroupMembers200,
   AttemptWithUser,
 } from "@elepad/api-client";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import StreakCounter from "@/components/StreakCounter";
@@ -247,6 +247,14 @@ const HomeScreen = () => {
     }
   }, [userElepad?.groupId, queryClient]);
 
+  useFocusEffect(
+    useCallback(() => {
+      if (userElepad?.groupId) {
+        attemptsQuery.refetch();
+      }
+    }, [userElepad?.groupId, attemptsQuery])
+  );
+
 
 
   const displayName =
@@ -403,7 +411,7 @@ const HomeScreen = () => {
                   lastMemory.mimeType &&
                   (lastMemory.mimeType.startsWith("image/") ||
                     lastMemory.mimeType.startsWith("video/"));
-                
+
                 // Si es audio, mostrar reproductor
                 if (isAudio && lastMemory.mediaUrl) {
                   // Generar waveform data consistente
@@ -449,7 +457,7 @@ const HomeScreen = () => {
                     </Pressable>
                   );
                 }
-                
+
                 return (
                   <Pressable
                     style={hasMedia ? styles.memoryCard : styles.memoryCardNote}

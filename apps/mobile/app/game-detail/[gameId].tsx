@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { StatusBar, ScrollView, View, StyleSheet } from "react-native";
 import {
   ActivityIndicator,
@@ -12,7 +12,7 @@ import {
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, STYLES, SHADOWS, FONT } from "@/styles/base";
-import { router, useLocalSearchParams, Stack } from "expo-router";
+import { router, useLocalSearchParams, Stack, useFocusEffect } from "expo-router";
 import {
   useGetAchievementsUserGameType,
   GameType,
@@ -195,14 +195,16 @@ export default function GameDetailScreen() {
     [gameConfig, hasMore],
   );
 
-  useEffect(() => {
-    if (gameConfig) {
-      setAttempts([]);
-      setOffset(0);
-      setHasMore(true);
-      fetchAttempts(0, false);
-    }
-  }, [gameConfig]);
+  useFocusEffect(
+    useCallback(() => {
+      if (gameConfig) {
+        setAttempts([]);
+        setOffset(0);
+        setHasMore(true);
+        fetchAttempts(0, false);
+      }
+    }, [gameConfig])
+  );
 
   const loadMoreAttempts = () => {
     if (!loadingMore && hasMore) fetchAttempts(offset);
@@ -367,7 +369,7 @@ export default function GameDetailScreen() {
                               style={[
                                 styles.achievementCard,
                                 !achievement.unlocked &&
-                                  styles.achievementLocked,
+                                styles.achievementLocked,
                               ]}
                               onPress={() =>
                                 setSelectedAchievement(achievement)
@@ -392,7 +394,7 @@ export default function GameDetailScreen() {
                                   style={[
                                     styles.achievementTitle,
                                     !achievement.unlocked &&
-                                      styles.achievementTitleLocked,
+                                    styles.achievementTitleLocked,
                                   ]}
                                   numberOfLines={2}
                                 >
