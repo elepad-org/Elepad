@@ -34,6 +34,16 @@ interface SelectedMemory {
   order: number;
 }
 
+export type ThemeTag = "Aventura" | "Fantasía" | "Pequeños momentos" | "Celebración" | "Acogedor";
+
+const THEME_TAGS: ThemeTag[] = [
+  "Aventura",
+  "Fantasía",
+  "Pequeños momentos",
+  "Celebración",
+  "Acogedor",
+];
+
 export default function CreateAlbumDialog({
   visible,
   onDismiss,
@@ -50,6 +60,7 @@ export default function CreateAlbumDialog({
   const [step, setStep] = useState<"form" | "select" | "reorder">("form");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [selectedTags, setSelectedTags] = useState<ThemeTag[]>([]);
   const [selectedMemories, setSelectedMemories] = useState<SelectedMemory[]>(
     [],
   );
@@ -62,12 +73,25 @@ export default function CreateAlbumDialog({
     setStep("form");
     setTitle("");
     setDescription("");
+    setSelectedTags([]);
     setSelectedMemories([]);
   };
 
   const handleDismiss = () => {
     handleReset();
     onDismiss();
+  };
+
+  const handleToggleTag = (tag: ThemeTag) => {
+    const isSelected = selectedTags.includes(tag);
+    
+    if (isSelected) {
+      setSelectedTags(prev => prev.filter(t => t !== tag));
+    } else {
+      if (selectedTags.length < 2) {
+        setSelectedTags(prev => [...prev, tag]);
+      }
+    }
   };
 
   const handleToggleMemory = (memory: Memory) => {
@@ -110,6 +134,7 @@ export default function CreateAlbumDialog({
         title: title.trim(),
         description: description.trim() || undefined,
         memoryIds: orderedMemoryIds,
+        tags: selectedTags,
       });
     } catch (err) {
       console.error("Error en handleCreateAlbum:", err);
@@ -204,7 +229,36 @@ export default function CreateAlbumDialog({
                   keyboardType="default"
                   autoCapitalize="sentences"
                   returnKeyType="done"
+                  marginBottom={16}
                 />
+
+                <Text style={styles.tagsLabel}>
+                  Temática del álbum (selecciona 1-2)
+                </Text>
+                <View style={styles.tagsContainer}>
+                  {THEME_TAGS.map((tag) => {
+                    const isSelected = selectedTags.includes(tag);
+                    return (
+                      <TouchableOpacity
+                        key={tag}
+                        onPress={() => handleToggleTag(tag)}
+                        style={[
+                          styles.tagChip,
+                          isSelected && styles.tagChipSelected,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.tagText,
+                            isSelected && styles.tagTextSelected,
+                          ]}
+                        >
+                          {tag}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
               </View>
             )}
 
@@ -339,7 +393,7 @@ export default function CreateAlbumDialog({
                   <Button
                     mode="contained"
                     onPress={() => setStep("select")}
-                    disabled={!title.trim() || isCreating}
+                    disabled={!title.trim() || selectedTags.length === 0 || isCreating}
                     buttonColor={COLORS.primary}
                     textColor={COLORS.white}
                     style={{ borderRadius: 12 }}
@@ -561,5 +615,36 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.backgroundSecondary,
     borderRadius: 16,
     overflow: "hidden",
+  },
+  tagsLabel: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: COLORS.text,
+    marginBottom: 12,
+  },
+  tagsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  tagChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.background,
+  },
+  tagChipSelected: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  tagText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: COLORS.text,
+  },
+  tagTextSelected: {
+    color: COLORS.white,
   },
 });
