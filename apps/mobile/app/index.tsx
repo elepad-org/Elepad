@@ -29,7 +29,7 @@ export default function IndexRedirect() {
   useEffect(() => {
     if (session && !loading && !hasRedirected.current) {
       hasRedirected.current = true;
-      router.replace("/home");
+      router.replace("/(tabs)/home");
     }
   }, [session, loading]);
 

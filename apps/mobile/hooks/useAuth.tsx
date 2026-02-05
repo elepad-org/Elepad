@@ -247,26 +247,35 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
   useEffect(() => {
     const setData = async () => {
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
-      if (error) {
-        throw error;
-      }
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        // No esperamos a que cargue el perfil para liberar el loading inicial
-        // Esto permite que la UI navegue a home y muestre skeletons
-        loadElepadUserById(session.user.id);
-      } else {
+      try {
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+        if (error) {
+          throw error;
+        }
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          // No esperamos a que cargue el perfil para liberar el loading inicial
+          // Esto permite que la UI navegue a home y muestre skeletons
+          await loadElepadUserById(session.user.id);
+        } else {
+          setUserElepad(null);
+          setUserElepadLoading(false);
+        }
+        hasInitialized.current = true;
+        // No redirigir aquí - dejar que cada pantalla maneje su propia redirección
+      } catch (err) {
+        console.error("❌ Error inicializando sesión:", err);
+        setSession(null);
+        setUser(null);
         setUserElepad(null);
         setUserElepadLoading(false);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-      hasInitialized.current = true;
-      // No redirigir aquí - dejar que cada pantalla maneje su propia redirección
     };
 
     setData();

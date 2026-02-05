@@ -15,6 +15,7 @@ type Props = {
     rounds: number;
     errors: number;
     score: number;
+    durationMs: number;
     achievements?: Array<{
       id: string;
       title: string;
@@ -35,7 +36,7 @@ export default function AttentionGame({
   const [, setTick] = useState(0);
   const [score, setScore] = useState({ correct: 0, rounds: rounds });
   const [lives, setLives] = useState(3);
-  const [lastResult, setLastResult] = useState<boolean | null>(null);  
+  const [lastResult, setLastResult] = useState<boolean | null>(null);
 
   const [showQuitDialog, setShowQuitDialog] = useState(false);
 
@@ -48,6 +49,7 @@ export default function AttentionGame({
     rounds: number;
     errors: number;
     score: number;
+    durationMs: number;
     achievements?: Array<{
       id: string;
       title: string;
@@ -56,7 +58,7 @@ export default function AttentionGame({
       points: number;
     }>;
   } | null>(null);
-  
+
   const hasCalledOnComplete = useRef(false);
   const prevGameId = useRef<string>(gameId);
 
@@ -110,17 +112,17 @@ export default function AttentionGame({
     setIsGameComplete(false);
     setHasStartedPlaying(false);
     setGameEndStats(null);
-    
+
     // 2. Resetear el core del juego
     core.reset();
     core.startRound();
     setTick((t) => t + 1);
-    
+
     // 3. Generar nuevo ID de juego (dispara el sync)
     const newGameId = Date.now().toString();
     setGameId(newGameId);
     console.log("🆕 Nuevo juego iniciado con ID:", newGameId);
-    
+
     // 4. Resetear el juego en el hook
     focus.resetGame();
   }, [core, rounds, focus]);
@@ -143,17 +145,17 @@ export default function AttentionGame({
 
   const handleSelection = (selection: ColorName) => {
     if (!prompt || showQuitDialog) return;
-    
+
     // Iniciar el timer en la PRIMERA interacción del usuario
     if (!hasStartedPlaying) {
       setHasStartedPlaying(true);
       focus.startTimer();
       console.log("⏱️ Timer iniciado en primera interacción");
     }
-    
+
     const correct = core.handleSelection(selection);
     setLastResult(correct);
-    
+
     const newCorrectScore = score.correct + (correct ? 1 : 0);
     setScore({ correct: newCorrectScore, rounds });
     setCurrentRound((prev) => prev + 1);
@@ -171,9 +173,10 @@ export default function AttentionGame({
             rounds,
             errors,
             score: 0, // Score es 0 al perder
+            durationMs: focus.getDuration(),
             achievements: [], // No hay logros al perder
           });
-          
+
           // Finalizar el intento en el backend (no bloqueante)
           focus.finishGame(
             { correct: newCorrectScore, rounds },
@@ -202,27 +205,28 @@ export default function AttentionGame({
         const durationMs = focus.getDuration();
         const calculatedScore = Math.max(
           0,
-          Math.floor(1000 - (durationMs / 1000) * 5 - errors * 10)
+          Math.floor(1000 - (durationMs / 1000) * 15 - errors * 100)
         );
-        
+
         // Predecir logros SÍNCRONAMENTE
         const predictedAchievements = focus.predictAchievementsSync({
           correct: newCorrectScore,
           rounds,
           durationMs
         });
-        
+
         // Guardar los stats para que se llame onComplete en el useEffect
         setGameEndStats({
           correct: newCorrectScore,
           rounds,
           errors,
           score: calculatedScore,
+          durationMs,
           achievements: predictedAchievements,
         });
-        
+
         setIsGameComplete(true);
-        
+
         // Backend en background
         focus.finishGame(
           { correct: newCorrectScore, rounds, durationMs },
@@ -319,20 +323,20 @@ export default function AttentionGame({
 
       {/* Botones de control inferiores */}
       <View style={styles.controls}>
-        <Button 
-            mode="contained" 
-            onPress={restartGame} 
-            icon="refresh" 
-            style={styles.actionButton}
-            buttonColor={COLORS.secondary}
+        <Button
+          mode="contained"
+          onPress={restartGame}
+          icon="refresh"
+          style={styles.actionButton}
+          buttonColor={COLORS.secondary}
         >
           Reiniciar
         </Button>
-        <Button 
-            mode="outlined" 
-            onPress={handleQuit} 
-            icon="exit-to-app" 
-            style={styles.actionButton}
+        <Button
+          mode="outlined"
+          onPress={handleQuit}
+          icon="exit-to-app"
+          style={styles.actionButton}
         >
           Salir
         </Button>

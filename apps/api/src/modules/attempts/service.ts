@@ -4,7 +4,7 @@ import type { Database } from "@/supabase-types";
 import type { StartAttempt, FinishAttempt } from "./schema";
 
 export class AttemptService {
-  constructor(private supabase: SupabaseClient<Database>) {}
+  constructor(private supabase: SupabaseClient<Database>) { }
 
   /**
    * Inicia un nuevo intento de juego
@@ -59,7 +59,12 @@ export class AttemptService {
     // Verificar que el intento existe y pertenece al usuario
     const { data: existingAttempt, error: checkError } = await this.supabase
       .from("attempts")
-      .select("id, userId, finishedAt")
+      .select(`
+        id, userId, finishedAt,
+        memoryPuzzleId, logicPuzzleId, sudokuPuzzleId, isFocusGame,
+        memoryPuzzle:memoryGames!memoryPuzzleId(rows, cols),
+        sudokuPuzzle:sudokuGames!sudokuPuzzleId(puzzle:puzzles!puzzleId(difficulty))
+      `)
       .eq("id", attemptId)
       .single();
 
@@ -82,9 +87,33 @@ export class AttemptService {
     console.log(`  Moves: ${moves}`);
     console.log(`  Score from payload: ${score ?? 'null (will calculate)'}`);
 
+    // Determinar tipo de juego y modificadores
+    let gameType = 'unknown';
+    let modifiers: { difficulty?: number; rows?: number; cols?: number } = {};
+
+    if (existingAttempt.isFocusGame) {
+      gameType = 'focus';
+    } else if (existingAttempt.memoryPuzzleId) {
+      gameType = 'memory';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mem = (existingAttempt as any).memoryPuzzle;
+      if (mem) {
+        modifiers = { rows: mem.rows, cols: mem.cols };
+      }
+    } else if (existingAttempt.logicPuzzleId) {
+      gameType = 'logic'; // NET
+    } else if (existingAttempt.sudokuPuzzleId) {
+      gameType = 'sudoku';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sud = (existingAttempt as any).sudokuPuzzle;
+      if (sud && sud.puzzle) {
+        modifiers = { difficulty: sud.puzzle.difficulty };
+      }
+    }
+
     // Calcular el score si no viene en el payload
     const calculatedScore =
-      score ?? this.calculateScore(durationMs, moves, success);
+      score ?? this.calculateScore(durationMs, moves, success, gameType, modifiers);
 
     // Actualizar el intento
     const { data: attempt, error: updateError } = await this.supabase
@@ -118,30 +147,64 @@ export class AttemptService {
     durationMs: number,
     moves: number,
     success: boolean,
+    gameType: string,
+    modifiers: { difficulty?: number; rows?: number; cols?: number } = {}
   ): number {
     if (!success) return 0;
 
     const durationSeconds = durationMs / 1000;
-
-    // Fórmula: Base 1000 puntos - penalización por tiempo y movimientos
-    // Cada segundo resta 5 puntos, cada movimiento resta 10 puntos
-    const timepenalty = durationSeconds * 5;
-    const movesPenalty = moves * 10;
-
     const baseScore = 1000;
-    const finalScore = Math.max(
-      0,
-      Math.floor(baseScore - timepenalty - movesPenalty),
-    );
+    let finalScore = 0;
 
-    console.log("[BACKEND SCORE CALCULATION]");
-    console.log(`  Duration: ${durationMs}ms (${durationSeconds.toFixed(2)}s)`);
-    console.log(`  Moves (errores): ${moves}`);
-    console.log(`  Time penalty: ${durationSeconds.toFixed(2)} * 5 = ${timepenalty.toFixed(2)}`);
-    console.log(`  Moves penalty: ${moves} * 10 = ${movesPenalty}`);
-    console.log(`  Final score: ${baseScore} - ${timepenalty.toFixed(2)} - ${movesPenalty} = ${finalScore}`);
+    if (gameType === 'sudoku') {
+      // Sudoku: Base 1000, -0.5 pts/s, -100 pts/error
+      // Multiplicador: 1.0 (Fácil/Desc), 1.3 (Medio), 1.6 (Difícil)
+      const timePenalty = durationSeconds * 0.5;
+      const errorPenalty = moves * 100; // En Sudoku moves = mistakes
 
-    return finalScore;
+      let multiplier = 1.0;
+      // Difficulty 1 = Easy, 2 = Medium, 3 = Hard
+      if (modifiers.difficulty === 2) multiplier = 1.3;
+      if (modifiers.difficulty === 3) multiplier = 1.6;
+
+      finalScore = Math.max(0, baseScore - timePenalty - errorPenalty) * multiplier;
+
+      console.log(`[SCORE] Sudoku: (1000 - ${timePenalty.toFixed(1)} - ${errorPenalty}) * ${multiplier} = ${finalScore}`);
+    }
+    else if (gameType === 'memory') {
+      // Memory: Base 1000, -5 pts/s, -10 pts/move
+      // Multiplicador: 1.0 (4x4), 1.5 (4x6)
+      const timePenalty = durationSeconds * 5;
+      const movePenalty = moves * 10;
+
+      let multiplier = 1.0;
+      // Si rows=4 y cols=6 => multiplicador 1.5
+      if (modifiers.rows === 4 && modifiers.cols === 6) {
+        multiplier = 1.5;
+      }
+
+      finalScore = Math.max(0, baseScore - timePenalty - movePenalty) * multiplier;
+      console.log(`[SCORE] Memory: (1000 - ${timePenalty.toFixed(1)} - ${movePenalty}) * ${multiplier} = ${finalScore}`);
+
+    }
+    else if (gameType === 'focus') {
+      // Focus: Base 1000, -15 pts/s, -100 pts/error
+      const timePenalty = durationSeconds * 15;
+      const errorPenalty = moves * 100; // moves = errors
+
+      finalScore = Math.max(0, baseScore - timePenalty - errorPenalty);
+      console.log(`[SCORE] Focus: 1000 - ${timePenalty.toFixed(1)} - ${errorPenalty} = ${finalScore}`);
+    }
+    else {
+      // Default (NET y otros): Base 1000, -5 pts/s, -10 pts/mov
+      const timePenalty = durationSeconds * 5;
+      const movePenalty = moves * 10;
+
+      finalScore = Math.max(0, baseScore - timePenalty - movePenalty);
+      console.log(`[SCORE] Default/NET: 1000 - ${timePenalty.toFixed(1)} - ${movePenalty} = ${finalScore}`);
+    }
+
+    return Math.floor(finalScore);
   }
 
   /**
@@ -221,7 +284,7 @@ export class AttemptService {
     // Agregar gameType a cada attempt basado en qué puzzle tiene
     const attemptsWithGameType = (data || []).map(attempt => {
       let determinedGameType = 'unknown';
-      
+
       if (attempt.isFocusGame) {
         determinedGameType = 'focus';
       } else if (attempt.memoryPuzzleId) {
@@ -231,7 +294,7 @@ export class AttemptService {
       } else if (attempt.sudokuPuzzleId) {
         determinedGameType = 'sudoku';
       }
-      
+
       return {
         ...attempt,
         gameType: determinedGameType,
@@ -328,7 +391,7 @@ export class AttemptService {
     // Agregar gameType a cada attempt basado en qué puzzle tiene
     const attemptsWithGameType = (data || []).map(attempt => {
       let determinedGameType = 'unknown';
-      
+
       if (attempt.isFocusGame) {
         determinedGameType = 'focus';
       } else if (attempt.memoryPuzzleId) {
@@ -338,7 +401,7 @@ export class AttemptService {
       } else if (attempt.sudokuPuzzleId) {
         determinedGameType = 'sudoku';
       }
-      
+
       return {
         ...attempt,
         gameType: determinedGameType,
@@ -397,13 +460,13 @@ export class AttemptService {
     const avgDuration =
       finishedAttempts.length > 0
         ? finishedAttempts.reduce((sum, a) => sum + (a.durationMs || 0), 0) /
-          finishedAttempts.length
+        finishedAttempts.length
         : null;
 
     const avgMoves =
       finishedAttempts.length > 0
         ? finishedAttempts.reduce((sum, a) => sum + (a.moves || 0), 0) /
-          finishedAttempts.length
+        finishedAttempts.length
         : null;
 
     const bestScore =

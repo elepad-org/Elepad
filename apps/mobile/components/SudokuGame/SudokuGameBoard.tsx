@@ -12,6 +12,8 @@ interface SudokuGameBoardProps {
   onComplete: (stats: {
     moves: number;
     timeElapsed: number;
+    score: number;
+    mistakes: number;
     achievements?: Array<{
       id: string;
       title: string;
@@ -39,6 +41,7 @@ export const SudokuGameBoard: React.FC<SudokuGameBoardProps> = ({
     isLoading,
     actions,
     unlockedAchievements,
+    score,
   } = useSudoku({
     difficulty,
     maxMistakes: 3,
@@ -84,10 +87,12 @@ export const SudokuGameBoard: React.FC<SudokuGameBoardProps> = ({
       onComplete({
         moves: userMoves,
         timeElapsed,
+        score,
+        mistakes,
         achievements: unlockedAchievements,
       });
     }
-  }, [isComplete, userMoves, timeElapsed, onComplete, unlockedAchievements]);
+  }, [isComplete, userMoves, timeElapsed, score, mistakes, onComplete, unlockedAchievements]);
 
   // Resetear el flag cuando se reinicia el juego
   useEffect(() => {
@@ -170,7 +175,7 @@ export const SudokuGameBoard: React.FC<SudokuGameBoardProps> = ({
                             const actualCol = blockCol * 3 + cellCol;
                             const cell = board[actualRow]?.[actualCol];
                             if (!cell) return null;
-                            
+
                             return (
                               <SudokuCell
                                 key={`cell-${actualRow}-${actualCol}`}

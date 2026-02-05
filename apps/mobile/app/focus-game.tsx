@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useRef} from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar, View } from "react-native";
 import { COLORS, STYLES, LAYOUT } from "@/styles/base";
@@ -23,7 +23,9 @@ export default function AttentionGameScreen() {
     correct: number;
     rounds: number;
     errors: number;
+
     score: number;
+    durationMs: number;
     achievements?: Achievement[];
   } | null>(null);
   const restartGameRef = useRef<(() => void) | null>(null);
@@ -33,7 +35,9 @@ export default function AttentionGameScreen() {
       correct: number;
       rounds: number;
       errors: number;
+
       score: number;
+      durationMs: number;
       achievements?: Array<{
         id: string;
         title: string;
@@ -66,7 +70,7 @@ export default function AttentionGameScreen() {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      
+
       <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
         <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
         <View
@@ -81,7 +85,7 @@ export default function AttentionGameScreen() {
           <Text style={{ marginBottom: 12, color: COLORS.textSecondary }}>
             Selecciona el color que indica la palabra (no el color del texto).
           </Text>
-          
+
           <AttentionGame
             rounds={ROUNDS}
             onComplete={handleComplete}
@@ -100,6 +104,11 @@ export default function AttentionGameScreen() {
                 icon: "🎯",
                 label: "Puntaje",
                 value: gameResults?.score || 0,
+              },
+              {
+                icon: "⏱️",
+                label: "Tiempo",
+                value: gameResults?.durationMs ? `${Math.floor(gameResults.durationMs / 1000)}s` : "0s",
               },
               {
                 icon: "✅",

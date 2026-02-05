@@ -13,6 +13,7 @@ interface NetGameBoardProps {
     stats: {
       moves: number;
       timeElapsed: number;
+      score: number;
       achievements?: Array<{
         id: string;
         title: string;
@@ -63,6 +64,7 @@ export const NetGameBoard: React.FC<NetGameBoardProps> = ({
         {
           moves: stats.moves,
           timeElapsed: stats.timeElapsed,
+          score: stats.score,
           achievements: unlockedAchievements,
         },
         isSolvedAutomatically,

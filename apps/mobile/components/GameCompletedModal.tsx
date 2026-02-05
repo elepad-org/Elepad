@@ -51,36 +51,51 @@ export function GameCompletedModal({
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
-  // Usar stats personalizados si se proveen, sino usar los predeterminados
-  const displayStats = customStats || [
+  // Construir estadísticas predeterminadas basadas en props
+  const defaultStats = [
     ...(score !== undefined && score !== null
       ? [
-          {
-            icon: "🎯",
-            label: "Puntaje",
-            value: score,
-          },
-        ]
+        {
+          icon: "🎯",
+          label: "Puntaje",
+          value: score,
+        },
+      ]
       : []),
     ...(moves !== undefined && moves !== null
       ? [
-          {
-            icon: "🔢",
-            label: "Movimientos",
-            value: moves,
-          },
-        ]
+        {
+          icon: "🔢",
+          label: "Movimientos",
+          value: moves,
+        },
+      ]
       : []),
     ...(time !== undefined && time !== null
       ? [
-          {
-            icon: "⏱️",
-            label: "Tiempo",
-            value: formatTime(time),
-          },
-        ]
+        {
+          icon: "⏱️",
+          label: "Tiempo",
+          value: formatTime(time),
+        },
+      ]
       : []),
   ];
+
+  // Combinar predeterminadas con personalizadas
+  const displayStats = [...defaultStats, ...(customStats || [])];
+
+  // Separar el puntaje si hay muchas estadísticas (para destacarlo)
+  let mainStat = null;
+  let secondaryStats = displayStats;
+
+  if (displayStats.length > 3) {
+    const scoreIndex = displayStats.findIndex((s) => s.label === "Puntaje");
+    if (scoreIndex !== -1) {
+      mainStat = displayStats[scoreIndex];
+      secondaryStats = displayStats.filter((_, i) => i !== scoreIndex);
+    }
+  }
 
   return (
     <Portal>
@@ -92,7 +107,7 @@ export function GameCompletedModal({
         <Dialog.Title style={styles.dialogTitle}>
           {success ? "¡Felicitaciones! 🎉" : "Inténtalo de nuevo 💪"}
         </Dialog.Title>
-        
+
         <Dialog.Content>
           <View style={styles.resultsContainer}>
             <Text style={styles.resultsText}>
@@ -103,15 +118,28 @@ export function GameCompletedModal({
 
             {/* Estadísticas del juego */}
             {displayStats.length > 0 && (
-              <View style={styles.resultStats}>
-                {displayStats.map((stat, index) => (
-                  <View key={index} style={styles.resultStat}>
-                    <Text style={styles.resultIcon}>{stat.icon}</Text>
-                    <Text style={styles.resultLabel}>{stat.label}</Text>
-                    <Text style={styles.resultValue}>{stat.value}</Text>
+              <>
+                {/* Estadística destacada (Score) si hay más de 3 */}
+                {mainStat && (
+                  <View style={styles.mainResultStat}>
+                    <Text style={styles.mainResultIcon}>{mainStat.icon}</Text>
+                    <View>
+                      <Text style={styles.mainResultLabel}>{mainStat.label}</Text>
+                      <Text style={styles.mainResultValue}>{mainStat.value}</Text>
+                    </View>
                   </View>
-                ))}
-              </View>
+                )}
+
+                <View style={styles.resultStats}>
+                  {secondaryStats.map((stat, index) => (
+                    <View key={index} style={styles.resultStat}>
+                      <Text style={styles.resultIcon}>{stat.icon}</Text>
+                      <Text style={styles.resultLabel}>{stat.label}</Text>
+                      <Text style={styles.resultValue}>{stat.value}</Text>
+                    </View>
+                  ))}
+                </View>
+              </>
             )}
 
             {/* Logros desbloqueados */}
@@ -219,6 +247,32 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     color: COLORS.text,
+  },
+  mainResultStat: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: COLORS.card,
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 8,
+    gap: 16,
+    borderWidth: 2,
+    borderColor: COLORS.primary + "40", // 40 = 25% opacidad hex
+  },
+  mainResultIcon: {
+    fontSize: 42,
+  },
+  mainResultLabel: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  mainResultValue: {
+    fontSize: 32,
+    fontWeight: "bold",
+    color: COLORS.primary,
   },
   achievementsSection: {
     marginTop: 8,
