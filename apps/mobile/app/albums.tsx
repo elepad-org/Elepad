@@ -197,7 +197,6 @@ export default function AlbumsScreen() {
 const styles = StyleSheet.create({
   content: {
     flex: 1,
-    paddingHorizontal: 24,
   },
   loadingContainer: {
     flex: 1,
@@ -225,11 +224,11 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   listContent: {
+    paddingHorizontal: 24,
     paddingTop: 16,
   },
   row: {
     justifyContent: "space-between",
-    paddingHorizontal: 16,
   },
   columnItem: {
     width: "48%",

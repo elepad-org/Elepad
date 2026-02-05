@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { View, Image, StyleSheet, Linking, Pressable, ActivityIndicator } from "react-native";
+import { View, StyleSheet, Linking, Pressable, ActivityIndicator } from "react-native";
+import { Image } from "expo-image";
 import {
   Text,
   Card,
@@ -143,10 +144,12 @@ export default function AlbumCard({
 
   return (
     <View>
-      <Card
-        style={styles.card}
+      <Pressable
+        style={({ pressed }) => [
+          styles.card,
+          pressed && { opacity: 0.95 },
+        ]}
         onPress={() => setDetailsVisible(true)}
-        elevation={2}
       >
         {/* Image */}
         <View style={styles.imageWrapper}>
@@ -154,7 +157,8 @@ export default function AlbumCard({
             <Image
               source={{ uri: coverImageUrl }}
               style={styles.image}
-              resizeMode="cover"
+              contentFit="cover"
+              transition={200}
             />
           ) : (
             <View style={styles.placeholder}>
@@ -173,7 +177,7 @@ export default function AlbumCard({
             {title}
           </Text>
         </View>
-      </Card>
+      </Pressable>
 
       {/* Dialog */}
       <Portal>
@@ -343,11 +347,13 @@ export default function AlbumCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: COLORS.backgroundSecondary,
-    borderRadius: 16,
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
     overflow: "hidden",
-    marginBottom: 12,
-    ...SHADOWS.card,
+    marginBottom: 0, // Handled by gap in list
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.05)",
+    ...SHADOWS.light,
   },
 
   imageWrapper: {
