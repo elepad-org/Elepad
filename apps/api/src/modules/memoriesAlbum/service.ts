@@ -748,30 +748,40 @@ Este recuerdo nos muestra...`;
     album: AlbumWithPages,
     familyName: string,
   ): Promise<Buffer> {
-    // Create a new PDF document in landscape
     const pdfDoc = await PDFDocument.create();
 
-    // Embed fonts
-    const titleFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    // Fonts
+    const titleFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
     const bodyFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const lightFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
 
-    // Page dimensions (A4 landscape)
+    // Page dimensions
     const pageWidth = 842;
     const pageHeight = 595;
 
     // Cover page
     const coverPage = pdfDoc.addPage([pageWidth, pageHeight]);
-    const coverColor = rgb(66 / 255, 74 / 255, 112 / 255); // #424a70
 
-    // Draw background
-    coverPage.drawRectangle({
-      x: 0,
-      y: 0,
-      width: pageWidth,
-      height: pageHeight,
-      color: coverColor,
-    });
+    // Draw gradient background
+    const gradientSteps = 50;
+    for (let step = 0; step < gradientSteps; step++) {
+      const ratio = step / gradientSteps;
+      // Interpolate between #9a9ece (154, 158, 206) and #424a70 (66, 74, 112)
+      const r = 154 - (154 - 66) * ratio;
+      const g = 158 - (158 - 74) * ratio;
+      const b = 206 - (206 - 112) * ratio;
+      
+      const stepHeight = pageHeight / gradientSteps;
+      const stepY = pageHeight - (step * stepHeight);
+      
+      coverPage.drawRectangle({
+        x: 0,
+        y: stepY - stepHeight,
+        width: pageWidth,
+        height: stepHeight,
+        color: rgb(r / 255, g / 255, b / 255),
+      });
+    }
 
     // Title
     const titleX = this.calculateCenteredX(album.title, 42, pageWidth);
@@ -836,13 +846,13 @@ Este recuerdo nos muestra...`;
 
       // Image section (left half)
       const imageX = 30;
-      const imageY = 150;
+      const imageY = 100;
       const imageMaxWidth = (pageWidth / 2) - 60;
-      const imageMaxHeight = 330;
+      const imageMaxHeight = 400;
 
       // Draw polaroid frame
-      const frameWidth = Math.min(imageMaxWidth, 300);
-      const frameHeight = frameWidth + 60;
+      const frameWidth = Math.min(imageMaxWidth, 340);
+      const frameHeight = frameWidth + 50;
       const frameBg = rgb(1, 1, 1);
       const frameCenterX = imageX + (imageMaxWidth - frameWidth) / 2;
       const frameCenterY = imageY + (imageMaxHeight - frameHeight) / 2;
@@ -892,15 +902,15 @@ Este recuerdo nos muestra...`;
             }
 
             // Calculate scaled dimensions for image (top part of polaroid)
-            const imageWidth = frameWidth - 40;
-            const imageHeight = frameWidth - 40;
+            const imageWidth = frameWidth - 30;
+            const imageHeight = frameWidth - 30;
 
             // Position image at the top of the polaroid with a small margin
-            const imageTopY = frameCenterY + frameHeight - 20; // top inner margin
+            const imageTopY = frameCenterY + frameHeight - 15; // top inner margin (reduced)
             const imageYPos = imageTopY - imageHeight; // place image so its top is imageTopY
 
             contentPage.drawImage(image, {
-              x: frameCenterX + 20,
+              x: frameCenterX + 10,
               y: imageYPos,
               width: imageWidth,
               height: imageHeight,
@@ -921,7 +931,7 @@ Este recuerdo nos muestra...`;
         const innerWidth = frameWidth - 20;
         const centeredOffset = this.calculateCenteredX(cleanedTitle, 11, innerWidth);
         const titleX = frameCenterX + 10 + centeredOffset;
-        const titleY = frameCenterY + 30; // small bottom margin inside polaroid
+        const titleY = frameCenterY + 20; // reduced bottom margin inside polaroid
 
         contentPage.drawText(cleanedTitle, {
           x: titleX,
@@ -975,5 +985,44 @@ Este recuerdo nos muestra...`;
     // Save PDF to buffer
     const pdfBytes = await pdfDoc.save();
     return Buffer.from(pdfBytes);
+  }
+
+  /**
+   * Delete an album by ID
+   * Verifies the user has access to the album before deleting
+   */
+  async deleteAlbum(userId: string, albumId: string): Promise<void> {
+    // First, verify the album exists and user has access to it
+    const { data: userGroup } = await this.supabase
+      .from("users")
+      .select("groupId")
+      .eq("id", userId)
+      .single();
+
+    if (!userGroup?.groupId) {
+      throw new ApiException(404, "User is not part of any family group");
+    }
+
+    const { data: album, error: albumError } = await this.supabase
+      .from("memoriesAlbums")
+      .select("id, groupId")
+      .eq("id", albumId)
+      .eq("groupId", userGroup.groupId)
+      .single();
+
+    if (albumError || !album) {
+      throw new ApiException(404, "Album not found or you don't have access to it");
+    }
+
+    // Delete the album
+    const { error: deleteError } = await this.supabase
+      .from("memoriesAlbums")
+      .delete()
+      .eq("id", albumId);
+
+    if (deleteError) {
+      console.error("Error deleting album:", deleteError);
+      throw new ApiException(500, "Error deleting album");
+    }
   }
 }

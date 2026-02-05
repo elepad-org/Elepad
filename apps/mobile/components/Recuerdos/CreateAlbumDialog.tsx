@@ -19,6 +19,7 @@ import DraggableFlatList, {
   RenderItemParams,
   ScaleDecorator,
 } from "react-native-draggable-flatlist";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 interface CreateAlbumDialogProps {
   visible: boolean;
@@ -308,6 +309,7 @@ export default function CreateAlbumDialog({
             )}
 
             {step === "reorder" && (
+              <GestureHandlerRootView style={{ flex: 1, width: "100%" }}>
               <DraggableFlatList
                 data={selectedMemories}
                 onDragEnd={({ data }) => {
@@ -320,7 +322,10 @@ export default function CreateAlbumDialog({
                 keyExtractor={(item) => item.id}
                 renderItem={renderDraggableItem}
                 containerStyle={{ flex: 1 }}
+                activationDistance={10}
+                scrollEnabled={true}
               />
+              </GestureHandlerRootView>
             )}
           </View>
 
@@ -517,7 +522,7 @@ const styles = StyleSheet.create({
     maxWidth: "90%",
   },
   draggableItemActive: {
-    backgroundColor: `${COLORS.primary}15`,
+    backgroundColor: `${COLORS.primary}90`,
     borderColor: COLORS.primary,
     maxWidth: "90%",
   },

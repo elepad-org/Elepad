@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { File, Directory, Paths } from "expo-file-system";
 import * as FileSystem from "expo-file-system/legacy";
-import * as IntentLauncher from 'expo-intent-launcher';
+import * as IntentLauncher from "expo-intent-launcher";
 import * as Sharing from "expo-sharing";
 import { useToast } from "@/components/shared/Toast";
 
@@ -32,7 +32,7 @@ export function usePdfDownload(options?: UsePdfDownloadOptions) {
   };
 
   const getCacheDir = () => {
-    const cache = Paths.cache || "";
+    const cache = Paths.cache;
     if (!cache) throw new Error("Cache directory not available");
     return new Directory(cache);
   };
@@ -47,7 +47,7 @@ export function usePdfDownload(options?: UsePdfDownloadOptions) {
       if (!cacheDir.exists)
         cacheDir.create({ intermediates: true, idempotent: true });
     } catch (err) {
-      console.log(err)
+      console.log(err);
       throw err as Error;
     }
 
@@ -87,63 +87,65 @@ export function usePdfDownload(options?: UsePdfDownloadOptions) {
     setIsDownloading(true);
     try {
       if (!(await Sharing.isAvailableAsync())) {
-        showToast({message: "Compartir no está disponible en este dispositivo", type: "error"});
-        throw new Error;
+        showToast({message: "No se puede compartir", type: "error"});
+        return;
       }
 
-      showToast({ message: "Preparando álbum...", type: "info" });
-
+      showToast({ message: "Preparando envío...", type: "info" });
       const filename = `${sanitizeFilename(albumTitle)}.pdf`;
-      const downloaded = await downloadToCacheWithFileApi(pdfUrl, filename);
 
-      const shareUri = downloaded.contentUri || downloaded.uri;
+      await downloadToCacheWithFileApi(pdfUrl, filename);
+      
+      const tempLegacyUri = FileSystem.cacheDirectory + filename;
 
-      await Sharing.shareAsync(shareUri, {
+      await Sharing.shareAsync(tempLegacyUri, {
         mimeType: "application/pdf",
         dialogTitle: `Compartir ${albumTitle}`,
         UTI: "com.adobe.pdf",
       });
+      
+      try { await FileSystem.deleteAsync(tempLegacyUri, { idempotent: true }); } catch (e) {console.error(e)}
 
       options?.onSuccess?.();
     } catch (err) {
-      console.log(err)
-      showToast({ message: "Error al intentar compartir el álbum", type: "error" });
+      console.log(err);
+      showToast({ message: "Error al compartir", type: "error" });
       options?.onError?.(err instanceof Error ? err : new Error);
     } finally {
       setIsDownloading(false);
     }
   };
 
-  const viewLocalPdf = async (
-    pdfUrl: string,
-  ): Promise<void> => {
+  const viewLocalPdf = async (pdfUrl: string): Promise<void> => {
     if (!pdfUrl) return;
     setIsDownloading(true);
     try {
       showToast({ message: "Cargando archivo...", type: "info" });
 
-
       const destDir = new Directory(Paths.cache);
       destDir.create({ idempotent: true, intermediates: true });
 
-      const output = await File.downloadFileAsync(pdfUrl, destDir, {idempotent: true});
-      console.log(output)
-
+      const output = await File.downloadFileAsync(pdfUrl, destDir, {
+        idempotent: true,
+      });
+      console.log(output);
 
       const savedUri = await FileSystem.getContentUriAsync(output.uri);
 
-      await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
+      await IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
         data: savedUri,
         flags: 1, // FLAG_GRANT_READ_URI_PERMISSION
-        type: 'application/pdf', // Para apps que lean pdf
-        });
+        type: "application/pdf", // Para apps que lean pdf
+      });
       options?.onSuccess?.();
       setIsDownloading(false);
-      
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       console.log(err);
-      showToast({ message: "No se pudo abrir el PDF. Intenta nuevamente", type: "error" });
+      showToast({
+        message: "No se pudo abrir el PDF. Intenta nuevamente",
+        type: "error",
+      });
       options?.onError?.(err instanceof Error ? err : new Error(msg));
     } finally {
       setIsDownloading(false);
