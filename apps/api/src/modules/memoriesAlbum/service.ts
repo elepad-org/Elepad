@@ -770,6 +770,7 @@ Este recuerdo nos muestra...`;
     const coverPage = pdfDoc.addPage([pageWidth, pageHeight]);
 
     // Draw gradient background
+    /*
     const gradientSteps = 50;
     for (let step = 0; step < gradientSteps; step++) {
       const ratio = step / gradientSteps;
@@ -789,6 +790,16 @@ Este recuerdo nos muestra...`;
         color: rgb(r / 255, g / 255, b / 255),
       });
     }
+    */
+
+    // Solid background instead of gradient
+    coverPage.drawRectangle({
+      x: 0,
+      y: 0,
+      width: pageWidth,
+      height: pageHeight,
+      color: rgb(143 / 255, 161 / 255, 247 / 255), // #8FA1F7 (algo mas celestito que el gris primario)
+    });
 
     // Title
     const titleX = this.calculateCenteredX(album.title, 42, pageWidth);
