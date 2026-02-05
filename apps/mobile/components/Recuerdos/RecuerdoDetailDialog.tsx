@@ -287,38 +287,47 @@ export default function RecuerdoDetailDialog({
         <View style={{ flex: 1 }} />
       )}
 
-      {menuMounted && recuerdo.autorId === currentUserId && (
-        <Menu
-          visible={menuVisible}
-          onDismiss={closeMenu}
-          contentStyle={{
-            backgroundColor: COLORS.background,
-            borderRadius: 12,
-          }}
-          anchor={
-            <IconButton
-              icon="dots-horizontal"
-              size={20}
-              style={{ margin: 0 }}
-              onPress={() => setMenuVisible(true)}
+      {recuerdo.autorId === currentUserId &&
+        (menuMounted ? (
+          <Menu
+            visible={menuVisible}
+            onDismiss={closeMenu}
+            contentStyle={{
+              backgroundColor: COLORS.background,
+              borderRadius: 12,
+            }}
+            anchor={
+              <IconButton
+                icon="dots-horizontal"
+                size={20}
+                style={{ margin: 0 }}
+                onPress={() => setMenuVisible(true)}
+                disabled={isMutating}
+              />
+            }
+          >
+            <Menu.Item
+              leadingIcon="pencil"
+              title="Modificar"
+              onPress={openEdit}
               disabled={isMutating}
             />
-          }
-        >
-          <Menu.Item
-            leadingIcon="pencil"
-            title="Modificar"
-            onPress={openEdit}
+            <Menu.Item
+              leadingIcon="trash-can"
+              title="Eliminar"
+              onPress={openDeleteConfirm}
+              disabled={isMutating}
+            />
+          </Menu>
+        ) : (
+          <IconButton
+            icon="dots-horizontal"
+            size={20}
+            style={{ margin: 0 }}
+            onPress={() => setMenuVisible(true)}
             disabled={isMutating}
           />
-          <Menu.Item
-            leadingIcon="trash-can"
-            title="Eliminar"
-            onPress={openDeleteConfirm}
-            disabled={isMutating}
-          />
-        </Menu>
-      )}
+        ))}        
     </View>
   );
 
@@ -676,10 +685,14 @@ export default function RecuerdoDetailDialog({
                     <View
                       style={{
                         backgroundColor: "#e8e8e8",
-                        padding: 12,
+                        padding: 8,
                         borderRadius: 4,
                         borderWidth: 1,
                         borderColor: "#c0c0c0",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        minHeight: 48,
                       }}
                     >
                       <Text
@@ -687,13 +700,59 @@ export default function RecuerdoDetailDialog({
                         style={{
                           fontSize: 14,
                           color: "#1a1a1a",
-                          textAlign: "center",
+                          textAlign: "left",
                           fontFamily: "Montserrat",
                           fontWeight: "600",
+                          flex: 1,
+                          paddingLeft: 4,
                         }}
                       >
                         {recuerdo.titulo || "Nota de voz"}
                       </Text>
+
+                      {recuerdo.autorId === currentUserId &&
+                        (menuMounted ? (
+                          <Menu
+                            visible={menuVisible}
+                            onDismiss={closeMenu}
+                            contentStyle={{
+                              backgroundColor: COLORS.background,
+                              borderRadius: 12,
+                            }}
+                            anchor={
+                              <IconButton
+                                icon="dots-horizontal"
+                                size={20}
+                                iconColor="#1a1a1a"
+                                style={{ margin: 0 }}
+                                onPress={() => setMenuVisible(true)}
+                                disabled={isMutating}
+                              />
+                            }
+                          >
+                            <Menu.Item
+                              leadingIcon="pencil"
+                              title="Modificar"
+                              onPress={openEdit}
+                              disabled={isMutating}
+                            />
+                            <Menu.Item
+                              leadingIcon="trash-can"
+                              title="Eliminar"
+                              onPress={openDeleteConfirm}
+                              disabled={isMutating}
+                            />
+                          </Menu>
+                        ) : (
+                          <IconButton
+                            icon="dots-horizontal"
+                            size={20}
+                            iconColor="#1a1a1a"
+                            style={{ margin: 0 }}
+                            onPress={() => setMenuVisible(true)}
+                            disabled={isMutating}
+                          />
+                        ))}
                     </View>
 
                     {/* Diseño del cassette - réplica exacta de la miniatura */}
