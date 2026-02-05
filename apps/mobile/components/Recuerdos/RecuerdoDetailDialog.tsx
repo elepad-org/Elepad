@@ -1,7 +1,15 @@
 import { useState, useEffect, useRef } from "react";
-import { View, Dimensions, Animated, ImageBackground, TouchableOpacity } from "react-native";
+import {
+  View,
+  Dimensions,
+  Animated,
+  ImageBackground,
+  TouchableOpacity,
+} from "react-native";
 import { Image } from "expo-image";
 import Reanimated, { ZoomIn, ZoomOut } from "react-native-reanimated";
+import { captureRef } from "react-native-view-shot";
+import { shareAsync } from "expo-sharing";
 import {
   Dialog,
   Portal,
@@ -92,6 +100,10 @@ export default function RecuerdoDetailDialog({
   const [isFlipped, setIsFlipped] = useState(false);
   const flipAnimation = useRef(new Animated.Value(0)).current;
 
+  // Ref para capturar la vista y estado de compartir
+  const viewRef = useRef<View>(null);
+  const [isSharing, setIsSharing] = useState(false);
+
   // SIEMPRE crear los players (regla de hooks), pero con valores seguros
   const audioUrl =
     recuerdo?.tipo === "audio" && recuerdo.contenido
@@ -129,7 +141,14 @@ export default function RecuerdoDetailDialog({
         // ignore
       }
     }
-  }, [visible, shouldUseAudio, shouldUseVideo, player, videoPlayer, flipAnimation]);
+  }, [
+    visible,
+    shouldUseAudio,
+    shouldUseVideo,
+    player,
+    videoPlayer,
+    flipAnimation,
+  ]);
 
   useEffect(() => {
     if (!shouldUseAudio) return;
@@ -263,6 +282,39 @@ export default function RecuerdoDetailDialog({
     opacity: backOpacity,
   };
 
+  /*
+   * Función para compartir visualmente el recuerdo (Polaroid)
+   */
+  const handleShare = async () => {
+    if (recuerdo.tipo !== "imagen") return;
+
+    try {
+      setIsSharing(true);
+      // Small delay to ensure UI updates (hides buttons) before capture
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      const uri = await captureRef(viewRef, {
+        format: "png",
+        quality: 1,
+      });
+
+      setIsSharing(false);
+
+      const message = `${recuerdo.titulo || "Recuerdo"}. ${
+        recuerdo.autorNombre || "Alguien"
+      } te invita a usar Elepad.`;
+
+      await shareAsync(uri, {
+        mimeType: "image/png",
+        dialogTitle: message,
+        UTI: "public.png",
+      });
+    } catch (error) {
+      console.error("Error sharing:", error);
+      setIsSharing(false);
+    }
+  };
+
   const renderInfoHeader = () => (
     <View
       style={{
@@ -287,38 +339,50 @@ export default function RecuerdoDetailDialog({
         <View style={{ flex: 1 }} />
       )}
 
-      {menuMounted && recuerdo.autorId === currentUserId && (
-        <Menu
-          visible={menuVisible}
-          onDismiss={closeMenu}
-          contentStyle={{
-            backgroundColor: COLORS.background,
-            borderRadius: 12,
-          }}
-          anchor={
-            <IconButton
-              icon="dots-horizontal"
-              size={20}
-              style={{ margin: 0 }}
-              onPress={() => setMenuVisible(true)}
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        {!isSharing && recuerdo.tipo === "imagen" && (
+          <IconButton
+            icon="share-variant"
+            size={20}
+            style={{ margin: 0, marginRight: 0 }}
+            onPress={handleShare}
+            disabled={isMutating}
+          />
+        )}
+
+        {!isSharing && menuMounted && recuerdo.autorId === currentUserId && (
+          <Menu
+            visible={menuVisible}
+            onDismiss={closeMenu}
+            contentStyle={{
+              backgroundColor: COLORS.background,
+              borderRadius: 12,
+            }}
+            anchor={
+              <IconButton
+                icon="dots-horizontal"
+                size={20}
+                style={{ margin: 0 }}
+                onPress={() => setMenuVisible(true)}
+                disabled={isMutating}
+              />
+            }
+          >
+            <Menu.Item
+              leadingIcon="pencil"
+              title="Modificar"
+              onPress={openEdit}
               disabled={isMutating}
             />
-          }
-        >
-          <Menu.Item
-            leadingIcon="pencil"
-            title="Modificar"
-            onPress={openEdit}
-            disabled={isMutating}
-          />
-          <Menu.Item
-            leadingIcon="trash-can"
-            title="Eliminar"
-            onPress={openDeleteConfirm}
-            disabled={isMutating}
-          />
-        </Menu>
-      )}
+            <Menu.Item
+              leadingIcon="trash-can"
+              title="Eliminar"
+              onPress={openDeleteConfirm}
+              disabled={isMutating}
+            />
+          </Menu>
+        )}
+      </View>
     </View>
   );
 
@@ -531,6 +595,8 @@ export default function RecuerdoDetailDialog({
           }}
         >
           <Animated.View
+            ref={viewRef}
+            collapsable={false}
             style={{
               backgroundColor:
                 recuerdo.tipo === "audio" ? "transparent" : COLORS.white,
@@ -645,384 +711,395 @@ export default function RecuerdoDetailDialog({
                   </TouchableOpacity>
                 </View>
 
-                <View style={{ minHeight: 245, backgroundColor: "#1a1a1a", borderTopLeftRadius: 8, borderTopRightRadius: 8, overflow: "hidden" }}>
-                {/* Frente del cassette */}
-                <Animated.View
-                  style={[
-                    {
-                      position: "absolute",
-                      width: "100%",
-                      top: 0,
-                      left: 0,
-                    },
-                    frontAnimatedStyle,
-                  ]}
+                <View
+                  style={{
+                    minHeight: 245,
+                    backgroundColor: "#1a1a1a",
+                    borderTopLeftRadius: 8,
+                    borderTopRightRadius: 8,
+                    overflow: "hidden",
+                  }}
                 >
-                  <View
-                    style={{
-                      backgroundColor: "#1a1a1a",
-                      paddingTop: 16,
-                      paddingBottom: 16,
-                      paddingHorizontal: 16,
-                      borderRadius: 8,
-                      minHeight: 245,
-                      borderWidth: 3,
-                      borderColor: "#1a1a1a",
-                      ...SHADOWS.medium,
-                      justifyContent: "space-between",
-                    }}
+                  {/* Frente del cassette */}
+                  <Animated.View
+                    style={[
+                      {
+                        position: "absolute",
+                        width: "100%",
+                        top: 0,
+                        left: 0,
+                      },
+                      frontAnimatedStyle,
+                    ]}
                   >
-                    {/* Etiqueta superior estilo cassette con título */}
                     <View
                       style={{
-                        backgroundColor: "#e8e8e8",
-                        padding: 12,
-                        borderRadius: 4,
-                        borderWidth: 1,
-                        borderColor: "#c0c0c0",
-                      }}
-                    >
-                      <Text
-                        numberOfLines={2}
-                        style={{
-                          fontSize: 14,
-                          color: "#1a1a1a",
-                          textAlign: "center",
-                          fontFamily: "Montserrat",
-                          fontWeight: "600",
-                        }}
-                      >
-                        {recuerdo.titulo || "Nota de voz"}
-                      </Text>
-                    </View>
-
-                    {/* Diseño del cassette - réplica exacta de la miniatura */}
-                    <View
-                      style={{
-                        paddingVertical: 16,
-                        alignItems: "center",
-                      }}
-                    >
-                      <View
-                        style={{
-                          width: "85%",
-                          height: 80,
-                          backgroundColor: "#2a2a2a",
-                          borderRadius: 40,
-                          borderWidth: 3,
-                          borderColor: "#4a4a4a",
-                          flexDirection: "row",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          paddingHorizontal: 8,
-                        }}
-                      >
-                        <View
-                          style={{
-                            width: 64,
-                            height: 64,
-                            borderRadius: 32,
-                            borderWidth: 4,
-                            borderColor: "#4a4a4a",
-                            backgroundColor: "#1a1a1a",
-                            justifyContent: "center",
-                            alignItems: "center",
-                          }}
-                        >
-                          <View
-                            style={{
-                              width: 24,
-                              height: 24,
-                              borderRadius: 12,
-                              backgroundColor: "#d0d0d0",
-                            }}
-                          />
-                        </View>
-                        <View
-                          style={{
-                            width: 44,
-                            height: 44,
-                            borderRadius: 22,
-                            backgroundColor: "#ff6b35",
-                            justifyContent: "center",
-                            alignItems: "center",
-                          }}
-                        >
-                          <IconButton
-                            icon="play"
-                            size={24}
-                            iconColor="#1a1a1a"
-                            style={{ margin: 0 }}
-                          />
-                        </View>
-                        <View
-                          style={{
-                            width: 64,
-                            height: 64,
-                            borderRadius: 32,
-                            borderWidth: 4,
-                            borderColor: "#4a4a4a",
-                            backgroundColor: "#1a1a1a",
-                            justifyContent: "center",
-                            alignItems: "center",
-                          }}
-                        >
-                          <View
-                            style={{
-                              width: 24,
-                              height: 24,
-                              borderRadius: 12,
-                              backgroundColor: "#d0d0d0",
-                            }}
-                          />
-                        </View>
-                      </View>
-                    </View>
-                  </View>
-                </Animated.View>
-
-                {/* Reverso del cassette */}
-                <Animated.View
-                  style={[
-                    {
-                      position: "absolute",
-                      width: "100%",
-                      top: 0,
-                      left: 0,
-                    },
-                    backAnimatedStyle,
-                  ]}
-                >
-                  <View
-                    style={{
-                      backgroundColor: "#1a1a1a",
-                      paddingTop: 16,
-                      paddingBottom: 12,
-                      paddingHorizontal: 16,
-                      borderRadius: 8,
-                      minHeight: 215,
-                      borderWidth: 3,
-                      borderColor: "#1a1a1a",
-                      ...SHADOWS.medium,
-                    }}
-                  >
-                    {/* Display LCD con tiempos y botón de play */}
-                    <View
-                      style={{
-                        backgroundColor: "#3d3d3d",
-                        padding: 6,
-                        borderRadius: 6,
-                        marginBottom: 16,
-                        borderWidth: 2,
-                        borderColor: "#2a2a2a",
-                      }}
-                    >
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          marginBottom: 6,
-                        }}
-                      >
-                        <Text
-                          style={{
-                            color: "#ff6b35",
-                            fontSize: 16,
-                            fontFamily: "monospace",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {formatTime(currentTime)}
-                        </Text>
-                        
-                        {/* Botón de play en el medio */}
-                        <TouchableOpacity
-                          onPress={playAudio}
-                          style={{
-                            width: 44,
-                            height: 44,
-                            borderRadius: 22,
-                            backgroundColor: "#ff6b35",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            borderWidth: 3,
-                            borderColor: "#d85a2a",
-                            ...SHADOWS.medium,
-                          }}
-                        >
-                          <IconButton
-                            icon={isPlaying ? "pause" : "play"}
-                            size={24}
-                            iconColor="#1a1a1a"
-                            style={{ margin: 0 }}
-                          />
-                        </TouchableOpacity>
-
-                        <Text
-                          style={{
-                            color: "#ff6b35",
-                            fontSize: 16,
-                            fontFamily: "monospace",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {formatTime(duration)}
-                        </Text>
-                      </View>
-
-                      {/* Barra de progreso dentro del LCD */}
-                      <View style={{ paddingHorizontal: 4 }}>
-                        <Slider
-                          style={{ width: "100%", height: 15 }}
-                          minimumValue={0}
-                          maximumValue={duration || 1}
-                          value={currentTime}
-                          onSlidingComplete={handleSliderChange}
-                          minimumTrackTintColor="#ff6b35"
-                          maximumTrackTintColor="#2a2a2a"
-                          thumbTintColor="#e0e0e0"
-                        />
-                      </View>
-                    </View>
-
-                    {/* Información */}
-                    <View
-                      style={{
-                        backgroundColor: "#2a2a2a",
-                        padding: 10,
+                        backgroundColor: "#1a1a1a",
+                        paddingTop: 16,
+                        paddingBottom: 16,
+                        paddingHorizontal: 16,
                         borderRadius: 8,
-                        borderWidth: 1,
-                        borderColor: "#3a3a3a",
+                        minHeight: 245,
+                        borderWidth: 3,
+                        borderColor: "#1a1a1a",
+                        ...SHADOWS.medium,
+                        justifyContent: "space-between",
                       }}
                     >
-                      {/* Descripción si existe */}
-                      {recuerdo.descripcion && (
-                        <View style={{ marginBottom: 10 }}>
-                          <HighlightedMentionText
-                            text={recuerdo.descripcion}
-                            familyMembers={familyMembers}
-                            style={{
-                              fontSize: 12,
-                              color: "#d0d0d0",
-                              fontFamily: FONT.regular,
-                              lineHeight: 16,
-                            }}
-                          />
-                        </View>
-                      )}
-
-                      {/* Autor y fecha */}
+                      {/* Etiqueta superior estilo cassette con título */}
                       <View
                         style={{
-                          flexDirection: "row",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          paddingTop: recuerdo.descripcion ? 10 : 0,
-                          borderTopWidth: recuerdo.descripcion ? 1 : 0,
-                          borderTopColor: "#3a3a3a",
+                          backgroundColor: "#e8e8e8",
+                          padding: 12,
+                          borderRadius: 4,
+                          borderWidth: 1,
+                          borderColor: "#c0c0c0",
                         }}
                       >
                         <Text
+                          numberOfLines={2}
                           style={{
-                            fontSize: 11,
-                            color: "#999",
-                            fontFamily: FONT.regular,
+                            fontSize: 14,
+                            color: "#1a1a1a",
+                            textAlign: "center",
+                            fontFamily: "Montserrat",
+                            fontWeight: "600",
                           }}
                         >
-                          {recuerdo.autorNombre || "Desconocido"}
-                        </Text>
-                        <Text
-                          style={{
-                            fontSize: 11,
-                            color: "#999",
-                            fontFamily: FONT.regular,
-                          }}
-                        >
-                          {new Date(recuerdo.fecha).toLocaleDateString()}
+                          {recuerdo.titulo || "Nota de voz"}
                         </Text>
                       </View>
 
-                      {/* Reacciones si existen */}
-                      {recuerdo.reactions && recuerdo.reactions.length > 0 && (
+                      {/* Diseño del cassette - réplica exacta de la miniatura */}
+                      <View
+                        style={{
+                          paddingVertical: 16,
+                          alignItems: "center",
+                        }}
+                      >
+                        <View
+                          style={{
+                            width: "85%",
+                            height: 80,
+                            backgroundColor: "#2a2a2a",
+                            borderRadius: 40,
+                            borderWidth: 3,
+                            borderColor: "#4a4a4a",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            paddingHorizontal: 8,
+                          }}
+                        >
+                          <View
+                            style={{
+                              width: 64,
+                              height: 64,
+                              borderRadius: 32,
+                              borderWidth: 4,
+                              borderColor: "#4a4a4a",
+                              backgroundColor: "#1a1a1a",
+                              justifyContent: "center",
+                              alignItems: "center",
+                            }}
+                          >
+                            <View
+                              style={{
+                                width: 24,
+                                height: 24,
+                                borderRadius: 12,
+                                backgroundColor: "#d0d0d0",
+                              }}
+                            />
+                          </View>
+                          <View
+                            style={{
+                              width: 44,
+                              height: 44,
+                              borderRadius: 22,
+                              backgroundColor: "#ff6b35",
+                              justifyContent: "center",
+                              alignItems: "center",
+                            }}
+                          >
+                            <IconButton
+                              icon="play"
+                              size={24}
+                              iconColor="#1a1a1a"
+                              style={{ margin: 0 }}
+                            />
+                          </View>
+                          <View
+                            style={{
+                              width: 64,
+                              height: 64,
+                              borderRadius: 32,
+                              borderWidth: 4,
+                              borderColor: "#4a4a4a",
+                              backgroundColor: "#1a1a1a",
+                              justifyContent: "center",
+                              alignItems: "center",
+                            }}
+                          >
+                            <View
+                              style={{
+                                width: 24,
+                                height: 24,
+                                borderRadius: 12,
+                                backgroundColor: "#d0d0d0",
+                              }}
+                            />
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  </Animated.View>
+
+                  {/* Reverso del cassette */}
+                  <Animated.View
+                    style={[
+                      {
+                        position: "absolute",
+                        width: "100%",
+                        top: 0,
+                        left: 0,
+                      },
+                      backAnimatedStyle,
+                    ]}
+                  >
+                    <View
+                      style={{
+                        backgroundColor: "#1a1a1a",
+                        paddingTop: 16,
+                        paddingBottom: 12,
+                        paddingHorizontal: 16,
+                        borderRadius: 8,
+                        minHeight: 215,
+                        borderWidth: 3,
+                        borderColor: "#1a1a1a",
+                        ...SHADOWS.medium,
+                      }}
+                    >
+                      {/* Display LCD con tiempos y botón de play */}
+                      <View
+                        style={{
+                          backgroundColor: "#3d3d3d",
+                          padding: 6,
+                          borderRadius: 6,
+                          marginBottom: 16,
+                          borderWidth: 2,
+                          borderColor: "#2a2a2a",
+                        }}
+                      >
                         <View
                           style={{
                             flexDirection: "row",
-                            flexWrap: "wrap",
-                            gap: 8,
-                            paddingTop: 10,
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            marginBottom: 6,
                           }}
                         >
-                          {recuerdo.reactions.map((reaction, idx) => {
-                            const member = familyMembers.find(
-                              (m) => m.id === reaction.userId,
-                            );
-                            return (
-                              <Reanimated.View
-                                key={`${reaction.userId}-${idx}`}
-                                entering={ZoomIn.delay(idx * 50)}
-                                style={{
-                                  position: "relative",
-                                  width: 28,
-                                  height: 28,
-                                }}
-                              >
-                                {member?.avatarUrl ? (
-                                  <Image
-                                    source={{ uri: member.avatarUrl }}
+                          <Text
+                            style={{
+                              color: "#ff6b35",
+                              fontSize: 16,
+                              fontFamily: "monospace",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            {formatTime(currentTime)}
+                          </Text>
+
+                          {/* Botón de play en el medio */}
+                          <TouchableOpacity
+                            onPress={playAudio}
+                            style={{
+                              width: 44,
+                              height: 44,
+                              borderRadius: 22,
+                              backgroundColor: "#ff6b35",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              borderWidth: 3,
+                              borderColor: "#d85a2a",
+                              ...SHADOWS.medium,
+                            }}
+                          >
+                            <IconButton
+                              icon={isPlaying ? "pause" : "play"}
+                              size={24}
+                              iconColor="#1a1a1a"
+                              style={{ margin: 0 }}
+                            />
+                          </TouchableOpacity>
+
+                          <Text
+                            style={{
+                              color: "#ff6b35",
+                              fontSize: 16,
+                              fontFamily: "monospace",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            {formatTime(duration)}
+                          </Text>
+                        </View>
+
+                        {/* Barra de progreso dentro del LCD */}
+                        <View style={{ paddingHorizontal: 4 }}>
+                          <Slider
+                            style={{ width: "100%", height: 15 }}
+                            minimumValue={0}
+                            maximumValue={duration || 1}
+                            value={currentTime}
+                            onSlidingComplete={handleSliderChange}
+                            minimumTrackTintColor="#ff6b35"
+                            maximumTrackTintColor="#2a2a2a"
+                            thumbTintColor="#e0e0e0"
+                          />
+                        </View>
+                      </View>
+
+                      {/* Información */}
+                      <View
+                        style={{
+                          backgroundColor: "#2a2a2a",
+                          padding: 10,
+                          borderRadius: 8,
+                          borderWidth: 1,
+                          borderColor: "#3a3a3a",
+                        }}
+                      >
+                        {/* Descripción si existe */}
+                        {recuerdo.descripcion && (
+                          <View style={{ marginBottom: 10 }}>
+                            <HighlightedMentionText
+                              text={recuerdo.descripcion}
+                              familyMembers={familyMembers}
+                              style={{
+                                fontSize: 12,
+                                color: "#d0d0d0",
+                                fontFamily: FONT.regular,
+                                lineHeight: 16,
+                              }}
+                            />
+                          </View>
+                        )}
+
+                        {/* Autor y fecha */}
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            paddingTop: recuerdo.descripcion ? 10 : 0,
+                            borderTopWidth: recuerdo.descripcion ? 1 : 0,
+                            borderTopColor: "#3a3a3a",
+                          }}
+                        >
+                          <Text
+                            style={{
+                              fontSize: 11,
+                              color: "#999",
+                              fontFamily: FONT.regular,
+                            }}
+                          >
+                            {recuerdo.autorNombre || "Desconocido"}
+                          </Text>
+                          <Text
+                            style={{
+                              fontSize: 11,
+                              color: "#999",
+                              fontFamily: FONT.regular,
+                            }}
+                          >
+                            {new Date(recuerdo.fecha).toLocaleDateString()}
+                          </Text>
+                        </View>
+
+                        {/* Reacciones si existen */}
+                        {recuerdo.reactions &&
+                          recuerdo.reactions.length > 0 && (
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                flexWrap: "wrap",
+                                gap: 8,
+                                paddingTop: 10,
+                              }}
+                            >
+                              {recuerdo.reactions.map((reaction, idx) => {
+                                const member = familyMembers.find(
+                                  (m) => m.id === reaction.userId,
+                                );
+                                return (
+                                  <Reanimated.View
+                                    key={`${reaction.userId}-${idx}`}
+                                    entering={ZoomIn.delay(idx * 50)}
                                     style={{
+                                      position: "relative",
                                       width: 28,
                                       height: 28,
-                                      borderRadius: 14,
-                                      borderWidth: 2,
-                                      borderColor: "#ff6b35",
-                                    }}
-                                  />
-                                ) : (
-                                  <View
-                                    style={{
-                                      width: 28,
-                                      height: 28,
-                                      borderRadius: 14,
-                                      backgroundColor: "#ff6b35",
-                                      justifyContent: "center",
-                                      alignItems: "center",
-                                      borderWidth: 2,
-                                      borderColor: "#d85a2a",
                                     }}
                                   >
-                                    <Text
-                                      style={{
-                                        color: "#1a1a1a",
-                                        fontSize: 11,
-                                        fontWeight: "bold",
-                                      }}
-                                    >
-                                      {member?.displayName?.charAt(0).toUpperCase()}
-                                    </Text>
-                                  </View>
-                                )}
-                                {reaction.stickerUrl && (
-                                  <Image
-                                    source={{ uri: reaction.stickerUrl }}
-                                    style={{
-                                      width: 14,
-                                      height: 14,
-                                      position: "absolute",
-                                      bottom: -3,
-                                      right: -3,
-                                    }}
-                                  />
-                                )}
-                              </Reanimated.View>
-                            );
-                          })}
-                        </View>
-                      )}
+                                    {member?.avatarUrl ? (
+                                      <Image
+                                        source={{ uri: member.avatarUrl }}
+                                        style={{
+                                          width: 28,
+                                          height: 28,
+                                          borderRadius: 14,
+                                          borderWidth: 2,
+                                          borderColor: "#ff6b35",
+                                        }}
+                                      />
+                                    ) : (
+                                      <View
+                                        style={{
+                                          width: 28,
+                                          height: 28,
+                                          borderRadius: 14,
+                                          backgroundColor: "#ff6b35",
+                                          justifyContent: "center",
+                                          alignItems: "center",
+                                          borderWidth: 2,
+                                          borderColor: "#d85a2a",
+                                        }}
+                                      >
+                                        <Text
+                                          style={{
+                                            color: "#1a1a1a",
+                                            fontSize: 11,
+                                            fontWeight: "bold",
+                                          }}
+                                        >
+                                          {member?.displayName
+                                            ?.charAt(0)
+                                            .toUpperCase()}
+                                        </Text>
+                                      </View>
+                                    )}
+                                    {reaction.stickerUrl && (
+                                      <Image
+                                        source={{ uri: reaction.stickerUrl }}
+                                        style={{
+                                          width: 14,
+                                          height: 14,
+                                          position: "absolute",
+                                          bottom: -3,
+                                          right: -3,
+                                        }}
+                                      />
+                                    )}
+                                  </Reanimated.View>
+                                );
+                              })}
+                            </View>
+                          )}
+                      </View>
                     </View>
-                  </View>
-                </Animated.View>
-              </View>
+                  </Animated.View>
+                </View>
               </View>
             )}
             {/* Visual Feedback for Reaction */}
