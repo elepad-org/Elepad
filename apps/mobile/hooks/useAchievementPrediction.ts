@@ -10,10 +10,10 @@ export interface AttemptData {
   success: boolean;
   score: number | null;
   moves: number | null;
+  mistakes?: number; // Optional, for Sudoku
   durationMs: number | null;
   userId: string;
 }
-
 export interface PredictedAchievement {
   id: string;
   code: string;
@@ -25,7 +25,7 @@ export interface PredictedAchievement {
 
 // Tipado para la condición del achievement que viene del backend
 interface AchievementCondition {
-  type: "first_completion" | "time_under" | "moves_under" | "score" | "combined" | "streak";
+  type: "first_completion" | "time_under" | "moves_under" | "score" | "combined" | "streak" | "mistakes_under";
   game?: string;
   value?: number;
   time?: number;
@@ -48,7 +48,7 @@ const getCondition = (achievement: GetAchievementsUserGameType200Item["achieveme
  */
 export function useAchievementPrediction(gameType: "memory" | "logic" | "attention" | "reaction") {
   const [predictedAchievements, setPredictedAchievements] = useState<PredictedAchievement[]>([]);
-  
+
   // Cargar logros del usuario (incluye toda la info de achievements)
   const userAchievementsQuery = useGetAchievementsUserGameType(gameType, {
     query: {
@@ -68,12 +68,21 @@ export function useAchievementPrediction(gameType: "memory" | "logic" | "attenti
       // El achievement viene en el campo `achievement` del objeto
       const ach = achievement.achievement;
       const condition = getCondition(ach);
-      
+
       if (!condition) return false;
 
       // Si el logro especifica un juego específico, verificar que coincida
       if (condition.game && attemptData.gameName !== condition.game) {
         return false;
+      }
+
+      // Verificar condiciones especiales por título si el código no coincide
+      // "Impecable" o "Perfect" implica 0 errores
+      if (ach.title.toLowerCase().includes("impecable") || ach.title.toLowerCase().includes("perfect")) {
+        console.log(`  🔍 Verificando condición especial: Impecable (Errores: ${attemptData.mistakes})`);
+        if (typeof attemptData.mistakes === 'number') {
+          return attemptData.mistakes === 0;
+        }
       }
 
       switch (condition.type) {
@@ -84,7 +93,7 @@ export function useAchievementPrediction(gameType: "memory" | "logic" | "attenti
           // Ejemplo: Usuario puede tener intentos exitosos previos pero sin logro desbloqueado
           // Por eso, asumimos que SI es primera vez si NO tiene el logro desbloqueado
           // Esto puede causar falsos positivos, pero el backend corregirá
-          
+
           // Para logros con juego específico
           if (condition.game) {
             console.log(`  🎮 Buscando logro first_completion con juego: ${condition.game}`);
@@ -175,7 +184,7 @@ export function useAchievementPrediction(gameType: "memory" | "logic" | "attenti
   const predictAchievements = useCallback(
     (attemptData: AttemptData): PredictedAchievement[] => {
       console.log("🔮 [PREDICTION] Iniciando predicción de logros...");
-      
+
       if (!attemptData.success) {
         console.log("🔮 [PREDICTION] Intento no exitoso, sin logros");
         return [];
@@ -194,7 +203,7 @@ export function useAchievementPrediction(gameType: "memory" | "logic" | "attenti
 
       for (const userAchievement of userAchievements) {
         const ach = userAchievement.achievement;
-        
+
         // Saltar si ya está desbloqueado
         if (userAchievement.unlocked) {
           console.log(`⏭️ [PREDICTION] Saltando ${ach.title} (ya desbloqueado)`);
@@ -202,7 +211,7 @@ export function useAchievementPrediction(gameType: "memory" | "logic" | "attenti
         }
 
         console.log(`🔍 [PREDICTION] Evaluando: ${ach.title}`);
-        
+
         // Verificar condición
         const meetsCondition = checkCondition(userAchievement, attemptData, userAchievements);
 

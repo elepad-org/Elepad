@@ -171,26 +171,26 @@ export const useFocusGame = (props: UseFocusGameProps) => {
       try {
         // Variable para guardar los logros predichos (para validación posterior)
         let predictedAchievements: PredictedAchievement[] = [];
+        let predictedScore = 0;
 
         // 🔮 PREDICCIÓN OPTIMISTA: Predecir logros ANTES de llamar al backend
         if (success && user) {
           // Calcular score usando la MISMA fórmula del backend
           const moves = stats.rounds - stats.correct; // Errores cometidos
           const durationSeconds = durationMs / 1000;
-          const timePenalty = durationSeconds * 5;
-          const movesPenalty = moves * 10;
-          const predictedScore = Math.max(
+
+          // Focus: -15 pts/sec, -100 pts/error
+          const timePenalty = durationSeconds * 15;
+          const movesPenalty = moves * 100;
+
+          predictedScore = Math.max(
             0,
             Math.floor(1000 - timePenalty - movesPenalty),
           );
 
-          console.log("[FRONTEND SCORE PREDICTION]");
-          console.log(`  Duration: ${durationMs}ms (${durationSeconds.toFixed(2)}s)`);
-          console.log(`  Correct: ${stats.correct} / ${stats.rounds}`);
-          console.log(`  Moves (errores): ${moves}`);
-          console.log(`  Time penalty: ${durationSeconds.toFixed(2)} * 5 = ${timePenalty.toFixed(2)}`);
-          console.log(`  Moves penalty: ${moves} * 10 = ${movesPenalty}`);
-          console.log(`  Predicted score: 1000 - ${timePenalty.toFixed(2)} - ${movesPenalty} = ${predictedScore}`);
+          console.log(`📝 Resultados: Tiempo: ${durationSeconds.toFixed(2)}s - Errores: ${moves}`);
+          console.log(`🧮 Calculo: 1000 - (${durationSeconds.toFixed(2)} * 15) - (${moves} * 100)`);
+          console.log(`  Predicted Score: ${predictedScore}`);
 
           predictedAchievements = predictAchievements({
             gameType: "reaction",
@@ -225,7 +225,23 @@ export const useFocusGame = (props: UseFocusGameProps) => {
           },
         });
 
-        
+        const responseData = "data" in finishResponse ? finishResponse.data : finishResponse;
+
+        const backendScore = responseData && "score" in responseData ? responseData.score : undefined;
+        // Aquí usamos predictedScore porque en Focus el score real no se envía en finishAttempt, sino que se calcula en el back
+        // pero predictedScore tiene la misma fórmula
+        console.log(`📱 Puntaje - mobile: ${predictedScore}`);
+        console.log(`☁️ Puntaje - back: ${backendScore}`);
+
+        if (backendScore !== undefined) {
+          if (backendScore === predictedScore) {
+            console.log("✅ COINCIDEN");
+          } else {
+            console.log("❌ NO COINCIDEN");
+          }
+        }
+
+
         if ("status" in finishResponse && finishResponse.status !== 200) {
           console.error(
             "❌ Status de respuesta inválido:",
@@ -238,15 +254,15 @@ export const useFocusGame = (props: UseFocusGameProps) => {
 
         // Validar predicción con respuesta real del backend
         const resData = "data" in finishResponse ? finishResponse.data : finishResponse;
-        
+
         if (resData && "unlockedAchievements" in resData) {
           console.log(`🎯 Logros reales del backend: ${resData.unlockedAchievements?.length || 0}`);
-          
+
           const realAchievements = (resData.unlockedAchievements || []) as UnlockedAchievement[];
-          
+
           // Validar si la predicción fue correcta
           const isCorrect = validatePrediction(predictedAchievements, realAchievements);
-          
+
           if (!isCorrect) {
             console.log("⚠️ Predicción incorrecta, actualizando con logros reales");
             setUnlockedAchievements(realAchievements);
@@ -254,7 +270,7 @@ export const useFocusGame = (props: UseFocusGameProps) => {
             console.log("✅ Predicción correcta, sin cambios");
           }
         }
-        
+
         // Invalidar queries de rachas para refrescar datos (solo si success es true)
         if (success) {
           queryClient.invalidateQueries({ queryKey: ["getStreaksMe"] });
@@ -262,7 +278,7 @@ export const useFocusGame = (props: UseFocusGameProps) => {
         }
 
         // Retornar logros predichos para uso inmediato
-        return { 
+        return {
           predictedAchievements,
           finalAchievements: resData.unlockedAchievements || []
         };
@@ -309,12 +325,19 @@ export const useFocusGame = (props: UseFocusGameProps) => {
       const durationMs = stats.durationMs ?? getDuration();
       const moves = stats.rounds - stats.correct;
       const durationSeconds = durationMs / 1000;
-      const timePenalty = durationSeconds * 5;
-      const movesPenalty = moves * 10;
+
+      // Focus: -15 pts/sec, -100 pts/error
+      const timePenalty = durationSeconds * 15;
+      const movesPenalty = moves * 100;
+
       const predictedScore = Math.max(
         0,
         Math.floor(1000 - timePenalty - movesPenalty)
       );
+
+      console.log("[FRONTEND FOCUS SCORE - SYNC]");
+      console.log(`  Time penalty: -${timePenalty.toFixed(1)}`);
+      console.log(`  Error penalty: -${movesPenalty}`);
 
       console.log("[FRONTEND SCORE PREDICTION - SYNC]");
       console.log(`  Duration: ${durationMs}ms (${durationSeconds.toFixed(2)}s)`);

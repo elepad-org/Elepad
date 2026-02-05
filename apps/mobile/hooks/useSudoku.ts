@@ -71,6 +71,7 @@ export const useSudoku = (props: UseSudokuProps) => {
 
   // Estados de control (Timer, API, Loading)
   const [timeElapsed, setTimeElapsed] = useState(0);
+  const [score, setScore] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -89,7 +90,7 @@ export const useSudoku = (props: UseSudokuProps) => {
   const isStartingAttempt = useRef(false);
 
   const queryClient = useQueryClient();
-  
+
   // Hook para predicción optimista de logros
   const { predictAchievements, validatePrediction, loadRecentAttempts } = useSudokuAchievementPrediction();
 
@@ -146,9 +147,9 @@ export const useSudoku = (props: UseSudokuProps) => {
       const responseData =
         "data" in puzzleResponse ? puzzleResponse.data as PuzzleSudokuGame : puzzleResponse as PuzzleSudokuGame;
 
-      const {puzzle, sudokuGame} = responseData;
+      const { puzzle, sudokuGame } = responseData;
       setPuzzleId(puzzle.id);
-      
+
       // 📊 Cargar historial de intentos para evaluar streaks
       loadRecentAttempts().catch((error) => {
         console.error("⚠️ Error cargando historial, continuando sin datos de streak:", error);
@@ -280,7 +281,8 @@ export const useSudoku = (props: UseSudokuProps) => {
             success: false,
             moves: filledCells,
             durationMs,
-            score: 81 - maxMistakes,
+            // Score 0 al perder
+            score: 0,
             clientDate: getTodayLocal(),
           },
         });
@@ -314,19 +316,19 @@ export const useSudoku = (props: UseSudokuProps) => {
               data: { puzzleId, gameType: "attention" },
             })
             .then((res) => {
-              if("status" in res && res.status !== 201){
+              if ("status" in res && res.status !== 201) {
                 console.error("Error iniciando el intento de sudoku");
                 throw new Error("Failed to start attempt");
               }
-                const id = "id" in res ? res.id : res.data.id;
-                setAttemptId(id as string);
-                console.log("✅ Attempt iniciado:", id);
-              
+              const id = "id" in res ? res.id : res.data.id;
+              setAttemptId(id as string);
+              console.log("✅ Attempt iniciado:", id);
+
             })
             .catch((err) => {
               console.error("❌ Error iniciando attempt:", err);
             });
-          }
+        }
       }
 
       // 2. Lógica de validación
@@ -426,8 +428,25 @@ export const useSudoku = (props: UseSudokuProps) => {
         if (attemptId && startTimeRef.current && user) {
           hasFinishedAttempt.current = true;
           const durationMs = Date.now() - startTimeRef.current;
+          const durationSeconds = durationMs / 1000;
 
-          const score = 81 - mistakes;
+          // Fórmula Sugerida: Max(0, (1000 - (segundos * 0.5) - (errores * 100)) * MultiplicadorDificultad)
+          const timePenalty = durationSeconds * 0.5;
+          const mistakePenalty = mistakes * 100;
+
+          let difficultyMultiplier = 1.0;
+          if (difficulty === "medium") difficultyMultiplier = 1.3;
+          if (difficulty === "hard") difficultyMultiplier = 1.6;
+
+          const baseScore = 1000;
+          const rawScore = Math.max(0, baseScore - timePenalty - mistakePenalty);
+
+          const score = Math.floor(rawScore * difficultyMultiplier);
+          setScore(score);
+
+          console.log(`📝 Resultados: Tiempo: ${durationSeconds.toFixed(1)}s - Errores: ${mistakes} - Dificultad: ${difficulty || 'easy'}`);
+          console.log(`🧮 Calculo: (1000 - (${durationSeconds.toFixed(1)} * 0.5) - (${mistakes} * 100)) * ${difficultyMultiplier}`);
+          console.log(`  Final Score: ${score}`);
 
           try {
             // Variable para guardar los logros predichos (para validación posterior)
@@ -440,6 +459,7 @@ export const useSudoku = (props: UseSudokuProps) => {
               success: true,
               score,
               moves: userMoves,
+              mistakes, // Pass mistakes for prediction
               durationMs,
               userId: user.id,
             });
@@ -462,8 +482,24 @@ export const useSudoku = (props: UseSudokuProps) => {
                 durationMs,
                 score: score,
                 clientDate: getTodayLocal(),
+                meta: { mistakes },
               },
             });
+
+            const responseData = "data" in finishResponse ? finishResponse.data : finishResponse;
+
+            const backendScore = responseData && "score" in responseData ? responseData.score : undefined;
+
+            console.log(`📱 Puntaje - mobile: ${score}`);
+            console.log(`☁️ Puntaje - back: ${backendScore}`);
+
+            if (backendScore !== undefined) {
+              if (backendScore === score) {
+                console.log("✅ COINCIDEN");
+              } else {
+                console.log("❌ NO COINCIDEN");
+              }
+            }
 
             if ("status" in finishResponse && finishResponse.status !== 200) {
               console.error(
@@ -479,15 +515,15 @@ export const useSudoku = (props: UseSudokuProps) => {
 
             // Validar predicción con respuesta real del backend
             const resData = "data" in finishResponse ? finishResponse.data : finishResponse;
-            
+
             if (resData && "unlockedAchievements" in resData) {
               const realAchievements = (resData.unlockedAchievements || []) as PredictedAchievement[];
-              
+
               console.log(`🎯 Logros reales del backend: ${realAchievements.length}`);
-              
+
               // Validar si la predicción fue correcta (usar la variable local, no el estado)
               const isCorrect = validatePrediction(predictedAchievements, realAchievements);
-              
+
               if (!isCorrect) {
                 console.warn("⚠️ Discrepancia entre predicción y backend, corrigiendo...");
                 // Actualizar con los logros reales
@@ -518,7 +554,7 @@ export const useSudoku = (props: UseSudokuProps) => {
     setBoard(newBoard);
   }, [board, selectedCell, isComplete]);
 
-  
+
 
   const resetGame = useCallback(() => {
     hasInitialized.current = false;
@@ -533,6 +569,7 @@ export const useSudoku = (props: UseSudokuProps) => {
     mistakes,
     timeElapsed,
     userMoves,
+    score, // Exposing score
     isComplete,
     isLoading,
     difficulty,

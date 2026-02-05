@@ -3,7 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/supabase-types";
 
 export class AchievementService {
-  constructor(private supabase: SupabaseClient<Database>) {}
+  constructor(private supabase: SupabaseClient<Database>) { }
 
   /**
    * Lista todos los logros disponibles para un tipo de juego
@@ -236,7 +236,7 @@ export class AchievementService {
 
     if (!puzzleId && !attempt.isFocusGame) return null;
     if (!puzzleId && attempt.isFocusGame) return "focus";
-    
+
     // puzzleId no puede ser null aquí porque ya verificamos arriba
     if (!puzzleId) return null;
 
@@ -267,6 +267,23 @@ export class AchievementService {
     // Si el logro especifica un juego específico, verificar que coincida
     if (condition.game && gameName !== condition.game) {
       return false;
+    }
+
+    switch (condition.type) {
+      // 🏆 CHECK ESPECIAL: "Impecable" o "Perfect" implica 0 errores (especialmente para Sudoku)
+      case undefined: // Fallthrough si no tiene tipo (poco probable) o para insertar lógica antes
+      default:
+        // Si el título contiene "Impecable" o "Perfect", verificamos mistakes en meta
+        if (achievement.title.includes("Impecable") || achievement.title.includes("Perfect")) {
+          const meta = attempt.meta as { mistakes?: number } | null;
+          console.log(`  🔍 Verificando condición especial Backend: ${achievement.title} (Errores: ${meta?.mistakes})`);
+          if (meta && typeof meta.mistakes === 'number') {
+            if (meta.mistakes === 0) return true;
+            return false; // Si tiene errores, falla explícitamente
+          }
+          // Si no hay info de mistakes, dejamos que continúe (fallback a la condición original)
+        }
+        break;
     }
 
     switch (condition.type) {
@@ -334,7 +351,7 @@ export class AchievementService {
         // Verifica que el puntaje del intento sea mayor o igual al requerido
         const scoreValue = typeof condition.value === "number" ? condition.value : 0;
         return attempt.score !== null && attempt.score >= scoreValue;
-        
+
       case "combined":
         const timeLimit =
           typeof condition.time === "number" ? condition.time : 0;

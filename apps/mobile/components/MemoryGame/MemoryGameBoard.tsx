@@ -12,6 +12,7 @@ interface MemoryGameBoardProps {
   onComplete: (stats: {
     moves: number;
     timeElapsed: number;
+    score: number;
     achievements: Array<{
       id: string;
       title: string;
@@ -107,6 +108,7 @@ export const MemoryGameBoard: React.FC<MemoryGameBoardProps> = ({
         onComplete({
           moves: stats.moves,
           timeElapsed: stats.timeElapsed,
+          score: stats.score,
           achievements: unlockedAchievements,
         });
       }, 100); // Pequeño delay para asegurar que los logros se hayan actualizado

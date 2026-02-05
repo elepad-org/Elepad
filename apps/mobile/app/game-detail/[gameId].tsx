@@ -134,13 +134,7 @@ export default function GameDetailScreen() {
     refetch: refetchAchievements,
   } = useGetAchievementsUserGameType(gameConfig?.gameType || GameType.memory);
 
-  console.log("🎮 Game Type:", gameConfig?.gameType);
-  console.log(
-    "📊 Achievements Data:",
-    JSON.stringify(achievementsData, null, 2),
-  );
-  console.log("⏳ Loading:", achievementsLoading);
-  console.log("❌ Error:", achievementsError);
+  console.log("🎮 Showing details for:", gameConfig?.gameType);
 
   const achievementsArray: UserAchievement[] = Array.isArray(achievementsData)
     ? (achievementsData as UserAchievement[])
@@ -202,8 +196,10 @@ export default function GameDetailScreen() {
         setOffset(0);
         setHasMore(true);
         fetchAttempts(0, false);
+        // Refresh achievements when returning to screen
+        refetchAchievements();
       }
-    }, [gameConfig])
+    }, [gameConfig, refetchAchievements])
   );
 
   const loadMoreAttempts = () => {

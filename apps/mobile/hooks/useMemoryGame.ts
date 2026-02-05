@@ -21,6 +21,7 @@ export interface GameStats {
   moves: number;
   timeElapsed: number;
   isComplete: boolean;
+  score: number;
 }
 
 export interface UnlockedAchievement {
@@ -57,6 +58,7 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [moves, setMoves] = useState(0);
   const [timeElapsed, setTimeElapsed] = useState(0);
+  const [score, setScore] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [puzzleId, setPuzzleId] = useState<string | null>(null);
@@ -70,9 +72,9 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
   const startTimeRef = useRef<number | null>(null);
   const hasFinishedAttempt = useRef(false);
   const isStartingAttempt = useRef(false);
-  
+
   const queryClient = useQueryClient();
-  
+
   // Hook para predicción de logros
   const { predictAchievements, validatePrediction } = useAchievementPrediction("memory");
 
@@ -353,10 +355,24 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
           try {
             const durationMs = Date.now() - startTimeRef.current;
             const durationSeconds = Math.floor(durationMs / 1000);
+
+            // Fórmula Base: 1000 - 5 * seg - 10 * mov
+            const timePenalty = durationSeconds * 5;
+            const movesPenalty = moves * 10;
+            const baseScore = 1000 - timePenalty - movesPenalty;
+
+            // Multiplicador: 1.5 para 4x6, 1.0 para 4x4
+            const multiplier = mode === "4x6" ? 1.5 : 1.0;
+
             const score = Math.max(
               0,
-              Math.floor(1000 - durationSeconds * 5 - moves * 10),
+              Math.floor(baseScore * multiplier),
             );
+            setScore(score);
+
+            console.log(`📝 Resultados: Tiempo: ${durationSeconds}s - Movimientos: ${moves} - Modo: ${mode}`);
+            console.log(`🧮 Calculo: (1000 - (${durationSeconds} * 5) - (${moves} * 10)) * ${multiplier}`);
+            console.log(`  Final Score: ${score}`);
 
             // 🔮 PREDICCIÓN OPTIMISTA: Predecir logros ANTES de llamar al backend
             const predicted = predictAchievements({
@@ -393,6 +409,21 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
 
             console.log("✅ Intento finalizado con score:", score);
 
+            const backendResponseData = "data" in finishResponse ? finishResponse.data : finishResponse;
+
+            const backendScore = backendResponseData && "score" in backendResponseData ? backendResponseData.score : undefined;
+
+            console.log(`📱 Puntaje - mobile: ${score}`);
+            console.log(`☁️ Puntaje - back: ${backendScore}`);
+
+            if (backendScore !== undefined) {
+              if (backendScore === score) {
+                console.log("✅ COINCIDEN");
+              } else {
+                console.log("❌ NO COINCIDEN");
+              }
+            }
+
             // Invalidar queries de rachas para refrescar datos (sincronización final)
             queryClient.invalidateQueries({ queryKey: ['getStreaksMe'] });
             queryClient.invalidateQueries({ queryKey: ['getStreaksHistory'] });
@@ -401,17 +432,17 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
             const responseData = "data" in finishResponse ? finishResponse.data : finishResponse;
             if (responseData && "unlockedAchievements" in responseData) {
               const realAchievements = (responseData.unlockedAchievements || []) as PredictedAchievement[];
-              
+
               console.log(`🎯 Logros reales del backend: ${realAchievements.length}`);
-              
+
               // Validar si la predicción fue correcta
               const isCorrect = validatePrediction(predicted, realAchievements);
-              
+
               if (!isCorrect) {
                 console.warn("⚠️ Discrepancia entre predicción y backend, corrigiendo...");
                 // Actualizar con los logros reales
                 setUnlockedAchievements(realAchievements);
-                
+
                 // Notificar logros que no fueron predichos
                 realAchievements.forEach((achievement) => {
                   if (!predicted.some((p) => p.id === achievement.id)) {
@@ -450,6 +481,7 @@ export const useMemoryGame = (props: UseMemoryGameProps) => {
     moves,
     timeElapsed,
     isComplete,
+    score,
   };
 
   return {

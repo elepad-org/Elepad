@@ -34,6 +34,7 @@ export interface GameStats {
   isComplete: boolean;
   connectedTiles: number;
   totalTiles: number;
+  score: number;
 }
 
 // Se importa desde useNetAchievementPrediction
@@ -70,6 +71,7 @@ export const useNetGame = ({
   const [tiles, setTiles] = useState<Tile[]>([]);
   const [moves, setMoves] = useState(0);
   const [timeElapsed, setTimeElapsed] = useState(0);
+  const [score, setScore] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [puzzleId, setPuzzleId] = useState<string | null>(null);
@@ -91,7 +93,7 @@ export const useNetGame = ({
   const isStartingAttempt = useRef(false);
 
   const queryClient = useQueryClient();
-  
+
   // Hook para predicción optimista de logros
   const { predictAchievements, validatePrediction, loadRecentAttempts } = useNetAchievementPrediction();
 
@@ -165,7 +167,7 @@ export const useNetGame = ({
 
       console.log("✅ Puzzle NET creado exitosamente:", puzzle.id);
       setPuzzleId(puzzle.id);
-      
+
       // 📊 Cargar historial de intentos para evaluar streaks
       loadRecentAttempts().catch((error) => {
         console.error("⚠️ Error cargando historial, continuando sin datos de streak:", error);
@@ -430,8 +432,14 @@ export const useNetGame = ({
           success: true,
           autoSolved: wasAutoSolved,
         });
-        
-        const score = Math.max(0, Math.floor(1000 - (durationMs / 1000) * 5 - moves * 10));
+
+        const durationSeconds = durationMs / 1000;
+        const score = Math.max(0, Math.floor(1000 - durationSeconds * 5 - moves * 10));
+        setScore(score);
+
+        console.log(`📝 Resultados: Tiempo: ${durationSeconds.toFixed(1)}s - Movimientos: ${moves}`);
+        console.log(`🧮 Calculo: 1000 - (${durationSeconds.toFixed(1)} * 5) - (${moves} * 10)`);
+        console.log(`  Final Score: ${score}`);
 
         // Variable para guardar los logros predichos (para validación posterior)
         let predictedAchievements: PredictedAchievement[] = [];
@@ -453,7 +461,7 @@ export const useNetGame = ({
           // Mostrar logros predichos INMEDIATAMENTE
           if (predictedAchievements.length > 0) {
             setUnlockedAchievements(predictedAchievements);
-            
+
             // Notificar logros predichos
             predictedAchievements.forEach((achievement) => {
               if (onAchievementUnlocked) {
@@ -484,6 +492,22 @@ export const useNetGame = ({
         });
 
         console.log("✅ Intento finalizado exitosamente");
+
+        const backendResponseData = "data" in finishResponse ? finishResponse.data : finishResponse;
+
+        const backendScore = backendResponseData && "score" in backendResponseData ? backendResponseData.score : undefined;
+
+        console.log(`📱 Puntaje - mobile: ${score}`);
+        console.log(`☁️ Puntaje - back: ${backendScore}`);
+
+        if (backendScore !== undefined) {
+          if (backendScore === score) {
+            console.log("✅ COINCIDEN");
+          } else {
+            console.log("❌ NO COINCIDEN");
+          }
+        }
+
         console.log("🔍 [NET] finishResponse completo:", JSON.stringify(finishResponse, null, 2));
         console.log("🔍 [NET] typeof finishResponse:", typeof finishResponse);
         console.log("🔍 [NET] 'data' in finishResponse:", "data" in finishResponse);
@@ -496,20 +520,20 @@ export const useNetGame = ({
 
         // Validar predicción con respuesta real del backend
         const responseData = "data" in finishResponse ? finishResponse.data : finishResponse;
-        
+
         if (!wasAutoSolved && responseData && "unlockedAchievements" in responseData) {
           const realAchievements = (responseData.unlockedAchievements || []) as PredictedAchievement[];
-          
+
           console.log(`🎯 Logros reales del backend: ${realAchievements.length}`);
-          
+
           // Validar si la predicción fue correcta (usar la variable local, no el estado)
           const isCorrect = validatePrediction(predictedAchievements, realAchievements);
-          
+
           if (!isCorrect) {
             console.warn("⚠️ Discrepancia entre predicción y backend, corrigiendo...");
             // Actualizar con los logros reales
             setUnlockedAchievements(realAchievements);
-            
+
             // Notificar logros que no fueron predichos
             realAchievements.forEach((achievement) => {
               if (!predictedAchievements.some((p) => p.id === achievement.id)) {
@@ -694,6 +718,7 @@ export const useNetGame = ({
     isComplete,
     connectedTiles,
     totalTiles,
+    score,
   };
 
   return {

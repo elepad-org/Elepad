@@ -43,23 +43,7 @@ export default function MemoryGameScreen() {
     router.back();
   }, []);
 
-  const calculateScore = useCallback(
-    (durationSeconds: number, moves: number): number => {
-      // Fórmula: Base 1000 puntos - penalización por tiempo y movimientos
-      // Cada segundo resta 5 puntos, cada movimiento resta 10 puntos
-      const timePenalty = durationSeconds * 5;
-      const movesPenalty = moves * 10;
 
-      const baseScore = 1000;
-      const finalScore = Math.max(
-        0,
-        Math.floor(baseScore - timePenalty - movesPenalty),
-      );
-
-      return finalScore;
-    },
-    [],
-  );
 
 
 
@@ -67,6 +51,7 @@ export default function MemoryGameScreen() {
     (stats: {
       moves: number;
       timeElapsed: number;
+      score: number;
       achievements: Array<{
         id: string;
         title: string;
@@ -75,13 +60,14 @@ export default function MemoryGameScreen() {
         description?: string | null;
       }>;
     }) => {
-      const score = calculateScore(stats.timeElapsed, stats.moves);
+      // Usar '4x4' como fallback si selectedMode es null (no debería suceder en juego)
+      const score = stats.score;
       setGameResults({ ...stats, score });
 
       // Mostrar el modal inmediatamente con los logros predichos
       setShowResultsDialog(true);
     },
-    [calculateScore],
+    [selectedMode],
   );
 
   const handlePlayAgain = useCallback(() => {

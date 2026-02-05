@@ -22,6 +22,8 @@ export default function SudokuGameScreen() {
   const [gameResults, setGameResults] = useState<{
     moves: number;
     timeElapsed: number;
+    score: number;
+    mistakes: number;
     hasWon: boolean;
     achievements?: Array<{
       id: string;
@@ -41,10 +43,13 @@ export default function SudokuGameScreen() {
     router.back();
   }, []);
 
+
   const handleComplete = useCallback(
     (stats: {
       moves: number;
       timeElapsed: number;
+      score: number;
+      mistakes: number;
       achievements?: Array<{
         id: string;
         title: string;
@@ -68,6 +73,8 @@ export default function SudokuGameScreen() {
     setGameResults({
       moves: 0,
       timeElapsed: 0,
+      score: 0,
+      mistakes: 3,
       hasWon: false,
     });
   }, []);
@@ -236,9 +243,17 @@ export default function SudokuGameScreen() {
             onPlayAgain={handlePlayAgain}
             onBackToGames={handleBackToGames}
             success={gameResults?.hasWon ?? false}
+            score={gameResults?.score}
             time={gameResults?.hasWon && gameResults.timeElapsed ? gameResults.timeElapsed * 1000 : null}
             moves={gameResults?.hasWon ? gameResults.moves : null}
             achievements={gameResults?.achievements}
+            customStats={gameResults?.hasWon ? [
+              {
+                icon: "❌",
+                label: "Errores",
+                value: `${gameResults.mistakes}/3`,
+              }
+            ] : undefined}
           />
         </View>
       </SafeAreaView>
