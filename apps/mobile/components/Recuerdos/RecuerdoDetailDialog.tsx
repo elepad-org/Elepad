@@ -645,7 +645,7 @@ export default function RecuerdoDetailDialog({
                   </TouchableOpacity>
                 </View>
 
-                <View style={{ minHeight: 250, backgroundColor: "#1a1a1a" }}>
+                <View style={{ minHeight: 245, backgroundColor: "#1a1a1a", borderTopLeftRadius: 8, borderTopRightRadius: 8, overflow: "hidden" }}>
                 {/* Frente del cassette */}
                 <Animated.View
                   style={[
@@ -665,7 +665,7 @@ export default function RecuerdoDetailDialog({
                       paddingBottom: 16,
                       paddingHorizontal: 16,
                       borderRadius: 8,
-                      minHeight: 250,
+                      minHeight: 245,
                       borderWidth: 3,
                       borderColor: "#1a1a1a",
                       ...SHADOWS.medium,
@@ -800,7 +800,7 @@ export default function RecuerdoDetailDialog({
                       paddingBottom: 12,
                       paddingHorizontal: 16,
                       borderRadius: 8,
-                      minHeight: 220,
+                      minHeight: 215,
                       borderWidth: 3,
                       borderColor: "#1a1a1a",
                       ...SHADOWS.medium,
