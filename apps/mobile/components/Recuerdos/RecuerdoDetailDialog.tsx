@@ -275,7 +275,7 @@ export default function RecuerdoDetailDialog({
         <Text
           style={{
             ...STYLES.heading,
-            color: COLORS.primary,
+            color: "#000000",
             textAlign: "left",
             flex: 1,
             paddingRight: 8,
@@ -293,7 +293,7 @@ export default function RecuerdoDetailDialog({
             visible={menuVisible}
             onDismiss={closeMenu}
             contentStyle={{
-              backgroundColor: COLORS.background,
+              backgroundColor: "rgba(255, 255, 255, 0.70)",
               borderRadius: 12,
             }}
             anchor={
@@ -634,21 +634,18 @@ export default function RecuerdoDetailDialog({
                   <TouchableOpacity
                     onPress={toggleFlip}
                     style={{
-                      backgroundColor: "#ff6b35",
+                      backgroundColor: "rgba(0, 0, 0, 0.6)",
                       width: 40,
                       height: 40,
                       borderRadius: 20,
                       justifyContent: "center",
                       alignItems: "center",
-                      borderWidth: 2,
-                      borderColor: "#d85a2a",
-                      ...SHADOWS.medium,
                     }}
                   >
                     <IconButton
                       icon="swap-horizontal"
-                      size={22}
-                      iconColor="#1a1a1a"
+                      size={28}
+                      iconColor="#ffffff"
                       style={{ margin: 0 }}
                     />
                   </TouchableOpacity>
@@ -678,7 +675,6 @@ export default function RecuerdoDetailDialog({
                       borderWidth: 3,
                       borderColor: "#1a1a1a",
                       ...SHADOWS.medium,
-                      justifyContent: "space-between",
                     }}
                   >
                     {/* Etiqueta superior estilo cassette con título */}
@@ -689,9 +685,7 @@ export default function RecuerdoDetailDialog({
                         borderRadius: 4,
                         borderWidth: 1,
                         borderColor: "#c0c0c0",
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
+                        justifyContent: "center",
                         minHeight: 48,
                       }}
                     >
@@ -700,30 +694,40 @@ export default function RecuerdoDetailDialog({
                         style={{
                           fontSize: 14,
                           color: "#1a1a1a",
-                          textAlign: "left",
+                          textAlign: "center",
                           fontFamily: "Montserrat",
                           fontWeight: "600",
-                          flex: 1,
-                          paddingLeft: 4,
+                          width: "100%",
                         }}
                       >
                         {recuerdo.titulo || "Nota de voz"}
                       </Text>
+                    </View>
 
+                    {/* Menú debajo de la etiqueta */}
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "flex-end",
+                        marginTop: 4,
+                        height: 32,
+                        zIndex: 100,
+                      }}
+                    >
                       {recuerdo.autorId === currentUserId &&
                         (menuMounted ? (
                           <Menu
                             visible={menuVisible}
                             onDismiss={closeMenu}
                             contentStyle={{
-                              backgroundColor: COLORS.background,
+                              backgroundColor: "rgba(255, 255, 255, 0.70)",
                               borderRadius: 12,
                             }}
                             anchor={
                               <IconButton
                                 icon="dots-horizontal"
-                                size={20}
-                                iconColor="#1a1a1a"
+                                size={22}
+                                iconColor="#e8e8e8"
                                 style={{ margin: 0 }}
                                 onPress={() => setMenuVisible(true)}
                                 disabled={isMutating}
@@ -746,8 +750,8 @@ export default function RecuerdoDetailDialog({
                         ) : (
                           <IconButton
                             icon="dots-horizontal"
-                            size={20}
-                            iconColor="#1a1a1a"
+                            size={22}
+                            iconColor="#e8e8e8"
                             style={{ margin: 0 }}
                             onPress={() => setMenuVisible(true)}
                             disabled={isMutating}
@@ -758,7 +762,8 @@ export default function RecuerdoDetailDialog({
                     {/* Diseño del cassette - réplica exacta de la miniatura */}
                     <View
                       style={{
-                        paddingVertical: 16,
+                        flex: 1,
+                        justifyContent: "center",
                         alignItems: "center",
                       }}
                     >
@@ -905,8 +910,6 @@ export default function RecuerdoDetailDialog({
                             backgroundColor: "#ff6b35",
                             justifyContent: "center",
                             alignItems: "center",
-                            borderWidth: 3,
-                            borderColor: "#d85a2a",
                             ...SHADOWS.medium,
                           }}
                         >

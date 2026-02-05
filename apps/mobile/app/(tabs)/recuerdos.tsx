@@ -1330,7 +1330,7 @@ export default function RecuerdosScreen() {
               visible={bookMenuVisible}
               onDismiss={handleCloseBookMenu}
               contentStyle={{
-                backgroundColor: COLORS.background,
+                backgroundColor: "rgba(255, 255, 255, 0.70)",
                 borderRadius: 12,
               }}
               anchor={
@@ -1497,7 +1497,7 @@ export default function RecuerdosScreen() {
             visible={bookMenuVisible}
             onDismiss={handleCloseBookMenu}
             contentStyle={{
-              backgroundColor: COLORS.background,
+              backgroundColor: "rgba(255, 255, 255, 0.70)",
               borderRadius: 12,
               width: 215,
             }}
