@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Platform } from "react-native";
 import { File, Directory, Paths } from "expo-file-system";
 import * as FileSystem from "expo-file-system/legacy";
 import * as IntentLauncher from "expo-intent-launcher";
@@ -105,7 +104,7 @@ export function usePdfDownload(options?: UsePdfDownloadOptions) {
         UTI: "com.adobe.pdf",
       });
       
-      try { await FileSystem.deleteAsync(tempLegacyUri, { idempotent: true }); } catch (e) {}
+      try { await FileSystem.deleteAsync(tempLegacyUri, { idempotent: true }); } catch (e) {console.error(e)}
 
       options?.onSuccess?.();
     } catch (err) {

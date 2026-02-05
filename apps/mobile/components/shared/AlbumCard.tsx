@@ -314,7 +314,7 @@ export default function AlbumCard({
 
           <Dialog.Content>
             <Text style={STYLES.paragraphText}>
-              ¿Estás seguro de que deseas eliminar el álbum "{title}"? Esta acción no se puede deshacer.
+              ¿Estás seguro de que deseas eliminar el álbum {title}? Esta acción no se puede deshacer.
             </Text>
           </Dialog.Content>
 
