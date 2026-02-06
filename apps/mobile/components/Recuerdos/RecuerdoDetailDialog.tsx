@@ -715,7 +715,7 @@ export default function RecuerdoDetailDialog({
               collapsable={false}
               style={{
                 backgroundColor: COLORS.white,
-                borderRadius: 10,
+                borderRadius: 0,
                 width: screenWidth * 0.92,
                 overflow: "hidden",
                 opacity: 1,
