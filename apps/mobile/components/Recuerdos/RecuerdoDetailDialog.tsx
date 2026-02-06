@@ -472,7 +472,7 @@ export default function RecuerdoDetailDialog({
         <Text
           style={{
             ...STYLES.heading,
-            color: COLORS.primary,
+            color: "#000000",
             textAlign: "left",
             flex: 1,
             paddingRight: 8,
@@ -501,43 +501,47 @@ export default function RecuerdoDetailDialog({
             </TouchableOpacity>
           )}
 
-          {menuMounted && recuerdo.autorId === currentUserId && (
-            <Menu
-              visible={menuVisible}
-              onDismiss={closeMenu}
-              contentStyle={{
-                backgroundColor: COLORS.background,
-                borderRadius: 12,
-              }}
-              anchor={
-                <TouchableOpacity
-                  onPress={() => setMenuVisible(true)}
-                  disabled={isMutating}
-                  activeOpacity={0.6}
-                  style={{ padding: 8, paddingRight: 0 }}
-                >
-                  <MaterialCommunityIcons
-                    name="dots-horizontal"
-                    size={22}
-                    color={COLORS.textSecondary || "#757575"}
+          {recuerdo.autorId === currentUserId &&
+            (menuMounted ? (
+              <Menu
+                visible={menuVisible}
+                onDismiss={closeMenu}
+                contentStyle={{
+                  backgroundColor: "rgba(255, 255, 255, 0.70)",
+                  borderRadius: 12,
+                }}
+                anchor={
+                  <IconButton
+                    icon="dots-horizontal"
+                    size={20}
+                    style={{ margin: 0 }}
+                    onPress={() => setMenuVisible(true)}
+                    disabled={isMutating}
                   />
-                </TouchableOpacity>
-              }
-            >
-              <Menu.Item
-                leadingIcon="pencil"
-                title="Modificar"
-                onPress={openEdit}
+                }
+              >
+                <Menu.Item
+                  leadingIcon="pencil"
+                  title="Modificar"
+                  onPress={openEdit}
+                  disabled={isMutating}
+                />
+                <Menu.Item
+                  leadingIcon="trash-can"
+                  title="Eliminar"
+                  onPress={openDeleteConfirm}
+                  disabled={isMutating}
+                />
+              </Menu>
+            ) : (
+              <IconButton
+                icon="dots-horizontal"
+                size={20}
+                style={{ margin: 0 }}
+                onPress={() => setMenuVisible(true)}
                 disabled={isMutating}
               />
-              <Menu.Item
-                leadingIcon="trash-can"
-                title="Eliminar"
-                onPress={openDeleteConfirm}
-                disabled={isMutating}
-              />
-            </Menu>
-          )}
+            ))}
         </View>
       )}
     </View>
@@ -752,6 +756,33 @@ export default function RecuerdoDetailDialog({
             shadowRadius: 0,
           }}
         >
+          <Animated.View
+            style={{
+              backgroundColor:
+                recuerdo.tipo === "audio" ? "transparent" : COLORS.white,
+              borderRadius: 10,
+              width: screenWidth * 0.92,
+              elevation: 0,
+              shadowColor: "transparent",
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: 0,
+              shadowRadius: 0,
+              opacity: fadeAnim,
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            {/* Contenido principal según el tipo */}
+            {recuerdo.tipo === "imagen" && recuerdo.miniatura && (
+              <View>
+                <View style={{ padding: 14, paddingBottom: 0 }}>
+                  <Pressable
+                    onPress={handleShare}
+                    style={{ opacity: 1 }}
+                    android_ripple={null}
+                  >
+                    <Image
+                      source={{ uri: recuerdo.miniatura }}
           <GestureDetector gesture={panGesture}>
             <Reanimated.View
               entering={ZoomIn}
@@ -829,6 +860,21 @@ export default function RecuerdoDetailDialog({
                   <ImageBackground
                     source={fondoRecuerdos}
                     style={{
+                      backgroundColor: "rgba(0, 0, 0, 0.6)",
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <IconButton
+                      icon="swap-horizontal"
+                      size={28}
+                      iconColor="#ffffff"
+                      style={{ margin: 0 }}
+                    />
+                  </TouchableOpacity>
                       borderRadius: 10,
                       padding: 10,
                       justifyContent: "center",
@@ -844,6 +890,27 @@ export default function RecuerdoDetailDialog({
                 </View>
               )}
 
+                <View
+                  style={{
+                    minHeight: 245,
+                    backgroundColor: "#1a1a1a",
+                    borderTopLeftRadius: 8,
+                    borderTopRightRadius: 8,
+                    overflow: "hidden",
+                  }}
+                >
+                  {/* Frente del cassette */}
+                  <Animated.View
+                    pointerEvents={isFlipped ? "none" : "auto"}
+                    style={[
+                      {
+                        position: "absolute",
+                        width: "100%",
+                        top: 0,
+                        left: 0,
+                      },
+                      frontAnimatedStyle,
+                    ]}
               {recuerdo.tipo === "audio" && (
                 <View>
                   {/* Botón para voltear - arriba del cassette */}
@@ -900,6 +967,13 @@ export default function RecuerdoDetailDialog({
                     >
                       <View
                         style={{
+                          backgroundColor: "#e8e8e8",
+                          padding: 8,
+                          borderRadius: 4,
+                          borderWidth: 1,
+                          borderColor: "#c0c0c0",
+                          justifyContent: "center",
+                          minHeight: 48,
                           backgroundColor: "#1a1a1a",
                           paddingTop: 16,
                           paddingBottom: 16,
@@ -915,6 +989,12 @@ export default function RecuerdoDetailDialog({
                         {/* Etiqueta superior estilo cassette con título */}
                         <View
                           style={{
+                            fontSize: 14,
+                            color: "#1a1a1a",
+                            textAlign: "center",
+                            fontFamily: "Montserrat",
+                            fontWeight: "600",
+                            width: "100%",
                             backgroundColor: "#e8e8e8",
                             padding: 12,
                             borderRadius: 4,
@@ -936,6 +1016,69 @@ export default function RecuerdoDetailDialog({
                           </Text>
                         </View>
 
+                      {/* Menú debajo de la etiqueta */}
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          justifyContent: "flex-end",
+                          marginTop: 4,
+                          height: 32,
+                          zIndex: 100,
+                        }}
+                      >
+                        {recuerdo.autorId === currentUserId &&
+                          (menuMounted ? (
+                            <Menu
+                              visible={menuVisible}
+                              onDismiss={closeMenu}
+                              contentStyle={{
+                                backgroundColor: "rgba(255, 255, 255, 0.70)",
+                                borderRadius: 12,
+                              }}
+                              anchor={
+                                <IconButton
+                                  icon="dots-horizontal"
+                                  size={22}
+                                  iconColor="#e8e8e8"
+                                  style={{ margin: 0 }}
+                                  onPress={() => setMenuVisible(true)}
+                                  disabled={isMutating}
+                                />
+                              }
+                            >
+                              <Menu.Item
+                                leadingIcon="pencil"
+                                title="Modificar"
+                                onPress={openEdit}
+                                disabled={isMutating}
+                              />
+                              <Menu.Item
+                                leadingIcon="trash-can"
+                                title="Eliminar"
+                                onPress={openDeleteConfirm}
+                                disabled={isMutating}
+                              />
+                            </Menu>
+                          ) : (
+                            <IconButton
+                              icon="dots-horizontal"
+                              size={22}
+                              iconColor="#e8e8e8"
+                              style={{ margin: 0 }}
+                              onPress={() => setMenuVisible(true)}
+                              disabled={isMutating}
+                            />
+                          ))}
+                      </View>
+
+                      {/* Diseño del cassette - réplica exacta de la miniatura */}
+                      <View
+                        style={{
+                          flex: 1,
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
                         {/* Diseño del cassette - réplica exacta de la miniatura */}
                         <View
                           style={{
@@ -1019,6 +1162,34 @@ export default function RecuerdoDetailDialog({
                           </View>
                         </View>
                       </View>
+                    </View>
+                  </Animated.View>
+
+                  {/* Reverso del cassette */}
+                  <Animated.View
+                    pointerEvents={isFlipped ? "auto" : "none"}
+                    style={[
+                      {
+                        position: "absolute",
+                        width: "100%",
+                        top: 0,
+                        left: 0,
+                      },
+                      backAnimatedStyle,
+                    ]}
+                  >
+                    <View
+                      style={{
+                        backgroundColor: "#1a1a1a",
+                        paddingTop: 16,
+                        paddingBottom: 12,
+                        paddingHorizontal: 16,
+                        borderRadius: 8,
+                        minHeight: 215,
+                        borderWidth: 3,
+                        borderColor: "#1a1a1a",
+                        ...SHADOWS.medium,
+                      }}
                     </Animated.View>
 
                     {/* Reverso del cassette */}
@@ -1062,6 +1233,23 @@ export default function RecuerdoDetailDialog({
                               flexDirection: "row",
                               justifyContent: "space-between",
                               alignItems: "center",
+                              ...SHADOWS.medium,
+                            }}
+                          >
+                            <IconButton
+                              icon={isPlaying ? "pause" : "play"}
+                              size={24}
+                              iconColor="#1a1a1a"
+                              style={{ margin: 0 }}
+                            />
+                          </TouchableOpacity>
+
+                          <Text
+                            style={{
+                              color: "#ff6b35",
+                              fontSize: 16,
+                              fontFamily: "monospace",
+                              fontWeight: "bold",
                               marginBottom: 6,
                             }}
                           >

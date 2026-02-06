@@ -2,7 +2,7 @@ import React from "react";
 import { TouchableOpacity, View, Dimensions, ImageBackground } from "react-native";
 import { Image } from "expo-image";
 import { Text, IconButton } from "react-native-paper";
-import { COLORS, SHADOWS } from "@/styles/base";
+import { SHADOWS } from "@/styles/base";
 import fondoRecuerdos from "@/assets/images/fondoRecuerdos.png";
 import eleDef from "@/assets/images/ele-def.png";
 
@@ -125,7 +125,7 @@ const RecuerdoItemComponent = React.memo(({
                 numberOfLines={1}
                 style={{
                   fontSize: 11 * scale,
-                  color: COLORS.primary,
+                  color: "#000000",
                   textAlign: "left",
                   paddingHorizontal: 10 * scale,
                   fontFamily: "Montserrat", // Fuente principal de la app
@@ -289,7 +289,7 @@ const RecuerdoItemComponent = React.memo(({
                 numberOfLines={2}
                 style={{
                   fontSize: 12 * scale,
-                  color: COLORS.primary,
+                  color: "#000000",
                   paddingHorizontal: 5 * scale,
                   textAlign: "left",
                   fontFamily: "Montserrat",

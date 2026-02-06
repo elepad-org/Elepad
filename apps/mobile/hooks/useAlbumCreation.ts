@@ -6,12 +6,13 @@ import {
   useGetAlbumId,
   useGetAlbum,
 } from "@elepad/api-client";
-//TODO: Agregar la creación de notificaciones
+import { ThemeTag } from "@/components/Recuerdos/CreateAlbumDialog";
 
 interface CreateAlbumData {
   title: string;
   description?: string;
   memoryIds: string[];
+  tags: ThemeTag[];
 }
 
 interface TranscribeAudioData {
@@ -92,6 +93,7 @@ export function useAlbumCreation(): UseAlbumCreationReturn {
             title: data.title,
             description: data.description || "",
             memoryIds: data.memoryIds,
+            tags: data.tags
           },
         });
         

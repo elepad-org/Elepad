@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { View, Image, StyleSheet, Linking, Pressable, ActivityIndicator } from "react-native";
+import { View, StyleSheet, Linking, Pressable, ActivityIndicator } from "react-native";
+import { Image } from "expo-image";
 import {
   Text,
-  Card,
   Portal,
   Dialog,
   Button,
@@ -10,7 +10,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { usePostAlbumIdExportPdf, useDeleteAlbumId } from "@elepad/api-client";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { COLORS, STYLES, SHADOWS } from "@/styles/base";
+import { COLORS, STYLES, SHADOWS, FONT } from "@/styles/base";
 import { useToast } from "@/components/shared/Toast";
 import { usePdfDownload } from "@/hooks/usePdfDownload";
 import { useQueryClient } from "@tanstack/react-query";
@@ -51,7 +51,16 @@ export default function AlbumCard({
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("es-AR");
+    const datePart = date.toLocaleDateString("es-ES", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+    const timePart = date.toLocaleTimeString("es-ES", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    return `${datePart} · ${timePart} hs`;
   };
 
   const handleExportPdf = () => {
@@ -143,10 +152,12 @@ export default function AlbumCard({
 
   return (
     <View>
-      <Card
-        style={styles.card}
+      <Pressable
+        style={({ pressed }) => [
+          styles.card,
+          pressed && { opacity: 0.95 },
+        ]}
         onPress={() => setDetailsVisible(true)}
-        elevation={2}
       >
         {/* Image */}
         <View style={styles.imageWrapper}>
@@ -154,7 +165,8 @@ export default function AlbumCard({
             <Image
               source={{ uri: coverImageUrl }}
               style={styles.image}
-              resizeMode="cover"
+              contentFit="cover"
+              transition={200}
             />
           ) : (
             <View style={styles.placeholder}>
@@ -173,7 +185,7 @@ export default function AlbumCard({
             {title}
           </Text>
         </View>
-      </Card>
+      </Pressable>
 
       {/* Dialog */}
       <Portal>
@@ -188,52 +200,52 @@ export default function AlbumCard({
 
           <Dialog.Content>
             {description && (
-              <View style={{ marginBottom: 16 }}>
-                <Text style={STYLES.paragraphText}>{description}</Text>
+              <View style={{ marginBottom: 12 }}>
+                <Text style={{ 
+                  fontSize: 16, 
+                  color: COLORS.primary, 
+                  fontFamily: FONT.medium,
+                  lineHeight: 22 
+                }}>
+                  {description}
+                </Text>
               </View>
             )}
 
-            <Text style={STYLES.paragraphText}>
-              Creado el: {formatDate(createdAt)}
+            <Text style={{ 
+              fontSize: 13, 
+              color: COLORS.textSecondary,
+              fontFamily: FONT.regular 
+            }}>
+              {formatDate(createdAt)}
             </Text>
 
             {totalPages !== undefined && (
-              <Text style={STYLES.paragraphText}>Páginas: {totalPages}</Text>
+              <Text style={{ 
+                fontSize: 13, 
+                color: COLORS.textSecondary,
+                fontFamily: FONT.regular,
+                marginTop: 4
+              }}>
+                Páginas: {totalPages}
+              </Text>
             )}
           </Dialog.Content>
 
-          <Dialog.Actions style={styles.dialogActions}>
-            <Pressable
-              onPress={() => setDeleteConfirmVisible(true)}
-              style={({ pressed }) => [
-                styles.deleteButton,
-                pressed && { opacity: 0.7 },
-              ]}
-              accessibilityLabel="Eliminar álbum"
-            >
-              <MaterialCommunityIcons
-                name="delete"
-                size={24}
-                color={COLORS.error}
-              />
-            </Pressable>
-
-            <View style={{ flex: 1 }} />
-            <Button mode="outlined" onPress={() => setDetailsVisible(false)}>
-              Cerrar
-            </Button>
-
+          <Dialog.Actions style={[styles.dialogActions, { justifyContent: "flex-start" }]}>
             {pdfUrl ? (
-              <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+              <View style={{ flexDirection: "row", gap: 8, alignItems: "center", flex: 1 }}>
                 <Button
                   mode="contained"
                   onPress={() => {
                     setDetailsVisible(false);
                     onPress();
                   }}
+                  style={{ flex: 1 }}
                 >
                   Ver Álbum
                 </Button>
+                
                 <View style={styles.actionsDropdown}>
                   <Pressable
                     onPress={() => setActionsOpen((v) => !v)}
@@ -247,7 +259,7 @@ export default function AlbumCard({
                   </Pressable>
 
                   {actionsOpen && (
-                    <View style={styles.dropdownItems}>
+                    <View style={[styles.dropdownItems, { right: 0 }]}>
                       <Pressable
                         onPress={() => {
                           handleViewPdf();
@@ -274,29 +286,74 @@ export default function AlbumCard({
                           <MaterialCommunityIcons name="share-variant" size={20} color={COLORS.primary} style={{left: -5}} />
                         )}
                       </Pressable>
+
+                      <Pressable
+                        onPress={() => {
+                          setActionsOpen(false);
+                          setDeleteConfirmVisible(true);
+                        }}
+                        style={({ pressed }) => [styles.iconAction, pressed && { opacity: 0.7 }]}
+                        accessibilityLabel="Eliminar álbum"
+                      >
+                        <MaterialCommunityIcons
+                          name="delete"
+                          size={20}
+                          color={COLORS.primary}
+                        />
+                      </Pressable>
                     </View>
                   )}
                 </View>
-
               </View>
             ) : (
-              <View style={{ flexDirection: "row", gap: 8 }}>
-                <Button
-                  mode="outlined"
-                  loading={exportPdfMutation.isPending}
-                  onPress={handleExportPdf}
-                >
-                  Exportar PDF
-                </Button>
+              <View style={{ flexDirection: "row", gap: 8, flex: 1 }}>
                 <Button
                   mode="contained"
                   onPress={() => {
                     setDetailsVisible(false);
                     onPress();
                   }}
+                  style={{ flex: 1 }}
                 >
                   Ver Álbum
                 </Button>
+                <Button
+                  mode="outlined"
+                  loading={exportPdfMutation.isPending}
+                  onPress={handleExportPdf}
+                >
+                  PDF
+                </Button>
+                
+                <View style={styles.actionsDropdown}>
+                  <Pressable
+                    onPress={() => setActionsOpen((v) => !v)}
+                    style={({ pressed }) => [
+                      styles.plusButton,
+                      pressed && { opacity: 0.65 },
+                    ]}
+                  >
+                    <MaterialCommunityIcons name={actionsOpen ? "minus" : "plus"} size={20} color={COLORS.white} />
+                  </Pressable>
+
+                  {actionsOpen && (
+                    <View style={[styles.dropdownItems, { right: 0 }]}>
+                      <Pressable
+                        onPress={() => {
+                          setActionsOpen(false);
+                          setDeleteConfirmVisible(true);
+                        }}
+                        style={({ pressed }) => [styles.iconAction, pressed && { opacity: 0.7 }]}
+                      >
+                        <MaterialCommunityIcons
+                          name="delete"
+                          size={20}
+                          color={COLORS.primary}
+                        />
+                      </Pressable>
+                    </View>
+                  )}
+                </View>
               </View>
             )}
           </Dialog.Actions>
@@ -343,11 +400,13 @@ export default function AlbumCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: COLORS.backgroundSecondary,
-    borderRadius: 16,
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
     overflow: "hidden",
-    marginBottom: 12,
-    ...SHADOWS.card,
+    marginBottom: 0, // Handled by gap in list
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.05)",
+    ...SHADOWS.light,
   },
 
   imageWrapper: {
@@ -370,8 +429,8 @@ const styles = StyleSheet.create({
 
   content: {
     paddingHorizontal: 12,
-    paddingVertical: 10,
-    minHeight: 56,
+    paddingVertical: 6,
+    minHeight: 35,
     justifyContent: "center",
   },
 
@@ -401,12 +460,13 @@ const styles = StyleSheet.create({
   dropdownItems: {
     position: "absolute",
     top: -56,
-    left: -25,
     borderRadius: 8,
-    borderColor: COLORS.backgroundSecondary,
-    borderWidth: 2,
+    backgroundColor: COLORS.white,
+    borderColor: COLORS.border,
+    borderWidth: 1,
     flexDirection: "row",
     gap: 4,
+    ...SHADOWS.medium,
   },
 
   iconAction: {

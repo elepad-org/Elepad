@@ -7,7 +7,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/supabase-types";
 import { CreateAlbumRequest, AlbumWithPages, Album } from "./schema";
 import { NotificationsService } from "../notifications/service";
-import { uploadAlbumCoverImage, uploadAlbumPDF } from "@/services/storage";
+import { uploadAlbumPDF } from "@/services/storage";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import dotenv from "dotenv";
 
@@ -181,6 +181,16 @@ export class MemoriesAlbumService {
       throw new ApiException(400, "No image memories found in the selection");
     }
 
+    // Determine cover image (first image memory in the ordered list)
+    let coverImageUrl: string | null = null;
+    for (const memId of data.memoryIds) {
+      const memory = imageMemories.find((m) => m.id === memId);
+      if (memory && memory.mediaUrl) {
+        coverImageUrl = memory.mediaUrl;
+        break;
+      }
+    }
+
     // Create album record with "processing" status
     const { data: album, error: albumError } = await this.supabase
       .from("memoriesAlbums")
@@ -190,6 +200,7 @@ export class MemoriesAlbumService {
         title: data.title,
         description: data.description,
         status: "processing",
+        coverImageUrl: coverImageUrl,
       })
       .select()
       .single();
@@ -229,7 +240,7 @@ export class MemoriesAlbumService {
     }
 
     // Process in background (async without await usually, but logic kept as provided)
-    await this.processAlbumNarratives(album.id, userId, userGroup.groupId).catch(
+    await this.processAlbumNarratives(album.id, userId, userGroup.groupId, data.tags).catch(
       (err) => {
         console.error("Error processing album narratives:", err);
       },
@@ -243,6 +254,7 @@ export class MemoriesAlbumService {
     albumId: string,
     userId: string,
     groupId: string,
+    tags: string[],
   ): Promise<void> {
     try {
       // Get album pages with memory data
@@ -293,6 +305,7 @@ export class MemoriesAlbumService {
         album,
         familyGroup?.name || "Tu familia",
         pages,
+        tags,
       );
 
       // Update album pages with generated narratives
@@ -310,30 +323,11 @@ export class MemoriesAlbumService {
           .eq("id", page.id);
       }
 
-      // Generate and upload album cover image
-      let coverImageUrl: string | null = null;
-      try {
-        const imageBuffer = await this.generateAlbumCoverImage(
-          album,
-          narratives,
-          pages[0],
-        );
-        coverImageUrl = await uploadAlbumCoverImage(
-          this.supabase,
-          groupId,
-          albumId,
-          imageBuffer,
-        );
-      } catch (err) {
-        console.error("Error generating or uploading album cover image:", err);
-      }
-
       // Update album status to "ready"
       await this.supabase
         .from("memoriesAlbums")
         .update({
           status: "ready",
-          coverImageUrl: coverImageUrl,
           updatedAt: new Date().toISOString(),
         })
         .eq("id", albumId);
@@ -380,6 +374,7 @@ export class MemoriesAlbumService {
     album: { title: string; description: string | null },
     familyName: string,
     pages: pageWithMemory[],
+    tags: string[],
   ): Promise<string[]> {
     if (!this.apiKey) {
       throw new Error("Gemini API key not configured");
@@ -389,12 +384,14 @@ export class MemoriesAlbumService {
     const contentParts: Part[] = [];
 
     // Prompt inicial
+    const tagsText = tags.join(" y ");
     const prompt = `Eres un asistente que crea narrativas emotivas y personales para álbumes de fotos familiares.
 
 Contexto del álbum:
 - Título: ${album.title}
 - Descripción: ${album.description || "Sin descripción adicional"}
 - Familia: ${familyName}
+- Temáticas: ${tagsText}
 
 A continuación te proporciono ${pages.length} imágenes con sus descripciones originales:
 
@@ -404,6 +401,8 @@ Tu tarea es generar una narrativa emotiva y personalizada para CADA imagen, crea
 3. Tener entre 2-3 oraciones
 4. Usar un tono cálido y personal
 5. Incorporar detalles visibles en la imagen
+6. Reflejar las temáticas del álbum: ${tagsText}
+7. Adaptar el estilo narrativo según las temáticas seleccionadas
 
 Responde SOLO con las narrativas, una por línea, separadas por "---". NO incluyas números, títulos ni otro texto adicional.
 
@@ -576,7 +575,7 @@ Este recuerdo nos muestra...`;
 
     const { data: albums, error: albumsError } = await this.supabase
       .from("memoriesAlbums")
-      .select("*")
+      .select("*, memoriesAlbumPages(imageUrl, order)")
       .eq("groupId", userGroup.groupId)
       .eq("status", "ready")
       .range(offset, offset + limit - 1);
@@ -586,11 +585,40 @@ Este recuerdo nos muestra...`;
       throw new ApiException(500, "Error getting the family group albums");
     }
 
-    return albums.map((album) => ({
-      ...album,
-      createdAt: new Date(album.createdAt),
-      updatedAt: album.updatedAt ? new Date(album.updatedAt) : null,
-    }));
+    return albums.map((album) => {
+      let coverImageUrl = album.coverImageUrl;
+
+      // Fallback: use first page image if cover is missing
+      if (
+        !coverImageUrl &&
+        album.memoriesAlbumPages &&
+        Array.isArray(album.memoriesAlbumPages) &&
+        album.memoriesAlbumPages.length > 0
+      ) {
+        // Sort to ensure we get the first page
+        const sortedPages = [...album.memoriesAlbumPages].sort(
+          (a, b) => a.order - b.order,
+        );
+        const firstPage = sortedPages.find((p) => p.imageUrl);
+        if (firstPage) {
+          coverImageUrl = firstPage.imageUrl;
+        }
+      }
+
+      // Return album without pages to match Album type
+      return {
+        id: album.id,
+        groupId: album.groupId,
+        createdBy: album.createdBy,
+        title: album.title,
+        description: album.description,
+        coverImageUrl,
+        status: album.status,
+        urlPdf: album.urlPdf,
+        createdAt: new Date(album.createdAt),
+        updatedAt: album.updatedAt ? new Date(album.updatedAt) : null,
+      };
+    });
   }
 
   async getAlbumById(userId: string, albumId: string): Promise<AlbumWithPages> {
@@ -763,6 +791,7 @@ Este recuerdo nos muestra...`;
     const coverPage = pdfDoc.addPage([pageWidth, pageHeight]);
 
     // Draw gradient background
+    /*
     const gradientSteps = 50;
     for (let step = 0; step < gradientSteps; step++) {
       const ratio = step / gradientSteps;
@@ -782,6 +811,16 @@ Este recuerdo nos muestra...`;
         color: rgb(r / 255, g / 255, b / 255),
       });
     }
+    */
+
+    // Solid background instead of gradient
+    coverPage.drawRectangle({
+      x: 0,
+      y: 0,
+      width: pageWidth,
+      height: pageHeight,
+      color: rgb(143 / 255, 161 / 255, 247 / 255), // #8FA1F7 (algo mas celestito que el gris primario)
+    });
 
     // Title
     const titleX = this.calculateCenteredX(album.title, 42, pageWidth);
@@ -910,7 +949,7 @@ Este recuerdo nos muestra...`;
             const imageYPos = imageTopY - imageHeight; // place image so its top is imageTopY
 
             contentPage.drawImage(image, {
-              x: frameCenterX + 10,
+              x: frameCenterX + 15,
               y: imageYPos,
               width: imageWidth,
               height: imageHeight,
