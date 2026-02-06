@@ -596,7 +596,7 @@ export default function RecuerdoDetailDialog({
       </Text>
 
       {/* Reacciones */}
-      {recuerdo.reactions && recuerdo.reactions.length > 0 && (
+      {showActions && recuerdo.reactions && recuerdo.reactions.length > 0 && (
         <View
           style={{
             marginTop: 16,
@@ -710,7 +710,7 @@ export default function RecuerdoDetailDialog({
               zIndex: -100,
             }}
           >
-            <Animated.View
+            <View
               ref={viewRef}
               collapsable={false}
               style={{
@@ -718,7 +718,6 @@ export default function RecuerdoDetailDialog({
                 borderRadius: 10,
                 width: screenWidth * 0.92,
                 overflow: "hidden",
-                // No opacity animation here, just full opacity
                 opacity: 1,
               }}
             >
@@ -739,7 +738,7 @@ export default function RecuerdoDetailDialog({
                 {/* Render info WITHOUT actions for the screenshot */}
                 {renderInfoBlock(false)}
               </View>
-            </Animated.View>
+            </View>
           </View>
         )}
 
