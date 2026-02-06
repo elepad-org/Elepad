@@ -776,6 +776,7 @@ export default function RecuerdoDetailDialog({
                 >
                   {/* Frente del cassette */}
                   <Animated.View
+                    pointerEvents={isFlipped ? "none" : "auto"}
                     style={[
                       {
                         position: "absolute",
@@ -969,6 +970,7 @@ export default function RecuerdoDetailDialog({
 
                   {/* Reverso del cassette */}
                   <Animated.View
+                    pointerEvents={isFlipped ? "auto" : "none"}
                     style={[
                       {
                         position: "absolute",
