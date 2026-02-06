@@ -447,7 +447,7 @@ export default function RecuerdoDetailDialog({
    * Función para compartir visualmente el recuerdo (Polaroid)
    */
   const handleShare = async () => {
-    if (recuerdo.tipo !== "imagen") return;
+    if (recuerdo.tipo !== "imagen" && recuerdo.tipo !== "texto") return;
 
     try {
       const uri = await captureRef(viewRef, {
@@ -495,7 +495,7 @@ export default function RecuerdoDetailDialog({
 
       {showActions && (
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          {recuerdo.tipo === "imagen" && (
+          {(recuerdo.tipo === "imagen" || recuerdo.tipo === "texto") && (
             <TouchableOpacity
               onPress={handleShare}
               disabled={isMutating}
@@ -701,7 +701,8 @@ export default function RecuerdoDetailDialog({
     <Portal>
       <>
         {/* SHADOW VIEW FOR CAPTURE - Off-screen rendering of the clean card */}
-        {recuerdo.tipo === "imagen" && (
+        {/* SHADOW VIEW FOR CAPTURE - Off-screen rendering of the clean card */}
+        {(recuerdo.tipo === "imagen" || recuerdo.tipo === "texto") && (
           <View
             style={{
               position: "absolute",
@@ -714,30 +715,46 @@ export default function RecuerdoDetailDialog({
               ref={viewRef}
               collapsable={false}
               style={{
-                backgroundColor: COLORS.white,
+                backgroundColor:
+                  recuerdo.tipo === "texto" ? "transparent" : COLORS.white,
                 borderRadius: 0,
                 width: screenWidth * 0.92,
                 overflow: "hidden",
                 opacity: 1,
               }}
             >
-              <View>
-                <View style={{ padding: 14, paddingBottom: 0 }}>
-                  {recuerdo.miniatura && (
-                    <Image
-                      source={{ uri: recuerdo.miniatura }}
-                      style={{
-                        width: "100%",
-                        height: screenWidth * 0.84,
-                        borderRadius: 0,
-                      }}
-                      contentFit="cover"
-                    />
-                  )}
+              {recuerdo.tipo === "texto" ? (
+                <ImageBackground
+                  source={fondoRecuerdos}
+                  resizeMode="cover"
+                  style={{
+                    padding: 10,
+                    justifyContent: "center",
+                    minHeight: 200,
+                    width: screenWidth * 0.92,
+                  }}
+                >
+                  {renderInfoBlock(false)}
+                </ImageBackground>
+              ) : (
+                <View>
+                  <View style={{ padding: 14, paddingBottom: 0 }}>
+                    {recuerdo.miniatura && (
+                      <Image
+                        source={{ uri: recuerdo.miniatura }}
+                        style={{
+                          width: "100%",
+                          height: screenWidth * 0.84,
+                          borderRadius: 0,
+                        }}
+                        contentFit="cover"
+                      />
+                    )}
+                  </View>
+                  {/* Render info WITHOUT actions for the screenshot */}
+                  {renderInfoBlock(false)}
                 </View>
-                {/* Render info WITHOUT actions for the screenshot */}
-                {renderInfoBlock(false)}
-              </View>
+              )}
             </View>
           </View>
         )}
@@ -762,7 +779,9 @@ export default function RecuerdoDetailDialog({
               style={[
                 {
                   backgroundColor:
-                    recuerdo.tipo === "audio" ? "transparent" : COLORS.white,
+                    recuerdo.tipo === "audio" || recuerdo.tipo === "texto"
+                      ? "transparent"
+                      : COLORS.white,
                   borderRadius: 10,
                   width: screenWidth * 0.92,
                   elevation: 0,
