@@ -89,8 +89,17 @@ const ReactionItem = ({
   member,
   onPress,
 }: {
-  reaction: any;
-  member: any;
+  reaction: {
+    id: string;
+    userId: string;
+    stickerId: string;
+    stickerUrl: string | null;
+  };
+  member: {
+    id: string;
+    displayName: string;
+    avatarUrl?: string | null;
+  };
   onPress: (stickerUrl: string | null) => void;
 }) => {
   const handlePress = () => {
