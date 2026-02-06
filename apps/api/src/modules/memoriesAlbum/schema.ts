@@ -50,12 +50,24 @@ export const AlbumSchema = z
 
 export type Album = z.infer<typeof AlbumSchema>;
 
+// Album theme tags enum
+export const AlbumThemeTagSchema = z.enum([
+  "Aventura",
+  "Fantasía",
+  "Pequeños momentos",
+  "Celebración",
+  "Acogedor",
+]);
+
+export type AlbumThemeTag = z.infer<typeof AlbumThemeTagSchema>;
+
 // Schema for creating an album
 export const CreateAlbumRequestSchema = z
   .object({
     title: z.string().min(1).max(200),
     description: z.string().max(1000),
     memoryIds: z.array(z.uuid()).min(1).max(50),
+    tags: z.array(AlbumThemeTagSchema).min(1).max(2),
   })
   .openapi("CreateAlbumRequest");
 

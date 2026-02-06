@@ -182,6 +182,17 @@ export interface Transcription {
   text: string;
 }
 
+export type CreateAlbumRequestTagsItem =
+  (typeof CreateAlbumRequestTagsItem)[keyof typeof CreateAlbumRequestTagsItem];
+
+export const CreateAlbumRequestTagsItem = {
+  Aventura: "Aventura",
+  Fantasía: "Fantasía",
+  Pequeños_momentos: "Pequeños momentos",
+  Celebración: "Celebración",
+  Acogedor: "Acogedor",
+} as const;
+
 export interface CreateAlbumRequest {
   /**
    * @minLength 1
@@ -195,6 +206,11 @@ export interface CreateAlbumRequest {
    * @maxItems 50
    */
   memoryIds: string[];
+  /**
+   * @minItems 1
+   * @maxItems 2
+   */
+  tags: CreateAlbumRequestTagsItem[];
 }
 
 export type AlbumStatus = (typeof AlbumStatus)[keyof typeof AlbumStatus];

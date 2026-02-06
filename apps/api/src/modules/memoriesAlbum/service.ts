@@ -229,7 +229,7 @@ export class MemoriesAlbumService {
     }
 
     // Process in background (async without await usually, but logic kept as provided)
-    await this.processAlbumNarratives(album.id, userId, userGroup.groupId).catch(
+    await this.processAlbumNarratives(album.id, userId, userGroup.groupId, data.tags).catch(
       (err) => {
         console.error("Error processing album narratives:", err);
       },
@@ -243,6 +243,7 @@ export class MemoriesAlbumService {
     albumId: string,
     userId: string,
     groupId: string,
+    tags: string[],
   ): Promise<void> {
     try {
       // Get album pages with memory data
@@ -293,6 +294,7 @@ export class MemoriesAlbumService {
         album,
         familyGroup?.name || "Tu familia",
         pages,
+        tags,
       );
 
       // Update album pages with generated narratives
@@ -380,6 +382,7 @@ export class MemoriesAlbumService {
     album: { title: string; description: string | null },
     familyName: string,
     pages: pageWithMemory[],
+    tags: string[],
   ): Promise<string[]> {
     if (!this.apiKey) {
       throw new Error("Gemini API key not configured");
@@ -389,12 +392,14 @@ export class MemoriesAlbumService {
     const contentParts: Part[] = [];
 
     // Prompt inicial
+    const tagsText = tags.join(" y ");
     const prompt = `Eres un asistente que crea narrativas emotivas y personales para álbumes de fotos familiares.
 
 Contexto del álbum:
 - Título: ${album.title}
 - Descripción: ${album.description || "Sin descripción adicional"}
 - Familia: ${familyName}
+- Temáticas: ${tagsText}
 
 A continuación te proporciono ${pages.length} imágenes con sus descripciones originales:
 
@@ -404,6 +409,8 @@ Tu tarea es generar una narrativa emotiva y personalizada para CADA imagen, crea
 3. Tener entre 2-3 oraciones
 4. Usar un tono cálido y personal
 5. Incorporar detalles visibles en la imagen
+6. Reflejar las temáticas del álbum: ${tagsText}
+7. Adaptar el estilo narrativo según las temáticas seleccionadas
 
 Responde SOLO con las narrativas, una por línea, separadas por "---". NO incluyas números, títulos ni otro texto adicional.
 
@@ -763,6 +770,7 @@ Este recuerdo nos muestra...`;
     const coverPage = pdfDoc.addPage([pageWidth, pageHeight]);
 
     // Draw gradient background
+    /*
     const gradientSteps = 50;
     for (let step = 0; step < gradientSteps; step++) {
       const ratio = step / gradientSteps;
@@ -782,6 +790,16 @@ Este recuerdo nos muestra...`;
         color: rgb(r / 255, g / 255, b / 255),
       });
     }
+    */
+
+    // Solid background instead of gradient
+    coverPage.drawRectangle({
+      x: 0,
+      y: 0,
+      width: pageWidth,
+      height: pageHeight,
+      color: rgb(143 / 255, 161 / 255, 247 / 255), // #8FA1F7 (algo mas celestito que el gris primario)
+    });
 
     // Title
     const titleX = this.calculateCenteredX(album.title, 42, pageWidth);
@@ -910,7 +928,7 @@ Este recuerdo nos muestra...`;
             const imageYPos = imageTopY - imageHeight; // place image so its top is imageTopY
 
             contentPage.drawImage(image, {
-              x: frameCenterX + 10,
+              x: frameCenterX + 15,
               y: imageYPos,
               width: imageWidth,
               height: imageHeight,
