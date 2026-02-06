@@ -315,7 +315,7 @@ export default function RecuerdoDetailDialog({
     }
   };
 
-  const renderInfoHeader = () => (
+  const renderInfoHeader = (showActions = true) => (
     <View
       style={{
         flexDirection: "row",
@@ -339,56 +339,58 @@ export default function RecuerdoDetailDialog({
         <View style={{ flex: 1 }} />
       )}
 
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        {!isSharing && recuerdo.tipo === "imagen" && (
-          <IconButton
-            icon="share-variant"
-            size={20}
-            style={{ margin: 0, marginRight: 0 }}
-            onPress={handleShare}
-            disabled={isMutating}
-          />
-        )}
+      {showActions && (
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          {recuerdo.tipo === "imagen" && (
+            <IconButton
+              icon="share-variant"
+              size={20}
+              style={{ margin: 0, marginRight: 0 }}
+              onPress={handleShare}
+              disabled={isMutating}
+            />
+          )}
 
-        {!isSharing && menuMounted && recuerdo.autorId === currentUserId && (
-          <Menu
-            visible={menuVisible}
-            onDismiss={closeMenu}
-            contentStyle={{
-              backgroundColor: COLORS.background,
-              borderRadius: 12,
-            }}
-            anchor={
-              <IconButton
-                icon="dots-horizontal"
-                size={20}
-                style={{ margin: 0 }}
-                onPress={() => setMenuVisible(true)}
+          {menuMounted && recuerdo.autorId === currentUserId && (
+            <Menu
+              visible={menuVisible}
+              onDismiss={closeMenu}
+              contentStyle={{
+                backgroundColor: COLORS.background,
+                borderRadius: 12,
+              }}
+              anchor={
+                <IconButton
+                  icon="dots-horizontal"
+                  size={20}
+                  style={{ margin: 0 }}
+                  onPress={() => setMenuVisible(true)}
+                  disabled={isMutating}
+                />
+              }
+            >
+              <Menu.Item
+                leadingIcon="pencil"
+                title="Modificar"
+                onPress={openEdit}
                 disabled={isMutating}
               />
-            }
-          >
-            <Menu.Item
-              leadingIcon="pencil"
-              title="Modificar"
-              onPress={openEdit}
-              disabled={isMutating}
-            />
-            <Menu.Item
-              leadingIcon="trash-can"
-              title="Eliminar"
-              onPress={openDeleteConfirm}
-              disabled={isMutating}
-            />
-          </Menu>
-        )}
-      </View>
+              <Menu.Item
+                leadingIcon="trash-can"
+                title="Eliminar"
+                onPress={openDeleteConfirm}
+                disabled={isMutating}
+              />
+            </Menu>
+          )}
+        </View>
+      )}
     </View>
   );
 
-  const renderInfoBlock = () => (
+  const renderInfoBlock = (showActions = true) => (
     <View style={{ padding: 20, paddingTop: 16 }}>
-      {renderInfoHeader()}
+      {renderInfoHeader(showActions)}
 
       {!!recuerdo.descripcion && (
         <HighlightedMentionText
@@ -580,6 +582,49 @@ export default function RecuerdoDetailDialog({
   return (
     <Portal>
       <>
+        {/* SHADOW VIEW FOR CAPTURE - Off-screen rendering of the clean card */}
+        {recuerdo.tipo === "imagen" && (
+          <View
+            style={{
+              position: "absolute",
+              top: screenWidth * 3, // Way off screen
+              left: 0,
+              zIndex: -100,
+            }}
+          >
+            <Animated.View
+              ref={viewRef}
+              collapsable={false}
+              style={{
+                backgroundColor: COLORS.white,
+                borderRadius: 10,
+                width: screenWidth * 0.92,
+                overflow: "hidden",
+                // No opacity animation here, just full opacity
+                opacity: 1,
+              }}
+            >
+              <View>
+                <View style={{ padding: 14, paddingBottom: 0 }}>
+                  {recuerdo.miniatura && (
+                    <Image
+                      source={{ uri: recuerdo.miniatura }}
+                      style={{
+                        width: "100%",
+                        height: screenWidth * 0.84,
+                        borderRadius: 0,
+                      }}
+                      contentFit="cover"
+                    />
+                  )}
+                </View>
+                {/* Render info WITHOUT actions for the screenshot */}
+                {renderInfoBlock(false)}
+              </View>
+            </Animated.View>
+          </View>
+        )}
+
         <Dialog
           visible={visible}
           onDismiss={handleDismiss}
@@ -595,7 +640,6 @@ export default function RecuerdoDetailDialog({
           }}
         >
           <Animated.View
-            ref={viewRef}
             collapsable={false}
             style={{
               backgroundColor:
@@ -616,19 +660,21 @@ export default function RecuerdoDetailDialog({
             {recuerdo.tipo === "imagen" && recuerdo.miniatura && (
               <View>
                 <View style={{ padding: 14, paddingBottom: 0 }}>
-                  <Image
-                    source={{ uri: recuerdo.miniatura }}
-                    style={{
-                      width: "100%",
-                      height: screenWidth * 0.84,
-                      borderRadius: 0,
-                    }}
-                    contentFit="cover"
-                  />
+                  <TouchableOpacity onPress={handleShare} activeOpacity={0.9}>
+                    <Image
+                      source={{ uri: recuerdo.miniatura }}
+                      style={{
+                        width: "100%",
+                        height: screenWidth * 0.84,
+                        borderRadius: 0,
+                      }}
+                      contentFit="cover"
+                    />
+                  </TouchableOpacity>
                 </View>
 
                 {/* Información debajo de la imagen */}
-                {renderInfoBlock()}
+                {renderInfoBlock(true)}
               </View>
             )}
 
