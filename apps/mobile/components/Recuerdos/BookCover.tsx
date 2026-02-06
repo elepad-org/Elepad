@@ -1,19 +1,71 @@
 import { View, StyleSheet, Animated } from "react-native";
 import { Image } from "expo-image";
+import { Text } from "react-native-paper";
 import { useGetMemories } from "@elepad/api-client";
 import { useEffect, useRef, useState, useMemo } from "react";
 import ChestIcon from "./ChestIcon";
-import { COLORS } from "@/styles/base";
+import { COLORS, FONT } from "@/styles/base";
 
 interface BookCoverProps {
   bookId: string;
   groupId: string;
   color: string;
+  title: string;
 }
 
-export default function BookCover({ bookId, groupId, color }: BookCoverProps) {
+function clamp01(v: number) {
+  return Math.max(0, Math.min(1, v));
+}
+
+function parseHexColor(input: string) {
+  const hex = input.trim();
+  const match = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.exec(hex);
+  if (!match) return null;
+
+  const raw = match[1];
+  const full =
+    raw.length === 3
+      ? raw
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : raw;
+
+  const r = parseInt(full.slice(0, 2), 16);
+  const g = parseInt(full.slice(2, 4), 16);
+  const b = parseInt(full.slice(4, 6), 16);
+  return { r, g, b };
+}
+
+function toHex({ r, g, b }: { r: number; g: number; b: number }) {
+  const hh = (n: number) => n.toString(16).padStart(2, "0");
+  return `#${hh(Math.round(r))}${hh(Math.round(g))}${hh(Math.round(b))}`;
+}
+
+function mix(
+  a: { r: number; g: number; b: number },
+  b: { r: number; g: number; b: number },
+  t: number
+) {
+  const tt = clamp01(t);
+  return {
+    r: a.r + (b.r - a.r) * tt,
+    g: a.g + (b.g - a.g) * tt,
+    b: a.b + (b.b - a.b) * tt,
+  };
+}
+
+export default function BookCover({ bookId, groupId, color, title }: BookCoverProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const [step, setStep] = useState(0);
+
+  // Calclular colores estilo ChestIcon
+  const base = color ? parseHexColor(color) : null;
+  const defaultWood = parseHexColor("#CD9965");
+  const woodFill =
+    base && defaultWood
+      ? toHex(mix(base, { r: 255, g: 255, b: 255 }, 0.35))
+      : "#CD9965";
 
   const { data: memoriesResponse } = useGetMemories(
     {
@@ -120,26 +172,45 @@ export default function BookCover({ bookId, groupId, color }: BookCoverProps) {
     return () => clearTimeout(timeout);
   }, [step, imageMemories.length]); // Depend on Step to trigger next cycle
 
-  // Si no hay imágenes, mostrar el SVG del cofre
+  // Si no hay imágenes, mostrar el SVG del cofre con el título
   if (imageMemories.length === 0) {
     return (
-      <View style={{ width: "92%", height: "92%" }}>
-        <ChestIcon color={color} />
+      <View style={{ width: "100%", height: "100%", alignItems: "center", justifyContent: "center" }}>
+        <View style={{ width: "92%", height: "92%" }}>
+          <ChestIcon color={color} />
+        </View>
+        <View style={{ position: "absolute", top: "15%", paddingHorizontal: 16 }}>
+          <Text numberOfLines={1} style={[styles.chestTitle, { color: '#2b1a17' }]}>{title}</Text>
+        </View>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      {/* Capa inferior: Imágenes actuales */}
-      <View style={styles.absFill}>
+      {/* Capa inferior: Imágenes actuales con margen para el diseño del baúl */}
+      <View style={[styles.absFill, { paddingTop: '24%', paddingBottom: '8%' }]}>
         <ImageGrid images={bottomImages} />
       </View>
 
       {/* Capa superior: Siguientes imágenes (animación de opacidad) */}
-      <Animated.View style={[styles.absFill, { opacity: fadeAnim }]}>
+      <Animated.View style={[styles.absFill, { opacity: fadeAnim, paddingTop: '24%', paddingBottom: '8%' }]}>
         <ImageGrid images={topImages} />
       </Animated.View>
+
+      {/* Superposición del Baul (diseño estético) */}
+      <View style={styles.chestOverlay} pointerEvents="none">
+        {/* Tapa del baúl (arriba) - más alta y redondeada */}
+        <View style={[styles.chestTop, { backgroundColor: woodFill }]}>
+          <Text numberOfLines={1} style={[styles.chestTitle, { color: '#2b1a17' }]}>{title}</Text>
+        </View>
+        
+        {/* Parte inferior del baúl (abajo) - rectangular simple */}
+        <View style={[styles.chestBottom, { backgroundColor: woodFill }]} />
+        
+        {/* Candado central estilizado */}
+        <View style={styles.lockPiece} />
+      </View>
     </View>
   );
 }
@@ -274,5 +345,50 @@ const styles = StyleSheet.create({
     height: "50%",
     borderWidth: 0.5,
     borderColor: COLORS.white,
+  },
+  chestOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "space-between",
+  },
+  chestTop: {
+    height: "24%",
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderBottomWidth: 3,
+    borderBottomColor: "rgba(0,0,0,0.3)",
+    zIndex: 2,
+  },
+  chestTitle: {
+    fontSize: 13,
+    fontFamily: FONT.bold,
+    textAlign: "center",
+    paddingHorizontal: 16,
+  },
+  chestBottom: {
+    height: "8%",
+    width: "100%",
+    borderTopWidth: 2,
+    borderTopColor: "rgba(0,0,0,0.25)",
+    zIndex: 2,
+  },
+  lockPiece: {
+    position: "absolute",
+    top: "20%",
+    left: "45%",
+    width: "10%",
+    height: "8%",
+    backgroundColor: "#4E342E",
+    borderRadius: 3,
+    borderWidth: 1.5,
+    borderColor: "rgba(0,0,0,0.5)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 2,
+    elevation: 3,
+    zIndex: 3,
   },
 });
