@@ -1206,40 +1206,9 @@ export default function RecuerdosScreen() {
                           bookId={item.id}
                           groupId={groupId}
                           color={color}
+                          title={title}
                         />
-                        <View
-                          style={{
-                            position: "absolute",
-                            top: 6,
-                            right: 6,
-                            flexDirection: "row",
-                          }}
-                        >
-                          <IconButton
-                            icon="pencil"
-                            size={18}
-                            onPress={() => openEditBookDialog(item)}
-                            style={{ margin: 0 }}
-                          />
-                          <IconButton
-                            icon="trash-can"
-                            size={18}
-                            onPress={() => setBookToDelete(item)}
-                            style={{ margin: 0 }}
-                          />
-                        </View>
                       </View>
-                      <Text
-                        style={{
-                          ...STYLES.heading,
-                          fontSize: 14,
-                          textAlign: "center",
-                          marginTop: 10,
-                        }}
-                        numberOfLines={2}
-                      >
-                        {title}
-                      </Text>
                     </Pressable>
                   </View>
                 );
