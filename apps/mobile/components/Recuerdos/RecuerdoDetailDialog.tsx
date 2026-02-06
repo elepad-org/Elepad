@@ -72,6 +72,79 @@ interface RecuerdoDetailDialogProps {
 
 const screenWidth = Dimensions.get("window").width;
 
+const ReactionItem = ({
+  reaction,
+  member,
+  onPress,
+}: {
+  reaction: any;
+  member: any;
+  onPress: (stickerUrl: string | null) => void;
+}) => {
+  const handlePress = () => {
+    onPress(reaction.stickerUrl);
+  };
+
+  return (
+    <Pressable onPress={handlePress} style={{ marginRight: 4 }}>
+      <Reanimated.View
+        entering={ZoomIn.springify()}
+        style={{
+          position: "relative",
+        }}
+      >
+        {member.avatarUrl ? (
+          <Image
+            source={{ uri: member.avatarUrl }}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 18,
+              borderWidth: 2,
+              borderColor: COLORS.white,
+            }}
+          />
+        ) : (
+          <View
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 18,
+              backgroundColor: COLORS.primary,
+              alignItems: "center",
+              justifyContent: "center",
+              borderWidth: 2,
+              borderColor: COLORS.white,
+            }}
+          >
+            <Text
+              style={{
+                color: COLORS.white,
+                fontSize: 14,
+                fontWeight: "bold",
+              }}
+            >
+              {member.displayName.charAt(0).toUpperCase()}
+            </Text>
+          </View>
+        )}
+        {reaction.stickerUrl && (
+          <Image
+            source={{ uri: reaction.stickerUrl }}
+            style={{
+              width: 20,
+              height: 20,
+              position: "absolute",
+              bottom: -4,
+              right: -4,
+            }}
+          />
+        )}
+      </Reanimated.View>
+    </Pressable>
+  );
+};
+
 export default function RecuerdoDetailDialog({
   visible,
   recuerdo,
@@ -453,59 +526,19 @@ export default function RecuerdoDetailDialog({
             const member = familyMembers.find((m) => m.id === reaction.userId);
             if (!member) return null;
             return (
-              <Reanimated.View
-                entering={ZoomIn.springify()}
+              <ReactionItem
                 key={reaction.id}
-                style={{ position: "relative", marginRight: 4 }}
-              >
-                {member.avatarUrl ? (
-                  <Image
-                    source={{ uri: member.avatarUrl }}
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 18,
-                      borderWidth: 2,
-                      borderColor: COLORS.white,
-                    }}
-                  />
-                ) : (
-                  <View
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 18,
-                      backgroundColor: COLORS.primary,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      borderWidth: 2,
-                      borderColor: COLORS.white,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: COLORS.white,
-                        fontSize: 14,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {member.displayName.charAt(0).toUpperCase()}
-                    </Text>
-                  </View>
-                )}
-                {reaction.stickerUrl && (
-                  <Image
-                    source={{ uri: reaction.stickerUrl }}
-                    style={{
-                      width: 20,
-                      height: 20,
-                      position: "absolute",
-                      bottom: -4,
-                      right: -4,
-                    }}
-                  />
-                )}
-              </Reanimated.View>
+                reaction={reaction}
+                member={member}
+                onPress={(stickerUrl) => {
+                  if (stickerUrl) {
+                    setLastReactedStickerUrl(stickerUrl);
+                    setTimeout(() => {
+                      setLastReactedStickerUrl(null);
+                    }, 1500);
+                  }
+                }}
+              />
             );
           })}
         </View>
