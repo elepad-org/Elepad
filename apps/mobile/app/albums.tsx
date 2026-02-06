@@ -225,13 +225,13 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: 24,
-    paddingTop: 16,
+    paddingTop: 8,
   },
   row: {
     justifyContent: "space-between",
   },
   columnItem: {
     width: "48%",
-    marginBottom: 16,
+    marginBottom: 8,
   },
 });

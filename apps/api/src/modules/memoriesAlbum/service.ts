@@ -181,6 +181,16 @@ export class MemoriesAlbumService {
       throw new ApiException(400, "No image memories found in the selection");
     }
 
+    // Determine cover image (first image memory in the ordered list)
+    let coverImageUrl: string | null = null;
+    for (const memId of data.memoryIds) {
+      const memory = imageMemories.find((m) => m.id === memId);
+      if (memory && memory.mediaUrl) {
+        coverImageUrl = memory.mediaUrl;
+        break;
+      }
+    }
+
     // Create album record with "processing" status
     const { data: album, error: albumError } = await this.supabase
       .from("memoriesAlbums")
@@ -190,6 +200,7 @@ export class MemoriesAlbumService {
         title: data.title,
         description: data.description,
         status: "processing",
+        coverImageUrl: coverImageUrl,
       })
       .select()
       .single();
@@ -310,30 +321,11 @@ export class MemoriesAlbumService {
           .eq("id", page.id);
       }
 
-      // Generate and upload album cover image
-      let coverImageUrl: string | null = null;
-      try {
-        const imageBuffer = await this.generateAlbumCoverImage(
-          album,
-          narratives,
-          pages[0],
-        );
-        coverImageUrl = await uploadAlbumCoverImage(
-          this.supabase,
-          groupId,
-          albumId,
-          imageBuffer,
-        );
-      } catch (err) {
-        console.error("Error generating or uploading album cover image:", err);
-      }
-
       // Update album status to "ready"
       await this.supabase
         .from("memoriesAlbums")
         .update({
           status: "ready",
-          coverImageUrl: coverImageUrl,
           updatedAt: new Date().toISOString(),
         })
         .eq("id", albumId);
@@ -576,7 +568,7 @@ Este recuerdo nos muestra...`;
 
     const { data: albums, error: albumsError } = await this.supabase
       .from("memoriesAlbums")
-      .select("*")
+      .select("*, memoriesAlbumPages(imageUrl, order)")
       .eq("groupId", userGroup.groupId)
       .eq("status", "ready")
       .range(offset, offset + limit - 1);
@@ -586,11 +578,36 @@ Este recuerdo nos muestra...`;
       throw new ApiException(500, "Error getting the family group albums");
     }
 
-    return albums.map((album) => ({
-      ...album,
-      createdAt: new Date(album.createdAt),
-      updatedAt: album.updatedAt ? new Date(album.updatedAt) : null,
-    }));
+    return albums.map((album) => {
+      let coverImageUrl = album.coverImageUrl;
+
+      // Fallback: use first page image if cover is missing
+      if (
+        !coverImageUrl &&
+        album.memoriesAlbumPages &&
+        Array.isArray(album.memoriesAlbumPages) &&
+        album.memoriesAlbumPages.length > 0
+      ) {
+        // Sort to ensure we get the first page
+        const sortedPages = [...album.memoriesAlbumPages].sort(
+          (a, b) => a.order - b.order,
+        );
+        const firstPage = sortedPages.find((p) => p.imageUrl);
+        if (firstPage) {
+          coverImageUrl = firstPage.imageUrl;
+        }
+      }
+
+      // Remove pages from result to match Album type
+      const { memoriesAlbumPages, ...rest } = album;
+
+      return {
+        ...rest,
+        coverImageUrl,
+        createdAt: new Date(album.createdAt),
+        updatedAt: album.updatedAt ? new Date(album.updatedAt) : null,
+      };
+    });
   }
 
   async getAlbumById(userId: string, albumId: string): Promise<AlbumWithPages> {
