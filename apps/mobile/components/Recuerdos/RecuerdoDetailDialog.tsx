@@ -104,7 +104,6 @@ export default function RecuerdoDetailDialog({
 
   // Ref para capturar la vista y estado de compartir
   const viewRef = useRef<View>(null);
-  const [isSharing, setIsSharing] = useState(false);
 
   // SIEMPRE crear los players (regla de hooks), pero con valores seguros
   const audioUrl =
@@ -291,16 +290,10 @@ export default function RecuerdoDetailDialog({
     if (recuerdo.tipo !== "imagen") return;
 
     try {
-      setIsSharing(true);
-      // Small delay to ensure UI updates (hides buttons) before capture
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
       const uri = await captureRef(viewRef, {
         format: "png",
         quality: 1,
       });
-
-      setIsSharing(false);
 
       const message = `${recuerdo.titulo || "Recuerdo"}. ${
         recuerdo.autorNombre || "Alguien"
@@ -313,7 +306,6 @@ export default function RecuerdoDetailDialog({
       });
     } catch (error) {
       console.error("Error sharing:", error);
-      setIsSharing(false);
     }
   };
 
