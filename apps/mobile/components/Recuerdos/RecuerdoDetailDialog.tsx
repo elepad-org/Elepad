@@ -8,7 +8,7 @@ import {
   Pressable,
 } from "react-native";
 import { Image } from "expo-image";
-import Reanimated, { ZoomIn, ZoomOut } from "react-native-reanimated";
+import Reanimated, { ZoomIn } from "react-native-reanimated";
 import { captureRef } from "react-native-view-shot";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { shareAsync } from "expo-sharing";
@@ -195,8 +195,21 @@ export default function RecuerdoDetailDialog({
     p.loop = false;
   });
 
+  // Auto-hide reaction feedback
+  useEffect(() => {
+    if (lastReactedStickerUrl) {
+      const timer = setTimeout(() => {
+        setLastReactedStickerUrl(null);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [lastReactedStickerUrl]);
+
   // Resetear el player cuando se abre el modal
   useEffect(() => {
+    // Limpiar sticker siempre que cambie la visibilidad (al abrir o cerrar)
+    setLastReactedStickerUrl(null);
+
     if (visible && shouldUseAudio) {
       console.log("Modal opened, resetting player");
       player.pause();
@@ -533,9 +546,6 @@ export default function RecuerdoDetailDialog({
                 onPress={(stickerUrl) => {
                   if (stickerUrl) {
                     setLastReactedStickerUrl(stickerUrl);
-                    setTimeout(() => {
-                      setLastReactedStickerUrl(null);
-                    }, 1500);
                   }
                 }}
               />
@@ -602,6 +612,7 @@ export default function RecuerdoDetailDialog({
   };
 
   const handleDismiss = () => {
+    setLastReactedStickerUrl(null);
     if (shouldUseAudio) {
       stopAudio();
     }
@@ -1193,7 +1204,7 @@ export default function RecuerdoDetailDialog({
             {lastReactedStickerUrl && (
               <Reanimated.View
                 entering={ZoomIn.springify()}
-                exiting={ZoomOut.duration(400)}
+                pointerEvents="none"
                 style={{
                   position: "absolute",
                   top: "30%",
@@ -1223,11 +1234,6 @@ export default function RecuerdoDetailDialog({
 
                 // Call the actual reaction handler
                 if (onReact) onReact(recuerdo.id, stickerId);
-
-                // Hide feedback after some time
-                setTimeout(() => {
-                  setLastReactedStickerUrl(null);
-                }, 1500);
               }}
               disabled={isMutating}
               onOpenShop={handleDismiss}
