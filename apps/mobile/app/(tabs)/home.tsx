@@ -7,7 +7,6 @@ import {
   Pressable,
   ImageBackground,
   Dimensions,
-  Image,
 } from "react-native";
 import React, { useEffect, useMemo, useCallback } from "react";
 import { Text, Avatar, Button, IconButton } from "react-native-paper";
@@ -34,6 +33,7 @@ import { GAMES_INFO } from "@/constants/gamesInfo";
 import { formatInUserTimezone, toUserLocalTime } from "@/lib/timezoneHelpers";
 import type { ImageSourcePropType } from "react-native";
 import { useVideoPlayer, VideoView } from "expo-video";
+import { Image } from "expo-image";
 import memoryImage from "@/assets/images/memory2.png";
 import netImage from "@/assets/images/net2.png";
 import sudokuImage from "@/assets/images/sudoku2.png";
