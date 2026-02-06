@@ -99,7 +99,7 @@ const memoryToRecuerdo = (
     miniatura:
       (memory.mimeType?.startsWith("image/") ||
         memory.mimeType?.startsWith("video/")) &&
-        memory.mediaUrl
+      memory.mediaUrl
         ? memory.mediaUrl
         : undefined,
     titulo: memory.title || undefined,
@@ -238,8 +238,6 @@ export default function RecuerdosScreen() {
   const [editingBook, setEditingBook] = useState<MemoriesBook | null>(null);
   const [bookMenuVisible, setBookMenuVisible] = useState(false);
 
-
-
   const handleCloseBookMenu = useCallback(() => {
     setBookMenuVisible(false);
     setMenuMode("main");
@@ -265,10 +263,16 @@ export default function RecuerdosScreen() {
   const [memberFilterId, setMemberFilterId] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<RecuerdoTipo | "all">("all");
   const [menuMode, setMenuMode] = useState<"main" | "filter">("main");
-  const [filterSubMode, setFilterSubMode] = useState<"none" | "person" | "type">("none");
+  const [filterSubMode, setFilterSubMode] = useState<
+    "none" | "person" | "type"
+  >("none");
 
   // --- Tour Setup ---
-  const { headerRef, addButtonRef, listRef, albumRef } = useRecuerdosTour({ activeTab, authLoading, selectedBook });
+  const { headerRef, addButtonRef, listRef, albumRef } = useRecuerdosTour({
+    activeTab,
+    authLoading,
+    selectedBook,
+  });
 
   const {
     data: booksResponse,
@@ -318,8 +322,9 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al crear el baúl: ${error instanceof Error ? error.message : "Error desconocido"
-          }`,
+        message: `Error al crear el baúl: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`,
         type: "error",
       });
     },
@@ -336,8 +341,9 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al actualizar el baúl: ${error instanceof Error ? error.message : "Error desconocido"
-          }`,
+        message: `Error al actualizar el baúl: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`,
         type: "error",
       });
     },
@@ -354,8 +360,9 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al eliminar el baúl: ${error instanceof Error ? error.message : "Error desconocido"
-          }`,
+        message: `Error al eliminar el baúl: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`,
         type: "error",
       });
     },
@@ -385,8 +392,9 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al actualizar el recuerdo: ${error instanceof Error ? error.message : "Error desconocido"
-          }`,
+        message: `Error al actualizar el recuerdo: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`,
         type: "error",
       });
     },
@@ -406,8 +414,9 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al eliminar el recuerdo: ${error instanceof Error ? error.message : "Error desconocido"
-          }`,
+        message: `Error al eliminar el recuerdo: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`,
         type: "error",
       });
     },
@@ -466,8 +475,9 @@ export default function RecuerdosScreen() {
     onError: (error) => {
       console.error("Upload mutation onError:", error);
       showToast({
-        message: `Error al subir el recuerdo: ${error instanceof Error ? error.message : "Error desconocido"
-          }`,
+        message: `Error al subir el recuerdo: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`,
         type: "error",
       });
     },
@@ -516,8 +526,9 @@ export default function RecuerdosScreen() {
     onError: (error) => {
       console.error("Create note mutation onError:", error);
       showToast({
-        message: `Error al crear la nota: ${error instanceof Error ? error.message : "Error desconocido"
-          }`,
+        message: `Error al crear la nota: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`,
         type: "error",
       });
     },
@@ -551,8 +562,8 @@ export default function RecuerdosScreen() {
     const memoriesData = Array.isArray(memoriesPayload)
       ? memoriesPayload
       : memoriesPayload &&
-        typeof memoriesPayload === "object" &&
-        "data" in (memoriesPayload as Record<string, unknown>)
+          typeof memoriesPayload === "object" &&
+          "data" in (memoriesPayload as Record<string, unknown>)
         ? (memoriesPayload as { data: unknown }).data
         : [];
 
@@ -562,7 +573,9 @@ export default function RecuerdosScreen() {
 
     return memories
       .map((memory) => memoryToRecuerdo(memory, memberNameById))
-      .filter((recuerdo) => typeFilter === "all" || recuerdo.tipo === typeFilter)
+      .filter(
+        (recuerdo) => typeFilter === "all" || recuerdo.tipo === typeFilter,
+      )
       .sort((a, b) => {
         if (sortOrder === "desc") {
           return b.fecha.getTime() - a.fecha.getTime();
@@ -636,8 +649,9 @@ export default function RecuerdosScreen() {
     deleteMemoryMutation.isPending;
 
   const emptyTitle = memberFilterId
-    ? `${memberNameById[memberFilterId] || "Este miembro"
-    } aún no ha subido recuerdos`
+    ? `${
+        memberNameById[memberFilterId] || "Este miembro"
+      } aún no ha subido recuerdos`
     : "No hay recuerdos aún";
 
   const emptySubtitle = memberFilterId
@@ -831,8 +845,9 @@ export default function RecuerdosScreen() {
       }
     } catch (error) {
       showToast({
-        message: `Error al preparar el archivo: ${error instanceof Error ? error.message : "Error desconocido"
-          }`,
+        message: `Error al preparar el archivo: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`,
         type: "error",
       });
     }
@@ -1056,8 +1071,8 @@ export default function RecuerdosScreen() {
   const booksData = Array.isArray(booksPayload)
     ? booksPayload
     : booksPayload &&
-      typeof booksPayload === "object" &&
-      "data" in (booksPayload as Record<string, unknown>)
+        typeof booksPayload === "object" &&
+        "data" in (booksPayload as Record<string, unknown>)
       ? (booksPayload as { data: unknown }).data
       : [];
 
@@ -1277,7 +1292,14 @@ export default function RecuerdosScreen() {
             </View>
           </View>
 
-          <View style={{ paddingTop: 10, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <View
+            style={{
+              paddingTop: 10,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
             <View style={{ flex: 1 }}>
               <Text style={{ ...STYLES.superHeading, textAlign: "left" }}>
                 {selectedBook.title || "Baúl"}
@@ -1303,35 +1325,35 @@ export default function RecuerdosScreen() {
                 borderRadius: 12,
               }}
               anchor={
-                  <IconButton
-                    icon="dots-horizontal"
-                    size={22}
-                    style={{ margin: 0 }}
-                    onPress={() => {
-                      setBookMenuVisible(true);
-                      setMenuMode("main");
-                      setFilterSubMode("none");
-                    }}
-                  />
-                }
-              >
-                <Menu.Item
-                  leadingIcon="pencil"
+                <IconButton
+                  icon="dots-horizontal"
+                  size={22}
+                  style={{ margin: 0 }}
                   onPress={() => {
-                    setBookMenuVisible(false);
-                    openEditBookDialog(selectedBook);
+                    setBookMenuVisible(true);
+                    setMenuMode("main");
+                    setFilterSubMode("none");
                   }}
-                  title="Modificar baúl"
                 />
-                <Menu.Item
-                  leadingIcon="trash-can"
-                  onPress={() => {
-                    setBookMenuVisible(false);
-                    setBookToDelete(selectedBook);
-                  }}
-                  title="Eliminar baúl"
-                />
-              </Menu>
+              }
+            >
+              <Menu.Item
+                leadingIcon="pencil"
+                onPress={() => {
+                  setBookMenuVisible(false);
+                  openEditBookDialog(selectedBook);
+                }}
+                title="Modificar baúl"
+              />
+              <Menu.Item
+                leadingIcon="trash-can"
+                onPress={() => {
+                  setBookMenuVisible(false);
+                  setBookToDelete(selectedBook);
+                }}
+                title="Eliminar baúl"
+              />
+            </Menu>
           </View>
         </View>
 
@@ -1372,7 +1394,9 @@ export default function RecuerdosScreen() {
             <IconButton
               icon={sortOrder === "desc" ? "arrow-down" : "arrow-up"}
               size={20}
-              onPress={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
+              onPress={() =>
+                setSortOrder(sortOrder === "desc" ? "asc" : "desc")
+              }
               mode="contained-tonal"
               style={{ margin: 0 }}
             />
@@ -1443,7 +1467,14 @@ export default function RecuerdosScreen() {
           </View>
         </View>
 
-        <View style={{ paddingTop: 10, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+        <View
+          style={{
+            paddingTop: 10,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
           <View style={{ flex: 1 }}>
             <Text style={{ ...STYLES.superHeading, textAlign: "left" }}>
               {selectedBook.title || "Baúl"}
@@ -1462,7 +1493,7 @@ export default function RecuerdosScreen() {
             )}
           </View>
           <Menu
-            key={bookMenuVisible ? 'open' : 'closed'}
+            key={bookMenuVisible ? "open" : "closed"}
             visible={bookMenuVisible}
             onDismiss={handleCloseBookMenu}
             contentStyle={{
@@ -1470,7 +1501,7 @@ export default function RecuerdosScreen() {
               borderRadius: 12,
               width: 215,
             }}
-            style={{ alignSelf: 'flex-end', marginRight: 0, marginTop: -8 }}
+            style={{ alignSelf: "flex-end", marginRight: 0, marginTop: -8 }}
             anchor={
               <IconButton
                 icon="dots-horizontal"
@@ -1483,186 +1514,213 @@ export default function RecuerdosScreen() {
                 }}
               />
             }
-            >
-              {(() => {
-                switch (menuMode) {
-                  case "main":
+          >
+            {(() => {
+              switch (menuMode) {
+                case "main":
+                  return (
+                    <>
+                      <Menu.Item
+                        leadingIcon="pencil"
+                        onPress={() => {
+                          setBookMenuVisible(false);
+                          openEditBookDialog(selectedBook);
+                        }}
+                        title="Modificar baúl"
+                      />
+                      <Menu.Item
+                        leadingIcon="trash-can"
+                        onPress={() => {
+                          setBookMenuVisible(false);
+                          setBookToDelete(selectedBook);
+                        }}
+                        title="Eliminar baúl"
+                      />
+                      <Menu.Item
+                        leadingIcon="filter-variant"
+                        onPress={() => {
+                          setMenuMode("filter");
+                          setFilterSubMode("none");
+                        }}
+                        title="Filtrar"
+                      />
+                    </>
+                  );
+                case "filter":
+                  if (filterSubMode === "none") {
                     return (
                       <>
                         <Menu.Item
-                          leadingIcon="pencil"
-                          onPress={() => {
-                            setBookMenuVisible(false);
-                            openEditBookDialog(selectedBook);
-                          }}
-                          title="Modificar baúl"
+                          leadingIcon="arrow-left"
+                          onPress={() => setMenuMode("main")}
+                          title="Atrás"
                         />
                         <Menu.Item
-                          leadingIcon="trash-can"
-                          onPress={() => {
-                            setBookMenuVisible(false);
-                            setBookToDelete(selectedBook);
-                          }}
-                          title="Eliminar baúl"
+                          leadingIcon="account-group"
+                          onPress={() => setFilterSubMode("person")}
+                          title="Filtrar por persona"
                         />
                         <Menu.Item
-                          leadingIcon="filter-variant"
-                          onPress={() => {
-                            setMenuMode("filter");
-                            setFilterSubMode("none");
-                          }}
-                          title="Filtrar"
+                          leadingIcon="file-multiple"
+                          onPress={() => setFilterSubMode("type")}
+                          title="Filtrar por tipo"
                         />
                       </>
                     );
-                  case "filter":
-                    if (filterSubMode === "none") {
-                      return (
-                        <>
+                  } else if (filterSubMode === "person") {
+                    return (
+                      <>
+                        <Menu.Item
+                          leadingIcon="arrow-left"
+                          onPress={() => setFilterSubMode("none")}
+                          title="Atrás"
+                        />
+                        <Menu.Item
+                          leadingIcon="account-group"
+                          onPress={() => {
+                            setMemberFilterId(null);
+                            setBookMenuVisible(false);
+                            setMenuMode("main");
+                            setFilterSubMode("none");
+                          }}
+                          title="Todos"
+                          style={{
+                            backgroundColor:
+                              memberFilterId === null
+                                ? COLORS.primary + "20"
+                                : "transparent",
+                          }}
+                        />
+                        {groupMembers.map((m) => (
                           <Menu.Item
-                            leadingIcon="arrow-left"
-                            onPress={() => setMenuMode("main")}
-                            title="Atrás"
-                          />
-                          <Menu.Item
-                            leadingIcon="account-group"
-                            onPress={() => setFilterSubMode("person")}
-                            title="Filtrar por persona"
-                          />
-                          <Menu.Item
-                            leadingIcon="file-multiple"
-                            onPress={() => setFilterSubMode("type")}
-                            title="Filtrar por tipo"
-                          />
-                        </>
-                      );
-                    } else if (filterSubMode === "person") {
-                      return (
-                        <>
-                          <Menu.Item
-                            leadingIcon="arrow-left"
-                            onPress={() => setFilterSubMode("none")}
-                            title="Atrás"
-                          />
-                          <Menu.Item
-                            leadingIcon="account-group"
+                            key={m.id}
+                            leadingIcon={() =>
+                              m.avatarUrl ? (
+                                <Avatar.Image
+                                  size={24}
+                                  source={{ uri: m.avatarUrl }}
+                                />
+                              ) : (
+                                <Avatar.Text
+                                  size={24}
+                                  label={m.displayName.charAt(0).toUpperCase()}
+                                />
+                              )
+                            }
                             onPress={() => {
-                              setMemberFilterId(null);
+                              setMemberFilterId(m.id);
                               setBookMenuVisible(false);
                               setMenuMode("main");
                               setFilterSubMode("none");
                             }}
-                            title="Todos"
+                            title={m.displayName}
                             style={{
-                              backgroundColor: memberFilterId === null ? COLORS.primary + "20" : "transparent"
+                              backgroundColor:
+                                memberFilterId === m.id
+                                  ? COLORS.primary + "20"
+                                  : "transparent",
                             }}
                           />
-                          {groupMembers.map((m) => (
-                            <Menu.Item
-                              key={m.id}
-                              leadingIcon={() => (
-                                m.avatarUrl ? (
-                                  <Avatar.Image size={24} source={{ uri: m.avatarUrl }} />
-                                ) : (
-                                  <Avatar.Text size={24} label={m.displayName.charAt(0).toUpperCase()} />
-                                )
-                              )}
-                              onPress={() => {
-                                setMemberFilterId(m.id);
-                                setBookMenuVisible(false);
-                                setMenuMode("main");
-                                setFilterSubMode("none");
-                              }}
-                              title={m.displayName}
-                              style={{
-                                backgroundColor: memberFilterId === m.id ? COLORS.primary + "20" : "transparent"
-                              }}
-                            />
-                          ))}
-                        </>
-                      );
-                    } else if (filterSubMode === "type") {
-                      return (
-                        <>
-                          <Menu.Item
-                            leadingIcon="arrow-left"
-                            onPress={() => setFilterSubMode("none")}
-                            title="Atrás"
-                          />
-                          <Menu.Item
-                            leadingIcon="file-multiple"
-                            onPress={() => {
-                              setTypeFilter("all");
-                              setBookMenuVisible(false);
-                              setMenuMode("main");
-                              setFilterSubMode("none");
-                            }}
-                            title="Todos los tipos"
-                            style={{
-                              backgroundColor: typeFilter === "all" ? COLORS.primary + "20" : "transparent"
-                            }}
-                          />
-                          <Menu.Item
-                            leadingIcon="image"
-                            onPress={() => {
-                              setTypeFilter("imagen");
-                              setBookMenuVisible(false);
-                              setMenuMode("main");
-                              setFilterSubMode("none");
-                            }}
-                            title="Imágenes"
-                            style={{
-                              backgroundColor: typeFilter === "imagen" ? COLORS.primary + "20" : "transparent"
-                            }}
-                          />
-                          <Menu.Item
-                            leadingIcon="video"
-                            onPress={() => {
-                              setTypeFilter("video");
-                              setBookMenuVisible(false);
-                              setMenuMode("main");
-                              setFilterSubMode("none");
-                            }}
-                            title="Videos"
-                            style={{
-                              backgroundColor: typeFilter === "video" ? COLORS.primary + "20" : "transparent"
-                            }}
-                          />
-                          <Menu.Item
-                            leadingIcon="microphone"
-                            onPress={() => {
-                              setTypeFilter("audio");
-                              setBookMenuVisible(false);
-                              setMenuMode("main");
-                              setFilterSubMode("none");
-                            }}
-                            title="Audios"
-                            style={{
-                              backgroundColor: typeFilter === "audio" ? COLORS.primary + "20" : "transparent"
-                            }}
-                          />
-                          <Menu.Item
-                            leadingIcon="text"
-                            onPress={() => {
-                              setTypeFilter("texto");
-                              setBookMenuVisible(false);
-                              setMenuMode("main");
-                              setFilterSubMode("none");
-                            }}
-                            title="Notas"
-                            style={{
-                              backgroundColor: typeFilter === "texto" ? COLORS.primary + "20" : "transparent"
-                            }}
-                          />
-                        </>
-                      );
-                    }
-                    break;
-                  default:
-                    return null;
-                }
-              })()}
-            </Menu>
+                        ))}
+                      </>
+                    );
+                  } else if (filterSubMode === "type") {
+                    return (
+                      <>
+                        <Menu.Item
+                          leadingIcon="arrow-left"
+                          onPress={() => setFilterSubMode("none")}
+                          title="Atrás"
+                        />
+                        <Menu.Item
+                          leadingIcon="file-multiple"
+                          onPress={() => {
+                            setTypeFilter("all");
+                            setBookMenuVisible(false);
+                            setMenuMode("main");
+                            setFilterSubMode("none");
+                          }}
+                          title="Todos los tipos"
+                          style={{
+                            backgroundColor:
+                              typeFilter === "all"
+                                ? COLORS.primary + "20"
+                                : "transparent",
+                          }}
+                        />
+                        <Menu.Item
+                          leadingIcon="image"
+                          onPress={() => {
+                            setTypeFilter("imagen");
+                            setBookMenuVisible(false);
+                            setMenuMode("main");
+                            setFilterSubMode("none");
+                          }}
+                          title="Imágenes"
+                          style={{
+                            backgroundColor:
+                              typeFilter === "imagen"
+                                ? COLORS.primary + "20"
+                                : "transparent",
+                          }}
+                        />
+                        <Menu.Item
+                          leadingIcon="video"
+                          onPress={() => {
+                            setTypeFilter("video");
+                            setBookMenuVisible(false);
+                            setMenuMode("main");
+                            setFilterSubMode("none");
+                          }}
+                          title="Videos"
+                          style={{
+                            backgroundColor:
+                              typeFilter === "video"
+                                ? COLORS.primary + "20"
+                                : "transparent",
+                          }}
+                        />
+                        <Menu.Item
+                          leadingIcon="microphone"
+                          onPress={() => {
+                            setTypeFilter("audio");
+                            setBookMenuVisible(false);
+                            setMenuMode("main");
+                            setFilterSubMode("none");
+                          }}
+                          title="Audios"
+                          style={{
+                            backgroundColor:
+                              typeFilter === "audio"
+                                ? COLORS.primary + "20"
+                                : "transparent",
+                          }}
+                        />
+                        <Menu.Item
+                          leadingIcon="text"
+                          onPress={() => {
+                            setTypeFilter("texto");
+                            setBookMenuVisible(false);
+                            setMenuMode("main");
+                            setFilterSubMode("none");
+                          }}
+                          title="Notas"
+                          style={{
+                            backgroundColor:
+                              typeFilter === "texto"
+                                ? COLORS.primary + "20"
+                                : "transparent",
+                          }}
+                        />
+                      </>
+                    );
+                  }
+                  break;
+                default:
+                  return null;
+              }
+            })()}
+          </Menu>
         </View>
       </View>
 
@@ -1705,7 +1763,7 @@ export default function RecuerdosScreen() {
             size={20}
             onPress={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
             mode="contained-tonal"
-            style={{ paddingRight: 0}}
+            style={{ paddingRight: 0 }}
           />
         </View>
       </View>
@@ -1792,9 +1850,33 @@ export default function RecuerdosScreen() {
         <RecuerdoDetailDialog
           visible={detailDialogVisible}
           recuerdo={selectedRecuerdo}
+          hasNext={
+            selectedRecuerdo
+              ? recuerdos.findIndex((r) => r.id === selectedRecuerdo.id) <
+                recuerdos.length - 1
+              : false
+          }
+          hasPrev={
+            selectedRecuerdo
+              ? recuerdos.findIndex((r) => r.id === selectedRecuerdo.id) > 0
+              : false
+          }
           onDismiss={() => {
             handleCloseDetail();
             router.setParams({ memoryId: "", bookId: "" });
+          }}
+          onNavigate={(direction) => {
+            if (!selectedRecuerdo) return;
+            const currentIndex = recuerdos.findIndex(
+              (r) => r.id === selectedRecuerdo.id,
+            );
+            if (currentIndex === -1) return;
+
+            const nextIndex =
+              direction === "next" ? currentIndex + 1 : currentIndex - 1;
+            if (nextIndex >= 0 && nextIndex < recuerdos.length) {
+              setSelectedRecuerdo(recuerdos[nextIndex]);
+            }
           }}
           onUpdateRecuerdo={async (id, patch) => {
             await updateMemoryMutation.mutateAsync({ id, patch });
