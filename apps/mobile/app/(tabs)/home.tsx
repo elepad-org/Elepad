@@ -398,7 +398,7 @@ const HomeScreen = () => {
         </View>
 
         {/* Último Recuerdo - DESTACADO */}
-        <View ref={lastMemoryRef} style={{ marginTop: 45 }}>
+        <View ref={lastMemoryRef} style={{ marginTop: 50 }}>
           {memoriesQuery.isLoading || isLoading ? (
             <View style={styles.memoryCardLoading}>
               <SkeletonBox width={SCREEN_WIDTH} height={280} borderRadius={0} />
