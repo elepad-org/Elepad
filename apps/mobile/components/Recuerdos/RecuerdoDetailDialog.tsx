@@ -62,7 +62,7 @@ interface RecuerdoDetailDialogProps {
 
 const screenWidth = Dimensions.get("window").width;
 
-export default function RecuerdoDetailDialog({
+export default function RecuerdoDetailDialog({ 
   visible,
   recuerdo,
   onDismiss,
@@ -1237,3 +1237,4 @@ export default function RecuerdoDetailDialog({
     </Portal>
   );
 }
+
