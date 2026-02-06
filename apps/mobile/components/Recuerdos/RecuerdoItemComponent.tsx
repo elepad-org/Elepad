@@ -2,7 +2,7 @@ import React from "react";
 import { TouchableOpacity, View, Dimensions, ImageBackground } from "react-native";
 import { Image } from "expo-image";
 import { Text, IconButton } from "react-native-paper";
-import { COLORS, SHADOWS } from "@/styles/base";
+import { SHADOWS } from "@/styles/base";
 import fondoRecuerdos from "@/assets/images/fondoRecuerdos.png";
 import eleDef from "@/assets/images/ele-def.png";
 

@@ -3,7 +3,6 @@ import { View, StyleSheet, Linking, Pressable, ActivityIndicator } from "react-n
 import { Image } from "expo-image";
 import {
   Text,
-  Card,
   Portal,
   Dialog,
   Button,

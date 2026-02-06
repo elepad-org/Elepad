@@ -7,7 +7,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/supabase-types";
 import { CreateAlbumRequest, AlbumWithPages, Album } from "./schema";
 import { NotificationsService } from "../notifications/service";
-import { uploadAlbumCoverImage, uploadAlbumPDF } from "@/services/storage";
+import { uploadAlbumPDF } from "@/services/storage";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import dotenv from "dotenv";
 
@@ -605,12 +605,16 @@ Este recuerdo nos muestra...`;
         }
       }
 
-      // Remove pages from result to match Album type
-      const { memoriesAlbumPages, ...rest } = album;
-
+      // Return album without pages to match Album type
       return {
-        ...rest,
+        id: album.id,
+        groupId: album.groupId,
+        createdBy: album.createdBy,
+        title: album.title,
+        description: album.description,
         coverImageUrl,
+        status: album.status,
+        urlPdf: album.urlPdf,
         createdAt: new Date(album.createdAt),
         updatedAt: album.updatedAt ? new Date(album.updatedAt) : null,
       };
