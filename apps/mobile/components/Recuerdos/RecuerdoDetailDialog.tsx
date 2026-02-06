@@ -5,10 +5,12 @@ import {
   Animated,
   ImageBackground,
   TouchableOpacity,
+  Pressable,
 } from "react-native";
 import { Image } from "expo-image";
 import Reanimated, { ZoomIn, ZoomOut } from "react-native-reanimated";
 import { captureRef } from "react-native-view-shot";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { shareAsync } from "expo-sharing";
 import {
   Dialog,
@@ -342,13 +344,18 @@ export default function RecuerdoDetailDialog({
       {showActions && (
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           {recuerdo.tipo === "imagen" && (
-            <IconButton
-              icon="share-variant"
-              size={20}
-              style={{ margin: 0, marginRight: 0 }}
+            <TouchableOpacity
               onPress={handleShare}
               disabled={isMutating}
-            />
+              activeOpacity={0.6}
+              style={{ padding: 8 }}
+            >
+              <MaterialCommunityIcons
+                name="share-variant"
+                size={22}
+                color={COLORS.textSecondary || "#757575"}
+              />
+            </TouchableOpacity>
           )}
 
           {menuMounted && recuerdo.autorId === currentUserId && (
@@ -360,13 +367,18 @@ export default function RecuerdoDetailDialog({
                 borderRadius: 12,
               }}
               anchor={
-                <IconButton
-                  icon="dots-horizontal"
-                  size={20}
-                  style={{ margin: 0 }}
+                <TouchableOpacity
                   onPress={() => setMenuVisible(true)}
                   disabled={isMutating}
-                />
+                  activeOpacity={0.6}
+                  style={{ padding: 8, paddingRight: 0 }}
+                >
+                  <MaterialCommunityIcons
+                    name="dots-horizontal"
+                    size={22}
+                    color={COLORS.textSecondary || "#757575"}
+                  />
+                </TouchableOpacity>
               }
             >
               <Menu.Item
@@ -660,7 +672,11 @@ export default function RecuerdoDetailDialog({
             {recuerdo.tipo === "imagen" && recuerdo.miniatura && (
               <View>
                 <View style={{ padding: 14, paddingBottom: 0 }}>
-                  <TouchableOpacity onPress={handleShare} activeOpacity={0.9}>
+                  <Pressable
+                    onPress={handleShare}
+                    style={{ opacity: 1 }}
+                    android_ripple={null}
+                  >
                     <Image
                       source={{ uri: recuerdo.miniatura }}
                       style={{
@@ -670,7 +686,7 @@ export default function RecuerdoDetailDialog({
                       }}
                       contentFit="cover"
                     />
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
 
                 {/* Información debajo de la imagen */}
