@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   View,
   Dimensions,
@@ -8,7 +8,14 @@ import {
   Pressable,
 } from "react-native";
 import { Image } from "expo-image";
-import Reanimated, { ZoomIn } from "react-native-reanimated";
+import Reanimated, {
+  ZoomIn,
+  runOnJS,
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
+} from "react-native-reanimated";
 import { captureRef } from "react-native-view-shot";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { shareAsync } from "expo-sharing";
@@ -29,6 +36,8 @@ import HighlightedMentionText from "./HighlightedMentionText";
 import MentionInput from "./MentionInput";
 import StickerReactionPicker from "./StickerReactionPicker";
 import fondoRecuerdos from "@/assets/images/fondoRecuerdos.png";
+
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
 
@@ -54,6 +63,7 @@ interface RecuerdoDetailDialogProps {
   visible: boolean;
   recuerdo: Recuerdo | null;
   onDismiss: () => void;
+  onNavigate?: (direction: "next" | "prev") => void;
   onUpdateRecuerdo: (
     id: string,
     patch: { title?: string; caption?: string },
@@ -68,6 +78,8 @@ interface RecuerdoDetailDialogProps {
   }>;
   currentUserId?: string;
   isElder?: boolean;
+  hasNext?: boolean;
+  hasPrev?: boolean;
 }
 
 const screenWidth = Dimensions.get("window").width;
@@ -156,6 +168,9 @@ export default function RecuerdoDetailDialog({
   familyMembers = [],
   currentUserId,
   isElder = false,
+  onNavigate,
+  hasNext = false,
+  hasPrev = false,
 }: RecuerdoDetailDialogProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -170,6 +185,71 @@ export default function RecuerdoDetailDialog({
   const [lastReactedStickerUrl, setLastReactedStickerUrl] = useState<
     string | null
   >(null);
+
+  const translateX = useSharedValue(0);
+  const swipeDirection = useRef<"next" | "prev" | null>(null);
+
+  const handleNavigation = (dir: "next" | "prev") => {
+    if (onNavigate) {
+      swipeDirection.current = dir;
+      onNavigate(dir);
+    }
+  };
+
+  const panGesture = useMemo(() => {
+    return Gesture.Pan()
+      .activeOffsetX([-20, 20])
+      .onUpdate((e) => {
+        let x = e.translationX;
+        // Resistance if trying to go beyond bounds
+        if ((x < 0 && !hasNext) || (x > 0 && !hasPrev)) {
+          x *= 0.2; // Hard resistance
+        }
+        translateX.value = x;
+      })
+      .onEnd((e) => {
+        if (!onNavigate) {
+          translateX.value = withSpring(0);
+          return;
+        }
+
+        let x = e.translationX;
+        // Check effective translation (re-apply resistance logic for consistency check? No, e.translationX is raw)
+        // Check intent based on raw gesture
+        if (x < -80 && hasNext) {
+          // Swipe Left -> Next
+          translateX.value = withTiming(-screenWidth, { duration: 200 }, () => {
+            runOnJS(handleNavigation)("next");
+          });
+        } else if (x > 80 && hasPrev) {
+          // Swipe Right -> Prev
+          translateX.value = withTiming(screenWidth, { duration: 200 }, () => {
+            runOnJS(handleNavigation)("prev");
+          });
+        } else {
+          // Bounce back
+          translateX.value = withSpring(0);
+        }
+      });
+  }, [onNavigate, hasNext, hasPrev]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+  }));
+
+  // Reset animation when recuerdo changes
+  useEffect(() => {
+    if (swipeDirection.current === "next") {
+      translateX.value = screenWidth;
+      translateX.value = withSpring(0);
+    } else if (swipeDirection.current === "prev") {
+      translateX.value = -screenWidth;
+      translateX.value = withSpring(0);
+    } else {
+      translateX.value = 0;
+    }
+    swipeDirection.current = null;
+  }, [recuerdo?.id]);
 
   // Estado para el flip del cassette
   const [isFlipped, setIsFlipped] = useState(false);
@@ -267,21 +347,6 @@ export default function RecuerdoDetailDialog({
       }
     };
   }, [shouldUseAudio, player]);
-
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    if (visible) {
-      fadeAnim.setValue(0);
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      fadeAnim.setValue(0);
-    }
-  }, [visible]);
 
   if (!recuerdo) return null;
 
@@ -687,543 +752,547 @@ export default function RecuerdoDetailDialog({
             shadowRadius: 0,
           }}
         >
-          <Animated.View
-            collapsable={false}
-            style={{
-              backgroundColor:
-                recuerdo.tipo === "audio" ? "transparent" : COLORS.white,
-              borderRadius: 10,
-              width: screenWidth * 0.92,
-              elevation: 0,
-              shadowColor: "transparent",
-              shadowOffset: { width: 0, height: 0 },
-              shadowOpacity: 0,
-              shadowRadius: 0,
-              opacity: fadeAnim,
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
-            {/* Contenido principal según el tipo */}
-            {recuerdo.tipo === "imagen" && recuerdo.miniatura && (
-              <View>
-                <View style={{ padding: 14, paddingBottom: 0 }}>
-                  <Pressable
-                    onPress={handleShare}
-                    style={{ opacity: 1 }}
-                    android_ripple={null}
-                  >
-                    <Image
-                      source={{ uri: recuerdo.miniatura }}
+          <GestureDetector gesture={panGesture}>
+            <Reanimated.View
+              entering={ZoomIn}
+              style={[
+                {
+                  backgroundColor:
+                    recuerdo.tipo === "audio" ? "transparent" : COLORS.white,
+                  borderRadius: 10,
+                  width: screenWidth * 0.92,
+                  elevation: 0,
+                  shadowColor: "transparent",
+                  shadowOffset: { width: 0, height: 0 },
+                  shadowOpacity: 0,
+                  shadowRadius: 0,
+                  position: "relative",
+                  overflow: "hidden",
+                },
+                animatedStyle,
+              ]}
+            >
+              {/* Contenido principal según el tipo */}
+              {recuerdo.tipo === "imagen" && recuerdo.miniatura && (
+                <View>
+                  <View style={{ padding: 14, paddingBottom: 0 }}>
+                    <Pressable
+                      onPress={handleShare}
+                      style={{ opacity: 1 }}
+                      android_ripple={null}
+                    >
+                      <Image
+                        source={{ uri: recuerdo.miniatura }}
+                        style={{
+                          width: "100%",
+                          height: screenWidth * 0.84,
+                          borderRadius: 0,
+                        }}
+                        contentFit="cover"
+                      />
+                    </Pressable>
+                  </View>
+
+                  {/* Información debajo de la imagen */}
+                  {renderInfoBlock(true)}
+                </View>
+              )}
+
+              {recuerdo.tipo === "video" && recuerdo.contenido && (
+                <View>
+                  <View style={{ padding: 14, paddingBottom: 0 }}>
+                    <VideoView
+                      player={videoPlayer}
                       style={{
                         width: "100%",
                         height: screenWidth * 0.84,
                         borderRadius: 0,
                       }}
-                      contentFit="cover"
+                      nativeControls
+                      contentFit="contain"
                     />
-                  </Pressable>
-                </View>
+                  </View>
 
-                {/* Información debajo de la imagen */}
-                {renderInfoBlock(true)}
-              </View>
-            )}
-
-            {recuerdo.tipo === "video" && recuerdo.contenido && (
-              <View>
-                <View style={{ padding: 14, paddingBottom: 0 }}>
-                  <VideoView
-                    player={videoPlayer}
-                    style={{
-                      width: "100%",
-                      height: screenWidth * 0.84,
-                      borderRadius: 0,
-                    }}
-                    nativeControls
-                    contentFit="contain"
-                  />
-                </View>
-
-                {/* Información debajo del video */}
-                {renderInfoBlock()}
-              </View>
-            )}
-
-            {recuerdo.tipo === "texto" && (
-              <View
-                style={{
-                  alignItems: "center",
-                  justifyContent: "center",
-                  paddingVertical: 0,
-                }}
-              >
-                <ImageBackground
-                  source={fondoRecuerdos}
-                  style={{
-                    borderRadius: 10,
-                    padding: 10,
-                    justifyContent: "center",
-                    ...SHADOWS.card,
-                    borderColor: "#f1f1f1", // Softer beige border
-                    minHeight: 200,
-                    width: screenWidth * 0.92,
-                  }}
-                >
-                  {/* Información de la nota */}
+                  {/* Información debajo del video */}
                   {renderInfoBlock()}
-                </ImageBackground>
-              </View>
-            )}
+                </View>
+              )}
 
-            {recuerdo.tipo === "audio" && (
-              <View>
-                {/* Botón para voltear - arriba del cassette */}
+              {recuerdo.tipo === "texto" && (
                 <View
                   style={{
                     alignItems: "center",
-                    paddingTop: 12,
-                    paddingBottom: 8,
+                    justifyContent: "center",
+                    paddingVertical: 0,
                   }}
                 >
-                  <TouchableOpacity
-                    onPress={toggleFlip}
+                  <ImageBackground
+                    source={fondoRecuerdos}
                     style={{
-                      backgroundColor: "#ff6b35",
-                      width: 40,
-                      height: 40,
-                      borderRadius: 20,
+                      borderRadius: 10,
+                      padding: 10,
                       justifyContent: "center",
-                      alignItems: "center",
-                      borderWidth: 2,
-                      borderColor: "#d85a2a",
-                      ...SHADOWS.medium,
+                      ...SHADOWS.card,
+                      borderColor: "#f1f1f1", // Softer beige border
+                      minHeight: 200,
+                      width: screenWidth * 0.92,
                     }}
                   >
-                    <IconButton
-                      icon="swap-horizontal"
-                      size={22}
-                      iconColor="#1a1a1a"
-                      style={{ margin: 0 }}
-                    />
-                  </TouchableOpacity>
+                    {/* Información de la nota */}
+                    {renderInfoBlock()}
+                  </ImageBackground>
                 </View>
+              )}
 
-                <View
-                  style={{
-                    minHeight: 245,
-                    backgroundColor: "#1a1a1a",
-                    borderTopLeftRadius: 8,
-                    borderTopRightRadius: 8,
-                    overflow: "hidden",
-                  }}
-                >
-                  {/* Frente del cassette */}
-                  <Animated.View
-                    style={[
-                      {
-                        position: "absolute",
-                        width: "100%",
-                        top: 0,
-                        left: 0,
-                      },
-                      frontAnimatedStyle,
-                    ]}
+              {recuerdo.tipo === "audio" && (
+                <View>
+                  {/* Botón para voltear - arriba del cassette */}
+                  <View
+                    style={{
+                      alignItems: "center",
+                      paddingTop: 12,
+                      paddingBottom: 8,
+                    }}
                   >
-                    <View
+                    <TouchableOpacity
+                      onPress={toggleFlip}
                       style={{
-                        backgroundColor: "#1a1a1a",
-                        paddingTop: 16,
-                        paddingBottom: 16,
-                        paddingHorizontal: 16,
-                        borderRadius: 8,
-                        minHeight: 245,
-                        borderWidth: 3,
-                        borderColor: "#1a1a1a",
-                        ...SHADOWS.medium,
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      {/* Etiqueta superior estilo cassette con título */}
-                      <View
-                        style={{
-                          backgroundColor: "#e8e8e8",
-                          padding: 12,
-                          borderRadius: 4,
-                          borderWidth: 1,
-                          borderColor: "#c0c0c0",
-                        }}
-                      >
-                        <Text
-                          numberOfLines={2}
-                          style={{
-                            fontSize: 14,
-                            color: "#1a1a1a",
-                            textAlign: "center",
-                            fontFamily: "Montserrat",
-                            fontWeight: "600",
-                          }}
-                        >
-                          {recuerdo.titulo || "Nota de voz"}
-                        </Text>
-                      </View>
-
-                      {/* Diseño del cassette - réplica exacta de la miniatura */}
-                      <View
-                        style={{
-                          paddingVertical: 16,
-                          alignItems: "center",
-                        }}
-                      >
-                        <View
-                          style={{
-                            width: "85%",
-                            height: 80,
-                            backgroundColor: "#2a2a2a",
-                            borderRadius: 40,
-                            borderWidth: 3,
-                            borderColor: "#4a4a4a",
-                            flexDirection: "row",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            paddingHorizontal: 8,
-                          }}
-                        >
-                          <View
-                            style={{
-                              width: 64,
-                              height: 64,
-                              borderRadius: 32,
-                              borderWidth: 4,
-                              borderColor: "#4a4a4a",
-                              backgroundColor: "#1a1a1a",
-                              justifyContent: "center",
-                              alignItems: "center",
-                            }}
-                          >
-                            <View
-                              style={{
-                                width: 24,
-                                height: 24,
-                                borderRadius: 12,
-                                backgroundColor: "#d0d0d0",
-                              }}
-                            />
-                          </View>
-                          <View
-                            style={{
-                              width: 44,
-                              height: 44,
-                              borderRadius: 22,
-                              backgroundColor: "#ff6b35",
-                              justifyContent: "center",
-                              alignItems: "center",
-                            }}
-                          >
-                            <IconButton
-                              icon="play"
-                              size={24}
-                              iconColor="#1a1a1a"
-                              style={{ margin: 0 }}
-                            />
-                          </View>
-                          <View
-                            style={{
-                              width: 64,
-                              height: 64,
-                              borderRadius: 32,
-                              borderWidth: 4,
-                              borderColor: "#4a4a4a",
-                              backgroundColor: "#1a1a1a",
-                              justifyContent: "center",
-                              alignItems: "center",
-                            }}
-                          >
-                            <View
-                              style={{
-                                width: 24,
-                                height: 24,
-                                borderRadius: 12,
-                                backgroundColor: "#d0d0d0",
-                              }}
-                            />
-                          </View>
-                        </View>
-                      </View>
-                    </View>
-                  </Animated.View>
-
-                  {/* Reverso del cassette */}
-                  <Animated.View
-                    style={[
-                      {
-                        position: "absolute",
-                        width: "100%",
-                        top: 0,
-                        left: 0,
-                      },
-                      backAnimatedStyle,
-                    ]}
-                  >
-                    <View
-                      style={{
-                        backgroundColor: "#1a1a1a",
-                        paddingTop: 16,
-                        paddingBottom: 12,
-                        paddingHorizontal: 16,
-                        borderRadius: 8,
-                        minHeight: 215,
-                        borderWidth: 3,
-                        borderColor: "#1a1a1a",
+                        backgroundColor: "#ff6b35",
+                        width: 40,
+                        height: 40,
+                        borderRadius: 20,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        borderWidth: 2,
+                        borderColor: "#d85a2a",
                         ...SHADOWS.medium,
                       }}
                     >
-                      {/* Display LCD con tiempos y botón de play */}
+                      <IconButton
+                        icon="swap-horizontal"
+                        size={22}
+                        iconColor="#1a1a1a"
+                        style={{ margin: 0 }}
+                      />
+                    </TouchableOpacity>
+                  </View>
+
+                  <View
+                    style={{
+                      minHeight: 245,
+                      backgroundColor: "#1a1a1a",
+                      borderTopLeftRadius: 8,
+                      borderTopRightRadius: 8,
+                      overflow: "hidden",
+                    }}
+                  >
+                    {/* Frente del cassette */}
+                    <Animated.View
+                      style={[
+                        {
+                          position: "absolute",
+                          width: "100%",
+                          top: 0,
+                          left: 0,
+                        },
+                        frontAnimatedStyle,
+                      ]}
+                    >
                       <View
                         style={{
-                          backgroundColor: "#3d3d3d",
-                          padding: 6,
-                          borderRadius: 6,
-                          marginBottom: 16,
-                          borderWidth: 2,
-                          borderColor: "#2a2a2a",
-                        }}
-                      >
-                        <View
-                          style={{
-                            flexDirection: "row",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            marginBottom: 6,
-                          }}
-                        >
-                          <Text
-                            style={{
-                              color: "#ff6b35",
-                              fontSize: 16,
-                              fontFamily: "monospace",
-                              fontWeight: "bold",
-                            }}
-                          >
-                            {formatTime(currentTime)}
-                          </Text>
-
-                          {/* Botón de play en el medio */}
-                          <TouchableOpacity
-                            onPress={playAudio}
-                            style={{
-                              width: 44,
-                              height: 44,
-                              borderRadius: 22,
-                              backgroundColor: "#ff6b35",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              borderWidth: 3,
-                              borderColor: "#d85a2a",
-                              ...SHADOWS.medium,
-                            }}
-                          >
-                            <IconButton
-                              icon={isPlaying ? "pause" : "play"}
-                              size={24}
-                              iconColor="#1a1a1a"
-                              style={{ margin: 0 }}
-                            />
-                          </TouchableOpacity>
-
-                          <Text
-                            style={{
-                              color: "#ff6b35",
-                              fontSize: 16,
-                              fontFamily: "monospace",
-                              fontWeight: "bold",
-                            }}
-                          >
-                            {formatTime(duration)}
-                          </Text>
-                        </View>
-
-                        {/* Barra de progreso dentro del LCD */}
-                        <View style={{ paddingHorizontal: 4 }}>
-                          <Slider
-                            style={{ width: "100%", height: 15 }}
-                            minimumValue={0}
-                            maximumValue={duration || 1}
-                            value={currentTime}
-                            onSlidingComplete={handleSliderChange}
-                            minimumTrackTintColor="#ff6b35"
-                            maximumTrackTintColor="#2a2a2a"
-                            thumbTintColor="#e0e0e0"
-                          />
-                        </View>
-                      </View>
-
-                      {/* Información */}
-                      <View
-                        style={{
-                          backgroundColor: "#2a2a2a",
-                          padding: 10,
+                          backgroundColor: "#1a1a1a",
+                          paddingTop: 16,
+                          paddingBottom: 16,
+                          paddingHorizontal: 16,
                           borderRadius: 8,
-                          borderWidth: 1,
-                          borderColor: "#3a3a3a",
+                          minHeight: 245,
+                          borderWidth: 3,
+                          borderColor: "#1a1a1a",
+                          ...SHADOWS.medium,
+                          justifyContent: "space-between",
                         }}
                       >
-                        {/* Descripción si existe */}
-                        {recuerdo.descripcion && (
-                          <View style={{ marginBottom: 10 }}>
-                            <HighlightedMentionText
-                              text={recuerdo.descripcion}
-                              familyMembers={familyMembers}
-                              style={{
-                                fontSize: 12,
-                                color: "#d0d0d0",
-                                fontFamily: FONT.regular,
-                                lineHeight: 16,
-                              }}
-                            />
-                          </View>
-                        )}
-
-                        {/* Autor y fecha */}
+                        {/* Etiqueta superior estilo cassette con título */}
                         <View
                           style={{
-                            flexDirection: "row",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            paddingTop: recuerdo.descripcion ? 10 : 0,
-                            borderTopWidth: recuerdo.descripcion ? 1 : 0,
-                            borderTopColor: "#3a3a3a",
+                            backgroundColor: "#e8e8e8",
+                            padding: 12,
+                            borderRadius: 4,
+                            borderWidth: 1,
+                            borderColor: "#c0c0c0",
                           }}
                         >
                           <Text
+                            numberOfLines={2}
                             style={{
-                              fontSize: 11,
-                              color: "#999",
-                              fontFamily: FONT.regular,
+                              fontSize: 14,
+                              color: "#1a1a1a",
+                              textAlign: "center",
+                              fontFamily: "Montserrat",
+                              fontWeight: "600",
                             }}
                           >
-                            {recuerdo.autorNombre || "Desconocido"}
-                          </Text>
-                          <Text
-                            style={{
-                              fontSize: 11,
-                              color: "#999",
-                              fontFamily: FONT.regular,
-                            }}
-                          >
-                            {new Date(recuerdo.fecha).toLocaleDateString()}
+                            {recuerdo.titulo || "Nota de voz"}
                           </Text>
                         </View>
 
-                        {/* Reacciones si existen */}
-                        {recuerdo.reactions &&
-                          recuerdo.reactions.length > 0 && (
+                        {/* Diseño del cassette - réplica exacta de la miniatura */}
+                        <View
+                          style={{
+                            paddingVertical: 16,
+                            alignItems: "center",
+                          }}
+                        >
+                          <View
+                            style={{
+                              width: "85%",
+                              height: 80,
+                              backgroundColor: "#2a2a2a",
+                              borderRadius: 40,
+                              borderWidth: 3,
+                              borderColor: "#4a4a4a",
+                              flexDirection: "row",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              paddingHorizontal: 8,
+                            }}
+                          >
                             <View
                               style={{
-                                flexDirection: "row",
-                                flexWrap: "wrap",
-                                gap: 8,
-                                paddingTop: 10,
+                                width: 64,
+                                height: 64,
+                                borderRadius: 32,
+                                borderWidth: 4,
+                                borderColor: "#4a4a4a",
+                                backgroundColor: "#1a1a1a",
+                                justifyContent: "center",
+                                alignItems: "center",
                               }}
                             >
-                              {recuerdo.reactions.map((reaction, idx) => {
-                                const member = familyMembers.find(
-                                  (m) => m.id === reaction.userId,
-                                );
-                                return (
-                                  <Reanimated.View
-                                    key={`${reaction.userId}-${idx}`}
-                                    entering={ZoomIn.delay(idx * 50)}
-                                    style={{
-                                      position: "relative",
-                                      width: 28,
-                                      height: 28,
-                                    }}
-                                  >
-                                    {member?.avatarUrl ? (
-                                      <Image
-                                        source={{ uri: member.avatarUrl }}
-                                        style={{
-                                          width: 28,
-                                          height: 28,
-                                          borderRadius: 14,
-                                          borderWidth: 2,
-                                          borderColor: "#ff6b35",
-                                        }}
-                                      />
-                                    ) : (
-                                      <View
-                                        style={{
-                                          width: 28,
-                                          height: 28,
-                                          borderRadius: 14,
-                                          backgroundColor: "#ff6b35",
-                                          justifyContent: "center",
-                                          alignItems: "center",
-                                          borderWidth: 2,
-                                          borderColor: "#d85a2a",
-                                        }}
-                                      >
-                                        <Text
-                                          style={{
-                                            color: "#1a1a1a",
-                                            fontSize: 11,
-                                            fontWeight: "bold",
-                                          }}
-                                        >
-                                          {member?.displayName
-                                            ?.charAt(0)
-                                            .toUpperCase()}
-                                        </Text>
-                                      </View>
-                                    )}
-                                    {reaction.stickerUrl && (
-                                      <Image
-                                        source={{ uri: reaction.stickerUrl }}
-                                        style={{
-                                          width: 14,
-                                          height: 14,
-                                          position: "absolute",
-                                          bottom: -3,
-                                          right: -3,
-                                        }}
-                                      />
-                                    )}
-                                  </Reanimated.View>
-                                );
-                              })}
+                              <View
+                                style={{
+                                  width: 24,
+                                  height: 24,
+                                  borderRadius: 12,
+                                  backgroundColor: "#d0d0d0",
+                                }}
+                              />
+                            </View>
+                            <View
+                              style={{
+                                width: 44,
+                                height: 44,
+                                borderRadius: 22,
+                                backgroundColor: "#ff6b35",
+                                justifyContent: "center",
+                                alignItems: "center",
+                              }}
+                            >
+                              <IconButton
+                                icon="play"
+                                size={24}
+                                iconColor="#1a1a1a"
+                                style={{ margin: 0 }}
+                              />
+                            </View>
+                            <View
+                              style={{
+                                width: 64,
+                                height: 64,
+                                borderRadius: 32,
+                                borderWidth: 4,
+                                borderColor: "#4a4a4a",
+                                backgroundColor: "#1a1a1a",
+                                justifyContent: "center",
+                                alignItems: "center",
+                              }}
+                            >
+                              <View
+                                style={{
+                                  width: 24,
+                                  height: 24,
+                                  borderRadius: 12,
+                                  backgroundColor: "#d0d0d0",
+                                }}
+                              />
+                            </View>
+                          </View>
+                        </View>
+                      </View>
+                    </Animated.View>
+
+                    {/* Reverso del cassette */}
+                    <Animated.View
+                      style={[
+                        {
+                          position: "absolute",
+                          width: "100%",
+                          top: 0,
+                          left: 0,
+                        },
+                        backAnimatedStyle,
+                      ]}
+                    >
+                      <View
+                        style={{
+                          backgroundColor: "#1a1a1a",
+                          paddingTop: 16,
+                          paddingBottom: 12,
+                          paddingHorizontal: 16,
+                          borderRadius: 8,
+                          minHeight: 215,
+                          borderWidth: 3,
+                          borderColor: "#1a1a1a",
+                          ...SHADOWS.medium,
+                        }}
+                      >
+                        {/* Display LCD con tiempos y botón de play */}
+                        <View
+                          style={{
+                            backgroundColor: "#3d3d3d",
+                            padding: 6,
+                            borderRadius: 6,
+                            marginBottom: 16,
+                            borderWidth: 2,
+                            borderColor: "#2a2a2a",
+                          }}
+                        >
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              marginBottom: 6,
+                            }}
+                          >
+                            <Text
+                              style={{
+                                color: "#ff6b35",
+                                fontSize: 16,
+                                fontFamily: "monospace",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {formatTime(currentTime)}
+                            </Text>
+
+                            {/* Botón de play en el medio */}
+                            <TouchableOpacity
+                              onPress={playAudio}
+                              style={{
+                                width: 44,
+                                height: 44,
+                                borderRadius: 22,
+                                backgroundColor: "#ff6b35",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                borderWidth: 3,
+                                borderColor: "#d85a2a",
+                                ...SHADOWS.medium,
+                              }}
+                            >
+                              <IconButton
+                                icon={isPlaying ? "pause" : "play"}
+                                size={24}
+                                iconColor="#1a1a1a"
+                                style={{ margin: 0 }}
+                              />
+                            </TouchableOpacity>
+
+                            <Text
+                              style={{
+                                color: "#ff6b35",
+                                fontSize: 16,
+                                fontFamily: "monospace",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {formatTime(duration)}
+                            </Text>
+                          </View>
+
+                          {/* Barra de progreso dentro del LCD */}
+                          <View style={{ paddingHorizontal: 4 }}>
+                            <Slider
+                              style={{ width: "100%", height: 15 }}
+                              minimumValue={0}
+                              maximumValue={duration || 1}
+                              value={currentTime}
+                              onSlidingComplete={handleSliderChange}
+                              minimumTrackTintColor="#ff6b35"
+                              maximumTrackTintColor="#2a2a2a"
+                              thumbTintColor="#e0e0e0"
+                            />
+                          </View>
+                        </View>
+
+                        {/* Información */}
+                        <View
+                          style={{
+                            backgroundColor: "#2a2a2a",
+                            padding: 10,
+                            borderRadius: 8,
+                            borderWidth: 1,
+                            borderColor: "#3a3a3a",
+                          }}
+                        >
+                          {/* Descripción si existe */}
+                          {recuerdo.descripcion && (
+                            <View style={{ marginBottom: 10 }}>
+                              <HighlightedMentionText
+                                text={recuerdo.descripcion}
+                                familyMembers={familyMembers}
+                                style={{
+                                  fontSize: 12,
+                                  color: "#d0d0d0",
+                                  fontFamily: FONT.regular,
+                                  lineHeight: 16,
+                                }}
+                              />
                             </View>
                           )}
+
+                          {/* Autor y fecha */}
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              paddingTop: recuerdo.descripcion ? 10 : 0,
+                              borderTopWidth: recuerdo.descripcion ? 1 : 0,
+                              borderTopColor: "#3a3a3a",
+                            }}
+                          >
+                            <Text
+                              style={{
+                                fontSize: 11,
+                                color: "#999",
+                                fontFamily: FONT.regular,
+                              }}
+                            >
+                              {recuerdo.autorNombre || "Desconocido"}
+                            </Text>
+                            <Text
+                              style={{
+                                fontSize: 11,
+                                color: "#999",
+                                fontFamily: FONT.regular,
+                              }}
+                            >
+                              {new Date(recuerdo.fecha).toLocaleDateString()}
+                            </Text>
+                          </View>
+
+                          {/* Reacciones si existen */}
+                          {recuerdo.reactions &&
+                            recuerdo.reactions.length > 0 && (
+                              <View
+                                style={{
+                                  flexDirection: "row",
+                                  flexWrap: "wrap",
+                                  gap: 8,
+                                  paddingTop: 10,
+                                }}
+                              >
+                                {recuerdo.reactions.map((reaction, idx) => {
+                                  const member = familyMembers.find(
+                                    (m) => m.id === reaction.userId,
+                                  );
+                                  return (
+                                    <Reanimated.View
+                                      key={`${reaction.userId}-${idx}`}
+                                      entering={ZoomIn.delay(idx * 50)}
+                                      style={{
+                                        position: "relative",
+                                        width: 28,
+                                        height: 28,
+                                      }}
+                                    >
+                                      {member?.avatarUrl ? (
+                                        <Image
+                                          source={{ uri: member.avatarUrl }}
+                                          style={{
+                                            width: 28,
+                                            height: 28,
+                                            borderRadius: 14,
+                                            borderWidth: 2,
+                                            borderColor: "#ff6b35",
+                                          }}
+                                        />
+                                      ) : (
+                                        <View
+                                          style={{
+                                            width: 28,
+                                            height: 28,
+                                            borderRadius: 14,
+                                            backgroundColor: "#ff6b35",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            borderWidth: 2,
+                                            borderColor: "#d85a2a",
+                                          }}
+                                        >
+                                          <Text
+                                            style={{
+                                              color: "#1a1a1a",
+                                              fontSize: 11,
+                                              fontWeight: "bold",
+                                            }}
+                                          >
+                                            {member?.displayName
+                                              ?.charAt(0)
+                                              .toUpperCase()}
+                                          </Text>
+                                        </View>
+                                      )}
+                                      {reaction.stickerUrl && (
+                                        <Image
+                                          source={{ uri: reaction.stickerUrl }}
+                                          style={{
+                                            width: 14,
+                                            height: 14,
+                                            position: "absolute",
+                                            bottom: -3,
+                                            right: -3,
+                                          }}
+                                        />
+                                      )}
+                                    </Reanimated.View>
+                                  );
+                                })}
+                              </View>
+                            )}
+                        </View>
                       </View>
-                    </View>
-                  </Animated.View>
+                    </Animated.View>
+                  </View>
                 </View>
-              </View>
-            )}
-            {/* Visual Feedback for Reaction */}
-            {lastReactedStickerUrl && (
-              <Reanimated.View
-                entering={ZoomIn.springify()}
-                pointerEvents="none"
-                style={{
-                  position: "absolute",
-                  top: "30%",
-                  alignSelf: "center",
-                  zIndex: 2000,
-                  backgroundColor: "rgba(255,255,255,0.9)",
-                  borderRadius: 50,
-                  padding: 20,
-                  ...SHADOWS.medium,
-                }}
-              >
-                <Image
-                  source={{ uri: lastReactedStickerUrl }}
-                  style={{ width: 100, height: 100 }}
-                  contentFit="contain"
-                />
-              </Reanimated.View>
-            )}
-          </Animated.View>
+              )}
+              {/* Visual Feedback for Reaction */}
+              {lastReactedStickerUrl && (
+                <Reanimated.View
+                  entering={ZoomIn.springify()}
+                  pointerEvents="none"
+                  style={{
+                    position: "absolute",
+                    top: "30%",
+                    alignSelf: "center",
+                    zIndex: 2000,
+                    backgroundColor: "rgba(255,255,255,0.9)",
+                    borderRadius: 50,
+                    padding: 20,
+                    ...SHADOWS.medium,
+                  }}
+                >
+                  <Image
+                    source={{ uri: lastReactedStickerUrl }}
+                    style={{ width: 100, height: 100 }}
+                    contentFit="contain"
+                  />
+                </Reanimated.View>
+              )}
+            </Reanimated.View>
+          </GestureDetector>
 
           {/* Sticker Reaction Picker - Only for elders - Positioned below the dialog */}
           {isElder && onReact && recuerdo && (
