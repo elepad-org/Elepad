@@ -212,6 +212,7 @@ function DayComponent({
     selected?: boolean;
     hasStreak?: boolean;
     streakPosition?: "single" | "start" | "middle" | "end";
+    isCurrentStreak?: boolean;
   };
   onPress?: (date: DateData) => void;
 }) {
@@ -223,16 +224,20 @@ function DayComponent({
   const hasStreak = marking?.hasStreak;
   const hasDot = marking?.marked;
   const streakPosition = marking?.streakPosition || "single";
+  const isCurrentStreak = marking?.isCurrentStreak || false;
 
   // Determinar el estilo del fondo según la posición de racha
   const getStreakBackgroundStyle = () => {
     if (!hasStreak) return null;
 
+    // Color más oscuro para racha actual, más claro para rachas pasadas
+    const bgColor = isCurrentStreak ? "#FFB84D" : "#FFE5CC";
+
     const baseStyle = {
       position: "absolute" as const,
       top: 0,
       bottom: 0,
-      backgroundColor: "#FFD6A5", // Naranja pastel suave
+      backgroundColor: bgColor,
     };
 
     switch (streakPosition) {
@@ -512,6 +517,7 @@ export default function CalendarCard(props: CalendarCardProps) {
         selected?: boolean;
         hasStreak?: boolean;
         streakPosition?: "single" | "start" | "middle" | "end";
+        isCurrentStreak?: boolean;
       }
     > = {};
 
@@ -538,6 +544,28 @@ export default function CalendarCard(props: CalendarCardProps) {
       // Crear un Set para búsqueda rápida
       const streakSet = new Set(streakDays);
 
+      // Encontrar la racha actual (la que incluye el día más reciente)
+      const sortedStreakDays = [...streakDays].sort();
+      const mostRecentDay = sortedStreakDays[sortedStreakDays.length - 1];
+
+      // Rastrear hacia atrás desde el día más reciente para encontrar toda la racha actual
+      const currentStreakDays = new Set<string>();
+      currentStreakDays.add(mostRecentDay);
+
+      let currentDay = mostRecentDay;
+      while (true) {
+        const [year, month, dayNum] = currentDay.split("-").map(Number);
+        const prevDate = new Date(year, month - 1, dayNum - 1);
+        const prevDayStr = toLocalDateString(prevDate);
+
+        if (streakSet.has(prevDayStr)) {
+          currentStreakDays.add(prevDayStr);
+          currentDay = prevDayStr;
+        } else {
+          break;
+        }
+      }
+
       for (const streakDay of streakDays) {
         const day = streakDay as string;
 
@@ -560,6 +588,7 @@ export default function CalendarCard(props: CalendarCardProps) {
           obj[day] = {};
         }
         obj[day].hasStreak = true;
+        obj[day].isCurrentStreak = currentStreakDays.has(day); // Marcar si es racha actual
 
         // Determinar posición
         if (hasPrevConsecutive && hasNextConsecutive) {
