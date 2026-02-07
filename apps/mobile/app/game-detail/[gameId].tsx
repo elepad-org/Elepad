@@ -21,6 +21,8 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { GAMES_INFO } from "@/constants/gamesInfo";
 import { GameInstructions } from "@/components/shared/GameInstructions";
+import AttemptCard from "@/components/Historial/AttemptCard";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Achievement {
   id: string;
@@ -75,46 +77,13 @@ const GAMES_CONFIG: Record<
 
 const PAGE_SIZE = 10;
 
-// Inline AttemptItem component
-function AttemptItem({
-  attempt,
-  gameType,
-}: {
-  attempt: Attempt;
-  gameType: string;
-}) {
-  const isSuccess = attempt?.success;
-  const statusColor = isSuccess ? COLORS.success : COLORS.error;
-  const score = attempt?.score ?? "-";
 
-  let dateFormatted = "-";
-  if (attempt?.startedAt) {
-    const dateObj = new Date(attempt.startedAt);
-    const day = dateObj.getDate().toString().padStart(2, "0");
-    const month = (dateObj.getMonth() + 1).toString().padStart(2, "0");
-    dateFormatted = `${day}/${month}`;
-  }
-
-  return (
-    <View style={styles.attemptCard}>
-      <View style={[styles.statusStrip, { backgroundColor: statusColor }]} />
-      <View style={styles.attemptContent}>
-        <View>
-          <Text style={styles.attemptGameType}>{gameType}</Text>
-          <Text style={styles.attemptDate}>{dateFormatted}</Text>
-        </View>
-        <Text style={[styles.attemptScore, { color: statusColor }]}>
-          {score} pts
-        </Text>
-      </View>
-    </View>
-  );
-}
 
 export default function GameDetailScreen() {
   const { gameId } = useLocalSearchParams<{ gameId: string }>();
   const gameConfig = GAMES_CONFIG[gameId as string];
   const gameInfo = GAMES_INFO[gameId as string];
+  const { userElepad } = useAuth();
 
   const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [offset, setOffset] = useState<number>(0);
@@ -478,10 +447,11 @@ export default function GameDetailScreen() {
                     ) : (
                       <>
                         {attempts.map((attempt) => (
-                          <AttemptItem
+                          <AttemptCard
                             key={attempt.id}
                             attempt={attempt}
                             gameType={detectGameType(attempt)}
+                            userTimezone={userElepad?.timezone}
                           />
                         ))}
 
