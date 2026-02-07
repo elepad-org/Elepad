@@ -199,6 +199,17 @@ export default function AlbumCard({
           </Dialog.Title>
 
           <Dialog.Content>
+            {coverImageUrl && (
+              <View style={{ marginBottom: 16, alignItems: "center" }}>
+                <Image
+                  source={{ uri: coverImageUrl }}
+                  style={{ width: 200, height: 200, borderRadius: 8 }}
+                  contentFit="cover"
+                  transition={200}
+                />
+              </View>
+            )}
+
             {description && (
               <View style={{ marginBottom: 12 }}>
                 <Text style={{ 
