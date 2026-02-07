@@ -24,7 +24,6 @@ import {
 } from "@elepad/api-client";
 import { useRouter, useFocusEffect } from "expo-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { LinearGradient } from "expo-linear-gradient";
 import StreakCounter from "@/components/StreakCounter";
 import HighlightedMentionText from "@/components/Recuerdos/HighlightedMentionText";
 import CompactAudioPlayer from "@/components/Recuerdos/CompactAudioPlayer";
