@@ -19,6 +19,7 @@ import Reanimated, {
 import { captureRef } from "react-native-view-shot";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { shareAsync } from "expo-sharing";
+import * as FileSystem from "expo-file-system/legacy";
 import {
   Dialog,
   Portal,
@@ -444,12 +445,43 @@ export default function RecuerdoDetailDialog({
   };
 
   /*
-   * Función para compartir visualmente el recuerdo (Polaroid)
+   * Función para compartir visualmente el recuerdo (Polaroid) o el video
    */
   const handleShare = async () => {
-    if (recuerdo.tipo !== "imagen") return;
+    if (
+      recuerdo.tipo !== "imagen" &&
+      recuerdo.tipo !== "texto" &&
+      recuerdo.tipo !== "video"
+    )
+      return;
 
     try {
+      // Para video, descargamos y compartimos el archivo directament (sin marco)
+      if (recuerdo.tipo === "video" && recuerdo.contenido) {
+        // Generar un nombre de archivo local seguro (evitar query params del URL)
+        const filename = `video-${recuerdo.id}.mp4`;
+        const localUri = `${FileSystem.cacheDirectory}${filename}`;
+
+        console.log("Downloading video to:", localUri);
+
+        // Descargar el video
+        const downloadResult = await FileSystem.downloadAsync(
+          recuerdo.contenido,
+          localUri,
+        );
+        console.log("Download result:", downloadResult);
+
+        const uri = downloadResult.uri;
+
+        await shareAsync(uri, {
+          mimeType: "video/mp4",
+          dialogTitle: recuerdo.titulo || "Compartir video",
+          UTI: "public.movie",
+        });
+        return;
+      }
+
+      // Para imagen, texto y video, usamos view-shot (Polaroid)
       const uri = await captureRef(viewRef, {
         format: "png",
         quality: 1,
@@ -495,7 +527,9 @@ export default function RecuerdoDetailDialog({
 
       {showActions && (
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          {recuerdo.tipo === "imagen" && (
+          {(recuerdo.tipo === "imagen" ||
+            recuerdo.tipo === "texto" ||
+            recuerdo.tipo === "video") && (
             <TouchableOpacity
               onPress={handleShare}
               disabled={isMutating}
@@ -596,7 +630,7 @@ export default function RecuerdoDetailDialog({
       </Text>
 
       {/* Reacciones */}
-      {recuerdo.reactions && recuerdo.reactions.length > 0 && (
+      {showActions && recuerdo.reactions && recuerdo.reactions.length > 0 && (
         <View
           style={{
             marginTop: 16,
@@ -701,7 +735,9 @@ export default function RecuerdoDetailDialog({
     <Portal>
       <>
         {/* SHADOW VIEW FOR CAPTURE - Off-screen rendering of the clean card */}
-        {recuerdo.tipo === "imagen" && (
+        {(recuerdo.tipo === "imagen" ||
+          recuerdo.tipo === "texto" ||
+          recuerdo.tipo === "video") && (
           <View
             style={{
               position: "absolute",
@@ -710,36 +746,82 @@ export default function RecuerdoDetailDialog({
               zIndex: -100,
             }}
           >
-            <Animated.View
+            <View
               ref={viewRef}
               collapsable={false}
               style={{
-                backgroundColor: COLORS.white,
-                borderRadius: 10,
+                backgroundColor:
+                  recuerdo.tipo === "texto" ? "transparent" : COLORS.white,
+                borderRadius: 0,
                 width: screenWidth * 0.92,
                 overflow: "hidden",
-                // No opacity animation here, just full opacity
                 opacity: 1,
               }}
             >
-              <View>
-                <View style={{ padding: 14, paddingBottom: 0 }}>
-                  {recuerdo.miniatura && (
-                    <Image
-                      source={{ uri: recuerdo.miniatura }}
-                      style={{
-                        width: "100%",
-                        height: screenWidth * 0.84,
-                        borderRadius: 0,
-                      }}
-                      contentFit="cover"
-                    />
-                  )}
+              {recuerdo.tipo === "texto" ? (
+                <ImageBackground
+                  source={fondoRecuerdos}
+                  resizeMode="cover"
+                  style={{
+                    padding: 10,
+                    justifyContent: "center",
+                    minHeight: 200,
+                    width: screenWidth * 0.92,
+                  }}
+                >
+                  {renderInfoBlock(false)}
+                </ImageBackground>
+              ) : (
+                <View>
+                  <View style={{ padding: 14, paddingBottom: 0 }}>
+                    {recuerdo.tipo === "imagen" && recuerdo.miniatura && (
+                      <Image
+                        source={{ uri: recuerdo.miniatura }}
+                        style={{
+                          width: "100%",
+                          height: screenWidth * 0.84,
+                          borderRadius: 0,
+                        }}
+                        contentFit="cover"
+                      />
+                    )}
+                    {recuerdo.tipo === "video" && (
+                      <View
+                        style={{
+                          width: "100%",
+                          height: screenWidth * 0.84,
+                          borderRadius: 0,
+                          backgroundColor: "#000",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {recuerdo.miniatura ? (
+                          <Image
+                            source={{ uri: recuerdo.miniatura }}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              position: "absolute",
+                            }}
+                            contentFit="cover"
+                          />
+                        ) : null}
+                        <MaterialCommunityIcons
+                          name="play-circle-outline"
+                          size={64}
+                          color="rgba(255,255,255,0.8)"
+                          style={{ zIndex: 10 }}
+                        />
+                      </View>
+                    )}
+                  </View>
+                  {/* Render info WITHOUT actions for the screenshot */}
+                  {renderInfoBlock(false)}
                 </View>
-                {/* Render info WITHOUT actions for the screenshot */}
-                {renderInfoBlock(false)}
-              </View>
-            </Animated.View>
+              )}
+            </View>
           </View>
         )}
 
@@ -763,7 +845,9 @@ export default function RecuerdoDetailDialog({
               style={[
                 {
                   backgroundColor:
-                    recuerdo.tipo === "audio" ? "transparent" : COLORS.white,
+                    recuerdo.tipo === "audio" || recuerdo.tipo === "texto"
+                      ? "transparent"
+                      : COLORS.white,
                   borderRadius: 10,
                   width: screenWidth * 0.92,
                   elevation: 0,
