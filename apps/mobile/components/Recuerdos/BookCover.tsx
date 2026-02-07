@@ -1,9 +1,10 @@
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, ViewStyle } from "react-native";
 import { Image } from "expo-image";
 import { Text } from "react-native-paper";
-import { COLORS, FONT } from "@/styles/base";
+import { FONT } from "@/styles/base";
 import { useGetMemories } from "@elepad/api-client";
 import { useMemo } from "react";
+import chestImage from "@/assets/images/baul.png";
 
 interface BookCoverProps {
   bookId: string;
@@ -12,15 +13,23 @@ interface BookCoverProps {
   title: string;
 }
 
+type StickerPosition = {
+  top: `${number}%`;
+  left?: `${number}%`;
+  right?: `${number}%`;
+  rotation: number;
+  size: number;
+};
+
 // Posiciones y rotaciones predefinidas para los stickers
-const stickerPositions = [
+const stickerPositions: StickerPosition[] = [
   { top: "35%", left: "9%", rotation: -10, size: 80 },
   { top: "38%", right: "12%", rotation: 8, size: 80 },
   { top: "57%", left: "18%", rotation: -12, size: 80 },
   { top: "57%", right: "9%", rotation: 9, size: 78 },
 ];
 
-export default function BookCover({ bookId, groupId, color, title }: BookCoverProps) {
+export default function BookCover({ bookId, groupId, title }: BookCoverProps) {
   const { data: memoriesResponse } = useGetMemories(
     {
       groupId,
@@ -66,14 +75,14 @@ export default function BookCover({ bookId, groupId, color, title }: BookCoverPr
     <View style={styles.container}>
       {/* Imagen del baúl de fondo */}
       <Image
-        source={require("@/assets/images/baul.png")}
+        source={chestImage}
         style={styles.chestImage}
       />
       
       {/* Imágenes de memorias como stickers */}
       {imageMemories.map((memory: { id: string; mediaUrl: string }, index: number) => {
         const position = stickerPositions[index];
-        const stickerStyle: any = {
+        const stickerStyle: ViewStyle = {
           top: position.top,
           transform: [{ rotate: `${position.rotation}deg` }],
         };
