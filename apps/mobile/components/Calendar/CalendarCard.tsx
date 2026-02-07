@@ -285,32 +285,31 @@ function DayComponent({
           zIndex: 2,
         }}
       >
-        <View style={{ alignItems: "center", justifyContent: "center" }}>
-          <Text
-            style={[
-              { fontSize: 16, color: COLORS.text, fontWeight: "400" },
-              isDisabled && { color: COLORS.textPlaceholder },
-              isToday &&
-                !isSelected &&
-                !hasStreak && { color: COLORS.primary, fontWeight: "bold" },
-              isSelected && { color: COLORS.white, fontWeight: "bold" },
-              hasStreak && { color: "#FFFFFF", fontWeight: "bold" },
-            ]}
-          >
-            {date.day}
-          </Text>
-          {hasDot && (
-            <View
-              style={{
-                width: 4,
-                height: 4,
-                borderRadius: 2,
-                marginTop: 2,
-                backgroundColor: marking?.dotColor || COLORS.primary,
-              }}
-            />
-          )}
-        </View>
+        <Text
+          style={[
+            { fontSize: 16, color: COLORS.text, fontWeight: "400" },
+            isDisabled && { color: COLORS.textPlaceholder },
+            isToday &&
+              !isSelected &&
+              !hasStreak && { color: COLORS.primary, fontWeight: "bold" },
+            isSelected && { color: COLORS.white, fontWeight: "bold" },
+            hasStreak && { color: "#FFFFFF", fontWeight: "bold" },
+          ]}
+        >
+          {date.day}
+        </Text>
+        {hasDot && (
+          <View
+            style={{
+              position: "absolute",
+              bottom: 4,
+              width: 4,
+              height: 4,
+              borderRadius: 2,
+              backgroundColor: marking?.dotColor || COLORS.primary,
+            }}
+          />
+        )}
       </TouchableOpacity>
     </View>
   );
