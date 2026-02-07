@@ -1179,6 +1179,7 @@ export default function RecuerdosScreen() {
         ) : (
           <View style={{ flex: 1 }} ref={listRef}>
             <FlatList
+              key="single-column-books"
               data={books}
               keyExtractor={(item) => item.id}
               contentContainerStyle={{
@@ -1186,8 +1187,6 @@ export default function RecuerdosScreen() {
                 paddingTop: 2,
                 paddingBottom: LAYOUT.bottomNavHeight,
               }}
-              numColumns={2}
-              columnWrapperStyle={{ justifyContent: "space-between" }}
               refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
               }
@@ -1197,8 +1196,8 @@ export default function RecuerdosScreen() {
                 return (
                   <View
                     style={{
-                      width: "48%",
-                      marginBottom: 16,
+                      width: "100%",
+                      marginBottom: -8,
                     }}
                   >
                     <Pressable
@@ -1209,11 +1208,8 @@ export default function RecuerdosScreen() {
                     >
                       <View
                         style={{
-                          backgroundColor: COLORS.backgroundSecondary,
                           borderRadius: 18,
-                          aspectRatio: 1,
-                          alignItems: "center",
-                          justifyContent: "center",
+                          height: 190,
                           overflow: "hidden",
                         }}
                       >
