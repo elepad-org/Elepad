@@ -1,37 +1,56 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { Card, Text } from "react-native-paper";
+import { Text } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { COLORS } from "@/styles/base";
+import { COLORS, SHADOWS } from "@/styles/base";
+import { formatInUserTimezone } from "@/lib/timezoneHelpers";
+
+interface Attempt {
+  id: string;
+  memoryPuzzleId?: string;
+  logicPuzzleId?: string;
+  sudokuPuzzleId?: string;
+  isFocusGame?: boolean;
+  success?: boolean;
+  score?: number;
+  startedAt?: string;
+  durationMs?: number;
+}
 
 type Props = {
-  attempt: {
-    success?: boolean;
-    score?: number;
-    startedAt?: string;
-    durationMs?: number;
-    moves?: number;
-  };
+  attempt: Attempt;
   gameType: string;
+  userTimezone?: string;
+  viewRef?: React.Ref<View>;
 };
 
-export default function AttemptCard({ attempt, gameType }: Props) {
-  const isSuccess = attempt?.success;
-  const statusColor = isSuccess ? COLORS.success : COLORS.error;
+export default function AttemptCard({
+  attempt,
+  gameType,
+  userTimezone,
+  viewRef,
+}: Props) {
+  // Mapeo de colores por tipo de juego
+  const gameColors: Record<string, string> = {
+    "Memoria": "#6B8DD6", // Azul suave
+    "NET": "#8E7CC3", // Púrpura
+    "Sudoku": "#F4A460", // Naranja suave
+    "Focus": "#66BB6A", // Verde
+  };
+
+  const statusColor = COLORS.secondary;
+  const gameColor = gameColors[gameType] || COLORS.primary;
   const score = attempt?.score ?? "-";
 
-  // Formateo de fecha: DD/MM HH:MM
   let dateFormatted = "-";
   if (attempt?.startedAt) {
-    const dateObj = new Date(attempt.startedAt);
-    const day = dateObj.getDate().toString().padStart(2, "0");
-    const month = (dateObj.getMonth() + 1).toString().padStart(2, "0");
-    const hours = dateObj.getHours().toString().padStart(2, "0");
-    const minutes = dateObj.getMinutes().toString().padStart(2, "0");
-    dateFormatted = `${day}/${month} - ${hours}:${minutes}`;
+    dateFormatted = formatInUserTimezone(
+      attempt.startedAt,
+      "dd/MM - HH:mm",
+      userTimezone
+    );
   }
 
-  // Formateo de duración
   let durationFormatted = "-";
   if (attempt?.durationMs) {
     const totalSeconds = Math.floor(attempt.durationMs / 1000);
@@ -41,100 +60,87 @@ export default function AttemptCard({ attempt, gameType }: Props) {
   }
 
   return (
-    <Card style={[styles.card, { backgroundColor: COLORS.background }]}>
-      <View style={styles.rowContainer}>
-        <View style={[styles.statusStrip, { backgroundColor: statusColor }]} />
-        <View style={styles.contentContainer}>
-          {/* Tipo, Fecha y Estado */}
-          <View style={styles.leftColumn}>
-            <Text variant="titleMedium" style={styles.gameTitle}>
-              {gameType}
-            </Text>
-            <View style={styles.metaRow}>
-              <MaterialCommunityIcons
-                name="calendar-clock"
-                size={14}
-                color="#666"
-              />
-              <Text variant="bodySmall" style={styles.metaText}>
-                {dateFormatted}
-              </Text>
-            </View>
-            <Text>{isSuccess ? "Terminada" : "No terminada"}</Text>
+    <View
+      style={[
+        styles.attemptCard,
+        { backgroundColor: COLORS.backgroundSecondary },
+      ]}
+      ref={viewRef}
+    >
+      <View style={[styles.statusStrip, { backgroundColor: gameColor }]} />
+      <View style={styles.attemptContent}>
+        <View style={styles.attemptLeft}>
+          <Text style={styles.attemptGameType}>{gameType}</Text>
+          <View style={styles.attemptMeta}>
+            <MaterialCommunityIcons
+              name="calendar-clock"
+              size={14}
+              color={COLORS.textLight}
+            />
+            <Text style={styles.attemptMetaText}>{dateFormatted}</Text>
           </View>
-
-          {/* Puntos y Tiempo */}
-          <View style={styles.rightColumn}>
-            <Text
-              variant="titleMedium"
-              style={[styles.scoreText, { color: statusColor }]}
-            >
-              Puntos: {score}
-            </Text>
-            <View style={styles.metaRow}>
-              <MaterialCommunityIcons
-                name="timer-outline"
-                size={14}
-                color="#666"
-              />
-              <Text variant="bodySmall" style={styles.metaText}>
-                {durationFormatted}
-              </Text>
-            </View>
+        </View>
+        <View style={styles.attemptRight}>
+          <Text style={[styles.attemptScore, { color: statusColor }]}>
+            {score} pts
+          </Text>
+          <View style={styles.attemptMeta}>
+            <MaterialCommunityIcons
+              name="timer-outline"
+              size={14}
+              color={COLORS.textLight}
+            />
+            <Text style={styles.attemptMetaText}>{durationFormatted}</Text>
           </View>
         </View>
       </View>
-    </Card>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
+  attemptCard: {
+    flexDirection: "row",
+    borderRadius: 12,
     marginBottom: 8,
     overflow: "hidden",
-    elevation: 2,
-    width: "100%",
-  },
-  rowContainer: {
-    flexDirection: "row",
-    height: 70,
+    ...SHADOWS.light,
   },
   statusStrip: {
     width: 4,
-    height: "100%",
   },
-  contentContainer: {
+  attemptContent: {
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
   },
-  leftColumn: {
-    justifyContent: "center",
-    alignItems: "flex-start",
+  attemptLeft: {
     flex: 1,
   },
-  rightColumn: {
-    justifyContent: "center",
+  attemptRight: {
     alignItems: "flex-end",
-    minWidth: 16,
   },
-  gameTitle: {
-    fontWeight: "bold",
-    textTransform: "capitalize",
+  attemptGameType: {
+    fontWeight: "600",
+    fontSize: 15,
+    color: COLORS.text,
     marginBottom: 4,
   },
-  scoreText: {
-    fontWeight: "bold",
-    marginBottom: 2,
+  attemptScore: {
+    fontWeight: "600",
+    fontSize: 15,
+    marginBottom: 4,
   },
-  metaRow: {
+  attemptMeta: {
     flexDirection: "row",
     alignItems: "center",
   },
-  metaText: {
-    color: "#666",
+  attemptMetaText: {
+    fontSize: 12,
+    color: COLORS.textLight,
     marginLeft: 4,
   },
 });

@@ -151,10 +151,10 @@ const PaperDateTimeWeb = ({
         >
           {value
             ? value.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: false,
-              })
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+            })
             : "--:--"}
         </Button>
       </View>
@@ -362,7 +362,7 @@ export default function ActivityForm({
                 onChangeText={setTitle}
                 placeholder={initial ? "Agregar evento" : "Nuevo evento"}
                 marginBottom={16}
-                autoFocus={!initial}
+                autoFocus={!initial || !initial.id}
               />
 
               {/* Selector de destinatario - solo visible para familiares (no elders) */}

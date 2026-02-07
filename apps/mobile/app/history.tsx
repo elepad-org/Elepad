@@ -22,8 +22,8 @@ import StatisticsChart from "@/components/Historial/StatisticsChart";
 import { useAuth } from "@/hooks/useAuth";
 import DropdownSelect from "@/components/shared/DropdownSelect";
 import { BackButton } from "@/components/shared/BackButton";
-import { formatInUserTimezone } from "@/lib/timezoneHelpers";
 import { useStatisticsTour } from "@/hooks/tours/useStatisticsTour";
+import AttemptCard from "@/components/Historial/AttemptCard";
 
 const PAGE_SIZE = 50;
 
@@ -44,85 +44,7 @@ type Props = {
   activeTab?: string;
 };
 
-// Inline AttemptCard component for consistency
-function AttemptItem({
-  attempt,
-  gameType,
-  userTimezone,
-  viewRef,
-}: {
-  attempt: Attempt;
-  gameType: string;
-  userTimezone?: string;
-  viewRef?: React.Ref<View>;
-}) {
-  // Mapeo de colores por tipo de juego
-  const gameColors: Record<string, string> = {
-    "Memoria": "#6B8DD6", // Azul suave
-    "NET": "#8E7CC3", // Púrpura
-    "Sudoku": "#F4A460", // Naranja suave
-    "Focus": "#66BB6A", // Verde
-  };
 
-  const statusColor = COLORS.secondary;
-  const gameColor = gameColors[gameType] || COLORS.primary;
-  const score = attempt?.score ?? "-";
-
-  let dateFormatted = "-";
-  if (attempt?.startedAt) {
-    dateFormatted = formatInUserTimezone(
-      attempt.startedAt,
-      "dd/MM - HH:mm",
-      userTimezone
-    );
-  }
-
-  let durationFormatted = "-";
-  if (attempt?.durationMs) {
-    const totalSeconds = Math.floor(attempt.durationMs / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    durationFormatted = `${minutes}:${seconds.toString().padStart(2, "0")}`;
-  }
-
-  return (
-    <View
-      style={[
-        styles.attemptCard,
-        { backgroundColor: COLORS.backgroundSecondary },
-      ]}
-      ref={viewRef}
-    >
-      <View style={[styles.statusStrip, { backgroundColor: gameColor }]} />
-      <View style={styles.attemptContent}>
-        <View style={styles.attemptLeft}>
-          <Text style={styles.attemptGameType}>{gameType}</Text>
-          <View style={styles.attemptMeta}>
-            <MaterialCommunityIcons
-              name="calendar-clock"
-              size={14}
-              color={COLORS.textLight}
-            />
-            <Text style={styles.attemptMetaText}>{dateFormatted}</Text>
-          </View>
-        </View>
-        <View style={styles.attemptRight}>
-          <Text style={[styles.attemptScore, { color: statusColor }]}>
-            {score} pts
-          </Text>
-          <View style={styles.attemptMeta}>
-            <MaterialCommunityIcons
-              name="timer-outline"
-              size={14}
-              color={COLORS.textLight}
-            />
-            <Text style={styles.attemptMetaText}>{durationFormatted}</Text>
-          </View>
-        </View>
-      </View>
-    </View>
-  );
-}
 
 export default function HistoryScreen({ initialAttempts = [], activeTab = "" }: Props) {
   const { userElepad } = useAuth();
@@ -482,7 +404,7 @@ export default function HistoryScreen({ initialAttempts = [], activeTab = "" }: 
                   data={attempts}
                   keyExtractor={(item) => item.id}
                   renderItem={({ item, index }) => (
-                    <AttemptItem
+                    <AttemptCard
                       attempt={item}
                       gameType={detectGameType(item)}
                       userTimezone={userElepad?.timezone}
