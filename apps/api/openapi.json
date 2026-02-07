@@ -605,6 +605,10 @@
             "type": "string",
             "nullable": true
           },
+          "iaImage": {
+            "type": "boolean",
+            "nullable": true
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -634,6 +638,7 @@
           "title",
           "description",
           "coverImageUrl",
+          "iaImage",
           "status",
           "urlPdf",
           "createdAt",
@@ -663,6 +668,10 @@
           },
           "coverImageUrl": {
             "type": "string",
+            "nullable": true
+          },
+          "iaImage": {
+            "type": "boolean",
             "nullable": true
           },
           "status": {
@@ -696,6 +705,7 @@
           "title",
           "description",
           "coverImageUrl",
+          "iaImage",
           "status",
           "createdAt",
           "updatedAt",

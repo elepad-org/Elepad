@@ -7,8 +7,8 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/supabase-types";
 import { CreateAlbumRequest, AlbumWithPages, Album } from "./schema";
 import { NotificationsService } from "../notifications/service";
-import { uploadAlbumPDF } from "@/services/storage";
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { uploadAlbumCoverImage, uploadAlbumPDF } from "@/services/storage";
+import { PDFDocument, PDFPage, PDFFont, rgb, StandardFonts } from "pdf-lib";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -240,11 +240,14 @@ export class MemoriesAlbumService {
     }
 
     // Process in background (async without await usually, but logic kept as provided)
-    await this.processAlbumNarratives(album.id, userId, userGroup.groupId, data.tags).catch(
-      (err) => {
-        console.error("Error processing album narratives:", err);
-      },
-    );
+    await this.processAlbumNarratives(
+      album.id,
+      userId,
+      userGroup.groupId,
+      data.tags,
+    ).catch((err) => {
+      console.error("Error processing album narratives:", err);
+    });
   }
 
   /**
@@ -323,14 +326,52 @@ export class MemoriesAlbumService {
           .eq("id", page.id);
       }
 
-      // Update album status to "ready"
-      await this.supabase
-        .from("memoriesAlbums")
-        .update({
-          status: "ready",
-          updatedAt: new Date().toISOString(),
-        })
-        .eq("id", albumId);
+      let imageByAi: string | undefined = undefined;
+      const imageBuffer = await this.generateAlbumCoverImage(
+        album,
+        narratives,
+        tags,
+      );
+      if (imageBuffer) {
+        imageByAi = await uploadAlbumCoverImage(
+          this.supabase,
+          groupId,
+          albumId,
+          imageBuffer,
+        );
+
+        // Update album status to "ready"
+        if (imageByAi) {
+          await this.supabase
+            .from("memoriesAlbums")
+            .update({
+              status: "ready",
+              coverImageUrl: imageByAi,
+              iaImage: true,
+              updatedAt: new Date().toISOString(),
+            })
+            .eq("id", albumId);
+        } else {
+          await this.supabase
+            .from("memoriesAlbums")
+            .update({
+              status: "ready",
+              iaImage: false,
+              updatedAt: new Date().toISOString(),
+            })
+            .eq("id", albumId);
+        }
+      } else {
+        // Update album status to "ready"
+        await this.supabase
+          .from("memoriesAlbums")
+          .update({
+            status: "ready",
+            iaImage: false,
+            updatedAt: new Date().toISOString(),
+          })
+          .eq("id", albumId);
+      }
 
       // Create notification for user
       const notificationsService = new NotificationsService(this.supabase);
@@ -501,24 +542,33 @@ Este recuerdo nos muestra...`;
   private async generateAlbumCoverImage(
     album: { title: string; description: string | null },
     narratives: string[],
-    firstPage?: pageWithMemory,
-  ): Promise<Buffer> {
-    if (!this.apiKey) {
-      throw new Error("Gemini API key not configured");
-    }
-
+    tags: string[],
+  ): Promise<Buffer | undefined> {
     const narrativesSummary = narratives.slice(0, 3).join(" ");
-    const imagePrompt = `Create a beautiful, artistic album cover image for a family photo album.
-    
-    Title: ${album.title}
-    Description: ${album.description || "Family memories"}
-    Vibe: ${narrativesSummary}
-    
-    Style: Warm, emotional, soft colors, photorealistic or artistic illustration suitable for a book cover.`;
+    const imagePrompt = `A beautiful, full-bleed artistic cartoon illustration for a family photo album cover.
+
+    TEXT CONTENT RULES:
+    1. MAIN TITLE: "${album.title}"
+    2. CRITICAL: The main title is the ONLY text allowed in the entire image. It must be artistically integrated into the illustration.
+    3. NEGATIVE CONSTRAINT: Do NOT include any other text, captions, descriptions, summaries, or paragraphs. The image should contain NO text blocks other than the title.
+
+    VISUAL CONTEXT (Use the following for visual inspiration ONLY, do NOT render as text):
+    - Scene Inspiration: ${album.description || "Memorias familiares"}
+    - Vibe/Atmosphere: ${narrativesSummary}
+    - Key Topics to Visualize: ${tags.join(", ")}
+
+    VISUAL STYLE:
+    - Soft, warm, and emotional color palette.
+    - Artistic book cover illustration style.
+    - CREATIVE INTERPRETATION: Be imaginative! Dynamically weave the "Key Topics to Visualize" into the scene.
+      (Example: if "Fantasy" is a topic, add subtle magical elements; if "Funny" is a topic, include a discreet, charming comedic detail like someone tripping or laughing).
+
+    TECHNICAL CONSTRAINTS:
+    - FULL-BLEED IMAGE: The illustration must cover the entire canvas from edge to edge.
+    - Absolutely NO borders, NO frames, NO white margins, and NO letterboxing.`;
 
     try {
       const response = await this.client.models.generateImages({
-        //model: "gemini-2.5-flash-image",
         model: "imagen-4.0-generate-001", // Los modelos 3.0 para atras fueron dados de baja
         prompt: imagePrompt,
         config: {
@@ -533,28 +583,11 @@ Este recuerdo nos muestra...`;
         return Buffer.from(imagePart, "base64");
       }
 
-      throw new Error("No image data in response");
+      console.error("No image data in response");
+      return undefined;
     } catch (error) {
       console.error("Error generating cover image:", error);
-      // Fallback: use the first image of the album as cover
-      try {
-        if (firstPage) {
-          const mediaUrl = firstPage?.memories?.mediaUrl;
-          if (mediaUrl) {
-            const resp = await fetch(mediaUrl);
-            if (!resp.ok)
-              throw new Error(
-                `Failed to download fallback image: ${resp.status}`,
-              );
-            const buf = Buffer.from(await resp.arrayBuffer());
-            return buf;
-          }
-        }
-      } catch (fallbackErr) {
-        console.error("Error fetching fallback cover image:", fallbackErr);
-      }
-
-      throw error;
+      return undefined;
     }
   }
 
@@ -613,6 +646,7 @@ Este recuerdo nos muestra...`;
         title: album.title,
         description: album.description,
         coverImageUrl,
+        iaImage: album.iaImage,
         status: album.status,
         urlPdf: album.urlPdf,
         createdAt: new Date(album.createdAt),
@@ -790,81 +824,99 @@ Este recuerdo nos muestra...`;
     // Cover page
     const coverPage = pdfDoc.addPage([pageWidth, pageHeight]);
 
-    // Draw gradient background
-    /*
-    const gradientSteps = 50;
-    for (let step = 0; step < gradientSteps; step++) {
-      const ratio = step / gradientSteps;
-      // Interpolate between #9a9ece (154, 158, 206) and #424a70 (66, 74, 112)
-      const r = 154 - (154 - 66) * ratio;
-      const g = 158 - (158 - 74) * ratio;
-      const b = 206 - (206 - 112) * ratio;
-      
-      const stepHeight = pageHeight / gradientSteps;
-      const stepY = pageHeight - (step * stepHeight);
-      
-      coverPage.drawRectangle({
-        x: 0,
-        y: stepY - stepHeight,
-        width: pageWidth,
-        height: stepHeight,
-        color: rgb(r / 255, g / 255, b / 255),
-      });
-    }
-    */
+    // Check if cover image was generated with AI
+    if (album.iaImage === true && album.coverImageUrl) {
+      // AI-generated image as full cover (no text)
+      try {
+        const imageResponse = await fetch(album.coverImageUrl);
+        if (imageResponse.ok) {
+          const imageBuffer = await imageResponse.arrayBuffer();
+          const imageBytes = new Uint8Array(imageBuffer);
+          let image;
 
-    // Solid background instead of gradient
-    coverPage.drawRectangle({
-      x: 0,
-      y: 0,
-      width: pageWidth,
-      height: pageHeight,
-      color: rgb(143 / 255, 161 / 255, 247 / 255), // #8FA1F7 (algo mas celestito que el gris primario)
-    });
+          // Embed image based on URL or try JPEG first as fallback
+          if (album.coverImageUrl.includes(".png")) {
+            image = await pdfDoc.embedPng(imageBytes);
+          } else if (album.coverImageUrl.includes(".gif")) {
+            image = await pdfDoc.embedPng(imageBytes);
+          } else {
+            try {
+              image = await pdfDoc.embedJpg(imageBytes);
+            } catch {
+              image = await pdfDoc.embedPng(imageBytes);
+            }
+          }
 
-    // Title
-    const titleX = this.calculateCenteredX(album.title, 42, pageWidth);
-    coverPage.drawText(album.title, {
-      x: titleX,
-      y: pageHeight - 150,
-      size: 42,
-      font: titleFont,
-      color: rgb(1, 1, 1),
-      maxWidth: pageWidth - 100,
-    });
+          // Image is 1:1, scale to fit height and center horizontally
+          const imageHeight = pageHeight;
+          const imageWidth = imageHeight; // 1:1 ratio
+          const imageX = (pageWidth - imageWidth) / 2; // Center horizontally
 
-    // Description
-    if (album.description) {
-      const descX = this.calculateCenteredX(
-        album.description,
-        16,
+          // Draw white bars on sides to maintain 1:1 aspect ratio
+          if (imageX > 0) {
+            coverPage.drawRectangle({
+              x: 0,
+              y: 0,
+              width: imageX,
+              height: pageHeight,
+              color: rgb(1, 1, 1),
+            });
+            coverPage.drawRectangle({
+              x: imageX + imageWidth,
+              y: 0,
+              width: imageX,
+              height: pageHeight,
+              color: rgb(1, 1, 1),
+            });
+          }
+
+          coverPage.drawImage(image, {
+            x: imageX,
+            y: 0,
+            width: imageWidth,
+            height: imageHeight,
+          });
+        } else {
+          console.warn(`Failed to fetch AI cover image: ${imageResponse.status}`);
+          // Fallback to regular cover
+          this.drawRegularCover(
+            coverPage,
+            album,
+            familyName,
+            pageWidth,
+            pageHeight,
+            titleFont,
+            bodyFont,
+            lightFont,
+          );
+        }
+      } catch (error) {
+        console.error("Error loading AI cover image:", error);
+        // Fallback to regular cover
+        this.drawRegularCover(
+          coverPage,
+          album,
+          familyName,
+          pageWidth,
+          pageHeight,
+          titleFont,
+          bodyFont,
+          lightFont,
+        );
+      }
+    } else {
+      // Regular cover with title, description, and family name
+      this.drawRegularCover(
+        coverPage,
+        album,
+        familyName,
         pageWidth,
+        pageHeight,
+        titleFont,
+        bodyFont,
+        lightFont,
       );
-      coverPage.drawText(album.description, {
-        x: descX,
-        y: pageHeight - 280,
-        size: 16,
-        font: bodyFont,
-        color: rgb(1, 1, 1),
-        maxWidth: pageWidth - 200,
-        lineHeight: 24,
-      });
     }
-
-    // Family name
-    const familyX = this.calculateCenteredX(
-      familyName,
-      14,
-      pageWidth,
-    );
-    coverPage.drawText(familyName, {
-      x: familyX,
-      y: 80,
-      size: 14,
-      font: lightFont,
-      color: rgb(1, 1, 1),
-      maxWidth: pageWidth - 100,
-    });
 
     // Content pages
     for (let i = 0; i < album.pages.length; i++) {
@@ -886,7 +938,7 @@ Este recuerdo nos muestra...`;
       // Image section (left half)
       const imageX = 30;
       const imageY = 100;
-      const imageMaxWidth = (pageWidth / 2) - 60;
+      const imageMaxWidth = pageWidth / 2 - 60;
       const imageMaxHeight = 400;
 
       // Draw polaroid frame
@@ -956,10 +1008,7 @@ Este recuerdo nos muestra...`;
             });
           }
         } catch (error) {
-          console.error(
-            `Error loading image for page ${i + 1}:`,
-            error,
-          );
+          console.error(`Error loading image for page ${i + 1}:`, error);
         }
       }
       // Draw image title (polaroid text - at the bottom, centered)
@@ -968,7 +1017,11 @@ Este recuerdo nos muestra...`;
       if (cleanedTitle) {
         // Calculate centered position for title at bottom of polaroid
         const innerWidth = frameWidth - 20;
-        const centeredOffset = this.calculateCenteredX(cleanedTitle, 11, innerWidth);
+        const centeredOffset = this.calculateCenteredX(
+          cleanedTitle,
+          11,
+          innerWidth,
+        );
         const titleX = frameCenterX + 10 + centeredOffset;
         const titleY = frameCenterY + 20; // reduced bottom margin inside polaroid
 
@@ -984,7 +1037,7 @@ Este recuerdo nos muestra...`;
 
       // Text section (right half)
       const textX = pageWidth / 2 + 20;
-      const textWidth = (pageWidth / 2) - 50;
+      const textWidth = pageWidth / 2 - 50;
 
       // Page title (clean emojis for proper rendering)
       const pageTitleText = this.removeEmojis(page.title || "");
@@ -1027,6 +1080,65 @@ Este recuerdo nos muestra...`;
   }
 
   /**
+   * Draw a regular cover page with title, description, and family name
+   */
+  private drawRegularCover(
+    coverPage: PDFPage,
+    album: AlbumWithPages,
+    familyName: string,
+    pageWidth: number,
+    pageHeight: number,
+    titleFont: PDFFont,
+    bodyFont: PDFFont,
+    lightFont: PDFFont,
+  ): void {
+    // Solid background instead of gradient
+    coverPage.drawRectangle({
+      x: 0,
+      y: 0,
+      width: pageWidth,
+      height: pageHeight,
+      color: rgb(143 / 255, 161 / 255, 247 / 255), // #8FA1F7 (algo mas celestito que el gris primario)
+    });
+
+    // Title
+    const titleX = this.calculateCenteredX(album.title, 42, pageWidth);
+    coverPage.drawText(album.title, {
+      x: titleX,
+      y: pageHeight - 150,
+      size: 42,
+      font: titleFont,
+      color: rgb(1, 1, 1),
+      maxWidth: pageWidth - 100,
+    });
+
+    // Description
+    if (album.description) {
+      const descX = this.calculateCenteredX(album.description, 16, pageWidth);
+      coverPage.drawText(album.description, {
+        x: descX,
+        y: pageHeight - 280,
+        size: 16,
+        font: bodyFont,
+        color: rgb(1, 1, 1),
+        maxWidth: pageWidth - 200,
+        lineHeight: 24,
+      });
+    }
+
+    // Family name
+    const familyX = this.calculateCenteredX(familyName, 14, pageWidth);
+    coverPage.drawText(familyName, {
+      x: familyX,
+      y: 80,
+      size: 14,
+      font: lightFont,
+      color: rgb(1, 1, 1),
+      maxWidth: pageWidth - 100,
+    });
+  }
+
+  /**
    * Delete an album by ID
    * Verifies the user has access to the album before deleting
    */
@@ -1050,7 +1162,10 @@ Este recuerdo nos muestra...`;
       .single();
 
     if (albumError || !album) {
-      throw new ApiException(404, "Album not found or you don't have access to it");
+      throw new ApiException(
+        404,
+        "Album not found or you don't have access to it",
+      );
     }
 
     // Delete the album
