@@ -22,7 +22,7 @@ import { Text, Dialog, Button, Portal } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CancelButton from "@/components/shared/CancelButton";
 import { useToast } from "@/components/shared/Toast";
-import { toLocalDateString } from "@/lib/dateHelpers";
+import { toLocalDateString, getTodayLocal } from "@/lib/dateHelpers";
 import { useQueryClient } from "@tanstack/react-query";
 
 
@@ -38,10 +38,12 @@ function CalendarScreenContent() {
   const [googleCalendarEnabled] = useState(false);
 
   const [formVisible, setFormVisible] = useState(false);
-  const [editing, setEditing] = useState<Activity | null>(null);
+  const [editing, setEditing] = useState<Partial<Activity> | null>(null);
   const [selectedElderId, setSelectedElderId] = useState<string | null>(null);
   const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(familyCode);
   const membersQuery = useGetFamilyGroupIdGroupMembers(familyCode);
+
+  const [selectedDay, setSelectedDay] = useState<string>(getTodayLocal());
 
   const { activeTab } = useTabContext();
 
@@ -260,7 +262,7 @@ function CalendarScreenContent() {
 
   const handleSave = async (payload: Partial<Activity>) => {
     // No usamos try-catch aquí, dejamos que el error se propague al formulario
-    if (editing) {
+    if (editing && editing.id) {
       await patchActivity.mutateAsync({
         id: editing.id,
         data: payload as UpdateActivity,
@@ -324,7 +326,14 @@ function CalendarScreenContent() {
         <View ref={addButtonRef}>
           <Button
             mode="contained"
-            onPress={() => setFormVisible(true)}
+            onPress={() => {
+              // Combinar el día seleccionado con la hora actual
+              const now = new Date();
+              const [year, month, day] = selectedDay.split("-").map(Number);
+              const startDate = new Date(year, month - 1, day, now.getHours(), now.getMinutes());
+              setEditing({ startsAt: startDate.toISOString() });
+              setFormVisible(true);
+            }}
             style={{ ...baseStyles.miniButton, width: "auto", paddingHorizontal: 16 }}
             icon="plus"
           >
@@ -349,6 +358,8 @@ function CalendarScreenContent() {
           onElderChange={setSelectedElderId}
           calendarViewRef={calendarViewRef}
           taskListRef={taskListRef}
+          selectedDay={selectedDay}
+          onDayChange={setSelectedDay}
         />
       </View>
 

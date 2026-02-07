@@ -148,6 +148,8 @@ interface CalendarCardProps {
   onElderChange: (elderId: string | null) => void;
   calendarViewRef?: RefObject<View | null>;
   taskListRef?: RefObject<View | null>;
+  selectedDay: string;
+  onDayChange: (day: string) => void;
 }
 
 // Configuración de calendario en español
@@ -188,8 +190,9 @@ LocaleConfig.locales["es"] = {
     "Jueves",
     "Viernes",
     "Sábado",
+    "Lunes",
   ],
-  dayNamesShort: ["Dom", "Lun", "Mar", "Mir", "Jue", "Vie", "Sab"],
+  dayNamesShort: ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"],
   today: "Hoy",
 };
 LocaleConfig.defaultLocale = "es";
@@ -209,10 +212,11 @@ export default function CalendarCard(props: CalendarCardProps) {
     onElderChange,
     calendarViewRef,
     taskListRef,
+    selectedDay,
+    onDayChange
   } = props;
   const { userElepad } = useAuth();
   const today = getTodayLocal();
-  const [selectedDay, setSelectedDay] = useState<string>(today);
 
   // Cambiar al día de la actividad cuando se recibe desde notificaciones
   useEffect(() => {
@@ -221,7 +225,7 @@ export default function CalendarCard(props: CalendarCardProps) {
         "📅 CalendarCard: Changing selected day to",
         activityDateToView,
       );
-      setSelectedDay(activityDateToView);
+      onDayChange(activityDateToView);
     }
   }, [activityDateToView]);
 
@@ -538,7 +542,7 @@ export default function CalendarCard(props: CalendarCardProps) {
       <View style={styles.headerContainer}>
         <View style={styles.calendarWrapper} ref={calendarViewRef}>
           <Calendar
-            onDayPress={(d: DateData) => setSelectedDay(d.dateString)}
+            onDayPress={(d: DateData) => onDayChange(d.dateString)}
             markedDates={marked}
             markingType={"custom"}
             enableSwipeMonths
@@ -587,7 +591,7 @@ export default function CalendarCard(props: CalendarCardProps) {
             size={24}
             mode="contained"
             onPress={() => {
-              setSelectedDay(today);
+              onDayChange(today);
             }}
             style={styles.todayIconButton}
             containerColor={COLORS.primary}
