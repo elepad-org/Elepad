@@ -282,7 +282,7 @@ function DayComponent({
         return {
           ...baseStyle,
           left: -16,
-          right: isSaturday ? 12 : 4, // Más margen si es sábado
+          right: 0, // Más margen si es sábado
           borderTopRightRadius: 10,
           borderBottomRightRadius: 10,
         };
