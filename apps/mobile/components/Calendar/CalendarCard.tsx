@@ -248,8 +248,8 @@ function DayComponent({
           ...baseStyle,
           left: 4,
           right: -16,
-          borderTopLeftRadius: 16,
-          borderBottomLeftRadius: 16,
+          borderTopLeftRadius: 10,
+          borderBottomLeftRadius: 10,
         };
       case "middle":
         return { ...baseStyle, left: -16, right: -16, borderRadius: 0 };
@@ -258,8 +258,8 @@ function DayComponent({
           ...baseStyle,
           left: -16,
           right: 4,
-          borderTopRightRadius: 16,
-          borderBottomRightRadius: 16,
+          borderTopRightRadius: 10,
+          borderBottomRightRadius: 10,
         };
     }
   };
