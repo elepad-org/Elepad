@@ -1095,7 +1095,7 @@ export default function RecuerdosScreen() {
         <View
           style={{
             paddingHorizontal: 24,
-            paddingVertical: 16,
+            paddingVertical: 24,
             borderBottomColor: COLORS.border,
           }}
         >
@@ -1184,7 +1184,7 @@ export default function RecuerdosScreen() {
               keyExtractor={(item) => item.id}
               contentContainerStyle={{
                 paddingHorizontal: 24,
-                paddingTop: 2,
+                paddingTop: 0,
                 paddingBottom: LAYOUT.bottomNavHeight,
               }}
               refreshControl={
