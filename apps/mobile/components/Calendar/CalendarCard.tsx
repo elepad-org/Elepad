@@ -232,7 +232,7 @@ function DayComponent({
       position: "absolute" as const,
       top: 0,
       bottom: 0,
-      backgroundColor: "#FF9500",
+      backgroundColor: "#FFD6A5", // Naranja pastel suave
     };
 
     switch (streakPosition) {
