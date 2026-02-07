@@ -389,15 +389,16 @@ function CalendarScreenContent() {
             style={{
               paddingBottom: 12,
               paddingHorizontal: 20,
-              justifyContent: "space-between",
+              gap: 12,
+              flexDirection: "column",
             }}
           >
             <CancelButton onPress={() => setDeleteModalVisible(false)} />
             <Button
               onPress={handleDelete}
               mode="contained"
-              buttonColor={COLORS.secondary}
-              style={{ borderRadius: 12, paddingHorizontal: 24 }}
+              buttonColor={COLORS.primary}
+              style={{ borderRadius: 12, width: "100%" }}
             >
               Eliminar
             </Button>
