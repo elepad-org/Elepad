@@ -226,6 +226,26 @@ function DayComponent({
   const streakPosition = marking?.streakPosition || "single";
   const isCurrentStreak = marking?.isCurrentStreak || false;
 
+  // Detectar si es el primer o último día de la semana
+  // Parsear como fecha local para evitar problemas de timezone
+  const [year, month, day] = date.dateString.split("-").map(Number);
+  const localDate = new Date(year, month - 1, day);
+  const dayOfWeek = localDate.getDay();
+  const isSunday = dayOfWeek === 0; // Primer día de la semana
+  const isSaturday = dayOfWeek === 6; // Último día de la semana
+
+  // Debug: log cuando es sábado o domingo
+  if (isSunday && hasStreak) {
+    console.log(
+      `Domingo detectado: ${date.dateString}, dayOfWeek: ${dayOfWeek}, streakPosition: ${streakPosition}`,
+    );
+  }
+  if (isSaturday && hasStreak) {
+    console.log(
+      `Sábado detectado: ${date.dateString}, dayOfWeek: ${dayOfWeek}, streakPosition: ${streakPosition}`,
+    );
+  }
+
   // Determinar el estilo del fondo según la posición de racha
   const getStreakBackgroundStyle = () => {
     if (!hasStreak) return null;
@@ -246,18 +266,23 @@ function DayComponent({
       case "start":
         return {
           ...baseStyle,
-          left: 4,
-          right: -16,
+          left: 0, // Más margen si es domingo
+          right: isSaturday ? 0 : -16,
           borderTopLeftRadius: 10,
           borderBottomLeftRadius: 10,
         };
       case "middle":
-        return { ...baseStyle, left: -16, right: -16, borderRadius: 0 };
+        return {
+          ...baseStyle,
+          left: isSunday ? 0 : -16,
+          right: isSaturday ? 0 : -16,
+          borderRadius: 0,
+        };
       case "end":
         return {
           ...baseStyle,
           left: -16,
-          right: 4,
+          right: isSaturday ? 12 : 4, // Más margen si es sábado
           borderTopRightRadius: 10,
           borderBottomRightRadius: 10,
         };
@@ -298,10 +323,12 @@ function DayComponent({
               !isSelected &&
               !hasStreak && { color: COLORS.primary, fontWeight: "bold" },
             isSelected && { color: COLORS.white, fontWeight: "bold" },
-            hasStreak &&
-              isCurrentStreak && { color: "#FFFFFF", fontWeight: "bold" }, // Blanco para racha actual
-            hasStreak &&
-              !isCurrentStreak && { color: "#D67D00", fontWeight: "bold" }, // Naranja oscuro para rachas pasadas
+            !isSelected &&
+              hasStreak &&
+              isCurrentStreak && { color: "#FFFFFF", fontWeight: "bold" },
+            !isSelected &&
+              hasStreak &&
+              !isCurrentStreak && { color: "#D67D00", fontWeight: "bold" },
           ]}
         >
           {date.day}
@@ -310,11 +337,14 @@ function DayComponent({
           <View
             style={{
               position: "absolute",
-              bottom: 4,
+              top: 4,
+              left: 4,
               width: 4,
               height: 4,
               borderRadius: 2,
-              backgroundColor: marking?.dotColor || COLORS.primary,
+              backgroundColor: isSelected
+                ? "#FFFFFF"
+                : marking?.dotColor || COLORS.primary,
             }}
           />
         )}
