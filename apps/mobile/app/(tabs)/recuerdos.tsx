@@ -1095,7 +1095,7 @@ export default function RecuerdosScreen() {
         <View
           style={{
             paddingHorizontal: 24,
-            paddingVertical: 16,
+            paddingVertical: 24,
             borderBottomColor: COLORS.border,
           }}
         >
@@ -1179,15 +1179,14 @@ export default function RecuerdosScreen() {
         ) : (
           <View style={{ flex: 1 }} ref={listRef}>
             <FlatList
+              key="single-column-books"
               data={books}
               keyExtractor={(item) => item.id}
               contentContainerStyle={{
                 paddingHorizontal: 24,
-                paddingTop: 2,
+                paddingTop: 0,
                 paddingBottom: LAYOUT.bottomNavHeight,
               }}
-              numColumns={2}
-              columnWrapperStyle={{ justifyContent: "space-between" }}
               refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
               }
@@ -1195,37 +1194,25 @@ export default function RecuerdosScreen() {
                 const title = item.title || "(Sin nombre)";
                 const color = item.color || COLORS.primary;
                 return (
-                  <View
+                  <Pressable
+                    key={item.id}
+                    onPress={() => {
+                      setSelectedBook(item);
+                      setMemberFilterId(null);
+                    }}
                     style={{
-                      width: "48%",
-                      marginBottom: 16,
+                      width: "100%",
+                      height: 360,
+                      marginBottom: -80,
                     }}
                   >
-                    <Pressable
-                      onPress={() => {
-                        setSelectedBook(item);
-                        setMemberFilterId(null);
-                      }}
-                    >
-                      <View
-                        style={{
-                          backgroundColor: COLORS.backgroundSecondary,
-                          borderRadius: 18,
-                          aspectRatio: 1,
-                          alignItems: "center",
-                          justifyContent: "center",
-                          overflow: "hidden",
-                        }}
-                      >
-                        <BookCover
-                          bookId={item.id}
-                          groupId={groupId}
-                          color={color}
-                          title={title}
-                        />
-                      </View>
-                    </Pressable>
-                  </View>
+                    <BookCover
+                      bookId={item.id}
+                      groupId={groupId}
+                      color={color}
+                      title={title}
+                    />
+                  </Pressable>
                 );
               }}
             />

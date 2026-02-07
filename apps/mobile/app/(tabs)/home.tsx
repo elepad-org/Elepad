@@ -7,7 +7,6 @@ import {
   Pressable,
   ImageBackground,
   Dimensions,
-  Image,
 } from "react-native";
 import React, { useEffect, useMemo, useCallback } from "react";
 import { Text, Avatar, Button, IconButton } from "react-native-paper";
@@ -34,6 +33,7 @@ import { GAMES_INFO } from "@/constants/gamesInfo";
 import { formatInUserTimezone, toUserLocalTime } from "@/lib/timezoneHelpers";
 import type { ImageSourcePropType } from "react-native";
 import { useVideoPlayer, VideoView } from "expo-video";
+import { Image } from "expo-image";
 import memoryImage from "@/assets/images/memory2.png";
 import netImage from "@/assets/images/net2.png";
 import sudokuImage from "@/assets/images/sudoku2.png";
@@ -398,7 +398,7 @@ const HomeScreen = () => {
         </View>
 
         {/* Último Recuerdo - DESTACADO */}
-        <View ref={lastMemoryRef}>
+        <View ref={lastMemoryRef} style={{ marginTop: 50 }}>
           {memoriesQuery.isLoading || isLoading ? (
             <View style={styles.memoryCardLoading}>
               <SkeletonBox width={SCREEN_WIDTH} height={280} borderRadius={0} />
@@ -488,42 +488,50 @@ const HomeScreen = () => {
                           />
                         </View>
                       ) : (
-                        <ImageBackground
-                          source={{ uri: lastMemory.mediaUrl }}
-                          style={styles.memoryImage}
-                          imageStyle={styles.memoryImageStyle}
-                        >
-                          <LinearGradient
-                            colors={["transparent", "rgba(0,0,0,0.7)"]}
-                            style={styles.memoryGradient}
-                          >
-                            <View style={styles.memoryContent}>
-                              <Text style={styles.memoryLabel}>
-                                ÚLTIMO RECUERDO
-                              </Text>
-                              <Text
-                                style={styles.memoryTitle}
-                                numberOfLines={2}
-                              >
-                                {lastMemory.title || "Sin título"}
-                              </Text>
-                              {lastMemory.caption && (
-                                <HighlightedMentionText
-                                  text={lastMemory.caption}
-                                  familyMembers={groupMembers}
-                                  style={styles.memoryDescription}
-                                />
-                              )}
-                              <Text style={styles.memoryDate}>
-                                {formatInUserTimezone(
-                                  lastMemory.createdAt,
-                                  "d 'de' MMMM 'de' yyyy",
-                                  userElepad?.timezone,
-                                )}
-                              </Text>
+                        // Diseño polaroid para imágenes
+                        <View style={styles.memoryPolaroidContainer}>
+                          <View style={[
+                            styles.memoryPolaroidFrame,
+                            {
+                              transform: [{
+                                rotate: `${(
+                                  ((lastMemory.id.charCodeAt(0) + lastMemory.id.charCodeAt(lastMemory.id.length - 1)) % 11) - 5
+                                )}deg`
+                              }]
+                            }
+                          ]}>
+                            <View style={styles.memoryPolaroidImage}>
+                              <Image
+                                source={{ uri: lastMemory.mediaUrl }}
+                                style={styles.memoryPolaroidImageStyle}
+                                contentFit="cover"
+                                transition={200}
+                                cachePolicy="memory-disk"
+                              />
                             </View>
-                          </LinearGradient>
-                        </ImageBackground>
+                            <View style={styles.memoryPolaroidBottom}>
+                              <View style={styles.memoryPolaroidContent}>
+                                <Text style={styles.memoryPolaroidLabel}>
+                                  ÚLTIMO RECUERDO
+                                </Text>
+                                <Text
+                                  style={styles.memoryPolaroidTitle}
+                                  numberOfLines={2}
+                                >
+                                  {lastMemory.title || "Sin título"}
+                                </Text>
+                                {lastMemory.caption && (
+                                  <HighlightedMentionText
+                                    text={lastMemory.caption}
+                                    familyMembers={groupMembers}
+                                    style={styles.memoryPolaroidDescription}
+                                  />
+                                )}
+
+                              </View>
+                            </View>
+                          </View>
+                        </View>
                       )
                     ) : (
                       <ImageBackground
@@ -1032,17 +1040,17 @@ const styles = StyleSheet.create({
   memoryCard: {
     width: SCREEN_WIDTH,
     height: 280,
-    marginBottom: 24,
+    marginBottom: 70,
   },
   memoryCardNote: {
     width: SCREEN_WIDTH,
     height: 180,
-    marginBottom: 24,
+    marginBottom: 40,
   },
   memoryCardLoading: {
     width: SCREEN_WIDTH,
     height: 280,
-    marginBottom: 24,
+    marginBottom: 40,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: COLORS.backgroundSecondary,
@@ -1050,7 +1058,7 @@ const styles = StyleSheet.create({
   memoryCardEmpty: {
     width: SCREEN_WIDTH,
     height: 280,
-    marginBottom: 24,
+    marginBottom: 40,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: COLORS.backgroundSecondary,
@@ -1344,6 +1352,78 @@ const styles = StyleSheet.create({
   emptyButtonOutline: {
     borderRadius: 12,
     borderColor: COLORS.primary,
+  },
+
+  // Polaroid Styles
+  memoryPolaroidContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  memoryPolaroidFrame: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    paddingTop: 16,
+    paddingLeft: 16,
+    paddingRight: 16,
+    paddingBottom: 0,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
+    width: '93%',
+    maxWidth: 340,
+  },
+  memoryPolaroidImage: {
+    width: '100%',
+    aspectRatio: 1,
+    borderRadius: 0,
+    overflow: 'hidden',
+    marginBottom: 12,
+  },
+  memoryPolaroidImageStyle: {
+    width: '100%',
+    height: '100%',
+  },
+  memoryPolaroidBottom: {
+    paddingBottom: 16,
+    minHeight: 50,
+  },
+  memoryPolaroidContent: {
+    alignItems: 'flex-start',
+    gap: 4,
+  },
+  memoryPolaroidLabel: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: COLORS.primary,
+    letterSpacing: 1.2,
+    marginBottom: 2,
+  },
+  memoryPolaroidTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: COLORS.text,
+    lineHeight: 20,
+  },
+  memoryPolaroidDescription: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    lineHeight: 18,
+  },
+  memoryPolaroidDate: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+    fontWeight: "500",
+    marginTop: 2,
   },
 });
 
