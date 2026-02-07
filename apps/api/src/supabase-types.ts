@@ -270,7 +270,15 @@ export type Database = {
           platform?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "device_tokens_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       familyGroups: {
         Row: {
@@ -473,6 +481,7 @@ export type Database = {
           createdBy: string
           description: string
           groupId: string
+          iaImage: boolean | null
           id: string
           status: Database["public"]["Enums"]["album_status"]
           title: string
@@ -485,6 +494,7 @@ export type Database = {
           createdBy: string
           description: string
           groupId: string
+          iaImage?: boolean | null
           id?: string
           status: Database["public"]["Enums"]["album_status"]
           title: string
@@ -497,6 +507,7 @@ export type Database = {
           createdBy?: string
           description?: string
           groupId?: string
+          iaImage?: boolean | null
           id?: string
           status?: Database["public"]["Enums"]["album_status"]
           title?: string
