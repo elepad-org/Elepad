@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, RefObject } from "react";
-import { View, StyleSheet, FlatList } from "react-native";
+import { View, StyleSheet, FlatList, TouchableOpacity } from "react-native";
 import { Text, IconButton } from "react-native-paper";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import Animated, { LinearTransition, ZoomIn } from "react-native-reanimated";
@@ -197,6 +197,125 @@ LocaleConfig.locales["es"] = {
 };
 LocaleConfig.defaultLocale = "es";
 
+// Componente personalizado para días del calendario con racha conectada
+function DayComponent({
+  date,
+  state,
+  marking,
+  onPress,
+}: {
+  date?: DateData;
+  state?: string;
+  marking?: {
+    marked?: boolean;
+    dotColor?: string;
+    selected?: boolean;
+    hasStreak?: boolean;
+    streakPosition?: "single" | "start" | "middle" | "end";
+  };
+  onPress?: (date: DateData) => void;
+}) {
+  if (!date) return <View style={{ width: 32, height: 32 }} />;
+
+  const isDisabled = state === "disabled";
+  const isToday = state === "today";
+  const isSelected = marking?.selected;
+  const hasStreak = marking?.hasStreak;
+  const hasDot = marking?.marked;
+  const streakPosition = marking?.streakPosition || "single";
+
+  // Determinar el estilo del fondo según la posición de racha
+  const getStreakBackgroundStyle = () => {
+    if (!hasStreak) return null;
+
+    const baseStyle = {
+      position: "absolute" as const,
+      top: 0,
+      bottom: 0,
+      backgroundColor: "#FF9500",
+    };
+
+    switch (streakPosition) {
+      case "single":
+        return { ...baseStyle, left: 4, right: 4, borderRadius: 16 };
+      case "start":
+        return {
+          ...baseStyle,
+          left: 4,
+          right: -16,
+          borderTopLeftRadius: 16,
+          borderBottomLeftRadius: 16,
+        };
+      case "middle":
+        return { ...baseStyle, left: -16, right: -16, borderRadius: 0 };
+      case "end":
+        return {
+          ...baseStyle,
+          left: -16,
+          right: 4,
+          borderTopRightRadius: 16,
+          borderBottomRightRadius: 16,
+        };
+    }
+  };
+
+  const streakBgStyle = getStreakBackgroundStyle();
+
+  return (
+    <View
+      style={{
+        width: 32,
+        height: 32,
+        position: "relative",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      {streakBgStyle && <View style={streakBgStyle} />}
+      <TouchableOpacity
+        onPress={() => onPress?.(date)}
+        disabled={isDisabled}
+        style={{
+          width: 32,
+          height: 32,
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: 16,
+          backgroundColor: isSelected ? COLORS.primary : "transparent",
+          zIndex: 2,
+        }}
+      >
+        <View style={{ alignItems: "center", justifyContent: "center" }}>
+          <Text
+            style={[
+              { fontSize: 16, color: COLORS.text, fontWeight: "400" },
+              isDisabled && { color: COLORS.textPlaceholder },
+              isToday &&
+                !isSelected &&
+                !hasStreak && { color: COLORS.primary, fontWeight: "bold" },
+              isSelected && { color: COLORS.white, fontWeight: "bold" },
+              hasStreak && { color: "#FFFFFF", fontWeight: "bold" },
+            ]}
+          >
+            {date.day}
+          </Text>
+          {hasDot && (
+            <View
+              style={{
+                width: 4,
+                height: 4,
+                borderRadius: 2,
+                marginTop: 2,
+                backgroundColor: marking?.dotColor || COLORS.primary,
+              }}
+            />
+          )}
+        </View>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
 export default function CalendarCard(props: CalendarCardProps) {
   const {
     idUser,
@@ -213,7 +332,7 @@ export default function CalendarCard(props: CalendarCardProps) {
     calendarViewRef,
     taskListRef,
     selectedDay,
-    onDayChange
+    onDayChange,
   } = props;
   const { userElepad } = useAuth();
   const today = getTodayLocal();
@@ -392,19 +511,14 @@ export default function CalendarCard(props: CalendarCardProps) {
         marked?: boolean;
         dotColor?: string;
         selected?: boolean;
-        customStyles?: {
-          container?: {
-            borderColor?: string;
-            borderWidth?: number;
-            borderRadius?: number;
-          };
-        };
+        hasStreak?: boolean;
+        streakPosition?: "single" | "start" | "middle" | "end";
       }
     > = {};
 
     // Obtener las fechas del historial de rachas - Solo si es elder
     const streakDays = userElepad?.elder
-      ? streakHistoryQuery.data?.dates || []
+      ? (streakHistoryQuery.data?.dates || []).map(String).sort()
       : [];
 
     // Filtrar los días con actividades según el adulto mayor seleccionado
@@ -420,20 +534,44 @@ export default function CalendarCard(props: CalendarCardProps) {
       }
     }
 
-    // Agregar círculos naranjas para días con racha - Solo para usuarios elder
-    if (userElepad?.elder) {
+    // Agregar indicador de racha y detectar días consecutivos - Solo para usuarios elder
+    if (userElepad?.elder && streakDays.length > 0) {
+      // Crear un Set para búsqueda rápida
+      const streakSet = new Set(streakDays);
+
       for (const streakDay of streakDays) {
         const day = streakDay as string;
+
+        // Parsear la fecha como local (no UTC) para evitar cambios de día por timezone
+        const [year, month, dayNum] = day.split("-").map(Number);
+
+        // Calcular día anterior
+        const prevDate = new Date(year, month - 1, dayNum - 1);
+        const prevDayStr = toLocalDateString(prevDate);
+
+        // Calcular día siguiente
+        const nextDate = new Date(year, month - 1, dayNum + 1);
+        const nextDayStr = toLocalDateString(nextDate);
+
+        // Verificar si los días anterior/siguiente tienen racha
+        const hasPrevConsecutive = streakSet.has(prevDayStr);
+        const hasNextConsecutive = streakSet.has(nextDayStr);
+
         if (!obj[day]) {
           obj[day] = {};
         }
-        obj[day].customStyles = {
-          container: {
-            borderColor: "#FF6B35",
-            borderWidth: 2,
-            borderRadius: 18,
-          },
-        };
+        obj[day].hasStreak = true;
+
+        // Determinar posición
+        if (hasPrevConsecutive && hasNextConsecutive) {
+          obj[day].streakPosition = "middle";
+        } else if (hasPrevConsecutive && !hasNextConsecutive) {
+          obj[day].streakPosition = "end";
+        } else if (!hasPrevConsecutive && hasNextConsecutive) {
+          obj[day].streakPosition = "start";
+        } else {
+          obj[day].streakPosition = "single";
+        }
       }
     }
 
@@ -544,7 +682,12 @@ export default function CalendarCard(props: CalendarCardProps) {
           <Calendar
             onDayPress={(d: DateData) => onDayChange(d.dateString)}
             markedDates={marked}
-            markingType={"custom"}
+            dayComponent={(props) => (
+              <DayComponent
+                {...props}
+                onPress={(d) => onDayChange(d.dateString)}
+              />
+            )}
             enableSwipeMonths
             style={styles.calendar}
             theme={{
@@ -599,7 +742,6 @@ export default function CalendarCard(props: CalendarCardProps) {
           />
         </View>
       </View>
-
 
       {activitiesQuery.isLoading && <Text>Cargando...</Text>}
       {!!activitiesQuery.error && (
@@ -713,5 +855,36 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
     paddingHorizontal: 16,
     paddingTop: 8,
+  },
+
+  selectedDay: {
+    backgroundColor: COLORS.primary,
+  },
+  dayContent: {
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  dayText: {
+    fontSize: 16,
+    color: COLORS.text,
+    fontWeight: "400",
+  },
+  disabledText: {
+    color: COLORS.textPlaceholder,
+  },
+  todayText: {
+    color: COLORS.primary,
+    fontWeight: "bold",
+  },
+  selectedDayText: {
+    color: COLORS.white,
+    fontWeight: "bold",
+  },
+  dot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    marginTop: 2,
   },
 });
