@@ -305,16 +305,32 @@ function DayComponent({
       <TouchableOpacity
         onPress={() => onPress?.(date)}
         disabled={isDisabled}
+        activeOpacity={0.7}
         style={{
           width: 32,
           height: 32,
           alignItems: "center",
           justifyContent: "center",
-          borderRadius: 16,
-          backgroundColor: isSelected ? COLORS.primary : "transparent",
           zIndex: 2,
         }}
       >
+        {isSelected && (
+          <Animated.View
+            entering={ZoomIn.duration(200)}
+            style={{
+              position: "absolute",
+              width: 36,
+              height: 36,
+              borderRadius: 18,
+              backgroundColor: COLORS.primary,
+              shadowColor: COLORS.primary,
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.3,
+              shadowRadius: 4,
+              elevation: 4,
+            }}
+          />
+        )}
         <Text
           style={[
             { fontSize: 16, color: COLORS.text, fontWeight: "400" },
