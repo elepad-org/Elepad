@@ -298,7 +298,10 @@ function DayComponent({
               !isSelected &&
               !hasStreak && { color: COLORS.primary, fontWeight: "bold" },
             isSelected && { color: COLORS.white, fontWeight: "bold" },
-            hasStreak && { color: "#FFFFFF", fontWeight: "bold" },
+            hasStreak &&
+              isCurrentStreak && { color: "#FFFFFF", fontWeight: "bold" }, // Blanco para racha actual
+            hasStreak &&
+              !isCurrentStreak && { color: "#D67D00", fontWeight: "bold" }, // Naranja oscuro para rachas pasadas
           ]}
         >
           {date.day}
