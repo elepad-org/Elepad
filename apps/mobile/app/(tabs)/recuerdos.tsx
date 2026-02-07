@@ -1194,34 +1194,25 @@ export default function RecuerdosScreen() {
                 const title = item.title || "(Sin nombre)";
                 const color = item.color || COLORS.primary;
                 return (
-                  <View
+                  <Pressable
+                    key={item.id}
+                    onPress={() => {
+                      setSelectedBook(item);
+                      setMemberFilterId(null);
+                    }}
                     style={{
                       width: "100%",
-                      marginBottom: -8,
+                      height: 360,
+                      marginBottom: -80,
                     }}
                   >
-                    <Pressable
-                      onPress={() => {
-                        setSelectedBook(item);
-                        setMemberFilterId(null);
-                      }}
-                    >
-                      <View
-                        style={{
-                          borderRadius: 18,
-                          height: 190,
-                          overflow: "hidden",
-                        }}
-                      >
-                        <BookCover
-                          bookId={item.id}
-                          groupId={groupId}
-                          color={color}
-                          title={title}
-                        />
-                      </View>
-                    </Pressable>
-                  </View>
+                    <BookCover
+                      bookId={item.id}
+                      groupId={groupId}
+                      color={color}
+                      title={title}
+                    />
+                  </Pressable>
                 );
               }}
             />
