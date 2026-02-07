@@ -410,6 +410,8 @@ function CalendarScreenContent() {
               mode="contained"
               buttonColor={COLORS.primary}
               style={{ borderRadius: 12, width: "100%" }}
+              loading={deleteActivity.isPending}
+              disabled={deleteActivity.isPending}
             >
               Eliminar
             </Button>
