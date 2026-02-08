@@ -185,6 +185,36 @@ const Toast = ({
     });
   };
 
+  // Rainbow Animation for Streak Border
+  const rainbowAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (visible && type === "streak") {
+      Animated.loop(
+        Animated.timing(rainbowAnim, {
+          toValue: 1,
+          duration: 3000,
+          useNativeDriver: false, // Color interpolation doesn't support native driver
+        }),
+      ).start();
+    } else {
+      rainbowAnim.setValue(0);
+    }
+  }, [visible, type]);
+
+  const rainbowColor = rainbowAnim.interpolate({
+    inputRange: [0, 0.16, 0.33, 0.5, 0.66, 0.83, 1],
+    outputRange: [
+      "#FFD700", // Gold
+      "#FF6B6B", // Red-ish
+      "#4ECDC4", // Teal
+      "#45B7D1", // Blue
+      "#FFA07A", // Orange
+      "#98D8C8", // Green-ish
+      "#FFD700", // Back to Gold
+    ],
+  });
+
   if (!visible && !isVisible) return null;
 
   // Calculate dynamic bottom position based on navbar presence and safe area
@@ -255,21 +285,29 @@ const Toast = ({
             />
           ))}
 
-        <View
-          style={[styles.accentBorder, { backgroundColor: TOAST_COLORS[type] }]}
-        />
-        <View
+        <Animated.View
           style={[
-            styles.iconContainer,
-            { backgroundColor: `${TOAST_COLORS[type]}15` },
+            styles.accentBorder,
+            {
+              backgroundColor:
+                type === "streak" ? rainbowColor : TOAST_COLORS[type],
+            },
           ]}
-        >
-          <Icon
-            source={TOAST_ICONS[type]}
-            size={24}
-            color={TOAST_COLORS[type]}
-          />
-        </View>
+        />
+        {type !== "streak" && (
+          <View
+            style={[
+              styles.iconContainer,
+              { backgroundColor: `${TOAST_COLORS[type]}15` },
+            ]}
+          >
+            <Icon
+              source={TOAST_ICONS[type]}
+              size={24}
+              color={TOAST_COLORS[type]}
+            />
+          </View>
+        )}
 
         <View style={styles.textContainer}>
           {title && (

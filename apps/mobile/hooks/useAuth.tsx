@@ -29,7 +29,6 @@ type AuthContext = {
   streakLoading: boolean;
   markGameCompleted: () => Promise<void>;
   syncStreak: () => Promise<void>;
-  debug_incrementStreak: () => void;
 };
 
 type StreakState = {
@@ -370,17 +369,6 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     }
   };
 
-  // Función de depuración para probar el modal de racha
-  const debug_incrementStreak = () => {
-    if (!streak) return;
-    const newStreakValue = streak.currentStreak + 1;
-    setStreak({
-      ...streak,
-      currentStreak: newStreakValue,
-      longestStreak: Math.max(newStreakValue, streak.longestStreak),
-    });
-  };
-
   const value = {
     session,
     user,
@@ -394,7 +382,6 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     streakLoading: streakQuery.isLoading,
     markGameCompleted,
     syncStreak,
-    debug_incrementStreak,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

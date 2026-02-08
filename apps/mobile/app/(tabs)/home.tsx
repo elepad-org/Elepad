@@ -95,11 +95,11 @@ const HomeScreen = () => {
     userElepad?.elder
       ? { limit: 1 }
       : {
-        limit: 10,
-        elderOnly: true,
-        startDate: dateRange.start,
-        endDate: dateRange.end,
-      },
+          limit: 10,
+          elderOnly: true,
+          startDate: dateRange.start,
+          endDate: dateRange.end,
+        },
     {
       query: {
         enabled: !!userElepad,
@@ -256,10 +256,8 @@ const HomeScreen = () => {
         refetchAttempts();
         refetchMemories();
       }
-    }, [userElepad?.groupId, refetchAttempts, refetchMemories])
+    }, [userElepad?.groupId, refetchAttempts, refetchMemories]),
   );
-
-
 
   const displayName =
     (userElepad?.displayName as string) || userElepad?.email || "Usuario";
@@ -405,7 +403,7 @@ const HomeScreen = () => {
           ref={lastMemoryRef}
           style={{
             marginTop: lastMemory?.mimeType?.startsWith("image/") ? 50 : 16,
-            marginBottom: 20
+            marginBottom: 20,
           }}
         >
           {memoriesQuery.isLoading || isLoading ? (
@@ -456,16 +454,16 @@ const HomeScreen = () => {
                     style={hasMedia ? styles.memoryCard : styles.memoryCardNote}
                     onPress={
                       lastMemory.mimeType.startsWith("video/")
-                        ? () => { }
+                        ? () => {}
                         : () =>
-                          router.navigate({
-                            pathname: "/(tabs)/recuerdos",
-                            params: {
-                              tab: "recuerdos",
-                              memoryId: lastMemory.id,
-                              bookId: lastMemory.bookId,
-                            },
-                          })
+                            router.navigate({
+                              pathname: "/(tabs)/recuerdos",
+                              params: {
+                                tab: "recuerdos",
+                                memoryId: lastMemory.id,
+                                bookId: lastMemory.bookId,
+                              },
+                            })
                     }
                   >
                     {hasMedia ? (
@@ -482,16 +480,22 @@ const HomeScreen = () => {
                       ) : (
                         // Diseño polaroid para imágenes
                         <View style={styles.memoryPolaroidContainer}>
-                          <View style={[
-                            styles.memoryPolaroidFrame,
-                            {
-                              transform: [{
-                                rotate: `${(
-                                  (lastMemory.id.charCodeAt(0) % 2) === 0 ? 1 : -1
-                                )}deg`
-                              }]
-                            }
-                          ]}>
+                          <View
+                            style={[
+                              styles.memoryPolaroidFrame,
+                              {
+                                transform: [
+                                  {
+                                    rotate: `${
+                                      lastMemory.id.charCodeAt(0) % 2 === 0
+                                        ? 1
+                                        : -1
+                                    }deg`,
+                                  },
+                                ],
+                              },
+                            ]}
+                          >
                             <View style={styles.memoryPolaroidImage}>
                               <Image
                                 source={{ uri: lastMemory.mediaUrl }}
@@ -824,107 +828,107 @@ const HomeScreen = () => {
               </View>
             )
           ) : // Familiar: mostrar múltiples intentos de elder
-            Array.isArray(lastAttempt) && lastAttempt.length > 0 ? (
-              <View style={{ gap: 5, marginTop: 22 }}>
-                {lastAttempt.map((attempt: AttemptWithUser) => (
-                  <Pressable
-                    key={attempt.id}
-                    style={styles.gameCard}
-                    onPress={() => {
-                      router.navigate({
-                        pathname: "/(tabs)/home",
-                        params: {
-                          tab: "juegos",
-                        },
-                      });
-                    }}
-                  >
-                    <View style={styles.gameIcon}>
-                      <Image
-                        source={GAME_IMAGES[attempt.gameType || "memory"]}
-                        style={{ width: 40, height: 40, resizeMode: "contain" }}
-                      />
-                    </View>
-                    <View style={styles.gameInfo}>
-                      <Text style={styles.gameName}>
-                        {getGameInfo(attempt.gameType || "").name}
-                      </Text>
-                      <Text style={styles.gameTime}>
-                        {formatInUserTimezone(
-                          attempt.startedAt,
-                          "d 'de' MMMM, HH:mm",
-                          userElepad?.timezone,
-                        )}
-                      </Text>
-                      {attempt.user && (
-                        <View style={styles.playerInfo}>
-                          {attempt.user.avatarUrl ? (
-                            <Avatar.Image
-                              size={20}
-                              source={{ uri: attempt.user.avatarUrl }}
-                              style={styles.playerAvatar}
-                            />
-                          ) : (
-                            <Avatar.Text
-                              size={20}
-                              label={attempt.user.displayName
-                                .substring(0, 2)
-                                .toUpperCase()}
-                              style={styles.playerAvatar}
-                            />
-                          )}
-                          <Text style={styles.playerName}>
-                            {attempt.user.displayName}
-                          </Text>
-                        </View>
+          Array.isArray(lastAttempt) && lastAttempt.length > 0 ? (
+            <View style={{ gap: 5, marginTop: 22 }}>
+              {lastAttempt.map((attempt: AttemptWithUser) => (
+                <Pressable
+                  key={attempt.id}
+                  style={styles.gameCard}
+                  onPress={() => {
+                    router.navigate({
+                      pathname: "/(tabs)/home",
+                      params: {
+                        tab: "juegos",
+                      },
+                    });
+                  }}
+                >
+                  <View style={styles.gameIcon}>
+                    <Image
+                      source={GAME_IMAGES[attempt.gameType || "memory"]}
+                      style={{ width: 40, height: 40, resizeMode: "contain" }}
+                    />
+                  </View>
+                  <View style={styles.gameInfo}>
+                    <Text style={styles.gameName}>
+                      {getGameInfo(attempt.gameType || "").name}
+                    </Text>
+                    <Text style={styles.gameTime}>
+                      {formatInUserTimezone(
+                        attempt.startedAt,
+                        "d 'de' MMMM, HH:mm",
+                        userElepad?.timezone,
                       )}
-                    </View>
-                    <View style={styles.gameScore}>
-                      <Text style={styles.scoreLabel}>PUNTOS</Text>
-                      <Text style={styles.scoreValue}>{attempt.score || 0}</Text>
-                    </View>
-                  </Pressable>
-                ))}
-                <View style={{ alignItems: "center", marginTop: 8 }}>
-                  <Button
-                    mode="text"
-                    onPress={() =>
-                      router.navigate({
-                        pathname: "/(tabs)/home",
-                        params: { tab: "juegos" },
-                      })
-                    }
-                    textColor={COLORS.primary}
-                  >
-                    Ver historial completo
-                  </Button>
-                </View>
-              </View>
-            ) : (
-              <View style={styles.emptySection}>
-                <Text style={styles.emptyText}>
-                  No hay actividad reciente en el grupo
-                </Text>
+                    </Text>
+                    {attempt.user && (
+                      <View style={styles.playerInfo}>
+                        {attempt.user.avatarUrl ? (
+                          <Avatar.Image
+                            size={20}
+                            source={{ uri: attempt.user.avatarUrl }}
+                            style={styles.playerAvatar}
+                          />
+                        ) : (
+                          <Avatar.Text
+                            size={20}
+                            label={attempt.user.displayName
+                              .substring(0, 2)
+                              .toUpperCase()}
+                            style={styles.playerAvatar}
+                          />
+                        )}
+                        <Text style={styles.playerName}>
+                          {attempt.user.displayName}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                  <View style={styles.gameScore}>
+                    <Text style={styles.scoreLabel}>PUNTOS</Text>
+                    <Text style={styles.scoreValue}>{attempt.score || 0}</Text>
+                  </View>
+                </Pressable>
+              ))}
+              <View style={{ alignItems: "center", marginTop: 8 }}>
                 <Button
                   mode="text"
-                  onPress={() => {
-                    if (userElepad?.elder) {
-                      router.push("/history");
-                    } else {
-                      router.navigate({
-                        pathname: "/(tabs)/home",
-                        params: {
-                          tab: "juegos",
-                        },
-                      });
-                    }
-                  }}
+                  onPress={() =>
+                    router.navigate({
+                      pathname: "/(tabs)/home",
+                      params: { tab: "juegos" },
+                    })
+                  }
                   textColor={COLORS.primary}
                 >
-                  Ver estadísticas
+                  Ver historial completo
                 </Button>
               </View>
-            )}
+            </View>
+          ) : (
+            <View style={styles.emptySection}>
+              <Text style={styles.emptyText}>
+                No hay actividad reciente en el grupo
+              </Text>
+              <Button
+                mode="text"
+                onPress={() => {
+                  if (userElepad?.elder) {
+                    router.push("/history");
+                  } else {
+                    router.navigate({
+                      pathname: "/(tabs)/home",
+                      params: {
+                        tab: "juegos",
+                      },
+                    });
+                  }
+                }}
+                textColor={COLORS.primary}
+              >
+                Ver estadísticas
+              </Button>
+            </View>
+          )}
         </View>
 
         {/* Espacio inferior para que el contenido no quede debajo del menú */}
@@ -1341,21 +1345,21 @@ const styles = StyleSheet.create({
   // Polaroid Styles
   memoryPolaroidContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
   memoryPolaroidFrame: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderRadius: 8,
     paddingTop: 16,
     paddingLeft: 16,
     paddingRight: 16,
     paddingBottom: 0,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.05)',
-    shadowColor: '#000',
+    borderColor: "rgba(0,0,0,0.05)",
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 4,
@@ -1363,26 +1367,26 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 8,
     elevation: 8,
-    width: '93%',
+    width: "93%",
     maxWidth: 340,
   },
   memoryPolaroidImage: {
-    width: '100%',
+    width: "100%",
     aspectRatio: 1,
     borderRadius: 0,
-    overflow: 'hidden',
+    overflow: "hidden",
     marginBottom: 12,
   },
   memoryPolaroidImageStyle: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   memoryPolaroidBottom: {
     paddingBottom: 16,
     minHeight: 50,
   },
   memoryPolaroidContent: {
-    alignItems: 'flex-start',
+    alignItems: "flex-start",
     gap: 4,
   },
   memoryPolaroidLabel: {

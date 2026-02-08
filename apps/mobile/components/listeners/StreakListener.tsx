@@ -27,7 +27,6 @@ export default function StreakListener() {
         streak.currentStreak > previousStreakRef.current &&
         streak.currentStreak > 0
       ) {
-        console.log("🔥 Racha extendida detectada:", streak.currentStreak);
         setStreakCount(streak.currentStreak);
         setModalVisible(true);
       }
