@@ -1,11 +1,13 @@
-import { View, StyleSheet, Image } from "react-native";
+import { View, StyleSheet, Image, Dimensions } from "react-native";
 import { Text } from "react-native-paper";
 import { COLORS, FONT, SHADOWS } from "@/styles/base";
 import { useAuth } from "@/hooks/useAuth";
 import { SkeletonBox } from "@/components/shared";
 import { useStreakHistory } from "@/hooks/useStreak";
 import { useMemo } from "react";
-import { LinearGradient } from "expo-linear-gradient";
+
+// Obtener ancho de pantalla para hacerlo responsivo
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 // Imágenes de Elepad según nivel de racha
 const ELEPAD_IMAGES = {
@@ -50,11 +52,47 @@ export default function StreakCounter() {
     return status;
   }, [historyData]);
 
-  // Determinar qué imagen de Elepad mostrar
-  const getElepadImage = (streakCount: number) => {
-    if (streakCount >= 7) return ELEPAD_IMAGES.gold;
-    if (streakCount >= 1) return ELEPAD_IMAGES.silver;
-    return ELEPAD_IMAGES.bronze;
+  // Factores de escala basados en tu preferencia de 400px
+  // 400px es aprox 100% del ancho de un celular promedio, usaremos un factor seguro
+  const IMAGE_SIZE_LARGE = SCREEN_WIDTH * 0.95; // 95% del ancho de pantalla
+  const IMAGE_SIZE_NORMAL = SCREEN_WIDTH * 0.75;
+
+  // Configuración específica para cada nivel de racha
+  const getElepadConfig = (streakCount: number) => {
+    // NIVEL ORO (>= 70 días) - Fuego
+    if (streakCount >= 7) {
+      return {
+        source: ELEPAD_IMAGES.gold,
+        style: {
+          width: IMAGE_SIZE_LARGE,
+          height: IMAGE_SIZE_LARGE,
+          marginRight: -IMAGE_SIZE_LARGE * 0.18, // Proporcional al tamaño
+          marginBottom: -50,
+        },
+      };
+    }
+    // NIVEL PLATA (10 - 69 días) - Normal
+    if (streakCount >= 1) {
+      return {
+        source: ELEPAD_IMAGES.silver,
+        style: {
+          width: IMAGE_SIZE_NORMAL,
+          height: IMAGE_SIZE_NORMAL,
+          marginRight: -40,
+          marginBottom: -40,
+        },
+      };
+    }
+    // NIVEL BRONCE (< 10 días) - Frio
+    return {
+      source: ELEPAD_IMAGES.bronze,
+      style: {
+        width: IMAGE_SIZE_LARGE,
+        height: IMAGE_SIZE_LARGE,
+        marginRight: -IMAGE_SIZE_LARGE * 0.15,
+        marginBottom: -50,
+      },
+    };
   };
 
   if ((streakLoading || historyLoading) && !streak) {
@@ -68,64 +106,53 @@ export default function StreakCounter() {
   if (!streak) return null;
 
   const currentStreak = streak.currentStreak;
-  const elepadImage = getElepadImage(currentStreak);
+  const elepadConfig = getElepadConfig(currentStreak);
 
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        {/* Parte Superior: Info + Mascota (Fondo Blanco) */}
-        <View style={styles.topSection}>
-          <View style={styles.infoContainer}>
-            <View style={styles.streakBadge}>
-              <Text style={styles.streakNumber}>{currentStreak}</Text>
-              <Text style={styles.streakIcon}>🔥</Text>
+        <View style={styles.contentRow}>
+          {/* Columna Izquierda: Info + Días */}
+          <View style={styles.infoColumn}>
+            <View>
+              <View style={styles.streakInfo}>
+                <Text style={styles.streakNumber}>{currentStreak}</Text>
+                <Text style={styles.streakIcon}>🔥</Text>
+              </View>
+              <Text style={styles.streakLabel}>Días de racha</Text>
             </View>
-            <Text style={styles.streakLabel}>Días de racha</Text>
-            <Text style={styles.message}>
-              ¡Sigue así! Practica a diario para mantener tu fuego.
-            </Text>
+
+            {/* Días de la semana */}
+            <View style={styles.weekContainer}>
+              {DAYS_OF_WEEK.map((day, index) => (
+                <View key={index} style={styles.dayWrapper}>
+                  <Text style={styles.dayLabel}>{day}</Text>
+                  <View
+                    style={[
+                      styles.dayCircle,
+                      weekStatus[index] && styles.dayCircleActive,
+                    ]}
+                  >
+                    {weekStatus[index] && (
+                      <Text style={styles.checkmark}>✓</Text>
+                    )}
+                  </View>
+                </View>
+              ))}
+            </View>
           </View>
 
-          <View style={styles.elepadContainer}>
+          {/* Columna Derecha: Elepad */}
+          <View style={styles.imageColumn}>
             <Image
-              source={elepadImage}
-              style={[
-                styles.elepadImage,
-                // Ajuste especial para imágenes de pared (Bronce < 10, Oro >= 20)
-                (currentStreak < 10 || currentStreak >= 20) && {
-                  width: 300, // MUCHO más grande
-                  height: 300,
-                  marginRight: -50, // Pegado agresivamente a la derecha
-                  marginTop: 10, // Ajuste vertical si es necesario
-                },
-              ]}
+              source={elepadConfig.source}
+              style={{
+                resizeMode: "contain",
+                ...elepadConfig.style, // Aplica los estilos específicos
+              }}
             />
           </View>
         </View>
-
-        {/* Parte Inferior: Días de la semana (Fondo Gradiente) */}
-        <LinearGradient
-          colors={["#7C3AED", "#A855F7"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.bottomSection}
-        >
-          <View style={styles.weekContainer}>
-            {DAYS_OF_WEEK.map((day, index) => (
-              <View key={index} style={styles.dayWrapper}>
-                <Text style={styles.dayLabel}>{day}</Text>
-                <View
-                  style={[
-                    styles.dayCircle,
-                    weekStatus[index] && styles.dayCircleActive,
-                  ]}
-                >
-                  {weekStatus[index] && <Text style={styles.checkmark}>✓</Text>}
-                </View>
-              </View>
-            ))}
-          </View>
-        </LinearGradient>
       </View>
     </View>
   );
@@ -135,101 +162,85 @@ const styles = StyleSheet.create({
   container: {
     marginHorizontal: 20,
     marginVertical: 16,
-    borderRadius: 20,
-    ...SHADOWS.card,
+    borderRadius: 24,
     backgroundColor: COLORS.white,
+    ...SHADOWS.card,
   },
   card: {
-    borderRadius: 20,
+    borderRadius: 24,
     backgroundColor: COLORS.white,
     overflow: "hidden",
+    height: 180, // Altura fija
   },
-  topSection: {
+  contentRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingLeft: 24, // Padding solo a la izquierda
-    paddingTop: 24,
-    paddingBottom: 24,
-    paddingRight: 0, // Cero padding a la derecha para que la imagen toque el borde
+    height: "100%",
   },
-  infoContainer: {
+  infoColumn: {
     flex: 1,
-    marginRight: 10,
-    paddingRight: 10, // Un poco de espacio antes de la imagen
+    padding: 24,
+    paddingRight: 0,
+    justifyContent: "space-between",
+    zIndex: 2,
   },
-  streakBadge: {
+  imageColumn: {
+    width: 140,
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "flex-end", // Alinear a la derecha
+    zIndex: 1,
+  },
+  streakInfo: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 4,
   },
   streakNumber: {
-    fontSize: 48,
+    fontSize: 56,
     fontFamily: FONT.bold,
     color: COLORS.text,
-    lineHeight: 56,
+    lineHeight: 60,
+    letterSpacing: -2,
   },
   streakIcon: {
     fontSize: 32,
     marginLeft: 8,
   },
   streakLabel: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: FONT.bold,
-    color: COLORS.text,
-    marginBottom: 4,
-  },
-  message: {
-    fontSize: 13,
-    fontFamily: FONT.regular,
     color: COLORS.textSecondary,
-    lineHeight: 18,
-  },
-  elepadContainer: {
-    width: 120, // Ancho fijo para el contenedor
-    height: 120,
-    alignItems: "flex-end", // Alinear imagen a la derecha del contenedor
-    justifyContent: "center",
-  },
-  elepadImage: {
-    width: 120,
-    height: 120,
-    resizeMode: "contain",
-  },
-  bottomSection: {
-    padding: 20,
-    paddingTop: 24,
+    marginBottom: 8,
   },
   weekContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    gap: 6,
   },
   dayWrapper: {
     alignItems: "center",
-    gap: 8,
+    gap: 4,
   },
   dayLabel: {
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: FONT.medium,
-    color: "rgba(255, 255, 255, 0.9)",
+    color: COLORS.textSecondary,
   },
   dayCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: COLORS.backgroundSecondary,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   dayCircleActive: {
-    backgroundColor: "#FFA500",
-    borderColor: "#FFA500",
+    backgroundColor: "#F59E0B",
   },
   checkmark: {
-    fontSize: 16,
+    fontSize: 12,
     color: COLORS.white,
     fontWeight: "bold",
+  },
+  elepadImage: {
+    resizeMode: "contain",
   },
 });
