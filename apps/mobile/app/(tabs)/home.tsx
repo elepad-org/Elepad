@@ -420,22 +420,6 @@ const HomeScreen = () => {
 
                 // Si es audio, mostrar reproductor
                 if (isAudio && lastMemory.mediaUrl) {
-                  // Generar waveform data consistente
-                  let seed = 0;
-                  for (let i = 0; i < lastMemory.mediaUrl.length; i++) {
-                    seed += lastMemory.mediaUrl.charCodeAt(i);
-                  }
-                  const waveformData = Array.from({ length: 30 }, (_, i) => {
-                    const t = i / 30;
-                    const wave1 = Math.sin(t * Math.PI * 2 + seed * 0.1) * 12;
-                    const wave2 = Math.sin(t * Math.PI * 4 + seed * 0.2) * 8;
-                    const wave3 = Math.sin(t * Math.PI * 8 + seed * 0.3) * 4;
-                    const noise = ((seed + i * 123) % 100) / 100 * 6;
-                    const envelope = Math.sin(t * Math.PI);
-                    const amplitude = Math.abs(wave1 + wave2 + wave3 + noise) * envelope;
-                    return Math.max(10, Math.min(35, 12 + amplitude));
-                  });
-
                   return (
                     <Pressable
                       onPress={() =>
@@ -458,7 +442,6 @@ const HomeScreen = () => {
                           "d 'de' MMMM 'de' yyyy",
                           userElepad?.timezone,
                         )}
-                        waveformData={waveformData}
                       />
                     </Pressable>
                   );

@@ -10,7 +10,6 @@ interface CompactAudioPlayerProps {
   title?: string;
   caption?: string;
   date?: string;
-  waveformData?: number[];
 }
 
 export default function CompactAudioPlayer({
@@ -18,7 +17,6 @@ export default function CompactAudioPlayer({
   title,
   caption,
   date,
-  waveformData = [],
 }: CompactAudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
