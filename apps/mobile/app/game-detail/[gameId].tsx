@@ -208,7 +208,7 @@ export default function GameDetailScreen() {
 
   const detectGameType = (a: Attempt): string => {
     return (
-      (a.memoryPuzzleId && "Memoria") || (a.logicPuzzleId && "Lógica") || (a.sudokuPuzzleId && "Atención") || (a.isFocusGame && "Reacción") || ""
+      (a.memoryPuzzleId && "Memoria") || (a.logicPuzzleId && "NET") || (a.sudokuPuzzleId && "Sudoku") || (a.isFocusGame && "Focus") || ""
     );
   };
 
