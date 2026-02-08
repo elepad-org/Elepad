@@ -1,16 +1,28 @@
-import { View, StyleSheet, Image, Dimensions } from "react-native";
+import React, { useMemo, useCallback, useRef } from "react";
+import {
+  View,
+  StyleSheet,
+  Image,
+  Dimensions,
+  ImageStyle,
+  ImageSourcePropType,
+} from "react-native";
 import { Text } from "react-native-paper";
-import { COLORS, FONT, SHADOWS } from "@/styles/base";
-import { useAuth } from "@/hooks/useAuth";
-import { SkeletonBox } from "@/components/shared";
-import { useStreakHistory } from "@/hooks/useStreak";
-import { useMemo, useCallback, useRef } from "react";
 import { useFocusEffect } from "expo-router";
 
-// Obtener ancho de pantalla para hacerlo responsivo
+import { useAuth } from "@/hooks/useAuth";
+import { useStreakHistory } from "@/hooks/useStreak";
+import { SkeletonBox } from "@/components/shared";
+import { COLORS, FONT, SHADOWS } from "@/styles/base";
+
+/**
+ * Ancho de la pantalla para cálculos responsivos
+ */
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-// Imágenes de Elepad según nivel de racha
+/**
+ * Imágenes de la mascota Elepad según el nivel de racha
+ */
 const ELEPAD_IMAGES = {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   bronze: require("../assets/images/EleRacha/FrioPared.png"), // 0-2 días
@@ -20,32 +32,95 @@ const ELEPAD_IMAGES = {
   gold: require("../assets/images/EleRacha/FuegoPared.png"), // 30+ días
 };
 
+/**
+ * Etiquetas de los días de la semana
+ */
 const DAYS_OF_WEEK = ["D", "L", "Ma", "Mi", "J", "V", "S"];
 
+// Factores de escala para responsividad
+const IMAGE_SIZE_LARGE = SCREEN_WIDTH * 0.95; // 95% del ancho de pantalla
+const IMAGE_SIZE_NORMAL = SCREEN_WIDTH * 0.9;
+
+/**
+ * Retorna la configuración de imagen y estilo según la racha actual.
+ * @param streakCount Número de días de racha
+ */
+const getElepadConfig = (
+  streakCount: number,
+): { source: ImageSourcePropType; style: ImageStyle } => {
+  // NIVEL ORO (>= 7 días) - Fuego
+  if (streakCount >= 7) {
+    return {
+      source: ELEPAD_IMAGES.gold,
+      style: {
+        width: IMAGE_SIZE_LARGE,
+        height: IMAGE_SIZE_LARGE,
+        marginRight: -IMAGE_SIZE_LARGE * 0.2,
+        marginBottom: -50,
+      } as ImageStyle,
+    };
+  }
+  // NIVEL PLATA (1 - 6 días) - Normal
+  if (streakCount >= 1) {
+    return {
+      source: ELEPAD_IMAGES.silver,
+      style: {
+        width: IMAGE_SIZE_NORMAL,
+        height: IMAGE_SIZE_NORMAL,
+        marginRight: -70,
+        marginBottom: 0,
+      } as ImageStyle,
+    };
+  }
+  // NIVEL BRONCE (< 1 día) - Frio
+  return {
+    source: ELEPAD_IMAGES.bronze,
+    style: {
+      width: IMAGE_SIZE_LARGE,
+      height: IMAGE_SIZE_LARGE,
+      marginRight: -IMAGE_SIZE_LARGE * 0.2,
+      marginBottom: -50,
+    } as ImageStyle,
+  };
+};
+
+/**
+ * Formatea una fecha a string local YYYY-MM-DD
+ */
+const formatDateLocal = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+/**
+ * Componente que muestra el contador de racha semanal del usuario.
+ * Incluye visualización de la mascota, racha actual y días de la semana activos.
+ * Se actualiza automáticamente al enfocar la pantalla.
+ */
 export default function StreakCounter() {
   const { streak, streakLoading, syncStreak } = useAuth();
 
-  // Helper para formatear fecha local YYYY-MM-DD
-  const formatDateLocal = (date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-
   // Calcular la semana actual (Domingo a Sábado) en hora local
-  const today = new Date();
-  const currentDayOfWeek = today.getDay(); // 0 (Dom) - 6 (Sab)
+  const { startDateStr, endDateStr, startOfWeek } = useMemo(() => {
+    const today = new Date();
+    const currentDayOfWeek = today.getDay(); // 0 (Dom) - 6 (Sab)
 
-  const startOfWeek = new Date(today);
-  startOfWeek.setDate(today.getDate() - currentDayOfWeek); // Retroceder al Domingo
+    const start = new Date(today);
+    start.setDate(today.getDate() - currentDayOfWeek); // Retroceder al Domingo
 
-  const endOfWeek = new Date(startOfWeek);
-  endOfWeek.setDate(startOfWeek.getDate() + 6); // Avanzar al Sábado
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6); // Avanzar al Sábado
 
-  const startDateStr = formatDateLocal(startOfWeek);
-  const endDateStr = formatDateLocal(endOfWeek);
+    return {
+      startOfWeek: start,
+      startDateStr: formatDateLocal(start),
+      endDateStr: formatDateLocal(end),
+    };
+  }, []); // Solo se calcula al montar, la fecha 'today' es la del momento de carga
 
+  // Hook para obtener el historial de racha
   const {
     data: historyData,
     isLoading: historyLoading,
@@ -56,15 +131,13 @@ export default function StreakCounter() {
   const syncStreakRef = useRef(syncStreak);
   const refetchHistoryRef = useRef(refetchHistory);
 
-  // Mantener refs actualizadas
+  // Mantener refs actualizadas en cada render
   syncStreakRef.current = syncStreak;
   refetchHistoryRef.current = refetchHistory;
 
   // Refrescar datos SOLO al enfocar la pantalla (sin dependencias que causen loop)
   useFocusEffect(
     useCallback(() => {
-      // Usar refs para llamar a las funciones más recientes sin disparar el efecto
-      // Esto rompe el ciclo de renderizado infinito
       if (syncStreakRef.current) syncStreakRef.current();
       if (refetchHistoryRef.current) refetchHistoryRef.current();
     }, []),
@@ -87,48 +160,7 @@ export default function StreakCounter() {
     return status;
   }, [historyData, startOfWeek]);
 
-  // Factores de escala basados en tu preferencia de 400px
-  const IMAGE_SIZE_LARGE = SCREEN_WIDTH * 0.95; // 95% del ancho de pantalla
-  const IMAGE_SIZE_NORMAL = SCREEN_WIDTH * 0.9;
-
-  // Configuración específica para cada nivel de racha
-  const getElepadConfig = (streakCount: number) => {
-    // NIVEL ORO (>= 7 días) - Fuego
-    if (streakCount >= 7) {
-      return {
-        source: ELEPAD_IMAGES.gold,
-        style: {
-          width: IMAGE_SIZE_LARGE,
-          height: IMAGE_SIZE_LARGE,
-          marginRight: -IMAGE_SIZE_LARGE * 0.2,
-          marginBottom: -50,
-        },
-      };
-    }
-    // NIVEL PLATA (1 - 6 días) - Normal
-    if (streakCount >= 1) {
-      return {
-        source: ELEPAD_IMAGES.silver,
-        style: {
-          width: IMAGE_SIZE_NORMAL,
-          height: IMAGE_SIZE_NORMAL,
-          marginRight: -70,
-          marginBottom: 0,
-        },
-      };
-    }
-    // NIVEL BRONCE (< 1 día) - Frio
-    return {
-      source: ELEPAD_IMAGES.bronze,
-      style: {
-        width: IMAGE_SIZE_LARGE,
-        height: IMAGE_SIZE_LARGE,
-        marginRight: -IMAGE_SIZE_LARGE * 0.2,
-        marginBottom: -50,
-      },
-    };
-  };
-
+  // Loading state
   if ((streakLoading || historyLoading) && !streak) {
     return (
       <View style={styles.container}>
@@ -137,6 +169,7 @@ export default function StreakCounter() {
     );
   }
 
+  // Si no hay datos de racha (ej. usuario no logueado o error), no mostrar nada
   if (!streak) return null;
 
   const currentStreak = streak.currentStreak;
@@ -182,7 +215,7 @@ export default function StreakCounter() {
               source={elepadConfig.source}
               style={{
                 resizeMode: "contain",
-                ...elepadConfig.style, // Aplica los estilos específicos
+                ...elepadConfig.style,
               }}
             />
           </View>
@@ -218,10 +251,10 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   imageColumn: {
-    width: 140, // Ancho base del contenedor, la imagen se sale con overflow visible (si el padre lo permitiera, pero aquí usamos paddingRight: 0 en columna izquierda)
+    width: 140, // Ancho base para controlar el layout flex, la imagen usa overflow visible si es necesario
     height: "100%",
     justifyContent: "center",
-    alignItems: "flex-end", // Alinear a la derecha
+    alignItems: "flex-end", // Alinear imagen a la derecha del contenedor
     zIndex: 1,
   },
   streakInfo: {
