@@ -1026,13 +1026,12 @@ export default function RecuerdoDetailDialog({
                           </Text>
                         </View>
 
-                        {/* Menú debajo de la etiqueta */}
+                        {/* Menú debajo de la etiqueta - posición absoluta */}
                         <View
                           style={{
-                            flexDirection: "row",
-                            justifyContent: "flex-end",
-                            marginTop: 4,
-                            height: 32,
+                            position: "absolute",
+                            top: 68,
+                            right: 16,
                             zIndex: 100,
                           }}
                         >
@@ -1087,6 +1086,7 @@ export default function RecuerdoDetailDialog({
                             flex: 1,
                             justifyContent: "center",
                             alignItems: "center",
+                            marginTop: -16,
                           }}
                         >
                           <View
@@ -1124,21 +1124,25 @@ export default function RecuerdoDetailDialog({
                                 }}
                               />
                             </View>
+                            {/* Ventana central del cassette */}
                             <View
                               style={{
-                                width: 44,
-                                height: 44,
-                                borderRadius: 22,
-                                backgroundColor: "#ff6b35",
+                                width: 100,
+                                height: 40,
+                                backgroundColor: "#1a1a1a",
+                                borderRadius: 4,
+                                borderWidth: 2,
+                                borderColor: "#4a4a4a",
                                 justifyContent: "center",
                                 alignItems: "center",
                               }}
                             >
-                              <IconButton
-                                icon="play"
-                                size={24}
-                                iconColor="#1a1a1a"
-                                style={{ margin: 0 }}
+                              <View
+                                style={{
+                                  width: "80%",
+                                  height: 4,
+                                  backgroundColor: "#ff6b35",
+                                }}
                               />
                             </View>
                             <View

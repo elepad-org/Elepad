@@ -397,7 +397,13 @@ const HomeScreen = () => {
         </View>
 
         {/* Último Recuerdo - DESTACADO */}
-        <View ref={lastMemoryRef} style={{ marginTop: 50 }}>
+        <View 
+          ref={lastMemoryRef} 
+          style={{ 
+            marginTop: lastMemory?.mimeType?.startsWith("image/") ? 50 : 16,
+            marginBottom: 20 
+          }}
+        >
           {memoriesQuery.isLoading || isLoading ? (
             <View style={styles.memoryCardLoading}>
               <SkeletonBox width={SCREEN_WIDTH} height={280} borderRadius={0} />
@@ -494,7 +500,7 @@ const HomeScreen = () => {
                             {
                               transform: [{
                                 rotate: `${(
-                                  ((lastMemory.id.charCodeAt(0) + lastMemory.id.charCodeAt(lastMemory.id.length - 1)) % 11) - 5
+                                  (lastMemory.id.charCodeAt(0) % 2) === 0 ? 1 : -1
                                 )}deg`
                               }]
                             }
@@ -519,14 +525,6 @@ const HomeScreen = () => {
                                 >
                                   {lastMemory.title || "Sin título"}
                                 </Text>
-                                {lastMemory.caption && (
-                                  <HighlightedMentionText
-                                    text={lastMemory.caption}
-                                    familyMembers={groupMembers}
-                                    style={styles.memoryPolaroidDescription}
-                                  />
-                                )}
-
                               </View>
                             </View>
                           </View>
