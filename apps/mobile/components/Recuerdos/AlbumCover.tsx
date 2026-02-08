@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { Image } from "expo-image";
 import { Text } from "react-native-paper";
-import { FONT, COLORS } from "@/styles/base";
+import { FONT } from "@/styles/base";
 import albumLogoImage from "@/assets/images/album-leviatan.webp";
 import tapeImage from "@/assets/images/paper-transparent-sticky-tape-png.png";
 
