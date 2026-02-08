@@ -1,18 +1,12 @@
-import { Modal, View, StyleSheet, Pressable } from "react-native";
+import { Modal, View, StyleSheet, Pressable, Image } from "react-native";
 import { Text } from "react-native-paper";
-import { COLORS, FONT } from "@/styles/base";
-import { LinearGradient } from "expo-linear-gradient";
+import { COLORS, FONT, SHADOWS } from "@/styles/base";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withSpring,
-  withRepeat,
-  withSequence,
-  withDelay,
   withTiming,
-  Easing,
 } from "react-native-reanimated";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 type Props = {
   visible: boolean;
@@ -20,75 +14,91 @@ type Props = {
   onClose: () => void;
 };
 
+const DAYS_OF_WEEK = ["D", "L", "Ma", "Mi", "J", "V", "S"];
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const nuevoDiaRachaImage = require("../assets/images/EleRacha/NuevoDiaRacha.png");
+
+const CONFETTI_COLORS = [
+  "#FFD700",
+  "#FF6B6B",
+  "#4ECDC4",
+  "#45B7D1",
+  "#FFA07A",
+  "#98D8C8",
+];
+
 export default function StreakCelebrationModal({
   visible,
   streakCount,
   onClose,
 }: Props) {
-  // Valores animados
-  const scale = useSharedValue(0);
-  const rotation = useSharedValue(0);
+  // Animaciones
   const opacity = useSharedValue(0);
-  const fireScale = useSharedValue(1);
-  const confettiOpacity = useSharedValue(0);
+
+  // Confetti animations (12 particles) - create shared values directly
+  const confettiValues = Array.from({ length: 12 }, () => ({
+    translateY: useSharedValue(-100),
+    translateX: useSharedValue(0),
+    rotate: useSharedValue(0),
+    opacity: useSharedValue(0),
+  }));
+
+  // Calcular estado de los días de la semana
+  const weekStatus = useMemo(() => {
+    const today = new Date();
+    const currentDayOfWeek = today.getDay();
+    const status: boolean[] = [];
+
+    for (let i = 0; i < 7; i++) {
+      // Marcar como completado si es hoy o un día anterior de esta semana
+      status.push(i <= currentDayOfWeek);
+    }
+
+    return status;
+  }, []);
 
   useEffect(() => {
     if (visible) {
-      // Reset valores
-      scale.value = 0;
-      rotation.value = 0;
+      // Reset
       opacity.value = 0;
-      fireScale.value = 1;
-      confettiOpacity.value = 0;
+      confettiValues.forEach((conf) => {
+        conf.translateY.value = -100;
+        conf.translateX.value = 0;
+        conf.rotate.value = 0;
+        conf.opacity.value = 0;
+      });
 
-      // Iniciar animaciones
       // Fade in del fondo
       opacity.value = withTiming(1, { duration: 300 });
 
-      // Entrada del emoji con bounce
-      scale.value = withSequence(
-        withSpring(1.3, { damping: 3, stiffness: 100 }),
-        withSpring(1, { damping: 8, stiffness: 200 })
-      );
+      // Animate confetti
+      confettiValues.forEach((conf, index) => {
+        const delay = index * 80;
+        const randomX = (Math.random() - 0.5) * 300;
+        const randomRotation = Math.random() * 720 - 360;
+        const duration = 2500 + Math.random() * 500;
 
-      // Rotación suave
-      rotation.value = withSequence(
-        withTiming(-10, { duration: 200 }),
-        withTiming(10, { duration: 200 }),
-        withTiming(0, { duration: 200 })
-      );
+        setTimeout(() => {
+          conf.opacity.value = withTiming(1, { duration: 200 });
+          conf.translateY.value = withTiming(700, { duration });
+          conf.translateX.value = withTiming(randomX, { duration });
+          conf.rotate.value = withTiming(randomRotation, { duration });
+        }, delay);
 
-      // Pulso del fuego
-      fireScale.value = withRepeat(
-        withSequence(
-          withTiming(1.1, { duration: 500, easing: Easing.inOut(Easing.ease) }),
-          withTiming(1, { duration: 500, easing: Easing.inOut(Easing.ease) })
-        ),
-        -1, // Infinito
-        true
-      );
-
-      // Confetti fade in con delay
-      confettiOpacity.value = withDelay(
-        200,
-        withTiming(1, { duration: 400 })
-      );
+        // Fade out at the end
+        setTimeout(
+          () => {
+            conf.opacity.value = withTiming(0, { duration: 300 });
+          },
+          duration + delay - 300,
+        );
+      });
     }
-  }, [visible]);
+  }, [visible, opacity, confettiValues]);
 
   const containerAnimatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
-  }));
-
-  const fireAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { scale: scale.value * fireScale.value },
-      { rotate: `${rotation.value}deg` },
-    ],
-  }));
-
-  const confettiAnimatedStyle = useAnimatedStyle(() => ({
-    opacity: confettiOpacity.value,
   }));
 
   if (!visible) return null;
@@ -102,47 +112,81 @@ export default function StreakCelebrationModal({
     >
       <Animated.View style={[styles.overlay, containerAnimatedStyle]}>
         <Pressable style={styles.backdrop} onPress={onClose} />
-        
+
+        {/* Confetti particles */}
+        {confettiValues.map((conf, index) => {
+          const animatedStyle = useAnimatedStyle(() => ({
+            transform: [
+              { translateY: conf.translateY.value },
+              { translateX: conf.translateX.value },
+              { rotate: `${conf.rotate.value}deg` },
+            ],
+            opacity: conf.opacity.value,
+          }));
+
+          const color = CONFETTI_COLORS[index % CONFETTI_COLORS.length];
+          const size = 8 + Math.random() * 6;
+
+          return (
+            <Animated.View
+              key={index}
+              style={[
+                styles.confettiParticle,
+                animatedStyle,
+                {
+                  backgroundColor: color,
+                  width: size,
+                  height: size,
+                  left: `${10 + index * 7}%`,
+                },
+              ]}
+            />
+          );
+        })}
+
         <View style={styles.contentContainer}>
-          <LinearGradient
-            colors={["#7C3AED", "#A855F7", "#C084FC"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.card}
-          >
-            {/* Confetti decorativo */}
-            <Animated.View style={[styles.confettiContainer, confettiAnimatedStyle]}>
-              <Text style={styles.confetti}>✨</Text>
-              <Text style={[styles.confetti, styles.confettiTopRight]}>🎉</Text>
-              <Text style={[styles.confetti, styles.confettiBottomLeft]}>⭐</Text>
-              <Text style={[styles.confetti, styles.confettiBottomRight]}>💫</Text>
-            </Animated.View>
+          <View style={styles.card}>
+            {/* Imagen de fondo grande */}
+            <Image
+              source={nuevoDiaRachaImage}
+              style={styles.backgroundImage}
+              resizeMode="contain"
+            />
 
-            {/* Emoji de fuego animado */}
-            <Animated.Text style={[styles.fireEmoji, fireAnimatedStyle]}>
-              🔥
-            </Animated.Text>
+            {/* Contenido en primer plano */}
+            <View style={styles.contentWrapper}>
+              <View>
+                <Text style={styles.title}>¡Racha extendida!</Text>
 
-            {/* Textos */}
-            <Text style={styles.title}>¡Racha extendida!</Text>
-            <Text style={styles.streakText}>
-              {streakCount} {streakCount === 1 ? "día" : "días"}
-            </Text>
-            <Text style={styles.subtitle}>
-              {streakCount === 1
-                ? "¡Buen comienzo! Sigue así"
-                : streakCount < 7
-                ? "¡Vas muy bien!"
-                : streakCount < 30
-                ? "¡Increíble constancia!"
-                : "¡Eres una leyenda! 🏆"}
-            </Text>
+                <View style={styles.streakInfo}>
+                  <Text style={styles.streakNumber}>{streakCount}</Text>
+                  <Text style={styles.streakIcon}>🔥</Text>
+                </View>
+                <Text style={styles.streakLabel}>Días de racha</Text>
+              </View>
 
-            {/* Botón de cerrar */}
-            <Pressable style={styles.button} onPress={onClose}>
-              <Text style={styles.buttonText}>Continuar</Text>
-            </Pressable>
-          </LinearGradient>
+              {/* Días de la semana */}
+              <View style={styles.weekContainer}>
+                {DAYS_OF_WEEK.map((day, index) => {
+                  return (
+                    <View key={index} style={styles.dayWrapper}>
+                      <Text style={styles.dayLabel}>{day}</Text>
+                      <View
+                        style={[
+                          styles.dayCircle,
+                          weekStatus[index] && styles.dayCircleActive,
+                        ]}
+                      >
+                        {weekStatus[index] && (
+                          <Text style={styles.checkmark}>✓</Text>
+                        )}
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+          </View>
         </View>
       </Animated.View>
     </Modal>
@@ -154,85 +198,95 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
   },
+  confettiParticle: {
+    position: "absolute",
+    top: 0,
+    borderRadius: 4,
+  },
   contentContainer: {
-    width: "85%",
-    maxWidth: 400,
+    width: "90%",
+    maxWidth: 420,
+    zIndex: 1,
   },
   card: {
     borderRadius: 24,
-    padding: 32,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 10,
+    padding: 24,
+    backgroundColor: COLORS.white,
+    ...SHADOWS.card,
+    overflow: "hidden",
+    position: "relative",
   },
-  confettiContainer: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  confetti: {
-    fontSize: 40,
+  backgroundImage: {
     position: "absolute",
-    top: 20,
-    left: 20,
+    right: -100,
+    bottom: -80,
+    width: 380,
+    height: 380,
   },
-  confettiTopRight: {
-    top: 30,
-    left: undefined,
-    right: 30,
-  },
-  confettiBottomLeft: {
-    top: undefined,
-    bottom: 80,
-    left: 25,
-  },
-  confettiBottomRight: {
-    top: undefined,
-    bottom: 90,
-    left: undefined,
-    right: 25,
-  },
-  fireEmoji: {
-    fontSize: 120,
-    marginBottom: 16,
+  contentWrapper: {
+    zIndex: 1,
+    gap: 16,
   },
   title: {
-    fontSize: 28,
+    fontSize: 20,
     fontFamily: FONT.bold,
-    color: COLORS.white,
+    color: COLORS.text,
     marginBottom: 8,
-    textAlign: "center",
   },
-  streakText: {
+  streakInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  streakNumber: {
     fontSize: 48,
     fontFamily: FONT.bold,
-    color: COLORS.white,
-    marginBottom: 8,
+    color: COLORS.text,
+    lineHeight: 52,
+    letterSpacing: -2,
   },
-  subtitle: {
-    fontSize: 16,
-    fontFamily: FONT.medium,
-    color: "rgba(255, 255, 255, 0.9)",
-    textAlign: "center",
-    marginBottom: 24,
+  streakIcon: {
+    fontSize: 28,
+    marginLeft: 8,
   },
-  button: {
-    backgroundColor: "rgba(255, 255, 255, 0.25)",
-    paddingVertical: 14,
-    paddingHorizontal: 40,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-  },
-  buttonText: {
-    fontSize: 18,
+  streakLabel: {
+    fontSize: 14,
     fontFamily: FONT.bold,
+    color: COLORS.textSecondary,
+    marginBottom: 16,
+  },
+  weekContainer: {
+    flexDirection: "row",
+    gap: 6,
+  },
+  dayWrapper: {
+    alignItems: "center",
+    gap: 4,
+  },
+  dayLabel: {
+    fontSize: 10,
+    fontFamily: FONT.medium,
+    color: COLORS.textSecondary,
+  },
+  dayCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: COLORS.backgroundSecondary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  dayCircleActive: {
+    backgroundColor: "#F59E0B",
+  },
+  checkmark: {
+    fontSize: 12,
     color: COLORS.white,
+    fontWeight: "bold",
   },
 });
