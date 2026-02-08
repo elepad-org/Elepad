@@ -236,7 +236,8 @@ const HomeScreen = () => {
   useEffect(() => {
     if (userElepad?.groupId) {
       // Invalidar las queries relacionadas con el grupo para forzar refetch
-      queryClient.invalidateQueries({ queryKey: ["getMemories"] });
+      // La key generada por orval es ['/memories', params]
+      queryClient.invalidateQueries({ queryKey: ["/memories"] });
       queryClient.invalidateQueries({
         queryKey: ["getActivitiesFamilyCodeIdFamilyGroup"],
       });
@@ -247,12 +248,15 @@ const HomeScreen = () => {
   }, [userElepad?.groupId, queryClient]);
 
   const { refetch: refetchAttempts } = attemptsQuery;
+  const { refetch: refetchMemories } = memoriesQuery;
+
   useFocusEffect(
     useCallback(() => {
       if (userElepad?.groupId) {
         refetchAttempts();
+        refetchMemories();
       }
-    }, [userElepad?.groupId, refetchAttempts])
+    }, [userElepad?.groupId, refetchAttempts, refetchMemories])
   );
 
 
@@ -397,11 +401,11 @@ const HomeScreen = () => {
         </View>
 
         {/* Último Recuerdo - DESTACADO */}
-        <View 
-          ref={lastMemoryRef} 
-          style={{ 
+        <View
+          ref={lastMemoryRef}
+          style={{
             marginTop: lastMemory?.mimeType?.startsWith("image/") ? 50 : 16,
-            marginBottom: 20 
+            marginBottom: 20
           }}
         >
           {memoriesQuery.isLoading || isLoading ? (
