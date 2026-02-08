@@ -220,7 +220,7 @@ const RecuerdoItemComponent = React.memo(({
               {/* Ventana central del cassette */}
               <View
                 style={{
-                  width: 60 * scale,
+                  width: 50 * scale,
                   height: 20 * scale,
                   backgroundColor: "#1a1a1a",
                   borderRadius: 2 * scale,
@@ -235,7 +235,6 @@ const RecuerdoItemComponent = React.memo(({
                     width: "80%",
                     height: 2 * scale,
                     backgroundColor: "#ff6b35",
-                    opacity: 0.6,
                   }}
                 />
               </View>

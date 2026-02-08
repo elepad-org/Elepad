@@ -1043,7 +1043,7 @@ export default function RecuerdoDetailDialog({
                             {/* Ventana central del cassette */}
                             <View
                               style={{
-                                width: 120,
+                                width: 100,
                                 height: 40,
                                 backgroundColor: "#1a1a1a",
                                 borderRadius: 4,
@@ -1058,7 +1058,6 @@ export default function RecuerdoDetailDialog({
                                   width: "80%",
                                   height: 4,
                                   backgroundColor: "#ff6b35",
-                                  opacity: 0.6,
                                 }}
                               />
                             </View>

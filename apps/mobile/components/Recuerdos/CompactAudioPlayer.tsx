@@ -186,37 +186,97 @@ export default function CompactAudioPlayer({
         </View>
       </View>
 
-      {/* Botón de play/pause */}
-      <View
+      {/* Diseño del cassette */}
+      <TouchableOpacity
+        onPress={playAudio}
         style={{
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "center",
           marginBottom: 15,
+          alignItems: "center",
         }}
       >
-        <TouchableOpacity
-          onPress={playAudio}
+        <View
           style={{
-            width: 60,
-            height: 60,
-            backgroundColor: "#ff6b35",
-            borderRadius: 30,
-            justifyContent: "center",
-            alignItems: "center",
+            width: "85%",
+            height: 80,
+            backgroundColor: "#2a2a2a",
+            borderRadius: 40,
             borderWidth: 3,
-            borderColor: "#d85a2a",
-            ...SHADOWS.medium,
+            borderColor: "#4a4a4a",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            paddingHorizontal: 8,
           }}
         >
-          <IconButton
-            icon={isPlaying ? "pause" : "play"}
-            size={30}
-            iconColor="#1a1a1a"
-            style={{ margin: 0 }}
-          />
-        </TouchableOpacity>
-      </View>
+          {/* Rueda izquierda */}
+          <View
+            style={{
+              width: 64,
+              height: 64,
+              borderRadius: 32,
+              borderWidth: 4,
+              borderColor: "#4a4a4a",
+              backgroundColor: "#1a1a1a",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <View
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: 12,
+                backgroundColor: "#d0d0d0",
+              }}
+            />
+          </View>
+
+          {/* Ventana central del cassette */}
+          <View
+            style={{
+              width: 100,
+              height: 40,
+              backgroundColor: "#1a1a1a",
+              borderRadius: 4,
+              borderWidth: 2,
+              borderColor: "#4a4a4a",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <View
+              style={{
+                width: "80%",
+                height: 4,
+                backgroundColor: "#ff6b35",
+              }}
+            />
+          </View>
+
+          {/* Rueda derecha */}
+          <View
+            style={{
+              width: 64,
+              height: 64,
+              borderRadius: 32,
+              borderWidth: 4,
+              borderColor: "#4a4a4a",
+              backgroundColor: "#1a1a1a",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <View
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: 12,
+                backgroundColor: "#d0d0d0",
+              }}
+            />
+          </View>
+        </View>
+      </TouchableOpacity>
 
       {/* Información */}
       <View
