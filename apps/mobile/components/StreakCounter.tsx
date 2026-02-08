@@ -24,33 +24,48 @@ const DAYS_OF_WEEK = ["D", "L", "Ma", "Mi", "J", "V", "S"];
 export default function StreakCounter() {
   const { streak, streakLoading } = useAuth();
 
-  // Obtener los últimos 7 días para mostrar el gráfico semanal
+  // Helper para formatear fecha local YYYY-MM-DD
+  const formatDateLocal = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  // Calcular la semana actual (Domingo a Sábado) en hora local
   const today = new Date();
-  const endDate = today.toISOString().split("T")[0];
-  const startDate = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .split("T")[0];
+  const currentDayOfWeek = today.getDay(); // 0 (Dom) - 6 (Sab)
+
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - currentDayOfWeek); // Retroceder al Domingo
+
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6); // Avanzar al Sábado
+
+  const startDateStr = formatDateLocal(startOfWeek);
+  const endDateStr = formatDateLocal(endOfWeek);
 
   const { data: historyData, isLoading: historyLoading } = useStreakHistory(
-    startDate,
-    endDate,
+    startDateStr,
+    endDateStr,
   );
 
-  // Calcular qué días de la última semana tienen racha
+  // Calcular status para cada día de la semana actual (Domingo a Sábado)
   const weekStatus = useMemo(() => {
     if (!historyData?.dates) return Array(7).fill(false);
 
     const streakDates = new Set(historyData.dates);
     const status: boolean[] = [];
 
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
-      const dateStr = date.toISOString().split("T")[0];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startOfWeek);
+      date.setDate(startOfWeek.getDate() + i);
+      const dateStr = formatDateLocal(date);
       status.push(streakDates.has(dateStr));
     }
 
     return status;
-  }, [historyData]);
+  }, [historyData, startOfWeek]);
 
   // Factores de escala basados en tu preferencia de 400px
   // 400px es aprox 100% del ancho de un celular promedio, usaremos un factor seguro
