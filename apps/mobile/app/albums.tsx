@@ -147,8 +147,7 @@ export default function AlbumsScreen() {
           <FlatList
             data={albums}
             keyExtractor={(item) => item.id}
-            numColumns={2}
-            columnWrapperStyle={styles.row}
+            numColumns={1}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
             refreshControl={
@@ -227,11 +226,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 8,
   },
-  row: {
-    justifyContent: "space-between",
-  },
   columnItem: {
-    width: "48%",
-    marginBottom: 8,
+    width: "100%",
+    marginBottom: 16,
   },
 });
