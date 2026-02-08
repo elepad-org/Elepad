@@ -4,7 +4,7 @@ import { Text } from "react-native-paper";
 import { FONT } from "@/styles/base";
 import { useGetMemories } from "@elepad/api-client";
 import { useMemo } from "react";
-import chestImage from "@/assets/images/baul-2.png";
+import chestImage from "@/assets/images/baul-azul-fixed.png";
 
 interface BookCoverProps {
   bookId: string;

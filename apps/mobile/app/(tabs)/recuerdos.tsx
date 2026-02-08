@@ -1198,8 +1198,8 @@ export default function RecuerdosScreen() {
                     }}
                     style={{
                       width: "100%",
-                      aspectRatio: 1.4,
-                      marginBottom: 24,
+                      aspectRatio: 1.64,
+                      marginBottom: 16,
                     }}
                   >
                     <BookCover
