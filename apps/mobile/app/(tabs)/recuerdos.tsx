@@ -99,7 +99,7 @@ const memoryToRecuerdo = (
     miniatura:
       (memory.mimeType?.startsWith("image/") ||
         memory.mimeType?.startsWith("video/")) &&
-      memory.mediaUrl
+        memory.mediaUrl
         ? memory.mediaUrl
         : undefined,
     titulo: memory.title || undefined,
@@ -322,9 +322,8 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al crear el baúl: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al crear el baúl: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -341,9 +340,8 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al actualizar el baúl: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al actualizar el baúl: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -360,9 +358,8 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al eliminar el baúl: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al eliminar el baúl: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -392,9 +389,8 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al actualizar el recuerdo: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al actualizar el recuerdo: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -414,9 +410,8 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al eliminar el recuerdo: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al eliminar el recuerdo: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -475,9 +470,8 @@ export default function RecuerdosScreen() {
     onError: (error) => {
       console.error("Upload mutation onError:", error);
       showToast({
-        message: `Error al subir el recuerdo: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al subir el recuerdo: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -526,9 +520,8 @@ export default function RecuerdosScreen() {
     onError: (error) => {
       console.error("Create note mutation onError:", error);
       showToast({
-        message: `Error al crear la nota: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al crear la nota: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -562,8 +555,8 @@ export default function RecuerdosScreen() {
     const memoriesData = Array.isArray(memoriesPayload)
       ? memoriesPayload
       : memoriesPayload &&
-          typeof memoriesPayload === "object" &&
-          "data" in (memoriesPayload as Record<string, unknown>)
+        typeof memoriesPayload === "object" &&
+        "data" in (memoriesPayload as Record<string, unknown>)
         ? (memoriesPayload as { data: unknown }).data
         : [];
 
@@ -649,9 +642,8 @@ export default function RecuerdosScreen() {
     deleteMemoryMutation.isPending;
 
   const emptyTitle = memberFilterId
-    ? `${
-        memberNameById[memberFilterId] || "Este miembro"
-      } aún no ha subido recuerdos`
+    ? `${memberNameById[memberFilterId] || "Este miembro"
+    } aún no ha subido recuerdos`
     : "No hay recuerdos aún";
 
   const emptySubtitle = memberFilterId
@@ -845,9 +837,8 @@ export default function RecuerdosScreen() {
       }
     } catch (error) {
       showToast({
-        message: `Error al preparar el archivo: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al preparar el archivo: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     }
@@ -1071,8 +1062,8 @@ export default function RecuerdosScreen() {
   const booksData = Array.isArray(booksPayload)
     ? booksPayload
     : booksPayload &&
-        typeof booksPayload === "object" &&
-        "data" in (booksPayload as Record<string, unknown>)
+      typeof booksPayload === "object" &&
+      "data" in (booksPayload as Record<string, unknown>)
       ? (booksPayload as { data: unknown }).data
       : [];
 
@@ -1202,8 +1193,8 @@ export default function RecuerdosScreen() {
                     }}
                     style={{
                       width: "100%",
-                      height: 360,
-                      marginBottom: -80,
+                      aspectRatio: 1.4,
+                      marginBottom: 24,
                     }}
                   >
                     <BookCover
@@ -1840,7 +1831,7 @@ export default function RecuerdosScreen() {
           hasNext={
             selectedRecuerdo
               ? recuerdos.findIndex((r) => r.id === selectedRecuerdo.id) <
-                recuerdos.length - 1
+              recuerdos.length - 1
               : false
           }
           hasPrev={
