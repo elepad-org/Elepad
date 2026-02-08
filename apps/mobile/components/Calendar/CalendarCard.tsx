@@ -1,132 +1,33 @@
-import { useMemo, useState, useEffect, RefObject } from "react";
-import { View, StyleSheet, FlatList } from "react-native";
+import React, { useMemo, useState, useEffect, RefObject } from "react";
+import { View, StyleSheet, FlatList, TouchableOpacity } from "react-native";
 import { Text, IconButton } from "react-native-paper";
 import { Calendar, DateData, LocaleConfig } from "react-native-calendars";
 import Animated, { LinearTransition, ZoomIn } from "react-native-reanimated";
+
 import DropdownSelect from "../shared/DropdownSelect";
-import { Activity, useGetFrequencies } from "@elepad/api-client";
-import { COLORS } from "@/styles/base";
-import type { getActivitiesFamilyCodeIdFamilyGroupResponse } from "@elepad/api-client";
 import ActivityItem from "./ActivityItem";
-import {
-  useGetActivityCompletions,
-  usePostActivityCompletionsToggle,
-} from "@elepad/api-client/src/gen/client";
 import ErrorSnackbar from "@/components/shared/ErrorSnackbar";
-import { useStreakHistory } from "@/hooks/useStreak";
+import { COLORS } from "@/styles/base";
 import { useAuth } from "@/hooks/useAuth";
+import { useStreakHistory } from "@/hooks/useStreak";
 import { getTodayLocal, toLocalDateString } from "@/lib/dateHelpers";
 
-import type { GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
+import {
+  Activity,
+  useGetFrequencies,
+  useGetActivityCompletions,
+  usePostActivityCompletionsToggle,
+  getActivitiesFamilyCodeIdFamilyGroupResponse,
+  GetFamilyGroupIdGroupMembers200,
+} from "@elepad/api-client";
+
+// --- Tipos y Constantes ---
 
 type Frequency = {
   id: string;
   label: string;
   rrule: string | null;
 };
-
-// Función para expandir actividades recurrentes según frequencyId y RRULE
-function expandRecurringActivity(
-  activity: Activity,
-  startDate: Date,
-  endDate: Date,
-  frequencies: Record<string, { label: string; rrule: string | null }>,
-): string[] {
-  // Si no tiene frecuencia, solo retorna el día de inicio
-  if (!activity.frequencyId || !frequencies[activity.frequencyId]) {
-    return [toLocalDateString(new Date(activity.startsAt))];
-  }
-
-  const frequency = frequencies[activity.frequencyId];
-  const rrule = frequency.rrule;
-
-  // Si no hay RRULE (Una vez), solo el día de inicio
-  if (!rrule) {
-    return [toLocalDateString(new Date(activity.startsAt))];
-  }
-
-  const dates: string[] = [];
-  const activityStart = new Date(activity.startsAt);
-  const activityEnd = activity.endsAt ? new Date(activity.endsAt) : endDate;
-
-  // Parsear el RRULE
-  let freq: string | null = null;
-  let interval = 1;
-  let byDay: string[] = [];
-
-  // Extraer FREQ
-  const freqMatch = rrule.match(/FREQ=(\w+)/);
-  if (freqMatch) freq = freqMatch[1];
-
-  // Extraer INTERVAL
-  const intervalMatch = rrule.match(/INTERVAL=(\d+)/);
-  if (intervalMatch) interval = parseInt(intervalMatch[1]);
-
-  // Extraer BYDAY
-  const byDayMatch = rrule.match(/BYDAY=([A-Z,]+)/);
-  if (byDayMatch) byDay = byDayMatch[1].split(",");
-
-  // Generar fechas según la frecuencia
-  let currentDate = new Date(activityStart);
-
-  // Limitar a 365 días para evitar loops infinitos
-  const maxIterations = 365;
-  let iterations = 0;
-
-  while (
-    currentDate <= activityEnd &&
-    currentDate <= endDate &&
-    iterations < maxIterations
-  ) {
-    iterations++;
-
-    // Verificar si la fecha actual cumple con las condiciones
-    let shouldInclude = true;
-
-    // Si tiene BYDAY, verificar que el día de la semana coincida
-    if (byDay.length > 0) {
-      const dayOfWeek = currentDate.getDay();
-      const dayMap: Record<number, string> = {
-        0: "SU",
-        1: "MO",
-        2: "TU",
-        3: "WE",
-        4: "TH",
-        5: "FR",
-        6: "SA",
-      };
-      shouldInclude = byDay.includes(dayMap[dayOfWeek]);
-    }
-
-    if (shouldInclude && currentDate >= activityStart) {
-      const dateStr = toLocalDateString(currentDate);
-      dates.push(dateStr);
-    }
-
-    // Avanzar según la frecuencia
-    switch (freq) {
-      case "DAILY":
-        currentDate.setDate(currentDate.getDate() + interval);
-        break;
-      case "WEEKLY":
-        currentDate.setDate(currentDate.getDate() + 7 * interval);
-        break;
-      case "MONTHLY":
-        currentDate.setMonth(currentDate.getMonth() + interval);
-        break;
-      case "YEARLY":
-        currentDate.setFullYear(currentDate.getFullYear() + interval);
-        break;
-      default:
-        // Si no hay frecuencia válida, solo agregar el primer día
-        return [toLocalDateString(new Date(activity.startsAt))];
-    }
-  }
-
-  return dates.length > 0
-    ? dates
-    : [toLocalDateString(new Date(activity.startsAt))];
-}
 
 interface CalendarCardProps {
   idFamilyGroup: string;
@@ -152,7 +53,7 @@ interface CalendarCardProps {
   onDayChange: (day: string) => void;
 }
 
-// Configuración de calendario en español
+// Configuración de localización para el calendario (Español)
 LocaleConfig.locales["es"] = {
   monthNames: [
     "Enero",
@@ -190,12 +91,242 @@ LocaleConfig.locales["es"] = {
     "Jueves",
     "Viernes",
     "Sábado",
-    "Lunes",
   ],
   dayNamesShort: ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"],
   today: "Hoy",
 };
 LocaleConfig.defaultLocale = "es";
+
+// --- Helpers ---
+
+/**
+ * Expande una actividad recurrente en una lista de fechas basadas en su regla RRULE.
+ * Soporta FREQ=DAILY, WEEKLY, MONTHLY, YEARLY y BYDAY.
+ */
+function expandRecurringActivity(
+  activity: Activity,
+  startDate: Date,
+  endDate: Date,
+  frequencies: Record<string, { label: string; rrule: string | null }>,
+): string[] {
+  // Si no tiene frecuencia válida, retornar solo fecha de inicio
+  if (!activity.frequencyId || !frequencies[activity.frequencyId]) {
+    return [toLocalDateString(new Date(activity.startsAt))];
+  }
+
+  const frequency = frequencies[activity.frequencyId];
+  const rrule = frequency.rrule;
+
+  // Si no hay RRULE ("Una vez"), retornar solo fecha de inicio
+  if (!rrule) {
+    return [toLocalDateString(new Date(activity.startsAt))];
+  }
+
+  const dates: string[] = [];
+  const activityStart = new Date(activity.startsAt);
+  const activityEnd = activity.endsAt ? new Date(activity.endsAt) : endDate;
+
+  // Parsing básico de RRULE
+  let freq: string | null = null;
+  let interval = 1;
+  let byDay: string[] = [];
+
+  const freqMatch = rrule.match(/FREQ=(\w+)/);
+  if (freqMatch) freq = freqMatch[1];
+
+  const intervalMatch = rrule.match(/INTERVAL=(\d+)/);
+  if (intervalMatch) interval = parseInt(intervalMatch[1]);
+
+  const byDayMatch = rrule.match(/BYDAY=([A-Z,]+)/);
+  if (byDayMatch) byDay = byDayMatch[1].split(",");
+
+  // Generación de fechas
+  const currentDate = new Date(activityStart);
+  const maxIterations = 365; // Límite de seguridad
+  let iterations = 0;
+
+  while (
+    currentDate <= activityEnd &&
+    currentDate <= endDate &&
+    iterations < maxIterations
+  ) {
+    iterations++;
+
+    let shouldInclude = true;
+
+    // Verificar día de la semana (BYDAY)
+    if (byDay.length > 0) {
+      const dayOfWeek = currentDate.getDay();
+      const dayMap: Record<number, string> = {
+        0: "SU",
+        1: "MO",
+        2: "TU",
+        3: "WE",
+        4: "TH",
+        5: "FR",
+        6: "SA",
+      };
+      shouldInclude = byDay.includes(dayMap[dayOfWeek]);
+    }
+
+    if (shouldInclude && currentDate >= activityStart) {
+      dates.push(toLocalDateString(currentDate));
+    }
+
+    // Avanzar fecha según frecuencia
+    switch (freq) {
+      case "DAILY":
+        currentDate.setDate(currentDate.getDate() + interval);
+        break;
+      case "WEEKLY":
+        currentDate.setDate(currentDate.getDate() + 7 * interval);
+        break;
+      case "MONTHLY":
+        currentDate.setMonth(currentDate.getMonth() + interval);
+        break;
+      case "YEARLY":
+        currentDate.setFullYear(currentDate.getFullYear() + interval);
+        break;
+      default:
+        return [toLocalDateString(new Date(activity.startsAt))];
+    }
+  }
+
+  return dates.length > 0
+    ? dates
+    : [toLocalDateString(new Date(activity.startsAt))];
+}
+
+// Interfaz para las marcas del calendario
+interface Marking {
+  marked?: boolean;
+  dotColor?: string;
+  selected?: boolean;
+  hasStreak?: boolean;
+  streakPosition?: "single" | "start" | "middle" | "end";
+  isCurrentStreak?: boolean;
+}
+
+interface DayComponentProps {
+  date?: DateData;
+  state?: string;
+  marking?: Marking;
+  onPress?: (date: DateData) => void;
+}
+
+/**
+ * Componente personalizado para renderizar un día en el calendario.
+ * Maneja la visualización de selección, puntos de actividad y la racha (streak).
+ */
+function DayComponent({ date, state, marking, onPress }: DayComponentProps) {
+  if (!date) return <View style={styles.emptyDay} />;
+
+  const isDisabled = state === "disabled";
+  const isToday = state === "today";
+  const isSelected = marking?.selected;
+  const hasStreak = marking?.hasStreak;
+  const hasDot = marking?.marked;
+  const streakPosition = marking?.streakPosition || "single";
+  const isCurrentStreak = marking?.isCurrentStreak || false;
+
+  // Calcular si es inicio/fin de semana para estilos de racha
+  const [year, month, day] = date.dateString.split("-").map(Number);
+  const localDate = new Date(year, month - 1, day);
+  const dayOfWeek = localDate.getDay();
+  const isSunday = dayOfWeek === 0;
+  const isSaturday = dayOfWeek === 6;
+
+  // Estilos de fondo para la racha
+  const getStreakBackgroundStyle = () => {
+    if (!hasStreak) return null;
+
+    const bgColor = isCurrentStreak ? "#FFB84D" : "#FFE5CC";
+    const baseStyle = {
+      position: "absolute" as const,
+      top: 0,
+      bottom: 0,
+      backgroundColor: bgColor,
+    };
+
+    switch (streakPosition) {
+      case "single":
+        return { ...baseStyle, left: 0, right: 0, borderRadius: 10 };
+      case "start":
+        return {
+          ...baseStyle,
+          left: 0,
+          right: isSaturday ? 0 : -16,
+          borderTopLeftRadius: 10,
+          borderBottomLeftRadius: 10,
+        };
+      case "middle":
+        return {
+          ...baseStyle,
+          left: isSunday ? 0 : -16,
+          right: isSaturday ? 0 : -16,
+          borderRadius: 0,
+        };
+      case "end":
+        return {
+          ...baseStyle,
+          left: -16,
+          right: 0,
+          borderTopRightRadius: 10,
+          borderBottomRightRadius: 10,
+        };
+    }
+  };
+
+  const streakBgStyle = getStreakBackgroundStyle();
+
+  return (
+    <View style={styles.dayContainer}>
+      {streakBgStyle && <View style={streakBgStyle} />}
+      <TouchableOpacity
+        onPress={() => onPress?.(date)}
+        disabled={isDisabled}
+        activeOpacity={0.7}
+        style={styles.dayTouchable}
+      >
+        {isSelected && (
+          <Animated.View
+            entering={ZoomIn.duration(200)}
+            style={styles.selectedIndicator}
+          />
+        )}
+        <Text
+          style={[
+            styles.dayText,
+            isDisabled && styles.disabledText,
+            isToday && !isSelected && !hasStreak && styles.todayText,
+            isSelected && styles.selectedDayText,
+            !isSelected && hasStreak && isCurrentStreak && styles.streakText,
+            !isSelected &&
+              hasStreak &&
+              !isCurrentStreak &&
+              styles.streakPastText,
+          ]}
+        >
+          {date.day}
+        </Text>
+        {hasDot && (
+          <View
+            style={[
+              styles.dot,
+              {
+                backgroundColor: isSelected
+                  ? "#FFFFFF"
+                  : marking?.dotColor || COLORS.primary,
+              },
+            ]}
+          />
+        )}
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+// --- Componente Principal ---
 
 export default function CalendarCard(props: CalendarCardProps) {
   const {
@@ -213,23 +344,20 @@ export default function CalendarCard(props: CalendarCardProps) {
     calendarViewRef,
     taskListRef,
     selectedDay,
-    onDayChange
+    onDayChange,
   } = props;
+
   const { userElepad } = useAuth();
   const today = getTodayLocal();
 
   // Cambiar al día de la actividad cuando se recibe desde notificaciones
   useEffect(() => {
     if (activityDateToView) {
-      console.log(
-        "📅 CalendarCard: Changing selected day to",
-        activityDateToView,
-      );
       onDayChange(activityDateToView);
     }
-  }, [activityDateToView]);
+  }, [activityDateToView, onDayChange]); // Agregué onDayChange a dependencias para cumplir linter
 
-  // Preparar lista de miembros de la familia para menciones
+  // Lista de miembros preparada para menciones
   const familyMembers = useMemo(() => {
     if (!groupInfo) return [];
     return (
@@ -242,25 +370,24 @@ export default function CalendarCard(props: CalendarCardProps) {
     );
   }, [groupInfo]);
 
-  // Preparar lista de adultos mayores para el filtro
+  // Lista de adultos mayores para filtro
   const elders = useMemo(() => {
     if (!groupInfo) return [];
     const allMembers = [groupInfo.owner, ...(groupInfo.members || [])];
     return allMembers.filter((member) => member?.elder === true);
   }, [groupInfo]);
 
-  // Estado optimista local para las completaciones
+  // Estado optimista y errores
   const [optimisticCompletions, setOptimisticCompletions] = useState<
     Record<string, boolean>
   >({});
 
-  // Estado para mostrar errores
   const [errorSnackbar, setErrorSnackbar] = useState<{
     visible: boolean;
     message: string;
   }>({ visible: false, message: "" });
 
-  // Calcular rango de fechas para cargar completaciones (3 meses antes y después)
+  // Rango de fechas para cargar datos (3 meses +/-)
   const dateRange = useMemo(() => {
     const now = new Date();
     const start = new Date(now);
@@ -273,47 +400,38 @@ export default function CalendarCard(props: CalendarCardProps) {
     };
   }, []);
 
-  // Cargar completaciones para el rango de fechas
+  // Queries
   const completionsQuery = useGetActivityCompletions({
     startDate: dateRange.startDate,
     endDate: dateRange.endDate,
   });
 
-  // Cargar historial de rachas - Solo si el usuario es elder
   const streakHistoryQuery = useStreakHistory(
     userElepad?.elder ? dateRange.startDate : undefined,
     userElepad?.elder ? dateRange.endDate : undefined,
   );
 
-  // Mutation para toggle de completaciones
   const toggleCompletionMutation = usePostActivityCompletionsToggle();
-
-  // Cargar frecuencias para expandir actividades recurrentes
   const frequenciesQuery = useGetFrequencies();
 
+  // Procesar eventos
   const events: Activity[] = useMemo(() => {
     if (!activitiesQuery.data) return [];
-
-    // El tipo de respuesta es { data: Activity[], status: number, headers: Headers }
     if (
       "data" in activitiesQuery.data &&
       Array.isArray(activitiesQuery.data.data)
     ) {
       return activitiesQuery.data.data;
     }
-
-    // Fallback por si acaso
     if (Array.isArray(activitiesQuery.data)) {
       return activitiesQuery.data as Activity[];
     }
-
     return [];
   }, [activitiesQuery.data]);
 
-  // Crear mapa de frecuencias para acceso rápido
+  // Mapa de frecuencias
   const frequenciesMap = useMemo(() => {
     const map: Record<string, { label: string; rrule: string | null }> = {};
-
     if (!frequenciesQuery.data) return map;
 
     const frequencies: Frequency[] = (() => {
@@ -328,14 +446,12 @@ export default function CalendarCard(props: CalendarCardProps) {
     for (const freq of frequencies) {
       map[freq.id] = { label: freq.label, rrule: freq.rrule };
     }
-
     return map;
   }, [frequenciesQuery.data]);
 
+  // Expandir eventos recurrentes
   const eventsByDate = useMemo(() => {
     const map: Record<string, Activity[]> = {};
-
-    // Calcular rango de fechas para expandir (3 meses antes y 3 meses después)
     const now = new Date();
     const startRange = new Date(now);
     startRange.setMonth(now.getMonth() - 3);
@@ -343,15 +459,12 @@ export default function CalendarCard(props: CalendarCardProps) {
     endRange.setMonth(now.getMonth() + 3);
 
     for (const ev of events) {
-      // Expandir la actividad según su frecuencia
       const dates = expandRecurringActivity(
         ev,
         startRange,
         endRange,
         frequenciesMap,
       );
-
-      // Agregar la actividad a cada fecha expandida
       for (const date of dates) {
         if (!map[date]) map[date] = [];
         map[date].push(ev);
@@ -360,12 +473,11 @@ export default function CalendarCard(props: CalendarCardProps) {
     return map;
   }, [events, frequenciesMap]);
 
-  // Crear mapa de completaciones por activityId + fecha (combina servidor + optimista)
+  // Mapa de completaciones (Server + Optimista)
   const completionsByDateMap = useMemo(() => {
     const map: Record<string, boolean> = {};
     const completionsData = completionsQuery.data;
 
-    // Verificar que sea la respuesta exitosa con data
     if (
       completionsData &&
       "data" in completionsData &&
@@ -377,40 +489,22 @@ export default function CalendarCard(props: CalendarCardProps) {
       }
     }
 
-    // Sobrescribir con cambios optimistas
     for (const key in optimisticCompletions) {
       map[key] = optimisticCompletions[key];
     }
-
     return map;
   }, [completionsQuery.data, optimisticCompletions]);
 
+  // Calcular marcas del calendario (Puntos y Racha)
   const marked = useMemo(() => {
-    const obj: Record<
-      string,
-      {
-        marked?: boolean;
-        dotColor?: string;
-        selected?: boolean;
-        customStyles?: {
-          container?: {
-            borderColor?: string;
-            borderWidth?: number;
-            borderRadius?: number;
-          };
-        };
-      }
-    > = {};
-
-    // Obtener las fechas del historial de rachas - Solo si es elder
+    const obj: Record<string, Marking> = {};
     const streakDays = userElepad?.elder
-      ? streakHistoryQuery.data?.dates || []
+      ? (streakHistoryQuery.data?.dates || []).map(String).sort()
       : [];
 
-    // Filtrar los días con actividades según el adulto mayor seleccionado
+    // Marcar días con eventos
     for (const d of Object.keys(eventsByDate)) {
       const eventsOnDay = eventsByDate[d];
-      // Si hay un adulto mayor seleccionado, solo marcar si tiene actividades para él
       const hasRelevantActivities = selectedElderId
         ? eventsOnDay.some((ev) => ev.assignedTo === selectedElderId)
         : eventsOnDay.length > 0;
@@ -420,26 +514,58 @@ export default function CalendarCard(props: CalendarCardProps) {
       }
     }
 
-    // Agregar círculos naranjas para días con racha - Solo para usuarios elder
-    if (userElepad?.elder) {
+    // Lógica de Racha Visual (Solo para Elders)
+    if (userElepad?.elder && streakDays.length > 0) {
+      const streakSet = new Set(streakDays);
+      const sortedStreakDays = [...streakDays].sort();
+      const mostRecentDay = sortedStreakDays[sortedStreakDays.length - 1];
+      const currentStreakDays = new Set<string>();
+
+      // Identificar días de la racha actual continua
+      currentStreakDays.add(mostRecentDay);
+      let currentDayIter = mostRecentDay;
+      while (true) {
+        const [year, month, dayNum] = currentDayIter.split("-").map(Number);
+        const prevDate = new Date(year, month - 1, dayNum - 1);
+        const prevDayStr = toLocalDateString(prevDate);
+        if (streakSet.has(prevDayStr)) {
+          currentStreakDays.add(prevDayStr);
+          currentDayIter = prevDayStr;
+        } else {
+          break;
+        }
+      }
+
       for (const streakDay of streakDays) {
         const day = streakDay as string;
-        if (!obj[day]) {
-          obj[day] = {};
-        }
-        obj[day].customStyles = {
-          container: {
-            borderColor: "#FF6B35",
-            borderWidth: 2,
-            borderRadius: 18,
-          },
-        };
+        const [year, month, dayNum] = day.split("-").map(Number);
+        const prevDayStr = toLocalDateString(
+          new Date(year, month - 1, dayNum - 1),
+        );
+        const nextDayStr = toLocalDateString(
+          new Date(year, month - 1, dayNum + 1),
+        );
+
+        const hasPrev = streakSet.has(prevDayStr);
+        const hasNext = streakSet.has(nextDayStr);
+
+        if (!obj[day]) obj[day] = {};
+
+        obj[day].hasStreak = true;
+        obj[day].isCurrentStreak = currentStreakDays.has(day);
+
+        if (hasPrev && hasNext) obj[day].streakPosition = "middle";
+        else if (hasPrev && !hasNext) obj[day].streakPosition = "end";
+        else if (!hasPrev && hasNext) obj[day].streakPosition = "start";
+        else obj[day].streakPosition = "single";
       }
     }
 
+    // Marcar día seleccionado
     obj[selectedDay] = obj[selectedDay]
       ? { ...obj[selectedDay], selected: true }
       : { selected: true };
+
     return obj;
   }, [
     eventsByDate,
@@ -449,94 +575,72 @@ export default function CalendarCard(props: CalendarCardProps) {
     selectedElderId,
   ]);
 
-  // Filtrar actividades por adulto mayor seleccionado, ordenados: primero incompletos, luego completados
+  // Filtrar y ordenar eventos del día seleccionado
   const dayEvents = useMemo(() => {
     const eventsToday = eventsByDate[selectedDay] ?? [];
-    // Si hay un adulto mayor seleccionado, filtrar por assignedTo
     const filtered = selectedElderId
       ? eventsToday.filter((ev) => ev.assignedTo === selectedElderId)
       : eventsToday;
 
-    // Separar completados de no completados usando completionsByDateMap
-    const incomplete = filtered.filter((ev) => {
-      const key = `${ev.id}_${selectedDay}`;
-      return !completionsByDateMap[key];
-    });
-    const complete = filtered.filter((ev) => {
-      const key = `${ev.id}_${selectedDay}`;
-      return completionsByDateMap[key];
-    });
+    const incomplete = filtered.filter(
+      (ev) => !completionsByDateMap[`${ev.id}_${selectedDay}`],
+    );
+    const complete = filtered.filter(
+      (ev) => completionsByDateMap[`${ev.id}_${selectedDay}`],
+    );
 
-    // Ordenar cada grupo por hora de inicio
     incomplete.sort((a, b) => a.startsAt.localeCompare(b.startsAt));
     complete.sort((a, b) => a.startsAt.localeCompare(b.startsAt));
 
-    // Retornar incompletos primero, luego completados
     return [...incomplete, ...complete];
   }, [eventsByDate, selectedDay, selectedElderId, completionsByDateMap]);
 
-  // Función para toggle optimista con reintentos
+  // Manejar toggle de completado
   const handleToggleCompletion = async (activity: Activity) => {
     const key = `${activity.id}_${selectedDay}`;
-    const currentState = completionsByDateMap[key] || false;
-    const newState = !currentState;
+    const newState = !completionsByDateMap[key];
 
-    // 1. Actualización optimista instantánea
-    setOptimisticCompletions((prev) => ({
-      ...prev,
-      [key]: newState,
-    }));
+    // Optimista
+    setOptimisticCompletions((prev) => ({ ...prev, [key]: newState }));
 
-    // 2. Función de reintento con backoff
-    const attemptToggle = async (attemptNumber: number): Promise<boolean> => {
+    // Reintento con backoff
+    const attemptToggle = async (attempt: number): Promise<boolean> => {
       try {
         await toggleCompletionMutation.mutateAsync({
-          data: {
-            activityId: activity.id,
-            completedDate: selectedDay,
-          },
+          data: { activityId: activity.id, completedDate: selectedDay },
         });
         return true;
-      } catch (error) {
-        console.error(`Intento ${attemptNumber} fallido:`, error);
-
-        if (attemptNumber < 2) {
-          // Esperar 3 segundos antes del siguiente intento
-          await new Promise((resolve) => setTimeout(resolve, 3000));
-          return attemptToggle(attemptNumber + 1);
+      } catch {
+        if (attempt < 2) {
+          await new Promise((r) => setTimeout(r, 3000));
+          return attemptToggle(attempt + 1);
         }
-
         return false;
       }
     };
 
-    // 3. Ejecutar con reintentos (máximo 2 intentos)
     const success = await attemptToggle(1);
 
     if (success) {
-      // 4. Éxito: refrescar datos del servidor y limpiar estado optimista
       await completionsQuery.refetch();
       setOptimisticCompletions((prev) => {
-        const updated = { ...prev };
-        delete updated[key];
-        return updated;
+        const next = { ...prev };
+        delete next[key];
+        return next;
       });
     } else {
-      // 5. Fallo después de 2 intentos: revertir al estado original
-      console.warn("Toggle falló después de 2 intentos, revirtiendo...");
       setOptimisticCompletions((prev) => {
-        const updated = { ...prev };
-        delete updated[key];
-        return updated;
+        const next = { ...prev };
+        delete next[key];
+        return next;
       });
-
-      // Mostrar mensaje de error al usuario
       setErrorSnackbar({
         visible: true,
         message: "No se pudo actualizar. Intenta nuevamente.",
       });
     }
   };
+
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
@@ -544,7 +648,12 @@ export default function CalendarCard(props: CalendarCardProps) {
           <Calendar
             onDayPress={(d: DateData) => onDayChange(d.dateString)}
             markedDates={marked}
-            markingType={"custom"}
+            dayComponent={(dayProps) => (
+              <DayComponent
+                {...dayProps}
+                onPress={(d) => onDayChange(d.dateString)}
+              />
+            )}
             enableSwipeMonths
             style={styles.calendar}
             theme={{
@@ -579,9 +688,9 @@ export default function CalendarCard(props: CalendarCardProps) {
                   frameUrl: elder.activeFrameUrl || null,
                 })),
               ]}
-              onSelect={(value) => {
-                onElderChange(value === "all" ? null : value);
-              }}
+              onSelect={(value) =>
+                onElderChange(value === "all" ? null : value)
+              }
               placeholder="Seleccionar adulto mayor"
               showLabel={false}
             />
@@ -590,9 +699,7 @@ export default function CalendarCard(props: CalendarCardProps) {
             icon="calendar-today"
             size={24}
             mode="contained"
-            onPress={() => {
-              onDayChange(today);
-            }}
+            onPress={() => onDayChange(today)}
             style={styles.todayIconButton}
             containerColor={COLORS.primary}
             iconColor={COLORS.white}
@@ -600,22 +707,15 @@ export default function CalendarCard(props: CalendarCardProps) {
         </View>
       </View>
 
-
-      {activitiesQuery.isLoading && <Text>Cargando...</Text>}
-      {!!activitiesQuery.error && (
-        <Text style={{ color: "red" }}>
-          {activitiesQuery.error instanceof Error
-            ? activitiesQuery.error.message
-            : String(activitiesQuery.error)}
-        </Text>
-      )}
-
       <View style={{ flex: 1 }} ref={taskListRef}>
         {dayEvents.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>
               {selectedElderId
-                ? `No hay actividades programadas para ${elders.find((e) => e.id === selectedElderId)?.displayName || "este usuario"} ${selectedDay === today ? "hoy" : "en este día"}.`
+                ? `No hay actividades programadas para ${
+                    elders.find((e) => e.id === selectedElderId)?.displayName ||
+                    "este usuario"
+                  } ${selectedDay === today ? "hoy" : "en este día"}.`
                 : selectedDay === today
                   ? "No hay eventos para hoy."
                   : "No hay eventos para este día."}
@@ -624,11 +724,9 @@ export default function CalendarCard(props: CalendarCardProps) {
         ) : (
           <FlatList
             data={dayEvents}
-            keyExtractor={(i) => {
-              const key = `${i.id}_${selectedDay}`;
-              const completed = completionsByDateMap[key] || false;
-              return `${i.id}-${completed}`;
-            }}
+            keyExtractor={(item) =>
+              `${item.id}-${completionsByDateMap[`${item.id}_${selectedDay}`]}`
+            }
             renderItem={({ item, index }) => (
               <Animated.View
                 key={`${item.id}-${selectedDay}`}
@@ -643,10 +741,9 @@ export default function CalendarCard(props: CalendarCardProps) {
                   onToggleComplete={() => handleToggleCompletion(item)}
                   isOwnerOfGroup={isOwnerOfGroup}
                   groupInfo={groupInfo}
-                  completed={(() => {
-                    const key = `${item.id}_${selectedDay}`;
-                    return completionsByDateMap[key] || false;
-                  })()}
+                  completed={
+                    completionsByDateMap[`${item.id}_${selectedDay}`] || false
+                  }
                   familyMembers={familyMembers}
                   shouldOpen={activityToView === item.id}
                   onOpened={onActivityViewed}
@@ -678,9 +775,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   calendarWrapper: {
-    position: "relative",
     marginTop: 16,
     marginBottom: 16,
+    position: "relative",
   },
   calendar: {
     borderRadius: 16,
@@ -692,9 +789,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     marginBottom: 16,
-  },
-  filterIcon: {
-    margin: 0,
   },
   todayIconButton: {
     margin: 0,
@@ -713,5 +807,69 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
     paddingHorizontal: 16,
     paddingTop: 8,
+  },
+
+  // Estilos del DayComponent
+  emptyDay: {
+    width: 32,
+    height: 32,
+  },
+  dayContainer: {
+    width: 32,
+    height: 32,
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  dayTouchable: {
+    width: 32,
+    height: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 2,
+  },
+  selectedIndicator: {
+    position: "absolute",
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: COLORS.primary,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  dayText: {
+    fontSize: 16,
+    color: COLORS.text,
+    fontWeight: "400",
+  },
+  disabledText: {
+    color: COLORS.textPlaceholder,
+  },
+  todayText: {
+    color: COLORS.primary,
+    fontWeight: "bold",
+  },
+  selectedDayText: {
+    color: COLORS.white,
+    fontWeight: "bold",
+  },
+  streakText: {
+    color: "#FFFFFF",
+    fontWeight: "bold",
+  },
+  streakPastText: {
+    color: "#D67D00",
+    fontWeight: "bold",
+  },
+  dot: {
+    position: "absolute",
+    top: 4,
+    left: 4,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
   },
 });
