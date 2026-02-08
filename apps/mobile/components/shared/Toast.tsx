@@ -13,11 +13,12 @@ import {
   TouchableOpacity,
   View,
   Dimensions,
+  Platform,
 } from "react-native";
 import { Text, Icon } from "react-native-paper";
 import { useSegments } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { COLORS, SHADOWS, FONT, LAYOUT } from "@/styles/base";
+import { COLORS, SHADOWS, FONT } from "@/styles/base";
 
 export type ToastType = "success" | "error" | "info" | "warning" | "streak";
 
@@ -187,10 +188,17 @@ const Toast = ({
   if (!visible && !isVisible) return null;
 
   // Calculate dynamic bottom position based on navbar presence and safe area
-  // Use safe area bottom inset + additional spacing + navbar height if present
-  const baseBottomSpacing = 16;
-  const navbarOffset = effectiveWithNavbar ? LAYOUT.bottomNavHeight : 0;
-  const bottomPosition = insets.bottom + baseBottomSpacing + navbarOffset;
+  // Use precise dimensions from BottomTabBar to ensure it sits right on top
+  const TAB_BAR_HEIGHT = 72;
+  const TAB_BAR_BOTTOM_MARGIN = Platform.OS === "android" ? 14 : 0;
+
+  // Use tighter spacing when navbar is present
+  const spacing = effectiveWithNavbar ? 10 : 24;
+  const navbarBlockHeight = effectiveWithNavbar
+    ? TAB_BAR_HEIGHT + TAB_BAR_BOTTOM_MARGIN
+    : 0;
+
+  const bottomPosition = insets.bottom + spacing + navbarBlockHeight;
 
   // Calculate responsive width and horizontal margins
   // For smaller screens (< 360px), use more width
