@@ -942,13 +942,12 @@ export default function RecuerdoDetailDialog({
                           </Text>
                         </View>
 
-                        {/* Menú debajo de la etiqueta */}
+                        {/* Menú debajo de la etiqueta - posición absoluta */}
                         <View
                           style={{
-                            flexDirection: "row",
-                            justifyContent: "flex-end",
-                            marginTop: 4,
-                            height: 32,
+                            position: "absolute",
+                            top: 68,
+                            right: 16,
                             zIndex: 100,
                           }}
                         >
@@ -1003,6 +1002,7 @@ export default function RecuerdoDetailDialog({
                             flex: 1,
                             justifyContent: "center",
                             alignItems: "center",
+                            marginTop: -16,
                           }}
                         >
                           <View
