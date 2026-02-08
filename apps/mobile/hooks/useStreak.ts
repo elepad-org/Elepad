@@ -1,13 +1,12 @@
-import { useGetStreaksMe, useGetStreaksHistory, GetStreaksMe200, GetStreaksHistory200 } from "@elepad/api-client";
-import { useEffect, useRef } from "react";
-import { useStreakSnackbar } from "./useStreakSnackbar";
+import { useGetStreaksMe, useGetStreaksHistory, GetStreaksHistory200 } from "@elepad/api-client";
+
 
 /**
  * Hook para obtener la racha actual del usuario
  */
 export function useUserStreak() {
-  const { showStreakExtended } = useStreakSnackbar();
-  const previousStreakRef = useRef<number | null>(null);
+
+
   
   // Obtener la fecha local del cliente en formato YYYY-MM-DD
   const getClientDate = () => {
@@ -29,29 +28,7 @@ export function useUserStreak() {
     },
   });
 
-  // Detectar cuando se extiende la racha
-  useEffect(() => {
-    if (query.data) {
-      const responseData = 'data' in query.data ? query.data.data : query.data;
-      if (responseData && typeof responseData === 'object' && 'currentStreak' in responseData) {
-        const streakData = responseData as GetStreaksMe200;
-        const currentStreak = streakData.currentStreak;
-        
-        // Si había una racha previa y aumentó, mostrar toast
-        // Incluye el caso de 0 -> 1 (primera racha)
-        if (
-          previousStreakRef.current !== null && 
-          currentStreak > previousStreakRef.current &&
-          currentStreak > 0
-        ) {
-          console.log(`🔥 Racha extendida: ${previousStreakRef.current} -> ${currentStreak}`);
-          showStreakExtended(currentStreak);
-        }
-        
-        previousStreakRef.current = currentStreak;
-      }
-    }
-  }, [query.data, showStreakExtended]);
+
 
   return query;
 }
