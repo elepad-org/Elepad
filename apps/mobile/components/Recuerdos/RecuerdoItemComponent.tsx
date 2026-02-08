@@ -217,22 +217,26 @@ const RecuerdoItemComponent = React.memo(({
                 />
               </View>
 
-              {/* Ícono de play central */}
+              {/* Ventana central del cassette */}
               <View
                 style={{
-                  width: 22 * scale,
-                  height: 22 * scale,
-                  borderRadius: 12 * scale,
-                  backgroundColor: "#ff6b35",
+                  width: 60 * scale,
+                  height: 20 * scale,
+                  backgroundColor: "#1a1a1a",
+                  borderRadius: 2 * scale,
+                  borderWidth: 1 * scale,
+                  borderColor: "#4a4a4a",
                   justifyContent: "center",
                   alignItems: "center",
                 }}
               >
-                <IconButton
-                  icon="play"
-                  size={14 * scale}
-                  iconColor="#1a1a1a"
-                  style={{ margin: 0 }}
+                <View
+                  style={{
+                    width: "80%",
+                    height: 2 * scale,
+                    backgroundColor: "#ff6b35",
+                    opacity: 0.6,
+                  }}
                 />
               </View>
 

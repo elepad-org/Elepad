@@ -1040,21 +1040,26 @@ export default function RecuerdoDetailDialog({
                                 }}
                               />
                             </View>
+                            {/* Ventana central del cassette */}
                             <View
                               style={{
-                                width: 44,
-                                height: 44,
-                                borderRadius: 22,
-                                backgroundColor: "#ff6b35",
+                                width: 120,
+                                height: 40,
+                                backgroundColor: "#1a1a1a",
+                                borderRadius: 4,
+                                borderWidth: 2,
+                                borderColor: "#4a4a4a",
                                 justifyContent: "center",
                                 alignItems: "center",
                               }}
                             >
-                              <IconButton
-                                icon="play"
-                                size={24}
-                                iconColor="#1a1a1a"
-                                style={{ margin: 0 }}
+                              <View
+                                style={{
+                                  width: "80%",
+                                  height: 4,
+                                  backgroundColor: "#ff6b35",
+                                  opacity: 0.6,
+                                }}
                               />
                             </View>
                             <View

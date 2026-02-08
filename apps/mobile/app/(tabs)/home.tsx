@@ -494,7 +494,7 @@ const HomeScreen = () => {
                             {
                               transform: [{
                                 rotate: `${(
-                                  ((lastMemory.id.charCodeAt(0) + lastMemory.id.charCodeAt(lastMemory.id.length - 1)) % 11) - 5
+                                  (lastMemory.id.charCodeAt(0) % 2) === 0 ? 1 : -1
                                 )}deg`
                               }]
                             }
@@ -519,14 +519,6 @@ const HomeScreen = () => {
                                 >
                                   {lastMemory.title || "Sin título"}
                                 </Text>
-                                {lastMemory.caption && (
-                                  <HighlightedMentionText
-                                    text={lastMemory.caption}
-                                    familyMembers={groupMembers}
-                                    style={styles.memoryPolaroidDescription}
-                                  />
-                                )}
-
                               </View>
                             </View>
                           </View>
