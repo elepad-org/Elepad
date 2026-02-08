@@ -5,6 +5,9 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
+  withRepeat,
+  withSpring,
+  withDelay,
 } from "react-native-reanimated";
 import { useEffect, useMemo } from "react";
 
@@ -35,6 +38,11 @@ export default function StreakCelebrationModal({
 }: Props) {
   // Animaciones
   const opacity = useSharedValue(0);
+  const numberOpacity = useSharedValue(0);
+  const cardTranslateY = useSharedValue(50);
+
+  // Checkmark animations (one for each day)
+  const checkmarkScales = Array.from({ length: 7 }, () => useSharedValue(0));
 
   // Confetti animations (12 particles) - create shared values directly
   const confettiValues = Array.from({ length: 12 }, () => ({
@@ -62,8 +70,10 @@ export default function StreakCelebrationModal({
     if (visible) {
       // Reset
       opacity.value = 0;
+      numberOpacity.value = 0;
+      cardTranslateY.value = 50;
       confettiValues.forEach((conf) => {
-        conf.translateY.value = -100;
+        conf.translateY.value = -50;
         conf.translateX.value = 0;
         conf.rotate.value = 0;
         conf.opacity.value = 0;
@@ -72,27 +82,51 @@ export default function StreakCelebrationModal({
       // Fade in del fondo
       opacity.value = withTiming(1, { duration: 300 });
 
-      // Animate confetti
+      // Slide up animation for the card
+      cardTranslateY.value = withSpring(0, {
+        damping: 15,
+        stiffness: 150,
+      });
+
+      // Fade in the streak number
+      numberOpacity.value = withTiming(1, { duration: 600 });
+
+      // Animate checkmarks with staggered delays for completed days
+      weekStatus.forEach((completed, index) => {
+        if (completed) {
+          checkmarkScales[index].value = withDelay(
+            400 + index * 100,
+            withSpring(1, { damping: 8, stiffness: 200 }),
+          );
+        }
+      });
+
+      // Animate confetti infinitely
       confettiValues.forEach((conf, index) => {
-        const delay = index * 80;
-        const randomX = (Math.random() - 0.5) * 300;
-        const randomRotation = Math.random() * 720 - 360;
-        const duration = 2500 + Math.random() * 500;
+        const delay = index * 200;
+        const randomX = (Math.random() - 0.5) * 120;
+        const randomRotation = Math.random() * 360 - 180;
+        const duration = 3000 + Math.random() * 1000;
 
         setTimeout(() => {
-          conf.opacity.value = withTiming(1, { duration: 200 });
-          conf.translateY.value = withTiming(700, { duration });
-          conf.translateX.value = withTiming(randomX, { duration });
-          conf.rotate.value = withTiming(randomRotation, { duration });
+          conf.opacity.value = 1;
+          // Infinite loop: fall down, then reset and repeat
+          conf.translateY.value = withRepeat(
+            withTiming(350, { duration }),
+            -1,
+            false,
+          );
+          conf.translateX.value = withRepeat(
+            withTiming(randomX, { duration }),
+            -1,
+            false,
+          );
+          conf.rotate.value = withRepeat(
+            withTiming(randomRotation, { duration }),
+            -1,
+            false,
+          );
         }, delay);
-
-        // Fade out at the end
-        setTimeout(
-          () => {
-            conf.opacity.value = withTiming(0, { duration: 300 });
-          },
-          duration + delay - 300,
-        );
       });
     }
   }, [visible, opacity, confettiValues]);
@@ -100,6 +134,160 @@ export default function StreakCelebrationModal({
   const containerAnimatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
   }));
+
+  const cardAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: cardTranslateY.value }],
+  }));
+
+  const numberAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: numberOpacity.value,
+  }));
+
+  // Create animated styles for all 7 checkmarks
+  const checkmark0 = useAnimatedStyle(() => ({
+    transform: [{ scale: checkmarkScales[0].value }],
+  }));
+  const checkmark1 = useAnimatedStyle(() => ({
+    transform: [{ scale: checkmarkScales[1].value }],
+  }));
+  const checkmark2 = useAnimatedStyle(() => ({
+    transform: [{ scale: checkmarkScales[2].value }],
+  }));
+  const checkmark3 = useAnimatedStyle(() => ({
+    transform: [{ scale: checkmarkScales[3].value }],
+  }));
+  const checkmark4 = useAnimatedStyle(() => ({
+    transform: [{ scale: checkmarkScales[4].value }],
+  }));
+  const checkmark5 = useAnimatedStyle(() => ({
+    transform: [{ scale: checkmarkScales[5].value }],
+  }));
+  const checkmark6 = useAnimatedStyle(() => ({
+    transform: [{ scale: checkmarkScales[6].value }],
+  }));
+
+  const checkmarkStyles = [
+    checkmark0,
+    checkmark1,
+    checkmark2,
+    checkmark3,
+    checkmark4,
+    checkmark5,
+    checkmark6,
+  ];
+
+  // Create animated styles for all 12 confetti particles (must be outside of map)
+  const confetti0 = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: confettiValues[0].translateY.value },
+      { translateX: confettiValues[0].translateX.value },
+      { rotate: `${confettiValues[0].rotate.value}deg` },
+    ],
+    opacity: confettiValues[0].opacity.value,
+  }));
+  const confetti1 = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: confettiValues[1].translateY.value },
+      { translateX: confettiValues[1].translateX.value },
+      { rotate: `${confettiValues[1].rotate.value}deg` },
+    ],
+    opacity: confettiValues[1].opacity.value,
+  }));
+  const confetti2 = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: confettiValues[2].translateY.value },
+      { translateX: confettiValues[2].translateX.value },
+      { rotate: `${confettiValues[2].rotate.value}deg` },
+    ],
+    opacity: confettiValues[2].opacity.value,
+  }));
+  const confetti3 = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: confettiValues[3].translateY.value },
+      { translateX: confettiValues[3].translateX.value },
+      { rotate: `${confettiValues[3].rotate.value}deg` },
+    ],
+    opacity: confettiValues[3].opacity.value,
+  }));
+  const confetti4 = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: confettiValues[4].translateY.value },
+      { translateX: confettiValues[4].translateX.value },
+      { rotate: `${confettiValues[4].rotate.value}deg` },
+    ],
+    opacity: confettiValues[4].opacity.value,
+  }));
+  const confetti5 = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: confettiValues[5].translateY.value },
+      { translateX: confettiValues[5].translateX.value },
+      { rotate: `${confettiValues[5].rotate.value}deg` },
+    ],
+    opacity: confettiValues[5].opacity.value,
+  }));
+  const confetti6 = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: confettiValues[6].translateY.value },
+      { translateX: confettiValues[6].translateX.value },
+      { rotate: `${confettiValues[6].rotate.value}deg` },
+    ],
+    opacity: confettiValues[6].opacity.value,
+  }));
+  const confetti7 = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: confettiValues[7].translateY.value },
+      { translateX: confettiValues[7].translateX.value },
+      { rotate: `${confettiValues[7].rotate.value}deg` },
+    ],
+    opacity: confettiValues[7].opacity.value,
+  }));
+  const confetti8 = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: confettiValues[8].translateY.value },
+      { translateX: confettiValues[8].translateX.value },
+      { rotate: `${confettiValues[8].rotate.value}deg` },
+    ],
+    opacity: confettiValues[8].opacity.value,
+  }));
+  const confetti9 = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: confettiValues[9].translateY.value },
+      { translateX: confettiValues[9].translateX.value },
+      { rotate: `${confettiValues[9].rotate.value}deg` },
+    ],
+    opacity: confettiValues[9].opacity.value,
+  }));
+  const confetti10 = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: confettiValues[10].translateY.value },
+      { translateX: confettiValues[10].translateX.value },
+      { rotate: `${confettiValues[10].rotate.value}deg` },
+    ],
+    opacity: confettiValues[10].opacity.value,
+  }));
+  const confetti11 = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: confettiValues[11].translateY.value },
+      { translateX: confettiValues[11].translateX.value },
+      { rotate: `${confettiValues[11].rotate.value}deg` },
+    ],
+    opacity: confettiValues[11].opacity.value,
+  }));
+
+  const confettiStyles = [
+    confetti0,
+    confetti1,
+    confetti2,
+    confetti3,
+    confetti4,
+    confetti5,
+    confetti6,
+    confetti7,
+    confetti8,
+    confetti9,
+    confetti10,
+    confetti11,
+  ];
 
   if (!visible) return null;
 
@@ -113,39 +301,8 @@ export default function StreakCelebrationModal({
       <Animated.View style={[styles.overlay, containerAnimatedStyle]}>
         <Pressable style={styles.backdrop} onPress={onClose} />
 
-        {/* Confetti particles */}
-        {confettiValues.map((conf, index) => {
-          const animatedStyle = useAnimatedStyle(() => ({
-            transform: [
-              { translateY: conf.translateY.value },
-              { translateX: conf.translateX.value },
-              { rotate: `${conf.rotate.value}deg` },
-            ],
-            opacity: conf.opacity.value,
-          }));
-
-          const color = CONFETTI_COLORS[index % CONFETTI_COLORS.length];
-          const size = 8 + Math.random() * 6;
-
-          return (
-            <Animated.View
-              key={index}
-              style={[
-                styles.confettiParticle,
-                animatedStyle,
-                {
-                  backgroundColor: color,
-                  width: size,
-                  height: size,
-                  left: `${10 + index * 7}%`,
-                },
-              ]}
-            />
-          );
-        })}
-
         <View style={styles.contentContainer}>
-          <View style={styles.card}>
+          <Animated.View style={[styles.card, cardAnimatedStyle]}>
             {/* Imagen de fondo grande */}
             <Image
               source={nuevoDiaRachaImage}
@@ -153,13 +310,39 @@ export default function StreakCelebrationModal({
               resizeMode="contain"
             />
 
+            {/* Confetti particles */}
+            {confettiValues.map((conf, index) => {
+              const color = CONFETTI_COLORS[index % CONFETTI_COLORS.length];
+              const size = 4 + (index % 3); // Smaller particles: 4, 5, 6px
+
+              return (
+                <Animated.View
+                  key={index}
+                  style={[
+                    styles.confettiParticle,
+                    confettiStyles[index],
+                    {
+                      backgroundColor: color,
+                      width: size,
+                      height: size,
+                      left: `${5 + index * 8}%`,
+                    },
+                  ]}
+                />
+              );
+            })}
+
             {/* Contenido en primer plano */}
             <View style={styles.contentWrapper}>
               <View>
                 <Text style={styles.title}>¡Racha extendida!</Text>
 
                 <View style={styles.streakInfo}>
-                  <Text style={styles.streakNumber}>{streakCount}</Text>
+                  <Animated.Text
+                    style={[styles.streakNumber, numberAnimatedStyle]}
+                  >
+                    {streakCount}
+                  </Animated.Text>
                   <Text style={styles.streakIcon}>🔥</Text>
                 </View>
                 <Text style={styles.streakLabel}>Días de racha</Text>
@@ -186,7 +369,7 @@ export default function StreakCelebrationModal({
                 })}
               </View>
             </View>
-          </View>
+          </Animated.View>
         </View>
       </Animated.View>
     </Modal>
