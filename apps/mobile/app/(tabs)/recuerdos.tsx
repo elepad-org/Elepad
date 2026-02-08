@@ -1475,7 +1475,7 @@ export default function RecuerdosScreen() {
             visible={bookMenuVisible}
             onDismiss={handleCloseBookMenu}
             contentStyle={{
-              backgroundColor: "rgba(255, 255, 255, 0.70)",
+              backgroundColor: COLORS.white,
               borderRadius: 12,
               width: 215,
             }}
@@ -1484,6 +1484,7 @@ export default function RecuerdosScreen() {
               <IconButton
                 icon="dots-horizontal"
                 size={22}
+                iconColor={COLORS.primary}
                 style={{ margin: 0 }}
                 onPress={() => {
                   setBookMenuVisible(true);
