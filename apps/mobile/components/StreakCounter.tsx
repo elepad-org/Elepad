@@ -160,11 +160,37 @@ export default function StreakCounter() {
     return status;
   }, [historyData, startOfWeek]);
 
-  // Loading state
+  // Loading state con Skeleton detallado
   if ((streakLoading || historyLoading) && !streak) {
     return (
       <View style={styles.container}>
-        <SkeletonBox width="100%" height={160} borderRadius={16} />
+        <View style={styles.card}>
+          <View style={styles.contentRow}>
+            {/* Skeleton Columna Izquierda */}
+            <View style={styles.infoColumn}>
+              <View>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <SkeletonBox width={80} height={60} borderRadius={8} />
+                </View>
+                <View style={{ marginTop: 8 }}>
+                  <SkeletonBox width={120} height={16} borderRadius={4} />
+                </View>
+              </View>
+
+              {/* Skeleton Días de la semana */}
+              <View style={styles.weekContainer}>
+                {Array(7)
+                  .fill(0)
+                  .map((_, index) => (
+                    <View key={index} style={styles.dayWrapper}>
+                      <SkeletonBox width={20} height={10} borderRadius={2} />
+                      <SkeletonBox width={24} height={24} borderRadius={12} />
+                    </View>
+                  ))}
+              </View>
+            </View>
+          </View>
+        </View>
       </View>
     );
   }
