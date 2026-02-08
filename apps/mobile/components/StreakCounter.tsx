@@ -14,7 +14,7 @@ const ELEPAD_IMAGES = {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   bronze: require("../assets/images/EleRacha/FrioPared.png"), // 0-2 días
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  silver: require("../assets/images/EleRacha/Normal.png"), // 3-29 días
+  silver: require("../assets/images/EleRacha/NormalPared.png"), // 3-29 días
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   gold: require("../assets/images/EleRacha/FuegoPared.png"), // 30+ días
 };
@@ -55,12 +55,12 @@ export default function StreakCounter() {
   // Factores de escala basados en tu preferencia de 400px
   // 400px es aprox 100% del ancho de un celular promedio, usaremos un factor seguro
   const IMAGE_SIZE_LARGE = SCREEN_WIDTH * 0.95; // 95% del ancho de pantalla
-  const IMAGE_SIZE_NORMAL = SCREEN_WIDTH * 0.75;
+  const IMAGE_SIZE_NORMAL = SCREEN_WIDTH * 0.9;
 
   // Configuración específica para cada nivel de racha
   const getElepadConfig = (streakCount: number) => {
     // NIVEL ORO (>= 70 días) - Fuego
-    if (streakCount >= 7) {
+    if (streakCount >= 10) {
       return {
         source: ELEPAD_IMAGES.gold,
         style: {
@@ -72,14 +72,14 @@ export default function StreakCounter() {
       };
     }
     // NIVEL PLATA (10 - 69 días) - Normal
-    if (streakCount >= 1) {
+    if (streakCount >= 10) {
       return {
         source: ELEPAD_IMAGES.silver,
         style: {
           width: IMAGE_SIZE_NORMAL,
           height: IMAGE_SIZE_NORMAL,
-          marginRight: -40,
-          marginBottom: -40,
+          marginRight: -70,
+          marginBottom: 0,
         },
       };
     }
@@ -89,7 +89,7 @@ export default function StreakCounter() {
       style: {
         width: IMAGE_SIZE_LARGE,
         height: IMAGE_SIZE_LARGE,
-        marginRight: -IMAGE_SIZE_LARGE * 0.15,
+        marginRight: -IMAGE_SIZE_LARGE * 0.2,
         marginBottom: -50,
       },
     };
