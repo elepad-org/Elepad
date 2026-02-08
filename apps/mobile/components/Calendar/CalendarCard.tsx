@@ -240,7 +240,7 @@ function DayComponent({ date, state, marking, onPress }: DayComponentProps) {
   const getStreakBackgroundStyle = () => {
     if (!hasStreak) return null;
 
-    const bgColor = isCurrentStreak ? "#FFB84D" : "#FFE5CC";
+    const bgColor = isCurrentStreak ? "#ffbf84ff" : "#ffe5ccff";
     const baseStyle = {
       position: "absolute" as const,
       top: 0,
@@ -269,7 +269,7 @@ function DayComponent({ date, state, marking, onPress }: DayComponentProps) {
       case "end":
         return {
           ...baseStyle,
-          left: -16,
+          left: isSunday ? 0 : -16,
           right: 0,
           borderTopRightRadius: 10,
           borderBottomRightRadius: 10,
