@@ -4,7 +4,7 @@ import { Text } from "react-native-paper";
 import { FONT } from "@/styles/base";
 import { useGetMemories } from "@elepad/api-client";
 import { useMemo } from "react";
-import chestImage from "@/assets/images/baul.png";
+import chestImage from "@/assets/images/baul-2.png";
 
 interface BookCoverProps {
   bookId: string;
@@ -78,7 +78,7 @@ export default function BookCover({ bookId, groupId, title }: BookCoverProps) {
         source={chestImage}
         style={styles.chestImage}
       />
-      
+
       {/* Imágenes de memorias como stickers */}
       {imageMemories.map((memory: { id: string; mediaUrl: string }, index: number) => {
         const position = stickerPositions[index];
@@ -88,7 +88,7 @@ export default function BookCover({ bookId, groupId, title }: BookCoverProps) {
         };
         if (position.left) stickerStyle.left = position.left;
         if (position.right) stickerStyle.right = position.right;
-        
+
         return (
           <View
             key={memory.id}
@@ -102,7 +102,7 @@ export default function BookCover({ bookId, groupId, title }: BookCoverProps) {
           </View>
         );
       })}
-      
+
       {/* Título superpuesto */}
       <View style={styles.titleContainer}>
         <Text numberOfLines={2} style={styles.chestTitle}>
@@ -120,14 +120,12 @@ const styles = StyleSheet.create({
     position: "relative",
     alignItems: "center",
     justifyContent: "center",
-    overflow: "visible",
   },
   chestImage: {
     position: "absolute",
-    width: "140%",
-    height: "140%",
-    resizeMode: "cover",
-    transform: [{ scale: 1.05 }],
+    width: "100%",
+    height: "100%",
+    resizeMode: "contain",
   },
   titleContainer: {
     position: "absolute",
