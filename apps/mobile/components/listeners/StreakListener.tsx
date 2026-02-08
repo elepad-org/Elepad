@@ -41,7 +41,7 @@ export default function StreakListener() {
     setTimeout(() => {
       showToast({
         message: `¡Racha extendida! ${streakCount} días 🔥`,
-        type: "success",
+        type: "streak",
         duration: 3000,
       });
     }, 300);
