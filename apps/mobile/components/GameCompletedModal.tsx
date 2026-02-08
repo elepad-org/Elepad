@@ -55,30 +55,30 @@ export function GameCompletedModal({
   const defaultStats = [
     ...(score !== undefined && score !== null
       ? [
-        {
-          icon: "🎯",
-          label: "Puntaje",
-          value: score,
-        },
-      ]
+          {
+            icon: "🎯",
+            label: "Puntaje",
+            value: score,
+          },
+        ]
       : []),
     ...(moves !== undefined && moves !== null
       ? [
-        {
-          icon: "🔢",
-          label: "Movimientos",
-          value: moves,
-        },
-      ]
+          {
+            icon: "🔢",
+            label: "Movimientos",
+            value: moves,
+          },
+        ]
       : []),
     ...(time !== undefined && time !== null
       ? [
-        {
-          icon: "⏱️",
-          label: "Tiempo",
-          value: formatTime(time),
-        },
-      ]
+          {
+            icon: "⏱️",
+            label: "Tiempo",
+            value: formatTime(time),
+          },
+        ]
       : []),
   ];
 
@@ -102,6 +102,7 @@ export function GameCompletedModal({
       <Dialog
         visible={visible}
         onDismiss={onDismiss}
+        dismissable={false}
         style={styles.dialog}
       >
         <Dialog.Title style={styles.dialogTitle}>
@@ -124,8 +125,12 @@ export function GameCompletedModal({
                   <View style={styles.mainResultStat}>
                     <Text style={styles.mainResultIcon}>{mainStat.icon}</Text>
                     <View>
-                      <Text style={styles.mainResultLabel}>{mainStat.label}</Text>
-                      <Text style={styles.mainResultValue}>{mainStat.value}</Text>
+                      <Text style={styles.mainResultLabel}>
+                        {mainStat.label}
+                      </Text>
+                      <Text style={styles.mainResultValue}>
+                        {mainStat.value}
+                      </Text>
                     </View>
                   </View>
                 )}

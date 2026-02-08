@@ -27,8 +27,11 @@ export default function StreakListener() {
         streak.currentStreak > previousStreakRef.current &&
         streak.currentStreak > 0
       ) {
-        setStreakCount(streak.currentStreak);
-        setModalVisible(true);
+        // Delay slightly to allow game completion modals to appear first if any
+        setTimeout(() => {
+          setStreakCount(streak.currentStreak);
+          setModalVisible(true);
+        }, 800);
       }
       previousStreakRef.current = streak.currentStreak;
     }
