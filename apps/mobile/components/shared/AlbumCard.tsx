@@ -14,6 +14,7 @@ import { COLORS, STYLES, SHADOWS, FONT } from "@/styles/base";
 import { useToast } from "@/components/shared/Toast";
 import { usePdfDownload } from "@/hooks/usePdfDownload";
 import { useQueryClient } from "@tanstack/react-query";
+import AlbumCover from "@/components/Recuerdos/AlbumCover";
 
 interface AlbumCardProps {
   id: string;
@@ -155,35 +156,12 @@ export default function AlbumCard({
       <Pressable
         style={({ pressed }) => [
           styles.card,
-          pressed && { opacity: 0.95 },
+          pressed && { opacity: 0.9 },
         ]}
         onPress={() => setDetailsVisible(true)}
       >
-        {/* Image */}
-        <View style={styles.imageWrapper}>
-          {coverImageUrl ? (
-            <Image
-              source={{ uri: coverImageUrl }}
-              style={styles.image}
-              contentFit="cover"
-              transition={200}
-            />
-          ) : (
-            <View style={styles.placeholder}>
-              <MaterialCommunityIcons
-                name="book-open-page-variant"
-                size={36}
-                color={COLORS.primary}
-              />
-            </View>
-          )}
-        </View>
-
-        {/* Content */}
-        <View style={styles.content}>
-          <Text style={styles.title} numberOfLines={2}>
-            {title}
-          </Text>
+        <View style={styles.coverWrapper}>
+          <AlbumCover title={title} coverImageUrl={coverImageUrl} />
         </View>
       </Pressable>
 
@@ -199,6 +177,17 @@ export default function AlbumCard({
           </Dialog.Title>
 
           <Dialog.Content>
+            {coverImageUrl && (
+              <View style={{ marginBottom: 16, alignItems: "center" }}>
+                <Image
+                  source={{ uri: coverImageUrl }}
+                  style={{ width: 200, height: 200, borderRadius: 8 }}
+                  contentFit="cover"
+                  transition={200}
+                />
+              </View>
+            )}
+
             {description && (
               <View style={{ marginBottom: 12 }}>
                 <Text style={{ 
@@ -400,45 +389,16 @@ export default function AlbumCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: COLORS.white,
-    borderRadius: 12,
     overflow: "hidden",
-    marginBottom: 0, // Handled by gap in list
-    borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.05)",
-    ...SHADOWS.light,
+    marginBottom: 0,
+    borderRadius: 8,
   },
 
-  imageWrapper: {
+  coverWrapper: {
     width: "100%",
-    aspectRatio: 1,
+    //height: "60%",
+    aspectRatio: 1.5,
     backgroundColor: COLORS.backgroundSecondary,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  image: {
-    width: "100%",
-    height: "100%",
-  },
-
-  placeholder: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  content: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    minHeight: 35,
-    justifyContent: "center",
-  },
-
-  title: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: COLORS.text,
-    textAlign: "center",
   },
 
   actionsDropdown: {
