@@ -72,6 +72,7 @@ export default function StreakCelebrationModal({
       opacity.value = 0;
       numberOpacity.value = 0;
       cardTranslateY.value = 50;
+      checkmarkScales.forEach((scale) => (scale.value = 0));
       confettiValues.forEach((conf) => {
         conf.translateY.value = -50;
         conf.translateX.value = 0;
@@ -361,7 +362,11 @@ export default function StreakCelebrationModal({
                         ]}
                       >
                         {weekStatus[index] && (
-                          <Text style={styles.checkmark}>✓</Text>
+                          <Animated.Text
+                            style={[styles.checkmark, checkmarkStyles[index]]}
+                          >
+                            ✓
+                          </Animated.Text>
                         )}
                       </View>
                     </View>
