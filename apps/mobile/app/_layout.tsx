@@ -15,7 +15,7 @@ import { Provider as PaperProvider } from "react-native-paper";
 import { lightTheme, darkTheme } from "@/styles/theme";
 import { supabase } from "@/lib/supabase";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { StreakSnackbarProvider } from "@/hooks/useStreakSnackbar";
+import StreakListener from "@/components/listeners/StreakListener";
 import { COLORS } from "@/styles/base";
 import { ToastProvider } from "@/components/shared/Toast";
 import { TourProvider } from "@/components/tour/TourProvider";
@@ -69,11 +69,12 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <StreakSnackbarProvider>
-            <AuthProvider>
-              <PaperProvider theme={paperTheme}>
-                <NavigationThemeProvider value={navTheme}>
+          <AuthProvider>
+            <PaperProvider theme={paperTheme}>
+              <NavigationThemeProvider value={navTheme}>
+                <ToastProvider>
                   <ToastProvider>
+                    <StreakListener />
                     <TourProvider>
                       <Stack
                         screenOptions={{
@@ -176,10 +177,10 @@ export default function RootLayout() {
                       <TourOverlay />
                     </TourProvider>
                   </ToastProvider>
-                </NavigationThemeProvider>
-              </PaperProvider>
-            </AuthProvider>
-          </StreakSnackbarProvider>
+                </ToastProvider>
+              </NavigationThemeProvider>
+            </PaperProvider>
+          </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

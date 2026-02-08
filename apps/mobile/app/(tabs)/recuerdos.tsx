@@ -41,7 +41,7 @@ import {
   updateMemoriesBook,
   useAddReaction,
 } from "@elepad/api-client";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, STYLES, LAYOUT } from "@/styles/base";
 import { Platform } from "react-native";
@@ -156,6 +156,7 @@ export default function RecuerdosScreen() {
   const isFocused = useIsFocused();
   const { loading: authLoading, userElepad } = useAuth();
   const { showToast } = useToast();
+  const queryClient = useQueryClient();
 
   // Dimensiones responsive
   const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
@@ -458,6 +459,9 @@ export default function RecuerdosScreen() {
       console.log("Upload mutation onSuccess:", data);
       // Refrescar la lista de memorias
       refetchMemories();
+      // Invalidar query global de memorias (para el Home)
+      queryClient.invalidateQueries({ queryKey: ["/memories"] });
+
       showToast({ message: "Recuerdo agregado exitosamente", type: "success" });
 
       // Resetear estado del diálogo
@@ -504,10 +508,11 @@ export default function RecuerdosScreen() {
         throw error;
       }
     },
-    onSuccess: (data) => {
-      console.log("Create note mutation onSuccess:", data);
-      // Refrescar la lista de memorias
-      refetchMemories();
+    onSuccess: () => {
+      // Invalidar query global de memorias (para el Home)
+      // La key generada por orval es ['/memories', params]. Usamos partial matching.
+      queryClient.invalidateQueries({ queryKey: ["/memories"] });
+
       showToast({ message: "Nota agregada exitosamente", type: "success" });
 
       // Resetear estado del diálogo
@@ -1475,7 +1480,7 @@ export default function RecuerdosScreen() {
             visible={bookMenuVisible}
             onDismiss={handleCloseBookMenu}
             contentStyle={{
-              backgroundColor: "rgba(255, 255, 255, 0.70)",
+              backgroundColor: COLORS.white,
               borderRadius: 12,
               width: 215,
             }}
@@ -1484,6 +1489,7 @@ export default function RecuerdosScreen() {
               <IconButton
                 icon="dots-horizontal"
                 size={22}
+                iconColor={COLORS.primary}
                 style={{ margin: 0 }}
                 onPress={() => {
                   setBookMenuVisible(true);

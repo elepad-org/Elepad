@@ -549,14 +549,14 @@ export default function RecuerdoDetailDialog({
               visible={menuVisible}
               onDismiss={closeMenu}
               contentStyle={{
-                backgroundColor: "rgba(255, 255, 255, 0.70)",
+                backgroundColor: COLORS.white,
                 borderRadius: 12,
               }}
               anchor={
                 <IconButton
                   icon="dots-horizontal"
                   size={20}
-                  iconColor="#000000"
+                  iconColor={COLORS.textSecondary}
                   style={{ margin: 0 }}
                   onPress={() => setMenuVisible(true)}
                   disabled={isMutating}
