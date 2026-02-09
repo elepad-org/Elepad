@@ -402,8 +402,11 @@ const HomeScreen = () => {
         <View
           ref={lastMemoryRef}
           style={{
-            marginTop: lastMemory?.mimeType?.startsWith("image/") ? 50 : 16,
-            marginBottom: 20,
+            marginTop: lastMemory?.mimeType?.startsWith("image/") ? 50 : 
+                      (!lastMemory?.mimeType?.startsWith("audio/") && 
+                       !lastMemory?.mediaUrl) ? 4 : 16,
+            marginBottom: (!lastMemory?.mimeType?.startsWith("audio/") && 
+                          !lastMemory?.mediaUrl) ? 0 : 20,
           }}
         >
           {memoriesQuery.isLoading || isLoading ? (
@@ -1033,7 +1036,7 @@ const styles = StyleSheet.create({
   memoryCardNote: {
     width: SCREEN_WIDTH,
     height: 180,
-    marginBottom: 40,
+    marginBottom: 20,
   },
   memoryCardLoading: {
     width: SCREEN_WIDTH,
@@ -1067,10 +1070,11 @@ const styles = StyleSheet.create({
   memoryNoImage: {
     flex: 1,
     borderRadius: 3,
-    margin: 16,
-    padding: 20,
+    margin: 8,
+    paddingVertical: 20,
+    paddingHorizontal: "18%",
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "flex-start",
     ...SHADOWS.card,
     transform: [{ rotate: "-1deg" }], // Slight rotation like a stuck note
     borderWidth: 1,
@@ -1078,6 +1082,8 @@ const styles = StyleSheet.create({
   },
   memoryContent: {
     gap: 6,
+    alignSelf: "flex-start",
+    width: "100%",
   },
   memoryLabel: {
     fontSize: 11,
