@@ -167,123 +167,127 @@ app.doc("/openapi.json", {
 // Serve OpenAPI documentation with SwaggerUI.
 app.get("/", swaggerUI({ url: "./openapi.json" }));
 
-/**
- * Cron job to send notifications for pending activities
- * Runs every 6 hours at 00:00, 06:00, 12:00, and 18:00
- */
-export async function scheduled(
-  event: ScheduledEvent,
-  env: {
-    SUPABASE_URL: string;
-    SUPABASE_SERVICE_ROLE_KEY: string;
-  },
-  ctx: ExecutionContext,
-): Promise<void> {
-  console.log("Running scheduled job for pending activities notifications");
+// Export both the app and a scheduled function following Hono's recommended pattern for Cloudflare Workers
+export default {
+  // The Hono app handles regular HTTP requests
+  fetch: app.fetch,
 
-  try {
-    const supabaseOptions = customFetch
-      ? { global: { fetch: customFetch } }
-      : undefined;
+  /**
+   * Cron job to send notifications for pending activities
+   * Runs every 3 hours
+   */
+  async scheduled(
+    event: ScheduledEvent,
+    env: {
+      SUPABASE_URL: string;
+      SUPABASE_SERVICE_ROLE_KEY: string;
+    },
+    ctx: ExecutionContext,
+  ): Promise<void> {
+    console.log("Running scheduled job for pending activities notifications");
 
-    const supabase = createClient(
-      env.SUPABASE_URL || "https://sdnmoweppzszpxyggdyg.supabase.co",
-      env.SUPABASE_SERVICE_ROLE_KEY,
-      supabaseOptions,
-    );
+    try {
+      const supabaseOptions = customFetch
+        ? { global: { fetch: customFetch } }
+        : undefined;
 
-    // Get today's date in ISO format (YYYY-MM-DD)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayStr = today.toISOString().split('T')[0];
+      const supabase = createClient(
+        env.SUPABASE_URL || "https://sdnmoweppzszpxyggdyg.supabase.co",
+        env.SUPABASE_SERVICE_ROLE_KEY,
+        supabaseOptions,
+      );
 
-    // Query 1: Get single-day activities (no frequency) for today
-    const { data: singleDayActivities, error: error1 } = await supabase
-      .from("activities")
-      .select("id, title, description, assignedTo, startsAt")
-      .is("frequencyId", null)
-      .gte("startsAt", todayStr)
-      .lt("startsAt", `${todayStr}T23:59:59.999Z`);
+      // Get today's date in ISO format (YYYY-MM-DD)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayStr = today.toISOString().split('T')[0];
 
-    if (error1) {
-      console.error("Error fetching single-day activities:", error1);
-    }
+      // Query 1: Get single-day activities (no frequency) for today
+      const { data: singleDayActivities, error: error1 } = await supabase
+        .from("activities")
+        .select("id, title, description, assignedTo, startsAt")
+        .is("frequencyId", null)
+        .gte("startsAt", todayStr)
+        .lt("startsAt", `${todayStr}T23:59:59.999Z`);
 
-    // Query 2: Get recurring activities that haven't ended and are not completed today
-    const { data: recurringActivities, error: error2 } = await supabase
-      .from("activities")
-      .select("id, title, description, assignedTo, startsAt, frequencyId")
-      .not("frequencyId", "is", null)
-      .or(`endsAt.is.null,endsAt.gte.${todayStr}`);
+      if (error1) {
+        console.error("Error fetching single-day activities:", error1);
+      }
 
-    if (error2) {
-      console.error("Error fetching recurring activities:", error2);
-    }
+      // Query 2: Get recurring activities that haven't ended and are not completed today
+      const { data: recurringActivities, error: error2 } = await supabase
+        .from("activities")
+        .select("id, title, description, assignedTo, startsAt, frequencyId")
+        .not("frequencyId", "is", null)
+        .or(`endsAt.is.null,endsAt.gte.${todayStr}`);
 
-    // Filter recurring activities that don't have a completion for today
-    const recurringToNotify: typeof recurringActivities = [];
-    if (recurringActivities && recurringActivities.length > 0) {
-      for (const activity of recurringActivities) {
-        const { data: completions } = await supabase
-          .from("activity_completions")
-          .select("id")
-          .eq("activityId", activity.id)
-          .eq("completedDate", todayStr)
-          .limit(1);
+      if (error2) {
+        console.error("Error fetching recurring activities:", error2);
+      }
 
-        // If no completion found for today, add to notification list
-        if (!completions || completions.length === 0) {
-          recurringToNotify.push(activity);
+      // Filter recurring activities that don't have a completion for today
+      const recurringToNotify: typeof recurringActivities = [];
+      if (recurringActivities && recurringActivities.length > 0) {
+        for (const activity of recurringActivities) {
+          const { data: completions } = await supabase
+            .from("activity_completions")
+            .select("id")
+            .eq("activityId", activity.id)
+            .eq("completedDate", todayStr)
+            .limit(1);
+
+          // If no completion found for today, add to notification list
+          if (!completions || completions.length === 0) {
+            recurringToNotify.push(activity);
+          }
         }
       }
-    }
 
-    // Combine both lists
-    const allActivitiesToNotify = [
-      ...(singleDayActivities || []),
-      ...recurringToNotify,
-    ];
+      // Combine both lists
+      const allActivitiesToNotify = [
+        ...(singleDayActivities || []),
+        ...recurringToNotify,
+      ];
 
-    if (allActivitiesToNotify.length === 0) {
-      console.log("No hay actividades para notificar.");
-      return;
-    }
+      if (allActivitiesToNotify.length === 0) {
+        console.log("No hay actividades para notificar.");
+        return;
+      }
 
-    console.log(`Found ${allActivitiesToNotify.length} pending activities for today`);
+      console.log(`Found ${allActivitiesToNotify.length} pending activities for today`);
 
-    // Send notifications for each activity
-    const { NotificationsService } = await import("./modules/notifications/service.js");
-    const notificationsService = new NotificationsService(supabase);
+      // Send notifications for each activity
+      const { NotificationsService } = await import("./modules/notifications/service.js");
+      const notificationsService = new NotificationsService(supabase);
 
-    // Array de Promises
-    const notificationPromises = allActivitiesToNotify.map(async (activity) => {
-      const targetUserId = activity.assignedTo;
-      if (!targetUserId) return;
+      // Array de Promises
+      const notificationPromises = allActivitiesToNotify.map(async (activity) => {
+        const targetUserId = activity.assignedTo;
+        if (!targetUserId) return;
 
-      return notificationsService.createNotification({
-        userId: targetUserId,
-        eventType: "activity_reminder",
-        entityType: "activity",
-        entityId: activity.id,
-        title: "Actividad pendiente",
-        body: `Tienes una actividad pendiente: ${activity.title}`,
+        return notificationsService.createNotification({
+          userId: targetUserId,
+          eventType: "activity_reminder",
+          entityType: "activity",
+          entityId: activity.id,
+          title: "Actividad pendiente",
+          body: `Tienes una actividad pendiente: ${activity.title}`,
+        });
       });
-    });
 
-    // ctx.waitUntil para que Cloudflare no mate el proceso
-    // y Promise.allSettled para que si una falla, las otras igual se ejecuten
-    ctx.waitUntil(
-      Promise.allSettled(notificationPromises).then((results) => {
-        const successful = results.filter((r) => r.status === "fulfilled").length;
-        const failed = results.filter((r) => r.status === "rejected").length;
-        console.log(`Proceso terminado: ${successful} enviadas, ${failed} fallidas.`);
-      })
-    );
+      // ctx.waitUntil para que Cloudflare no mate el proceso
+      // y Promise.allSettled para que si una falla, las otras igual se ejecuten
+      ctx.waitUntil(
+        Promise.allSettled(notificationPromises).then((results) => {
+          const successful = results.filter((r) => r.status === "fulfilled").length;
+          const failed = results.filter((r) => r.status === "rejected").length;
+          console.log(`Proceso terminado: ${successful} enviadas, ${failed} fallidas.`);
+        })
+      );
 
-    console.log("Scheduled job completed successfully");
-  } catch (error) {
-    console.error("Error in scheduled job:", error);
-  }
-}
-
-export default app;
+      console.log("Scheduled job completed successfully");
+    } catch (error) {
+      console.error("Error in scheduled job:", error);
+    }
+  },
+};
