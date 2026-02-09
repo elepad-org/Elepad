@@ -11,8 +11,8 @@ import {
   useState,
   useRef,
 } from "react";
-import { usePushNotifications } from './usePushNotifications';
-import { useStreakSnackbar } from "./useStreakSnackbar";
+import { usePushNotifications } from "./usePushNotifications";
+
 import { getTodayLocal, isSameLocalDate } from "@/lib/dateHelpers";
 
 type AuthContext = {
@@ -48,7 +48,6 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [loading, setLoading] = useState(true);
   const [streak, setStreak] = useState<StreakState | null>(null);
   const router = useRouter();
-  const { showStreakExtended } = useStreakSnackbar();
 
   // Register push notifications when user is authenticated
   usePushNotifications(user?.id);
@@ -233,9 +232,6 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       lastPlayedDate: today,
       hasPlayedToday: true,
     });
-
-    // Mostrar toast inmediatamente
-    showStreakExtended(newStreakValue);
 
     // 🌐 Sincronizar con backend en background (sin await para no bloquear)
     syncStreak().catch((err) => {

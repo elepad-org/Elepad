@@ -1,4 +1,4 @@
-# 🐘 Elepad
+# Elepad
 
 <p align="center">
   <b>¡Conectá con tus seres queridos mediante amor y tecnología!</b>
