@@ -51,7 +51,7 @@ if (typeof process !== "undefined" && process.env?.NODE_ENV === "development") {
   }
 }
 
-const app = new OpenAPIHono();
+export const app = new OpenAPIHono();
 
 // Global middleware.
 app.use(logger());
@@ -167,10 +167,11 @@ app.doc("/openapi.json", {
 // Serve OpenAPI documentation with SwaggerUI.
 app.get("/", swaggerUI({ url: "./openapi.json" }));
 
+
 // Export both the app and a scheduled function following Hono's recommended pattern for Cloudflare Workers
 export default {
   // The Hono app handles regular HTTP requests
-  fetch: app,
+  fetch: app.fetch,
 
   /**
    * Cron job to send notifications for pending activities
