@@ -268,6 +268,10 @@ export default function RecuerdosScreen() {
     "none" | "person" | "type"
   >("none");
 
+  // --- Books Filter State ---
+  const [booksSortOrder, setBooksSortOrder] = useState<"desc" | "asc">("desc");
+  const [booksNumColumns, setBooksNumColumns] = useState(1);
+
   // --- Tour Setup ---
   const { headerRef, addButtonRef, listRef, albumRef } = useRecuerdosTour({
     activeTab,
@@ -1072,7 +1076,20 @@ export default function RecuerdosScreen() {
       ? (booksPayload as { data: unknown }).data
       : [];
 
-  const books = Array.isArray(booksData) ? (booksData as MemoriesBook[]) : [];
+  const rawBooks = Array.isArray(booksData) ? (booksData as MemoriesBook[]) : [];
+
+  const books = useMemo(() => {
+    return [...rawBooks].sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      if (booksSortOrder === "desc") {
+        return dateB - dateA;
+      } else {
+        return dateA - dateB;
+      }
+    });
+  }, [rawBooks, booksSortOrder]);
+
   const isBooksLoading =
     authLoading ||
     booksLoading ||
@@ -1137,6 +1154,46 @@ export default function RecuerdosScreen() {
           </View>
         </View>
 
+        {/* Controles de ordenamiento y vista para Baúles */}
+        <View
+          style={{
+            paddingHorizontal: 16,
+            paddingVertical: 12,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          {/* Toggle de Vistas - Izquierda */}
+          <SegmentedButtons
+            value={booksNumColumns.toString()}
+            onValueChange={(value) => setBooksNumColumns(parseInt(value))}
+            buttons={[
+              { value: "1", icon: "view-agenda" }, // Lista
+              { value: "2", icon: "view-grid" },   // Grilla
+            ]}
+            density="small"
+            style={{ maxWidth: 100 }}
+            theme={{
+              colors: {
+                secondaryContainer: COLORS.primary,
+                onSecondaryContainer: COLORS.white,
+              },
+            }}
+          />
+
+          {/* Botón de Ordenar - Derecha */}
+          <IconButton
+            icon={booksSortOrder === "desc" ? "arrow-down" : "arrow-up"}
+            size={20}
+            onPress={() =>
+              setBooksSortOrder(booksSortOrder === "desc" ? "asc" : "desc")
+            }
+            mode="contained-tonal"
+            style={{ margin: 0 }}
+          />
+        </View>
+
         {isBooksLoading && books.length === 0 ? (
           <View style={{ ...STYLES.center, paddingHorizontal: 24 }}>
             <ActivityIndicator size="large" color={COLORS.primary} />
@@ -1175,20 +1232,31 @@ export default function RecuerdosScreen() {
         ) : (
           <View style={{ flex: 1 }} ref={listRef}>
             <FlatList
-              key="single-column-books"
+              key={booksNumColumns} // Forzar re-render al cambiar columnas
               data={books}
               keyExtractor={(item) => item.id}
+              numColumns={booksNumColumns}
               contentContainerStyle={{
                 paddingHorizontal: 24,
                 paddingTop: 0,
                 paddingBottom: LAYOUT.bottomNavHeight,
               }}
+              columnWrapperStyle={
+                booksNumColumns > 1 ? { gap: 12 } : undefined
+              }
               refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
               }
               renderItem={({ item }) => {
                 const title = item.title || "(Sin nombre)";
                 const color = item.color || COLORS.primary;
+
+                const gap = 12;
+                const padding = 24 * 2;
+                const availableWidth =
+                  screenWidth - padding - (booksNumColumns - 1) * gap;
+                const itemWidth = availableWidth / booksNumColumns;
+
                 return (
                   <Pressable
                     key={item.id}
@@ -1197,7 +1265,7 @@ export default function RecuerdosScreen() {
                       setMemberFilterId(null);
                     }}
                     style={{
-                      width: "100%",
+                      width: itemWidth,
                       aspectRatio: 1.64,
                       marginBottom: 16,
                     }}
