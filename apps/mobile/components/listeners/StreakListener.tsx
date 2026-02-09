@@ -22,10 +22,11 @@ export default function StreakListener() {
         return;
       }
 
-      // Si aumentó
+      // Si aumentó Y se ha jugado hoy
       if (
         streak.currentStreak > previousStreakRef.current &&
-        streak.currentStreak > 0
+        streak.currentStreak > 0 &&
+        streak.hasPlayedToday
       ) {
         // Delay slightly to allow game completion modals to appear first if any
         setTimeout(() => {
