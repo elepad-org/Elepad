@@ -7,6 +7,15 @@ export function getTodayLocal(): string {
 }
 
 /**
+ * Obtiene la fecha de ayer en formato YYYY-MM-DD en la zona horaria local del dispositivo.
+ */
+export function getYesterdayLocal(): string {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  return yesterday.toLocaleDateString("en-CA");
+}
+
+/**
  * Convierte una fecha Date a string YYYY-MM-DD en la zona horaria local.
  */
 export function toLocalDateString(date: Date): string {

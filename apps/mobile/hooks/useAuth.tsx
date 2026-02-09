@@ -13,7 +13,11 @@ import {
 } from "react";
 import { usePushNotifications } from "./usePushNotifications";
 
-import { getTodayLocal, isSameLocalDate } from "@/lib/dateHelpers";
+import {
+  getTodayLocal,
+  getYesterdayLocal,
+  isSameLocalDate,
+} from "@/lib/dateHelpers";
 
 type AuthContext = {
   user: User | null;
@@ -170,13 +174,32 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       const streakData = responseData as GetStreaksMe200;
 
       // Las fechas ya vienen en formato local del cliente desde el backend
-      const hasPlayedToday = isSameLocalDate(
-        streakData.lastPlayedDate || "",
-        today,
+      const yesterday = getYesterdayLocal();
+      const lastPlayed = streakData.lastPlayedDate || "";
+
+      // Las fechas ya vienen en formato local del cliente desde el backend
+      const hasPlayedToday = isSameLocalDate(lastPlayed, today);
+
+      // Verificar si la racha sigue activa (se jugó hoy o ayer)
+      const isStreakActive =
+        hasPlayedToday || isSameLocalDate(lastPlayed, yesterday);
+
+      // Si la racha no está activa, mostramos 0
+      const effectiveCurrentStreak = isStreakActive
+        ? streakData.currentStreak
+        : 0;
+
+      console.log(
+        "🔥 Racha actual:",
+        effectiveCurrentStreak,
+        "| Última jugada:",
+        lastPlayed,
+        "| Activa:",
+        isStreakActive,
       );
 
       setStreak({
-        currentStreak: streakData.currentStreak,
+        currentStreak: effectiveCurrentStreak,
         longestStreak: streakData.longestStreak,
         lastPlayedDate: streakData.lastPlayedDate,
         hasPlayedToday,

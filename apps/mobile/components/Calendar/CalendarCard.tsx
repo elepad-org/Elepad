@@ -347,7 +347,7 @@ export default function CalendarCard(props: CalendarCardProps) {
     onDayChange,
   } = props;
 
-  const { userElepad } = useAuth();
+  const { userElepad, streak } = useAuth();
   const today = getTodayLocal();
 
   // Cambiar al día de la actividad cuando se recibe desde notificaciones
@@ -514,6 +514,22 @@ export default function CalendarCard(props: CalendarCardProps) {
       }
     }
 
+    // Si `streak` indica que jugamos hoy
+    if (userElepad?.elder && streak?.hasPlayedToday) {
+      const todayStr = getTodayLocal();
+      if (!streakDays.includes(todayStr)) {
+        streakDays.push(todayStr);
+      }
+    }
+
+    // Asegurar que la última fecha jugada también esté incluida
+    if (userElepad?.elder && streak?.lastPlayedDate) {
+      if (!streakDays.includes(streak.lastPlayedDate)) {
+        streakDays.push(streak.lastPlayedDate);
+      }
+    }
+    streakDays.sort();
+
     // Lógica de Racha Visual (Solo para Elders)
     if (userElepad?.elder && streakDays.length > 0) {
       const streakSet = new Set(streakDays);
@@ -573,6 +589,7 @@ export default function CalendarCard(props: CalendarCardProps) {
     streakHistoryQuery.data,
     userElepad,
     selectedElderId,
+    streak,
   ]);
 
   // Filtrar y ordenar eventos del día seleccionado

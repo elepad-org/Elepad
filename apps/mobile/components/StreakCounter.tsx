@@ -148,6 +148,17 @@ export default function StreakCounter() {
     if (!historyData?.dates) return Array(7).fill(false);
 
     const streakDates = new Set(historyData.dates);
+
+    // Si `streak` indica que jugamos hoy, asegurarnos de que el día de hoy esté marcado
+    if (streak?.hasPlayedToday) {
+      streakDates.add(formatDateLocal(new Date()));
+    }
+
+    // Asegurar que la última fecha jugada también esté marcada (para consistencia)
+    if (streak?.lastPlayedDate) {
+      streakDates.add(streak.lastPlayedDate);
+    }
+
     const status: boolean[] = [];
 
     for (let i = 0; i < 7; i++) {
