@@ -170,7 +170,7 @@ app.get("/", swaggerUI({ url: "./openapi.json" }));
 // Export both the app and a scheduled function following Hono's recommended pattern for Cloudflare Workers
 export default {
   // The Hono app handles regular HTTP requests
-  fetch: app.fetch,
+  fetch: app,
 
   /**
    * Cron job to send notifications for pending activities

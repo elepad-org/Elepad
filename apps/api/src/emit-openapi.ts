@@ -6,7 +6,7 @@ import app from "./app.js";
 // This is useful for local development, so the api-client package is regenerated on every change.
 // This is needed in CI pipelines, since there is no server to serve the JSON from.
 
-const spec = app.getOpenAPIDocument({
+const spec = app.fetch.getOpenAPIDocument({
   openapi: "3.1.0",
   info: { title: "Elepad API", version: "1.0.0" },
 });
