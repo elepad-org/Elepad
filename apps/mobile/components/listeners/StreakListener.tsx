@@ -7,34 +7,35 @@ export default function StreakListener() {
   const { streak } = useAuth();
   const { showToast } = useToast();
   const previousStreakRef = useRef<number | null>(null);
+  const previousHasPlayedTodayRef = useRef<boolean | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [streakCount, setStreakCount] = useState(0);
 
   useEffect(() => {
     // Si tenemos datos de racha
     if (streak) {
-      // Primera carga, solo sincronizar ref si es nulo
-      // Sin embargo, si prev es null, y current > 0, podría ser que acabamos de cargar la racha.
-      // Pero no queremos mostrar toast al iniciar la app si ya tiene racha.
-      // Solo queremos mostrar si CAMBIA.
+      // Primera carga, inicializar refs
       if (previousStreakRef.current === null) {
         previousStreakRef.current = streak.currentStreak;
+        previousHasPlayedTodayRef.current = streak.hasPlayedToday;
         return;
       }
 
-      // Si aumentó Y se ha jugado hoy
-      if (
-        streak.currentStreak > previousStreakRef.current &&
-        streak.currentStreak > 0 &&
-        streak.hasPlayedToday
-      ) {
+      // Detectar si ACABAMOS de jugar hoy (cambio de false a true)
+      const justPlayedToday =
+        !previousHasPlayedTodayRef.current && streak.hasPlayedToday;
+
+      // Si se detecta que se jugó por primera vez en el día
+      if (justPlayedToday) {
         // Delay slightly to allow game completion modals to appear first if any
         setTimeout(() => {
           setStreakCount(streak.currentStreak);
           setModalVisible(true);
         }, 800);
       }
+
       previousStreakRef.current = streak.currentStreak;
+      previousHasPlayedTodayRef.current = streak.hasPlayedToday;
     }
   }, [streak]);
 
