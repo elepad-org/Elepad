@@ -17,7 +17,7 @@ import {
   useGetFamilyGroupIdGroupMembers,
 } from "@elepad/api-client";
 import { Divider } from "react-native-paper";
-import { COLORS, STYLES, SHADOWS, FONT } from "@/styles/base";
+import { COLORS, STYLES, SHADOWS, FONT, LAYOUT } from "@/styles/base";
 import StatisticsChart from "@/components/Historial/StatisticsChart";
 import { useAuth } from "@/hooks/useAuth";
 import DropdownSelect from "@/components/shared/DropdownSelect";
@@ -269,20 +269,20 @@ export default function HistoryScreen({ initialAttempts = [], activeTab = "" }: 
 
     if (hasMore && attempts.length > 0) {
       return (
-        <View style={{ paddingVertical: 20 }}>
+        <View style={{ alignItems: "center", marginTop: 8 }}>
           <Button
-            mode="contained"
+            mode="text"
             onPress={loadMore}
-            buttonColor={COLORS.primary}
-            style={{ borderRadius: 12 }}
+            textColor={COLORS.primary}
           >
             Mostrar más
           </Button>
+          <View style={{ height: 100 }} />
         </View>
       );
     }
 
-    return <View style={{ height: 20 }} />;
+    return <View style={{ height: 100 }} />;
   };
 
   return (
