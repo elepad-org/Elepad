@@ -1,7 +1,7 @@
 import { View, StyleSheet, ViewStyle } from "react-native";
 import { Image } from "expo-image";
 import { Text } from "react-native-paper";
-import { FONT } from "@/styles/base";
+import { FONT, COLORS } from "@/styles/base";
 import { useGetMemories } from "@elepad/api-client";
 import { useMemo } from "react";
 import chestImage from "@/assets/images/baul-azul-fixed.png";
@@ -140,8 +140,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: FONT.regular,
     textAlign: "center",
-    color: "#ac8548",
-    backgroundColor: "#3c271d",
+    color: COLORS.white,
+    backgroundColor: COLORS.primary,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 4,
