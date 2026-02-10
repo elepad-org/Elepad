@@ -268,6 +268,19 @@ export default {
 
       if (error1 && error2) console.error(error1, error2);
 
+      const { data: completedToday, error: completedError } = await supabase
+        .from("activity_completions")
+        .select("activityId")
+        .eq("completedDate", todayStr);
+
+      if (completedError) {
+        console.error(completedError);
+      }
+
+      const completedActivityIdsToday = new Set(
+        (completedToday || []).map((c) => c.activityId),
+      );
+
       // Filtrar actividades recurrentes que corresponden para hoy y la ventana horaria
       const recurringToNotify = [];
       if (recurringActivities && recurringActivities.length > 0) {
@@ -307,16 +320,8 @@ export default {
             continue;
           }
 
-          // Verificar si ya fue completada hoy
-          const { data: completions } = await supabase
-            .from("activity_completions")
-            .select("id")
-            .eq("activityId", activity.id)
-            .eq("completedDate", todayStr)
-            .limit(1);
-
           // Si no fue completada hoy, agregar a la lista
-          if (!completions || completions.length === 0) {
+          if (!completedActivityIdsToday.has(activity.id)) {
             recurringToNotify.push(activity);
           }
         }
