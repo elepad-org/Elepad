@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import app from "./app.js";
+import {app} from "./app.js";
 
 // This script writes the OpenAPI spec to a file.
 // This is useful for local development, so the api-client package is regenerated on every change.
