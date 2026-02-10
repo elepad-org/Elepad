@@ -10,6 +10,8 @@ import Animated, {
   withDelay,
 } from "react-native-reanimated";
 import { useEffect, useMemo } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useStreakHistory } from "@/hooks/useStreak";
 
 type Props = {
   visible: boolean;
@@ -52,19 +54,69 @@ export default function StreakCelebrationModal({
     opacity: useSharedValue(0),
   }));
 
-  // Calcular estado de los días de la semana
-  const weekStatus = useMemo(() => {
+  // Helpers para manejo de fechas
+  const formatDateLocal = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const { streak } = useAuth();
+
+  // Calcular fechas de la semana actual solo si el modal es visible
+  const { startDateStr, endDateStr, startOfWeek } = useMemo(() => {
+    if (!visible) {
+      return {
+        startDateStr: undefined,
+        endDateStr: undefined,
+        startOfWeek: new Date(),
+      };
+    }
+
     const today = new Date();
-    const currentDayOfWeek = today.getDay();
+    const currentDayOfWeek = today.getDay(); // 0 (Dom) - 6 (Sab)
+
+    const start = new Date(today);
+    start.setDate(today.getDate() - currentDayOfWeek); // Retroceder al Domingo
+
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6); // Avanzar al Sábado
+
+    return {
+      startOfWeek: start,
+      startDateStr: formatDateLocal(start),
+      endDateStr: formatDateLocal(end),
+    };
+  }, [visible]);
+
+  // Obtener historial real
+  const { data: historyData } = useStreakHistory(startDateStr, endDateStr);
+
+  // Calcular estado de los días de la semana basado en historial real
+  const weekStatus = useMemo(() => {
+    const streakDates = new Set(historyData?.dates || []);
+
+    // Asegurar que el día actual esté marcado si acabamos de completar la racha
+    // (el modal se muestra precisamente cuando completamos la racha)
+    streakDates.add(formatDateLocal(new Date()));
+
+    // Si tenemos info de racha en useAuth, usarla como fallback para consistencia
+    if (streak?.lastPlayedDate) {
+      streakDates.add(streak.lastPlayedDate);
+    }
+
     const status: boolean[] = [];
 
     for (let i = 0; i < 7; i++) {
-      // Marcar como completado si es hoy o un día anterior de esta semana
-      status.push(i <= currentDayOfWeek);
+      const date = new Date(startOfWeek);
+      date.setDate(startOfWeek.getDate() + i);
+      const dateStr = formatDateLocal(date);
+      status.push(streakDates.has(dateStr));
     }
 
     return status;
-  }, []);
+  }, [historyData, startOfWeek, streak]);
 
   useEffect(() => {
     if (visible) {
