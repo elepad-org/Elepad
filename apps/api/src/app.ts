@@ -205,7 +205,8 @@ export default {
       const year = argentinaTime.getUTCFullYear();
       const month = argentinaTime.getUTCMonth();
       const day = argentinaTime.getUTCDate();
-      const todayStr = argentinaTime.toISOString().split("T")[0];
+      const todayStr =
+        argentinaTime.toISOString().split("T")[0] || "2000-01-01";
 
       // NOTA: Construye la fecha en UTC usando los componentes ARG, y luego suma el offset
       // para obtener el instante UTC real equivalente al fin del dia de ARG.
@@ -216,50 +217,97 @@ export default {
         startOfTodayArgentina.getTime() + 24 * 60 * 60 * 1000,
       );
 
-      const dayStartUTC = startOfTodayArgentina.toISOString();
-      const dayEndUTC = endOfTodayArgentina.toISOString();
-
       // Calcular Ventana de Notificación (UTC puro)
       // Actividades que empiezan entre 2 y 3 horas desde "ahora"
       const windowStartMs = nowUTC.getTime() + 2 * 60 * 60 * 1000;
       const windowEndMs = nowUTC.getTime() + 3 * 60 * 60 * 1000;
 
       const windowStartTime = new Date(windowStartMs).toISOString();
-      const windowEndTime = new Date(windowEndMs).toISOString();
 
-      // Caso borde: Si son las 23:00 ARG, la ventana cae fuera del dia actual.
+      // Si la ventana termina mañana, se corta en la medianoche de hoy
+      const effectiveEndMs = Math.min(
+        windowEndMs,
+        endOfTodayArgentina.getTime(),
+      );
+      const effectiveEndTime = new Date(effectiveEndMs).toISOString();
+
+      // Verificamos si la ventana es válida (por si son las 23:00hs y la ventana empieza mañana)
+      if (windowStartMs >= endOfTodayArgentina.getTime()) {
+        return; // O devuelve array vacío
+      }
+
       const { data: singleDayActivities, error: error1 } = await supabase
         .from("activities")
         .select("id, title, description, assignedTo, startsAt")
-        .is("frequencyId", null)
         .eq("completed", false)
-        // Que pertenezca al día de hoy
-        .gte("startsAt", dayStartUTC)
-        .lt("startsAt", dayEndUTC)
-        // Que empiece dentro de las próximas 2-3 horas
+        .eq("frequencyId", null)
         .gte("startsAt", windowStartTime)
-        .lt("startsAt", windowEndTime);
+        .lt("startsAt", effectiveEndTime);
 
-      // Query 2: Get recurring activities that haven't ended and are valid for today
+      // Obtener actividades recurrentes con su frecuencia
       const { data: recurringActivities, error: error2 } = await supabase
         .from("activities")
-        .select("id, title, description, assignedTo, startsAt, frequencyId")
-        .not("frequencyId", "is", null)
+        .select(
+          `
+          id, 
+          title, 
+          description, 
+          assignedTo, 
+          startsAt, 
+          frequencyId,
+          endsAt,
+          frequencies!inner (
+            id,
+            rrule
+          )
+        `,
+        )
         .eq("completed", false)
-        .gte("startsAt", dayStartUTC)
-        .lt("startsAt", dayEndUTC)
-        .gte("startsAt", windowStartTime)
-        .lt("startsAt", windowEndTime);
+        .not("frequencyId", "is", null)
+        .lte("startsAt", nowUTC.toISOString()); // No debe ser actividad futura
 
-      // For linter
-      if(error1 && error2){
-        console.error(error1, error2);
-      }
+      if (error1 && error2) console.error(error1, error2);
 
-      // Filter recurring activities that don't have a completion for today
-      const recurringToNotify: typeof recurringActivities = [];
+      // Filtrar actividades recurrentes que corresponden para hoy y la ventana horaria
+      const recurringToNotify = [];
       if (recurringActivities && recurringActivities.length > 0) {
         for (const activity of recurringActivities) {
+          // Extraer la frecuencia
+          const frequency = Array.isArray(activity.frequencies)
+            ? activity.frequencies[0]
+            : activity.frequencies;
+
+          if (!frequency || !frequency.rrule) continue;
+
+          // Verificar si la actividad corresponde al día de hoy según su rrule
+          if (
+            !isActivityValidForToday(
+              activity.startsAt,
+              activity.endsAt,
+              frequency.rrule,
+              todayStr,
+            )
+          ) {
+            continue;
+          }
+
+          // Verificar si la hora de la actividad coincide con la ventana de notificación
+          // La hora se obtiene de startsAt (que ya está en UTC) y se aplica a la fecha de hoy
+          const activityStartDate = new Date(activity.startsAt);
+          const activityHour = activityStartDate.getUTCHours();
+          const activityMinute = activityStartDate.getUTCMinutes();
+
+          // Crear una fecha de hoy (UTC) con la hora de la actividad
+          const todayWithActivityTime = new Date(nowUTC);
+          todayWithActivityTime.setUTCHours(activityHour, activityMinute, 0, 0);
+
+          // Verificar si está dentro de la ventana de notificación
+          const activityTimeMs = todayWithActivityTime.getTime();
+          if (activityTimeMs < windowStartMs || activityTimeMs >= windowEndMs) {
+            continue;
+          }
+
+          // Verificar si ya fue completada hoy
           const { data: completions } = await supabase
             .from("activity_completions")
             .select("id")
@@ -267,10 +315,140 @@ export default {
             .eq("completedDate", todayStr)
             .limit(1);
 
-          // If no completion found for today, add to notification list
+          // Si no fue completada hoy, agregar a la lista
           if (!completions || completions.length === 0) {
             recurringToNotify.push(activity);
           }
+        }
+      }
+
+      /**
+       * Determina si una actividad recurrente corresponde al día de hoy según su rrule
+       * Soporta los siguientes formatos de rrule:
+       * - FREQ=YEARLY
+       * - FREQ=MONTHLY
+       * - FREQ=WEEKLY
+       * - FREQ=WEEKLY;INTERVAL=2
+       * - FREQ=DAILY
+       * - FREQ=DAILY;BYDAY=MO,TU,WE,TH,FR
+       * - NULL (se maneja fuera de esta función)
+       */
+      function isActivityValidForToday(
+        startsAt: string,
+        endsAt: string | null,
+        rrule: string,
+        todayStr: string,
+      ): boolean {
+        const activityStart = new Date(startsAt);
+        const activityEnd = endsAt ? new Date(endsAt) : null;
+
+        // Convertir la fecha de hoy (Argentina) a un objeto Date al inicio del día en UTC
+        const today = new Date(todayStr + "T00:00:00.000Z");
+
+        // Si la actividad ya terminó, no es válida
+        if (activityEnd && activityEnd < today) {
+          return false;
+        }
+
+        // Parsear la rrule
+        const freqMatch = rrule.match(/FREQ=(\w+)/);
+        const freq = freqMatch ? freqMatch[1] : null;
+
+        const intervalMatch = rrule.match(/INTERVAL=(\d+)/);
+        const interval = intervalMatch ? parseInt(intervalMatch[1] || "1") : 1;
+
+        const byDayMatch = rrule.match(/BYDAY=([A-Z,]+)/);
+        const byDay = byDayMatch
+          ? byDayMatch[1]
+            ? byDayMatch[1].split(",")
+            : []
+          : [];
+
+        if (!freq) return false;
+
+        // Convertir ambas fechas a Argentina para comparar días
+        const activityStartArgentina = new Date(
+          activityStart.getTime() - argentinaOffsetMs,
+        );
+        const todayArgentina = new Date(today.getTime() - argentinaOffsetMs);
+        const startMonth = activityStartArgentina.getUTCMonth();
+        const startYear = activityStartArgentina.getUTCFullYear();
+        const todayMonth = todayArgentina.getUTCMonth();
+        const todayYear = todayArgentina.getUTCFullYear();
+
+        // Normalizar fechas al inicio del día para comparación
+        const startOfActivityDay = new Date(activityStartArgentina);
+        startOfActivityDay.setUTCHours(0, 0, 0, 0);
+
+        const startOfToday = new Date(todayArgentina);
+        startOfToday.setUTCHours(0, 0, 0, 0);
+
+        // Calcular diferencia en días
+        const daysDiff = Math.floor(
+          (startOfToday.getTime() - startOfActivityDay.getTime()) /
+            (1000 * 60 * 60 * 24),
+        );
+
+        if (daysDiff < 0) return false; // La actividad aún no ha comenzado
+
+        switch (freq) {
+          case "DAILY":
+            // Si hay BYDAY, verificar que hoy sea uno de esos días
+            if (byDay.length > 0) {
+              const dayOfWeek = todayArgentina.getUTCDay();
+              const dayMap: Record<number, string> = {
+                0: "SU",
+                1: "MO",
+                2: "TU",
+                3: "WE",
+                4: "TH",
+                5: "FR",
+                6: "SA",
+              };
+
+              return byDay.includes(dayMap[dayOfWeek] ? dayMap[dayOfWeek] : "");
+            }
+            // Sin BYDAY, es todos los días según el intervalo
+            return daysDiff % interval === 0;
+
+          case "WEEKLY":
+            // Verificar que sea el mismo día de la semana que el día de inicio
+            const activityDayOfWeek = activityStartArgentina.getUTCDay();
+            const todayDayOfWeek = todayArgentina.getUTCDay();
+
+            if (activityDayOfWeek !== todayDayOfWeek) {
+              return false;
+            }
+
+            // Verificar el intervalo de semanas
+            const weeksDiff = Math.floor(daysDiff / 7);
+            return weeksDiff % interval === 0;
+
+          case "MONTHLY":
+            const monthsDiff =
+              (todayYear - startYear) * 12 + (todayMonth - startMonth);
+
+            // Verificar que sea el mismo día del mes y que el intervalo de meses sea correcto
+            return (
+              monthsDiff >= 0 &&
+              monthsDiff % interval === 0 &&
+              activityStartArgentina.getUTCDate() ===
+                todayArgentina.getUTCDate()
+            );
+
+          case "YEARLY":
+            const yearsDiff = todayYear - startYear;
+            // Verificar que sea el mismo día y mes del año y que el intervalo de años sea correcto
+            return (
+              yearsDiff >= 0 &&
+              yearsDiff % interval === 0 &&
+              activityStartArgentina.getUTCMonth() === todayMonth &&
+              activityStartArgentina.getUTCDate() ===
+                todayArgentina.getUTCDate()
+            );
+
+          default:
+            return false;
         }
       }
 
