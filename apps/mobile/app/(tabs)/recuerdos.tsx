@@ -1303,7 +1303,7 @@ export default function RecuerdosScreen() {
                     style={{
                       width: itemWidth,
                       aspectRatio: 1.64,
-                      marginBottom: 16,
+                      marginBottom: 12,
                     }}
                   >
                     <Pressable
