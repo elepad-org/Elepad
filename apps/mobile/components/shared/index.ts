@@ -6,6 +6,7 @@ export { LoadingProfile } from "./LoadingProfile";
 export { LoadingUser } from "./LoadingUser";
 export { InstructionsDialog } from "./InstructionsDialog";
 export { ChangePasswordModal } from "./ChangePasswordModal";
+export { EditNameModal } from "./EditNameModal";
 export { SkeletonBox } from "./SkeletonBox";
 export { default as CancelButton } from "./CancelButton";
 export { default as SuccessSnackbar } from "./SuccessSnackbar";
