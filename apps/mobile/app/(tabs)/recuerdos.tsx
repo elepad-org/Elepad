@@ -1108,7 +1108,8 @@ export default function RecuerdosScreen() {
         <View
           style={{
             paddingHorizontal: 24,
-            paddingVertical: 24,
+            paddingTop: 24,
+            paddingBottom: 12,
             borderBottomColor: COLORS.border,
           }}
         >
@@ -1232,7 +1233,7 @@ export default function RecuerdosScreen() {
         ) : (
           <View style={{ flex: 1 }} ref={listRef}>
             <FlatList
-              key={booksNumColumns} // Forzar re-render al cambiar columnas
+              key={`${booksNumColumns}-${booksSortOrder}`} // Forzar re-render al cambiar columnas o orden
               data={books}
               keyExtractor={(item) => item.id}
               numColumns={booksNumColumns}
@@ -1247,7 +1248,7 @@ export default function RecuerdosScreen() {
               refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
               }
-              renderItem={({ item }) => {
+              renderItem={({ item, index }) => {
                 const title = item.title || "(Sin nombre)";
                 const color = item.color || COLORS.primary;
 
@@ -1258,26 +1259,31 @@ export default function RecuerdosScreen() {
                 const itemWidth = availableWidth / booksNumColumns;
 
                 return (
-                  <Pressable
+                  <Animated.View
                     key={item.id}
-                    onPress={() => {
-                      setSelectedBook(item);
-                      setMemberFilterId(null);
-                    }}
+                    entering={ZoomIn.delay(index * 25).springify()}
                     style={{
                       width: itemWidth,
                       aspectRatio: 1.64,
                       marginBottom: 16,
                     }}
                   >
-                    <BookCover
-                      bookId={item.id}
-                      groupId={groupId}
-                      color={color}
-                      title={title}
-                      compact={booksNumColumns > 1}
-                    />
-                  </Pressable>
+                    <Pressable
+                      onPress={() => {
+                        setSelectedBook(item);
+                        setMemberFilterId(null);
+                      }}
+                      style={{ width: "100%", height: "100%" }}
+                    >
+                      <BookCover
+                        bookId={item.id}
+                        groupId={groupId}
+                        color={color}
+                        title={title}
+                        compact={booksNumColumns > 1}
+                      />
+                    </Pressable>
+                  </Animated.View>
                 );
               }}
             />
