@@ -8,6 +8,7 @@ import {
   ImageSourcePropType,
 } from "react-native";
 import { Text } from "react-native-paper";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 
 import { useAuth } from "@/hooks/useAuth";
@@ -221,7 +222,12 @@ export default function StreakCounter() {
             <View>
               <View style={styles.streakInfo}>
                 <Text style={styles.streakNumber}>{currentStreak}</Text>
-                <Text style={styles.streakIcon}>🔥</Text>
+                <MaterialCommunityIcons
+                  name="fire"
+                  size={44}
+                  color={streak.hasPlayedToday ? "#F59E0B" : "#A0A0A0"}
+                  style={{ marginLeft: 4 }}
+                />
               </View>
               <Text style={styles.streakLabel}>Días de racha</Text>
             </View>
@@ -305,10 +311,7 @@ const styles = StyleSheet.create({
     lineHeight: 60,
     letterSpacing: -2,
   },
-  streakIcon: {
-    fontSize: 32,
-    marginLeft: 8,
-  },
+
   streakLabel: {
     fontSize: 16,
     fontFamily: FONT.bold,
