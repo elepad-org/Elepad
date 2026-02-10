@@ -484,7 +484,13 @@ export default function RecuerdoDetailDialog({
 
       // Para audio, descargamos y compartimos el archivo directamente
       if (recuerdo.tipo === "audio" && recuerdo.contenido) {
-        const filename = `audio-${recuerdo.id}.m4a`;
+        // Usar el título como nombre de archivo (sanitizado)
+        const safeTitle = (recuerdo.titulo || `audio-${recuerdo.id}`)
+          .replace(/[^a-zA-Z0-9\u00C0-\u024F\s-_]/g, "") // Mantener letras (inc. acentos), números, espacios, guiones
+          .trim()
+          .replace(/\s+/g, "_"); // Reemplazar espacios con guiones bajos
+
+        const filename = `${safeTitle || "audio"}.m4a`;
         const localUri = `${FileSystem.cacheDirectory}${filename}`;
 
         console.log("Downloading audio to:", localUri);
