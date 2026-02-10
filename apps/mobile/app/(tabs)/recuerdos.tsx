@@ -1275,6 +1275,7 @@ export default function RecuerdosScreen() {
                       groupId={groupId}
                       color={color}
                       title={title}
+                      compact={booksNumColumns > 1}
                     />
                   </Pressable>
                 );

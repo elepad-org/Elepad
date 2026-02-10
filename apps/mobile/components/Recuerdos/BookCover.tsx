@@ -11,6 +11,7 @@ interface BookCoverProps {
   groupId: string;
   color: string;
   title: string;
+  compact?: boolean;
 }
 
 type StickerPosition = {
@@ -29,7 +30,12 @@ const stickerPositions: StickerPosition[] = [
   { top: "57%", right: "9%", rotation: 9, size: 78 },
 ];
 
-export default function BookCover({ bookId, groupId, title }: BookCoverProps) {
+export default function BookCover({
+  bookId,
+  groupId,
+  title,
+  compact = false,
+}: BookCoverProps) {
   const { data: memoriesResponse } = useGetMemories(
     {
       groupId,
@@ -79,33 +85,42 @@ export default function BookCover({ bookId, groupId, title }: BookCoverProps) {
         style={styles.chestImage}
       />
 
-      {/* Imágenes de memorias como stickers */}
-      {imageMemories.map((memory: { id: string; mediaUrl: string }, index: number) => {
-        const position = stickerPositions[index];
-        const stickerStyle: ViewStyle = {
-          top: position.top,
-          transform: [{ rotate: `${position.rotation}deg` }],
-        };
-        if (position.left) stickerStyle.left = position.left;
-        if (position.right) stickerStyle.right = position.right;
+      {/* Imágenes de memorias como stickers (solo si no es compact) */}
+      {!compact &&
+        imageMemories.map(
+          (memory: { id: string; mediaUrl: string }, index: number) => {
+            const position = stickerPositions[index];
+            const stickerStyle: ViewStyle = {
+              top: position.top,
+              transform: [{ rotate: `${position.rotation}deg` }],
+            };
+            if (position.left) stickerStyle.left = position.left;
+            if (position.right) stickerStyle.right = position.right;
 
-        return (
-          <View
-            key={memory.id}
-            style={[styles.stickerContainer, stickerStyle]}
-          >
-            <Image
-              source={{ uri: memory.mediaUrl }}
-              style={[styles.stickerImage, { width: position.size, height: position.size }]}
-              contentFit="cover"
-            />
-          </View>
-        );
-      })}
+            return (
+              <View
+                key={memory.id}
+                style={[styles.stickerContainer, stickerStyle]}
+              >
+                <Image
+                  source={{ uri: memory.mediaUrl }}
+                  style={[
+                    styles.stickerImage,
+                    { width: position.size, height: position.size },
+                  ]}
+                  contentFit="cover"
+                />
+              </View>
+            );
+          }
+        )}
 
       {/* Título superpuesto */}
       <View style={styles.titleContainer}>
-        <Text numberOfLines={2} style={styles.chestTitle}>
+        <Text
+          numberOfLines={compact ? 1 : 2}
+          style={[styles.chestTitle, compact && { fontSize: 14 }]}
+        >
           {title}
         </Text>
       </View>
