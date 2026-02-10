@@ -888,7 +888,7 @@ export default function RecuerdosScreen() {
           <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
             {bookDialogMode === "create" ? "Nuevo baúl" : "Editar baúl"}
           </Dialog.Title>
-          <Dialog.Content>
+          <Dialog.Content style={{ paddingBottom: 12 }}>
             <StyledTextInput
               label="Nombre"
               value={bookFormTitle}
@@ -903,81 +903,12 @@ export default function RecuerdosScreen() {
               numberOfLines={3}
               marginBottom={12}
             />
-
-            <Text
-              style={{
-                ...STYLES.subheading,
-                textAlign: "left",
-                marginTop: 0,
-              }}
-            >
-              Color del baúl
-            </Text>
-
-            <View
-              style={{ flexDirection: "row", flexWrap: "wrap", marginTop: 10 }}
-            >
-              {BAUL_COLOR_OPTIONS.map((opt) => {
-                const selected =
-                  bookFormColor?.toLowerCase?.() === opt.color.toLowerCase();
-                return (
-                  <Pressable
-                    key={opt.key}
-                    onPress={() => setBookFormColor(opt.color)}
-                    style={{ marginRight: 10, marginBottom: 10 }}
-                  >
-                    <View
-                      style={{
-                        width: 34,
-                        height: 34,
-                        borderRadius: 17,
-                        borderWidth: selected ? 2 : 1,
-                        borderColor: selected ? COLORS.text : COLORS.border,
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <View
-                        style={{
-                          width: 26,
-                          height: 26,
-                          borderRadius: 13,
-                          backgroundColor: opt.color,
-                          borderWidth:
-                            opt.color.toLowerCase() === "#ffffff" ? 1 : 0,
-                          borderColor: COLORS.border,
-                        }}
-                      />
-                    </View>
-                  </Pressable>
-                );
-              })}
-            </View>
-
-            <View style={{ alignItems: "center", marginTop: 12 }}>
-              <View
-                style={{
-                  width: 180,
-                  aspectRatio: 1,
-                  backgroundColor: "transparent",
-                  borderRadius: 18,
-                  borderWidth: 1,
-                  borderColor: COLORS.border,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <View style={{ width: "94%", height: "94%" }}>
-                  <ChestIcon color={bookFormColor} />
-                </View>
-              </View>
-            </View>
           </Dialog.Content>
           <Dialog.Actions
             style={{
               paddingBottom: 30,
               paddingHorizontal: 24,
-              paddingTop: 10,
+              paddingTop: 0,
               justifyContent: "space-between",
             }}
           >
