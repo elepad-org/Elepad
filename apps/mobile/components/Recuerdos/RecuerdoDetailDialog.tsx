@@ -1081,7 +1081,7 @@ export default function RecuerdoDetailDialog({
                                 visible={menuVisible}
                                 onDismiss={closeMenu}
                                 contentStyle={{
-                                  backgroundColor: "rgba(255, 255, 255, 0.70)",
+                                  backgroundColor: "#ffffff",
                                   borderRadius: 12,
                                 }}
                                 anchor={
