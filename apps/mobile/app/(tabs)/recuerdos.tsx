@@ -52,7 +52,6 @@ import RecuerdoItemComponent from "@/components/Recuerdos/RecuerdoItemComponent"
 import NuevoRecuerdoDialogComponent from "@/components/Recuerdos/NuevoRecuerdoDialogComponent";
 import RecuerdoDetailDialog from "@/components/Recuerdos/RecuerdoDetailDialog";
 import { BackButton } from "@/components/shared/BackButton";
-import ChestIcon from "@/components/Recuerdos/ChestIcon";
 import SaveButton from "@/components/shared/SaveButton";
 import CancelButton from "@/components/shared/CancelButton";
 import BookCover from "@/components/Recuerdos/BookCover";
@@ -140,17 +139,6 @@ interface Recuerdo {
     stickerUrl: string | null;
   }[];
 }
-
-const BAUL_COLOR_OPTIONS = [
-  { key: "red", color: "#E53935" },
-  { key: "green", color: "#43A047" },
-  { key: "blue", color: "#1E88E5" },
-  { key: "magenta", color: "#D81B60" },
-  { key: "yellow", color: "#FDD835" },
-  { key: "cyan", color: "#00ACC1" },
-  { key: "white", color: "#FFFFFF" },
-  { key: "purple", color: COLORS.primary },
-] as const;
 
 export default function RecuerdosScreen() {
   const isFocused = useIsFocused();

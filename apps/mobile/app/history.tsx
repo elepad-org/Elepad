@@ -17,7 +17,7 @@ import {
   useGetFamilyGroupIdGroupMembers,
 } from "@elepad/api-client";
 import { Divider } from "react-native-paper";
-import { COLORS, STYLES, SHADOWS, FONT, LAYOUT } from "@/styles/base";
+import { COLORS, STYLES, SHADOWS, FONT } from "@/styles/base";
 import StatisticsChart from "@/components/Historial/StatisticsChart";
 import { useAuth } from "@/hooks/useAuth";
 import DropdownSelect from "@/components/shared/DropdownSelect";
