@@ -260,6 +260,9 @@ export default function StreakCounter() {
                     style={[
                       styles.dayCircle,
                       weekStatus[index] && styles.dayCircleActive,
+                      index === new Date().getDay() &&
+                        !streak.hasPlayedToday &&
+                        styles.dayCircleTodayIncomplete,
                     ]}
                   >
                     {weekStatus[index] && (
@@ -367,6 +370,10 @@ const styles = StyleSheet.create({
   },
   dayCircleActive: {
     backgroundColor: "#F59E0B",
+  },
+  dayCircleTodayIncomplete: {
+    borderWidth: 2.5,
+    borderColor: COLORS.primary,
   },
   checkmark: {
     fontSize: 12,
