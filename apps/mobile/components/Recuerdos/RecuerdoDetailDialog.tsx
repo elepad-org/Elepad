@@ -451,7 +451,8 @@ export default function RecuerdoDetailDialog({
     if (
       recuerdo.tipo !== "imagen" &&
       recuerdo.tipo !== "texto" &&
-      recuerdo.tipo !== "video"
+      recuerdo.tipo !== "video" &&
+      recuerdo.tipo !== "audio"
     )
       return;
 
@@ -477,6 +478,28 @@ export default function RecuerdoDetailDialog({
           mimeType: "video/mp4",
           dialogTitle: recuerdo.titulo || "Compartir video",
           UTI: "public.movie",
+        });
+        return;
+      }
+
+      // Para audio, descargamos y compartimos el archivo directamente
+      if (recuerdo.tipo === "audio" && recuerdo.contenido) {
+        const filename = `audio-${recuerdo.id}.m4a`;
+        const localUri = `${FileSystem.cacheDirectory}${filename}`;
+
+        console.log("Downloading audio to:", localUri);
+
+        const downloadResult = await FileSystem.downloadAsync(
+          recuerdo.contenido,
+          localUri,
+        );
+
+        const uri = downloadResult.uri;
+
+        await shareAsync(uri, {
+          mimeType: "audio/m4a",
+          dialogTitle: recuerdo.titulo || "Compartir audio",
+          UTI: "public.audio",
         });
         return;
       }
@@ -529,7 +552,8 @@ export default function RecuerdoDetailDialog({
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           {(recuerdo.tipo === "imagen" ||
             recuerdo.tipo === "texto" ||
-            recuerdo.tipo === "video") && (
+            recuerdo.tipo === "video" ||
+            recuerdo.tipo === "audio") && (
             <TouchableOpacity
               onPress={handleShare}
               disabled={isMutating}
@@ -1033,8 +1057,18 @@ export default function RecuerdoDetailDialog({
                             top: 68,
                             right: 16,
                             zIndex: 100,
+                            flexDirection: "row",
+                            alignItems: "center",
                           }}
                         >
+                          <IconButton
+                            icon="share-variant"
+                            size={22}
+                            iconColor="#e8e8e8"
+                            style={{ margin: 0 }}
+                            onPress={handleShare}
+                            disabled={isMutating}
+                          />
                           {recuerdo.autorId === currentUserId &&
                             (menuMounted ? (
                               <Menu
