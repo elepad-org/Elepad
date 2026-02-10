@@ -1126,7 +1126,7 @@ export default function RecuerdoDetailDialog({
                             flex: 1,
                             justifyContent: "center",
                             alignItems: "center",
-                            marginTop: -16,
+                            marginTop: 12,
                           }}
                         >
                           <View
