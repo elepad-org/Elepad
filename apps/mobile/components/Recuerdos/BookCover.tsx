@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     fontFamily: FONT.regular,
     textAlign: "center",
     color: COLORS.white,
-    backgroundColor: COLORS.primary,
+    backgroundColor: "#485c75",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 4,

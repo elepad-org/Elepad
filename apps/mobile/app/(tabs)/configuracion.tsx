@@ -14,13 +14,12 @@ import {
   Portal,
   Dialog,
 } from "react-native-paper";
-import { StyledTextInput } from "@/components/shared";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/hooks/useAuth";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
 import { UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import ProfileHeader from "@/components/ProfileHeader";
-import { LoadingProfile, ChangePasswordModal } from "@/components/shared";
+import { LoadingProfile, ChangePasswordModal, EditNameModal } from "@/components/shared";
 import { useRouter } from "expo-router";
 import { COLORS, STYLES, FONT } from "@/styles/base";
 import { useToast } from "@/components/shared/Toast";
@@ -58,9 +57,7 @@ export default function ConfiguracionScreen() {
   const avatarUrl = userElepad?.avatarUrl || "";
   const activeFrameUrl = userElepad?.activeFrameUrl;
 
-  const [editExpanded, setEditExpanded] = useState(false);
-  const [formName, setFormName] = useState(displayName);
-  const [saving, setSaving] = useState(false);
+  const [editNameModalVisible, setEditNameModalVisible] = useState(false);
   const [photoOpen, setPhotoOpen] = useState(false);
   const [timezone, setTimezone] = useState(
     userElepad?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -171,99 +168,10 @@ export default function ConfiguracionScreen() {
             <List.Item
               title="Editar nombre"
               left={(props) => <List.Icon {...props} icon="account-edit" />}
-              right={(props) => (
-                <List.Icon
-                  {...props}
-                  icon={editExpanded ? "chevron-down" : "chevron-right"}
-                />
-              )}
+              right={(props) => <List.Icon {...props} icon="chevron-right" />}
               style={{ minHeight: 60, justifyContent: "center" }}
-              onPress={() => {
-                setFormName(displayName);
-                setEditExpanded(!editExpanded);
-              }}
+              onPress={() => setEditNameModalVisible(true)}
             />
-
-            {/* Campo de texto desplegable */}
-            {editExpanded && (
-              <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
-                <StyledTextInput
-                  label="Nombre"
-                  value={formName}
-                  onChangeText={setFormName}
-                  autoFocus
-                  backgroundColor={COLORS.white}
-                />
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    width: "100%",
-                  }}
-                >
-                  <Button
-                    mode="text"
-                    onPress={() => {
-                      setEditExpanded(false);
-                      setFormName(displayName);
-                    }}
-                    disabled={saving}
-                    style={[
-                      STYLES.buttonPrimary,
-                      { width: "40%", backgroundColor: COLORS.white },
-                    ]}
-                    labelStyle={{ color: COLORS.text }}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    mode="contained"
-                    onPress={async () => {
-                      const next = formName.trim();
-                      if (!next || !userElepad?.id) return;
-                      if (next === displayName) {
-                        setEditExpanded(false);
-                        return;
-                      }
-                      try {
-                        setSaving(true);
-                        await patchUsersId(userElepad.id, {
-                          displayName: next,
-                        });
-                        setEditExpanded(false);
-                        await refreshUserElepad?.();
-                        showToast({
-                          message: "Nombre actualizado correctamente",
-                          type: "success",
-                        });
-                      } catch (e: unknown) {
-                        const msg =
-                          e instanceof Error
-                            ? e.message
-                            : "Error al actualizar";
-                        showToast({
-                          message: msg,
-                          type: "error",
-                        });
-                      } finally {
-                        setSaving(false);
-                      }
-                    }}
-                    loading={saving}
-                    disabled={
-                      saving ||
-                      !formName.trim() ||
-                      formName.trim() === displayName ||
-                      !userElepad?.id
-                    }
-                    style={[STYLES.buttonPrimary, { width: "40%" }]}
-                  >
-                    Guardar
-                  </Button>
-                </View>
-              </View>
-            )}
-
             <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
             <List.Item
               title="Cambiar contraseña"
@@ -385,6 +293,16 @@ export default function ConfiguracionScreen() {
           <ChangePasswordModal
             visible={changePasswordModalVisible}
             onDismiss={() => setChangePasswordModalVisible(false)}
+            showToast={showToast}
+          />
+          <EditNameModal
+            visible={editNameModalVisible}
+            onDismiss={() => setEditNameModalVisible(false)}
+            currentName={displayName}
+            userId={userElepad?.id || ""}
+            onSuccess={async () => {
+              await refreshUserElepad?.();
+            }}
             showToast={showToast}
           />
         </Portal>
