@@ -26,7 +26,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   useGetMemoriesBooks,
-  useGetMemories,
   useGetFamilyGroupIdGroupMembers,
   createMemoriesBook,
   createMemoryWithMedia,
@@ -40,8 +39,9 @@ import {
   updateMemory,
   updateMemoriesBook,
   useAddReaction,
+  getMemories,
 } from "@elepad/api-client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, STYLES, LAYOUT } from "@/styles/base";
 import { Platform } from "react-native";
@@ -280,24 +280,143 @@ export default function RecuerdosScreen() {
     },
   );
 
-  // Hook del API client
+  // Hook de infinite query para paginación
   const {
-    data: memoriesResponse,
+    data: memoriesInfiniteData,
     isLoading: memoriesLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
     refetch: refetchMemories,
-  } = useGetMemories(
-    {
-      groupId,
-      bookId: selectedBook?.id,
-      createdBy: memberFilterId || undefined,
-      limit: 20,
-    },
-    {
-      query: {
-        enabled: !!groupId && !!selectedBook,
+  } = useInfiniteQuery({
+    queryKey: [
+      "/memories",
+      {
+        groupId,
+        bookId: selectedBook?.id,
+        createdBy: memberFilterId || undefined,
       },
+    ],
+    queryFn: async ({ pageParam = 0 }) => {
+      console.log("🔍 [MEMORIES] Fetching with params:", {
+        groupId,
+        bookId: selectedBook?.id,
+        createdBy: memberFilterId || undefined,
+        limit: 20,
+        offset: pageParam,
+      });
+      const response = await getMemories({
+        groupId,
+        bookId: selectedBook?.id,
+        createdBy: memberFilterId || undefined,
+        limit: 20,
+        offset: pageParam,
+      });
+      console.log("📦 [MEMORIES] Raw response:", JSON.stringify(response, null, 2));
+      return response;
     },
-  );
+    getNextPageParam: (lastPage) => {
+      console.log("🔄 [MEMORIES] getNextPageParam - lastPage:", JSON.stringify(lastPage, null, 2));
+      
+      // Verificar que lastPage tenga la estructura esperada
+      if (!lastPage || typeof lastPage !== 'object' || !('data' in lastPage)) {
+        console.log("❌ [MEMORIES] lastPage is invalid");
+        return undefined;
+      }
+
+      const { data, total, offset, limit } = lastPage as unknown as { data: unknown[]; total: number; offset: number; limit: number };
+      const nextOffset = offset + limit;
+
+      // Si la última página no tiene datos, no hay más
+      if (!data || data.length === 0) {
+        console.log("⚠️ [MEMORIES] No data in last page, stopping pagination");
+        return undefined;
+      }
+
+      // Si la última página tiene menos datos que el límite, ya terminamos
+      if (data.length < limit) {
+        console.log("⚠️ [MEMORIES] Last page has less data than limit, stopping pagination");
+        return undefined;
+      }
+
+      console.log("➡️ [MEMORIES] Pagination info:", { 
+        currentOffset: offset, 
+        limit, 
+        total, 
+        dataLength: data?.length,
+        nextOffset, 
+        hasMore: nextOffset < total || data.length === limit
+      });
+
+      // Continuar si:
+      // 1. nextOffset < total (caso normal)
+      // 2. O si la última página tiene exactamente 'limit' items (indica que puede haber más)
+      return (nextOffset < total || data.length === limit) ? nextOffset : undefined;
+    },
+    enabled: !!groupId && !!selectedBook,
+    initialPageParam: 0,
+  });
+
+  // Transformar la data paginada en un formato compatible con el código existente
+  const memoriesResponse = useMemo(() => {
+    console.log("🔄 [MEMORIES] Processing memoriesInfiniteData:", memoriesInfiniteData);
+    
+    if (!memoriesInfiniteData) {
+      console.log("❌ [MEMORIES] No infinite data available");
+      return undefined;
+    }
+
+    console.log("📄 [MEMORIES] Pages count:", memoriesInfiniteData.pages.length);
+
+    // Combinar todas las páginas en un solo array
+    const allMemories: MemoryWithReactions[] = [];
+    let total = 0;
+
+    memoriesInfiniteData.pages.forEach((page, index) => {
+      console.log(`📄 [MEMORIES] Processing page ${index}:`, JSON.stringify(page, null, 2));
+      
+      // Verificar que page tenga la estructura esperada
+      if (!page || typeof page !== 'object' || !('data' in page)) {
+        console.log(`⚠️ [MEMORIES] Page ${index} is invalid or has no data property`);
+        return;
+      }
+
+      const pageData = page as unknown as { data: MemoryWithReactions[]; total: number; limit: number; offset: number };
+        
+      console.log(`📊 [MEMORIES] Page ${index} data:`, {
+        hasData: !!pageData.data,
+        dataIsArray: Array.isArray(pageData.data),
+        dataLength: pageData.data?.length,
+        total: pageData.total,
+      });
+        
+      if (pageData.data && Array.isArray(pageData.data)) {
+        console.log(`✅ [MEMORIES] Adding ${pageData.data.length} memories from page ${index}`);
+        allMemories.push(...pageData.data);
+        total = pageData.total;
+      } else {
+        console.log(`⚠️ [MEMORIES] Page ${index} has no valid data array`);
+      }
+    });
+
+    console.log("✨ [MEMORIES] Final result:", {
+      totalMemories: allMemories.length,
+      expectedTotal: total,
+    });
+
+    const result = {
+      data: {
+        data: allMemories,
+        total,
+        limit: 20,
+        offset: 0,
+      },
+    };
+
+    console.log("🎯 [MEMORIES] Returning memoriesResponse:", JSON.stringify(result, null, 2));
+    
+    return result;
+  }, [memoriesInfiniteData]);
 
   const createBookMutation = useMutation({
     mutationFn: async (data: {
@@ -1781,9 +1900,15 @@ export default function RecuerdosScreen() {
           )}
           key={`masonry-${numColumns}-${sortOrder}-${isFocused}`}
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8 }}
+          onEndReached={() => {
+            if (hasNextPage && !isFetchingNextPage) {
+              fetchNextPage();
+            }
+          }}
+          onEndReachedThreshold={0.5}
           ListFooterComponent={
             <>
-              {memoriesLoading && recuerdos.length > 0 && (
+              {(memoriesLoading || isFetchingNextPage) && recuerdos.length > 0 && (
                 <View style={{ padding: 16, alignItems: "center" }}>
                   <ActivityIndicator />
                 </View>

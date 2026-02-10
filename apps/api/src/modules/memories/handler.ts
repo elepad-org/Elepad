@@ -62,12 +62,15 @@ memoriesApp.openapi(
   async (c) => {
     const filters = c.req.valid("query");
 
-    const memories = await c.var.memoriesService.getAllMemories(filters);
+    const [memories, total] = await Promise.all([
+      c.var.memoriesService.getAllMemories(filters),
+      c.var.memoriesService.getMemoriesCount(filters),
+    ]);
 
     return c.json(
       {
         data: memories,
-        total: memories.length,
+        total: total,
         limit: filters.limit,
         offset: filters.offset,
       },

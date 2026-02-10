@@ -106,6 +106,35 @@ export class MemoriesService {
   }
 
   /**
+   * Get the total count of memories matching the filters
+   */
+  async getMemoriesCount(filters?: MemoryFilters): Promise<number> {
+    let query = this.supabase
+      .from("memories")
+      .select("id", { count: "exact", head: true });
+
+    // Apply same filters as getAllMemories
+    if (filters?.bookId) {
+      query = query.eq("bookId", filters.bookId);
+    }
+    if (filters?.groupId) {
+      query = query.eq("groupId", filters.groupId);
+    }
+    if (filters?.createdBy) {
+      query = query.eq("createdBy", filters.createdBy);
+    }
+
+    const { count, error } = await query;
+
+    if (error) {
+      console.error("Error counting memories:", error);
+      throw new ApiException(500, "Error counting memories");
+    }
+
+    return count ?? 0;
+  }
+
+  /**
    * Get a single memory by ID
    */
   async getMemoryById(id: string): Promise<MemoryWithReactions | null> {
