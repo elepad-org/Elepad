@@ -221,7 +221,14 @@ export default function StreakCounter() {
           <View style={styles.infoColumn}>
             <View>
               <View style={styles.streakInfo}>
-                <Text style={styles.streakNumber}>{currentStreak}</Text>
+                <Text
+                  style={[
+                    styles.streakNumber,
+                    !streak.hasPlayedToday && styles.streakNumberCompact,
+                  ]}
+                >
+                  {currentStreak}
+                </Text>
                 <MaterialCommunityIcons
                   name="fire"
                   size={44}
@@ -229,7 +236,19 @@ export default function StreakCounter() {
                   style={{ marginLeft: 4 }}
                 />
               </View>
-              <Text style={styles.streakLabel}>Días de racha</Text>
+              <Text
+                style={[
+                  styles.streakLabel,
+                  !streak.hasPlayedToday && styles.streakLabelCompact,
+                ]}
+              >
+                Días de racha
+              </Text>
+              {!streak.hasPlayedToday && (
+                <Text style={styles.streakWarning}>
+                  ¡Completa la racha hoy!
+                </Text>
+              )}
             </View>
 
             {/* Días de la semana */}
@@ -311,12 +330,19 @@ const styles = StyleSheet.create({
     lineHeight: 60,
     letterSpacing: -2,
   },
-
+  streakNumberCompact: {
+    fontSize: 48,
+    lineHeight: 52,
+  },
   streakLabel: {
     fontSize: 16,
     fontFamily: FONT.bold,
     color: COLORS.textSecondary,
     marginBottom: 8,
+  },
+  streakLabelCompact: {
+    fontSize: 14,
+    marginBottom: 4,
   },
   weekContainer: {
     flexDirection: "row",
@@ -346,5 +372,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.white,
     fontWeight: "bold",
+  },
+  streakWarning: {
+    fontSize: 11,
+    fontFamily: FONT.medium,
+    color: COLORS.textSecondary,
+    marginTop: 0,
+    marginBottom: 0,
   },
 });
