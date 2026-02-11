@@ -277,12 +277,12 @@ export default function HistoryScreen({ initialAttempts = [], activeTab = "" }: 
           >
             Mostrar más
           </Button>
-          <View style={{ height: 100 }} />
+          {isHelper && <View style={{ height: 100 }} />}
         </View>
       );
     }
 
-    return <View style={{ height: 100 }} />;
+    return isHelper ? <View style={{ height: 100 }} /> : null;
   };
 
   return (
