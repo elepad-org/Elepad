@@ -1321,7 +1321,19 @@ export default function RecuerdosScreen() {
         {groupId && (
           <ExpandableFAB
             ref={albumRef}
-            label="Álbumes"
+            label={
+              <Text
+                numberOfLines={1}
+                style={{
+                  fontSize: 16,
+                  minWidth: 110,
+                }}
+              >
+                <Text style={{ color: COLORS.primary, fontWeight: "700" }}>Histor</Text>
+                <Text style={{ color: COLORS.secondary, fontWeight: "700" }}>IA</Text>
+                <Text style={{ color: COLORS.primary, fontWeight: "700" }}>s</Text>
+              </Text>
+            }
             icon="book-multiple"
             onPress={() => router.push("../albums")}
             bottom={LAYOUT.bottomNavHeight + 16}

@@ -1,12 +1,12 @@
-import { useState, useEffect, forwardRef } from "react";
+import { useState, useEffect, forwardRef, ReactNode } from "react";
 import { View, TouchableOpacity, Text } from "react-native";
 import { IconButton } from "react-native-paper";
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, interpolateColor } from "react-native-reanimated";
 import { COLORS, SHADOWS } from "@/styles/base";
 
 interface ExpandableFABProps {
-  /** Texto que se muestra cuando el FAB está expandido */
-  label: string;
+  /** Texto que se muestra cuando el FAB está expandido (puede ser string o ReactNode) */
+  label: string | ReactNode;
   /** Nombre del icono (react-native-paper icon) */
   icon: string;
   /** Callback que se ejecuta cuando el FAB está expandido y se presiona */
@@ -15,7 +15,7 @@ interface ExpandableFABProps {
   backgroundColor?: string;
   /** Color del icono */
   iconColor?: string;
-  /** Color del texto */
+  /** Color del texto (solo si label es string) */
   textColor?: string;
   /** Color de fondo de la parte expandible */
   expandedBackgroundColor?: string;
@@ -126,17 +126,21 @@ export const ExpandableFAB = forwardRef<View, ExpandableFABProps>(
           fabAnimatedStyle,
         ]}
       >
-        <Text
-          numberOfLines={1}
-          style={{
-            color: textColor,
-            fontSize: 16,
-            fontWeight: "600",
-            minWidth: expandedWidth - 20, // Ancho mínimo para evitar wrapping
-          }}
-        >
-          {label}
-        </Text>
+        {typeof label === "string" ? (
+          <Text
+            numberOfLines={1}
+            style={{
+              color: textColor,
+              fontSize: 16,
+              fontWeight: "600",
+              minWidth: expandedWidth - 20,
+            }}
+          >
+            {label}
+          </Text>
+        ) : (
+          label
+        )}
       </Animated.View>
 
       {/* Círculo - Siempre al frente */}
