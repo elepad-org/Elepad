@@ -41,7 +41,11 @@ import {
   useAddReaction,
   getMemories,
 } from "@elepad/api-client";
-import { useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  useInfiniteQuery,
+} from "@tanstack/react-query";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, STYLES, LAYOUT } from "@/styles/base";
 import { Platform } from "react-native";
@@ -99,7 +103,7 @@ const memoryToRecuerdo = (
     miniatura:
       (memory.mimeType?.startsWith("image/") ||
         memory.mimeType?.startsWith("video/")) &&
-        memory.mediaUrl
+      memory.mediaUrl
         ? memory.mediaUrl
         : undefined,
     titulo: memory.title || undefined,
@@ -313,19 +317,30 @@ export default function RecuerdosScreen() {
         limit: 20,
         offset: pageParam,
       });
-      console.log("📦 [MEMORIES] Raw response:", JSON.stringify(response, null, 2));
+      console.log(
+        "📦 [MEMORIES] Raw response:",
+        JSON.stringify(response, null, 2),
+      );
       return response;
     },
     getNextPageParam: (lastPage) => {
-      console.log("🔄 [MEMORIES] getNextPageParam - lastPage:", JSON.stringify(lastPage, null, 2));
-      
+      console.log(
+        "🔄 [MEMORIES] getNextPageParam - lastPage:",
+        JSON.stringify(lastPage, null, 2),
+      );
+
       // Verificar que lastPage tenga la estructura esperada
-      if (!lastPage || typeof lastPage !== 'object' || !('data' in lastPage)) {
+      if (!lastPage || typeof lastPage !== "object" || !("data" in lastPage)) {
         console.log("❌ [MEMORIES] lastPage is invalid");
         return undefined;
       }
 
-      const { data, total, offset, limit } = lastPage as unknown as { data: unknown[]; total: number; offset: number; limit: number };
+      const { data, total, offset, limit } = lastPage as unknown as {
+        data: unknown[];
+        total: number;
+        offset: number;
+        limit: number;
+      };
       const nextOffset = offset + limit;
 
       // Si la última página no tiene datos, no hay más
@@ -336,23 +351,27 @@ export default function RecuerdosScreen() {
 
       // Si la última página tiene menos datos que el límite, ya terminamos
       if (data.length < limit) {
-        console.log("⚠️ [MEMORIES] Last page has less data than limit, stopping pagination");
+        console.log(
+          "⚠️ [MEMORIES] Last page has less data than limit, stopping pagination",
+        );
         return undefined;
       }
 
-      console.log("➡️ [MEMORIES] Pagination info:", { 
-        currentOffset: offset, 
-        limit, 
-        total, 
+      console.log("➡️ [MEMORIES] Pagination info:", {
+        currentOffset: offset,
+        limit,
+        total,
         dataLength: data?.length,
-        nextOffset, 
-        hasMore: nextOffset < total || data.length === limit
+        nextOffset,
+        hasMore: nextOffset < total || data.length === limit,
       });
 
       // Continuar si:
       // 1. nextOffset < total (caso normal)
       // 2. O si la última página tiene exactamente 'limit' items (indica que puede haber más)
-      return (nextOffset < total || data.length === limit) ? nextOffset : undefined;
+      return nextOffset < total || data.length === limit
+        ? nextOffset
+        : undefined;
     },
     enabled: !!groupId && !!selectedBook,
     initialPageParam: 0,
@@ -360,39 +379,57 @@ export default function RecuerdosScreen() {
 
   // Transformar la data paginada en un formato compatible con el código existente
   const memoriesResponse = useMemo(() => {
-    console.log("🔄 [MEMORIES] Processing memoriesInfiniteData:", memoriesInfiniteData);
-    
+    console.log(
+      "🔄 [MEMORIES] Processing memoriesInfiniteData:",
+      memoriesInfiniteData,
+    );
+
     if (!memoriesInfiniteData) {
       console.log("❌ [MEMORIES] No infinite data available");
       return undefined;
     }
 
-    console.log("📄 [MEMORIES] Pages count:", memoriesInfiniteData.pages.length);
+    console.log(
+      "📄 [MEMORIES] Pages count:",
+      memoriesInfiniteData.pages.length,
+    );
 
     // Combinar todas las páginas en un solo array
     const allMemories: MemoryWithReactions[] = [];
     let total = 0;
 
     memoriesInfiniteData.pages.forEach((page, index) => {
-      console.log(`📄 [MEMORIES] Processing page ${index}:`, JSON.stringify(page, null, 2));
-      
+      console.log(
+        `📄 [MEMORIES] Processing page ${index}:`,
+        JSON.stringify(page, null, 2),
+      );
+
       // Verificar que page tenga la estructura esperada
-      if (!page || typeof page !== 'object' || !('data' in page)) {
-        console.log(`⚠️ [MEMORIES] Page ${index} is invalid or has no data property`);
+      if (!page || typeof page !== "object" || !("data" in page)) {
+        console.log(
+          `⚠️ [MEMORIES] Page ${index} is invalid or has no data property`,
+        );
         return;
       }
 
-      const pageData = page as unknown as { data: MemoryWithReactions[]; total: number; limit: number; offset: number };
-        
+      const pageData = page as unknown as {
+        data: MemoryWithReactions[];
+        total: number;
+        limit: number;
+        offset: number;
+      };
+
       console.log(`📊 [MEMORIES] Page ${index} data:`, {
         hasData: !!pageData.data,
         dataIsArray: Array.isArray(pageData.data),
         dataLength: pageData.data?.length,
         total: pageData.total,
       });
-        
+
       if (pageData.data && Array.isArray(pageData.data)) {
-        console.log(`✅ [MEMORIES] Adding ${pageData.data.length} memories from page ${index}`);
+        console.log(
+          `✅ [MEMORIES] Adding ${pageData.data.length} memories from page ${index}`,
+        );
         allMemories.push(...pageData.data);
         total = pageData.total;
       } else {
@@ -414,8 +451,11 @@ export default function RecuerdosScreen() {
       },
     };
 
-    console.log("🎯 [MEMORIES] Returning memoriesResponse:", JSON.stringify(result, null, 2));
-    
+    console.log(
+      "🎯 [MEMORIES] Returning memoriesResponse:",
+      JSON.stringify(result, null, 2),
+    );
+
     return result;
   }, [memoriesInfiniteData]);
 
@@ -435,8 +475,9 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al crear el baúl: ${error instanceof Error ? error.message : "Error desconocido"
-          }`,
+        message: `Error al crear el baúl: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`,
         type: "error",
       });
     },
@@ -453,8 +494,9 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al actualizar el baúl: ${error instanceof Error ? error.message : "Error desconocido"
-          }`,
+        message: `Error al actualizar el baúl: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`,
         type: "error",
       });
     },
@@ -471,8 +513,9 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al eliminar el baúl: ${error instanceof Error ? error.message : "Error desconocido"
-          }`,
+        message: `Error al eliminar el baúl: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`,
         type: "error",
       });
     },
@@ -502,8 +545,9 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al actualizar el recuerdo: ${error instanceof Error ? error.message : "Error desconocido"
-          }`,
+        message: `Error al actualizar el recuerdo: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`,
         type: "error",
       });
     },
@@ -523,8 +567,9 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al eliminar el recuerdo: ${error instanceof Error ? error.message : "Error desconocido"
-          }`,
+        message: `Error al eliminar el recuerdo: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`,
         type: "error",
       });
     },
@@ -586,8 +631,9 @@ export default function RecuerdosScreen() {
     onError: (error) => {
       console.error("Upload mutation onError:", error);
       showToast({
-        message: `Error al subir el recuerdo: ${error instanceof Error ? error.message : "Error desconocido"
-          }`,
+        message: `Error al subir el recuerdo: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`,
         type: "error",
       });
     },
@@ -637,8 +683,9 @@ export default function RecuerdosScreen() {
     onError: (error) => {
       console.error("Create note mutation onError:", error);
       showToast({
-        message: `Error al crear la nota: ${error instanceof Error ? error.message : "Error desconocido"
-          }`,
+        message: `Error al crear la nota: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`,
         type: "error",
       });
     },
@@ -672,8 +719,8 @@ export default function RecuerdosScreen() {
     const memoriesData = Array.isArray(memoriesPayload)
       ? memoriesPayload
       : memoriesPayload &&
-        typeof memoriesPayload === "object" &&
-        "data" in (memoriesPayload as Record<string, unknown>)
+          typeof memoriesPayload === "object" &&
+          "data" in (memoriesPayload as Record<string, unknown>)
         ? (memoriesPayload as { data: unknown }).data
         : [];
 
@@ -759,8 +806,9 @@ export default function RecuerdosScreen() {
     deleteMemoryMutation.isPending;
 
   const emptyTitle = memberFilterId
-    ? `${memberNameById[memberFilterId] || "Este miembro"
-    } aún no ha subido recuerdos`
+    ? `${
+        memberNameById[memberFilterId] || "Este miembro"
+      } aún no ha subido recuerdos`
     : "No hay recuerdos aún";
 
   const emptySubtitle = memberFilterId
@@ -954,8 +1002,9 @@ export default function RecuerdosScreen() {
       }
     } catch (error) {
       showToast({
-        message: `Error al preparar el archivo: ${error instanceof Error ? error.message : "Error desconocido"
-          }`,
+        message: `Error al preparar el archivo: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`,
         type: "error",
       });
     }
@@ -1110,12 +1159,14 @@ export default function RecuerdosScreen() {
   const booksData = Array.isArray(booksPayload)
     ? booksPayload
     : booksPayload &&
-      typeof booksPayload === "object" &&
-      "data" in (booksPayload as Record<string, unknown>)
+        typeof booksPayload === "object" &&
+        "data" in (booksPayload as Record<string, unknown>)
       ? (booksPayload as { data: unknown }).data
       : [];
 
-  const rawBooks = Array.isArray(booksData) ? (booksData as MemoriesBook[]) : [];
+  const rawBooks = Array.isArray(booksData)
+    ? (booksData as MemoriesBook[])
+    : [];
 
   const books = useMemo(() => {
     return [...rawBooks].sort((a, b) => {
@@ -1196,7 +1247,7 @@ export default function RecuerdosScreen() {
             onValueChange={(value) => setBooksNumColumns(parseInt(value))}
             buttons={[
               { value: "1", icon: "view-agenda" }, // Lista
-              { value: "2", icon: "view-grid" },   // Grilla
+              { value: "2", icon: "view-grid" }, // Grilla
             ]}
             density="small"
             style={{ maxWidth: 100 }}
@@ -1267,11 +1318,14 @@ export default function RecuerdosScreen() {
                 paddingTop: 0,
                 paddingBottom: LAYOUT.bottomNavHeight,
               }}
-              columnWrapperStyle={
-                booksNumColumns > 1 ? { gap: 12 } : undefined
-              }
+              columnWrapperStyle={booksNumColumns > 1 ? { gap: 12 } : undefined}
               refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  colors={[COLORS.primary]}
+                  tintColor={COLORS.primary}
+                />
               }
               renderItem={({ item, index }) => {
                 const title = item.title || "(Sin nombre)";
@@ -1329,9 +1383,15 @@ export default function RecuerdosScreen() {
                   minWidth: 110,
                 }}
               >
-                <Text style={{ color: COLORS.primary, fontWeight: "700" }}>Histor</Text>
-                <Text style={{ color: COLORS.secondary, fontWeight: "700" }}>IA</Text>
-                <Text style={{ color: COLORS.primary, fontWeight: "700" }}>s</Text>
+                <Text style={{ color: COLORS.primary, fontWeight: "700" }}>
+                  Histor
+                </Text>
+                <Text style={{ color: COLORS.secondary, fontWeight: "700" }}>
+                  IA
+                </Text>
+                <Text style={{ color: COLORS.primary, fontWeight: "700" }}>
+                  s
+                </Text>
               </Text>
             }
             icon="book-multiple"
@@ -1518,7 +1578,7 @@ export default function RecuerdosScreen() {
             justifyContent: "center",
           }}
         >
-          <ActivityIndicator />
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       </SafeAreaView>
     );
@@ -1920,11 +1980,12 @@ export default function RecuerdosScreen() {
           onEndReachedThreshold={0.5}
           ListFooterComponent={
             <>
-              {(memoriesLoading || isFetchingNextPage) && recuerdos.length > 0 && (
-                <View style={{ padding: 16, alignItems: "center" }}>
-                  <ActivityIndicator />
-                </View>
-              )}
+              {(memoriesLoading || isFetchingNextPage) &&
+                recuerdos.length > 0 && (
+                  <View style={{ padding: 16, alignItems: "center" }}>
+                    <ActivityIndicator color={COLORS.primary} />
+                  </View>
+                )}
               {/* Invisible spacer to ensure last item is visible above navigation bar */}
               <View style={{ height: LAYOUT.bottomNavHeight + 20 }} />
             </>
@@ -1968,7 +2029,7 @@ export default function RecuerdosScreen() {
           hasNext={
             selectedRecuerdo
               ? recuerdos.findIndex((r) => r.id === selectedRecuerdo.id) <
-              recuerdos.length - 1
+                recuerdos.length - 1
               : false
           }
           hasPrev={
