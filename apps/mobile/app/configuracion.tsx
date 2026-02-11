@@ -4,8 +4,6 @@ import {
   ScrollView,
   View,
   TouchableOpacity,
-  Text,
-  Pressable,
 } from "react-native";
 import {
   Button,
@@ -14,14 +12,14 @@ import {
   List,
   Portal,
   Dialog,
-  Icon,
+  Text,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/hooks/useAuth";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
 import { UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import ProfileHeader from "@/components/ProfileHeader";
-import { LoadingProfile, ChangePasswordModal, EditNameModal } from "@/components/shared";
+import { LoadingProfile, ChangePasswordModal, EditNameModal, BackButton } from "@/components/shared";
 import { useRouter } from "expo-router";
 import { COLORS, STYLES, FONT } from "@/styles/base";
 import { useToast } from "@/components/shared/Toast";
@@ -152,31 +150,26 @@ export default function ConfiguracionScreen() {
 
       {/* Header with back button */}
       <View style={{ 
-        flexDirection: "row", 
-        alignItems: "center", 
         paddingHorizontal: 16, 
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: COLORS.border,
+        paddingTop: 16,
+        paddingBottom: 8,
+        backgroundColor: COLORS.background,
       }}>
-        <Pressable 
-          onPress={() => router.back()}
-          style={({ pressed }) => ({
-            opacity: pressed ? 0.7 : 1,
-            padding: 8,
-            marginRight: 8,
-          })}
-        >
-          <Icon source="arrow-left" size={24} color={COLORS.text} />
-        </Pressable>
-        <Text style={{ 
-          fontSize: 20, 
-          fontWeight: "600", 
-          color: COLORS.text,
-          fontFamily: FONT.bold,
+        <View style={{
+          flexDirection: "row",
+          alignItems: "center",
         }}>
-          Configuración
-        </Text>
+          <BackButton size={28} />
+          <Text style={{ 
+            fontSize: 24, 
+            fontWeight: "bold", 
+            color: COLORS.text,
+            letterSpacing: -0.5,
+            flex: 1,
+          }}>
+            Configuración
+          </Text>
+        </View>
       </View>
 
       <ScrollView
