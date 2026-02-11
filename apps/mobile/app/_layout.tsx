@@ -71,16 +71,15 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <PaperProvider theme={paperTheme}>
-              <NavigationThemeProvider value={navTheme}>
-                <ToastProvider>
-                  <ToastProvider>
-                    <StreakListener />
-                    <TourProvider>
-                      <Stack
-                        screenOptions={{
-                          contentStyle: { backgroundColor: COLORS.background },
-                        }}
-                      >
+              <ToastProvider>
+                <NavigationThemeProvider value={navTheme}>
+                  <StreakListener />
+                  <TourProvider>
+                    <Stack
+                      screenOptions={{
+                        contentStyle: { backgroundColor: COLORS.background },
+                      }}
+                    >
                         <Stack.Screen
                           name="index"
                           options={{ headerShown: false, animation: "fade" }}
@@ -172,13 +171,12 @@ export default function RootLayout() {
                             animation: "fade",
                           }}
                         />
-                        <Stack.Screen name="+not-found" />
-                      </Stack>
-                      <TourOverlay />
-                    </TourProvider>
-                  </ToastProvider>
-                </ToastProvider>
-              </NavigationThemeProvider>
+                      <Stack.Screen name="+not-found" />
+                    </Stack>
+                    <TourOverlay />
+                  </TourProvider>
+                </NavigationThemeProvider>
+              </ToastProvider>
             </PaperProvider>
           </AuthProvider>
         </QueryClientProvider>

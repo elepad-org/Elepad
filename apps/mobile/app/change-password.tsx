@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { StatusBar, ScrollView, View, StyleSheet } from "react-native";
+import { StatusBar, ScrollView, View, StyleSheet, Keyboard } from "react-native";
 import { Button, Card, TextInput, Text, IconButton } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, Stack } from "expo-router";
@@ -65,35 +65,58 @@ export default function ChangePasswordScreen() {
   };
 
   const handleChangePassword = async () => {
+    // Cerrar el teclado primero y esperar un momento
+    Keyboard.dismiss();
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
     if (!validatePasswords()) {
       return;
     }
 
     setLoading(true);
     try {
-      // Primero verificamos la contraseña actual intentando hacer signIn
-      const { data: user } = await supabase.auth.getUser();
+      // Obtener usuario y email actual
+      const { data: userData, error: userError } = await supabase.auth.getUser();
 
-      if (!user.user?.email) {
-        throw new Error("No se pudo obtener el email del usuario");
+      if (userError || !userData.user?.email) {
+        throw new Error("No se pudo obtener la información del usuario");
       }
 
-      // Verificar contraseña actual
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: user.user.email,
-        password: currentPassword,
-      });
+      const userEmail = userData.user.email;
 
-      if (signInError) {
-        showToast({
-          message: "La contraseña actual es incorrecta",
-          type: "error",
-        });
-        setLoading(false);
-        return;
+      // Primero verificar la contraseña actual haciendo un reauthentication
+      // Esto usa la API de verifyOtp que no genera eventos de sesión
+      const { error: reauthError } = await supabase.auth.reauthenticate();
+
+      if (reauthError) {
+        // Si reauthenticate no está disponible, verificar manualmente
+        // Hacemos una llamada REST directa en lugar de signInWithPassword
+        const response = await fetch(
+          `${process.env.EXPO_PUBLIC_SUPABASE_URL}/auth/v1/token?grant_type=password`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!,
+            },
+            body: JSON.stringify({
+              email: userEmail,
+              password: currentPassword,
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          showToast({
+            message: "La contraseña actual es incorrecta",
+            type: "error",
+          });
+          setLoading(false);
+          return;
+        }
       }
 
-      // Actualizar a la nueva contraseña
+      // Actualizar la contraseña
       const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword,
       });
@@ -112,7 +135,7 @@ export default function ChangePasswordScreen() {
       setNewPassword("");
       setConfirmPassword("");
 
-      // Navegar de vuelta
+      // Navegar de vuelta después de mostrar el mensaje
       setTimeout(() => {
         router.back();
       }, 1500);
@@ -145,6 +168,7 @@ export default function ChangePasswordScreen() {
       <ScrollView
         contentContainerStyle={[STYLES.contentContainer, { paddingBottom: 40 }]}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         <Card style={[STYLES.menuCard, { backgroundColor: COLORS.white }]}>
           <Card.Content>

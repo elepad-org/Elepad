@@ -14,6 +14,7 @@ import {
   View,
   Dimensions,
   Platform,
+  Modal,
 } from "react-native";
 import { Text, Icon } from "react-native-paper";
 import { useSegments } from "expo-router";
@@ -410,7 +411,15 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
   return (
     <ToastContext.Provider value={{ showToast, hideToast }}>
       {children}
-      <Toast {...toastConfig} onDismiss={hideToast} />
+      <Modal
+        visible={toastConfig.visible}
+        transparent
+        animationType="none"
+        statusBarTranslucent
+        onRequestClose={hideToast}
+      >
+        <Toast {...toastConfig} onDismiss={hideToast} />
+      </Modal>
     </ToastContext.Provider>
   );
 };
@@ -418,10 +427,11 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    zIndex: 9999,
-    // Width and left are now set dynamically in the component
     // Add shadow properties to the animated container
     ...SHADOWS.medium,
+    zIndex: 999999,
+    elevation: 999999, // Para Android, asegura que esté sobre todo (sobrescribe SHADOWS.medium)
+    // Width and left are now set dynamically in the component
     borderRadius: 16,
     backgroundColor: COLORS.white, // Ensure shadow has a body to cast from
     // Ensure we don't clip overflow here so shadow is visible

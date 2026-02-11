@@ -220,10 +220,7 @@ export default function ConfiguracionScreen() {
           <Button
             mode="contained"
             icon="logout"
-            onPress={async () => {
-              await signOut();
-              router.replace("/");
-            }}
+            onPress={signOut}
             contentStyle={STYLES.buttonContent}
             style={STYLES.buttonPrimary}
           >

@@ -305,9 +305,12 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         setSession(session);
         setUser(session?.user ?? null);
 
-        // Verificar si estamos en flujo de recuperación
+        // Verificar si estamos en flujo de recuperación o cambio de contraseña
         const inRecovery = segmentsRef.current.some(
           (s) => s.includes("update-password") || s.includes("forgot-password"),
+        );
+        const inPasswordChange = segmentsRef.current.some(
+          (s) => s.includes("change-password"),
         );
 
         if (inRecovery) {
@@ -318,12 +321,22 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
           return;
         }
 
+        // Si es USER_UPDATED y estamos en cambio de contraseña, solo actualizar session sin recargar
+        if (event === "USER_UPDATED" && inPasswordChange) {
+          console.log("🔑 Contraseña actualizada, manteniendo estado actual");
+          setLoading(false);
+          return;
+        }
+
         if (session?.user) {
           // If this is a new sign up, wait a bit for the database to sync
           if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
             await new Promise((resolve) => setTimeout(resolve, 300));
           }
-          await loadElepadUserById(session.user.id);
+          // Solo recargar usuario si NO es un simple USER_UPDATED
+          if (event !== "USER_UPDATED") {
+            await loadElepadUserById(session.user.id);
+          }
           // Solo redirigir a home si el usuario acaba de iniciar sesión explícitamente
           // Y SOLO la primera vez (no en refrescos de token o window focus)
           if (
@@ -358,23 +371,28 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const signOut = async () => {
     try {
       console.log("Cerrando sesión:", user?.email);
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        const maybeCode = (error as unknown as { code?: string }).code;
-        if (maybeCode === "session_not_found") {
-          setSession(null);
-          setUser(null);
-          setUserElepad(null);
-          return;
-        }
-        console.warn("signOut error", error);
-      }
-      // Asegurar limpieza local (algunos navegadores pueden no emitir el evento)
+      
+      // Limpiar estado local primero para evitar re-renders durante el signOut
       setSession(null);
       setUser(null);
       setUserElepad(null);
+      
+      // Luego hacer el signOut de Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        const maybeCode = (error as unknown as { code?: string }).code;
+        if (maybeCode === "session_not_found") {
+          console.log("✅ Sesión ya cerrada");
+          return;
+        }
+        console.warn("signOut error", error);
+      } else {
+        console.log("✅ Sesión cerrada correctamente");
+      }
     } catch (e) {
       console.warn("signOut exception", e);
+      // Asegurar limpieza incluso si hay error
       setSession(null);
       setUser(null);
       setUserElepad(null);
