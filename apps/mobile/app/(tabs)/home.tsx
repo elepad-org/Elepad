@@ -350,12 +350,7 @@ const HomeScreen = () => {
               ref={profileRef}
               onPress={() => {
                 if (isLoading) return;
-                router.navigate({
-                  pathname: "/(tabs)/home",
-                  params: {
-                    tab: "configuracion",
-                  },
-                });
+                router.navigate("/configuracion");
               }}
               style={({ pressed }) => ({
                 opacity: pressed ? 0.7 : 1,

@@ -5,6 +5,7 @@ import {
   View,
   TouchableOpacity,
   Text,
+  Pressable,
 } from "react-native";
 import {
   Button,
@@ -13,6 +14,7 @@ import {
   List,
   Portal,
   Dialog,
+  Icon,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/hooks/useAuth";
@@ -147,6 +149,35 @@ export default function ConfiguracionScreen() {
   return (
     <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+
+      {/* Header with back button */}
+      <View style={{ 
+        flexDirection: "row", 
+        alignItems: "center", 
+        paddingHorizontal: 16, 
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: COLORS.border,
+      }}>
+        <Pressable 
+          onPress={() => router.back()}
+          style={({ pressed }) => ({
+            opacity: pressed ? 0.7 : 1,
+            padding: 8,
+            marginRight: 8,
+          })}
+        >
+          <Icon source="arrow-left" size={24} color={COLORS.text} />
+        </Pressable>
+        <Text style={{ 
+          fontSize: 20, 
+          fontWeight: "600", 
+          color: COLORS.text,
+          fontFamily: FONT.bold,
+        }}>
+          Configuración
+        </Text>
+      </View>
 
       <ScrollView
         contentContainerStyle={[
