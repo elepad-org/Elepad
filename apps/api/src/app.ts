@@ -211,7 +211,7 @@ export default {
       // NOTA: Construye la fecha en UTC usando los componentes ARG, y luego suma el offset
       // para obtener el instante UTC real equivalente al fin del dia de ARG.
       const startOfTodayArgentina = new Date(
-        Date.UTC(year, month, day) + argentinaOffsetMs,
+        Date.UTC(year, month, day),
       );
       const endOfTodayArgentina = new Date(
         startOfTodayArgentina.getTime() + 24 * 60 * 60 * 1000,
