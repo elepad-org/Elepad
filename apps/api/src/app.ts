@@ -240,7 +240,7 @@ export default {
         .from("activities")
         .select("id, title, description, assignedTo, startsAt")
         .eq("completed", false)
-        .eq("frequencyId", null)
+        .is("frequencyId", null)
         .gte("startsAt", windowStartTime)
         .lt("startsAt", windowEndMs)
 
