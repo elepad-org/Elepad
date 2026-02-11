@@ -50,6 +50,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [userElepad, setUserElepad] = useState<ElepadUser | null>(null);
   const [userElepadLoading, setUserElepadLoading] = useState(true); // Empezar con true
   const [loading, setLoading] = useState(true);
+  const [sessionReady, setSessionReady] = useState(false); // Nuevo: indica si la sesión ya se intentó cargar
   const [streak, setStreak] = useState<StreakState | null>(null);
   const router = useRouter();
 
@@ -93,11 +94,13 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     },
     {
       query: {
-        enabled: !!userElepad?.elder, // Solo si es elder
+        enabled: !!userElepad?.elder && sessionReady, // Solo si es elder Y la sesión está lista
         staleTime: 0,
         gcTime: 1000 * 60, // gcTime reemplaza cacheTime en React Query v5
         refetchOnMount: "always",
         refetchOnWindowFocus: true,
+        retry: 2,
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000),
       },
     },
   );
@@ -110,7 +113,21 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     }
     try {
       console.log("Cargando usuario de Elepad:", userId);
-      const res = await getUsersId(userId);
+      
+      // Timeout para getUsersId - si tarda más de 8 segundos, abortar
+      const userPromise = getUsersId(userId);
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('User fetch timeout')), 8000)
+      );
+      
+      const res = await Promise.race([
+        userPromise,
+        timeoutPromise
+      ]).catch((err) => {
+        console.warn("⚠️ getUsersId timeout o error:", err);
+        throw err;
+      });
+      
       console.log("Datos del usuario:", res);
       const maybeStatus = (res as unknown as { status?: number }).status;
       const maybeData = (res as unknown as { data?: unknown }).data;
@@ -120,17 +137,29 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       }
       const u = (maybeData ?? (res as unknown)) as ElepadUser;
 
-      // Fetch equipped frame
-      const { data: frameData } = await supabase
+      // Fetch equipped frame con timeout
+      const framePromise = supabase
         .from("user_inventory")
         .select("item:shop_items(asset_url)")
         .eq("user_id", userId)
         .eq("equipped", true)
         .single();
+      
+      const frameTimeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Frame fetch timeout')), 5000)
+      );
+      
+      const frameResult = await Promise.race([
+        framePromise,
+        frameTimeoutPromise
+      ]).catch((err) => {
+        console.warn("⚠️ Frame fetch timeout o error:", err);
+        return { data: null, error: err };
+      });
 
-      if (frameData?.item) {
+      if (frameResult?.data?.item) {
         // Safe cast as we know the structure from the query
-        const item = frameData.item as unknown as { asset_url: string };
+        const item = frameResult.data.item as unknown as { asset_url: string };
         u.activeFrameUrl = item.asset_url;
       }
 
@@ -267,15 +296,32 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   useEffect(() => {
     const setData = async () => {
       try {
-        const {
-          data: { session },
-          error,
-        } = await supabase.auth.getSession();
+        console.log("🔄 Iniciando carga de sesión...");
+        
+        // Timeout para getSession - si tarda más de 10 segundos, abortar
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error('Session timeout')), 10000)
+        );
+        
+        const result = await Promise.race([
+          sessionPromise,
+          timeoutPromise
+        ]).catch((err) => {
+          console.warn("⚠️ getSession timeout o error:", err);
+          return { data: { session: null }, error: err };
+        });
+        
+        const { data: { session }, error } = result;
+        
         if (error) {
-          throw error;
+          console.error("❌ Error obteniendo sesión:", error);
         }
+        
         setSession(session);
         setUser(session?.user ?? null);
+        setSessionReady(true); // ✅ Marcar sesión como lista (con o sin usuario)
+        
         if (session?.user) {
           // No esperamos a que cargue el perfil para liberar el loading inicial
           // Esto permite que la UI navegue a home y muestre skeletons
@@ -292,6 +338,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         setUser(null);
         setUserElepad(null);
         setUserElepadLoading(false);
+        setSessionReady(true); // ✅ Marcar como listo incluso si hay error
       } finally {
         setLoading(false);
       }

@@ -21,10 +21,19 @@ import { ToastProvider } from "@/components/shared/Toast";
 import { TourProvider } from "@/components/tour/TourProvider";
 import { TourOverlay } from "@/components/tour/TourOverlay";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
+      networkMode: 'offlineFirst',
+    },
+  },
+});
 
 // Caché en memoria del token para cumplir con la firma síncrona de getToken
 let AUTH_TOKEN: string | undefined;
+let TOKEN_LOADED = false;
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -32,19 +41,55 @@ export default function RootLayout() {
 
   // Mantener el token actualizado en AUTH_TOKEN de forma reactiva
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      AUTH_TOKEN = data.session?.access_token ?? undefined;
-      console.log(
-        "🔑 Token inicial cargado:",
-        AUTH_TOKEN ? "✅ Presente" : "❌ Ausente",
-      );
-    });
+    let isMounted = true;
+    
+    const loadSession = async () => {
+      try {
+        // Timeout para getSession - si tarda más de 8 segundos, abortar
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error('Session timeout')), 8000)
+        );
+        
+        const { data, error } = await Promise.race([
+          sessionPromise,
+          timeoutPromise
+        ]).catch((err) => {
+          console.warn("⚠️ getSession timeout o error:", err);
+          return { data: { session: null }, error: err };
+        });
+        
+        if (isMounted) {
+          AUTH_TOKEN = data.session?.access_token ?? undefined;
+          TOKEN_LOADED = true;
+          console.log(
+            "🔑 Token inicial cargado:",
+            AUTH_TOKEN ? "✅ Presente" : "❌ Ausente",
+            error ? `(con error: ${error})` : ""
+          );
+        }
+      } catch (err) {
+        console.error("❌ Error cargando sesión:", err);
+        if (isMounted) {
+          TOKEN_LOADED = true;
+        }
+      }
+    };
+    
+    loadSession();
+    
     const { data: listener } = supabase.auth.onAuthStateChange(
       (event, session) => {
         AUTH_TOKEN = session?.access_token ?? undefined;
+        TOKEN_LOADED = true;
+        console.log("🔐 Token actualizado vía onAuthStateChange:", event, AUTH_TOKEN ? "✅" : "❌");
       },
     );
-    return () => listener?.subscription?.unsubscribe?.();
+    
+    return () => {
+      isMounted = false;
+      listener?.subscription?.unsubscribe?.();
+    };
   }, []);
 
   if (!loaded) {
@@ -58,6 +103,10 @@ export default function RootLayout() {
     // Función que siempre retorna el token más reciente
     // Si AUTH_TOKEN está vacío, intenta obtenerlo sincrónicamente del storage
     getToken: () => {
+      // Si aún no se cargó, retornar undefined para que la API espere
+      if (!TOKEN_LOADED) {
+        console.warn("⏳ Token no está listo aún, retornando undefined");
+      }
       return AUTH_TOKEN;
     },
   });
