@@ -242,9 +242,11 @@ export default {
         .eq("completed", false)
         .eq("frequencyId", null)
         .gte("startsAt", windowStartTime)
-        .lt("startsAt", windowEndMs);
+        .lt("startsAt", windowEndMs)
+
       
-        console.log(singleDayActivities)
+        console.log("EfectiveTime", effectiveEndTime)
+        console.log(singleDayActivities ? singleDayActivities[0] : "No hay nada")
 
       // Obtener actividades recurrentes con su frecuencia
       const { data: recurringActivities, error: error2 } = await supabase
