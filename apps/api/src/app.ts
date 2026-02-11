@@ -218,9 +218,9 @@ export default {
       );
 
       // Calcular Ventana de Notificación (UTC puro)
-      // Actividades que empiezan entre 2 y 3 horas desde "ahora"
-      const windowStartMs = nowUTC.getTime() + 2 * 60 * 60 * 1000;
-      const windowEndMs = nowUTC.getTime() + 3 * 60 * 60 * 1000;
+      // Actividades que empiezan entre 1 y 2 horas desde "ahora"
+      const windowStartMs = nowUTC.getTime() + 1 * 60 * 60 * 1000;
+      const windowEndMs = nowUTC.getTime() + 2 * 60 * 60 * 1000;
 
       const windowStartTime = new Date(windowStartMs).toISOString();
 
