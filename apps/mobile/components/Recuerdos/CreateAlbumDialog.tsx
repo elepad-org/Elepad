@@ -212,7 +212,7 @@ export default function CreateAlbumDialog({
               <View style={{ width: "100%" }}>
                 <StyledTextInput
                   label="Título"
-                  placeholder="Título"
+                  placeholder=""
                   value={title}
                   onChangeText={setTitle}
                   keyboardType="default"
@@ -223,7 +223,7 @@ export default function CreateAlbumDialog({
 
                 <StyledTextInput
                   label="Descripción"
-                  placeholder="Descripción"
+                  placeholder=""
                   value={description}
                   onChangeText={setDescription}
                   keyboardType="default"

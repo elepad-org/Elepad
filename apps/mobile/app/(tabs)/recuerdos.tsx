@@ -1183,7 +1183,7 @@ export default function RecuerdosScreen() {
         {/* Controles de ordenamiento y vista para Baúles */}
         <View
           style={{
-            paddingHorizontal: 16,
+            paddingHorizontal: 24,
             paddingBottom: 12,
             flexDirection: "row",
             alignItems: "center",
@@ -1337,7 +1337,7 @@ export default function RecuerdosScreen() {
             icon="book-multiple"
             onPress={() => router.push("../albums")}
             bottom={LAYOUT.bottomNavHeight + 16}
-            right={16}
+            right={24}
             autoCollapseDelay={5000}
           />
         )}
@@ -1836,7 +1836,7 @@ export default function RecuerdosScreen() {
       {/* Controles de ordenamiento y vista */}
       <View
         style={{
-          paddingHorizontal: 16,
+          paddingHorizontal: 24,
           paddingVertical: 8,
         }}
       >
@@ -1911,7 +1911,7 @@ export default function RecuerdosScreen() {
             </Animated.View>
           )}
           key={`masonry-${numColumns}-${sortOrder}-${isFocused}`}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8 }}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 8 }}
           onEndReached={() => {
             if (hasNextPage && !isFetchingNextPage) {
               fetchNextPage();
