@@ -307,38 +307,44 @@ function CalendarScreenContent() {
         style={{
           paddingHorizontal: 24,
           paddingTop: 20,
-          paddingBottom: 8,
+          paddingBottom: 0,
           borderBottomColor: COLORS.border,
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
         }}
       >
-        <View ref={headerRef}>
-          <Text
-            style={baseStyles.superHeading}
-            suppressHighlighting={true}
-          >
-            Calendario
-          </Text>
-        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 24,
+          }}
+        >
+          <View ref={headerRef}>
+            <Text
+              style={baseStyles.superHeading}
+              suppressHighlighting={true}
+            >
+              Calendario
+            </Text>
+          </View>
 
-        <View ref={addButtonRef}>
-          <Button
-            mode="contained"
-            onPress={() => {
-              // Combinar el día seleccionado con la hora actual
-              const now = new Date();
-              const [year, month, day] = selectedDay.split("-").map(Number);
-              const startDate = new Date(year, month - 1, day, now.getHours(), now.getMinutes());
-              setEditing({ startsAt: startDate.toISOString() });
-              setFormVisible(true);
-            }}
-            style={{ ...baseStyles.miniButton, width: "auto", paddingHorizontal: 16 }}
-            icon="plus"
-          >
-            Agregar
-          </Button>
+          <View ref={addButtonRef}>
+            <Button
+              mode="contained"
+              onPress={() => {
+                // Combinar el día seleccionado con la hora actual
+                const now = new Date();
+                const [year, month, day] = selectedDay.split("-").map(Number);
+                const startDate = new Date(year, month - 1, day, now.getHours(), now.getMinutes());
+                setEditing({ startsAt: startDate.toISOString() });
+                setFormVisible(true);
+              }}
+              style={{ ...baseStyles.miniButton, width: "auto", paddingHorizontal: 16 }}
+              icon="plus"
+            >
+              Agregar
+            </Button>
+          </View>
         </View>
       </View>
 

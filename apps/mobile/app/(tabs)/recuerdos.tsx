@@ -58,6 +58,7 @@ import BookCover from "@/components/Recuerdos/BookCover";
 import eleEmpthy from "@/assets/images/ele-fotografiando.png";
 import { useToast } from "@/components/shared/Toast";
 import { StyledTextInput } from "@/components/shared";
+import { ExpandableFAB } from "@/components/shared/ExpandableFAB";
 
 import { useRecuerdosTour } from "@/hooks/tours/useRecuerdosTour";
 import { useTabContext } from "@/context/TabContext";
@@ -1146,8 +1147,8 @@ export default function RecuerdosScreen() {
         <View
           style={{
             paddingHorizontal: 24,
-            paddingTop: 24,
-            paddingBottom: 12,
+            paddingTop: 20,
+            paddingBottom: 0,
             borderBottomColor: COLORS.border,
           }}
         >
@@ -1156,6 +1157,7 @@ export default function RecuerdosScreen() {
               flexDirection: "row",
               justifyContent: "space-between",
               alignItems: "center",
+              marginBottom: 24,
             }}
           >
             <View ref={headerRef}>
@@ -1176,28 +1178,13 @@ export default function RecuerdosScreen() {
               </Button>
             </View>
           </View>
-          <View ref={albumRef} style={{ marginTop: 24 }}>
-            <Button
-              mode="outlined"
-              onPress={() => router.push("../albums")}
-              style={{
-                borderRadius: 12,
-                borderColor: COLORS.primary,
-              }}
-              icon="book-multiple"
-              textColor={COLORS.primary}
-              disabled={!groupId}
-            >
-              Álbumes
-            </Button>
-          </View>
         </View>
 
         {/* Controles de ordenamiento y vista para Baúles */}
         <View
           style={{
             paddingHorizontal: 16,
-            paddingVertical: 12,
+            paddingBottom: 12,
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "space-between",
@@ -1329,6 +1316,19 @@ export default function RecuerdosScreen() {
         )}
 
         {renderBookDialogs()}
+
+        {/* FAB expandible para Álbumes */}
+        {groupId && (
+          <ExpandableFAB
+            ref={albumRef}
+            label="Álbumes"
+            icon="book-multiple"
+            onPress={() => router.push("../albums")}
+            bottom={LAYOUT.bottomNavHeight + 16}
+            right={16}
+            autoCollapseDelay={5000}
+          />
+        )}
       </SafeAreaView>
     );
   }

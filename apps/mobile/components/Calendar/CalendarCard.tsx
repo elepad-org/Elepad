@@ -789,10 +789,10 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   headerContainer: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 24,
   },
   calendarWrapper: {
-    marginTop: 16,
+    marginTop: 0,
     marginBottom: 16,
     position: "relative",
   },

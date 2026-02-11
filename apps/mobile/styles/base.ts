@@ -108,7 +108,7 @@ export const STYLES = StyleSheet.create({
   contentContainer: {
     flexGrow: 1,
     padding: 20,
-    paddingTop: 16,
+    paddingTop: 20,
     justifyContent: "flex-start",
   },
   center: {
