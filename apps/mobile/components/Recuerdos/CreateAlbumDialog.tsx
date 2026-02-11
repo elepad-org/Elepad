@@ -212,7 +212,7 @@ export default function CreateAlbumDialog({
               <View style={{ width: "100%" }}>
                 <StyledTextInput
                   label="Título"
-                  placeholder="Título"
+                  placeholder=""
                   value={title}
                   onChangeText={setTitle}
                   keyboardType="default"
@@ -223,7 +223,7 @@ export default function CreateAlbumDialog({
 
                 <StyledTextInput
                   label="Descripción"
-                  placeholder="Descripción"
+                  placeholder=""
                   value={description}
                   onChangeText={setDescription}
                   keyboardType="default"
@@ -386,10 +386,10 @@ export default function CreateAlbumDialog({
           <View style={styles.buttonContainer}>
             {step === "form" && (
               <>
-                <View style={{ flex: 1 }}>
-                  <CancelButton onPress={handleDismiss} disabled={isCreating} />
+                <View style={{ width: 120 }}>
+                  <CancelButton onPress={handleDismiss} text="Cancelar" />
                 </View>
-                <View style={{ flex: 1, marginLeft: 8 }}>
+                <View style={{ width: 120 }}>
                   <Button
                     mode="contained"
                     onPress={() => setStep("select")}
@@ -406,7 +406,7 @@ export default function CreateAlbumDialog({
 
             {step === "select" && (
               <>
-                <View style={{ flex: 1 }}>
+                <View style={{ width: 120 }}>
                   <Button
                     mode="outlined"
                     onPress={() => setStep("form")}
@@ -417,7 +417,7 @@ export default function CreateAlbumDialog({
                     Atrás
                   </Button>
                 </View>
-                <View style={{ flex: 1, marginLeft: 8 }}>
+                <View style={{ width: 120 }}>
                   <Button
                     mode="contained"
                     onPress={() => setStep("reorder")}
@@ -434,7 +434,7 @@ export default function CreateAlbumDialog({
 
             {step === "reorder" && (
               <>
-                <View style={{ flex: 1 }}>
+                <View style={{ width: 120 }}>
                   <Button
                     mode="outlined"
                     onPress={() => setStep("select")}
@@ -445,7 +445,7 @@ export default function CreateAlbumDialog({
                     Atrás
                   </Button>
                 </View>
-                <View style={{ flex: 1, marginLeft: 8 }}>
+                <View style={{ width: 120 }}>
                   <SaveButton
                     onPress={handleCreateAlbum}
                     text="Crear"
@@ -621,11 +621,13 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: COLORS.text,
     marginBottom: 12,
+    textAlign: "center",
   },
   tagsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
+    justifyContent: "center",
   },
   tagChip: {
     paddingHorizontal: 16,
