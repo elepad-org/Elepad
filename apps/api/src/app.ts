@@ -242,7 +242,9 @@ export default {
         .eq("completed", false)
         .eq("frequencyId", null)
         .gte("startsAt", windowStartTime)
-        .lt("startsAt", effectiveEndTime);
+        .lt("startsAt", windowEndMs);
+      
+        console.log(singleDayActivities)
 
       // Obtener actividades recurrentes con su frecuencia
       const { data: recurringActivities, error: error2 } = await supabase
@@ -473,7 +475,7 @@ export default {
         }
       }
 
-      if (!currentToNotify.length && !recurringToNotify.length) {
+      if (currentToNotify.length === 0 && recurringToNotify.length === 0) {
         console.log("No actividades a notificar");
         return;
       }
