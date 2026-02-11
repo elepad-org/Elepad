@@ -4,7 +4,6 @@ import {
   ScrollView,
   View,
   TouchableOpacity,
-  Text,
 } from "react-native";
 import {
   Button,
@@ -13,13 +12,14 @@ import {
   List,
   Portal,
   Dialog,
+  Text,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/hooks/useAuth";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
 import { UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import ProfileHeader from "@/components/ProfileHeader";
-import { LoadingProfile, ChangePasswordModal, EditNameModal } from "@/components/shared";
+import { LoadingProfile, ChangePasswordModal, EditNameModal, BackButton } from "@/components/shared";
 import { useRouter } from "expo-router";
 import { COLORS, STYLES, FONT } from "@/styles/base";
 import { useToast } from "@/components/shared/Toast";
@@ -147,6 +147,30 @@ export default function ConfiguracionScreen() {
   return (
     <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
+
+      {/* Header with back button */}
+      <View style={{ 
+        paddingHorizontal: 16, 
+        paddingTop: 16,
+        paddingBottom: 8,
+        backgroundColor: COLORS.background,
+      }}>
+        <View style={{
+          flexDirection: "row",
+          alignItems: "center",
+        }}>
+          <BackButton size={28} />
+          <Text style={{ 
+            fontSize: 24, 
+            fontWeight: "bold", 
+            color: COLORS.text,
+            letterSpacing: -0.5,
+            flex: 1,
+          }}>
+            Configuración
+          </Text>
+        </View>
+      </View>
 
       <ScrollView
         contentContainerStyle={[

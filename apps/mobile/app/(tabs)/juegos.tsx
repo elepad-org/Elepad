@@ -5,11 +5,11 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
-import { RefObject } from "react";
+import { RefObject, useState } from "react";
 
 import { useGamesTour } from "@/hooks/tours/useGamesTour";
 import { useTabContext } from "@/context/TabContext";
-import { ActivityIndicator, Text, Button, Icon } from "react-native-paper";
+import { ActivityIndicator, Text, Icon, Menu, IconButton } from "react-native-paper";
 import { Image } from "react-native";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -105,6 +105,8 @@ export default function JuegosScreen() {
     isElder,
   });
 
+  const [actionsMenuVisible, setActionsMenuVisible] = useState(false);
+
   if (loading) {
     return (
       <View style={STYLES.center}>
@@ -136,34 +138,45 @@ export default function JuegosScreen() {
             <View ref={headerRef}>
               <Text style={STYLES.superHeading}>Juegos</Text>
             </View>
-            <View style={{ flexDirection: "row", gap: 8 }}>
-              <View ref={shopRef}>
-                <Button
-                  mode="contained"
-                  onPress={() => router.push("/shop")}
-                  style={{
-                    borderRadius: 12,
-                    backgroundColor: COLORS.primary,
-                  }}
-                  icon="store"
-                >
-                  Tienda
-                </Button>
-              </View>
-              <View ref={historyRef}>
-                <Button
-                  mode="contained"
-                  onPress={() => router.navigate("/history")}
-                  style={{
-                    borderRadius: 12,
-                    backgroundColor: COLORS.primary,
-                  }}
-                  icon="history"
-                >
-                  Historial
-                </Button>
-              </View>
-            </View>
+            <Menu
+              key={actionsMenuVisible ? "open" : "closed"}
+              visible={actionsMenuVisible}
+              onDismiss={() => setActionsMenuVisible(false)}
+              contentStyle={styles.menuContent}
+              style={{ alignSelf: "flex-end", marginRight: -4, marginTop: -8 }}
+              anchor={
+                <View style={styles.menuAnchorRow}>
+                  <View ref={shopRef} collapsable={false} style={styles.measureTarget} />
+                  <View ref={historyRef} collapsable={false} style={[styles.measureTarget, { top: 14 }]} />
+                  <IconButton
+                    icon="dots-horizontal"
+                    size={22}
+                    iconColor={COLORS.primary}
+                    style={{ margin: 0 }}
+                    onPress={() => {
+                      setActionsMenuVisible(true);
+                    }}
+                  />
+                </View>
+              }
+            >
+              <Menu.Item
+                leadingIcon="store"
+                onPress={() => {
+                  setActionsMenuVisible(false);
+                  router.push("/shop");
+                }}
+                title="Tienda"
+              />
+              <Menu.Item
+                leadingIcon="history"
+                onPress={() => {
+                  setActionsMenuVisible(false);
+                  router.navigate("/history");
+                }}
+                title="Historial"
+              />
+            </Menu>
           </View>
 
           {/* Games List */}
@@ -215,6 +228,22 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 24,
+  },
+  menuContent: {
+    backgroundColor: COLORS.white,
+    borderRadius: 12,
+    width: 150,
+  },
+  menuAnchorRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  measureTarget: {
+    position: "absolute",
+    width: 1,
+    height: 1,
+    right: 0,
+    top: 0,
   },
   gamesContainer: {
     width: "100%",

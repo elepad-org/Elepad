@@ -186,9 +186,9 @@ export default function CreateAlbumDialog({
             step === "form" ? styles.formContainer : styles.imagesContainer
           }
         >
-          <Text style={styles.title}>
+          <Text style={styles.modalTitle}>
             {step === "form"
-              ? "Crear Nuevo Álbum"
+              ? "Crear nuevo álbum"
               : step === "select"
                 ? "Seleccionar Fotos"
                 : "Ordenar Fotos"}
@@ -528,10 +528,9 @@ const styles = StyleSheet.create({
     padding: 28,
     zIndex: 1,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: COLORS.text,
+  modalTitle: {
+    ...STYLES.heading,
+    textAlign: "center",
     marginBottom: 8,
   },
   subtitle: {

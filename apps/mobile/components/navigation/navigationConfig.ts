@@ -30,12 +30,6 @@ export const elderRoutes: TabRoute[] = [
     focusedIcon: "image-multiple",
     unfocusedIcon: "image-multiple-outline",
   },
-  {
-    key: "configuracion",
-    title: "Config.",
-    focusedIcon: "cog",
-    unfocusedIcon: "cog-outline",
-  },
 ];
 
 export const nonElderRoutes: TabRoute[] = [
@@ -62,11 +56,5 @@ export const nonElderRoutes: TabRoute[] = [
     title: "Recuerdos",
     focusedIcon: "image-multiple",
     unfocusedIcon: "image-multiple-outline",
-  },
-  {
-    key: "configuracion",
-    title: "Config.",
-    focusedIcon: "cog",
-    unfocusedIcon: "cog-outline",
   },
 ];

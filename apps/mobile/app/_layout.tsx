@@ -149,6 +149,13 @@ export default function RootLayout() {
                           }}
                         />
                         <Stack.Screen
+                          name="configuracion"
+                          options={{
+                            headerShown: false,
+                            animation: "fade",
+                          }}
+                        />
+                        <Stack.Screen
                           name="history"
                           options={{
                             headerShown: false,

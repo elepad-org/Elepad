@@ -339,7 +339,9 @@ function CalendarScreenContent() {
                 setEditing({ startsAt: startDate.toISOString() });
                 setFormVisible(true);
               }}
-              style={{ ...baseStyles.miniButton, width: "auto", paddingHorizontal: 16 }}
+              style={{ borderRadius: 12 }}
+              buttonColor={COLORS.primary}
+              textColor={COLORS.white}
               icon="plus"
             >
               Agregar

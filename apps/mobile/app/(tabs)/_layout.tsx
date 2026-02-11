@@ -5,7 +5,6 @@ import { TabView, SceneMap } from "react-native-tab-view";
 import HomeScreen from "./home";
 import JuegosScreen from "./juegos";
 import RecuerdosScreen from "./recuerdos";
-import ConfiguracionScreen from "./configuracion";
 import CalendarScreen from "./calendar";
 import { COLORS } from "@/styles/base";
 import { useAuth } from "@/hooks/useAuth";
@@ -78,7 +77,6 @@ function TabLayoutContent() {
     calendar: CalendarScreen,
     juegos: JuegosScreen,
     recuerdos: RecuerdosScreen,
-    configuracion: ConfiguracionScreen,
   }), []);
 
   // Detect global keyboard visibility to hide tab bar
