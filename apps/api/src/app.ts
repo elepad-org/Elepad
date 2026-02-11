@@ -266,7 +266,10 @@ export default {
         .not("frequencyId", "is", null)
         .lte("startsAt", nowUTC.toISOString()); // No debe ser actividad futura
 
-      if (error1 && error2) console.error(error1, error2);
+      if (error1 && error2) {
+        console.log("Error en scheduled:", error1, error2);
+        return;
+      }
 
       const { data: completedToday, error: completedError } = await supabase
         .from("activity_completions")
@@ -275,6 +278,13 @@ export default {
 
       if (completedError) {
         console.error(completedError);
+      }
+
+      const currentToNotify = [];
+      if (singleDayActivities && singleDayActivities.length > 0) {
+        for (const activity of singleDayActivities) {
+          currentToNotify.push(activity);
+        }
       }
 
       const completedActivityIdsToday = new Set(
@@ -322,7 +332,13 @@ export default {
 
           // Si no fue completada hoy, agregar a la lista
           if (!completedActivityIdsToday.has(activity.id)) {
-            recurringToNotify.push(activity);
+            recurringToNotify.push(
+              activity.id,
+              activity.title,
+              activity.description,
+              activity.assignedTo,
+              activity.startsAt
+            );
           }
         }
       }
@@ -457,15 +473,13 @@ export default {
         }
       }
 
-      // Combine both lists
-      const allActivitiesToNotify = [
-        ...(singleDayActivities || []),
-        ...recurringToNotify,
-      ];
-
-      if (allActivitiesToNotify.length === 0) {
+      if (!currentToNotify.length && !recurringToNotify.length) {
+        console.log("No actividades a notificar");
         return;
       }
+
+      // Combine both lists
+      const allActivitiesToNotify = [...currentToNotify, ...recurringToNotify];
 
       // Send notifications for each activity
       const { NotificationsService } =
@@ -493,7 +507,7 @@ export default {
       // y Promise.allSettled para que si una falla, las otras igual se ejecuten
       ctx.waitUntil(Promise.allSettled(notificationPromises));
     } catch (error) {
-      console.error("Error in scheduled job:", error);
+      console.log("Error in scheduled job:", error);
     }
   },
 };
