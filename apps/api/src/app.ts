@@ -417,7 +417,7 @@ export default {
             if (byDays.length > 0) {
               return (
                 isDayInByDay(todayAnchor, byDays) &&
-                checkDailyInterval(daysDiff, interval)
+                checkDailyInterval()
               );
               // Nota: RRULE complejo combina intervalo y byday, pero usualmente DAILY + BYDAY implica
               // "cada X días, pero solo si es Lunes". Simplifiquemos a check de día.
@@ -477,7 +477,7 @@ export default {
       }
 
       // Helper opcional para daily si quieres ser estricto
-      function checkDailyInterval(daysDiff: number, interval: number): boolean {
+      function checkDailyInterval(): boolean {
         return true; // En DAILY simple con BYDAY, el intervalo suele ser 1.
       }
 
