@@ -37,7 +37,7 @@ function tourReducer(state: TourState, action: TourAction): TourState {
         currentTourId: action.tourId,
         currentStepIndex: 0,
         steps: action.steps,
-        isPreparing: false,
+        // No cambiar isPreparing aquí - dejar que useHomeTour lo maneje
       };
     case 'NEXT_STEP':
       if (state.currentStepIndex < state.steps.length - 1) {
