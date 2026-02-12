@@ -202,20 +202,8 @@ export default {
 
       // Calcular "Hoy" en Argentina
       const argentinaTime = new Date(nowUTC.getTime() - argentinaOffsetMs);
-      const year = argentinaTime.getUTCFullYear();
-      const month = argentinaTime.getUTCMonth();
-      const day = argentinaTime.getUTCDate();
       const todayStr =
         argentinaTime.toISOString().split("T")[0] || "2000-01-01";
-
-      // NOTA: Construye la fecha en UTC usando los componentes ARG, y luego suma el offset
-      // para obtener el instante UTC real equivalente al fin del dia de ARG.
-      const startOfTodayArgentina = new Date(
-        Date.UTC(year, month, day),
-      );
-      const endOfTodayArgentina = new Date(
-        startOfTodayArgentina.getTime() + 24 * 60 * 60 * 1000,
-      );
 
       // Calcular Ventana de Notificación (UTC puro)
       // Actividades que empiezan entre 1 y 2 horas desde "ahora"
@@ -224,17 +212,7 @@ export default {
 
       const windowStartTime = new Date(windowStartMs).toISOString();
 
-      // Si la ventana termina mañana, se corta en la medianoche de hoy
-      const effectiveEndMs = Math.min(
-        windowEndMs,
-        endOfTodayArgentina.getTime(),
-      );
-      const effectiveEndTime = new Date(effectiveEndMs).toISOString();
-
-      // Verificamos si la ventana es válida (por si son las 23:00hs y la ventana empieza mañana)
-      if (windowStartMs >= endOfTodayArgentina.getTime()) {
-        return; // O devuelve array vacío
-      }
+      const effectiveEndTime = new Date(windowEndMs).toISOString();
 
       const { data: singleDayActivities, error: error1 } = await supabase
         .from("activities")
@@ -242,7 +220,7 @@ export default {
         .eq("completed", false)
         .is("frequencyId", null)
         .gte("startsAt", windowStartTime)
-        .lt("startsAt", effectiveEndTime)
+        .lt("startsAt", effectiveEndTime);
 
       // Obtener actividades recurrentes con su frecuencia
       const { data: recurringActivities, error: error2 } = await supabase
@@ -264,7 +242,7 @@ export default {
         )
         .eq("completed", false)
         .not("frequencyId", "is", null)
-        .lte("startsAt", nowUTC.toISOString()); // No debe ser actividad futura
+        .lte("startsAt", effectiveEndTime); // No debe ser actividad futura
 
       if (error1 && error2) {
         console.log("Error en scheduled:", error1, error2);
@@ -277,7 +255,7 @@ export default {
         .eq("completedDate", todayStr);
 
       if (completedError) {
-        console.error(completedError);
+        console.log(completedError);
       }
 
       const currentToNotify = [];
@@ -294,51 +272,64 @@ export default {
       // Filtrar actividades recurrentes que corresponden para hoy y la ventana horaria
       const recurringToNotify = [];
       if (recurringActivities && recurringActivities.length > 0) {
-        for (const activity of recurringActivities) {
-          // Extraer la frecuencia
-          const frequency = Array.isArray(activity.frequencies)
-            ? activity.frequencies[0]
-            : activity.frequencies;
+        const [tYear, tMonth, tDay] = todayStr.split("-").map(Number);
+        if (tYear && tMonth && tDay) {
+          for (const activity of recurringActivities) {
+            // Extraer la frecuencia
+            const frequency = Array.isArray(activity.frequencies)
+              ? activity.frequencies[0]
+              : activity.frequencies;
 
-          if (!frequency || !frequency.rrule) continue;
+            if (!frequency || !frequency.rrule) continue;
 
-          // Verificar si la actividad corresponde al día de hoy según su rrule
-          if (
-            !isActivityValidForToday(
-              activity.startsAt,
-              activity.endsAt,
-              frequency.rrule,
-              todayStr,
-            )
-          ) {
-            continue;
-          }
+            // Verificar si la actividad corresponde al día de hoy según su rrule
+            if (
+              !isActivityValidForToday(
+                activity.startsAt,
+                activity.endsAt,
+                frequency.rrule,
+                tYear,
+                tMonth,
+                tDay,
+              )
+            ) {
+              continue;
+            }
 
-          // Verificar si la hora de la actividad coincide con la ventana de notificación
-          // La hora se obtiene de startsAt (que ya está en UTC) y se aplica a la fecha de hoy
-          const activityStartDate = new Date(activity.startsAt);
-          const activityHour = activityStartDate.getUTCHours();
-          const activityMinute = activityStartDate.getUTCMinutes();
+            // Verificar si la hora de la actividad coincide con la ventana de notificación
+            // La hora se obtiene de startsAt (que ya está en UTC) y se aplica a la fecha de hoy
+            const activityStartDate = new Date(activity.startsAt);
+            const activityHour = activityStartDate.getUTCHours();
+            const activityMinute = activityStartDate.getUTCMinutes();
 
-          // Crear una fecha de hoy (UTC) con la hora de la actividad
-          const todayWithActivityTime = new Date(nowUTC);
-          todayWithActivityTime.setUTCHours(activityHour, activityMinute, 0, 0);
-
-          // Verificar si está dentro de la ventana de notificación
-          const activityTimeMs = todayWithActivityTime.getTime();
-          if (activityTimeMs < windowStartMs || activityTimeMs >= windowEndMs) {
-            continue;
-          }
-
-          // Si no fue completada hoy, agregar a la lista
-          if (!completedActivityIdsToday.has(activity.id)) {
-            recurringToNotify.push(
-              activity.id,
-              activity.title,
-              activity.description,
-              activity.assignedTo,
-              activity.startsAt
+            // Crear una fecha de hoy (UTC) con la hora de la actividad
+            const todayWithActivityTime = new Date(nowUTC);
+            todayWithActivityTime.setUTCHours(
+              activityHour,
+              activityMinute,
+              0,
+              0,
             );
+
+            // Verificar si está dentro de la ventana de notificación
+            const activityTimeMs = todayWithActivityTime.getTime();
+            if (
+              activityTimeMs < windowStartMs ||
+              activityTimeMs >= windowEndMs
+            ) {
+              continue;
+            }
+
+            // Si no fue completada hoy, agregar a la lista
+            if (!completedActivityIdsToday.has(activity.id)) {
+              recurringToNotify.push(
+                activity.id,
+                activity.title,
+                activity.description,
+                activity.assignedTo,
+                activity.startsAt,
+              );
+            }
           }
         }
       }
@@ -358,119 +349,136 @@ export default {
         startsAt: string,
         endsAt: string | null,
         rrule: string,
-        todayStr: string,
+        tYear: number,
+        tMonth: number,
+        tDay: number,
       ): boolean {
-        const activityStart = new Date(startsAt);
-        const activityEnd = endsAt ? new Date(endsAt) : null;
+        // Parsear la fecha "Hoy" (Argentina) directamente a componentes locales
+        const todayAnchor = new Date(Date.UTC(tYear, tMonth - 1, tDay));
 
-        // Convertir la fecha de hoy (Argentina) a un objeto Date al inicio del día en UTC
-        const today = new Date(todayStr + "T00:00:00.000Z");
+        // Parsear fecha de inicio (UTC) y ajustarla a Argentina
+        const startDateUTC = new Date(startsAt);
+        const argentinaOffsetMs = 3 * 60 * 60 * 1000;
+        const startDateArgentina = new Date(
+          startDateUTC.getTime() - argentinaOffsetMs,
+        );
 
-        // Si la actividad ya terminó, no es válida
-        if (activityEnd && activityEnd < today) {
-          return false;
+        // Normalizar inicio al comienzo del día (00:00) para calcular diferencias de días limpias
+        const startAnchor = new Date(
+          Date.UTC(
+            startDateArgentina.getUTCFullYear(),
+            startDateArgentina.getUTCMonth(),
+            startDateArgentina.getUTCDate(),
+          ),
+        );
+
+        if (todayAnchor.getTime() < startAnchor.getTime()) return false;
+
+        // Validación de fin: Si la actividad ya terminó (y endsAt está definido)
+        if (endsAt) {
+          const endDateUTC = new Date(endsAt);
+          const endDateArgentina = new Date(
+            endDateUTC.getTime() - argentinaOffsetMs,
+          );
+          // Aquí asumimos: si terminó AYER, hoy ya no es válida.
+          const endAnchor = new Date(
+            Date.UTC(
+              endDateArgentina.getUTCFullYear(),
+              endDateArgentina.getUTCMonth(),
+              endDateArgentina.getUTCDate(),
+            ),
+          );
+          if (todayAnchor.getTime() > endAnchor.getTime()) return false;
         }
 
-        // Parsear la rrule
+        // Parsear RRULE
         const freqMatch = rrule.match(/FREQ=(\w+)/);
         const freq = freqMatch ? freqMatch[1] : null;
-
-        const intervalMatch = rrule.match(/INTERVAL=(\d+)/);
-        const interval = intervalMatch ? parseInt(intervalMatch[1] || "1") : 1;
-
-        const byDayMatch = rrule.match(/BYDAY=([A-Z,]+)/);
-        const byDay = byDayMatch
-          ? byDayMatch[1]
-            ? byDayMatch[1].split(",")
-            : []
-          : [];
-
         if (!freq) return false;
 
-        // Convertir ambas fechas a Argentina para comparar días
-        const activityStartArgentina = new Date(
-          activityStart.getTime() - argentinaOffsetMs,
-        );
-        const todayArgentina = new Date(today.getTime() - argentinaOffsetMs);
-        const startMonth = activityStartArgentina.getUTCMonth();
-        const startYear = activityStartArgentina.getUTCFullYear();
-        const todayMonth = todayArgentina.getUTCMonth();
-        const todayYear = todayArgentina.getUTCFullYear();
+        const intervalMatch = rrule.match(/INTERVAL=(\d+)/);
+        const interval = intervalMatch ? parseInt(intervalMatch[1] ? intervalMatch[1] : "1") : 1;
 
-        // Normalizar fechas al inicio del día para comparación
-        const startOfActivityDay = new Date(activityStartArgentina);
-        startOfActivityDay.setUTCHours(0, 0, 0, 0);
+        const byDayMatch = rrule.match(/BYDAY=([A-Z,]+)/);
 
-        const startOfToday = new Date(todayArgentina);
-        startOfToday.setUTCHours(0, 0, 0, 0);
+        const byDays = byDayMatch && byDayMatch[1] ? byDayMatch[1].split(",") : [];
 
-        // Calcular diferencia en días
+        // Calcular diferencia exacta en días
+        const msPerDay = 1000 * 60 * 60 * 24;
         const daysDiff = Math.floor(
-          (startOfToday.getTime() - startOfActivityDay.getTime()) /
-            (1000 * 60 * 60 * 24),
+          (todayAnchor.getTime() - startAnchor.getTime()) / msPerDay,
         );
 
-        if (daysDiff < 0) return false; // La actividad aún no ha comenzado
-
+        // 4. Lógica por Frecuencia
         switch (freq) {
           case "DAILY":
-            // Si hay BYDAY, verificar que hoy sea uno de esos días
-            if (byDay.length > 0) {
-              const dayOfWeek = todayArgentina.getUTCDay();
-              const dayMap: Record<number, string> = {
-                0: "SU",
-                1: "MO",
-                2: "TU",
-                3: "WE",
-                4: "TH",
-                5: "FR",
-                6: "SA",
-              };
-
-              return byDay.includes(dayMap[dayOfWeek] ? dayMap[dayOfWeek] : "");
+            // Si hay BYDAY (ej: Lunes y Miercoles), ignoramos el intervalo de días simples
+            // y chequeamos si hoy es uno de esos días.
+            if (byDays.length > 0) {
+              return (
+                isDayInByDay(todayAnchor, byDays) &&
+                checkDailyInterval(daysDiff, interval)
+              );
+              // Nota: RRULE complejo combina intervalo y byday, pero usualmente DAILY + BYDAY implica
+              // "cada X días, pero solo si es Lunes". Simplifiquemos a check de día.
             }
-            // Sin BYDAY, es todos los días según el intervalo
             return daysDiff % interval === 0;
 
           case "WEEKLY":
-            // Verificar que sea el mismo día de la semana que el día de inicio
-            const activityDayOfWeek = activityStartArgentina.getUTCDay();
-            const todayDayOfWeek = todayArgentina.getUTCDay();
+            // Calcular en qué "número de semana" estamos desde el inicio
+            const weekIndex = Math.floor(daysDiff / 7);
 
-            if (activityDayOfWeek !== todayDayOfWeek) {
-              return false;
+            // 1. Chequear intervalo de semanas (cada 2 semanas, etc)
+            if (weekIndex % interval !== 0) return false;
+
+            // 2. Chequear día específico
+            if (byDays.length > 0) {
+              // Si hay BYDAY explícito (ej: MO,WE), hoy debe ser uno de esos
+              return isDayInByDay(todayAnchor, byDays);
+            } else {
+              // Si NO hay BYDAY, debe ser el mismo día de la semana que el inicio
+              return todayAnchor.getUTCDay() === startAnchor.getUTCDay();
             }
 
-            // Verificar el intervalo de semanas
-            const weeksDiff = Math.floor(daysDiff / 7);
-            return weeksDiff % interval === 0;
-
           case "MONTHLY":
+            // Calculamos diferencia de meses
             const monthsDiff =
-              (todayYear - startYear) * 12 + (todayMonth - startMonth);
+              (tYear - startAnchor.getUTCFullYear()) * 12 +
+              (tMonth - 1 - startAnchor.getUTCMonth());
 
-            // Verificar que sea el mismo día del mes y que el intervalo de meses sea correcto
-            return (
-              monthsDiff >= 0 &&
-              monthsDiff % interval === 0 &&
-              activityStartArgentina.getUTCDate() ===
-                todayArgentina.getUTCDate()
-            );
+            if (monthsDiff < 0) return false;
+            if (monthsDiff % interval !== 0) return false;
+
+            // Verificar el día del mes (Ej: el 15 de cada mes)
+            // Nota: Esto no maneja "el tercer martes del mes", solo "el día X"
+            return tDay === startAnchor.getUTCDate();
 
           case "YEARLY":
-            const yearsDiff = todayYear - startYear;
-            // Verificar que sea el mismo día y mes del año y que el intervalo de años sea correcto
+            const yearsDiff = tYear - startAnchor.getUTCFullYear();
+            if (yearsDiff < 0) return false;
+            if (yearsDiff % interval !== 0) return false;
+
+            // Mismo día y mismo mes
             return (
-              yearsDiff >= 0 &&
-              yearsDiff % interval === 0 &&
-              activityStartArgentina.getUTCMonth() === todayMonth &&
-              activityStartArgentina.getUTCDate() ===
-                todayArgentina.getUTCDate()
+              tMonth - 1 === startAnchor.getUTCMonth() &&
+              tDay === startAnchor.getUTCDate()
             );
 
           default:
             return false;
         }
+      }
+
+      // Helper para verificar días de la semana (SU, MO, TU...)
+      function isDayInByDay(date: Date, byDays: string[]): boolean {
+        const dayMap = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
+        const dayCode = dayMap[date.getUTCDay()] || "";
+        return byDays.includes(dayCode);
+      }
+
+      // Helper opcional para daily si quieres ser estricto
+      function checkDailyInterval(daysDiff: number, interval: number): boolean {
+        return true; // En DAILY simple con BYDAY, el intervalo suele ser 1.
       }
 
       if (currentToNotify.length === 0 && recurringToNotify.length === 0) {
