@@ -37,6 +37,20 @@ export const useGamesTour = ({ activeTab, loading, isElder }: UseGamesTourProps)
     text: 'Revisa tu historial de partidas y progreso.',
   });
 
+  const shopFabStep = useTourStep({
+    tourId: 'games',
+    stepId: 'games-shop-fab',
+    order: 2,
+    text: 'Visita la tienda para canjear tus puntos por divertidos elementos.',
+  });
+
+  const historyFabStep = useTourStep({
+    tourId: 'games',
+    stepId: 'games-history-fab',
+    order: 3,
+    text: 'Revisa tu historial de partidas y progreso.',
+  });
+
   const gamesListStep = useTourStep({
     tourId: 'games',
     stepId: 'games-list',
@@ -81,8 +95,8 @@ export const useGamesTour = ({ activeTab, loading, isElder }: UseGamesTourProps)
 
               const steps = [
                 { ...headerStep.step, ref: headerStep.ref, layout: undefined },
-                { ...shopStep.step, ref: shopStep.ref, layout: undefined },
-                { ...historyStep.step, ref: historyStep.ref, layout: undefined },
+                { ...shopFabStep.step, ref: shopFabStep.ref, layout: undefined },
+                { ...historyFabStep.step, ref: historyFabStep.ref, layout: undefined },
                 { ...gamesListStep.step, ref: gamesListStep.ref, layout: undefined },
                 { ...gameDetailsStep.step, ref: gameDetailsStep.ref, layout: undefined },
                 { ...gamePlayStep.step, ref: gamePlayStep.ref, layout: undefined },
@@ -115,8 +129,8 @@ export const useGamesTour = ({ activeTab, loading, isElder }: UseGamesTourProps)
               };
 
               setTimeout(() => measureStep(headerStep, 'games-header'), 50);
-              setTimeout(() => measureStep(shopStep, 'games-shop'), 100);
-              setTimeout(() => measureStep(historyStep, 'games-history'), 150);
+              setTimeout(() => measureStep(shopFabStep, 'games-shop-fab'), 100);
+              setTimeout(() => measureStep(historyFabStep, 'games-history-fab'), 150);
               setTimeout(() => measureStep(gamesListStep, 'games-list'), 200);
               setTimeout(() => measureStep(gameDetailsStep, 'game-details-memory'), 250);
               setTimeout(() => measureStep(gamePlayStep, 'game-play-memory'), 300);
@@ -135,6 +149,8 @@ export const useGamesTour = ({ activeTab, loading, isElder }: UseGamesTourProps)
     headerRef: headerStep.ref,
     shopRef: shopStep.ref,
     historyRef: historyStep.ref,
+    shopFabRef: shopFabStep.ref,
+    historyFabRef: historyFabStep.ref,
     gamesListRef: gamesListStep.ref,
     gameDetailsRef: gameDetailsStep.ref,
     gamePlayRef: gamePlayStep.ref,

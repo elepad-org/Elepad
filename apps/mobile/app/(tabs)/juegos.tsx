@@ -16,6 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, STYLES, SHADOWS, LAYOUT } from "@/styles/base";
 import { router } from "expo-router";
 import HistoryScreen from "../history";
+import { ExpandableFAB } from "@/components/shared/ExpandableFAB";
 import type { ImageSourcePropType } from "react-native";
 import memoryImage from "@/assets/images/memory2.png";
 import netImage from "@/assets/images/net2.png";
@@ -99,7 +100,7 @@ export default function JuegosScreen() {
   // --- Tour Setup ---
   const isElder = userElepad?.elder === true;
 
-  const { headerRef, shopRef, historyRef, gamesListRef, gameDetailsRef, gamePlayRef } = useGamesTour({
+  const { headerRef, shopRef, historyRef, shopFabRef, historyFabRef, gamesListRef, gameDetailsRef, gamePlayRef } = useGamesTour({
     activeTab,
     loading,
     isElder,
@@ -217,6 +218,27 @@ export default function JuegosScreen() {
           </View>
         </View>
       </ScrollView>
+
+      {/* FABs para Tienda e Historial */}
+      <ExpandableFAB
+        ref={shopFabRef}
+        label="Tienda"
+        icon="store"
+        onPress={() => router.push("/shop")}
+        bottom={LAYOUT.bottomNavHeight + 86}
+        right={16}
+        autoCollapseDelay={5000}
+      />
+
+      <ExpandableFAB
+        ref={historyFabRef}
+        label="Historial"
+        icon="history"
+        onPress={() => router.navigate("/history")}
+        bottom={LAYOUT.bottomNavHeight + 16}
+        right={16}
+        autoCollapseDelay={5000}
+      />
     </SafeAreaView>
   );
 }
