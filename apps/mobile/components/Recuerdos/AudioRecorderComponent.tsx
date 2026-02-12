@@ -133,7 +133,6 @@ export default function AudioRecorderComponent({
       // Usar preset HIGH_QUALITY directamente sin sobrescribir
       await recorder.prepareToRecordAsync(RecordingPresets.HIGH_QUALITY);
       await recorder.record();
-      console.log("Recording started");
     } catch (error) {
       console.error("Error al iniciar grabación:", error);
       Alert.alert("Error", "No se pudo iniciar la grabación");
@@ -145,7 +144,6 @@ export default function AudioRecorderComponent({
       // Guardar URL actual antes de parar, por si el estado se limpia
       const lastUrl = recorderState.url;
       const result = await recorder.stop();
-      console.log("Recording stopped, result:", result);
 
       // El resultado puede ser un string (URI), un objeto con {url}, o void
       let uri: string | null = null;
@@ -157,11 +155,9 @@ export default function AudioRecorderComponent({
 
       // Fallback para iOS: si no viene en el result, usar el que teníamos antes de parar
       if (!uri && lastUrl) {
-        console.log("Using lastUrl fallback:", lastUrl);
         uri = lastUrl;
       }
 
-      console.log("Extracted URI:", uri);
       if (uri) {
         setAudioUri(uri);
         // Generar waveform data
@@ -169,10 +165,9 @@ export default function AudioRecorderComponent({
         // Usar replace para cambiar la fuente del player existente
         try {
           player.replace(uri);
-          console.log("Player source replaced with:", uri);
           // Esperar un poco para que cargue
           setTimeout(() => {
-            console.log("After replace - duration:", player.duration);
+            // Duration loaded
           }, 500);
         } catch (error) {
           console.error("Error replacing player source:", error);
@@ -185,17 +180,12 @@ export default function AudioRecorderComponent({
 
   const playSound = () => {
     if (!hasValidAudio) return;
-    console.log("Play/Pause audio, URL:", audioUri);
-    console.log("Player duration:", player.duration);
-    console.log("Player currentTime:", player.currentTime);
 
     try {
       if (player.playing) {
-        console.log("Pausing...");
         player.pause();
         setIsPlaying(false);
       } else {
-        console.log("Playing...");
         // Si el audio terminó, volver al inicio
         if (
           player.currentTime >= player.duration - 0.1 &&

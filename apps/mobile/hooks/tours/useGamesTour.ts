@@ -129,7 +129,7 @@ export const useGamesTour = ({ activeTab, loading, isElder }: UseGamesTourProps)
 
       checkAndStartTour();
     }
-  }, [activeTab, loading, tour.isActive, tourState.isPreparing]);
+  }, [activeTab, loading]);
 
   return {
     headerRef: headerStep.ref,

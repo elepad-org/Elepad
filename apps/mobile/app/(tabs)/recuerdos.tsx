@@ -303,13 +303,6 @@ export default function RecuerdosScreen() {
       },
     ],
     queryFn: async ({ pageParam = 0 }) => {
-      console.log("🔍 [MEMORIES] Fetching with params:", {
-        groupId,
-        bookId: selectedBook?.id,
-        createdBy: memberFilterId || undefined,
-        limit: 20,
-        offset: pageParam,
-      });
       const response = await getMemories({
         groupId,
         bookId: selectedBook?.id,
@@ -317,21 +310,11 @@ export default function RecuerdosScreen() {
         limit: 20,
         offset: pageParam,
       });
-      console.log(
-        "📦 [MEMORIES] Raw response:",
-        JSON.stringify(response, null, 2),
-      );
       return response;
     },
     getNextPageParam: (lastPage) => {
-      console.log(
-        "🔄 [MEMORIES] getNextPageParam - lastPage:",
-        JSON.stringify(lastPage, null, 2),
-      );
-
       // Verificar que lastPage tenga la estructura esperada
       if (!lastPage || typeof lastPage !== "object" || !("data" in lastPage)) {
-        console.log("❌ [MEMORIES] lastPage is invalid");
         return undefined;
       }
 
@@ -345,26 +328,13 @@ export default function RecuerdosScreen() {
 
       // Si la última página no tiene datos, no hay más
       if (!data || data.length === 0) {
-        console.log("⚠️ [MEMORIES] No data in last page, stopping pagination");
         return undefined;
       }
 
       // Si la última página tiene menos datos que el límite, ya terminamos
       if (data.length < limit) {
-        console.log(
-          "⚠️ [MEMORIES] Last page has less data than limit, stopping pagination",
-        );
         return undefined;
       }
-
-      console.log("➡️ [MEMORIES] Pagination info:", {
-        currentOffset: offset,
-        limit,
-        total,
-        dataLength: data?.length,
-        nextOffset,
-        hasMore: nextOffset < total || data.length === limit,
-      });
 
       // Continuar si:
       // 1. nextOffset < total (caso normal)
@@ -379,36 +349,17 @@ export default function RecuerdosScreen() {
 
   // Transformar la data paginada en un formato compatible con el código existente
   const memoriesResponse = useMemo(() => {
-    console.log(
-      "🔄 [MEMORIES] Processing memoriesInfiniteData:",
-      memoriesInfiniteData,
-    );
-
     if (!memoriesInfiniteData) {
-      console.log("❌ [MEMORIES] No infinite data available");
       return undefined;
     }
-
-    console.log(
-      "📄 [MEMORIES] Pages count:",
-      memoriesInfiniteData.pages.length,
-    );
 
     // Combinar todas las páginas en un solo array
     const allMemories: MemoryWithReactions[] = [];
     let total = 0;
 
-    memoriesInfiniteData.pages.forEach((page, index) => {
-      console.log(
-        `📄 [MEMORIES] Processing page ${index}:`,
-        JSON.stringify(page, null, 2),
-      );
-
+    memoriesInfiniteData.pages.forEach((page) => {
       // Verificar que page tenga la estructura esperada
       if (!page || typeof page !== "object" || !("data" in page)) {
-        console.log(
-          `⚠️ [MEMORIES] Page ${index} is invalid or has no data property`,
-        );
         return;
       }
 
@@ -419,27 +370,10 @@ export default function RecuerdosScreen() {
         offset: number;
       };
 
-      console.log(`📊 [MEMORIES] Page ${index} data:`, {
-        hasData: !!pageData.data,
-        dataIsArray: Array.isArray(pageData.data),
-        dataLength: pageData.data?.length,
-        total: pageData.total,
-      });
-
       if (pageData.data && Array.isArray(pageData.data)) {
-        console.log(
-          `✅ [MEMORIES] Adding ${pageData.data.length} memories from page ${index}`,
-        );
         allMemories.push(...pageData.data);
         total = pageData.total;
-      } else {
-        console.log(`⚠️ [MEMORIES] Page ${index} has no valid data array`);
       }
-    });
-
-    console.log("✨ [MEMORIES] Final result:", {
-      totalMemories: allMemories.length,
-      expectedTotal: total,
     });
 
     const result = {
@@ -450,11 +384,6 @@ export default function RecuerdosScreen() {
         offset: 0,
       },
     };
-
-    console.log(
-      "🎯 [MEMORIES] Returning memoriesResponse:",
-      JSON.stringify(result, null, 2),
-    );
 
     return result;
   }, [memoriesInfiniteData]);
@@ -584,36 +513,15 @@ export default function RecuerdosScreen() {
       caption?: string;
       image: Blob;
     }) => {
-      console.log("=== CLIENT: Starting upload mutation ===");
-      console.log("CLIENT: Upload data:", {
-        ...data,
-        image:
-          data.image instanceof Blob
-            ? "Blob"
-            : typeof data.image === "object"
-              ? "File object"
-              : typeof data.image,
-      });
       try {
         const result = await createMemoryWithMedia(data);
-        console.log("CLIENT: Upload successful:", result);
         return result;
       } catch (error) {
-        console.error("CLIENT: Upload mutation failed:", error);
-        // Log more details about the error
-        if (error && typeof error === "object") {
-          console.error("CLIENT: Error details:", {
-            message: (error as Error).message,
-            status: (error as { status?: number }).status,
-            statusText: (error as { statusText?: string }).statusText,
-            body: (error as { body?: unknown }).body,
-          });
-        }
+        console.error("Error al subir recuerdo:", error);
         throw error;
       }
     },
-    onSuccess: (data) => {
-      console.log("Upload mutation onSuccess:", data);
+    onSuccess: () => {
       // Refrescar la lista de memorias
       refetchMemories();
       // Invalidar query global de memorias (para el Home)
@@ -647,22 +555,11 @@ export default function RecuerdosScreen() {
       title: string;
       caption?: string;
     }) => {
-      console.log("=== CLIENT: Starting create note mutation ===");
-      console.log("CLIENT: Note data:", data);
       try {
         const result = await createNote(data);
-        console.log("CLIENT: Note created successfully:", result);
         return result;
       } catch (error) {
-        console.error("CLIENT: Create note mutation failed:", error);
-        if (error && typeof error === "object") {
-          console.error("CLIENT: Error details:", {
-            message: (error as Error).message,
-            status: (error as { status?: number }).status,
-            statusText: (error as { statusText?: string }).statusText,
-            body: (error as { body?: unknown }).body,
-          });
-        }
+        console.error("Error al crear nota:", error);
         throw error;
       }
     },
@@ -976,19 +873,12 @@ export default function RecuerdosScreen() {
             fileUri = `file://${fileUri}`;
           }
 
-          console.log("Creating file object with:", {
-            uri: fileUri,
-            name: fileName,
-            type: mimeType,
-          });
           fileData = {
             uri: fileUri,
             name: fileName,
             type: mimeType,
           } as unknown as Blob;
         }
-
-        console.log("File data prepared:", fileData);
 
         const uploadData = {
           bookId: selectedBook.id,

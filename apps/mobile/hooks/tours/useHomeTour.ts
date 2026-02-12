@@ -157,7 +157,7 @@ export const useHomeTour = ({
     };
 
     startHomeTour();
-  }, [userElepadLoading, userElepad, activitiesLoading, attemptsLoading, memoriesLoading, tour.isActive, tourState.isPreparing]);
+  }, [userElepadLoading, userElepad, activitiesLoading, attemptsLoading, memoriesLoading]);
 
   return {
     greetingRef: greetingStep.ref,

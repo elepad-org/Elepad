@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { View, StyleSheet, Animated, Easing } from "react-native";
 import { Text } from "react-native-paper";
-import eleIdea from "@/assets/images/ele-idea.png";
+import eleIdea from "@/assets/images/ele-celular-loading.png";
 import { COLORS, FONT } from "@/styles/base";
 
 /**

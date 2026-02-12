@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { COLORS, FONT, SHADOWS } from '@/styles/base';
-import eleImage from '@/assets/images/ele-idea.png';
+import eleImage from '@/assets/images/ele-tip.png';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const TOOLTIP_WIDTH = Math.min(SCREEN_WIDTH * 0.85, 340);

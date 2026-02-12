@@ -119,7 +119,7 @@ export const useRecuerdosTour = ({ activeTab, authLoading, selectedBook }: UseRe
     };
 
     checkAndStartTour();
-  }, [activeTab, tour.isActive, authLoading, selectedBook, tourState.isPreparing]);
+  }, [activeTab, authLoading, selectedBook]);
 
   return {
     headerRef: headerStep.ref,

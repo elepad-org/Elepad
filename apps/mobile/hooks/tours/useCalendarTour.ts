@@ -111,7 +111,7 @@ export const useCalendarTour = ({
 
       checkAndStartTour();
     }
-  }, [activeTab, activitiesLoading, tour.isActive, tourState.isPreparing]);
+  }, [activeTab, activitiesLoading]);
 
   return {
     headerRef: headerStep.ref,

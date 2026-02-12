@@ -301,7 +301,6 @@ export default function RecuerdoDetailDialog({
     setLastReactedStickerUrl(null);
 
     if (visible && shouldUseAudio) {
-      console.log("Modal opened, resetting player");
       player.pause();
       player.seekTo(0);
       setIsPlaying(false);
@@ -346,13 +345,12 @@ export default function RecuerdoDetailDialog({
     return () => {
       if (shouldUseAudio) {
         try {
-          console.log("Cleaning up player");
           if (player.playing) {
             player.pause();
           }
           player.seekTo(0);
         } catch {
-          console.log("Player already cleaned up");
+          // Player already cleaned up
         }
       }
     };
@@ -463,14 +461,11 @@ export default function RecuerdoDetailDialog({
         const filename = `video-${recuerdo.id}.mp4`;
         const localUri = `${FileSystem.cacheDirectory}${filename}`;
 
-        console.log("Downloading video to:", localUri);
-
         // Descargar el video
         const downloadResult = await FileSystem.downloadAsync(
           recuerdo.contenido,
           localUri,
         );
-        console.log("Download result:", downloadResult);
 
         const uri = downloadResult.uri;
 
@@ -492,8 +487,6 @@ export default function RecuerdoDetailDialog({
 
         const filename = `${safeTitle || "audio"}.m4a`;
         const localUri = `${FileSystem.cacheDirectory}${filename}`;
-
-        console.log("Downloading audio to:", localUri);
 
         const downloadResult = await FileSystem.downloadAsync(
           recuerdo.contenido,
@@ -693,18 +686,12 @@ export default function RecuerdoDetailDialog({
   const playAudio = () => {
     if (!shouldUseAudio) return;
 
-    console.log("Play audio clicked, URL:", recuerdo.contenido);
-    console.log("Player state:", player.playing);
-
     try {
       if (player.playing) {
-        console.log("Pausing...");
         player.pause();
       } else {
-        console.log("Playing from position:", player.currentTime);
         // Si el audio terminó, volver al inicio
         if (player.currentTime >= player.duration - 0.1) {
-          console.log("Audio finished, seeking to start");
           player.seekTo(0);
         }
         player.play();

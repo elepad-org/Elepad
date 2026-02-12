@@ -123,7 +123,7 @@ export const useStatisticsTour = ({ activeTab, loading, isHelper }: UseStatistic
 
       checkAndStartTour();
     }
-  }, [activeTab, loading, isHelper, tour.isActive, tourState.isPreparing]);
+  }, [activeTab, loading, isHelper]);
 
   return {
     headerRef: headerStep.ref,
