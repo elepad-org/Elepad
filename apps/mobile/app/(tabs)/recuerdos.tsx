@@ -153,8 +153,8 @@ export default function RecuerdosScreen() {
 
   // Dimensiones responsive
   const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
-  const emptyLogoSize = screenWidth * 0.55; // 55% del ancho de pantalla
-  const emptyLogoTop = screenHeight * 0.12; // 25% del alto de pantalla (más arriba que el 35% anterior)
+  const emptyLogoSize = screenWidth * 0.60; // 55% del ancho de pantalla
+  const emptyLogoTop = screenHeight * 0.08; // 25% del alto de pantalla (más arriba que el 35% anterior)
 
   const { mutateAsync: addReaction } = useAddReaction();
   const { activeTab } = useTabContext();
@@ -1841,7 +1841,7 @@ export default function RecuerdosScreen() {
             style={{
               width: emptyLogoSize,
               height: emptyLogoSize,
-              marginBottom: 10,
+              marginBottom: 0,
             }}
           />
           <Text style={STYLES.heading}>{emptyTitle}</Text>
