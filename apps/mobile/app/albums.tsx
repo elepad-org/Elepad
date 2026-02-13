@@ -11,7 +11,7 @@ import {
 import { Text, ActivityIndicator, Button } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { COLORS, STYLES, LAYOUT } from "@/styles/base";
+import { COLORS, STYLES } from "@/styles/base";
 import { useAuth } from "@/hooks/useAuth";
 import { useGetMemories, Album } from "@elepad/api-client";
 import CreateAlbumDialog from "@/components/Recuerdos/CreateAlbumDialog";
@@ -177,7 +177,7 @@ export default function AlbumsScreen() {
               );
             }}
             ListFooterComponent={
-              <View style={{ height: LAYOUT.bottomNavHeight + 80 }} />
+              <View style={{ height: 40 }} />
             }
           />
         )}
