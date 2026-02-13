@@ -10,7 +10,7 @@ import {
 import { Image } from "expo-image";
 import { Text, IconButton } from "react-native-paper";
 import { useVideoPlayer, VideoView } from "expo-video";
-import { SHADOWS } from "@/styles/base";
+import { COLORS, SHADOWS } from "@/styles/base";
 import fondoRecuerdos from "@/assets/images/fondoRecuerdos.png";
 import eleDef from "@/assets/images/ele-def.png";
 
@@ -296,7 +296,7 @@ const RecuerdoItemComponent = React.memo(
                     style={{
                       width: "80%",
                       height: 2 * scale,
-                      backgroundColor: "#ff6b35",
+                      backgroundColor: COLORS.primary,
                     }}
                   />
                 </View>

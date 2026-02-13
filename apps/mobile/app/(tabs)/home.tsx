@@ -95,7 +95,7 @@ const HomeScreen = () => {
     userElepad?.elder
       ? { limit: 1 }
       : {
-          limit: 10,
+          limit: 3,
           elderOnly: true,
           startDate: dateRange.start,
           endDate: dateRange.end,
@@ -391,191 +391,6 @@ const HomeScreen = () => {
               </View>
             </Pressable>
           </View>
-        </View>
-
-        {/* Último Recuerdo - DESTACADO */}
-        <View
-          ref={lastMemoryRef}
-          style={{
-            marginTop: lastMemory?.mimeType?.startsWith("image/") ? 50 : 
-                      (!lastMemory?.mimeType?.startsWith("audio/") && 
-                       !lastMemory?.mediaUrl) ? 4 : 16,
-            marginBottom: (!lastMemory?.mimeType?.startsWith("audio/") && 
-                          !lastMemory?.mediaUrl) ? 0 : 20,
-          }}
-        >
-          {memoriesQuery.isLoading || isLoading ? (
-            <View style={styles.memoryCardLoading}>
-              <SkeletonBox width={SCREEN_WIDTH} height={280} borderRadius={0} />
-            </View>
-          ) : lastMemory ? (
-            <Animated.View entering={FadeIn.duration(800)}>
-              {(() => {
-                const isAudio = lastMemory.mimeType?.startsWith("audio/");
-                const hasMedia =
-                  lastMemory.mediaUrl &&
-                  lastMemory.mimeType &&
-                  (lastMemory.mimeType.startsWith("image/") ||
-                    lastMemory.mimeType.startsWith("video/"));
-
-                // Si es audio, mostrar reproductor
-                if (isAudio && lastMemory.mediaUrl) {
-                  return (
-                    <Pressable
-                      onPress={() =>
-                        router.navigate({
-                          pathname: "/(tabs)/recuerdos",
-                          params: {
-                            tab: "recuerdos",
-                            memoryId: lastMemory.id,
-                            bookId: lastMemory.bookId,
-                          },
-                        })
-                      }
-                    >
-                      <CompactAudioPlayer
-                        audioUri={lastMemory.mediaUrl}
-                        title={lastMemory.title || "Sin título"}
-                        caption={lastMemory.caption || undefined}
-                        date={formatInUserTimezone(
-                          lastMemory.createdAt,
-                          "d 'de' MMMM 'de' yyyy",
-                          userElepad?.timezone,
-                        )}
-                      />
-                    </Pressable>
-                  );
-                }
-
-                return (
-                  <Pressable
-                    style={hasMedia ? styles.memoryCard : styles.memoryCardNote}
-                    onPress={
-                      lastMemory.mimeType.startsWith("video/")
-                        ? () => {}
-                        : () =>
-                            router.navigate({
-                              pathname: "/(tabs)/recuerdos",
-                              params: {
-                                tab: "recuerdos",
-                                memoryId: lastMemory.id,
-                                bookId: lastMemory.bookId,
-                              },
-                            })
-                    }
-                  >
-                    {hasMedia ? (
-                      lastMemory.mimeType.startsWith("video/") ? (
-                        <View style={styles.memoryImage}>
-                          <VideoView
-                            player={player}
-                            style={{ width: "100%", height: "100%" }}
-                            allowsFullscreen={false}
-                            allowsPictureInPicture={false}
-                            contentFit="cover"
-                          />
-                        </View>
-                      ) : (
-                        // Diseño polaroid para imágenes
-                        <View style={styles.memoryPolaroidContainer}>
-                          <View
-                            style={[
-                              styles.memoryPolaroidFrame,
-                              {
-                                transform: [
-                                  {
-                                    rotate: `${
-                                      lastMemory.id.charCodeAt(0) % 2 === 0
-                                        ? 1
-                                        : -1
-                                    }deg`,
-                                  },
-                                ],
-                              },
-                            ]}
-                          >
-                            <View style={styles.memoryPolaroidImage}>
-                              <Image
-                                source={{ uri: lastMemory.mediaUrl }}
-                                style={styles.memoryPolaroidImageStyle}
-                                contentFit="cover"
-                                transition={200}
-                                cachePolicy="memory-disk"
-                              />
-                            </View>
-                            <View style={styles.memoryPolaroidBottom}>
-                              <View style={styles.memoryPolaroidContent}>
-                                <Text style={styles.memoryPolaroidLabel}>
-                                  ÚLTIMO RECUERDO
-                                </Text>
-                                <Text
-                                  style={styles.memoryPolaroidTitle}
-                                  numberOfLines={2}
-                                >
-                                  {lastMemory.title || "Sin título"}
-                                </Text>
-                              </View>
-                            </View>
-                          </View>
-                        </View>
-                      )
-                    ) : (
-                      <ImageBackground
-                        source={fondoRecuerdos}
-                        style={styles.memoryNoImage}
-                      >
-                        <Image source={tapeImage} style={styles.tapeIcon} />
-                        <View style={styles.memoryContent}>
-                          <Text style={styles.memoryLabelNote}>
-                            ÚLTIMO RECUERDO
-                          </Text>
-                          <Text
-                            style={styles.memoryTitleNote}
-                            numberOfLines={2}
-                          >
-                            {lastMemory.title || "Sin título"}
-                          </Text>
-
-                          {lastMemory.caption && (
-                            <HighlightedMentionText
-                              text={lastMemory.caption}
-                              familyMembers={groupMembers}
-                              style={styles.memoryDescriptionNote}
-                            />
-                          )}
-                          <Text style={styles.memoryDateNote}>
-                            {formatInUserTimezone(
-                              lastMemory.createdAt,
-                              "d 'de' MMMM 'de' yyyy",
-                              userElepad?.timezone,
-                            )}
-                          </Text>
-                        </View>
-                      </ImageBackground>
-                    )}
-                  </Pressable>
-                );
-              })()}
-            </Animated.View>
-          ) : (
-            <Pressable
-              style={styles.memoryCardEmpty}
-              onPress={() => router.setParams({ tab: "recuerdos" })}
-            >
-              <Text style={styles.emptyTitle}>No hay recuerdos guardados</Text>
-              <Text style={styles.emptySubtitle}>
-                Comienza a crear tus momentos especiales
-              </Text>
-              <Button
-                mode="contained"
-                onPress={() => router.setParams({ tab: "recuerdos" })}
-                style={styles.emptyButton}
-                buttonColor={COLORS.primary}
-              >
-                Crear recuerdo
-              </Button>
-            </Pressable>
-          )}
         </View>
 
         {/* Contador de Racha - Solo para usuarios elder */}
@@ -926,6 +741,191 @@ const HomeScreen = () => {
                 Ver estadísticas
               </Button>
             </View>
+          )}
+        </View>
+
+        {/* Último Recuerdo - DESTACADO */}
+        <View
+          ref={lastMemoryRef}
+          style={{
+            marginTop: lastMemory?.mimeType?.startsWith("image/") ? 50 : 
+                      (!lastMemory?.mimeType?.startsWith("audio/") && 
+                       !lastMemory?.mediaUrl) ? 4 : 16,
+            marginBottom: (!lastMemory?.mimeType?.startsWith("audio/") && 
+                          !lastMemory?.mediaUrl) ? 0 : 20,
+          }}
+        >
+          {memoriesQuery.isLoading || isLoading ? (
+            <View style={styles.memoryCardLoading}>
+              <SkeletonBox width={SCREEN_WIDTH} height={280} borderRadius={0} />
+            </View>
+          ) : lastMemory ? (
+            <Animated.View entering={FadeIn.duration(800)}>
+              {(() => {
+                const isAudio = lastMemory.mimeType?.startsWith("audio/");
+                const hasMedia =
+                  lastMemory.mediaUrl &&
+                  lastMemory.mimeType &&
+                  (lastMemory.mimeType.startsWith("image/") ||
+                    lastMemory.mimeType.startsWith("video/"));
+
+                // Si es audio, mostrar reproductor
+                if (isAudio && lastMemory.mediaUrl) {
+                  return (
+                    <Pressable
+                      onPress={() =>
+                        router.navigate({
+                          pathname: "/(tabs)/recuerdos",
+                          params: {
+                            tab: "recuerdos",
+                            memoryId: lastMemory.id,
+                            bookId: lastMemory.bookId,
+                          },
+                        })
+                      }
+                    >
+                      <CompactAudioPlayer
+                        audioUri={lastMemory.mediaUrl}
+                        title={lastMemory.title || "Sin título"}
+                        caption={lastMemory.caption || undefined}
+                        date={formatInUserTimezone(
+                          lastMemory.createdAt,
+                          "d 'de' MMMM 'de' yyyy",
+                          userElepad?.timezone,
+                        )}
+                      />
+                    </Pressable>
+                  );
+                }
+
+                return (
+                  <Pressable
+                    style={hasMedia ? styles.memoryCard : styles.memoryCardNote}
+                    onPress={
+                      lastMemory.mimeType.startsWith("video/")
+                        ? () => {}
+                        : () =>
+                            router.navigate({
+                              pathname: "/(tabs)/recuerdos",
+                              params: {
+                                tab: "recuerdos",
+                                memoryId: lastMemory.id,
+                                bookId: lastMemory.bookId,
+                              },
+                            })
+                    }
+                  >
+                    {hasMedia ? (
+                      lastMemory.mimeType.startsWith("video/") ? (
+                        <View style={styles.memoryImage}>
+                          <VideoView
+                            player={player}
+                            style={{ width: "100%", height: "100%" }}
+                            allowsFullscreen={false}
+                            allowsPictureInPicture={false}
+                            contentFit="cover"
+                          />
+                        </View>
+                      ) : (
+                        // Diseño polaroid para imágenes
+                        <View style={styles.memoryPolaroidContainer}>
+                          <View
+                            style={[
+                              styles.memoryPolaroidFrame,
+                              {
+                                transform: [
+                                  {
+                                    rotate: `${
+                                      lastMemory.id.charCodeAt(0) % 2 === 0
+                                        ? 1
+                                        : -1
+                                    }deg`,
+                                  },
+                                ],
+                              },
+                            ]}
+                          >
+                            <View style={styles.memoryPolaroidImage}>
+                              <Image
+                                source={{ uri: lastMemory.mediaUrl }}
+                                style={styles.memoryPolaroidImageStyle}
+                                contentFit="cover"
+                                transition={200}
+                                cachePolicy="memory-disk"
+                              />
+                            </View>
+                            <View style={styles.memoryPolaroidBottom}>
+                              <View style={styles.memoryPolaroidContent}>
+                                <Text style={styles.memoryPolaroidLabel}>
+                                  ÚLTIMO RECUERDO
+                                </Text>
+                                <Text
+                                  style={styles.memoryPolaroidTitle}
+                                  numberOfLines={2}
+                                >
+                                  {lastMemory.title || "Sin título"}
+                                </Text>
+                              </View>
+                            </View>
+                          </View>
+                        </View>
+                      )
+                    ) : (
+                      <ImageBackground
+                        source={fondoRecuerdos}
+                        style={styles.memoryNoImage}
+                      >
+                        <Image source={tapeImage} style={styles.tapeIcon} />
+                        <View style={styles.memoryContent}>
+                          <Text style={styles.memoryLabelNote}>
+                            ÚLTIMO RECUERDO
+                          </Text>
+                          <Text
+                            style={styles.memoryTitleNote}
+                            numberOfLines={2}
+                          >
+                            {lastMemory.title || "Sin título"}
+                          </Text>
+
+                          {lastMemory.caption && (
+                            <HighlightedMentionText
+                              text={lastMemory.caption}
+                              familyMembers={groupMembers}
+                              style={styles.memoryDescriptionNote}
+                            />
+                          )}
+                          <Text style={styles.memoryDateNote}>
+                            {formatInUserTimezone(
+                              lastMemory.createdAt,
+                              "d 'de' MMMM 'de' yyyy",
+                              userElepad?.timezone,
+                            )}
+                          </Text>
+                        </View>
+                      </ImageBackground>
+                    )}
+                  </Pressable>
+                );
+              })()}
+            </Animated.View>
+          ) : (
+            <Pressable
+              style={styles.memoryCardEmpty}
+              onPress={() => router.setParams({ tab: "recuerdos" })}
+            >
+              <Text style={styles.emptyTitle}>No hay recuerdos guardados</Text>
+              <Text style={styles.emptySubtitle}>
+                Comienza a crear tus momentos especiales
+              </Text>
+              <Button
+                mode="contained"
+                onPress={() => router.setParams({ tab: "recuerdos" })}
+                style={styles.emptyButton}
+                buttonColor={COLORS.primary}
+              >
+                Crear recuerdo
+              </Button>
+            </Pressable>
           )}
         </View>
 

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { View, TouchableOpacity, Animated } from "react-native";
 import { Text, IconButton } from "react-native-paper";
 import { useAudioPlayer } from "expo-audio";
-import { FONT, SHADOWS } from "@/styles/base";
+import { FONT, SHADOWS, COLORS } from "@/styles/base";
 import Slider from "@react-native-community/slider";
 
 interface CompactAudioPlayerProps {
@@ -287,7 +287,7 @@ export default function CompactAudioPlayer({
                     style={{
                       width: "80%",
                       height: 4,
-                      backgroundColor: "#ff6b35",
+                      backgroundColor: COLORS.primary,
                     }}
                   />
                 </View>
@@ -364,7 +364,7 @@ export default function CompactAudioPlayer({
               >
                 <Text
                   style={{
-                    color: "#ff6b35",
+                    color: COLORS.primary,
                     fontSize: 16,
                     fontFamily: "monospace",
                     fontWeight: "bold",
@@ -379,7 +379,7 @@ export default function CompactAudioPlayer({
                     width: 44,
                     height: 44,
                     borderRadius: 22,
-                    backgroundColor: "#ff6b35",
+                    backgroundColor: COLORS.primary,
                     justifyContent: "center",
                     alignItems: "center",
                     ...SHADOWS.medium,
@@ -395,7 +395,7 @@ export default function CompactAudioPlayer({
 
                 <Text
                   style={{
-                    color: "#ff6b35",
+                    color: COLORS.primary,
                     fontSize: 16,
                     fontFamily: "monospace",
                     fontWeight: "bold",
@@ -412,7 +412,7 @@ export default function CompactAudioPlayer({
                   maximumValue={duration || 1}
                   value={currentTime}
                   onSlidingComplete={handleSliderChange}
-                  minimumTrackTintColor="#ff6b35"
+                  minimumTrackTintColor={COLORS.primary}
                   maximumTrackTintColor="#2a2a2a"
                   thumbTintColor="#e0e0e0"
                 />
@@ -446,7 +446,7 @@ export default function CompactAudioPlayer({
                 <Text
                   style={{
                     fontSize: 11,
-                    color: "#999",
+                    color: COLORS.primary,
                     fontFamily: FONT.regular,
                     textAlign: "left",
                   }}
