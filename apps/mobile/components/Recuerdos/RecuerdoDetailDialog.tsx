@@ -1168,7 +1168,7 @@ export default function RecuerdoDetailDialog({
                                 style={{
                                   width: "80%",
                                   height: 4,
-                                  backgroundColor: "#ff6b35",
+                                  backgroundColor: COLORS.primary,
                                 }}
                               />
                             </View>
@@ -1245,7 +1245,7 @@ export default function RecuerdoDetailDialog({
                           >
                             <Text
                               style={{
-                                color: "#ff6b35",
+                                color: COLORS.primary,
                                 fontSize: 16,
                                 fontFamily: "monospace",
                                 fontWeight: "bold",
@@ -1261,7 +1261,7 @@ export default function RecuerdoDetailDialog({
                                 width: 44,
                                 height: 44,
                                 borderRadius: 22,
-                                backgroundColor: "#ff6b35",
+                                backgroundColor: COLORS.primary,
                                 justifyContent: "center",
                                 alignItems: "center",
                                 ...SHADOWS.medium,
@@ -1277,7 +1277,7 @@ export default function RecuerdoDetailDialog({
 
                             <Text
                               style={{
-                                color: "#ff6b35",
+                                color: COLORS.primary,
                                 fontSize: 16,
                                 fontFamily: "monospace",
                                 fontWeight: "bold",
@@ -1392,7 +1392,7 @@ export default function RecuerdoDetailDialog({
                                             height: 28,
                                             borderRadius: 14,
                                             borderWidth: 2,
-                                            borderColor: "#ff6b35",
+                                            borderColor: COLORS.primary,
                                           }}
                                         />
                                       ) : (
@@ -1401,7 +1401,7 @@ export default function RecuerdoDetailDialog({
                                             width: 28,
                                             height: 28,
                                             borderRadius: 14,
-                                            backgroundColor: "#ff6b35",
+                                            backgroundColor: COLORS.primary,
                                             justifyContent: "center",
                                             alignItems: "center",
                                             borderWidth: 2,
