@@ -1,9 +1,8 @@
 import React, { useState, useCallback, useRef } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar, View } from "react-native";
-import { COLORS, STYLES, LAYOUT } from "@/styles/base";
+import { COLORS, STYLES } from "@/styles/base";
 import { AttentionGame } from "@/components/FocusGame";
-import { Text } from "react-native-paper";
 import { Stack, router } from "expo-router";
 import { GameCompletedModal } from "@/components/GameCompletedModal";
 
