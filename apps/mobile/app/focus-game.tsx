@@ -73,19 +73,7 @@ export default function AttentionGameScreen() {
 
       <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
         <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
-        <View
-          style={[
-            STYLES.contentContainer,
-            { paddingBottom: LAYOUT.bottomNavHeight },
-          ]}
-        >
-          <Text variant="titleLarge" style={{ marginBottom: 12 }}>
-            Focus
-          </Text>
-          <Text style={{ marginBottom: 12, color: COLORS.textSecondary }}>
-            Selecciona el color que indica la palabra (no el color del texto).
-          </Text>
-
+        <View style={{ flex: 1 }}>
           <AttentionGame
             rounds={ROUNDS}
             onComplete={handleComplete}
