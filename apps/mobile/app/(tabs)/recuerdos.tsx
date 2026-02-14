@@ -1356,6 +1356,7 @@ export default function RecuerdosScreen() {
               flexDirection: "row",
               alignItems: "center",
               justifyContent: "space-between",
+              marginRight: -12,
             }}
           >
             <View style={{ flex: 1 }}>
@@ -1418,7 +1419,7 @@ export default function RecuerdosScreen() {
         {/* Controles de ordenamiento y vista */}
         <View
           style={{
-            paddingHorizontal: 16,
+            paddingHorizontal: 24,
             paddingVertical: 8,
           }}
         >
@@ -1428,6 +1429,7 @@ export default function RecuerdosScreen() {
               flexDirection: "row",
               alignItems: "center",
               justifyContent: "space-between",
+              marginRight: -12,
             }}
           >
             {/* Toggle de Vistas - Izquierda */}
@@ -1456,7 +1458,10 @@ export default function RecuerdosScreen() {
                 setSortOrder(sortOrder === "desc" ? "asc" : "desc")
               }
               mode="contained-tonal"
-              style={{ margin: 0 }}
+              style={{
+                margin: 0,
+                backgroundColor: "rgba(103, 80, 164, 0.11)", // Color estándar de contained-tonal
+              }}
             />
           </View>
         </View>
@@ -1531,6 +1536,7 @@ export default function RecuerdosScreen() {
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "space-between",
+            marginRight: -8,
           }}
         >
           <View style={{ flex: 1 }}>
@@ -1822,7 +1828,7 @@ export default function RecuerdosScreen() {
             size={20}
             onPress={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
             mode="contained-tonal"
-            style={{ paddingRight: 0 }}
+            style={{ margin: 0 }}
           />
         </View>
       </View>
@@ -1861,7 +1867,7 @@ export default function RecuerdosScreen() {
             </Animated.View>
           )}
           key={`masonry-${numColumns}-${sortOrder}-${isFocused}`}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8 }}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8 }}
           onEndReached={() => {
             if (hasNextPage && !isFetchingNextPage) {
               fetchNextPage();
