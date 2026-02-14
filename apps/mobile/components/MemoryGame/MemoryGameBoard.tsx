@@ -143,7 +143,7 @@ export const MemoryGameBoard: React.FC<MemoryGameBoardProps> = ({
         <Card.Content style={styles.statsContent}>
           <View style={styles.stat}>
             <Text variant="titleMedium" style={styles.statLabel}>
-              ⏱️ Tiempo
+              Tiempo
             </Text>
             <Text variant="headlineSmall" style={styles.statValue}>
               {formatTime(stats.timeElapsed)}
@@ -151,7 +151,7 @@ export const MemoryGameBoard: React.FC<MemoryGameBoardProps> = ({
           </View>
           <View style={styles.stat}>
             <Text variant="titleMedium" style={styles.statLabel}>
-              🎯 Movimientos
+              Movimientos
             </Text>
             <Text variant="headlineSmall" style={styles.statValue}>
               {stats.moves}
@@ -214,7 +214,9 @@ const styles = StyleSheet.create({
   statsCard: {
     marginBottom: 12,
     marginHorizontal: 16,
-    elevation: 2,
+    elevation: 0,
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 16,
   },
   statsContent: {
     flexDirection: "row",
@@ -226,19 +228,21 @@ const styles = StyleSheet.create({
   statLabel: {
     color: COLORS.textSecondary,
     marginBottom: 4,
-    fontSize: 13,
+    fontSize: 14,
+    fontWeight: "500",
   },
   statValue: {
     color: COLORS.primary,
     fontWeight: "bold",
-    fontSize: 18,
+    fontSize: 24,
   },
   scrollContent: {
     flexGrow: 1,
+    justifyContent: "center",
   },
   boardContainer: {
     alignItems: "center",
-    paddingBottom: 16,
+    paddingVertical: 16,
     paddingHorizontal: 16,
   },
   board: {
@@ -247,7 +251,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-evenly",
     alignItems: "flex-start",
     backgroundColor: COLORS.backgroundSecondary,
-    borderRadius: 12,
+    borderRadius: 16,
     paddingVertical: 12,
     paddingHorizontal: 4,
     minHeight: 400,
