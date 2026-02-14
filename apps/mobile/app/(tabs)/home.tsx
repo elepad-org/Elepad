@@ -580,14 +580,29 @@ const HomeScreen = () => {
 
         {/* Actividad Reciente */}
         <View style={styles.section} ref={activityRef}>
-          <Text style={styles.sectionTitle}>
-            {userElepad?.elder
-              ? "Mi última actividad"
-              : "Última actividad del grupo"}
-          </Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>
+              {userElepad?.elder ? "Mi última actividad" : "Última actividad"}
+            </Text>
+            {Array.isArray(lastAttempt) && lastAttempt.length > 0 && (
+              <Button
+                mode="text"
+                onPress={() =>
+                  router.navigate({
+                    pathname: "/(tabs)/home",
+                    params: { tab: "juegos" },
+                  })
+                }
+                labelStyle={styles.sectionLink}
+                compact
+              >
+                Ver historial
+              </Button>
+            )}
+          </View>
 
           {attemptsQuery.isLoading || isLoading ? (
-            <View style={[styles.gameCard, { marginTop: 22 }]}>
+            <View style={[styles.gameCard, { marginTop: 0 }]}>
               <SkeletonBox width={60} height={60} borderRadius={30} />
               <View style={{ flex: 1, justifyContent: "center", gap: 8 }}>
                 <SkeletonBox width="70%" height={18} borderRadius={4} />
@@ -599,7 +614,7 @@ const HomeScreen = () => {
             // Elder: mostrar solo su último intento
             lastAttempt && !Array.isArray(lastAttempt) ? (
               <Pressable
-                style={[styles.gameCard, { marginTop: 22 }]}
+                style={[styles.gameCard, { marginTop: 0 }]}
                 onPress={() => router.push("/history")}
               >
                 <View style={styles.gameIcon}>
@@ -642,7 +657,7 @@ const HomeScreen = () => {
             )
           ) : // Familiar: mostrar múltiples intentos de elder
           Array.isArray(lastAttempt) && lastAttempt.length > 0 ? (
-            <View style={{ gap: 5, marginTop: 22 }}>
+            <View style={{ gap: 5, marginTop: 0 }}>
               {lastAttempt.map((attempt: AttemptWithUser) => (
                 <Pressable
                   key={attempt.id}
@@ -702,20 +717,6 @@ const HomeScreen = () => {
                   </View>
                 </Pressable>
               ))}
-              <View style={{ alignItems: "center", marginTop: 8 }}>
-                <Button
-                  mode="text"
-                  onPress={() =>
-                    router.navigate({
-                      pathname: "/(tabs)/home",
-                      params: { tab: "juegos" },
-                    })
-                  }
-                  textColor={COLORS.primary}
-                >
-                  Ver historial completo
-                </Button>
-              </View>
             </View>
           ) : (
             <View style={styles.emptySection}>
