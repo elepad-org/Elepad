@@ -12,35 +12,56 @@ if (!supabaseUrl || !supabasePublishableKey) {
   );
 }
 
-// Storage adapter que funciona en web y mobile
+// Storage adapter que funciona en web y mobile con mejor manejo de errores
 const storageAdapter = {
   getItem: async (key: string) => {
-    if (Platform.OS === "web") {
-      // Verificar si localStorage está disponible (no en SSR)
-      if (typeof window !== "undefined" && window.localStorage) {
-        return localStorage.getItem(key);
+    try {
+      if (Platform.OS === "web") {
+        // Verificar si localStorage está disponible (no en SSR)
+        if (typeof window !== "undefined" && window.localStorage) {
+          const value = localStorage.getItem(key);
+          console.log(`📦 Storage.getItem (web) [${key}]:`, value ? "✅ found" : "❌ not found");
+          return value;
+        }
+        return null;
       }
+      const value = await AsyncStorage.getItem(key);
+      console.log(`📦 Storage.getItem (native) [${key}]:`, value ? "✅ found" : "❌ not found");
+      return value;
+    } catch (error) {
+      console.error(`❌ Error en Storage.getItem [${key}]:`, error);
       return null;
     }
-    return AsyncStorage.getItem(key);
   },
   setItem: async (key: string, value: string) => {
-    if (Platform.OS === "web") {
-      if (typeof window !== "undefined" && window.localStorage) {
-        localStorage.setItem(key, value);
+    try {
+      if (Platform.OS === "web") {
+        if (typeof window !== "undefined" && window.localStorage) {
+          localStorage.setItem(key, value);
+          console.log(`💾 Storage.setItem (web) [${key}]: ✅`);
+        }
+        return;
       }
-      return;
+      await AsyncStorage.setItem(key, value);
+      console.log(`💾 Storage.setItem (native) [${key}]: ✅`);
+    } catch (error) {
+      console.error(`❌ Error en Storage.setItem [${key}]:`, error);
     }
-    return AsyncStorage.setItem(key, value);
   },
   removeItem: async (key: string) => {
-    if (Platform.OS === "web") {
-      if (typeof window !== "undefined" && window.localStorage) {
-        localStorage.removeItem(key);
+    try {
+      if (Platform.OS === "web") {
+        if (typeof window !== "undefined" && window.localStorage) {
+          localStorage.removeItem(key);
+          console.log(`🗑️ Storage.removeItem (web) [${key}]: ✅`);
+        }
+        return;
       }
-      return;
+      await AsyncStorage.removeItem(key);
+      console.log(`🗑️ Storage.removeItem (native) [${key}]: ✅`);
+    } catch (error) {
+      console.error(`❌ Error en Storage.removeItem [${key}]:`, error);
     }
-    return AsyncStorage.removeItem(key);
   },
 };
 
@@ -50,5 +71,8 @@ export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
+    // Configuración adicional para mejorar el comportamiento en producción
+    storageKey: 'elepad-auth-token',
+    flowType: 'pkce',
   },
 });

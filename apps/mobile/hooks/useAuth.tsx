@@ -298,10 +298,10 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       try {
         console.log("🔄 Iniciando carga de sesión...");
         
-        // Timeout para getSession - si tarda más de 10 segundos, abortar
+        // Timeout aumentado a 30s para producción (AsyncStorage puede ser lento)
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('Session timeout')), 10000)
+          setTimeout(() => reject(new Error('Session timeout')), 30000)
         );
         
         const result = await Promise.race([
@@ -309,13 +309,21 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
           timeoutPromise
         ]).catch((err) => {
           console.warn("⚠️ getSession timeout o error:", err);
-          return { data: { session: null }, error: err };
+          // En caso de timeout, intentar obtener la sesión sin timeout como fallback
+          return supabase.auth.getSession().catch((fallbackErr) => {
+            console.error("❌ Fallback getSession también falló:", fallbackErr);
+            return { data: { session: null }, error: fallbackErr };
+          });
         });
         
         const { data: { session }, error } = result;
         
         if (error) {
           console.error("❌ Error obteniendo sesión:", error);
+        } else if (session) {
+          console.log("✅ Sesión cargada correctamente:", session.user?.email);
+        } else {
+          console.log("ℹ️ No hay sesión guardada");
         }
         
         setSession(session);
@@ -384,14 +392,16 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
           if (event !== "USER_UPDATED") {
             await loadElepadUserById(session.user.id);
           }
-          // Solo redirigir a home si el usuario acaba de iniciar sesión explícitamente
-          // Y SOLO la primera vez (no en refrescos de token o window focus)
+          // Redirigir a home en estos casos:
+          // - SIGNED_IN: cuando el usuario acaba de iniciar sesión explícitamente
+          // - INITIAL_SESSION: cuando se restaura una sesión guardada (ej: después de reabrir la app)
+          // SOLO la primera vez (no en refrescos de token o window focus)
           if (
-            event === "SIGNED_IN" &&
+            (event === "SIGNED_IN" || event === "INITIAL_SESSION") &&
             hasInitialized.current &&
             !hasRedirectedAfterSignIn.current
           ) {
-            console.log("✅ Redirigiendo a home después de login");
+            console.log(`✅ Redirigiendo a home después de ${event}`);
             hasRedirectedAfterSignIn.current = true;
             router.replace("/(tabs)/home");
           }
