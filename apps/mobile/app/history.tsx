@@ -344,13 +344,13 @@ export default function HistoryScreen({ initialAttempts = [], activeTab = "" }: 
                       placeholder="Seleccionar adulto mayor"
                     />
                   </View>
-                  <View style={{ width: "48%", minWidth: 170 }}>
+                  <View style={{ width: "50%", minWidth: 170 }}>
                     <DropdownSelect
                       label="Tipo de juego"
                       value={selectedGame}
                       showLabel={false}
                       options={[
-                        { key: "all", label: "Todos los juegos", icon: "gamepad-variant" },
+                        { key: "all", label: "Todos", icon: "gamepad-variant" },
                         ...gameTypes.map((gt) => ({
                           key: gt,
                           label: gameTypesRender[gt],
@@ -359,6 +359,7 @@ export default function HistoryScreen({ initialAttempts = [], activeTab = "" }: 
                               gt === GameType.attention ? "eye" : "lightning-bolt"
                         }))
                       ]}
+                      //style={{minHeight:100}}
                       onSelect={setSelectedGame}
                     />
                   </View>
@@ -380,7 +381,7 @@ export default function HistoryScreen({ initialAttempts = [], activeTab = "" }: 
                       value={selectedGame}
                       showLabel={false}
                       options={[
-                        { key: "all", label: "Todos los juegos", icon: "gamepad-variant" },
+                        { key: "all", label: "Todos", icon: "gamepad-variant" },
                         ...gameTypes.map((gt) => ({
                           key: gt,
                           label: gameTypesRender[gt],
@@ -520,7 +521,7 @@ const styles = StyleSheet.create({
   },
   filterContainer: {
     flexDirection: "row",
-    gap: 12,
+    gap: 6,
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
