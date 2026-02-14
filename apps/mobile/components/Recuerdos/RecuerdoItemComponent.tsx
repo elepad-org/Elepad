@@ -72,10 +72,9 @@ const VideoItem = ({
 
 const RecuerdoItemComponent = React.memo(
   ({ item, numColumns, onPress }: RecuerdoItemProps) => {
-    const spacing = 19; // Espacio total horizontal
-    const gap = 5; // Espacio entre items
-    const itemSize =
-      (screenWidth - spacing * 2 - gap * (numColumns - 1)) / numColumns;
+    const spacing = 20; // Espacio total horizontal del contenedor (padding)
+    const gap = 8; // Espacio entre items
+    const itemSize = (screenWidth - spacing * 2) / numColumns - gap;
 
     // Factor de escala para ajustar tamaños cuando hay más columnas
     const scale = 2 / numColumns; // 1 para 2 columnas, ~0.67 para 3 columnas
@@ -101,7 +100,7 @@ const RecuerdoItemComponent = React.memo(
           width: itemSize,
           height: itemHeight,
           marginBottom: gap, // Separación vertical
-          marginRight: gap,
+          marginHorizontal: gap / 2, // Margen horizontal para centrar el gap
           paddingTop: isMedia ? 6 : 0,
           paddingLeft: isMedia ? 6 : 0,
           paddingRight: isMedia ? 6 : 0,
