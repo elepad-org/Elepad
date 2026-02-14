@@ -40,54 +40,17 @@ export default function RootLayout() {
   const [loaded] = useAppFonts();
 
   // Mantener el token actualizado en AUTH_TOKEN de forma reactiva
+  // Solo escuchar cambios de auth, la carga inicial se hace en useAuth
   useEffect(() => {
-    let isMounted = true;
-    
-    const loadSession = async () => {
-      try {
-        // Timeout para getSession - si tarda más de 8 segundos, abortar
-        const sessionPromise = supabase.auth.getSession();
-        const timeoutPromise = new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('Session timeout')), 8000)
-        );
-        
-        const { data, error } = await Promise.race([
-          sessionPromise,
-          timeoutPromise
-        ]).catch((err) => {
-          console.warn("⚠️ getSession timeout o error:", err);
-          return { data: { session: null }, error: err };
-        });
-        
-        if (isMounted) {
-          AUTH_TOKEN = data.session?.access_token ?? undefined;
-          TOKEN_LOADED = true;
-          console.log(
-            "🔑 Token inicial cargado:",
-            AUTH_TOKEN ? "✅ Presente" : "❌ Ausente",
-            error ? `(con error: ${error})` : ""
-          );
-        }
-      } catch (err) {
-        console.error("❌ Error cargando sesión:", err);
-        if (isMounted) {
-          TOKEN_LOADED = true;
-        }
-      }
-    };
-    
-    loadSession();
-    
     const { data: listener } = supabase.auth.onAuthStateChange(
       (event, session) => {
         AUTH_TOKEN = session?.access_token ?? undefined;
         TOKEN_LOADED = true;
-        console.log("🔐 Token actualizado vía onAuthStateChange:", event, AUTH_TOKEN ? "✅" : "❌");
+        console.log("🔐 Token actualizado vía onAuthStateChange (_layout):", event, AUTH_TOKEN ? "✅" : "❌");
       },
     );
     
     return () => {
-      isMounted = false;
       listener?.subscription?.unsubscribe?.();
     };
   }, []);

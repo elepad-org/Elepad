@@ -25,13 +25,20 @@ export default function IndexRedirect() {
   const logoMarginTop = screenHeight * 0.12; // 12% del alto de pantalla
   const brandFontSize = screenWidth * 0.16; // 16% del ancho de pantalla
 
-  // Si hay sesión, redirigir a home una sola vez
+  // Mejorar redirección para que también funcione cuando la sesión se carga después
   useEffect(() => {
+    // Redirigir solo si hay sesión, no está cargando, y no se ha redirigido aún
     if (session && !loading && !hasRedirected.current) {
+      console.log("🏠 Redirigiendo a home desde index (sesión detectada)");
       hasRedirected.current = true;
       router.replace("/(tabs)/home");
     }
-  }, [session, loading]);
+    
+    // Reset del flag si la sesión se pierde (por ejemplo, logout)
+    if (!session && !loading) {
+      hasRedirected.current = false;
+    }
+  }, [session, loading, router]);
 
 
   if (loading) {
