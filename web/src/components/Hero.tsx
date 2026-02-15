@@ -1,7 +1,7 @@
 import { Box, Container, Typography, Button, Stack } from '@mui/material';
 import { ArrowForward, Download } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
-import eleSvg from '/ele.svg';
+import eleSvg from '/ele-def.png';
 
 
 export default function Hero() {

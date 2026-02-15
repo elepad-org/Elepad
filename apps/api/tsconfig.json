@@ -5,6 +5,7 @@
     "moduleResolution": "Bundler",
     "baseUrl": ".",
     "paths": { "@/*": ["src/*"] },
+    "types": ["@cloudflare/workers-types"],
     "noUncheckedIndexedAccess": true,
     "noEmit": false,
     "outDir": "dist",

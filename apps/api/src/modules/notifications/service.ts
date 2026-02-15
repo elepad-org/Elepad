@@ -5,6 +5,20 @@ import { PushTokensService } from "../pushTokens/service";
 export type EventType = "mention" | "achievement" | "activity_reminder" | "activity_assigned" | "reaction";
 export type EntityType = "memory" | "activity" | "puzzle" | "achievement";
 
+// Expo Push Notification Response Types
+interface ExpoPushTicket {
+  status: 'ok' | 'error';
+  id?: string;
+  message?: string;
+  details?: {
+    error?: string;
+  };
+}
+
+interface ExpoPushResponse {
+  data?: ExpoPushTicket[];
+}
+
 export interface CreateNotificationParams {
   userId: string;
   actorId?: string;
@@ -57,14 +71,14 @@ export class NotificationsService {
         return;
       }
 
-      const result = await response.json();
+      const result = await response.json() as ExpoPushResponse;
       console.log(`Push notification sent to ${pushTokens.length} device(s) for user ${userId}`);
 
       // Handle errors per token
       if (result.data && Array.isArray(result.data)) {
         for (let i = 0; i < result.data.length; i++) {
           const ticket = result.data[i];
-          if (i < pushTokens.length) {
+          if (i < pushTokens.length && ticket) {
             const token = pushTokens[i]!.token;
 
             if (ticket.status === 'error' && ticket.details?.error === 'DeviceNotRegistered') {
