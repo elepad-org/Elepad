@@ -1,9 +1,8 @@
 import React, { useState, useCallback, useRef } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar, View } from "react-native";
-import { COLORS, STYLES, LAYOUT } from "@/styles/base";
+import { COLORS, STYLES } from "@/styles/base";
 import { AttentionGame } from "@/components/FocusGame";
-import { Text } from "react-native-paper";
 import { Stack, router } from "expo-router";
 import { GameCompletedModal } from "@/components/GameCompletedModal";
 
@@ -73,19 +72,7 @@ export default function AttentionGameScreen() {
 
       <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
         <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
-        <View
-          style={[
-            STYLES.contentContainer,
-            { paddingBottom: LAYOUT.bottomNavHeight },
-          ]}
-        >
-          <Text variant="titleLarge" style={{ marginBottom: 12 }}>
-            Focus
-          </Text>
-          <Text style={{ marginBottom: 12, color: COLORS.textSecondary }}>
-            Selecciona el color que indica la palabra (no el color del texto).
-          </Text>
-
+        <View style={{ flex: 1 }}>
           <AttentionGame
             rounds={ROUNDS}
             onComplete={handleComplete}

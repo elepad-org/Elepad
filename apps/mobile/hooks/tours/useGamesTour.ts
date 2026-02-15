@@ -23,53 +23,54 @@ export const useGamesTour = ({ activeTab, loading, isElder }: UseGamesTourProps)
     text: '¡Bienvenido a la zona de juegos! Aquí podrás divertirte y ejercitar tu mente.',
   });
 
-  const shopStep = useTourStep({
-    tourId: 'games',
-    stepId: 'games-shop',
-    order: 2,
-    text: 'Visita la tienda para canjear tus puntos por divertidos elementos.',
-  });
-
   const historyStep = useTourStep({
     tourId: 'games',
-    stepId: 'games-history',
-    order: 3,
-    text: 'Revisa tu historial de partidas y progreso.',
-  });
-
-  const shopFabStep = useTourStep({
-    tourId: 'games',
-    stepId: 'games-shop-fab',
+    stepId: 'games-history-btn',
     order: 2,
-    text: 'Visita la tienda para canjear tus puntos por divertidos elementos.',
-  });
-
-  const historyFabStep = useTourStep({
-    tourId: 'games',
-    stepId: 'games-history-fab',
-    order: 3,
     text: 'Revisa tu historial de partidas y progreso.',
   });
 
   const gamesListStep = useTourStep({
     tourId: 'games',
     stepId: 'games-list',
-    order: 4,
+    order: 3,
     text: 'Elige entre una variedad de juegos diseñados para ti.',
   });
 
   const gameDetailsStep = useTourStep({
     tourId: 'games',
     stepId: 'game-details-memory',
-    order: 5,
+    order: 4,
     text: 'Toca aquí para ver más detalles sobre este juego.',
   });
 
   const gamePlayStep = useTourStep({
     tourId: 'games',
     stepId: 'game-play-memory',
-    order: 6,
+    order: 5,
     text: 'O toca el botón de Play para empezar a jugar directamente.',
+  });
+
+  const shopFabStep = useTourStep({
+    tourId: 'games',
+    stepId: 'games-shop-fab',
+    order: 6,
+    text: 'Visita la tienda para canjear tus puntos por divertidos elementos.',
+  });
+
+  // Steps antiguos de compatibilidad (no usados en el tour visual)
+  const shopStep = useTourStep({
+    tourId: 'games',
+    stepId: 'games-shop-legacy',
+    order: 99,
+    text: '',
+  });
+
+  const historyFabStep = useTourStep({
+    tourId: 'games',
+    stepId: 'games-history-legacy',
+    order: 98,
+    text: '',
   });
 
   useEffect(() => {
@@ -95,11 +96,11 @@ export const useGamesTour = ({ activeTab, loading, isElder }: UseGamesTourProps)
 
               const steps = [
                 { ...headerStep.step, ref: headerStep.ref, layout: undefined },
-                { ...shopFabStep.step, ref: shopFabStep.ref, layout: undefined },
-                { ...historyFabStep.step, ref: historyFabStep.ref, layout: undefined },
+                { ...historyStep.step, ref: historyStep.ref, layout: undefined },
                 { ...gamesListStep.step, ref: gamesListStep.ref, layout: undefined },
                 { ...gameDetailsStep.step, ref: gameDetailsStep.ref, layout: undefined },
                 { ...gamePlayStep.step, ref: gamePlayStep.ref, layout: undefined },
+                { ...shopFabStep.step, ref: shopFabStep.ref, layout: undefined },
               ];
 
               let measurementsComplete = 0;
@@ -107,7 +108,7 @@ export const useGamesTour = ({ activeTab, loading, isElder }: UseGamesTourProps)
 
               const checkStart = () => {
                 measurementsComplete++;
-                if (measurementsComplete === totalMeasurements) {
+                if (measurementsComplete >= totalMeasurements) {
                   const finalSteps = steps.map(s => ({
                     ...s,
                     layout: tourLayoutsRef.current[s.stepId]
@@ -129,11 +130,11 @@ export const useGamesTour = ({ activeTab, loading, isElder }: UseGamesTourProps)
               };
 
               setTimeout(() => measureStep(headerStep, 'games-header'), 50);
-              setTimeout(() => measureStep(shopFabStep, 'games-shop-fab'), 100);
-              setTimeout(() => measureStep(historyFabStep, 'games-history-fab'), 150);
-              setTimeout(() => measureStep(gamesListStep, 'games-list'), 200);
-              setTimeout(() => measureStep(gameDetailsStep, 'game-details-memory'), 250);
-              setTimeout(() => measureStep(gamePlayStep, 'game-play-memory'), 300);
+              setTimeout(() => measureStep(historyStep, 'games-history-btn'), 100);
+              setTimeout(() => measureStep(gamesListStep, 'games-list'), 150);
+              setTimeout(() => measureStep(gameDetailsStep, 'game-details-memory'), 200);
+              setTimeout(() => measureStep(gamePlayStep, 'game-play-memory'), 250);
+              setTimeout(() => measureStep(shopFabStep, 'games-shop-fab'), 300);
 
             }, 100);
 

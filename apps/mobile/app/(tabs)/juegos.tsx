@@ -5,11 +5,11 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
-import { RefObject, useState } from "react";
+import { RefObject } from "react";
 
 import { useGamesTour } from "@/hooks/tours/useGamesTour";
 import { useTabContext } from "@/context/TabContext";
-import { ActivityIndicator, Text, Icon, Menu, IconButton } from "react-native-paper";
+import { ActivityIndicator, Text, Icon, Button } from "react-native-paper";
 import { Image } from "react-native";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -100,13 +100,13 @@ export default function JuegosScreen() {
   // --- Tour Setup ---
   const isElder = userElepad?.elder === true;
 
-  const { headerRef, shopRef, historyRef, shopFabRef, historyFabRef, gamesListRef, gameDetailsRef, gamePlayRef } = useGamesTour({
+  const { headerRef, shopRef, historyRef, shopFabRef, gamesListRef, gameDetailsRef, gamePlayRef } = useGamesTour({
     activeTab,
     loading,
     isElder,
   });
 
-  const [actionsMenuVisible, setActionsMenuVisible] = useState(false);
+  // const [actionsMenuVisible, setActionsMenuVisible] = useState(false);
 
   if (loading) {
     return (
@@ -139,45 +139,24 @@ export default function JuegosScreen() {
             <View ref={headerRef}>
               <Text style={STYLES.superHeading}>Juegos</Text>
             </View>
-            <Menu
-              key={actionsMenuVisible ? "open" : "closed"}
-              visible={actionsMenuVisible}
-              onDismiss={() => setActionsMenuVisible(false)}
-              contentStyle={styles.menuContent}
-              style={{ alignSelf: "flex-end", marginRight: -4, marginTop: -8 }}
-              anchor={
-                <View style={styles.menuAnchorRow}>
-                  <View ref={shopRef} collapsable={false} style={styles.measureTarget} />
-                  <View ref={historyRef} collapsable={false} style={[styles.measureTarget, { top: 14 }]} />
-                  <IconButton
-                    icon="dots-horizontal"
-                    size={22}
-                    iconColor={COLORS.primary}
-                    style={{ margin: 0 }}
-                    onPress={() => {
-                      setActionsMenuVisible(true);
-                    }}
-                  />
-                </View>
-              }
-            >
-              <Menu.Item
-                leadingIcon="store"
-                onPress={() => {
-                  setActionsMenuVisible(false);
-                  router.push("/shop");
-                }}
-                title="Tienda"
-              />
-              <Menu.Item
-                leadingIcon="history"
-                onPress={() => {
-                  setActionsMenuVisible(false);
-                  router.navigate("/history");
-                }}
-                title="Historial"
-              />
-            </Menu>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              {/* Mantengo shopRef invisible para compatibilidad con el tour si es necesario */}
+              <View ref={shopRef} style={{ width: 0, height: 0 }} />
+
+              <View ref={historyRef}>
+                <Button
+                  mode="contained"
+                  onPress={() => router.navigate("/history")}
+                  style={{
+                    borderRadius: 12,
+                    backgroundColor: COLORS.primary,
+                  }}
+                  icon="history"
+                >
+                  Historial
+                </Button>
+              </View>
+            </View>
           </View>
 
           {/* Games List */}
@@ -219,22 +198,12 @@ export default function JuegosScreen() {
         </View>
       </ScrollView>
 
-      {/* FABs para Tienda e Historial */}
+      {/* FABs para Tienda */}
       <ExpandableFAB
         ref={shopFabRef}
         label="Tienda"
         icon="store"
         onPress={() => router.push("/shop")}
-        bottom={LAYOUT.bottomNavHeight + 86}
-        right={16}
-        autoCollapseDelay={5000}
-      />
-
-      <ExpandableFAB
-        ref={historyFabRef}
-        label="Historial"
-        icon="history"
-        onPress={() => router.navigate("/history")}
         bottom={LAYOUT.bottomNavHeight + 16}
         right={16}
         autoCollapseDelay={5000}

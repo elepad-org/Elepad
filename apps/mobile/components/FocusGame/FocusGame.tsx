@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { AttentionGameCore, COLORS_MAP, ColorName } from "./game";
 import { Button, Portal, Dialog } from "react-native-paper";
 import { router } from "expo-router";
@@ -255,71 +255,76 @@ export default function AttentionGame({
       <View style={styles.statsCard}>
         <View style={styles.statsContent}>
           <View style={styles.stat}>
-            <Text style={styles.statLabel}>🎯 Ronda</Text>
+            <Text style={styles.statLabel}>Ronda</Text>
             <Text style={styles.statValue}>
               {Math.min(currentRound, rounds)} / {rounds}
             </Text>
           </View>
           <View style={styles.stat}>
-            <Text style={styles.statLabel}>✅ Aciertos</Text>
+            <Text style={styles.statLabel}>Aciertos</Text>
             <Text style={styles.statValue}>{score.correct}</Text>
           </View>
           <View style={styles.stat}>
-            <Text style={styles.statLabel}>❤️ Vidas</Text>
+            <Text style={styles.statLabel}>Vidas</Text>
             <Text style={styles.statValue}>{lives}</Text>
           </View>
         </View>
       </View>
 
-      {/* Área del Prompt (palabra) */}
-      <View
-        style={[
-          styles.promptBox,
-          {
-            backgroundColor: "rgba(0,0,0,0.05)",
-            borderWidth: lastResult === null ? 0 : 4,
-            borderColor:
-              lastResult === null
-                ? "transparent"
-                : lastResult
-                  ? "#4CAF50"
-                  : "#E53935",
-          },
-        ]}
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
-        {prompt ? (
-          <Text style={[styles.promptText, { color: prompt.fillColor }]}>
-            {prompt.word}
-          </Text>
-        ) : (
-          <Text style={styles.promptText}>Pulsa iniciar</Text>
-        )}
-      </View>
+        {/* Área del Prompt (palabra) */}
+        <View
+          style={[
+            styles.promptBox,
+            {
+              backgroundColor: "rgba(0,0,0,0.05)",
+              borderWidth: lastResult === null ? 0 : 4,
+              borderColor:
+                lastResult === null
+                  ? "transparent"
+                  : lastResult
+                    ? "#4CAF50"
+                    : "#E53935",
+            },
+          ]}
+        >
+          {prompt ? (
+            <Text style={[styles.promptText, { color: prompt.fillColor }]}>
+              {prompt.word}
+            </Text>
+          ) : (
+            <Text style={styles.promptText}>Pulsa iniciar</Text>
+          )}
+        </View>
 
-      {/* Opciones de colores */}
-      <View style={styles.grid}>
-        {Object.keys(COLORS_MAP).map((k) => {
-          const key = k as ColorName;
-          const bg = COLORS_MAP[key];
-          return (
-            <TouchableOpacity
-              key={key}
-              style={[styles.colorButton, { backgroundColor: bg }]}
-              onPress={() => handleSelection(key)}
-              activeOpacity={0.8}
-            >
-              <Text
-                style={[
-                  styles.colorLabel,
-                  { color: bg === "#FFFFFF" ? "#000" : "#fff" },
-                ]}
+        {/* Opciones de colores */}
+        <View style={styles.grid}>
+          {Object.keys(COLORS_MAP).map((k) => {
+            const key = k as ColorName;
+            const bg = COLORS_MAP[key];
+            return (
+              <TouchableOpacity
+                key={key}
+                style={[styles.colorButton, { backgroundColor: bg }]}
+                onPress={() => handleSelection(key)}
+                activeOpacity={0.8}
               >
-                {key}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+                <Text
+                  style={[
+                    styles.colorLabel,
+                    { color: bg === "#FFFFFF" ? "#000" : "#fff" },
+                  ]}
+                >
+                  {key}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </ScrollView>
 
       {/* Botones de control inferiores */}
       <View style={styles.controls}>
@@ -328,7 +333,7 @@ export default function AttentionGame({
           onPress={restartGame}
           icon="refresh"
           style={styles.actionButton}
-          buttonColor={COLORS.secondary}
+          buttonColor={COLORS.primary}
         >
           Reiniciar
         </Button>
@@ -337,8 +342,9 @@ export default function AttentionGame({
           onPress={handleQuit}
           icon="exit-to-app"
           style={styles.actionButton}
+          textColor={COLORS.error}
         >
-          Salir
+          Abandonar
         </Button>
       </View>
 
@@ -360,20 +366,24 @@ export default function AttentionGame({
             style={{
               paddingBottom: 12,
               paddingHorizontal: 20,
-              justifyContent: "center",
-              flexDirection: "column",
-              gap: 10,
+              flexDirection: "row",
+              justifyContent: "space-between",
+              gap: 12,
             }}
           >
-            <CancelButton onPress={() => setShowQuitDialog(false)} />
-            <Button
-              mode="contained"
-              onPress={confirmQuit}
-              buttonColor={COLORS.secondary}
-              style={{ borderRadius: 12, width: "100%" }}
-            >
-              Salir
-            </Button>
+            <View style={{ flex: 1 }}>
+              <CancelButton onPress={() => setShowQuitDialog(false)} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Button
+                mode="contained"
+                onPress={confirmQuit}
+                buttonColor={COLORS.primary}
+                style={{ borderRadius: 12 }}
+              >
+                Abandonar
+              </Button>
+            </View>
           </Dialog.Actions>
         </Dialog>
       </Portal>
@@ -385,47 +395,49 @@ export default function AttentionGame({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: COLORS.background,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingVertical: 0,
     alignItems: "center",
+    flexGrow: 1,
+    justifyContent: "center",
   },
   statsCard: {
     backgroundColor: COLORS.backgroundSecondary,
     borderRadius: 16,
     padding: 16,
-    width: "100%",
-    marginBottom: 20,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    marginBottom: 12,
+    marginHorizontal: 16,
+    elevation: 0,
   },
   statsContent: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-around",
   },
   stat: {
     alignItems: "center",
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 14,
     color: COLORS.textSecondary,
-    fontWeight: "600",
+    fontWeight: "500",
     marginBottom: 4,
   },
   statValue: {
-    fontSize: 20,
+    fontSize: 24,
     color: COLORS.primary,
     fontWeight: "bold",
   },
   promptBox: {
     width: "100%",
-    height: 120,
+    height: 140,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 20,
+    borderRadius: 16,
     marginBottom: 24,
+    marginTop: 16,
   },
   promptText: {
     fontSize: 48,
@@ -439,13 +451,14 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "center",
+    justifyContent: "space-between",
     gap: 12,
     width: "100%",
-    marginBottom: 24,
+    marginBottom: 16,
+    alignItems: "center",
   },
   colorButton: {
-    width: "45%",
+    width: "48%",
     aspectRatio: 1.5,
     justifyContent: "center",
     alignItems: "center",
@@ -460,17 +473,15 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     textTransform: "uppercase",
-    marginBottom: 20,
-    paddingBottom: 5,
   },
   controls: {
-    flexDirection: "row",
-    gap: 16,
-    width: "100%",
-    marginTop: "auto",
+    flexDirection: "column",
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
   },
   actionButton: {
-    flex: 1,
+    width: "100%",
     borderRadius: 12,
   },
   dialogContainer: {

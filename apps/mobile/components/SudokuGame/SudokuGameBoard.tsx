@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { View, StyleSheet, ScrollView, useWindowDimensions } from "react-native";
-import { Text, Button, Card } from "react-native-paper";
+import { Text, Button, Card, Icon } from "react-native-paper";
 import { SudokuCell } from "./SudokuCell";
 import { useSudoku, Difficulty } from "@/hooks/useSudoku";
 import { GameLoadingView } from "@/components/shared";
@@ -113,7 +113,7 @@ export const SudokuGameBoard: React.FC<SudokuGameBoardProps> = ({
         <Card.Content style={styles.statsContent}>
           <View style={styles.stat}>
             <Text variant="titleMedium" style={styles.statLabel}>
-              ⏱️ Tiempo
+              Tiempo
             </Text>
             <Text variant="headlineSmall" style={styles.statValue}>
               {formatTime(timeElapsed)}
@@ -121,7 +121,7 @@ export const SudokuGameBoard: React.FC<SudokuGameBoardProps> = ({
           </View>
           <View style={styles.stat}>
             <Text variant="titleMedium" style={styles.statLabel}>
-              🎯 Movimientos
+              Movimientos
             </Text>
             <Text variant="headlineSmall" style={styles.statValue}>
               {userMoves}
@@ -129,7 +129,7 @@ export const SudokuGameBoard: React.FC<SudokuGameBoardProps> = ({
           </View>
           <View style={styles.stat}>
             <Text variant="titleMedium" style={styles.statLabel}>
-              ❌ Errores
+              Errores
             </Text>
             <Text
               variant="headlineSmall"
@@ -201,43 +201,65 @@ export const SudokuGameBoard: React.FC<SudokuGameBoardProps> = ({
           </View>
 
           {/* Botones de numeros */}
-          <View style={[styles.keyboard, { width: boardSize }]}>
+          <View style={styles.keyboard}>
+            {[[1, 2, 3], [4, 5, 6], [7, 8, 9]].map((row, rowIndex) => (
+              <View key={rowIndex} style={styles.keyboardRow}>
+                {row.map((num) => (
+                  <Button
+                    key={num}
+                    mode="contained"
+                    onPress={() => actions.inputNumber(num)}
+                    disabled={!selectedCell || isComplete}
+                    style={[
+                      styles.numpadButton,
+                      {
+                        backgroundColor: COLORS.backgroundSecondary,
+                        elevation: 0,
+                      }
+                    ]}
+                    labelStyle={styles.numberButtonLabel}
+                    textColor={COLORS.primary}
+                    contentStyle={{ height: 60 }} // Altura fija para botones grandes
+                  >
+                    {num}
+                  </Button>
+                ))}
+              </View>
+            ))}
+            
             <View style={styles.keyboardRow}>
-              {[1, 2, 3, 4, 5].map((num) => (
-                <Button
-                  key={num}
-                  mode="contained-tonal"
-                  onPress={() => actions.inputNumber(num)}
-                  disabled={!selectedCell || isComplete}
-                  style={styles.numberButton}
-                  labelStyle={styles.numberButtonLabel}
-                >
-                  {num}
-                </Button>
-              ))}
-            </View>
-            <View style={styles.keyboardRow}>
-              {[6, 7, 8, 9].map((num) => (
-                <Button
-                  key={num}
-                  mode="contained-tonal"
-                  onPress={() => actions.inputNumber(num)}
-                  disabled={!selectedCell || isComplete}
-                  style={styles.numberButton}
-                  labelStyle={styles.numberButtonLabel}
-                >
-                  {num}
-                </Button>
-              ))}
+              {/* Espacio vacío para balancear el grid */}
               <Button
-                mode="outlined"
+                mode="text"
+                style={[styles.numpadButton, { opacity: 0 }]}
+                disabled
+              >
+                {""}
+              </Button>
+
+              <Button
+                mode="contained"
                 onPress={actions.erase}
                 disabled={!selectedCell || isComplete}
-                style={styles.numberButton}
-                labelStyle={styles.numberButtonLabel}
-                icon="backspace-outline"
+                style={[
+                  styles.numpadButton,
+                  {
+                    backgroundColor: COLORS.backgroundSecondary,
+                    elevation: 0,
+                  }
+                ]}
+                contentStyle={{ height: 60 }}
               >
-                Borrar
+                <Icon source="backspace-outline" size={28} color={COLORS.primary} />
+              </Button>
+
+              {/* Espacio vacío para balancear el grid */}
+              <Button
+                mode="text"
+                style={[styles.numpadButton, { opacity: 0 }]}
+                disabled
+              >
+                {""}
               </Button>
             </View>
           </View>
@@ -276,7 +298,9 @@ const styles = StyleSheet.create({
   statsCard: {
     marginBottom: 12,
     marginHorizontal: 16,
-    elevation: 2,
+    elevation: 0,
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 16,
   },
   statsContent: {
     flexDirection: "row",
@@ -288,27 +312,30 @@ const styles = StyleSheet.create({
   statLabel: {
     color: COLORS.textSecondary,
     marginBottom: 4,
-    fontSize: 13,
+    fontSize: 14,
+    fontWeight: "500",
   },
   statValue: {
     color: COLORS.primary,
     fontWeight: "bold",
-    fontSize: 18,
+    fontSize: 24,
   },
   scrollContent: {
     flexGrow: 1,
+    justifyContent: "center",
   },
   boardContainer: {
     alignItems: "center",
-    paddingBottom: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
     width: "100%",
   },
   board: {
     backgroundColor: COLORS.backgroundSecondary,
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 4,
     borderWidth: 2,
-    borderColor: COLORS.text,
+    borderColor: COLORS.backgroundSecondary,
     aspectRatio: 1, // Mantener cuadrado
     overflow: "hidden", // Para que los bordes redondeados de los bloques se vean bien
   },
@@ -319,19 +346,21 @@ const styles = StyleSheet.create({
   block: {
     flex: 1,
     borderWidth: 1.5,
-    borderColor: "#BDBDBD", // Gris más suave
+    borderColor: "#BDBDBD",
+    // Aseguramos que el contenido interno respete los bordes redondeados
+    overflow: "hidden", 
   },
   blockTopLeft: {
-    borderTopLeftRadius: 8,
+    borderTopLeftRadius: 12,
   },
   blockTopRight: {
-    borderTopRightRadius: 8,
+    borderTopRightRadius: 12,
   },
   blockBottomLeft: {
-    borderBottomLeftRadius: 8,
+    borderBottomLeftRadius: 12,
   },
   blockBottomRight: {
-    borderBottomRightRadius: 8,
+    borderBottomRightRadius: 12,
   },
   row: {
     flexDirection: "row",
@@ -346,25 +375,25 @@ const styles = StyleSheet.create({
     borderBottomColor: COLORS.text,
   },
   keyboard: {
-    marginTop: 16,
+    marginTop: 24,
+    width: "100%",
+    maxWidth: 320, // Limitar ancho para que no se estire demasiado en tablets
+    alignSelf: "center",
   },
   keyboardRow: {
     flexDirection: "row",
-    justifyContent: "center",
-    gap: 6,
-    marginBottom: 8,
+    justifyContent: "space-between",
+    marginBottom: 12,
+    gap: 12,
   },
-  numberButton: {
+  numpadButton: {
     flex: 1,
-    maxWidth: 70,
-    minHeight: 48,
+    borderRadius: 12,
     justifyContent: "center",
-    includeFontPadding: false,
   },
   numberButtonLabel: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "bold",
-    includeFontPadding: false,
   },
   controls: {
     flexDirection: "column",
@@ -374,5 +403,6 @@ const styles = StyleSheet.create({
   },
   button: {
     width: "100%",
+    borderRadius: 12,
   },
 });

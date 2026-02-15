@@ -98,7 +98,7 @@ export const NetGameBoard: React.FC<NetGameBoardProps> = ({
         <Card.Content style={styles.statsContent}>
           <View style={styles.stat}>
             <Text variant="titleMedium" style={styles.statLabel}>
-              ⏱️ Tiempo
+              Tiempo
             </Text>
             <Text variant="headlineSmall" style={styles.statValue}>
               {formatTime(stats.timeElapsed)}
@@ -106,7 +106,7 @@ export const NetGameBoard: React.FC<NetGameBoardProps> = ({
           </View>
           <View style={styles.stat}>
             <Text variant="titleMedium" style={styles.statLabel}>
-              🎯 Movimientos
+              Movimientos
             </Text>
             <Text variant="headlineSmall" style={styles.statValue}>
               {stats.moves}
@@ -114,7 +114,7 @@ export const NetGameBoard: React.FC<NetGameBoardProps> = ({
           </View>
           <View style={styles.stat}>
             <Text variant="titleMedium" style={styles.statLabel}>
-              🔗 Conectadas
+              Conectadas
             </Text>
             <Text variant="headlineSmall" style={styles.statValue}>
               {stats.connectedTiles}/{stats.totalTiles}
@@ -160,11 +160,12 @@ export const NetGameBoard: React.FC<NetGameBoardProps> = ({
           Reiniciar
         </Button>
         <Button
-          mode="contained-tonal"
+          mode="outlined"
           onPress={solveGame}
           icon="auto-fix"
           style={styles.button}
           disabled={stats.isComplete}
+          textColor={COLORS.textSecondary}
         >
           Resolver juego
         </Button>
@@ -189,7 +190,9 @@ const styles = StyleSheet.create({
   statsCard: {
     marginBottom: 12,
     marginHorizontal: 16,
-    elevation: 2,
+    elevation: 0,
+    backgroundColor: COLORS.backgroundSecondary,
+    borderRadius: 16,
   },
   statsContent: {
     flexDirection: "row",
@@ -201,19 +204,21 @@ const styles = StyleSheet.create({
   statLabel: {
     color: COLORS.textSecondary,
     marginBottom: 4,
-    fontSize: 13,
+    fontSize: 14,
+    fontWeight: "500",
   },
   statValue: {
     color: COLORS.primary,
     fontWeight: "bold",
-    fontSize: 18,
+    fontSize: 24,
   },
   scrollContent: {
     flexGrow: 1,
+    justifyContent: "center",
   },
   boardContainer: {
     alignItems: "center",
-    paddingBottom: 16,
+    paddingVertical: 16,
     width: "100%",
     paddingHorizontal: 16,
   },
@@ -222,7 +227,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "center",
     backgroundColor: COLORS.backgroundSecondary,
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 8,
     width: "100%",
     aspectRatio: 1, // Mantiene el tablero cuadrado
