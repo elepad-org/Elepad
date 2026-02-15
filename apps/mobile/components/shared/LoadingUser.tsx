@@ -54,7 +54,7 @@ export const LoadingUser: React.FC = () => {
     </View>
   );
 };
-
+       
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -63,8 +63,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   image: {
-    width: 200,
-    height: 200,
+    width: 180,
+    height: 180,
   },
   text: {
     marginTop: 20,
