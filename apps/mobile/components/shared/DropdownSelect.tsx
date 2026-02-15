@@ -166,7 +166,7 @@ export default function DropdownSelect({
         onSelect={handleSelect}
         onDismiss={() => setIsOpen(false)}
         anchorPosition={anchorPosition}
-        maxHeight={300}
+        maxHeight={350}
       />
     </View>
   );
