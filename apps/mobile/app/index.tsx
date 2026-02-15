@@ -5,6 +5,7 @@ import { useRef, useEffect, useState } from "react";
 import { Animated, View, Dimensions, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Text } from "react-native-paper";
+import EleImage from "@/assets/images/ele-def.png";
 import { COLORS, STYLES } from "@/styles/base";
 import { useTour } from "@/hooks/useTour";
 import { useToast } from "@/components/shared/Toast";
@@ -62,7 +63,7 @@ export default function IndexRedirect() {
       <View style={STYLES.container}>
         <View style={[STYLES.logoWrap, { marginTop: logoMarginTop }]}>
           <Image
-            source={require("@/assets/images/ele-def.png")}
+            source={EleImage}
             style={[STYLES.logo, { width: logoSize, height: logoSize }]}
             resizeMode="contain"
           />
