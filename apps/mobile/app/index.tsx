@@ -2,10 +2,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { LoadingUser } from "@/components/shared";
 import { useRouter } from "expo-router";
 import { useRef, useEffect, useState } from "react";
-import { Animated, View, Dimensions } from "react-native";
+import { Animated, View, Dimensions, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Text } from "react-native-paper";
-import EleSvg from "@/assets/images/ele.svg";
 import { COLORS, STYLES } from "@/styles/base";
 import { useTour } from "@/hooks/useTour";
 import { useToast } from "@/components/shared/Toast";
@@ -62,10 +61,10 @@ export default function IndexRedirect() {
     <SafeAreaView style={STYLES.safeAreaLogin}>
       <View style={STYLES.container}>
         <View style={[STYLES.logoWrap, { marginTop: logoMarginTop }]}>
-          <EleSvg
-            width={logoSize}
-            height={logoSize}
-            style={STYLES.logo}
+          <Image
+            source={require("@/assets/images/ele-def.png")}
+            style={[STYLES.logo, { width: logoSize, height: logoSize }]}
+            resizeMode="contain"
           />
           <Text style={[STYLES.brand, { fontSize: brandFontSize }]}> Elepad </Text>
         </View>
