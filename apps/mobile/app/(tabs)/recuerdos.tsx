@@ -231,10 +231,14 @@ export default function RecuerdosScreen() {
   const [selectedBook, setSelectedBook] = useState<MemoriesBook | null>(null);
   const [editingBook, setEditingBook] = useState<MemoriesBook | null>(null);
   const [bookMenuVisible, setBookMenuVisible] = useState(false);
+  const [filterMenuVisible, setFilterMenuVisible] = useState(false);
 
   const handleCloseBookMenu = useCallback(() => {
     setBookMenuVisible(false);
-    setMenuMode("main");
+  }, []);
+
+  const handleCloseFilterMenu = useCallback(() => {
+    setFilterMenuVisible(false);
     setFilterSubMode("none");
   }, []);
 
@@ -256,7 +260,6 @@ export default function RecuerdosScreen() {
 
   const [memberFilterId, setMemberFilterId] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<RecuerdoTipo | "all">("all");
-  const [menuMode, setMenuMode] = useState<"main" | "filter">("main");
   const [filterSubMode, setFilterSubMode] = useState<
     "none" | "person" | "type"
   >("none");
@@ -1388,11 +1391,7 @@ export default function RecuerdosScreen() {
                   icon="dots-horizontal"
                   size={22}
                   style={{ margin: 0 }}
-                  onPress={() => {
-                    setBookMenuVisible(true);
-                    setMenuMode("main");
-                    setFilterSubMode("none");
-                  }}
+                  onPress={() => setBookMenuVisible(true)}
                 />
               }
             >
@@ -1402,7 +1401,7 @@ export default function RecuerdosScreen() {
                   setBookMenuVisible(false);
                   openEditBookDialog(selectedBook);
                 }}
-                title="Modificar baúl"
+                title="Modificar"
               />
               <Menu.Item
                 leadingIcon="trash-can"
@@ -1410,7 +1409,7 @@ export default function RecuerdosScreen() {
                   setBookMenuVisible(false);
                   setBookToDelete(selectedBook);
                 }}
-                title="Eliminar baúl"
+                title="Eliminar"
               />
             </Menu>
           </View>
@@ -1572,219 +1571,26 @@ export default function RecuerdosScreen() {
                 size={22}
                 iconColor={COLORS.primary}
                 style={{ margin: 0 }}
-                onPress={() => {
-                  setBookMenuVisible(true);
-                  setMenuMode("main");
-                  setFilterSubMode("none");
-                }}
+                onPress={() => setBookMenuVisible(true)}
               />
             }
           >
-            {(() => {
-              switch (menuMode) {
-                case "main":
-                  return (
-                    <>
-                      <Menu.Item
-                        leadingIcon="pencil"
-                        onPress={() => {
-                          setBookMenuVisible(false);
-                          openEditBookDialog(selectedBook);
-                        }}
-                        title="Modificar baúl"
-                      />
-                      <Menu.Item
-                        leadingIcon="trash-can"
-                        onPress={() => {
-                          setBookMenuVisible(false);
-                          setBookToDelete(selectedBook);
-                        }}
-                        title="Eliminar baúl"
-                      />
-                      <Menu.Item
-                        leadingIcon="filter-variant"
-                        onPress={() => {
-                          setMenuMode("filter");
-                          setFilterSubMode("none");
-                        }}
-                        title="Filtrar"
-                      />
-                    </>
-                  );
-                case "filter":
-                  if (filterSubMode === "none") {
-                    return (
-                      <>
-                        <Menu.Item
-                          leadingIcon="arrow-left"
-                          onPress={() => setMenuMode("main")}
-                          title="Atrás"
-                        />
-                        <Menu.Item
-                          leadingIcon="account-group"
-                          onPress={() => setFilterSubMode("person")}
-                          title="Filtrar por persona"
-                        />
-                        <Menu.Item
-                          leadingIcon="file-multiple"
-                          onPress={() => setFilterSubMode("type")}
-                          title="Filtrar por tipo"
-                        />
-                      </>
-                    );
-                  } else if (filterSubMode === "person") {
-                    return (
-                      <>
-                        <Menu.Item
-                          leadingIcon="arrow-left"
-                          onPress={() => setFilterSubMode("none")}
-                          title="Atrás"
-                        />
-                        <Menu.Item
-                          leadingIcon="account-group"
-                          onPress={() => {
-                            setMemberFilterId(null);
-                            setBookMenuVisible(false);
-                            setMenuMode("main");
-                            setFilterSubMode("none");
-                          }}
-                          title="Todos"
-                          style={{
-                            backgroundColor:
-                              memberFilterId === null
-                                ? COLORS.primary + "20"
-                                : "transparent",
-                          }}
-                        />
-                        {groupMembers.map((m) => (
-                          <Menu.Item
-                            key={m.id}
-                            leadingIcon={() =>
-                              m.avatarUrl ? (
-                                <Avatar.Image
-                                  size={24}
-                                  source={{ uri: m.avatarUrl }}
-                                />
-                              ) : (
-                                <Avatar.Text
-                                  size={24}
-                                  label={m.displayName.charAt(0).toUpperCase()}
-                                />
-                              )
-                            }
-                            onPress={() => {
-                              setMemberFilterId(m.id);
-                              setBookMenuVisible(false);
-                              setMenuMode("main");
-                              setFilterSubMode("none");
-                            }}
-                            title={m.displayName}
-                            style={{
-                              backgroundColor:
-                                memberFilterId === m.id
-                                  ? COLORS.primary + "20"
-                                  : "transparent",
-                            }}
-                          />
-                        ))}
-                      </>
-                    );
-                  } else if (filterSubMode === "type") {
-                    return (
-                      <>
-                        <Menu.Item
-                          leadingIcon="arrow-left"
-                          onPress={() => setFilterSubMode("none")}
-                          title="Atrás"
-                        />
-                        <Menu.Item
-                          leadingIcon="file-multiple"
-                          onPress={() => {
-                            setTypeFilter("all");
-                            setBookMenuVisible(false);
-                            setMenuMode("main");
-                            setFilterSubMode("none");
-                          }}
-                          title="Todos los tipos"
-                          style={{
-                            backgroundColor:
-                              typeFilter === "all"
-                                ? COLORS.primary + "20"
-                                : "transparent",
-                          }}
-                        />
-                        <Menu.Item
-                          leadingIcon="image"
-                          onPress={() => {
-                            setTypeFilter("imagen");
-                            setBookMenuVisible(false);
-                            setMenuMode("main");
-                            setFilterSubMode("none");
-                          }}
-                          title="Imágenes"
-                          style={{
-                            backgroundColor:
-                              typeFilter === "imagen"
-                                ? COLORS.primary + "20"
-                                : "transparent",
-                          }}
-                        />
-                        <Menu.Item
-                          leadingIcon="video"
-                          onPress={() => {
-                            setTypeFilter("video");
-                            setBookMenuVisible(false);
-                            setMenuMode("main");
-                            setFilterSubMode("none");
-                          }}
-                          title="Videos"
-                          style={{
-                            backgroundColor:
-                              typeFilter === "video"
-                                ? COLORS.primary + "20"
-                                : "transparent",
-                          }}
-                        />
-                        <Menu.Item
-                          leadingIcon="microphone"
-                          onPress={() => {
-                            setTypeFilter("audio");
-                            setBookMenuVisible(false);
-                            setMenuMode("main");
-                            setFilterSubMode("none");
-                          }}
-                          title="Audios"
-                          style={{
-                            backgroundColor:
-                              typeFilter === "audio"
-                                ? COLORS.primary + "20"
-                                : "transparent",
-                          }}
-                        />
-                        <Menu.Item
-                          leadingIcon="text"
-                          onPress={() => {
-                            setTypeFilter("texto");
-                            setBookMenuVisible(false);
-                            setMenuMode("main");
-                            setFilterSubMode("none");
-                          }}
-                          title="Notas"
-                          style={{
-                            backgroundColor:
-                              typeFilter === "texto"
-                                ? COLORS.primary + "20"
-                                : "transparent",
-                          }}
-                        />
-                      </>
-                    );
-                  }
-                  break;
-                default:
-                  return null;
-              }
-            })()}
+            <Menu.Item
+              leadingIcon="pencil"
+              onPress={() => {
+                setBookMenuVisible(false);
+                openEditBookDialog(selectedBook);
+              }}
+              title="Modificar"
+            />
+            <Menu.Item
+              leadingIcon="trash-can"
+              onPress={() => {
+                setBookMenuVisible(false);
+                setBookToDelete(selectedBook);
+              }}
+              title="Eliminar"
+            />
           </Menu>
         </View>
       </View>
@@ -1822,14 +1628,194 @@ export default function RecuerdosScreen() {
             }}
           />
 
-          {/* Botón de Ordenar - Derecha */}
-          <IconButton
-            icon={sortOrder === "desc" ? "arrow-down" : "arrow-up"}
-            size={20}
-            onPress={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
-            mode="contained-tonal"
-            style={{ margin: 0 }}
-          />
+          {/* Botones de Ordenar y Filtrar - Derecha */}
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+            <IconButton
+              icon={sortOrder === "desc" ? "arrow-down" : "arrow-up"}
+              size={20}
+              onPress={() => setSortOrder(sortOrder === "desc" ? "asc" : "desc")}
+              mode="contained-tonal"
+              style={{ margin: 0 }}
+            />
+            <Menu
+              key={filterMenuVisible ? "open" : "closed"}
+              visible={filterMenuVisible}
+              onDismiss={handleCloseFilterMenu}
+              contentStyle={{
+                backgroundColor: COLORS.white,
+                borderRadius: 12,
+                width: 215,
+              }}
+              anchor={
+                <IconButton
+                  icon="filter-variant"
+                  size={20}
+                  onPress={() => setFilterMenuVisible(true)}
+                  mode="contained-tonal"
+                  style={{ margin: 0 }}
+                />
+              }
+            >
+              {(() => {
+                if (filterSubMode === "none") {
+                  return (
+                    <>
+                      <Menu.Item
+                        leadingIcon="account-group"
+                        onPress={() => setFilterSubMode("person")}
+                        title="Filtrar por persona"
+                      />
+                      <Menu.Item
+                        leadingIcon="file-multiple"
+                        onPress={() => setFilterSubMode("type")}
+                        title="Filtrar por tipo"
+                      />
+                    </>
+                  );
+                } else if (filterSubMode === "person") {
+                  return (
+                    <>
+                      <Menu.Item
+                        leadingIcon="arrow-left"
+                        onPress={() => setFilterSubMode("none")}
+                        title="Atrás"
+                      />
+                      <Menu.Item
+                        leadingIcon="account-group"
+                        onPress={() => {
+                          setMemberFilterId(null);
+                          setFilterMenuVisible(false);
+                          setFilterSubMode("none");
+                        }}
+                        title="Todos"
+                        style={{
+                          backgroundColor:
+                            memberFilterId === null
+                              ? COLORS.primary + "20"
+                              : "transparent",
+                        }}
+                      />
+                      {groupMembers.map((m) => (
+                        <Menu.Item
+                          key={m.id}
+                          leadingIcon={() =>
+                            m.avatarUrl ? (
+                              <Avatar.Image
+                                size={24}
+                                source={{ uri: m.avatarUrl }}
+                              />
+                            ) : (
+                              <Avatar.Text
+                                size={24}
+                                label={m.displayName.charAt(0).toUpperCase()}
+                              />
+                            )
+                          }
+                          onPress={() => {
+                            setMemberFilterId(m.id);
+                            setFilterMenuVisible(false);
+                            setFilterSubMode("none");
+                          }}
+                          title={m.displayName}
+                          style={{
+                            backgroundColor:
+                              memberFilterId === m.id
+                                ? COLORS.primary + "20"
+                                : "transparent",
+                          }}
+                        />
+                      ))}
+                    </>
+                  );
+                } else if (filterSubMode === "type") {
+                  return (
+                    <>
+                      <Menu.Item
+                        leadingIcon="arrow-left"
+                        onPress={() => setFilterSubMode("none")}
+                        title="Atrás"
+                      />
+                      <Menu.Item
+                        leadingIcon="file-multiple"
+                        onPress={() => {
+                          setTypeFilter("all");
+                          setFilterMenuVisible(false);
+                          setFilterSubMode("none");
+                        }}
+                        title="Todos los tipos"
+                        style={{
+                          backgroundColor:
+                            typeFilter === "all"
+                              ? COLORS.primary + "20"
+                              : "transparent",
+                        }}
+                      />
+                      <Menu.Item
+                        leadingIcon="image"
+                        onPress={() => {
+                          setTypeFilter("imagen");
+                          setFilterMenuVisible(false);
+                          setFilterSubMode("none");
+                        }}
+                        title="Imágenes"
+                        style={{
+                          backgroundColor:
+                            typeFilter === "imagen"
+                              ? COLORS.primary + "20"
+                              : "transparent",
+                        }}
+                      />
+                      <Menu.Item
+                        leadingIcon="video"
+                        onPress={() => {
+                          setTypeFilter("video");
+                          setFilterMenuVisible(false);
+                          setFilterSubMode("none");
+                        }}
+                        title="Videos"
+                        style={{
+                          backgroundColor:
+                            typeFilter === "video"
+                              ? COLORS.primary + "20"
+                              : "transparent",
+                        }}
+                      />
+                      <Menu.Item
+                        leadingIcon="microphone"
+                        onPress={() => {
+                          setTypeFilter("audio");
+                          setFilterMenuVisible(false);
+                          setFilterSubMode("none");
+                        }}
+                        title="Audios"
+                        style={{
+                          backgroundColor:
+                            typeFilter === "audio"
+                              ? COLORS.primary + "20"
+                              : "transparent",
+                        }}
+                      />
+                      <Menu.Item
+                        leadingIcon="text"
+                        onPress={() => {
+                          setTypeFilter("texto");
+                          setFilterMenuVisible(false);
+                          setFilterSubMode("none");
+                        }}
+                        title="Notas"
+                        style={{
+                          backgroundColor:
+                            typeFilter === "texto"
+                              ? COLORS.primary + "20"
+                              : "transparent",
+                        }}
+                      />
+                    </>
+                  );
+                }
+              })()}
+            </Menu>
+          </View>
         </View>
       </View>
 
