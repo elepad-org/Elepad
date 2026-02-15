@@ -180,7 +180,7 @@ export function GameCompletedModal({
           </View>
         </Dialog.Content>
 
-        <Dialog.Actions style={styles.dialogActions}>
+        <View style={styles.dialogActions}>
           <Button
             mode="outlined"
             onPress={onBackToGames}
@@ -196,7 +196,7 @@ export function GameCompletedModal({
           >
             Jugar de Nuevo
           </Button>
-        </Dialog.Actions>
+        </View>
       </Dialog>
     </Portal>
   );
@@ -320,8 +320,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   dialogActions: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingHorizontal: 24,
+    paddingTop: 24,
     gap: 12,
     flexDirection: "column",
   },

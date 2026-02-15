@@ -131,19 +131,24 @@ export default function NetGameScreen() {
                 style={{
                   paddingBottom: 12,
                   paddingHorizontal: 20,
-                  flexDirection: "column",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
                   gap: 12,
                 }}
               >
-                <CancelButton onPress={() => setShowQuitDialog(false)} />
-                <Button
-                  mode="contained"
-                  onPress={confirmQuit}
-                  buttonColor={COLORS.secondary}
-                  style={{ borderRadius: 12, width: "100%" }}
-                >
-                  Salir
-                </Button>
+                <View style={{ flex: 1 }}>
+                  <CancelButton onPress={() => setShowQuitDialog(false)} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Button
+                    mode="contained"
+                    onPress={confirmQuit}
+                    buttonColor={COLORS.primary}
+                    style={{ borderRadius: 12 }}
+                  >
+                    Salir
+                  </Button>
+                </View>
               </Dialog.Actions>
             </Dialog>
           </Portal>
