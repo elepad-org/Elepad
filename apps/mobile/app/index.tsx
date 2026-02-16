@@ -9,9 +9,10 @@ import EleImage from "@/assets/images/ele-def.png";
 import { COLORS, STYLES } from "@/styles/base";
 import { useTour } from "@/hooks/useTour";
 import { useToast } from "@/components/shared/Toast";
+import { supabase } from "@/lib/supabase";
 
 export default function IndexRedirect() {
-  const { session, loading } = useAuth();
+  const { session, loading, userElepad } = useAuth();
   const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const hasRedirected = useRef(false);
@@ -25,20 +26,16 @@ export default function IndexRedirect() {
   const logoMarginTop = screenHeight * 0.12; // 12% del alto de pantalla
   const brandFontSize = screenWidth * 0.16; // 16% del ancho de pantalla
 
-  // Mejorar redirección para que también funcione cuando la sesión se carga después
   useEffect(() => {
-    // Redirigir solo si hay sesión, no está cargando, y no se ha redirigido aún
-    if (session && !loading && !hasRedirected.current) {
-      console.log("🏠 Redirigiendo a home desde index (sesión detectada)");
-      hasRedirected.current = true;
-      router.replace("/(tabs)/home");
+    // Si ya hay sesión Y usuario elepad cargado con grupo, intentar redirigir
+    // Esto es un "safety net" por si el redirect de useAuth falló o si el usuario
+    // ya estaba cargado al montar este componente.
+    if (session && !loading && userElepad && userElepad.groupId && !hasRedirected.current) {
+       console.log("🏠 Redirigiendo a home desde index (sesión y usuario listos)");
+       hasRedirected.current = true;
+       router.replace("/(tabs)/home");
     }
-    
-    // Reset del flag si la sesión se pierde (por ejemplo, logout)
-    if (!session && !loading) {
-      hasRedirected.current = false;
-    }
-  }, [session, loading, router]);
+  }, [session, loading, userElepad, router]);
 
 
   if (loading) {
@@ -49,8 +46,39 @@ export default function IndexRedirect() {
     );
   }
 
-  // Si hay sesión, mostrar loading mientras redirige
   if (session) {
+    // Si falla la carga del usuario Elepad (no existe a pesar de tener sesión),
+    // debemos dar una salida al usuario.
+    // Esto ocurre si userElepad es null pero loading es false.
+    if (!loading && !userElepad) {
+      return (
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 24 }}>
+             <Image
+                source={EleImage}
+                style={{ width: 100, height: 100, marginBottom: 20 }}
+                resizeMode="contain"
+             />
+             <Text style={{ ...STYLES.heading, textAlign: "center", marginBottom: 10 }}>Algo salió mal</Text>
+             <Text style={{ ...STYLES.subheading, textAlign: "center", marginBottom: 24 }}>
+                No pudimos cargar tu perfil de usuario. Esto puede ocurrir si hubo un problema durante el registro.
+             </Text>
+             
+             <Button 
+                mode="contained" 
+                onPress={() => {
+                   // Forzar recarga completa
+                   router.replace("/");
+                   // O forzar cierre de sesión para intentar entrar de nuevo
+                   supabase.auth.signOut();
+                }}
+                style={{ marginBottom: 12, width: "100%" }}
+             >
+                Volver al inicio
+             </Button>
+        </View>
+      );
+    }
+    
     return (
       <View style={{ flex: 1 }}>
         <LoadingUser />

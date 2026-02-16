@@ -107,66 +107,123 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
   async function loadElepadUserById(userId: string) {
     // Solo mostrar loading si es un usuario diferente o no hay usuario cargado
-    // Usamos ref para evitar problemas de stale closure en los listeners
     if (userElepadRef.current?.id !== userId) {
       setUserElepadLoading(true);
     }
+    
+    let u: ElepadUser | null = null;
+    let attempts = 0;
+    const maxAttempts = 15; // 15 intentos ~ 15 segundos max
+
     try {
-      console.log("Cargando usuario de Elepad:", userId);
-      
-      // Timeout para getUsersId - si tarda más de 8 segundos, abortar
-      const userPromise = getUsersId(userId);
-      const timeoutPromise = new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('User fetch timeout')), 8000)
-      );
-      
-      const res = await Promise.race([
-        userPromise,
-        timeoutPromise
-      ]).catch((err) => {
-        console.warn("⚠️ getUsersId timeout o error:", err);
-        throw err;
-      });
-      
-      console.log("Datos del usuario:", res);
-      const maybeStatus = (res as unknown as { status?: number }).status;
-      const maybeData = (res as unknown as { data?: unknown }).data;
-      if (maybeStatus === 404) {
-        setUserElepad(null);
-        return;
+      console.log("🚀 Iniciando búsqueda de perfil Elepad:", userId);
+
+      while (attempts < maxAttempts) {
+        attempts++;
+        let res: unknown = null;
+        let fetchError = null;
+
+        // Intentar fetch
+        try {
+          // Timeout para getUsersId - si tarda más de 8 segundos, abortar
+          const userPromise = getUsersId(userId);
+          const timeoutPromise = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("User fetch timeout")), 8000),
+          );
+          
+          res = await Promise.race([userPromise, timeoutPromise]);
+        } catch (err) {
+          fetchError = err;
+        }
+
+        // Analizar resultado
+        if (fetchError) {
+           console.warn(`⚠️ Error fetching user (Intento ${attempts}/${maxAttempts}):`, fetchError);
+           // Si falla la red, esperamos y reintentamos
+           if (attempts < maxAttempts) {
+              await new Promise((r) => setTimeout(r, 1000));
+              continue;
+           }
+        } else {
+           // Si no hubo error de fetch, revisamos la respuesta
+           // La respuesta puede venir wrappeada en { data: ... } o ser directa
+           // eslint-disable-next-line @typescript-eslint/no-explicit-any
+           const status = (res as any)?.status;
+           // eslint-disable-next-line @typescript-eslint/no-explicit-any
+           let data = (res as any)?.data;
+           
+           // Si res parece ser el objeto usuario directamente (tiene id), lo usamos
+           // eslint-disable-next-line @typescript-eslint/no-explicit-any
+           if (!data && (res as any)?.id) {
+              data = res;
+           }
+           
+           // Caso 1: Usuario encontrado
+           if (data && (status === 200 || status === undefined)) {
+              const tempUser = data as ElepadUser;
+              
+              // Verificamos si tiene groupId (esencial para la app)
+              if (tempUser.groupId) {
+                 u = tempUser;
+                 break; // ¡ÉXITO COMPLETO!
+              } else {
+                 console.log(`👤 Usuario encontrado pero sin Grupo. (Intento ${attempts}/${maxAttempts}) - Esperando vinculación...`);
+                 // Backoff: Si ya existe el usuario pero no el grupo, esperamos más tiempo (2s)
+                 // para no saturar la red mientras se crea el grupo.
+                 await new Promise((r) => setTimeout(r, 2000));
+                 continue;
+              }
+           } 
+           // Caso 2: 404 Not Found
+           else if (status === 404) {
+              console.log(`Running... 404 User Not Found (Intento ${attempts}/${maxAttempts})`);
+           } 
+           // Caso 3: Otros errores
+           else {
+              console.log(`⚠️ Respuesta inesperada: Status ${status}`, res);
+           }
+           
+           // Si llegamos aquí es porque no tuvimos éxito completo (break)
+           // Esperamos y reintentamos si quedan intentos
+           if (attempts < maxAttempts) {
+              await new Promise((r) => setTimeout(r, 1000));
+              continue;
+           }
+        }
       }
-      const u = (maybeData ?? (res as unknown)) as ElepadUser;
 
-      // Fetch equipped frame con timeout
-      const framePromise = supabase
-        .from("user_inventory")
-        .select("item:shop_items(asset_url)")
-        .eq("user_id", userId)
-        .eq("equipped", true)
-        .single();
+      console.log("🏁 Fin de búsqueda de usuario. Resultado:", u ? "✅ ÉXITO" : "❌ FALLÓ");
       
-      const frameTimeoutPromise = new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('Frame fetch timeout')), 5000)
-      );
-      
-      const frameResult = await Promise.race([
-        framePromise,
-        frameTimeoutPromise
-      ]).catch((err) => {
-        console.warn("⚠️ Frame fetch timeout o error:", err);
-        return { data: null, error: err };
-      });
+      if (!u) {
+        setUserElepad(null);
+        return null; 
+      }
 
-      if (frameResult?.data?.item) {
-        // Safe cast as we know the structure from the query
-        const item = frameResult.data.item as unknown as { asset_url: string };
-        u.activeFrameUrl = item.asset_url;
+      // Fetch equipped frame (Inventario)
+      // Esto es secundario, no reintentamos agresivamente
+      try {
+        const { data } = await supabase
+          .from("user_inventory")
+          .select("item:shop_items(asset_url)")
+          .eq("user_id", userId)
+          .eq("equipped", true)
+          .maybeSingle(); // Usamos maybeSingle para evitar error si no tiene marco, y try/catch por si falla la red
+
+        if (data?.item) {
+          const item = data.item as unknown as { asset_url: string };
+          u.activeFrameUrl = item.asset_url;
+        }
+      } catch (err) {
+        console.warn("⚠️ Error fetching frame:", err);
+        // No fallamos toda la carga por esto
       }
 
       setUserElepad(u);
+      return u; 
     } catch (err) {
-      console.warn("loadElepadUserById error", err);
+      console.error("❌ Error fatal en loadElepadUserById:", err);
       setUserElepad(null);
+      return null;
     } finally {
       setUserElepadLoading(false);
     }
@@ -385,26 +442,44 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
         if (session?.user) {
           // If this is a new sign up, wait a bit for the database to sync
+          // Aumentamos el delay a 2000ms (2s) para dar tiempo a NewAccount a crear el grupo familiar
+          // y evitar condiciones de carrera o saturación de red.
           if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
-            await new Promise((resolve) => setTimeout(resolve, 300));
+            console.log("⏳ Esperando 2s antes de cargar perfil para permitir inicialización post-hilo...");
+            await new Promise((resolve) => setTimeout(resolve, 2000));
           }
+          
           // Solo recargar usuario si NO es un simple USER_UPDATED
           if (event !== "USER_UPDATED") {
-            await loadElepadUserById(session.user.id);
+            // NO esperar a que termine, para no bloquear el evento (especialmente SIGNED_IN que puede venir de signUp)
+            loadElepadUserById(session.user.id).then((user) => {
+               // Intentar redirección AQUÍ, cuando la promesa se resuelva
+                if (
+                  user &&
+                  (event === "SIGNED_IN" || event === "INITIAL_SESSION") &&
+                  hasInitialized.current &&
+                  !hasRedirectedAfterSignIn.current
+                ) {
+                    console.log(`✅ Redirigiendo a home después de ${event} (Usuario listo, carga asíncrona)`);
+                    hasRedirectedAfterSignIn.current = true;
+                    router.replace("/(tabs)/home");
+                } else if (!user && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
+                    console.log(`⏳ Usuario no listo aún tras carga asíncrona.`);
+                }
+            });
+          } else {
+             // En caso de USER_UPDATED, solo actualizamos referencia si es necesario,
+             // pero no forzamos redirect aquí típicamente. La redirección principal
+             // debe ocurrir en SIGNED_IN o INITIAL_SESSION.
           }
-          // Redirigir a home en estos casos:
-          // - SIGNED_IN: cuando el usuario acaba de iniciar sesión explícitamente
-          // - INITIAL_SESSION: cuando se restaura una sesión guardada (ej: después de reabrir la app)
-          // SOLO la primera vez (no en refrescos de token o window focus)
-          if (
-            (event === "SIGNED_IN" || event === "INITIAL_SESSION") &&
-            hasInitialized.current &&
-            !hasRedirectedAfterSignIn.current
-          ) {
-            console.log(`✅ Redirigiendo a home después de ${event}`);
-            hasRedirectedAfterSignIn.current = true;
-            router.replace("/(tabs)/home");
-          }
+          
+          /* 
+            IMPORTANTE: Eliminamos la redirección INMEDIATA que dependía del `await`.
+            Ahora la redirección ocurre:
+            1. En el .then() de loadElepadUserById
+            2. O en el useEffect reactivo de userElepad
+          */
+          
         } else {
           setUserElepad(null);
           setUserElepadLoading(false);
@@ -424,6 +499,21 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       listener?.subscription.unsubscribe();
     };
   }, []);
+
+  // Efecto de respaldo: Redirigir cuando userElepad esté listo si se quedó pendiente
+  useEffect(() => {
+    if (
+      session?.user && 
+      userElepad && 
+      hasInitialized.current && 
+      !hasRedirectedAfterSignIn.current
+    ) {
+       console.log("✅ Redirigiendo a home (Efecto reactivo: Usuario ya cargado)");
+       hasRedirectedAfterSignIn.current = true;
+       router.replace("/(tabs)/home");
+    }
+  }, [session, userElepad]);
+
 
   const signOut = async () => {
     try {

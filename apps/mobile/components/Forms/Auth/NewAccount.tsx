@@ -98,47 +98,68 @@ export default function NewAccount() {
         return;
       }
 
+      // Si el usuario ya existe pero no tiene sesión (email no confirmado o provider), data.user existe pero data.session es null
+      // Si el usuario ya existe Y se loguea (email/pass), devuelve session.
+      
+      /*
+         NOTA: Supabase signUp devuelve user si el usuario se crea O si ya existe.
+         Si ya existe y tiramos signUp, supabase puede devolver:
+         1. Error "User already registered" (si confirm email está desactivado o config específica)
+         2. Fake success (seguridad)
+         3. Session si las credenciales coinciden implícitamente (raro en signUp, común en signIn)
+      */
+
       if (!data.session) {
-        showDialog(
-          "Por favor verifica tu correo electrónico para continuar",
-          "email-check-outline",
-        );
-        setLoading(false);
-        return;
+         // Si no hay sesión, verificamos si es porque requiere confirmación de email
+         if (data.user && !data.session) {
+             showDialog(
+              "Por favor verifica tu correo electrónico para continuar",
+              "email-check-outline",
+            );
+            setLoading(false);
+            return;
+         }
       }
 
       // Handle family group
       if (!familyCode) {
         // Create new family group
         try {
+          console.log("Intentando crear grupo familiar...");
           const res = await postFamilyGroupCreate({
             name: displayName,
-            ownerUserId: data.session.user.id,
+            ownerUserId: data.session!.user.id, // Force unwrap session
           });
+          
+          console.log("Family creation res:", res);
+
           if (!res) {
-            showDialog(
-              "La cuenta se creó pero hubo un problema al crear el grupo familiar",
-            );
+             console.warn("Respuesta vacía al crear familia");
           } else {
-            // Wait a bit for the database to update
-            await new Promise((resolve) => setTimeout(resolve, 500));
-            // Refresh user data to get the new groupId
-            await refreshUserElepad();
+             // Si llegamos aquí, la petición HTTP fue exitosa.
+             // Esperamos un poco y refrescamos.
+             await new Promise((resolve) => setTimeout(resolve, 500));
+             await refreshUserElepad(); 
           }
         } catch (err: unknown) {
           console.error("Error creating family group:", err);
-          const errorMessage =
-            err instanceof Error ? err.message : "Error desconocido";
-          showDialog(
-            `La cuenta se creó pero hubo un problema al crear el grupo familiar: ${errorMessage}`,
-          );
+          
+          // Si hubo error, AUN ASÍ intentamos refrescar el usuario.
+          try {
+             await refreshUserElepad();
+          } catch (refreshErr) {
+             console.error("Error refreshing user after family failure:", refreshErr);
+          }
         }
       } else {
         // Link to existing family group
         try {
+           const sessionUser = data.session?.user;
+           if (!sessionUser) throw new Error("No user in session");
+
           const res = await postFamilyGroupLink({
             invitationCode: familyCode,
-            userId: data.session.user.id,
+            userId: sessionUser.id,
           });
           if (!res) {
             showDialog(
@@ -152,22 +173,24 @@ export default function NewAccount() {
           }
         } catch (err: unknown) {
           console.error("Error linking to family group:", err);
-          const errorMessage =
-            err instanceof Error ? err.message : "Código inválido o expirado";
-          showDialog(
-            `La cuenta se creó pero no se pudo vincular al grupo familiar: ${errorMessage}`,
-          );
+           // Intentamos refrescar igual por si acaso
+          await refreshUserElepad();
         }
       }
     } catch (err: unknown) {
-      console.error("Signup error:", err);
+      console.error("Signup Panic:", err);
+      // Solo mostramos error si realmente falló todo catastróficamente
+      if (!loading) return; // Si ya se hizo un refresh exitoso, no mostrar error
+      
       const errorMessage =
         err instanceof Error ? err.message : "Error al crear la cuenta";
       showDialog(getFriendlyErrorMessage(errorMessage));
-    } finally {
       setLoading(false);
     }
+    // Timeout de seguridad en caso de que todo se cuelgue
+    setTimeout(() => { if(loading) setLoading(false); }, 15000);
   };
+
 
   return (
     <View style={styles.container}>
