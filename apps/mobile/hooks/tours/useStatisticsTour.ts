@@ -13,40 +13,42 @@ interface UseStatisticsTourProps {
 
 export const useStatisticsTour = ({ activeTab, loading, isHelper, noElders }: UseStatisticsTourProps) => {
   const router = useRouter();  
-  const tour = useTour({ tourId: 'statistics' });
+  const tourId = noElders ? 'statistics-empty' : 'statistics';
+  const tour = useTour({ tourId: tourId });
   const { setPreparing, state: tourState } = useTourContext();
   const tourLayoutsRef = useRef<Record<string, { x: number; y: number; width: number; height: number }>>({});
 
   const headerStep = useTourStep({
-    tourId: 'statistics',
+    tourId,
     stepId: 'stats-header',
     order: 1,
     text: 'Bienvenido al panel de estadísticas. Aquí podrás ver el progreso y actividad detallada.',
   });
 
+
   const emptyStateStep = useTourStep({
-    tourId: 'statistics',
+    tourId,
     stepId: 'stats-empty',
     order: 2,
     text: 'Actualmente no tienes adultos mayores asociados. Cuando agregues uno, aquí podrás ver sus estadísticas, gráficos de progreso y el historial de partidas.',
   });
 
   const filtersStep = useTourStep({
-    tourId: 'statistics',
+    tourId,
     stepId: 'stats-filters',
     order: 2,
     text: 'Utiliza estos filtros para seleccionar el adulto mayor y el tipo de juego que deseas analizar.',
   });
 
   const chartStep = useTourStep({
-    tourId: 'statistics',
+    tourId,
     stepId: 'stats-chart',
     order: 3,
     text: 'Este gráfico muestra la evolución del rendimiento. Puedes cambiar la vista por semana, mes o año.',
   });
 
   const summaryStep = useTourStep({
-    tourId: 'statistics',
+    tourId,
     stepId: 'stats-summary',
     order: 4,
     text: 'Aquí tienes un resumen rápido con el total de partidas, mejor puntaje y tasa de éxito.',
@@ -54,7 +56,7 @@ export const useStatisticsTour = ({ activeTab, loading, isHelper, noElders }: Us
   });
 
   const historyStep = useTourStep({
-    tourId: 'statistics',
+    tourId,
     stepId: 'stats-history',
     order: 5,
     text: 'En esta sección aparecerán listadas las últimas partidas jugadas.',
@@ -68,7 +70,8 @@ export const useStatisticsTour = ({ activeTab, loading, isHelper, noElders }: Us
         if (tour.isActive) return;
         if (tourState.isPreparing) return;
 
-        const completed = await tour.isTourCompleted('statistics');
+        // Check if the specific tour (empty or full) is completed
+        const completed = await tour.isTourCompleted(tourId);
 
         if (!completed) {
           setPreparing(true);
@@ -103,7 +106,9 @@ export const useStatisticsTour = ({ activeTab, loading, isHelper, noElders }: Us
                   const finalSteps = steps.map(s => ({
                     ...s,
                     layout: tourLayoutsRef.current[s.stepId]
-                  }));
+                  })).filter(s => s.layout); // Only include steps that were successfully measured
+                  
+                  // Start the tour with the correct ID
                   tour.startTour(finalSteps);
                   setPreparing(false);
                 }
@@ -141,7 +146,7 @@ export const useStatisticsTour = ({ activeTab, loading, isHelper, noElders }: Us
 
       checkAndStartTour();
     }
-  }, [activeTab, loading, isHelper, noElders]);
+  }, [activeTab, loading, isHelper, noElders, tourId]);         
 
   return {
     headerRef: headerStep.ref,
