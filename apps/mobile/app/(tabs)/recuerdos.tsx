@@ -1013,30 +1013,35 @@ export default function RecuerdosScreen() {
               Esto eliminará también los recuerdos dentro del baúl.
             </Text>
           </Dialog.Content>
-          <Dialog.Actions style={{ paddingBottom: 12, paddingRight: 16 }}>
-            <Button
-              onPress={() => setBookToDelete(null)}
-              disabled={deleteBookMutation.isPending}
-            >
-              Cancelar
-            </Button>
-            <Button
-              mode="contained"
-              buttonColor={COLORS.primary}
-              textColor={COLORS.white}
-              onPress={() => {
-                if (!bookToDelete) return;
-                deleteBookMutation.mutate(bookToDelete.id);
-              }}
-              loading={deleteBookMutation.isPending}
-              disabled={
-                deleteBookMutation.isPending ||
-                createBookMutation.isPending ||
-                updateBookMutation.isPending
-              }
-            >
-              Eliminar
-            </Button>
+          <Dialog.Actions
+            style={{
+              paddingBottom: 30,
+              paddingHorizontal: 24,
+              paddingTop: 0,
+              justifyContent: "space-between",
+            }}
+          >
+            <View style={{ width: 120 }}>
+              <CancelButton
+                onPress={() => setBookToDelete(null)}
+                disabled={deleteBookMutation.isPending}
+              />
+            </View>
+            <View style={{ width: 120 }}>
+              <SaveButton
+                text="Eliminar"
+                onPress={() => {
+                  if (!bookToDelete) return;
+                  deleteBookMutation.mutate(bookToDelete.id);
+                }}
+                loading={deleteBookMutation.isPending}
+                disabled={
+                  deleteBookMutation.isPending ||
+                  createBookMutation.isPending ||
+                  updateBookMutation.isPending
+                }
+              />
+            </View>
           </Dialog.Actions>
         </Dialog>
       </Portal>

@@ -1567,7 +1567,7 @@ export default function RecuerdoDetailDialog({
           }}
         >
           <Dialog.Title
-            style={{ ...STYLES.heading, color: COLORS.primary, paddingTop: 8 }}
+            style={{ ...STYLES.heading, paddingTop: 8 }}
           >
             Eliminar recuerdo
           </Dialog.Title>
@@ -1576,23 +1576,28 @@ export default function RecuerdoDetailDialog({
               ¿Seguro que querés eliminar este recuerdo definitivamente?
             </Text>
           </Dialog.Content>
-          <Dialog.Actions style={{ paddingBottom: 12, paddingRight: 16 }}>
-            <Button
-              onPress={() => setDeleteConfirmVisible(false)}
-              disabled={isMutating}
-            >
-              Cancelar
-            </Button>
-            <Button
-              mode="contained"
-              buttonColor={COLORS.primary}
-              textColor={COLORS.white}
-              onPress={confirmDelete}
-              loading={isMutating}
-              disabled={isMutating}
-            >
-              Eliminar
-            </Button>
+          <Dialog.Actions
+            style={{
+              paddingBottom: 30,
+              paddingHorizontal: 24,
+              paddingTop: 0,
+              justifyContent: "space-between",
+            }}
+          >
+            <View style={{ width: 120 }}>
+              <CancelButton
+                onPress={() => setDeleteConfirmVisible(false)}
+                disabled={isMutating}
+              />
+            </View>
+            <View style={{ width: 120 }}>
+              <SaveButton
+                text="Eliminar"
+                onPress={confirmDelete}
+                loading={isMutating}
+                disabled={isMutating}
+              />
+            </View>
           </Dialog.Actions>
         </Dialog>
       </>
