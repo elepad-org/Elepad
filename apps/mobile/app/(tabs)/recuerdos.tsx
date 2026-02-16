@@ -1678,6 +1678,8 @@ export default function RecuerdosScreen() {
         <MasonryList
           data={recuerdos}
           numColumns={numColumns}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
           renderItem={({ item, i }) => (
             <Animated.View entering={ZoomIn.delay(i * 25).springify()}>
               <RecuerdoItemComponent
