@@ -4,12 +4,18 @@ import { Text, IconButton } from "react-native-paper";
 import { useAudioPlayer } from "expo-audio";
 import { FONT, SHADOWS, COLORS } from "@/styles/base";
 import Slider from "@react-native-community/slider";
+import HighlightedMentionText from "./HighlightedMentionText";
 
 interface CompactAudioPlayerProps {
   audioUri: string;
   title?: string;
   caption?: string;
   date?: string;
+  familyMembers?: Array<{
+    id: string;
+    displayName: string;
+    avatarUrl?: string | null;
+  }>;
 }
 
 export default function CompactAudioPlayer({
@@ -17,6 +23,7 @@ export default function CompactAudioPlayer({
   title,
   caption,
   date,
+  familyMembers = [],
 }: CompactAudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -124,7 +131,8 @@ export default function CompactAudioPlayer({
   return (
     <View
       style={{
-        width: "96%",
+        width: "100%",
+        paddingHorizontal: 20,
         alignSelf: "center",
         marginBottom: 10,
       }}
@@ -203,17 +211,6 @@ export default function CompactAudioPlayer({
                 minHeight: 48,
               }}
             >
-              <Text
-                style={{
-                  fontSize: 12,
-                  color: "#666",
-                  textAlign: "center",
-                  fontFamily: FONT.regular,
-                  marginBottom: 4,
-                }}
-              >
-                ÚLTIMO RECUERDO
-              </Text>
               <Text
                 numberOfLines={2}
                 style={{
@@ -430,7 +427,9 @@ export default function CompactAudioPlayer({
               }}
             >
               {caption && (
-                <Text
+                <HighlightedMentionText
+                  text={caption}
+                  familyMembers={familyMembers}
                   numberOfLines={2}
                   style={{
                     fontSize: 12,
@@ -438,9 +437,7 @@ export default function CompactAudioPlayer({
                     fontFamily: FONT.regular,
                     marginBottom: 8,
                   }}
-                >
-                  {caption}
-                </Text>
+                />
               )}
               {date && (
                 <Text

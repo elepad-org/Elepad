@@ -8,11 +8,11 @@ import {
   ImageBackground,
   Dimensions,
 } from "react-native";
-import React, { useEffect, useMemo, useCallback } from "react";
+import React, { useEffect, useMemo, useCallback, useRef } from "react";
 import { Text, Avatar, Button, IconButton } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { COLORS, SHADOWS } from "@/styles/base";
+import { COLORS, SHADOWS, FONT } from "@/styles/base";
 import { SkeletonBox } from "@/components/shared";
 import {
   useGetActivitiesFamilyCodeIdFamilyGroup,
@@ -231,6 +231,47 @@ const HomeScreen = () => {
   }, [memoriesQuery.data]);
 
   const player = useVideoPlayer(lastMemory?.mediaUrl || "");
+
+  // Manejo de doble click para videos
+  const lastTapRef = useRef<number>(0);
+
+  const handleMemoryPress = useCallback(
+    (isVideo: boolean) => {
+      if (!lastMemory) return;
+
+      if (isVideo) {
+        const now = Date.now();
+        const DOUBLE_PRESS_DELAY = 300; // 300ms para detectar doble click
+
+        if (now - lastTapRef.current < DOUBLE_PRESS_DELAY) {
+          // Es doble click, navegar al recuerdo
+          lastTapRef.current = 0; // Reset
+          router.navigate({
+            pathname: "/(tabs)/recuerdos",
+            params: {
+              tab: "recuerdos",
+              memoryId: lastMemory.id,
+              bookId: lastMemory.bookId,
+            },
+          });
+        } else {
+          // Es primer click, guardamos el timestamp
+          lastTapRef.current = now;
+        }
+      } else {
+        // No es video, navegar inmediatamente
+        router.navigate({
+          pathname: "/(tabs)/recuerdos",
+          params: {
+            tab: "recuerdos",
+            memoryId: lastMemory.id,
+            bookId: lastMemory.bookId,
+          },
+        });
+      }
+    },
+    [lastMemory, router],
+  );
 
   // Invalidar queries cuando cambia el groupId
   useEffect(() => {
@@ -643,13 +684,14 @@ const HomeScreen = () => {
                 </View>
               </Pressable>
             ) : (
-              <View style={styles.emptySection}>
+              <View style={[styles.emptySection, { marginTop: 0 }]}>
                 <Text style={styles.emptyText}>Aún no has jugado</Text>
                 <Button
                   mode="outlined"
                   onPress={() => router.push("/juegos")}
                   style={styles.emptyButtonOutline}
-                  labelStyle={{ color: COLORS.primary }}
+                  textColor={COLORS.primary}
+                  icon="gamepad-variant"
                 >
                   Explorar juegos
                 </Button>
@@ -719,12 +761,12 @@ const HomeScreen = () => {
               ))}
             </View>
           ) : (
-            <View style={styles.emptySection}>
+            <View style={[styles.emptySection, { marginTop: 0 }]}>
               <Text style={styles.emptyText}>
-                No hay actividad reciente en el grupo
+                No hay actividad reciente 
               </Text>
               <Button
-                mode="text"
+                mode="outlined"
                 onPress={() => {
                   if (userElepad?.elder) {
                     router.push("/history");
@@ -737,7 +779,9 @@ const HomeScreen = () => {
                     });
                   }
                 }}
+                style={styles.emptyButtonOutline}
                 textColor={COLORS.primary}
+                icon="chart-line"
               >
                 Ver estadísticas
               </Button>
@@ -746,16 +790,32 @@ const HomeScreen = () => {
         </View>
 
         {/* Último Recuerdo - DESTACADO */}
-        <View
-          ref={lastMemoryRef}
-          style={{
-            marginTop: lastMemory?.mimeType?.startsWith("image/") ? 50 : 
-                      (!lastMemory?.mimeType?.startsWith("audio/") && 
-                       !lastMemory?.mediaUrl) ? 4 : 16,
-            marginBottom: (!lastMemory?.mimeType?.startsWith("audio/") && 
-                          !lastMemory?.mediaUrl) ? 0 : 20,
-          }}
-        >
+        <View style={styles.lastMemorySection} ref={lastMemoryRef}>
+          {lastMemory ? (
+            <View style={styles.sectionHeaderWithButton}>
+              <Text style={styles.sectionTitle}>Último recuerdo</Text>
+              <Button
+                mode="text"
+                onPress={() =>
+                  router.navigate({
+                    pathname: "/(tabs)/recuerdos",
+                    params: {
+                      tab: "recuerdos",
+                    },
+                  })
+                }
+                labelStyle={styles.sectionLink}
+                compact
+              >
+                Ver todos
+              </Button>
+            </View>
+          ) : (
+            <View style={styles.sectionHeaderOnly}>
+              <Text style={styles.sectionTitle}>Último recuerdo</Text>
+            </View>
+          )}
+
           {memoriesQuery.isLoading || isLoading ? (
             <View style={styles.memoryCardLoading}>
               <SkeletonBox width={SCREEN_WIDTH} height={280} borderRadius={0} />
@@ -789,11 +849,16 @@ const HomeScreen = () => {
                         audioUri={lastMemory.mediaUrl}
                         title={lastMemory.title || "Sin título"}
                         caption={lastMemory.caption || undefined}
-                        date={formatInUserTimezone(
+                        date={`${formatInUserTimezone(
                           lastMemory.createdAt,
                           "d 'de' MMMM 'de' yyyy",
                           userElepad?.timezone,
-                        )}
+                        )} · ${formatInUserTimezone(
+                          lastMemory.createdAt,
+                          "HH:mm",
+                          userElepad?.timezone,
+                        )}`}
+                        familyMembers={groupMembers}
                       />
                     </Pressable>
                   );
@@ -801,76 +866,59 @@ const HomeScreen = () => {
 
                 return (
                   <Pressable
-                    style={hasMedia ? styles.memoryCard : styles.memoryCardNote}
-                    onPress={
-                      lastMemory.mimeType.startsWith("video/")
-                        ? () => {}
-                        : () =>
-                            router.navigate({
-                              pathname: "/(tabs)/recuerdos",
-                              params: {
-                                tab: "recuerdos",
-                                memoryId: lastMemory.id,
-                                bookId: lastMemory.bookId,
-                              },
-                            })
+                    style={hasMedia ? styles.memoryCardPolaroid : styles.memoryCardNote}
+                    onPress={() =>
+                      handleMemoryPress(
+                        lastMemory.mimeType?.startsWith("video/") || false,
+                      )
                     }
                   >
                     {hasMedia ? (
-                      lastMemory.mimeType.startsWith("video/") ? (
-                        <View style={styles.memoryImage}>
-                          <VideoView
-                            player={player}
-                            style={{ width: "100%", height: "100%" }}
-                            allowsFullscreen={false}
-                            allowsPictureInPicture={false}
-                            contentFit="cover"
-                          />
+                      // Diseño polaroid para imágenes y videos
+                      <View style={styles.memoryPolaroidFrame}>
+                        <View style={styles.memoryPolaroidImage}>
+                          {lastMemory.mimeType.startsWith("video/") ? (
+                            <VideoView
+                              player={player}
+                              style={styles.memoryPolaroidImageStyle}
+                              allowsFullscreen={false}
+                              allowsPictureInPicture={false}
+                              contentFit="cover"
+                            />
+                          ) : (
+                            <Image
+                              source={{ uri: lastMemory.mediaUrl }}
+                              style={styles.memoryPolaroidImageStyle}
+                              contentFit="cover"
+                              transition={200}
+                              cachePolicy="memory-disk"
+                            />
+                          )}
                         </View>
-                      ) : (
-                        // Diseño polaroid para imágenes
-                        <View style={styles.memoryPolaroidContainer}>
-                          <View
-                            style={[
-                              styles.memoryPolaroidFrame,
-                              {
-                                transform: [
-                                  {
-                                    rotate: `${
-                                      lastMemory.id.charCodeAt(0) % 2 === 0
-                                        ? 1
-                                        : -1
-                                    }deg`,
-                                  },
-                                ],
-                              },
-                            ]}
-                          >
-                            <View style={styles.memoryPolaroidImage}>
-                              <Image
-                                source={{ uri: lastMemory.mediaUrl }}
-                                style={styles.memoryPolaroidImageStyle}
-                                contentFit="cover"
-                                transition={200}
-                                cachePolicy="memory-disk"
-                              />
-                            </View>
-                            <View style={styles.memoryPolaroidBottom}>
-                              <View style={styles.memoryPolaroidContent}>
-                                <Text style={styles.memoryPolaroidLabel}>
-                                  ÚLTIMO RECUERDO
-                                </Text>
-                                <Text
-                                  style={styles.memoryPolaroidTitle}
-                                  numberOfLines={2}
-                                >
-                                  {lastMemory.title || "Sin título"}
-                                </Text>
-                              </View>
-                            </View>
+                        <View style={styles.memoryPolaroidBottom}>
+                          <View style={styles.memoryPolaroidContent}>
+                            <Text
+                              style={styles.memoryPolaroidTitle}
+                              numberOfLines={2}
+                            >
+                              {lastMemory.title || "Sin título"}
+                            </Text>
+                            <Text style={styles.memoryPolaroidDate}>
+                              {formatInUserTimezone(
+                                lastMemory.createdAt,
+                                "d 'de' MMMM 'de' yyyy",
+                                userElepad?.timezone,
+                              )}
+                              {" · "}
+                              {formatInUserTimezone(
+                                lastMemory.createdAt,
+                                "HH:mm",
+                                userElepad?.timezone,
+                              )}
+                            </Text>
                           </View>
                         </View>
-                      )
+                      </View>
                     ) : (
                       <ImageBackground
                         source={fondoRecuerdos}
@@ -878,9 +926,6 @@ const HomeScreen = () => {
                       >
                         <Image source={tapeImage} style={styles.tapeIcon} />
                         <View style={styles.memoryContent}>
-                          <Text style={styles.memoryLabelNote}>
-                            ÚLTIMO RECUERDO
-                          </Text>
                           <Text
                             style={styles.memoryTitleNote}
                             numberOfLines={2}
@@ -901,6 +946,12 @@ const HomeScreen = () => {
                               "d 'de' MMMM 'de' yyyy",
                               userElepad?.timezone,
                             )}
+                            {" · "}
+                            {formatInUserTimezone(
+                              lastMemory.createdAt,
+                              "HH:mm",
+                              userElepad?.timezone,
+                            )}
                           </Text>
                         </View>
                       </ImageBackground>
@@ -910,23 +961,20 @@ const HomeScreen = () => {
               })()}
             </Animated.View>
           ) : (
-            <Pressable
-              style={styles.memoryCardEmpty}
-              onPress={() => router.setParams({ tab: "recuerdos" })}
-            >
-              <Text style={styles.emptyTitle}>No hay recuerdos guardados</Text>
-              <Text style={styles.emptySubtitle}>
-                Comienza a crear tus momentos especiales
-              </Text>
-              <Button
-                mode="contained"
-                onPress={() => router.setParams({ tab: "recuerdos" })}
-                style={styles.emptyButton}
-                buttonColor={COLORS.primary}
-              >
-                Crear recuerdo
-              </Button>
-            </Pressable>
+            <View style={{ paddingHorizontal: 20 }}>
+              <View style={[styles.emptySection, { marginTop: 0 }]}>
+                <Text style={styles.emptyText}>No hay recuerdos guardados</Text>
+                <Button
+                  mode="outlined"
+                  onPress={() => router.setParams({ tab: "recuerdos" })}
+                  style={styles.emptyButtonOutline}
+                  textColor={COLORS.primary}
+                  icon="book-plus"
+                >
+                  Crear recuerdo
+                </Button>
+              </View>
+            </View>
           )}
         </View>
 
@@ -1024,6 +1072,12 @@ const styles = StyleSheet.create({
   },
 
   // Memory Card - DESTACADO
+  memoryCardPolaroid: {
+    width: SCREEN_WIDTH,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 0,
+  },
   memoryCard: {
     width: SCREEN_WIDTH,
     height: 280,
@@ -1066,13 +1120,13 @@ const styles = StyleSheet.create({
   memoryNoImage: {
     flex: 1,
     borderRadius: 3,
-    margin: 8,
+    marginHorizontal: 20,
     paddingVertical: 20,
-    paddingHorizontal: "18%",
+    paddingLeft: 55,
+    paddingRight: 30,
     justifyContent: "center",
     alignItems: "flex-start",
     ...SHADOWS.card,
-    transform: [{ rotate: "-1deg" }], // Slight rotation like a stuck note
     borderWidth: 1,
     borderColor: "#f1f1f1", // Softer beige border
   },
@@ -1131,21 +1185,21 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   memoryTitleNote: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#1f2937", // Dark gray for contrast on yellow
-    lineHeight: 30,
+    fontSize: 22,
+    fontFamily: FONT.semiBold,
+    color: COLORS.text,
+    lineHeight: 28,
   },
   memoryDescriptionNote: {
     fontSize: 15,
-    color: "#374151", // Medium gray
+    color: COLORS.textSecondary,
     lineHeight: 22,
   },
   memoryDateNote: {
     fontSize: 13,
-    color: "#6b7280", // Light gray
-    fontWeight: "600",
-    marginTop: 4,
+    color: COLORS.textSecondary,
+    fontFamily: FONT.regular,
+    marginTop: 8,
   },
   tapeIcon: {
     position: "absolute",
@@ -1153,7 +1207,6 @@ const styles = StyleSheet.create({
     left: -10,
     width: 70,
     height: 75,
-    transform: [{ rotate: "-3deg" }], // Slight angle
     zIndex: 1,
   },
   emptyTitle: {
@@ -1178,7 +1231,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 28,
   },
+  lastMemorySection: {
+    marginBottom: 28,
+  },
   sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  sectionHeaderOnly: {
+    paddingHorizontal: 20,
+    marginBottom: 12,
+  },
+  sectionHeaderWithButton: {
+    paddingHorizontal: 20,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -1364,13 +1431,14 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 2,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 8,
-    width: "93%",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+    width: SCREEN_WIDTH - 40,
     maxWidth: 340,
+    alignSelf: "center",
   },
   memoryPolaroidImage: {
     width: "100%",
@@ -1378,10 +1446,13 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     overflow: "hidden",
     marginBottom: 12,
+    alignItems: "center",
+    justifyContent: "center",
   },
   memoryPolaroidImageStyle: {
     width: "100%",
     height: "100%",
+    alignSelf: "center",
   },
   memoryPolaroidBottom: {
     paddingBottom: 16,
@@ -1399,10 +1470,10 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   memoryPolaroidTitle: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 18,
+    fontWeight: "bold",
     color: COLORS.text,
-    lineHeight: 20,
+    lineHeight: 22,
   },
   memoryPolaroidDescription: {
     fontSize: 13,
@@ -1410,7 +1481,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   memoryPolaroidDate: {
-    fontSize: 11,
+    fontSize: 13,
     color: COLORS.textSecondary,
     fontWeight: "500",
     marginTop: 2,
