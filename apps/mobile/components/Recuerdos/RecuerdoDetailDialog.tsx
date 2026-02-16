@@ -25,8 +25,7 @@ import {
   Portal,
   Text,
   IconButton,
-  Menu,
-  Button,
+  Menu
 } from "react-native-paper";
 import { COLORS, STYLES, FONT, SHADOWS } from "@/styles/base";
 import { useAudioPlayer } from "expo-audio";
