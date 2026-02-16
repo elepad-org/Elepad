@@ -791,24 +791,30 @@ const HomeScreen = () => {
 
         {/* Último Recuerdo - DESTACADO */}
         <View style={styles.lastMemorySection} ref={lastMemoryRef}>
-          <View style={styles.sectionHeaderWithButton}>
-            <Text style={styles.sectionTitle}>Último recuerdo</Text>
-            <Button
-              mode="text"
-              onPress={() =>
-                router.navigate({
-                  pathname: "/(tabs)/recuerdos",
-                  params: {
-                    tab: "recuerdos",
-                  },
-                })
-              }
-              labelStyle={styles.sectionLink}
-              compact
-            >
-              Ver todos
-            </Button>
-          </View>
+          {lastMemory ? (
+            <View style={styles.sectionHeaderWithButton}>
+              <Text style={styles.sectionTitle}>Último recuerdo</Text>
+              <Button
+                mode="text"
+                onPress={() =>
+                  router.navigate({
+                    pathname: "/(tabs)/recuerdos",
+                    params: {
+                      tab: "recuerdos",
+                    },
+                  })
+                }
+                labelStyle={styles.sectionLink}
+                compact
+              >
+                Ver todos
+              </Button>
+            </View>
+          ) : (
+            <View style={styles.sectionHeaderOnly}>
+              <Text style={styles.sectionTitle}>Último recuerdo</Text>
+            </View>
+          )}
 
           {memoriesQuery.isLoading || isLoading ? (
             <View style={styles.memoryCardLoading}>
@@ -955,17 +961,19 @@ const HomeScreen = () => {
               })()}
             </Animated.View>
           ) : (
-            <View style={[styles.emptySection, { marginTop: 0 }]}>
-              <Text style={styles.emptyText}>No hay recuerdos guardados</Text>
-              <Button
-                mode="outlined"
-                onPress={() => router.setParams({ tab: "recuerdos" })}
-                style={styles.emptyButtonOutline}
-                textColor={COLORS.primary}
-                icon="book-plus"
-              >
-                Crear recuerdo
-              </Button>
+            <View style={{ paddingHorizontal: 20 }}>
+              <View style={[styles.emptySection, { marginTop: 0 }]}>
+                <Text style={styles.emptyText}>No hay recuerdos guardados</Text>
+                <Button
+                  mode="outlined"
+                  onPress={() => router.setParams({ tab: "recuerdos" })}
+                  style={styles.emptyButtonOutline}
+                  textColor={COLORS.primary}
+                  icon="book-plus"
+                >
+                  Crear recuerdo
+                </Button>
+              </View>
             </View>
           )}
         </View>
