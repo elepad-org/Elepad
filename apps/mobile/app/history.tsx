@@ -167,10 +167,11 @@ export default function HistoryScreen({ initialAttempts = [], activeTab = "" }: 
     );
   };
 
-  const { headerRef, filtersRef, chartRef, summaryRef, historyRef } = useStatisticsTour({
+  const { headerRef, filtersRef, chartRef, summaryRef, historyRef, emptyStateRef } = useStatisticsTour({
     activeTab,
     loading: isLoading, // Using isLoading from auth/stats logic combination ideally, but using statsQueries loading state + global loading
     isHelper,
+    noElders: elders.length === 0,
   });
 
   const fetchPage = useCallback(
@@ -315,7 +316,7 @@ export default function HistoryScreen({ initialAttempts = [], activeTab = "" }: 
           {isHelper && (
             <>
               {elders.length === 0 ? (
-                <View style={styles.noEldersCard}>
+                <View style={styles.noEldersCard} ref={emptyStateRef}>
                   <MaterialCommunityIcons
                     name="account-alert"
                     size={48}

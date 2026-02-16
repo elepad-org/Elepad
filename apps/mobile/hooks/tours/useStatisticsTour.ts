@@ -8,10 +8,11 @@ interface UseStatisticsTourProps {
   activeTab: string;
   loading: boolean;
   isHelper: boolean;
+  noElders: boolean;
 }
 
-export const useStatisticsTour = ({ activeTab, loading, isHelper }: UseStatisticsTourProps) => {
-  const router = useRouter();
+export const useStatisticsTour = ({ activeTab, loading, isHelper, noElders }: UseStatisticsTourProps) => {
+  const router = useRouter();  
   const tour = useTour({ tourId: 'statistics' });
   const { setPreparing, state: tourState } = useTourContext();
   const tourLayoutsRef = useRef<Record<string, { x: number; y: number; width: number; height: number }>>({});
@@ -21,6 +22,13 @@ export const useStatisticsTour = ({ activeTab, loading, isHelper }: UseStatistic
     stepId: 'stats-header',
     order: 1,
     text: 'Bienvenido al panel de estadísticas. Aquí podrás ver el progreso y actividad detallada.',
+  });
+
+  const emptyStateStep = useTourStep({
+    tourId: 'statistics',
+    stepId: 'stats-empty',
+    order: 2,
+    text: 'Actualmente no tienes adultos mayores asociados. Cuando agregues uno, aquí podrás ver sus estadísticas, gráficos de progreso y el historial de partidas.',
   });
 
   const filtersStep = useTourStep({
@@ -73,20 +81,25 @@ export const useStatisticsTour = ({ activeTab, loading, isHelper }: UseStatistic
 
             setTimeout(() => {
 
-              const steps = [
-                { ...headerStep.step, ref: headerStep.ref, layout: undefined },
-                { ...filtersStep.step, ref: filtersStep.ref, layout: undefined },
-                { ...chartStep.step, ref: chartStep.ref, layout: undefined },
-                { ...summaryStep.step, ref: summaryStep.ref, layout: undefined },
-                { ...historyStep.step, ref: historyStep.ref, layout: undefined },
-              ];
+              const steps = noElders
+                ? [
+                    { ...headerStep.step, ref: headerStep.ref, layout: undefined },
+                    { ...emptyStateStep.step, ref: emptyStateStep.ref, layout: undefined },
+                  ]
+                : [
+                    { ...headerStep.step, ref: headerStep.ref, layout: undefined },
+                    { ...filtersStep.step, ref: filtersStep.ref, layout: undefined },
+                    { ...chartStep.step, ref: chartStep.ref, layout: undefined },
+                    { ...summaryStep.step, ref: summaryStep.ref, layout: undefined },
+                    { ...historyStep.step, ref: historyStep.ref, layout: undefined },
+                  ];
 
               let measurementsComplete = 0;
-              const totalMeasurements = 5;
+              const totalMeasurements = steps.length;
 
               const checkStart = () => {
                 measurementsComplete++;
-                if (measurementsComplete === totalMeasurements) {
+                if (measurementsComplete >= totalMeasurements) {
                   const finalSteps = steps.map(s => ({
                     ...s,
                     layout: tourLayoutsRef.current[s.stepId]
@@ -109,11 +122,16 @@ export const useStatisticsTour = ({ activeTab, loading, isHelper }: UseStatistic
                 }
               };
 
-              setTimeout(() => measureStep(headerStep, 'stats-header'), 50);
-              setTimeout(() => measureStep(filtersStep, 'stats-filters'), 100);
-              setTimeout(() => measureStep(chartStep, 'stats-chart'), 150);
-              setTimeout(() => measureStep(summaryStep, 'stats-summary'), 200);
-              setTimeout(() => measureStep(historyStep, 'stats-history'), 250);
+              if (noElders) {
+                setTimeout(() => measureStep(headerStep, 'stats-header'), 50);
+                setTimeout(() => measureStep(emptyStateStep, 'stats-empty'), 100);
+              } else {
+                setTimeout(() => measureStep(headerStep, 'stats-header'), 50);
+                setTimeout(() => measureStep(filtersStep, 'stats-filters'), 100);
+                setTimeout(() => measureStep(chartStep, 'stats-chart'), 150);
+                setTimeout(() => measureStep(summaryStep, 'stats-summary'), 200);
+                setTimeout(() => measureStep(historyStep, 'stats-history'), 250);
+              }
 
             }, 100);
 
@@ -123,7 +141,7 @@ export const useStatisticsTour = ({ activeTab, loading, isHelper }: UseStatistic
 
       checkAndStartTour();
     }
-  }, [activeTab, loading, isHelper]);
+  }, [activeTab, loading, isHelper, noElders]);
 
   return {
     headerRef: headerStep.ref,
@@ -131,5 +149,6 @@ export const useStatisticsTour = ({ activeTab, loading, isHelper }: UseStatistic
     chartRef: chartStep.ref,
     summaryRef: summaryStep.ref,
     historyRef: historyStep.ref,
+    emptyStateRef: emptyStateStep.ref,
   };
 };
