@@ -32,6 +32,8 @@ import { COLORS, STYLES, FONT, SHADOWS } from "@/styles/base";
 import { useAudioPlayer } from "expo-audio";
 import { VideoView, useVideoPlayer } from "expo-video";
 import { StyledTextInput } from "../shared";
+import SaveButton from "../shared/SaveButton";
+import CancelButton from "../shared/CancelButton";
 import Slider from "@react-native-community/slider";
 import HighlightedMentionText from "./HighlightedMentionText";
 import MentionInput from "./MentionInput";
@@ -1497,7 +1499,7 @@ export default function RecuerdoDetailDialog({
           }}
         >
           <Dialog.Title
-            style={{ ...STYLES.heading, color: COLORS.primary, paddingTop: 8 }}
+            style={{ ...STYLES.heading, paddingTop: 8 }}
           >
             Modificar recuerdo
           </Dialog.Title>
@@ -1530,20 +1532,27 @@ export default function RecuerdoDetailDialog({
               />
             </View>
           </Dialog.Content>
-          <Dialog.Actions style={{ paddingBottom: 12, paddingRight: 16 }}>
-            <Button onPress={() => setEditVisible(false)} disabled={isMutating}>
-              Cancelar
-            </Button>
-            <Button
-              mode="contained"
-              onPress={submitEdit}
-              buttonColor={COLORS.primary}
-              textColor={COLORS.white}
-              loading={isMutating}
-              disabled={isMutating}
-            >
-              Guardar
-            </Button>
+          <Dialog.Actions
+            style={{
+              paddingBottom: 30,
+              paddingHorizontal: 24,
+              paddingTop: 0,
+              justifyContent: "space-between",
+            }}
+          >
+            <View style={{ width: 120 }}>
+              <CancelButton
+                onPress={() => setEditVisible(false)}
+                disabled={isMutating}
+              />
+            </View>
+            <View style={{ width: 120 }}>
+              <SaveButton
+                onPress={submitEdit}
+                loading={isMutating}
+                disabled={isMutating}
+              />
+            </View>
           </Dialog.Actions>
         </Dialog>
 

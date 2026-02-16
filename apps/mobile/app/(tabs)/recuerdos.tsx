@@ -940,7 +940,7 @@ export default function RecuerdosScreen() {
           }}
         >
           <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
-            {bookDialogMode === "create" ? "Nuevo baúl" : "Editar baúl"}
+            {bookDialogMode === "create" ? "Nuevo baúl" : "Modificar baúl"}
           </Dialog.Title>
           <Dialog.Content style={{ paddingBottom: 12 }}>
             <StyledTextInput

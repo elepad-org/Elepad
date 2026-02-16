@@ -12,7 +12,7 @@ import React, { useEffect, useMemo, useCallback, useRef } from "react";
 import { Text, Avatar, Button, IconButton } from "react-native-paper";
 import { useAuth } from "@/hooks/useAuth";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { COLORS, SHADOWS } from "@/styles/base";
+import { COLORS, SHADOWS, FONT } from "@/styles/base";
 import { SkeletonBox } from "@/components/shared";
 import {
   useGetActivitiesFamilyCodeIdFamilyGroup,
@@ -684,13 +684,14 @@ const HomeScreen = () => {
                 </View>
               </Pressable>
             ) : (
-              <View style={styles.emptySection}>
+              <View style={[styles.emptySection, { marginTop: 0 }]}>
                 <Text style={styles.emptyText}>Aún no has jugado</Text>
                 <Button
                   mode="outlined"
                   onPress={() => router.push("/juegos")}
                   style={styles.emptyButtonOutline}
-                  labelStyle={{ color: COLORS.primary }}
+                  textColor={COLORS.primary}
+                  icon="gamepad-variant"
                 >
                   Explorar juegos
                 </Button>
@@ -760,12 +761,12 @@ const HomeScreen = () => {
               ))}
             </View>
           ) : (
-            <View style={styles.emptySection}>
+            <View style={[styles.emptySection, { marginTop: 0 }]}>
               <Text style={styles.emptyText}>
-                No hay actividad reciente en el grupo
+                No hay actividad reciente 
               </Text>
               <Button
-                mode="text"
+                mode="outlined"
                 onPress={() => {
                   if (userElepad?.elder) {
                     router.push("/history");
@@ -778,7 +779,9 @@ const HomeScreen = () => {
                     });
                   }
                 }}
+                style={styles.emptyButtonOutline}
                 textColor={COLORS.primary}
+                icon="chart-line"
               >
                 Ver estadísticas
               </Button>
@@ -952,23 +955,18 @@ const HomeScreen = () => {
               })()}
             </Animated.View>
           ) : (
-            <Pressable
-              style={styles.memoryCardEmpty}
-              onPress={() => router.setParams({ tab: "recuerdos" })}
-            >
-              <Text style={styles.emptyTitle}>No hay recuerdos guardados</Text>
-              <Text style={styles.emptySubtitle}>
-                Comienza a crear tus momentos especiales
-              </Text>
+            <View style={[styles.emptySection, { marginTop: 0 }]}>
+              <Text style={styles.emptyText}>No hay recuerdos guardados</Text>
               <Button
-                mode="contained"
+                mode="outlined"
                 onPress={() => router.setParams({ tab: "recuerdos" })}
-                style={styles.emptyButton}
-                buttonColor={COLORS.primary}
+                style={styles.emptyButtonOutline}
+                textColor={COLORS.primary}
+                icon="book-plus"
               >
                 Crear recuerdo
               </Button>
-            </Pressable>
+            </View>
           )}
         </View>
 
@@ -1114,8 +1112,9 @@ const styles = StyleSheet.create({
   memoryNoImage: {
     flex: 1,
     borderRadius: 3,
+    marginHorizontal: 20,
     paddingVertical: 20,
-    paddingHorizontal: "10%",
+    paddingHorizontal: 30,
     justifyContent: "center",
     alignItems: "flex-start",
     ...SHADOWS.card,
@@ -1177,21 +1176,21 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   memoryTitleNote: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#1f2937", // Dark gray for contrast on yellow
-    lineHeight: 32,
+    fontSize: 22,
+    fontFamily: FONT.semiBold,
+    color: COLORS.text,
+    lineHeight: 28,
   },
   memoryDescriptionNote: {
     fontSize: 15,
-    color: "#374151", // Medium gray
+    color: COLORS.textSecondary,
     lineHeight: 22,
   },
   memoryDateNote: {
-    fontSize: 15,
-    color: "#6b7280", // Light gray
-    fontWeight: "600",
-    marginTop: 4,
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    fontFamily: FONT.regular,
+    marginTop: 8,
   },
   tapeIcon: {
     position: "absolute",
