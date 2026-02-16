@@ -18,6 +18,7 @@ import {
   getYesterdayLocal,
   isSameLocalDate,
 } from "@/lib/dateHelpers";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type AuthContext = {
   user: User | null;
@@ -139,6 +140,16 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         // Analizar resultado
         if (fetchError) {
            console.warn(`⚠️ Error fetching user (Intento ${attempts}/${maxAttempts}):`, fetchError);
+           
+           // Si el error es 401, la sesión es inválida. Forzamos signOut.
+           // eslint-disable-next-line @typescript-eslint/no-explicit-any
+           if ((fetchError as any).status === 401) {
+              console.error("❌ Token inválido detectado (401) en loadElepadUserById. Limpiando sesión corrupta.");
+              // Forzar limpieza
+              await signOut();
+              return null;
+           }
+
            // Si falla la red, esperamos y reintentamos
            if (attempts < maxAttempts) {
               await new Promise((r) => setTimeout(r, 1000));
@@ -515,7 +526,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   }, [session, userElepad]);
 
 
-  const signOut = async () => {
+  async function signOut() {
     try {
       console.log("Cerrando sesión:", user?.email);
       
@@ -524,27 +535,34 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       setUser(null);
       setUserElepad(null);
       
-      // Luego hacer el signOut de Supabase
+      // Intentar signOut de Supabase
       const { error } = await supabase.auth.signOut();
       
       if (error) {
+        // Ignoramos sesión no encontrada
         const maybeCode = (error as unknown as { code?: string }).code;
-        if (maybeCode === "session_not_found") {
-          console.log("✅ Sesión ya cerrada");
-          return;
+        if (maybeCode !== "session_not_found") {
+          console.warn("signOut error supabase:", error);
         }
-        console.warn("signOut error", error);
-      } else {
-        console.log("✅ Sesión cerrada correctamente");
       }
     } catch (e) {
       console.warn("signOut exception", e);
-      // Asegurar limpieza incluso si hay error
+    } finally {
+      // SIEMPRE forzar limpieza de storage
+      try {
+        await AsyncStorage.removeItem('elepad-auth-token');
+        console.log("✅ Token de sesión eliminado forzosamente del storage (limpieza post-signout)");
+      } catch (storageError) {
+         console.error("❌ Error eliminando token del storage:", storageError);
+      }
+      
       setSession(null);
       setUser(null);
       setUserElepad(null);
+      // Redirigir siempre a login
+      router.replace("/");
     }
-  };
+  }
 
   const refreshUserElepad = async () => {
     const id = user?.id;
