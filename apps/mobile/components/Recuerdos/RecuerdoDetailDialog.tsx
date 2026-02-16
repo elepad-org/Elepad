@@ -1295,7 +1295,7 @@ export default function RecuerdoDetailDialog({
                               maximumValue={duration || 1}
                               value={currentTime}
                               onSlidingComplete={handleSliderChange}
-                              minimumTrackTintColor="#ff6b35"
+                              minimumTrackTintColor={COLORS.primary}
                               maximumTrackTintColor="#2a2a2a"
                               thumbTintColor="#e0e0e0"
                             />
