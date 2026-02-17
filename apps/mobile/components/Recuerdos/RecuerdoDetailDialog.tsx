@@ -20,6 +20,7 @@ import { captureRef } from "react-native-view-shot";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { shareAsync } from "expo-sharing";
 import * as FileSystem from "expo-file-system/legacy";
+import * as MediaLibrary from "expo-media-library";
 import {
   Dialog,
   Portal,
@@ -478,6 +479,84 @@ export default function RecuerdoDetailDialog({
   /*
    * Función para compartir visualmente el recuerdo (Polaroid) o el video
    */
+  /*
+   * Función para descargar el recuerdo al dispositivo
+   */
+  const handleDownload = async () => {
+    try {
+      // Solicitar permisos
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== 'granted') {
+        console.error('Permiso de almacenamiento denegado');
+        return;
+      }
+
+      // Para videos, descargar y guardar en galería
+      if (recuerdo.tipo === "video" && recuerdo.contenido) {
+        const filename = `video-${recuerdo.id}.mp4`;
+        const localUri = `${FileSystem.cacheDirectory}${filename}`;
+
+        const downloadResult = await FileSystem.downloadAsync(
+          recuerdo.contenido,
+          localUri,
+        );
+
+        await MediaLibrary.createAssetAsync(downloadResult.uri);
+        console.log('Video guardado en la galería');
+        return;
+      }
+
+      // Para audios, descargar y guardar en galería
+      if (recuerdo.tipo === "audio" && recuerdo.contenido) {
+        const safeTitle = (recuerdo.titulo || `audio-${recuerdo.id}`)
+          .replace(/[^a-zA-Z0-9\u00C0-\u024F\s-_]/g, "")
+          .trim()
+          .replace(/\s+/g, "_");
+
+        const filename = `${safeTitle || "audio"}.m4a`;
+        const localUri = `${FileSystem.cacheDirectory}${filename}`;
+
+        const downloadResult = await FileSystem.downloadAsync(
+          recuerdo.contenido,
+          localUri,
+        );
+
+        await MediaLibrary.createAssetAsync(downloadResult.uri);
+        console.log('Audio guardado en la galería');
+        return;
+      }
+
+      // Para imágenes, descargar y guardar en galería
+      if (recuerdo.tipo === "imagen" && recuerdo.contenido) {
+        const filename = `imagen-${recuerdo.id}.jpg`;
+        const localUri = `${FileSystem.cacheDirectory}${filename}`;
+
+        const downloadResult = await FileSystem.downloadAsync(
+          recuerdo.contenido,
+          localUri,
+        );
+
+        await MediaLibrary.createAssetAsync(downloadResult.uri);
+        console.log('Imagen guardada en la galería');
+        return;
+      }
+
+      // Para texto, capturar como imagen y guardar
+      if (recuerdo.tipo === "texto") {
+        const uri = await captureRef(viewRef, {
+          format: "png",
+          quality: 1,
+        });
+
+        await MediaLibrary.createAssetAsync(uri);
+        console.log('Nota guardada en la galería');
+        return;
+      }
+    } catch (error) {
+      console.error('Error al descargar:', error);
+    }
+  };
+
   const handleShare = async () => {
     if (
       recuerdo.tipo !== "imagen" &&
@@ -599,7 +678,7 @@ export default function RecuerdoDetailDialog({
               </TouchableOpacity>
             )}
 
-          {menuMounted && recuerdo.autorId === currentUserId && (
+          {menuMounted && (
             <Menu
               visible={menuVisible}
               onDismiss={closeMenu}
@@ -619,17 +698,30 @@ export default function RecuerdoDetailDialog({
               }
             >
               <Menu.Item
-                leadingIcon="pencil"
-                title="Modificar"
-                onPress={openEdit}
+                leadingIcon="download"
+                title="Descargar"
+                onPress={() => {
+                  closeMenu();
+                  handleDownload();
+                }}
                 disabled={isMutating}
               />
-              <Menu.Item
-                leadingIcon="trash-can"
-                title="Eliminar"
-                onPress={openDeleteConfirm}
-                disabled={isMutating}
-              />
+              {recuerdo.autorId === currentUserId && (
+                <>
+                  <Menu.Item
+                    leadingIcon="pencil"
+                    title="Modificar"
+                    onPress={openEdit}
+                    disabled={isMutating}
+                  />
+                  <Menu.Item
+                    leadingIcon="trash-can"
+                    title="Eliminar"
+                    onPress={openDeleteConfirm}
+                    disabled={isMutating}
+                  />
+                </>
+              )}
             </Menu>
           )}
         </View>
@@ -1124,49 +1216,61 @@ export default function RecuerdoDetailDialog({
                             onPress={handleShare}
                             disabled={isMutating}
                           />
-                          {recuerdo.autorId === currentUserId &&
-                            (menuMounted ? (
-                              <Menu
-                                visible={menuVisible}
-                                onDismiss={closeMenu}
-                                contentStyle={{
-                                  backgroundColor: "#ffffff",
-                                  borderRadius: 12,
+                          {menuMounted ? (
+                            <Menu
+                              visible={menuVisible}
+                              onDismiss={closeMenu}
+                              contentStyle={{
+                                backgroundColor: "#ffffff",
+                                borderRadius: 12,
+                              }}
+                              anchor={
+                                <IconButton
+                                  icon="dots-horizontal"
+                                  size={22}
+                                  iconColor="#e8e8e8"
+                                  style={{ margin: 0 }}
+                                  onPress={() => setMenuVisible(true)}
+                                  disabled={isMutating}
+                                />
+                              }
+                            >
+                              <Menu.Item
+                                leadingIcon="download"
+                                title="Descargar"
+                                onPress={() => {
+                                  closeMenu();
+                                  handleDownload();
                                 }}
-                                anchor={
-                                  <IconButton
-                                    icon="dots-horizontal"
-                                    size={22}
-                                    iconColor="#e8e8e8"
-                                    style={{ margin: 0 }}
-                                    onPress={() => setMenuVisible(true)}
-                                    disabled={isMutating}
-                                  />
-                                }
-                              >
-                                <Menu.Item
-                                  leadingIcon="pencil"
-                                  title="Modificar"
-                                  onPress={openEdit}
-                                  disabled={isMutating}
-                                />
-                                <Menu.Item
-                                  leadingIcon="trash-can"
-                                  title="Eliminar"
-                                  onPress={openDeleteConfirm}
-                                  disabled={isMutating}
-                                />
-                              </Menu>
-                            ) : (
-                              <IconButton
-                                icon="dots-horizontal"
-                                size={22}
-                                iconColor="#e8e8e8"
-                                style={{ margin: 0 }}
-                                onPress={() => setMenuVisible(true)}
                                 disabled={isMutating}
                               />
-                            ))}
+                              {recuerdo.autorId === currentUserId && (
+                                <>
+                                  <Menu.Item
+                                    leadingIcon="pencil"
+                                    title="Modificar"
+                                    onPress={openEdit}
+                                    disabled={isMutating}
+                                  />
+                                  <Menu.Item
+                                    leadingIcon="trash-can"
+                                    title="Eliminar"
+                                    onPress={openDeleteConfirm}
+                                    disabled={isMutating}
+                                  />
+                                </>
+                              )}
+                            </Menu>
+                          ) : (
+                            <IconButton
+                              icon="dots-horizontal"
+                              size={22}
+                              iconColor="#e8e8e8"
+                              style={{ margin: 0 }}
+                              onPress={() => setMenuVisible(true)}
+                              disabled={isMutating}
+                            />
+                          )}
                         </View>
 
                         {/* Diseño del cassette - réplica exacta de la miniatura */}

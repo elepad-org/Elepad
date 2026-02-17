@@ -78,6 +78,14 @@
           ]
         }
       ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Permitir a Elepad guardar tus recuerdos en la galería.",
+          "savePhotosPermission": "Permitir a Elepad guardar fotos y videos en tu galería.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
       "expo-build-properties",
       [
         "react-native-android-widget",
