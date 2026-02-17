@@ -34,48 +34,48 @@ export const useHomeTour = ({
     text: 'Aquí puedes ver tu nombre de usuario y tu rol en la familia. ¡Bienvenido!',
   });
 
-  const profileStep = useTourStep({
-    tourId: 'home',
-    stepId: 'profile',
-    order: 2,
-    text: 'Toca aquí para ver tu perfil y configuración.',
-  });
-
   const notificationStep = useTourStep({
     tourId: 'home',
     stepId: 'notifications',
-    order: 3,
+    order: 2,
     text: 'Recibe notificaciones importantes sobre la actividad familiar aquí.',
   });
 
-  const lastMemoryStep = useTourStep({
+  const profileStep = useTourStep({
     tourId: 'home',
-    stepId: 'last-memory',
-    order: 4,
-    text: 'Tu recuerdo más reciente aparecerá aquí. ¡Revive tus momentos favoritos!',
+    stepId: 'profile',
+    order: 3,
+    text: 'Toca aquí para ver tu perfil y configuración.',
   });
 
   const streakStep = useTourStep({
     tourId: 'home',
     stepId: 'streak-counter',
-    order: 5,
+    order: 4,
     text: '¡Este es tu contador de racha! Juega al menos una vez al día para mantener tu racha activa y ganar puntos extra.',
   });
 
   const eventsStep = useTourStep({
     tourId: 'home',
     stepId: 'events',
-    order: 6,
+    order: 5,
     text: 'Consulta aquí tus próximos eventos y la agenda familiar.',
   });
 
   const activityStep = useTourStep({
     tourId: 'home',
     stepId: 'recent-activity',
-    order: 7,
+    order: 6,
     text: userElepad?.elder
       ? 'Aquí puedes ver tu último juego completado con tu puntaje. ¡Toca para ver más detalles!'
       : 'Aquí verás la actividad reciente de los adultos mayores en tu grupo familiar.',
+  });
+
+  const lastMemoryStep = useTourStep({
+    tourId: 'home',
+    stepId: 'last-memory',
+    order: 7,
+    text: 'Tu recuerdo más reciente aparecerá aquí. ¡Revive tus momentos favoritos!',
   });
 
   useEffect(() => {
@@ -123,18 +123,20 @@ export const useHomeTour = ({
               // @ts-ignore
               router.navigate({ pathname: '/(tabs)', params: { tab: 'home' } });
 
-              // Esperar un frame/tiempo extra para asegurar que el layout se actualizó tras la navegación
+              // Aumentar el tiempo de espera para asegurar que el layout se estabilizó
+              // Especialmente importante si hubo navegación o cambios de estado
               const timer2 = setTimeout(() => {
 
                 // Determine which steps are active based on role
+                // Updated order: Greeting -> Notifications -> Profile -> Streak -> Events -> Activity -> Last Memory
                 const stepsToMeasure = [
                   greetingStep,
-                  profileStep,
                   notificationStep,
-                  lastMemoryStep,
+                  profileStep,
                   ...(userElepad.elder ? [streakStep] : []),
                   eventsStep,
-                  activityStep
+                  activityStep,
+                  lastMemoryStep
                 ];
 
                 let measurementsComplete = 0;
@@ -204,9 +206,13 @@ export const useHomeTour = ({
                       step.ref.current.measureInWindow((x, y, w, h) => {
                         console.log(`🏠 Home: Measured ${step.step.stepId}: x=${x}, y=${y}, w=${w}, h=${h}`);
                         
-                        // Si las dimensiones son 0, intentar una segunda medición después de un breve delay
-                        if (w === 0 || h === 0) {
-                          console.warn(`🏠 Home: Invalid dimensions for ${step.step.stepId}, retrying...`);
+                        // Validación más estricta: dimensiones deben ser > 0 y posición y razonable
+                        // A veces en Android y puede ser negativo si está fuera de pantalla arriba, o muy pequeño
+                        // Si y es muy pequeño (< -50) probablemente está fuera de pantalla
+                        const isValid = w > 0 && h > 0 && y > -50;
+
+                        if (!isValid) {
+                          console.warn(`🏠 Home: Invalid/Suspicious dimensions for ${step.step.stepId}, retrying...`);
                           const retryTimer = setTimeout(() => {
                             if (step.ref.current) {
                               step.ref.current.measureInWindow((x2, y2, w2, h2) => {
@@ -225,7 +231,7 @@ export const useHomeTour = ({
                               console.error(`🏠 Home: Ref lost for ${step.step.stepId} during retry`);
                               checkAndStart(step.step.stepId);
                             }
-                          }, 200);
+                          }, 500); // Dar más tiempo en el retry (500ms vs 200ms)
                           timersRef.current.push(retryTimer);
                         } else {
                           tourLayoutsRef.current[step.step.stepId] = { x, y, width: w, height: h };
@@ -243,10 +249,10 @@ export const useHomeTour = ({
 
                 // Measure sequentially with delays
                 stepsToMeasure.forEach((step, index) => {
-                  measureStep(step, 50 * (index + 1));
+                  measureStep(step, 100 * (index + 1)); // Increased delay between measurements
                 });
 
-              }, 100); // Pequeña espera tras forzar navegación
+              }, 800); // Increased wait time after navigation (100ms -> 800ms)
               timersRef.current.push(timer2);
 
             }, 500);
