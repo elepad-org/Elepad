@@ -39,6 +39,8 @@ import MentionInput from "./MentionInput";
 import StickerReactionPicker from "./StickerReactionPicker";
 import fondoRecuerdos from "@/assets/images/fondoRecuerdos.png";
 
+import cassetteSound from "@/assets/sounds/cassette-play-sound-effect.mp3";
+
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
@@ -187,6 +189,10 @@ export default function RecuerdoDetailDialog({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
+
+  const [isPlayingEffect, setIsPlayingEffect] = useState(false);
+  const effectPlayer = useAudioPlayer(cassetteSound);
+
   const [menuVisible, setMenuVisible] = useState(false);
   const [menuMounted, setMenuMounted] = useState(true);
   const [editVisible, setEditVisible] = useState(false);
@@ -308,6 +314,9 @@ export default function RecuerdoDetailDialog({
       setCurrentTime(0);
       setIsFlipped(false);
       flipAnimation.setValue(0);
+      setIsPlayingEffect(false);
+      effectPlayer.seekTo(0);
+      effectPlayer.pause();
     }
 
     if (visible && shouldUseVideo) {
@@ -325,21 +334,41 @@ export default function RecuerdoDetailDialog({
     player,
     videoPlayer,
     flipAnimation,
+    effectPlayer,
   ]);
+
+  const ignoreEffectCompletion = useRef(false);
 
   useEffect(() => {
     if (!shouldUseAudio) return;
 
     // Sincronizar estado con el player
+    // Sincronizar estado con el player
     const checkStatus = () => {
-      setIsPlaying(player.playing);
+      if (isPlayingEffect) {
+        if (ignoreEffectCompletion.current) {
+          ignoreEffectCompletion.current = false;
+          return;
+        }
+
+        if (
+          effectPlayer.currentTime >= effectPlayer.duration - 0.1 &&
+          effectPlayer.duration > 0
+        ) {
+          setIsPlayingEffect(false);
+          effectPlayer.seekTo(0);
+          effectPlayer.pause();
+          player.play();
+        }
+      }
+      setIsPlaying(player.playing || isPlayingEffect);
       setCurrentTime(player.currentTime);
       setDuration(player.duration);
     };
 
     const interval = setInterval(checkStatus, 100);
     return () => clearInterval(interval);
-  }, [shouldUseAudio, player]);
+  }, [shouldUseAudio, player, effectPlayer, isPlayingEffect]);
 
   // Limpiar el player cuando se cierra el modal
   useEffect(() => {
@@ -350,12 +379,15 @@ export default function RecuerdoDetailDialog({
             player.pause();
           }
           player.seekTo(0);
+          if (effectPlayer.playing) {
+            effectPlayer.pause();
+          }
         } catch {
           // Player already cleaned up
         }
       }
     };
-  }, [shouldUseAudio, player]);
+  }, [shouldUseAudio, player, effectPlayer]);
 
   if (!recuerdo) return null;
 
@@ -510,9 +542,8 @@ export default function RecuerdoDetailDialog({
         quality: 1,
       });
 
-      const message = `${recuerdo.titulo || "Recuerdo"}. ${
-        recuerdo.autorNombre || "Alguien"
-      } te invita a usar Elepad.`;
+      const message = `${recuerdo.titulo || "Recuerdo"}. ${recuerdo.autorNombre || "Alguien"
+        } te invita a usar Elepad.`;
 
       await shareAsync(uri, {
         mimeType: "image/png",
@@ -554,19 +585,19 @@ export default function RecuerdoDetailDialog({
             recuerdo.tipo === "texto" ||
             recuerdo.tipo === "video" ||
             recuerdo.tipo === "audio") && (
-            <TouchableOpacity
-              onPress={handleShare}
-              disabled={isMutating}
-              activeOpacity={0.6}
-              style={{ padding: 8 }}
-            >
-              <MaterialCommunityIcons
-                name="share-variant"
-                size={22}
-                color={COLORS.textSecondary || "#757575"}
-              />
-            </TouchableOpacity>
-          )}
+              <TouchableOpacity
+                onPress={handleShare}
+                disabled={isMutating}
+                activeOpacity={0.6}
+                style={{ padding: 8 }}
+              >
+                <MaterialCommunityIcons
+                  name="share-variant"
+                  size={22}
+                  color={COLORS.textSecondary || "#757575"}
+                />
+              </TouchableOpacity>
+            )}
 
           {menuMounted && recuerdo.autorId === currentUserId && (
             <Menu
@@ -684,30 +715,60 @@ export default function RecuerdoDetailDialog({
     </View>
   );
 
-  const playAudio = () => {
+  function playAudio() {
     if (!shouldUseAudio) return;
 
     try {
+      if (isPlayingEffect) {
+        setIsPlayingEffect(false);
+        effectPlayer.pause();
+        effectPlayer.seekTo(0);
+        return;
+      }
+
       if (player.playing) {
         player.pause();
       } else {
         // Si el audio terminó, volver al inicio
-        if (player.currentTime >= player.duration - 0.1) {
+        if (
+          player.currentTime >= player.duration - 0.1 &&
+          player.duration > 0
+        ) {
+          player.pause();
           player.seekTo(0);
+          // Play effect first
+          setIsPlayingEffect(true);
+          ignoreEffectCompletion.current = true;
+          effectPlayer.seekTo(0);
+          effectPlayer.play();
+        } else if (player.currentTime === 0) {
+          // Play effect first if starting from 0
+          player.pause();
+          setIsPlayingEffect(true);
+          ignoreEffectCompletion.current = true;
+          effectPlayer.seekTo(0);
+          effectPlayer.play();
+        } else {
+          // Resume
+          player.play();
         }
-        player.play();
       }
     } catch (error) {
       console.error("Error toggling audio:", error);
     }
   };
 
-  const stopAudio = () => {
+  function stopAudio() {
     if (!shouldUseAudio) return;
 
     try {
       player.pause();
       player.seekTo(0);
+      if (effectPlayer.playing) {
+        effectPlayer.pause();
+        effectPlayer.seekTo(0);
+      }
+      setIsPlayingEffect(false);
       setIsPlaying(false);
       setCurrentTime(0);
     } catch (error) {
@@ -715,7 +776,7 @@ export default function RecuerdoDetailDialog({
     }
   };
 
-  const handleSliderChange = (value: number) => {
+  function handleSliderChange(value: number) {
     if (!shouldUseAudio) return;
 
     try {
@@ -756,92 +817,92 @@ export default function RecuerdoDetailDialog({
         {(recuerdo.tipo === "imagen" ||
           recuerdo.tipo === "texto" ||
           recuerdo.tipo === "video") && (
-          <View
-            style={{
-              position: "absolute",
-              top: screenWidth * 3, // Way off screen
-              left: 0,
-              zIndex: -100,
-            }}
-          >
             <View
-              ref={viewRef}
-              collapsable={false}
               style={{
-                backgroundColor:
-                  recuerdo.tipo === "texto" ? "transparent" : COLORS.white,
-                borderRadius: 0,
-                width: screenWidth * 0.92,
-                overflow: "hidden",
-                opacity: 1,
+                position: "absolute",
+                top: screenWidth * 3, // Way off screen
+                left: 0,
+                zIndex: -100,
               }}
             >
-              {recuerdo.tipo === "texto" ? (
-                <ImageBackground
-                  source={fondoRecuerdos}
-                  resizeMode="cover"
-                  style={{
-                    padding: 10,
-                    justifyContent: "center",
-                    minHeight: 200,
-                    width: screenWidth * 0.92,
-                  }}
-                >
-                  {renderInfoBlock(false)}
-                </ImageBackground>
-              ) : (
-                <View>
-                  <View style={{ padding: 14, paddingBottom: 0 }}>
-                    {recuerdo.tipo === "imagen" && recuerdo.miniatura && (
-                      <Image
-                        source={{ uri: recuerdo.miniatura }}
-                        style={{
-                          width: "100%",
-                          height: screenWidth * 0.84,
-                          borderRadius: 0,
-                        }}
-                        contentFit="cover"
-                      />
-                    )}
-                    {recuerdo.tipo === "video" && (
-                      <View
-                        style={{
-                          width: "100%",
-                          height: screenWidth * 0.84,
-                          borderRadius: 0,
-                          backgroundColor: "#000",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          overflow: "hidden",
-                        }}
-                      >
-                        {recuerdo.miniatura ? (
-                          <Image
-                            source={{ uri: recuerdo.miniatura }}
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              position: "absolute",
-                            }}
-                            contentFit="cover"
-                          />
-                        ) : null}
-                        <MaterialCommunityIcons
-                          name="play-circle-outline"
-                          size={64}
-                          color="rgba(255,255,255,0.8)"
-                          style={{ zIndex: 10 }}
+              <View
+                ref={viewRef}
+                collapsable={false}
+                style={{
+                  backgroundColor:
+                    recuerdo.tipo === "texto" ? "transparent" : COLORS.white,
+                  borderRadius: 0,
+                  width: screenWidth * 0.92,
+                  overflow: "hidden",
+                  opacity: 1,
+                }}
+              >
+                {recuerdo.tipo === "texto" ? (
+                  <ImageBackground
+                    source={fondoRecuerdos}
+                    resizeMode="cover"
+                    style={{
+                      padding: 10,
+                      justifyContent: "center",
+                      minHeight: 200,
+                      width: screenWidth * 0.92,
+                    }}
+                  >
+                    {renderInfoBlock(false)}
+                  </ImageBackground>
+                ) : (
+                  <View>
+                    <View style={{ padding: 14, paddingBottom: 0 }}>
+                      {recuerdo.tipo === "imagen" && recuerdo.miniatura && (
+                        <Image
+                          source={{ uri: recuerdo.miniatura }}
+                          style={{
+                            width: "100%",
+                            height: screenWidth * 0.84,
+                            borderRadius: 0,
+                          }}
+                          contentFit="cover"
                         />
-                      </View>
-                    )}
+                      )}
+                      {recuerdo.tipo === "video" && (
+                        <View
+                          style={{
+                            width: "100%",
+                            height: screenWidth * 0.84,
+                            borderRadius: 0,
+                            backgroundColor: "#000",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            overflow: "hidden",
+                          }}
+                        >
+                          {recuerdo.miniatura ? (
+                            <Image
+                              source={{ uri: recuerdo.miniatura }}
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                position: "absolute",
+                              }}
+                              contentFit="cover"
+                            />
+                          ) : null}
+                          <MaterialCommunityIcons
+                            name="play-circle-outline"
+                            size={64}
+                            color="rgba(255,255,255,0.8)"
+                            style={{ zIndex: 10 }}
+                          />
+                        </View>
+                      )}
+                    </View>
+                    {/* Render info WITHOUT actions for the screenshot */}
+                    {renderInfoBlock(false)}
                   </View>
-                  {/* Render info WITHOUT actions for the screenshot */}
-                  {renderInfoBlock(false)}
-                </View>
-              )}
+                )}
+              </View>
             </View>
-          </View>
-        )}
+          )}
 
         <Dialog
           visible={visible}

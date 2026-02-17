@@ -6,6 +6,8 @@ import { FONT, SHADOWS, COLORS } from "@/styles/base";
 import Slider from "@react-native-community/slider";
 import HighlightedMentionText from "./HighlightedMentionText";
 
+import cassetteSound from "@/assets/sounds/cassette-play-sound-effect.mp3";
+
 interface CompactAudioPlayerProps {
   audioUri: string;
   title?: string;
@@ -35,15 +37,40 @@ export default function CompactAudioPlayer({
     updateInterval: 100,
   });
 
+
+
+  const [isPlayingEffect, setIsPlayingEffect] = useState(false);
+  const effectPlayer = useAudioPlayer(cassetteSound);
+
+  const ignoreEffectCompletion = useRef(false);
+
   useEffect(() => {
     const interval = setInterval(() => {
-      setIsPlaying(player.playing);
+      // Monitor effect player
+      if (isPlayingEffect) {
+        if (ignoreEffectCompletion.current) {
+          ignoreEffectCompletion.current = false;
+          return;
+        }
+
+        if (
+          effectPlayer.currentTime >= effectPlayer.duration - 0.1 &&
+          effectPlayer.duration > 0
+        ) {
+          setIsPlayingEffect(false);
+          effectPlayer.seekTo(0);
+          effectPlayer.pause();
+          player.play();
+        }
+      }
+
+      setIsPlaying(player.playing || isPlayingEffect);
       setDuration(player.duration);
       setCurrentTime(player.currentTime);
     }, 100);
 
     return () => clearInterval(interval);
-  }, [player]);
+  }, [player, effectPlayer, isPlayingEffect]);
 
   useEffect(() => {
     return () => {
@@ -51,21 +78,50 @@ export default function CompactAudioPlayer({
         if (player.playing) {
           player.pause();
         }
+        if (effectPlayer.playing) {
+          effectPlayer.pause();
+        }
       } catch {
         // ignore
       }
     };
-  }, [player]);
+  }, [player, effectPlayer]);
 
   const playAudio = () => {
     try {
+      if (isPlayingEffect) {
+        setIsPlayingEffect(false);
+        effectPlayer.pause();
+        effectPlayer.seekTo(0);
+        return;
+      }
+
       if (player.playing) {
         player.pause();
       } else {
-        if (player.currentTime >= player.duration - 0.1 && player.duration > 0) {
+        // Si está al final, volver al inicio
+        if (
+          player.currentTime >= player.duration - 0.1 &&
+          player.duration > 0
+        ) {
+          player.pause();
           player.seekTo(0);
+          // Play effect first
+          setIsPlayingEffect(true);
+          ignoreEffectCompletion.current = true;
+          effectPlayer.seekTo(0);
+          effectPlayer.play();
+        } else if (player.currentTime === 0) {
+          // Si está al inicio, reproducir efecto
+          player.pause();
+          setIsPlayingEffect(true);
+          ignoreEffectCompletion.current = true;
+          effectPlayer.seekTo(0);
+          effectPlayer.play();
+        } else {
+          // Si está pausado en el medio, continuar sin efecto
+          player.play();
         }
-        player.play();
       }
     } catch (error) {
       console.error("Error toggling audio:", error);
