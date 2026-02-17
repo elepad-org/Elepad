@@ -1800,6 +1800,7 @@ export default function RecuerdosScreen() {
           familyMembers={groupMembers}
           currentUserId={userElepad?.id}
           isElder={userElepad?.elder || false}
+          showToast={showToast}
         />
       )}
     </SafeAreaView>

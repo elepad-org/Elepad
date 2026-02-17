@@ -85,6 +85,7 @@ interface RecuerdoDetailDialogProps {
   isElder?: boolean;
   hasNext?: boolean;
   hasPrev?: boolean;
+  showToast?: (params: { message: string; type: "success" | "error" }) => void;
 }
 
 const screenWidth = Dimensions.get("window").width;
@@ -185,6 +186,7 @@ export default function RecuerdoDetailDialog({
   onNavigate,
   hasNext = false,
   hasPrev = false,
+  showToast,
 }: RecuerdoDetailDialogProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -487,7 +489,7 @@ export default function RecuerdoDetailDialog({
       // Solicitar permisos
       const { status } = await MediaLibrary.requestPermissionsAsync();
       if (status !== 'granted') {
-        console.error('Permiso de almacenamiento denegado');
+        showToast?.({ message: 'Permiso de almacenamiento denegado', type: 'error' });
         return;
       }
 
@@ -502,7 +504,7 @@ export default function RecuerdoDetailDialog({
         );
 
         await MediaLibrary.createAssetAsync(downloadResult.uri);
-        console.log('Video guardado en la galería');
+        showToast?.({ message: 'Video guardado en la galería', type: 'success' });
         return;
       }
 
@@ -522,7 +524,7 @@ export default function RecuerdoDetailDialog({
         );
 
         await MediaLibrary.createAssetAsync(downloadResult.uri);
-        console.log('Audio guardado en la galería');
+        showToast?.({ message: 'Audio guardado en la galería', type: 'success' });
         return;
       }
 
@@ -537,7 +539,7 @@ export default function RecuerdoDetailDialog({
         );
 
         await MediaLibrary.createAssetAsync(downloadResult.uri);
-        console.log('Imagen guardada en la galería');
+        showToast?.({ message: 'Imagen guardada en la galería', type: 'success' });
         return;
       }
 
@@ -549,11 +551,12 @@ export default function RecuerdoDetailDialog({
         });
 
         await MediaLibrary.createAssetAsync(uri);
-        console.log('Nota guardada en la galería');
+        showToast?.({ message: 'Nota guardada en la galería', type: 'success' });
         return;
       }
     } catch (error) {
       console.error('Error al descargar:', error);
+      showToast?.({ message: 'Error al descargar', type: 'error' });
     }
   };
 
