@@ -121,7 +121,7 @@ export default function NewAccount() {
             );
           } else {
             // Wait a bit for the database to update
-            await new Promise((resolve) => setTimeout(resolve, 500));
+            await new Promise((resolve) => setTimeout(resolve, 1000));
             // Refresh user data to get the new groupId
             await refreshUserElepad();
           }
@@ -146,7 +146,7 @@ export default function NewAccount() {
             );
           } else {
             // Wait a bit for the database to update
-            await new Promise((resolve) => setTimeout(resolve, 500));
+            await new Promise((resolve) => setTimeout(resolve, 1000));
             // Refresh user data to get the new groupId
             await refreshUserElepad();
           }

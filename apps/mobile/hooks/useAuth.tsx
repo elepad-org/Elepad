@@ -105,68 +105,131 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     },
   );
 
-  async function loadElepadUserById(userId: string) {
+  type LoadUserOptions = {
+    retries?: number;
+    retryDelayMs?: number;
+    fallbackUser?: User | null;
+  };
+
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  async function loadElepadUserById(userId: string, options?: LoadUserOptions) {
+    const retries = options?.retries ?? 0;
+    let delayMs = options?.retryDelayMs ?? 800;
+    let attempt = 0;
+
     // Solo mostrar loading si es un usuario diferente o no hay usuario cargado
     // Usamos ref para evitar problemas de stale closure en los listeners
     if (userElepadRef.current?.id !== userId) {
       setUserElepadLoading(true);
     }
+
     try {
-      console.log("Cargando usuario de Elepad:", userId);
-      
-      // Timeout para getUsersId - si tarda más de 8 segundos, abortar
-      const userPromise = getUsersId(userId);
-      const timeoutPromise = new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('User fetch timeout')), 8000)
-      );
-      
-      const res = await Promise.race([
-        userPromise,
-        timeoutPromise
-      ]).catch((err) => {
-        console.warn("⚠️ getUsersId timeout o error:", err);
-        throw err;
-      });
-      
-      console.log("Datos del usuario:", res);
-      const maybeStatus = (res as unknown as { status?: number }).status;
-      const maybeData = (res as unknown as { data?: unknown }).data;
-      if (maybeStatus === 404) {
-        setUserElepad(null);
-        return;
+      while (true) {
+        try {
+          console.log("Cargando usuario de Elepad:", userId);
+
+          // Timeout para getUsersId - si tarda más de 8 segundos, abortar
+          const userPromise = getUsersId(userId);
+          const timeoutPromise = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("User fetch timeout")), 8000)
+          );
+
+          const res = await Promise.race([userPromise, timeoutPromise]).catch(
+            (err) => {
+              console.warn("getUsersId timeout o error:", err);
+              throw err;
+            },
+          );
+
+          console.log("Datos del usuario:", res);
+          const maybeStatus = (res as unknown as { status?: number }).status;
+          const maybeData = (res as unknown as { data?: unknown }).data;
+
+          if (maybeStatus === 404) {
+            if (attempt < retries) {
+              attempt += 1;
+              await sleep(delayMs);
+              delayMs = Math.min(Math.round(delayMs * 1.5), 4000);
+              continue;
+            }
+
+            if (options?.fallbackUser) {
+              const fallbackDisplayName =
+                (options.fallbackUser.user_metadata?.displayName as string) ||
+                options.fallbackUser.email ||
+                "Usuario";
+              setUserElepad({
+                id: userId,
+                email: options.fallbackUser.email ?? "",
+                displayName: fallbackDisplayName,
+                elder: Boolean(options.fallbackUser.user_metadata?.elder),
+              });
+              return;
+            }
+
+            setUserElepad(null);
+            return;
+          }
+
+          const u = (maybeData ?? (res as unknown)) as ElepadUser;
+
+          // Fetch equipped frame con timeout
+          const framePromise = supabase
+            .from("user_inventory")
+            .select("item:shop_items(asset_url)")
+            .eq("user_id", userId)
+            .eq("equipped", true)
+            .single();
+
+          const frameTimeoutPromise = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("Frame fetch timeout")), 5000)
+          );
+
+          const frameResult = await Promise.race([
+            framePromise,
+            frameTimeoutPromise,
+          ]).catch((err) => {
+            console.warn("Frame fetch timeout o error:", err);
+            return { data: null, error: err };
+          });
+
+          if (frameResult?.data?.item) {
+            // Safe cast as we know the structure from the query
+            const item = frameResult.data.item as unknown as {
+              asset_url: string;
+            };
+            u.activeFrameUrl = item.asset_url;
+          }
+
+          setUserElepad(u);
+          return;
+        } catch (err) {
+          if (attempt < retries) {
+            attempt += 1;
+            await sleep(delayMs);
+            delayMs = Math.min(Math.round(delayMs * 1.5), 4000);
+            continue;
+          }
+
+          console.warn("loadElepadUserById error", err);
+          if (options?.fallbackUser) {
+            const fallbackDisplayName =
+              (options.fallbackUser.user_metadata?.displayName as string) ||
+              options.fallbackUser.email ||
+              "Usuario";
+            setUserElepad({
+              id: userId,
+              email: options.fallbackUser.email ?? "",
+              displayName: fallbackDisplayName,
+              elder: Boolean(options.fallbackUser.user_metadata?.elder),
+            });
+            return;
+          }
+          setUserElepad(null);
+          return;
+        }
       }
-      const u = (maybeData ?? (res as unknown)) as ElepadUser;
-
-      // Fetch equipped frame con timeout
-      const framePromise = supabase
-        .from("user_inventory")
-        .select("item:shop_items(asset_url)")
-        .eq("user_id", userId)
-        .eq("equipped", true)
-        .single();
-      
-      const frameTimeoutPromise = new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('Frame fetch timeout')), 5000)
-      );
-      
-      const frameResult = await Promise.race([
-        framePromise,
-        frameTimeoutPromise
-      ]).catch((err) => {
-        console.warn("⚠️ Frame fetch timeout o error:", err);
-        return { data: null, error: err };
-      });
-
-      if (frameResult?.data?.item) {
-        // Safe cast as we know the structure from the query
-        const item = frameResult.data.item as unknown as { asset_url: string };
-        u.activeFrameUrl = item.asset_url;
-      }
-
-      setUserElepad(u);
-    } catch (err) {
-      console.warn("loadElepadUserById error", err);
-      setUserElepad(null);
     } finally {
       setUserElepadLoading(false);
     }
@@ -298,10 +361,10 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       try {
         console.log("🔄 Iniciando carga de sesión...");
         
-        // Timeout aumentado a 30s para producción (AsyncStorage puede ser lento)
+        // Timeout aumentado a 10s para producción (AsyncStorage puede ser lento)
         const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('Session timeout')), 30000)
+          setTimeout(() => reject(new Error('Session timeout')), 10000)
         );
         
         const result = await Promise.race([
@@ -333,7 +396,11 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         if (session?.user) {
           // No esperamos a que cargue el perfil para liberar el loading inicial
           // Esto permite que la UI navegue a home y muestre skeletons
-          await loadElepadUserById(session.user.id);
+          await loadElepadUserById(session.user.id, {
+            retries: 6,
+            retryDelayMs: 800,
+            fallbackUser: session.user,
+          });
         } else {
           setUserElepad(null);
           setUserElepadLoading(false);
@@ -390,7 +457,11 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
           }
           // Solo recargar usuario si NO es un simple USER_UPDATED
           if (event !== "USER_UPDATED") {
-            await loadElepadUserById(session.user.id);
+            await loadElepadUserById(session.user.id, {
+              retries: 6,
+              retryDelayMs: 800,
+              fallbackUser: session.user,
+            });
           }
           // Redirigir a home en estos casos:
           // - SIGNED_IN: cuando el usuario acaba de iniciar sesión explícitamente
@@ -458,7 +529,13 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
   const refreshUserElepad = async () => {
     const id = user?.id;
-    if (id) await loadElepadUserById(id);
+    if (id) {
+      await loadElepadUserById(id, {
+        retries: 3,
+        retryDelayMs: 800,
+        fallbackUser: user,
+      });
+    }
   };
 
   const updateUserTimezone = (timezone: string) => {
