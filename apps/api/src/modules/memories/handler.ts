@@ -410,6 +410,8 @@ memoriesApp.openapi(
       "image/gif",
       "image/webp",
       "image/svg+xml",
+      "image/heic", // Formato HEIC usado por iOS
+      "image/heif", // Formato HEIF genérico
       // Videos
       "video/mp4",
       "video/webm",
