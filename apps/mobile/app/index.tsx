@@ -12,7 +12,7 @@ import { useToast } from "@/components/shared/Toast";
 import { supabase } from "@/lib/supabase";
 
 export default function IndexRedirect() {
-  const { session, loading, userElepad } = useAuth();
+  const { session, loading, userElepad, userElepadLoading } = useAuth();
   const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const hasRedirected = useRef(false);
@@ -50,7 +50,8 @@ export default function IndexRedirect() {
     // Si falla la carga del usuario Elepad (no existe a pesar de tener sesión),
     // debemos dar una salida al usuario.
     // Esto ocurre si userElepad es null pero loading es false.
-    if (!loading && !userElepad) {
+    // IMPORTANTE: userElepadLoading debe ser false para considerar que realmente terminó y falló.
+    if (!loading && !userElepad && !userElepadLoading) {
       return (
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 24 }}>
              <Image

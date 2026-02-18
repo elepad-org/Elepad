@@ -71,10 +71,12 @@ export default function LogIn() {
     });
     if (error) {
       showError(error.message);
+      setLoading(false);
     } else {
       console.log("Inicio de sesión:", email);
+      // No hacemos setLoading(false) aquí para que el botón siga loading
+      // hasta que el componente padre (LoginScreen) detecte la sesión y cambie la vista
     }
-    setLoading(false);
   };
 
   const handleGoogleLogin = async () => {
