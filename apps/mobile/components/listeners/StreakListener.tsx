@@ -12,31 +12,35 @@ export default function StreakListener() {
   const [streakCount, setStreakCount] = useState(0);
 
   useEffect(() => {
-    // Si tenemos datos de racha
-    if (streak) {
-      // Primera carga, inicializar refs
-      if (previousStreakRef.current === null) {
-        previousStreakRef.current = streak.currentStreak;
-        previousHasPlayedTodayRef.current = streak.hasPlayedToday;
-        return;
-      }
+    // Si no hay datos de racha (logout o usuario no-elder), resetear refs
+    if (!streak) {
+      previousStreakRef.current = null;
+      previousHasPlayedTodayRef.current = null;
+      return;
+    }
 
-      // Detectar si ACABAMOS de jugar hoy (cambio de false a true)
-      const justPlayedToday =
-        !previousHasPlayedTodayRef.current && streak.hasPlayedToday;
-
-      // Si se detecta que se jugó por primera vez en el día
-      if (justPlayedToday) {
-        // Delay slightly to allow game completion modals to appear first if any
-        setTimeout(() => {
-          setStreakCount(streak.currentStreak);
-          setModalVisible(true);
-        }, 800);
-      }
-
+    // Primera carga después de login: solo inicializar refs, NO mostrar modal
+    if (previousStreakRef.current === null) {
       previousStreakRef.current = streak.currentStreak;
       previousHasPlayedTodayRef.current = streak.hasPlayedToday;
+      return;
     }
+
+    // Detectar si ACABAMOS de jugar hoy (cambio de false a true)
+    const justPlayedToday =
+      previousHasPlayedTodayRef.current === false && streak.hasPlayedToday;
+
+    // Si se detecta que se jugó por primera vez en el día
+    if (justPlayedToday) {
+      // Delay slightly to allow game completion modals to appear first if any
+      setTimeout(() => {
+        setStreakCount(streak.currentStreak);
+        setModalVisible(true);
+      }, 800);
+    }
+
+    previousStreakRef.current = streak.currentStreak;
+    previousHasPlayedTodayRef.current = streak.hasPlayedToday;
   }, [streak]);
 
   const handleClose = useCallback(() => {

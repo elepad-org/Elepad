@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, memo } from "react";
-import { View, useWindowDimensions, Keyboard, Animated, InteractionManager } from "react-native";
+import { View, useWindowDimensions, Keyboard, Animated, InteractionManager, BackHandler, Platform } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { TabView, SceneMap } from "react-native-tab-view";
 import HomeScreen from "./home";
@@ -71,6 +71,20 @@ function TabLayoutContent() {
   }, [params.tab, routes]);
 
 
+
+  // En Android, interceptar el botón/gesto atrás para salir de la app
+  // en vez de volver al stack anterior (ej: pantalla index/login)
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      // Salir de la app (mover a background) en vez de navegar hacia atrás
+      BackHandler.exitApp();
+      return true; // Indicar que manejamos el evento
+    });
+
+    return () => backHandler.remove();
+  }, []);
 
   const renderScene = useMemo(() => SceneMap({
     home: HomeScreen,
