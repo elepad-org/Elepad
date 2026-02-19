@@ -17,7 +17,6 @@ import CancelButton from "../shared/CancelButton";
 import { StyledTextInput } from "../shared";
 import DraggableFlatList, {
   RenderItemParams,
-  ScaleDecorator,
 } from "react-native-draggable-flatlist";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import PolaroidPreview from "./PolaroidPreview";

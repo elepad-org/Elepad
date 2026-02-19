@@ -15,7 +15,7 @@ interface PolaroidPreviewProps {
     mimeType?: string | null;
     autorNombre?: string | null;
     fecha?: Date | string | null;
-    reactions?: Array<any>; // Support for future expansion
+    reactions?: Array<unknown>; // Support for future expansion
   };
   familyMembers?: Array<{
     id: string;
