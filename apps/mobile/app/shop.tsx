@@ -685,7 +685,7 @@ export default function ShopScreen() {
                     {buyForOthers && (
                       <View style={{ marginBottom: 16 }}>
                         <DropdownSelect
-                          label="Destinatario"
+                          label="Destinatari"
                           value={recipientUserId}
                           options={availableRecipients.map((member) => ({
                             key: member.id,
@@ -695,7 +695,7 @@ export default function ShopScreen() {
                           }))}
                           onSelect={(value) => setRecipientUserId(value)}
                           placeholder="Selecciona un familiar"
-                          showLabel={true}
+                          showLabel={false}
                         />
                       </View>
                     )}
@@ -703,15 +703,6 @@ export default function ShopScreen() {
                 )}
 
                 <View style={styles.modalActions}>
-                  <Button
-                    mode="text"
-                    onPress={handleDismissModal}
-                    style={styles.modalCancelBtn}
-                    textColor={COLORS.textSecondary}
-                    labelStyle={{ fontFamily: FONT.semiBold }}
-                  >
-                    Quizás luego
-                  </Button>
 
                   {isOwned(selectedItem.id) ? (
                     selectedItem.type === "frame" ? (
