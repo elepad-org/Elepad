@@ -7,12 +7,15 @@ import {
   useGetAlbum,
 } from "@elepad/api-client";
 import { ThemeTag } from "@/components/Recuerdos/CreateAlbumDialog";
+import { addPendingAlbum } from "@/hooks/usePendingAlbums";
 
 interface CreateAlbumData {
   title: string;
   description?: string;
   memoryIds: string[];
   tags: ThemeTag[];
+  /** URL of the first selected image to show as preview while creating */
+  coverPreviewUrl?: string | null;
 }
 
 interface TranscribeAudioData {
@@ -87,6 +90,12 @@ export function useAlbumCreation(): UseAlbumCreationReturn {
 
       try {
         console.log("📝 Creando álbum:", data.title);
+
+        // Agregar a la lista de álbumes pendientes para mostrar preview en la UI
+        addPendingAlbum({
+          title: data.title,
+          coverPreviewUrl: data.coverPreviewUrl ?? null,
+        });
 
         createAlbumApi.mutateAsync({
           data: {
