@@ -1,14 +1,14 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   View,
-  Image,
   TouchableOpacity,
   StyleSheet,
   FlatList,
   Dimensions,
   Modal,
 } from "react-native";
-import { Button, Text, IconButton } from "react-native-paper";
+import { Button, Text } from "react-native-paper";
+import { Image } from "expo-image";
 import { Memory } from "@elepad/api-client";
 import { COLORS, STYLES } from "@/styles/base";
 import { useAlbumCreation } from "@/hooks/useAlbumCreation";
@@ -17,14 +17,21 @@ import CancelButton from "../shared/CancelButton";
 import { StyledTextInput } from "../shared";
 import DraggableFlatList, {
   RenderItemParams,
-  ScaleDecorator,
 } from "react-native-draggable-flatlist";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import PolaroidPreview from "./PolaroidPreview";
+import RecuerdoItemComponent from "./RecuerdoItemComponent";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 interface CreateAlbumDialogProps {
   visible: boolean;
   onDismiss: () => void;
   memories: Memory[];
+  familyMembers?: Array<{
+    id: string;
+    displayName: string;
+    avatarUrl?: string | null;
+  }>;
 }
 
 interface SelectedMemory {
@@ -32,9 +39,16 @@ interface SelectedMemory {
   title: string | null;
   mediaUrl: string | null;
   order: number;
+  // Keep original memory data for preview
+  original: Memory;
 }
 
-export type ThemeTag = "Aventura" | "Fantasía" | "Pequeños momentos" | "Celebración" | "Acogedor";
+export type ThemeTag =
+  | "Aventura"
+  | "Fantasía"
+  | "Pequeños momentos"
+  | "Celebración"
+  | "Acogedor";
 
 const THEME_TAGS: ThemeTag[] = [
   "Aventura",
@@ -44,10 +58,13 @@ const THEME_TAGS: ThemeTag[] = [
   "Acogedor",
 ];
 
+const SCREEN_WIDTH = Dimensions.get("window").width;
+
 export default function CreateAlbumDialog({
   visible,
   onDismiss,
   memories,
+  familyMembers = [],
 }: CreateAlbumDialogProps) {
   const {
     createAlbum,
@@ -64,9 +81,12 @@ export default function CreateAlbumDialog({
   const [selectedMemories, setSelectedMemories] = useState<SelectedMemory[]>(
     [],
   );
+  const [previewMemory, setPreviewMemory] = useState<Memory | null>(null);
 
-  const imageMemories = memories.filter(
-    (m) => m.mimeType && m.mimeType.startsWith("image/"),
+  const imageMemories = useMemo(
+    () =>
+      memories.filter((m) => m.mimeType && m.mimeType.startsWith("image/")),
+    [memories],
   );
 
   const handleReset = () => {
@@ -75,6 +95,7 @@ export default function CreateAlbumDialog({
     setDescription("");
     setSelectedTags([]);
     setSelectedMemories([]);
+    setPreviewMemory(null);
   };
 
   const handleDismiss = () => {
@@ -84,12 +105,12 @@ export default function CreateAlbumDialog({
 
   const handleToggleTag = (tag: ThemeTag) => {
     const isSelected = selectedTags.includes(tag);
-    
+
     if (isSelected) {
-      setSelectedTags(prev => prev.filter(t => t !== tag));
+      setSelectedTags((prev) => prev.filter((t) => t !== tag));
     } else {
       if (selectedTags.length < 2) {
-        setSelectedTags(prev => [...prev, tag]);
+        setSelectedTags((prev) => [...prev, tag]);
       }
     }
   };
@@ -111,6 +132,7 @@ export default function CreateAlbumDialog({
           title: memory.title,
           mediaUrl: memory.mediaUrl,
           order: prev.length,
+          original: memory,
         },
       ]);
     }
@@ -147,25 +169,41 @@ export default function CreateAlbumDialog({
     isActive,
   }: RenderItemParams<SelectedMemory>) => {
     return (
-      <ScaleDecorator>
+      <View
+        style={[styles.draggableItem, isActive && styles.draggableItemActive]}
+      >
         <TouchableOpacity
-          onLongPress={drag}
-          disabled={isActive}
-          style={[styles.draggableItem, isActive && styles.draggableItemActive]}
+          style={styles.draggableContentContainer}
+          onPress={() => setPreviewMemory(item.original)}
+          activeOpacity={0.7}
         >
           {item.mediaUrl && (
             <Image source={{ uri: item.mediaUrl }} style={styles.thumbnail} />
           )}
           <View style={styles.draggableContent}>
-            <Text numberOfLines={2} style={styles.memoryTitle}>
+            <Text numberOfLines={1} style={styles.memoryTitle}>
               {item.title || "Sin título"}
             </Text>
             <Text style={styles.orderBadge}>#{item.order + 1}</Text>
           </View>
-          <IconButton icon="drag-horizontal" size={24} />
         </TouchableOpacity>
-      </ScaleDecorator>
+
+        {/* Drag Handle - Explicit interaction */}
+        <TouchableOpacity
+          onLongPress={drag}
+          delayLongPress={50}
+          style={styles.dragHandle}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <MaterialCommunityIcons name="drag-horizontal" size={24} color={COLORS.textSecondary} />
+        </TouchableOpacity>
+      </View>
     );
+  };
+
+  const getAuhorName = (id: string) => {
+    const member = familyMembers.find((m) => m.id === id);
+    return member?.displayName || "Desconocido";
   };
 
   return (
@@ -198,7 +236,7 @@ export default function CreateAlbumDialog({
               ? "Ingresa los datos del álbum"
               : step === "select"
                 ? `${selectedMemories.length} foto(s) seleccionada(s)`
-                : "Mantén presionado y arrastra para reordenar"}
+                : "Toca para ver, arrastra desde la derecha para ordenar"}
           </Text>
 
           <View
@@ -262,6 +300,7 @@ export default function CreateAlbumDialog({
               </View>
             )}
 
+
             {step === "select" && (
               <View style={{ flex: 1, width: "100%" }}>
                 <FlatList
@@ -270,71 +309,41 @@ export default function CreateAlbumDialog({
                   numColumns={3}
                   columnWrapperStyle={{
                     justifyContent: "flex-start",
-                    marginBottom: 8,
-                    gap: 8,
+                    // We remove gap here because RecuerdoItemComponent handles margins
+                  }}
+                  contentContainerStyle={{
+                    paddingBottom: 20,
+                    // RecuerdoItemComponent expects to manage its own spacing relative to container width
+                    // The container has padding 28. width is 90% of screen.
                   }}
                   scrollEnabled={true}
                   renderItem={({ item }) => {
                     const isSelected = selectedMemories.some(
                       (m) => m.id === item.id,
                     );
-                    const containerWidth =
-                      Dimensions.get("window").width * 0.88 - 56;
-                    const itemSize = (containerWidth - 16) / 3;
+
+                    // Available width calculation:
+                    // Dialog width is 90% of screen.
+                    // Container padding is 28 on each side => 56 total.
+                    const modalWidth = SCREEN_WIDTH * 0.9;
+                    const listAvailableWidth = modalWidth - 56;
 
                     return (
-                      <TouchableOpacity
-                        onPress={() => handleToggleMemory(item)}
-                        style={{
-                          width: itemSize,
-                          height: itemSize,
-                          borderRadius: 8,
-                          overflow: "hidden",
-                          borderWidth: 2,
-                          borderColor: isSelected
-                            ? COLORS.primary
-                            : COLORS.border,
-                          backgroundColor: isSelected
-                            ? `${COLORS.primary}15`
-                            : COLORS.card,
+                      <RecuerdoItemComponent
+                        item={{
+                          ...item,
+                          fecha: new Date(item.createdAt), // Ensure date compatibility if needed
+                          contenido: item.mediaUrl || "", // mapping
+                          miniatura: item.mediaUrl || undefined,
+                          titulo: item.title || undefined,
+                          tipo: "imagen",
                         }}
-                      >
-                        {item.mediaUrl && (
-                          <Image
-                            source={{ uri: item.mediaUrl }}
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              resizeMode: "cover",
-                            }}
-                          />
-                        )}
-                        {isSelected && (
-                          <View
-                            style={{
-                              position: "absolute",
-                              top: 4,
-                              right: 4,
-                              backgroundColor: COLORS.primary,
-                              borderRadius: 12,
-                              width: 24,
-                              height: 24,
-                              justifyContent: "center",
-                              alignItems: "center",
-                            }}
-                          >
-                            <Text
-                              style={{
-                                color: COLORS.white,
-                                fontSize: 12,
-                                fontWeight: "bold",
-                              }}
-                            >
-                              ✓
-                            </Text>
-                          </View>
-                        )}
-                      </TouchableOpacity>
+                        numColumns={3}
+                        onPress={() => handleToggleMemory(item)}
+                        onLongPress={() => setPreviewMemory(item)}
+                        isSelected={isSelected}
+                        availableWidth={listAvailableWidth}
+                      />
                     );
                   }}
                   ListEmptyComponent={
@@ -364,21 +373,29 @@ export default function CreateAlbumDialog({
 
             {step === "reorder" && (
               <GestureHandlerRootView style={{ flex: 1, width: "100%" }}>
-              <DraggableFlatList
-                data={selectedMemories}
-                onDragEnd={({ data }) => {
-                  const reordered = data.map((item, idx) => ({
-                    ...item,
-                    order: idx,
-                  }));
-                  setSelectedMemories(reordered);
-                }}
-                keyExtractor={(item) => item.id}
-                renderItem={renderDraggableItem}
-                containerStyle={{ flex: 1 }}
-                activationDistance={10}
-                scrollEnabled={true}
-              />
+                <DraggableFlatList
+                  data={selectedMemories}
+                  onDragEnd={({ data }) => {
+                    const reordered = data.map((item, idx) => ({
+                      ...item,
+                      order: idx,
+                    }));
+                    setSelectedMemories(reordered);
+                  }}
+                  keyExtractor={(item) => item.id}
+                  renderItem={renderDraggableItem}
+                  containerStyle={{ flex: 1, overflow: "visible" }}
+                  activationDistance={20}
+                  autoscrollThreshold={50}
+                  animationConfig={{
+                    damping: 20,
+                    mass: 0.2,
+                    stiffness: 100,
+                    overshootClamping: false,
+                  }}
+                  scrollEnabled={true}
+                  contentContainerStyle={{ paddingBottom: 20 }}
+                />
               </GestureHandlerRootView>
             )}
           </View>
@@ -393,7 +410,9 @@ export default function CreateAlbumDialog({
                   <Button
                     mode="contained"
                     onPress={() => setStep("select")}
-                    disabled={!title.trim() || selectedTags.length === 0 || isCreating}
+                    disabled={
+                      !title.trim() || selectedTags.length === 0 || isCreating
+                    }
                     buttonColor={COLORS.primary}
                     textColor={COLORS.white}
                     style={{ borderRadius: 12 }}
@@ -463,7 +482,7 @@ export default function CreateAlbumDialog({
           visible={!!processingAlbumTitle}
           animationType="fade"
           transparent={true}
-          onRequestClose={() => {}}
+          onRequestClose={() => { }}
         >
           <View style={styles.container}>
             <TouchableOpacity
@@ -493,6 +512,39 @@ export default function CreateAlbumDialog({
             </View>
           </View>
         </Modal>
+
+        {/* Preview Modal */}
+        {previewMemory && (
+          <Modal
+            visible={true}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setPreviewMemory(null)}
+          >
+            <View style={styles.previewContainer}>
+              <TouchableOpacity
+                style={styles.backdrop}
+                activeOpacity={1}
+                onPress={() => setPreviewMemory(null)}
+              />
+              <View style={styles.previewContent}>
+                <PolaroidPreview
+                  memory={{
+                    id: previewMemory.id,
+                    title: previewMemory.title,
+                    description: previewMemory.caption,
+                    mediaUrl: previewMemory.mediaUrl,
+                    mimeType: previewMemory.mimeType,
+                    autorNombre: getAuhorName(previewMemory.createdBy),
+                    fecha: new Date(previewMemory.createdAt),
+                  }}
+                  familyMembers={familyMembers}
+                />
+              </View>
+            </View>
+          </Modal>
+        )}
+
       </View>
     </Modal>
   );
@@ -503,16 +555,26 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 24,
+    // paddingHorizontal: 24, // Removed to allow 90% width control
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
+  previewContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.85)",
+  },
+  previewContent: {
+    width: '100%',
+    alignItems: 'center',
+  },
   imagesContainer: {
-    width: "100%",
-    maxWidth: 400,
-    minHeight: 600,
+    width: "90%", // Match other dialogs
+    height: "80%",
+    maxHeight: 700,
     alignItems: "center",
     backgroundColor: COLORS.background,
     borderRadius: 20,
@@ -520,8 +582,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   formContainer: {
-    width: "100%",
-    maxWidth: 400,
+    width: "90%", // Match other dialogs
     alignItems: "center",
     backgroundColor: COLORS.background,
     borderRadius: 20,
@@ -566,37 +627,47 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: COLORS.card,
-    padding: 12,
     marginBottom: 8,
-    borderRadius: 8,
-    borderWidth: 1,
+    borderRadius: 12,
+    borderWidth: 2,
     borderColor: COLORS.border,
     alignSelf: "center",
-    maxWidth: "90%",
+    width: "100%",
   },
   draggableItemActive: {
-    backgroundColor: `${COLORS.primary}90`,
     borderColor: COLORS.primary,
-    maxWidth: "90%",
+  },
+  draggableContentContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+  },
+  dragHandle: {
+    padding: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   thumbnail: {
-    width: 50,
-    height: 50,
-    borderRadius: 4,
+    width: 48,
+    height: 48,
+    borderRadius: 8,
     marginRight: 12,
+    backgroundColor: '#eee',
   },
   draggableContent: {
     flex: 1,
   },
   memoryTitle: {
-    fontSize: 14,
-    fontWeight: "500",
-    marginBottom: 4,
+    fontSize: 15,
+    fontWeight: "600",
+    marginBottom: 2,
+    color: COLORS.text,
   },
   orderBadge: {
     fontSize: 12,
     color: COLORS.primary,
-    fontWeight: "600",
+    fontWeight: "700",
   },
   processingTitle: {
     fontSize: 20,

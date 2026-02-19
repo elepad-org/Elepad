@@ -1,11 +1,22 @@
 import LogIn from "@/components/Forms/Auth/LogIn";
 import { useRef } from "react";
-import { Animated, StyleSheet, ImageBackground } from "react-native";
+import { Animated, StyleSheet, ImageBackground, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import fondoLogin from "@/assets/images/pirotecnia.png";
+import { useAuth } from "@/hooks/useAuth";
+import { LoadingUser } from "@/components/shared";
 
 export default function LoginScreen() {
   const fadeAnim = useRef(new Animated.Value(1)).current;
+  const { session } = useAuth();
+
+  if (session) {
+    return (
+      <View style={{ flex: 1 }}>
+        <LoadingUser />
+      </View>
+    );
+  }
 
   return (
     <ImageBackground
