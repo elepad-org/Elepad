@@ -416,14 +416,13 @@ export default function ShopScreen() {
       <View style={styles.headerContainer}>
         <View style={styles.headerTop}>
           <BackButton size={28} />
-          <Text style={styles.headerTitle}>Tienda de Puntos</Text>
+          <Text style={styles.headerTitle}>Tienda</Text>
         </View>
 
         <View style={styles.headerActions}>
           <Chip style={styles.chip} textStyle={styles.chipText}>
             {balanceData?.pointsBalance ?? 0} Puntos
           </Chip>
-          <Text style={styles.subtitleText}>¡Canjea tus premios!</Text>
         </View>
 
         {/* Filter Bar */}
@@ -814,6 +813,16 @@ export default function ShopScreen() {
                       )}
                     </Pressable>
                   )}
+
+                  <Button
+                    mode="text"
+                    onPress={() => setSelectedItem(null)}
+                    style={styles.modalCancelBtn}
+                    textColor={COLORS.textSecondary}
+                    labelStyle={{ fontFamily: FONT.semiBold }}
+                  >
+                    Quizás luego
+                  </Button>
                 </View>
 
                 {(balanceData?.pointsBalance ?? 0) < selectedItem.cost &&
@@ -1148,7 +1157,7 @@ const styles = StyleSheet.create({
   },
   modalCancelBtn: {
     borderRadius: 16,
-    height: 48,
+    height: 54,
     justifyContent: "center",
   },
   errorBanner: {
@@ -1156,7 +1165,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: COLORS.red + "10",
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
     borderRadius: 12,
     marginTop: 16,
     gap: 8,

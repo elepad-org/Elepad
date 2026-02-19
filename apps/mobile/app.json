@@ -30,7 +30,11 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS",
         "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_MEDIA_IMAGES",
+        "READ_MEDIA_VIDEO",
+        "READ_MEDIA_AUDIO",
+        "READ_MEDIA_VISUAL_USER_SELECTED"
       ],
       "googleServicesFile": "./google-services.json"
     },
@@ -83,7 +87,8 @@
         {
           "photosPermission": "Permitir a Elepad guardar tus recuerdos en la galería.",
           "savePhotosPermission": "Permitir a Elepad guardar fotos y videos en tu galería.",
-          "isAccessMediaLocationEnabled": true
+          "isAccessMediaLocationEnabled": true,
+          "granularPermissions": ["audio", "photo", "video"]
         }
       ],
       "expo-build-properties",

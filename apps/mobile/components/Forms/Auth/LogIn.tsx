@@ -15,6 +15,7 @@ import googleLogo from "@/assets/images/google.png";
 import { Link } from "expo-router";
 import { COLORS } from "@/styles/base";
 import { useToast } from "@/components/shared/Toast";
+import { getUsersId } from "@elepad/api-client/src/gen/client";
 
 export default function LogIn() {
   const router = useRouter();
@@ -110,68 +111,58 @@ export default function LogIn() {
         return;
       }
 
-      console.log(data);
-
       const authUrl = data?.url;
-      console.log(authUrl);
+      console.log("Auth URL:", authUrl);
       if (authUrl) {
-        // Abre el browser del telefono
+        // Abre el browser del teléfono y espera el redirect de vuelta
         const result = await WebBrowser.openAuthSessionAsync(
           authUrl,
           redirectTo,
         );
-        console.log(result);
+        console.log("WebBrowser result:", result);
         if (result.type === "success" && result.url) {
-          //Se parsea la URL que devuelve, ya que tiene los tokens de sesion
-          const parseParams = (u: string) => {
-            try {
-              const params: Record<string, string> = {};
-              const hashIndex = u.indexOf("#");
-              const queryIndex = u.indexOf("?");
-              const raw =
-                hashIndex !== -1
-                  ? u.substring(hashIndex + 1)
-                  : queryIndex !== -1
-                    ? u.substring(queryIndex + 1)
-                    : "";
-              raw.split("&").forEach((pair) => {
-                const [k, v] = pair.split("=");
-                if (k && v)
-                  params[decodeURIComponent(k)] = decodeURIComponent(v);
-              });
-              return params;
-            } catch (e) {
-              console.log(e);
-              return {} as Record<string, string>;
-            }
-          };
+          // Con flowType: 'pkce' la URL de retorno contiene un `code`, no tokens.
+          // exchangeCodeForSession maneja el intercambio PKCE correctamente.
+          const { data: sessionData, error: exchangeError } =
+            await supabase.auth.exchangeCodeForSession(result.url);
 
-          const params = parseParams(result.url);
-          const access_token = params["access_token"];
-          const refresh_token = params["refresh_token"];
-
-          try {
-            await supabase.auth.setSession({
-              access_token,
-              refresh_token,
-            });
-          } catch (e) {
-            console.warn("No se pudo establecer la sesión con los tokens:", e);
+          if (exchangeError) {
+            console.warn("Error al intercambiar código PKCE:", exchangeError);
+            showError(exchangeError.message);
+            return;
           }
 
-          // Confirma usuario y redirige al inicio
-          try {
-            const userRes = await supabase.auth.getUser();
-            const user = userRes?.data?.user;
-            if (user) {
+          if (sessionData?.session) {
+            /* 
+            console.log("✅ Sesión PKCE establecida, redirigiendo a home");
+            router.replace("/(tabs)/home"); 
+            */
+
+            const userId = sessionData.session.user.id;
+            // Verificar que el correo de Google esté registrado en Elepad
+            try {
+              const profile = await getUsersId(userId);
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const hasProfile = !!(profile as any)?.id || !!(profile as any)?.data?.id;
+              if (!hasProfile) throw new Error("not_found");
+              console.log("✅ Sesión establecida, redirigiendo a home");
               router.replace("/(tabs)/home");
-              return;
-            } else {
-              router.replace("/login");
+            } catch (profileErr) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const status = (profileErr as any)?.status ?? (profileErr as any)?.response?.status;
+              const isNotFound = status === 404 || (profileErr as Error)?.message === "not_found";
+              // Limpiar sesión de Supabase para que no quede a medias
+              await supabase.auth.signOut();
+              if (isNotFound) {
+                showError(
+                  "Este correo de Google no está registrado en Elepad. Crea una cuenta primero."
+                );
+                router.replace("/(auth)/signup");
+              } else {
+                console.warn("Error verificando perfil post-OAuth:", profileErr);
+                showError("No se pudo verificar tu cuenta. Inténtalo de nuevo.");
+              }
             }
-          } catch (error) {
-            console.warn("No se pudo verificar el usuario de OAuth:", error);
-            router.replace("/login");
           }
         }
       }
