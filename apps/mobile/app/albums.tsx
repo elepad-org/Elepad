@@ -8,7 +8,7 @@ import {
   Image,
   StatusBar,
 } from "react-native";
-import { Text, ActivityIndicator, Button } from "react-native-paper";
+import { Text, ActivityIndicator, Button, SegmentedButtons, IconButton } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { COLORS, STYLES } from "@/styles/base";
@@ -46,9 +46,9 @@ export default function AlbumsScreen() {
   const groupId = userElepad?.groupId || "";
 
   const [albumDialogVisible, setAlbumDialogVisible] = useState(false);
-  //const [snackbarVisible, setSnackbarVisible] = useState(false);
-  //const [snackbarMessage, setSnackbarMessage] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+  const [numColumns, setNumColumns] = useState(1);
 
   // Fetch albums using the custom hook
   const { albumsQuery } = useAlbumCreation();
@@ -162,12 +162,20 @@ export default function AlbumsScreen() {
     | { type: "album"; album: Album };
 
   const listData: ListItem[] = useMemo(() => {
+    // Sort real albums by createdAt
+    const sorted = [...albums].sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
+    });
+
+    // Pending always first, then sorted albums
     const items: ListItem[] = pendingAlbums.map((p) => ({ type: "pending" as const, pending: p }));
-    for (const album of albums) {
+    for (const album of sorted) {
       items.push({ type: "album" as const, album });
     }
     return items;
-  }, [pendingAlbums, albums]);
+  }, [pendingAlbums, albums, sortOrder]);
 
   const handleAlbumPress = useCallback(
     (albumId: string) => {
@@ -240,62 +248,111 @@ export default function AlbumsScreen() {
             </Text>
           </View>
         ) : (
-          <FlatList
-            data={listData}
-            keyExtractor={(item) =>
-              item.type === "pending" ? item.pending.id : item.album.id
-            }
-            numColumns={1}
-            contentContainerStyle={styles.listContent}
-            showsVerticalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                colors={[COLORS.primary]}
+          <>
+            {/* Controles de ordenamiento y vista */}
+            <View
+              style={{
+                paddingHorizontal: 24,
+                paddingVertical: 12,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              {/* Toggle de Vistas - Izquierda */}
+              <SegmentedButtons
+                value={numColumns.toString()}
+                onValueChange={(value) => setNumColumns(parseInt(value))}
+                buttons={[
+                  { value: "1", icon: "view-agenda" },
+                  { value: "2", icon: "view-grid" },
+                ]}
+                density="small"
+                style={{ maxWidth: 100 }}
+                theme={{
+                  colors: {
+                    secondaryContainer: COLORS.primary,
+                    onSecondaryContainer: COLORS.white,
+                  },
+                }}
               />
-            }
-            renderItem={({ item, index }) => {
-              if (item.type === "pending") {
+
+              {/* Botón de Ordenar - Derecha */}
+              <IconButton
+                icon={sortOrder === "desc" ? "arrow-down" : "arrow-up"}
+                size={20}
+                onPress={() =>
+                  setSortOrder(sortOrder === "desc" ? "asc" : "desc")
+                }
+                mode="contained-tonal"
+                style={{ margin: 0 }}
+              />
+            </View>
+
+            <FlatList
+              key={`albums-${numColumns}`}
+              data={listData}
+              keyExtractor={(item) =>
+                item.type === "pending" ? item.pending.id : item.album.id
+              }
+              numColumns={numColumns}
+              contentContainerStyle={styles.listContent}
+              showsVerticalScrollIndicator={false}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  colors={[COLORS.primary]}
+                />
+              }
+              renderItem={({ item, index }) => {
+                if (item.type === "pending") {
+                  return (
+                    <Animated.View
+                      entering={ZoomIn.delay(index * 25).springify()}
+                      style={[
+                        styles.columnItem,
+                        numColumns === 2 && styles.columnItemHalf,
+                      ]}
+                    >
+                      <AlbumCard
+                        id={item.pending.id}
+                        title={item.pending.title}
+                        coverImageUrl={item.pending.coverPreviewUrl}
+                        createdAt={new Date(item.pending.createdAt).toISOString()}
+                        onPress={() => {}}
+                        isPending
+                      />
+                    </Animated.View>
+                  );
+                }
+
                 return (
                   <Animated.View
                     entering={ZoomIn.delay(index * 25).springify()}
-                    style={styles.columnItem}
+                    style={[
+                      styles.columnItem,
+                      numColumns === 2 && styles.columnItemHalf,
+                    ]}
                   >
                     <AlbumCard
-                      id={item.pending.id}
-                      title={item.pending.title}
-                      coverImageUrl={item.pending.coverPreviewUrl}
-                      createdAt={new Date(item.pending.createdAt).toISOString()}
-                      onPress={() => {}}
-                      isPending
+                      id={item.album.id}
+                      title={item.album.title}
+                      description={item.album.description}
+                      coverImageUrl={item.album.coverImageUrl}
+                      pdfUrl={item.album.urlPdf}
+                      createdAt={item.album.createdAt}
+                      totalPages={undefined}
+                      onPress={() => handleAlbumPress(item.album.id)}
                     />
                   </Animated.View>
                 );
+              }}
+              ListFooterComponent={
+                <View style={{ height: 40 }} />
               }
-
-              return (
-                <Animated.View
-                  entering={ZoomIn.delay(index * 25).springify()}
-                  style={styles.columnItem}
-                >
-                  <AlbumCard
-                    id={item.album.id}
-                    title={item.album.title}
-                    description={item.album.description}
-                    coverImageUrl={item.album.coverImageUrl}
-                    pdfUrl={item.album.urlPdf}
-                    createdAt={item.album.createdAt}
-                    totalPages={undefined}
-                    onPress={() => handleAlbumPress(item.album.id)}
-                  />
-                </Animated.View>
-              );
-            }}
-            ListFooterComponent={
-              <View style={{ height: 40 }} />
-            }
-          />
+            />
+          </>
         )}
       </View>
 
@@ -346,5 +403,9 @@ const styles = StyleSheet.create({
   columnItem: {
     width: "100%",
     marginBottom: 16,
+  },
+  columnItemHalf: {
+    width: "50%",
+    paddingHorizontal: 4,
   },
 });
