@@ -24,6 +24,8 @@ import {
   usePostShopBuy,
   useGetShopInventory,
   usePostShopEquip,
+  useGetFamilyGroupIdGroupMembers,
+  useGetShopItemsItemIdOwnership,
 } from "@elepad/api-client";
 import { COLORS, SHADOWS, FONT } from "@/styles/base";
 import { useAuth } from "@/hooks/useAuth";
@@ -33,6 +35,7 @@ import Reanimated, { ZoomIn } from "react-native-reanimated";
 import { useToast } from "@/components/shared/Toast";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import DropdownSelect from "@/components/shared/DropdownSelect";
 
 export default function ShopScreen() {
   const router = useRouter();
@@ -46,6 +49,8 @@ export default function ShopScreen() {
     assetUrl?: string;
   } | null>(null);
   const [activeFilter, setActiveFilter] = React.useState("Todos");
+  const [buyForOthers, setBuyForOthers] = React.useState(false);
+  const [recipientUserId, setRecipientUserId] = React.useState<string>("");
 
   // Helpers to normalize data
   const normalizeData = (data: unknown) => {
@@ -75,6 +80,62 @@ export default function ShopScreen() {
   const inventoryResponse = useGetShopInventory();
   const inventoryData = normalizeData(inventoryResponse.data);
   const refetchInventory = inventoryResponse.refetch;
+
+  // Obtener miembros del grupo familiar
+  const groupMembersResponse = useGetFamilyGroupIdGroupMembers(
+    user?.groupId ?? "",
+    {
+      query: { enabled: !!user?.groupId },
+    },
+  );
+  const groupMembersData = normalizeData(groupMembersResponse.data) as
+    | {
+        owner: {
+          id: string;
+          displayName: string;
+          avatarUrl: string | null;
+          elder: boolean;
+          activeFrameUrl: string | null;
+        };
+        members: Array<{
+          id: string;
+          displayName: string;
+          avatarUrl: string | null;
+          elder: boolean;
+          activeFrameUrl: string | null;
+        }>;
+      }
+    | undefined;
+
+  // Filtrar miembros que NO sean abuelos
+  const nonElderMembers = React.useMemo(() => {
+    if (!groupMembersData) return [];
+    const allMembers = [...groupMembersData.members];
+    // Agregar owner si no es elder (aunque normalmente sí lo es)
+    if (!groupMembersData.owner.elder) {
+      allMembers.push(groupMembersData.owner);
+    }
+    return allMembers.filter((m) => !m.elder);
+  }, [groupMembersData]);
+
+  // Obtener quiénes tienen el item seleccionado
+  const ownershipResponse = useGetShopItemsItemIdOwnership(
+    selectedItem?.id ?? "",
+    {
+      query: { enabled: !!selectedItem?.id },
+    }
+  );
+  const ownershipData = normalizeData(ownershipResponse.data) as
+    | { itemId: string; ownerUserIds: string[] }
+    | undefined;
+
+  // Filtrar miembros que NO tienen el item seleccionado (para regalos)
+  const availableRecipients = React.useMemo(() => {
+    if (!selectedItem || !ownershipData) return nonElderMembers;
+    
+    const ownerIds = new Set(ownershipData.ownerUserIds);
+    return nonElderMembers.filter(member => !ownerIds.has(member.id));
+  }, [nonElderMembers, selectedItem, ownershipData]);
 
   // Removed duplicate isOwned declaration
 
@@ -144,8 +205,16 @@ export default function ShopScreen() {
   const { mutate: buyItem, isPending: isBuying } = usePostShopBuy({
     mutation: {
       onSuccess: () => {
-        showToast({ message: "¡Compra realizada con éxito!", type: "success" });
+        const recipientName = nonElderMembers.find(
+          (m) => m.id === recipientUserId,
+        )?.displayName;
+        const message = buyForOthers && recipientName
+          ? `¡Regalo comprado con éxito para ${recipientName}!`
+          : "¡Compra realizada con éxito!";
+        showToast({ message, type: "success" });
         setSelectedItem(null);
+        setBuyForOthers(false);
+        setRecipientUserId("");
         refetchBalance(); // Update points
         refetchInventory(); // Update inventory
       },
@@ -188,12 +257,30 @@ export default function ShopScreen() {
 
   const handleBuy = () => {
     if (!selectedItem) return;
-    buyItem({ data: { itemId: selectedItem.id } });
+    
+    // Validar que si está en modo "comprar para otros", se haya seleccionado un destinatario
+    if (buyForOthers && !recipientUserId) {
+      Alert.alert("Error", "Por favor selecciona un destinatario.");
+      return;
+    }
+    
+    buyItem({
+      data: {
+        itemId: selectedItem.id,
+        recipientUserId: buyForOthers ? recipientUserId : undefined,
+      },
+    });
   };
 
   const handleEquip = () => {
     if (!selectedItem) return;
     equipItem({ data: { itemId: selectedItem.id } });
+  };
+
+  const handleDismissModal = () => {
+    setSelectedItem(null);
+    setBuyForOthers(false);
+    setRecipientUserId("");
   };
 
   /* Redundant declarations removed */
@@ -329,14 +416,13 @@ export default function ShopScreen() {
       <View style={styles.headerContainer}>
         <View style={styles.headerTop}>
           <BackButton size={28} />
-          <Text style={styles.headerTitle}>Tienda de Puntos</Text>
+          <Text style={styles.headerTitle}>Tienda</Text>
         </View>
 
         <View style={styles.headerActions}>
           <Chip style={styles.chip} textStyle={styles.chipText}>
             {balanceData?.pointsBalance ?? 0} Puntos
           </Chip>
-          <Text style={styles.subtitleText}>¡Canjea tus premios!</Text>
         </View>
 
         {/* Filter Bar */}
@@ -386,7 +472,7 @@ export default function ShopScreen() {
       <Portal>
         <Modal
           visible={!!selectedItem}
-          onDismiss={() => setSelectedItem(null)}
+          onDismiss={handleDismissModal}
           contentContainerStyle={styles.modalContent}
         >
           {selectedItem && (
@@ -477,53 +563,149 @@ export default function ShopScreen() {
 
               <View style={styles.modalBody}>
                 <Text style={styles.modalTitle}>{selectedItem.title}</Text>
+                
                 {!isOwned(selectedItem.id) && (
                   <>
-                    <Text style={styles.modalDescription}>
-                      ¿Quieres canjear este premio por tus puntos acumulados?
-                    </Text>
-
+                    {/* Costo del canje */}
                     <View style={styles.modalCostContainer}>
                       <Text style={styles.modalCostLabel}>Costo del canje</Text>
                       <Text style={styles.modalCostValue}>
                         {selectedItem.cost} Puntos
                       </Text>
                     </View>
-                  </>
-                )}
 
-                {/* Point Info */}
-                {!isOwned(selectedItem.id) && (
-                  <View style={styles.pointsInfoRow}>
-                    <View style={styles.pointsInfoItem}>
-                      <Text style={styles.pointsInfoLabel}>Tus puntos</Text>
-                      <Text style={styles.pointsInfoValue}>
-                        {balanceData?.pointsBalance ?? 0}
-                      </Text>
+                    {/* Point Info */}
+                    <View style={styles.pointsInfoRow}>
+                      <View style={styles.pointsInfoItem}>
+                        <Text style={styles.pointsInfoLabel}>Tus puntos</Text>
+                        <Text style={styles.pointsInfoValue}>
+                          {balanceData?.pointsBalance ?? 0}
+                        </Text>
+                      </View>
+                      <View style={styles.pointsInfoDivider} />
+                      <View style={styles.pointsInfoItem}>
+                        <Text style={styles.pointsInfoLabel}>Restantes</Text>
+                        <Text
+                          style={[
+                            styles.pointsInfoValue,
+                            (balanceData?.pointsBalance ?? 0) <
+                              selectedItem.cost && styles.pointsNegative,
+                          ]}
+                        >
+                          {Math.max(
+                            0,
+                            (balanceData?.pointsBalance ?? 0) - selectedItem.cost,
+                          )}
+                        </Text>
+                      </View>
                     </View>
-                    <View style={styles.pointsInfoDivider} />
-                    <View style={styles.pointsInfoItem}>
-                      <Text style={styles.pointsInfoLabel}>Restantes</Text>
-                      <Text
-                        style={[
-                          styles.pointsInfoValue,
-                          (balanceData?.pointsBalance ?? 0) <
-                            selectedItem.cost && styles.pointsNegative,
+
+                    {/* Botones para seleccionar modo de compra */}
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        gap: 8,
+                        marginBottom: 16,
+                      }}
+                    >
+                      <Pressable
+                        onPress={() => {
+                          setBuyForOthers(false);
+                          setRecipientUserId("");
+                        }}
+                        style={({ pressed }) => [
+                          {
+                            flex: 1,
+                            paddingVertical: 10,
+                            paddingHorizontal: 12,
+                            borderRadius: 12,
+                            borderWidth: 2,
+                            borderColor: !buyForOthers
+                              ? COLORS.primary
+                              : COLORS.border,
+                            backgroundColor: !buyForOthers
+                              ? COLORS.primary + "15"
+                              : "transparent",
+                            opacity: pressed ? 0.7 : 1,
+                          },
                         ]}
                       >
-                        {Math.max(
-                          0,
-                          (balanceData?.pointsBalance ?? 0) - selectedItem.cost,
-                        )}
-                      </Text>
+                        <Text
+                          style={{
+                            textAlign: "center",
+                            fontFamily: FONT.semiBold,
+                            fontSize: 13,
+                            color: !buyForOthers
+                              ? COLORS.primary
+                              : COLORS.textSecondary,
+                          }}
+                        >
+                          Para mí
+                        </Text>
+                      </Pressable>
+
+                      <Pressable
+                        onPress={() => setBuyForOthers(true)}
+                        style={({ pressed }) => [
+                          {
+                            flex: 1,
+                            paddingVertical: 10,
+                            paddingHorizontal: 12,
+                            borderRadius: 12,
+                            borderWidth: 2,
+                            borderColor: buyForOthers
+                              ? COLORS.primary
+                              : COLORS.border,
+                            backgroundColor: buyForOthers
+                              ? COLORS.primary + "15"
+                              : "transparent",
+                            opacity: pressed ? 0.7 : 1,
+                          },
+                        ]}
+                        disabled={availableRecipients.length === 0}
+                      >
+                        <Text
+                          style={{
+                            textAlign: "center",
+                            fontFamily: FONT.semiBold,
+                            fontSize: 13,
+                            color: buyForOthers
+                              ? COLORS.primary
+                              : availableRecipients.length === 0
+                                ? COLORS.textSecondary + "50"
+                                : COLORS.textSecondary,
+                          }}
+                        >
+                          Regalar
+                        </Text>
+                      </Pressable>
                     </View>
-                  </View>
+
+                    {/* Selector de destinatario si está en modo regalo */}
+                    {buyForOthers && (
+                      <View style={{ marginBottom: 16 }}>
+                        <DropdownSelect
+                          label="Destinatario"
+                          value={recipientUserId}
+                          options={availableRecipients.map((member) => ({
+                            key: member.id,
+                            label: member.displayName,
+                            avatarUrl: member.avatarUrl || null,
+                            frameUrl: member.activeFrameUrl || null,
+                          }))}
+                          onSelect={(value) => setRecipientUserId(value)}
+                          placeholder="Selecciona un familiar"
+                          showLabel={true}
+                        />
+                      </View>
+                    )}
+                  </>
                 )}
 
                 <View style={styles.modalActions}>
                   <Button
                     mode="text"
-                    onPress={() => setSelectedItem(null)}
+                    onPress={handleDismissModal}
                     style={styles.modalCancelBtn}
                     textColor={COLORS.textSecondary}
                     labelStyle={{ fontFamily: FONT.semiBold }}
@@ -597,7 +779,8 @@ export default function ShopScreen() {
                       onPress={handleBuy}
                       disabled={
                         isBuying ||
-                        (balanceData?.pointsBalance ?? 0) < selectedItem.cost
+                        (balanceData?.pointsBalance ?? 0) < selectedItem.cost ||
+                        (buyForOthers && !recipientUserId)
                       }
                       style={({ pressed }) => [
                         styles.modalConfirmBtn,
@@ -607,7 +790,8 @@ export default function ShopScreen() {
                             pressed ||
                             isBuying ||
                             (balanceData?.pointsBalance ?? 0) <
-                              selectedItem.cost
+                              selectedItem.cost ||
+                            (buyForOthers && !recipientUserId)
                               ? 0.7
                               : 1,
                         },
@@ -624,11 +808,21 @@ export default function ShopScreen() {
                             textAlign: "center",
                           }}
                         >
-                          Canjear
+                          {buyForOthers ? "Regalar" : "Canjear"}
                         </Text>
                       )}
                     </Pressable>
                   )}
+
+                  <Button
+                    mode="text"
+                    onPress={() => setSelectedItem(null)}
+                    style={styles.modalCancelBtn}
+                    textColor={COLORS.textSecondary}
+                    labelStyle={{ fontFamily: FONT.semiBold }}
+                  >
+                    Quizás luego
+                  </Button>
                 </View>
 
                 {(balanceData?.pointsBalance ?? 0) < selectedItem.cost &&
@@ -963,7 +1157,7 @@ const styles = StyleSheet.create({
   },
   modalCancelBtn: {
     borderRadius: 16,
-    height: 48,
+    height: 54,
     justifyContent: "center",
   },
   errorBanner: {
@@ -971,7 +1165,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: COLORS.red + "10",
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
     borderRadius: 12,
     marginTop: 16,
     gap: 8,

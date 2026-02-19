@@ -35,6 +35,7 @@ import { StyledTextInput } from "../shared";
 import SaveButton from "../shared/SaveButton";
 import CancelButton from "../shared/CancelButton";
 import Slider from "@react-native-community/slider";
+import { useGetShopInventory } from "@elepad/api-client";
 import HighlightedMentionText from "./HighlightedMentionText";
 import MentionInput from "./MentionInput";
 import StickerReactionPicker from "./StickerReactionPicker";
@@ -205,6 +206,35 @@ export default function RecuerdoDetailDialog({
   const [lastReactedStickerUrl, setLastReactedStickerUrl] = useState<
     string | null
   >(null);
+
+  // Normalize data helper
+  const normalizeData = (
+    data: unknown,
+  ): (Record<string, unknown> | unknown[]) | undefined => {
+    if (!data) return undefined;
+    if (Array.isArray(data)) return data;
+    if (typeof data === "object" && data !== null && "data" in data) {
+      return (data as Record<string, unknown>).data as
+        | Record<string, unknown>
+        | unknown[];
+    }
+    return data as Record<string, unknown> | unknown[];
+  };
+
+  // Get user's sticker inventory to check if they have any stickers
+  const inventoryResponse = useGetShopInventory();
+  const inventoryData = normalizeData(inventoryResponse.data);
+  
+  // Check if user has at least one sticker
+  const hasStickers = Array.isArray(inventoryData)
+    ? (inventoryData as Array<{ item?: { type: string }; type?: string }>).some((item) => {
+        const itemType = item.item?.type || item.type;
+        return itemType === "Sticker" || itemType === "sticker";
+      })
+    : false;
+
+  // Can react if user is elder OR has at least one sticker
+  const canReact = isElder || hasStickers;
 
   const translateX = useSharedValue(0);
   const swipeDirection = useRef<"next" | "prev" | null>(null);
@@ -1639,8 +1669,8 @@ export default function RecuerdoDetailDialog({
             </Reanimated.View>
           </GestureDetector>
 
-          {/* Sticker Reaction Picker - Only for elders - Positioned below the dialog */}
-          {isElder && onReact && recuerdo && (
+          {/* Sticker Reaction Picker - Show if user can react (elder or has stickers) - Positioned below the dialog */}
+          {canReact && onReact && recuerdo && (
             <StickerReactionPicker
               onReact={(stickerId, stickerUrl) => {
                 // Show feedback animation

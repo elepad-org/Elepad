@@ -8,6 +8,7 @@ import {
   UserBalanceSchema,
   EquipItemRequestSchema,
   EquipItemResponseSchema,
+  ItemOwnershipSchema,
 } from "./schema";
 import { openApiErrorResponse } from "@/utils/api-error";
 
@@ -76,6 +77,52 @@ shopApp.openapi(
   }
 );
 
+// 2b. Get Item Ownership in Family Group
+shopApp.openapi(
+  {
+    method: "get",
+    path: "/shop/items/{itemId}/ownership",
+    tags: ["shop"],
+    summary: "Get which family members own a specific item",
+    request: {
+      params: z.object({
+        itemId: z.string().uuid(),
+      }),
+    },
+    responses: {
+      200: {
+        description: "List of user IDs who own this item in the family group",
+        content: {
+          "application/json": {
+            schema: ItemOwnershipSchema,
+          },
+        },
+      },
+      400: openApiErrorResponse("Bad request"),
+      404: openApiErrorResponse("User not in a family group"),
+      500: openApiErrorResponse("Internal server error"),
+    },
+  },
+  async (c) => {
+    const { itemId } = c.req.valid("param");
+    const userId = c.var.user.id;
+
+    // Get user's group
+    const { data: userData, error: userError } = await c.var.supabase
+      .from("users")
+      .select("groupId")
+      .eq("id", userId)
+      .single();
+
+    if (userError || !userData || !userData.groupId) {
+      return c.json({ error: { message: "User not in a family group" } }, 404);
+    }
+
+    const ownership = await c.var.shopService.getItemOwnership(itemId, userData.groupId);
+    return c.json(ownership, 200);
+  }
+);
+
 // 3. Buy Item
 shopApp.openapi(
   {
@@ -108,11 +155,11 @@ shopApp.openapi(
     },
   },
   async (c) => {
-    const { itemId } = c.req.valid("json");
+    const { itemId, recipientUserId } = c.req.valid("json");
     const userId = c.var.user.id;
     
     try {
-        const result = await c.var.shopService.buyItem(userId, itemId);
+        const result = await c.var.shopService.buyItem(userId, itemId, recipientUserId);
         return c.json(result, 200);
     } catch (e: unknown) {
         // If service threw an HTTPException, we could rethrow or handle here.
