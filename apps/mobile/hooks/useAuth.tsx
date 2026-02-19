@@ -20,6 +20,7 @@ import {
 } from "@/lib/dateHelpers";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQueryClient } from "@tanstack/react-query";
+import { clearPendingAlbums } from "@/hooks/usePendingAlbums";
 
 type AuthContext = {
   user: User | null;
@@ -564,6 +565,8 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       setStreak(null);
       // Limpiar toda la cache de React Query para que no queden datos del usuario anterior
       queryClient.clear();
+      // Limpiar álbumes pendientes
+      clearPendingAlbums();
       // Redirigir siempre a login
       router.replace("/");
     }

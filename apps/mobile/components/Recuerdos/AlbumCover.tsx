@@ -8,11 +8,20 @@ import tapeImage from "@/assets/images/paper-transparent-sticky-tape-png.png";
 
 interface AlbumCoverProps {
   title: string;
-  coverImageUrl?: string | null;
+  /** Remote URL string or a local require/import source */
+  coverImageUrl?: string | number | null;
 }
 
 export default function AlbumCover({ title, coverImageUrl }: AlbumCoverProps) {
   const [isTwoLines, setIsTwoLines] = useState(false);
+
+  // Build the source prop: if it's a number it's a local require, otherwise a URI
+  const coverSource =
+    typeof coverImageUrl === "number"
+      ? coverImageUrl
+      : coverImageUrl
+        ? { uri: coverImageUrl }
+        : null;
 
   return (
     <View style={styles.container}>
@@ -24,10 +33,10 @@ export default function AlbumCover({ title, coverImageUrl }: AlbumCoverProps) {
       />
       
       {/* Recuadro con la cover image del álbum en el centro */}
-      {coverImageUrl && (
+      {coverSource && (
         <View style={styles.coverContainer}>
           <Image
-            source={{ uri: coverImageUrl }}
+            source={coverSource}
             style={styles.coverImage}
             contentFit="cover"
           />

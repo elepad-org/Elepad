@@ -15,6 +15,7 @@ import { useToast } from "@/components/shared/Toast";
 import { usePdfDownload } from "@/hooks/usePdfDownload";
 import { useQueryClient } from "@tanstack/react-query";
 import AlbumCover from "@/components/Recuerdos/AlbumCover";
+import eleAlbumHogar from "@/assets/images/ele-album-hogar.png";
 
 interface AlbumCardProps {
   id: string;
@@ -26,6 +27,8 @@ interface AlbumCardProps {
   totalPages?: number;
   onPress: () => void;
   onDelete?: () => void;
+  /** When true, the card shows a loading overlay and is not interactive */
+  isPending?: boolean;
 }
 
 export default function AlbumCard({
@@ -38,6 +41,7 @@ export default function AlbumCard({
   totalPages,
   onPress,
   onDelete,
+  isPending = false,
 }: AlbumCardProps) {
   const [detailsVisible, setDetailsVisible] = useState(false);
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
@@ -150,6 +154,25 @@ export default function AlbumCard({
       }
     );
   };
+
+  // ─── Pending album: show cover with loading overlay ───
+  if (isPending) {
+    return (
+      <View style={[styles.card, { opacity: 0.85 }]}>
+        <View style={styles.coverWrapper}>
+          <AlbumCover title={title} coverImageUrl={eleAlbumHogar} />
+          {/* Loading overlay */}
+          <View style={styles.pendingOverlay}>
+            <ActivityIndicator
+              size="small"
+              color={COLORS.primary}
+            />
+            <Text style={styles.pendingText}>Generando álbum…</Text>
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View>
@@ -454,5 +477,20 @@ const styles = StyleSheet.create({
     padding: 8,
     alignItems: "center",
     justifyContent: "center",
+  },
+
+  pendingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(255,255,255,0.65)",
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  pendingText: {
+    marginTop: 4,
+    fontSize: 13,
+    fontFamily: FONT.medium,
+    color: COLORS.textSecondary,
   },
 });
