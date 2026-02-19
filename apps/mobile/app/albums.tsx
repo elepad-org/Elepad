@@ -18,7 +18,7 @@ import CreateAlbumDialog from "@/components/Recuerdos/CreateAlbumDialog";
 import AlbumCard from "@/components/shared/AlbumCard";
 import { useAlbumCreation } from "@/hooks/useAlbumCreation";
 import { BackButton } from "@/components/shared/BackButton";
-import eleEmpthy from "@/assets/images/ele-idea.png";
+import eleEmpthy from "@/assets/images/EleUltimatePack/ele-polaroids-pensativo.png";
 
 const unwrapAlbums = (response: unknown): Album[] => {
   let cursor: unknown = response;
