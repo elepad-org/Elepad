@@ -773,7 +773,7 @@ export default function ShopScreen() {
                         (balanceData?.pointsBalance ?? 0) < selectedItem.cost ||
                         (buyForOthers && !recipientUserId)
                       }
-                      style={({ pressed }) => [
+                      style={({}) => [
                         styles.modalConfirmBtn,
                         {
                           backgroundColor: COLORS.primary,
