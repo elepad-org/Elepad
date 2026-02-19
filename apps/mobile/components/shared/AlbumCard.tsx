@@ -29,6 +29,8 @@ interface AlbumCardProps {
   onDelete?: () => void;
   /** When true, the card shows a loading overlay and is not interactive */
   isPending?: boolean;
+  /** Use compact styling for 2-column grids */
+  compact?: boolean;
 }
 
 export default function AlbumCard({
@@ -42,6 +44,7 @@ export default function AlbumCard({
   onPress,
   onDelete,
   isPending = false,
+  compact = false,
 }: AlbumCardProps) {
   const [detailsVisible, setDetailsVisible] = useState(false);
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
@@ -160,7 +163,7 @@ export default function AlbumCard({
     return (
       <View style={[styles.card, { opacity: 0.85 }]}>
         <View style={styles.coverWrapper}>
-          <AlbumCover title={title} coverImageUrl={eleAlbumHogar} />
+          <AlbumCover title={title} coverImageUrl={eleAlbumHogar} compact={compact} />
           {/* Loading overlay */}
           <View style={styles.pendingOverlay}>
             <ActivityIndicator
@@ -184,7 +187,7 @@ export default function AlbumCard({
         onPress={() => setDetailsVisible(true)}
       >
         <View style={styles.coverWrapper}>
-          <AlbumCover title={title} coverImageUrl={coverImageUrl} />
+          <AlbumCover title={title} coverImageUrl={coverImageUrl} compact={compact} />
         </View>
       </Pressable>
 

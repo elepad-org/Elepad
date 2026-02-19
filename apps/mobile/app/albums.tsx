@@ -322,6 +322,7 @@ export default function AlbumsScreen() {
                         createdAt={new Date(item.pending.createdAt).toISOString()}
                         onPress={() => {}}
                         isPending
+                        compact={numColumns === 2}
                       />
                     </Animated.View>
                   );
@@ -344,6 +345,7 @@ export default function AlbumsScreen() {
                       createdAt={item.album.createdAt}
                       totalPages={undefined}
                       onPress={() => handleAlbumPress(item.album.id)}
+                      compact={numColumns === 2}
                     />
                   </Animated.View>
                 );
