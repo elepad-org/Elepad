@@ -170,37 +170,35 @@ export default function CreateAlbumDialog({
     isActive,
   }: RenderItemParams<SelectedMemory>) => {
     return (
-      <ScaleDecorator>
-        <View
-          style={[styles.draggableItem, isActive && styles.draggableItemActive]}
+      <View
+        style={[styles.draggableItem, isActive && styles.draggableItemActive]}
+      >
+        <TouchableOpacity
+          style={styles.draggableContentContainer}
+          onPress={() => setPreviewMemory(item.original)}
+          activeOpacity={0.7}
         >
-          <TouchableOpacity
-            style={styles.draggableContentContainer}
-            onPress={() => setPreviewMemory(item.original)}
-            activeOpacity={0.7}
-          >
-            {item.mediaUrl && (
-              <Image source={{ uri: item.mediaUrl }} style={styles.thumbnail} />
-            )}
-            <View style={styles.draggableContent}>
-              <Text numberOfLines={1} style={styles.memoryTitle}>
-                {item.title || "Sin título"}
-              </Text>
-              <Text style={styles.orderBadge}>#{item.order + 1}</Text>
-            </View>
-          </TouchableOpacity>
+          {item.mediaUrl && (
+            <Image source={{ uri: item.mediaUrl }} style={styles.thumbnail} />
+          )}
+          <View style={styles.draggableContent}>
+            <Text numberOfLines={1} style={styles.memoryTitle}>
+              {item.title || "Sin título"}
+            </Text>
+            <Text style={styles.orderBadge}>#{item.order + 1}</Text>
+          </View>
+        </TouchableOpacity>
 
-          {/* Drag Handle - Explicit interaction */}
-          <TouchableOpacity
-            onLongPress={drag}
-            delayLongPress={50}
-            style={styles.dragHandle}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <MaterialCommunityIcons name="drag-horizontal" size={24} color={COLORS.textSecondary} />
-          </TouchableOpacity>
-        </View>
-      </ScaleDecorator>
+        {/* Drag Handle - Explicit interaction */}
+        <TouchableOpacity
+          onLongPress={drag}
+          delayLongPress={50}
+          style={styles.dragHandle}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <MaterialCommunityIcons name="drag-horizontal" size={24} color={COLORS.textSecondary} />
+        </TouchableOpacity>
+      </View>
     );
   };
 
@@ -387,8 +385,15 @@ export default function CreateAlbumDialog({
                   }}
                   keyExtractor={(item) => item.id}
                   renderItem={renderDraggableItem}
-                  containerStyle={{ flex: 1 }}
-                  activationDistance={10}
+                  containerStyle={{ flex: 1, overflow: "visible" }}
+                  activationDistance={20}
+                  autoscrollThreshold={50}
+                  animationConfig={{
+                    damping: 20,
+                    mass: 0.2,
+                    stiffness: 100,
+                    overshootClamping: false,
+                  }}
                   scrollEnabled={true}
                   contentContainerStyle={{ paddingBottom: 20 }}
                 />
@@ -625,20 +630,13 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.card,
     marginBottom: 8,
     borderRadius: 12,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: COLORS.border,
     alignSelf: "center",
     width: "100%",
-    overflow: 'hidden'
   },
   draggableItemActive: {
-    backgroundColor: `${COLORS.primary}10`,
     borderColor: COLORS.primary,
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
   },
   draggableContentContainer: {
     flex: 1,
@@ -650,9 +648,6 @@ const styles = StyleSheet.create({
     padding: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    borderLeftWidth: 1,
-    borderLeftColor: COLORS.border,
-    backgroundColor: '#f9f9f9',
   },
   thumbnail: {
     width: 48,
