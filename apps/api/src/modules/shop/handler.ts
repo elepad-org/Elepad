@@ -8,6 +8,7 @@ import {
   UserBalanceSchema,
   EquipItemRequestSchema,
   EquipItemResponseSchema,
+  ItemOwnershipSchema,
 } from "./schema";
 import { openApiErrorResponse } from "@/utils/api-error";
 
@@ -73,6 +74,52 @@ shopApp.openapi(
     const userId = c.var.user.id;
     const inventory = await c.var.shopService.getUserInventory(userId);
     return c.json(inventory, 200);
+  }
+);
+
+// 2b. Get Item Ownership in Family Group
+shopApp.openapi(
+  {
+    method: "get",
+    path: "/shop/items/{itemId}/ownership",
+    tags: ["shop"],
+    summary: "Get which family members own a specific item",
+    request: {
+      params: z.object({
+        itemId: z.string().uuid(),
+      }),
+    },
+    responses: {
+      200: {
+        description: "List of user IDs who own this item in the family group",
+        content: {
+          "application/json": {
+            schema: ItemOwnershipSchema,
+          },
+        },
+      },
+      400: openApiErrorResponse("Bad request"),
+      404: openApiErrorResponse("User not in a family group"),
+      500: openApiErrorResponse("Internal server error"),
+    },
+  },
+  async (c) => {
+    const { itemId } = c.req.valid("param");
+    const userId = c.var.user.id;
+
+    // Get user's group
+    const { data: userData, error: userError } = await c.var.supabase
+      .from("users")
+      .select("groupId")
+      .eq("id", userId)
+      .single();
+
+    if (userError || !userData || !userData.groupId) {
+      return c.json({ error: { message: "User not in a family group" } }, 404);
+    }
+
+    const ownership = await c.var.shopService.getItemOwnership(itemId, userData.groupId);
+    return c.json(ownership, 200);
   }
 );
 

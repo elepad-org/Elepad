@@ -37,6 +37,39 @@ export class ShopService {
   }
 
   /**
+   * Get which users in a family group own a specific item
+   */
+  async getItemOwnership(itemId: string, groupId: string) {
+    // Get all users in the family group
+    const { data: groupMembers, error: groupError } = await this.supabase
+      .from("users")
+      .select("id")
+      .eq("groupId", groupId);
+
+    if (groupError) {
+      throw new Error(`Error fetching group members: ${groupError.message}`);
+    }
+
+    const memberIds = groupMembers?.map(m => m.id) || [];
+
+    // Get which of these users own the item
+    const { data: owners, error: ownerError } = await this.supabase
+      .from("user_inventory")
+      .select("user_id")
+      .eq("item_id", itemId)
+      .in("user_id", memberIds);
+
+    if (ownerError) {
+      throw new Error(`Error fetching item ownership: ${ownerError.message}`);
+    }
+
+    return {
+      itemId,
+      ownerUserIds: owners?.map(o => o.user_id) || [],
+    };
+  }
+
+  /**
    * Get items owned by a specific user
    */
   async getUserInventory(userId: string) {

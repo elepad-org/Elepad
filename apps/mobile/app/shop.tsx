@@ -25,6 +25,7 @@ import {
   useGetShopInventory,
   usePostShopEquip,
   useGetFamilyGroupIdGroupMembers,
+  useGetShopItemsItemIdOwnership,
 } from "@elepad/api-client";
 import { COLORS, SHADOWS, FONT } from "@/styles/base";
 import { useAuth } from "@/hooks/useAuth";
@@ -116,6 +117,25 @@ export default function ShopScreen() {
     }
     return allMembers.filter((m) => !m.elder);
   }, [groupMembersData]);
+
+  // Obtener quiénes tienen el item seleccionado
+  const ownershipResponse = useGetShopItemsItemIdOwnership(
+    selectedItem?.id ?? "",
+    {
+      query: { enabled: !!selectedItem?.id },
+    }
+  );
+  const ownershipData = normalizeData(ownershipResponse.data) as
+    | { itemId: string; ownerUserIds: string[] }
+    | undefined;
+
+  // Filtrar miembros que NO tienen el item seleccionado (para regalos)
+  const availableRecipients = React.useMemo(() => {
+    if (!selectedItem || !ownershipData) return nonElderMembers;
+    
+    const ownerIds = new Set(ownershipData.ownerUserIds);
+    return nonElderMembers.filter(member => !ownerIds.has(member.id));
+  }, [nonElderMembers, selectedItem, ownershipData]);
 
   // Removed duplicate isOwned declaration
 
@@ -544,11 +564,42 @@ export default function ShopScreen() {
 
               <View style={styles.modalBody}>
                 <Text style={styles.modalTitle}>{selectedItem.title}</Text>
+                
                 {!isOwned(selectedItem.id) && (
                   <>
-                    <Text style={styles.modalDescription}>
-                      ¿Quieres canjear este premio por tus puntos acumulados?
-                    </Text>
+                    {/* Costo del canje */}
+                    <View style={styles.modalCostContainer}>
+                      <Text style={styles.modalCostLabel}>Costo del canje</Text>
+                      <Text style={styles.modalCostValue}>
+                        {selectedItem.cost} Puntos
+                      </Text>
+                    </View>
+
+                    {/* Point Info */}
+                    <View style={styles.pointsInfoRow}>
+                      <View style={styles.pointsInfoItem}>
+                        <Text style={styles.pointsInfoLabel}>Tus puntos</Text>
+                        <Text style={styles.pointsInfoValue}>
+                          {balanceData?.pointsBalance ?? 0}
+                        </Text>
+                      </View>
+                      <View style={styles.pointsInfoDivider} />
+                      <View style={styles.pointsInfoItem}>
+                        <Text style={styles.pointsInfoLabel}>Restantes</Text>
+                        <Text
+                          style={[
+                            styles.pointsInfoValue,
+                            (balanceData?.pointsBalance ?? 0) <
+                              selectedItem.cost && styles.pointsNegative,
+                          ]}
+                        >
+                          {Math.max(
+                            0,
+                            (balanceData?.pointsBalance ?? 0) - selectedItem.cost,
+                          )}
+                        </Text>
+                      </View>
+                    </View>
 
                     {/* Botones para seleccionar modo de compra */}
                     <View
@@ -612,7 +663,7 @@ export default function ShopScreen() {
                             opacity: pressed ? 0.7 : 1,
                           },
                         ]}
-                        disabled={nonElderMembers.length === 0}
+                        disabled={availableRecipients.length === 0}
                       >
                         <Text
                           style={{
@@ -621,7 +672,7 @@ export default function ShopScreen() {
                             fontSize: 13,
                             color: buyForOthers
                               ? COLORS.primary
-                              : nonElderMembers.length === 0
+                              : availableRecipients.length === 0
                                 ? COLORS.textSecondary + "50"
                                 : COLORS.textSecondary,
                           }}
@@ -637,7 +688,7 @@ export default function ShopScreen() {
                         <DropdownSelect
                           label="Destinatario"
                           value={recipientUserId}
-                          options={nonElderMembers.map((member) => ({
+                          options={availableRecipients.map((member) => ({
                             key: member.id,
                             label: member.displayName,
                             avatarUrl: member.avatarUrl || null,
@@ -649,42 +700,7 @@ export default function ShopScreen() {
                         />
                       </View>
                     )}
-
-                    <View style={styles.modalCostContainer}>
-                      <Text style={styles.modalCostLabel}>Costo del canje</Text>
-                      <Text style={styles.modalCostValue}>
-                        {selectedItem.cost} Puntos
-                      </Text>
-                    </View>
                   </>
-                )}
-
-                {/* Point Info */}
-                {!isOwned(selectedItem.id) && (
-                  <View style={styles.pointsInfoRow}>
-                    <View style={styles.pointsInfoItem}>
-                      <Text style={styles.pointsInfoLabel}>Tus puntos</Text>
-                      <Text style={styles.pointsInfoValue}>
-                        {balanceData?.pointsBalance ?? 0}
-                      </Text>
-                    </View>
-                    <View style={styles.pointsInfoDivider} />
-                    <View style={styles.pointsInfoItem}>
-                      <Text style={styles.pointsInfoLabel}>Restantes</Text>
-                      <Text
-                        style={[
-                          styles.pointsInfoValue,
-                          (balanceData?.pointsBalance ?? 0) <
-                            selectedItem.cost && styles.pointsNegative,
-                        ]}
-                      >
-                        {Math.max(
-                          0,
-                          (balanceData?.pointsBalance ?? 0) - selectedItem.cost,
-                        )}
-                      </Text>
-                    </View>
-                  </View>
                 )}
 
                 <View style={styles.modalActions}>

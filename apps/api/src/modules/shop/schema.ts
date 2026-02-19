@@ -86,3 +86,10 @@ export const EquipItemResponseSchema = z
     message: z.string(),
   })
   .openapi("EquipItemResponse");
+
+export const ItemOwnershipSchema = z
+  .object({
+    itemId: z.string().uuid(),
+    ownerUserIds: z.array(z.string().uuid()),
+  })
+  .openapi("ItemOwnership");
