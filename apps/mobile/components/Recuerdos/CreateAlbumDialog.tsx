@@ -1,15 +1,14 @@
 import { useState, useMemo } from "react";
 import {
   View,
-  Image,
   TouchableOpacity,
   StyleSheet,
   FlatList,
   Dimensions,
   Modal,
-  Pressable,
 } from "react-native";
 import { Button, Text } from "react-native-paper";
+import { Image } from "expo-image";
 import { Memory } from "@elepad/api-client";
 import { COLORS, STYLES } from "@/styles/base";
 import { useAlbumCreation } from "@/hooks/useAlbumCreation";
@@ -22,6 +21,7 @@ import DraggableFlatList, {
 } from "react-native-draggable-flatlist";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import PolaroidPreview from "./PolaroidPreview";
+import RecuerdoItemComponent from "./RecuerdoItemComponent";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 interface CreateAlbumDialogProps {
@@ -303,6 +303,7 @@ export default function CreateAlbumDialog({
               </View>
             )}
 
+
             {step === "select" && (
               <View style={{ flex: 1, width: "100%" }}>
                 <FlatList
@@ -311,73 +312,41 @@ export default function CreateAlbumDialog({
                   numColumns={3}
                   columnWrapperStyle={{
                     justifyContent: "flex-start",
-                    gap: 8,
+                    // We remove gap here because RecuerdoItemComponent handles margins
                   }}
                   contentContainerStyle={{
-                    paddingBottom: 20
+                    paddingBottom: 20,
+                    // RecuerdoItemComponent expects to manage its own spacing relative to container width
+                    // The container has padding 28. width is 90% of screen.
                   }}
                   scrollEnabled={true}
                   renderItem={({ item }) => {
                     const isSelected = selectedMemories.some(
                       (m) => m.id === item.id,
                     );
-                    // Better calc for 3 columns with padding
-                    // Container padding horizontal is 28 (x2 = 56)
-                    // Gap is 8 (x2 = 16)
-                    // MaxWidth is 400. 
-                    // Let's use a percentage or fixed based on container
-                    // Actually checking styles.imagesContainer padding is 28.
-                    const availableWidth = Math.min(SCREEN_WIDTH - 48, 400 - 56);
-                    const itemSize = (availableWidth - 16) / 3;
+
+                    // Available width calculation:
+                    // Dialog width is 90% of screen.
+                    // Container padding is 28 on each side => 56 total.
+                    const modalWidth = SCREEN_WIDTH * 0.9;
+                    const listAvailableWidth = modalWidth - 56;
 
                     return (
-                      <TouchableOpacity
+                      <RecuerdoItemComponent
+                        item={{
+                          ...item,
+                          fecha: new Date(item.createdAt), // Ensure date compatibility if needed
+                          contenido: item.mediaUrl || "", // mapping
+                          miniatura: item.mediaUrl || undefined,
+                          titulo: item.title || undefined,
+                          tipo: "imagen",
+                        }}
+                        numColumns={3}
                         onPress={() => handleToggleMemory(item)}
                         onLongPress={() => setPreviewMemory(item)}
-                        delayLongPress={300}
-                        activeOpacity={0.7}
-                        style={{
-                          width: itemSize,
-                          height: itemSize,
-                          borderRadius: 8,
-                          overflow: "hidden",
-                          borderWidth: isSelected ? 3 : 0,
-                          borderColor: COLORS.primary,
-                          marginBottom: 8,
-                          backgroundColor: COLORS.card,
-                        }}
-                      >
-                        {item.mediaUrl && (
-                          <Image
-                            source={{ uri: item.mediaUrl }}
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              resizeMode: "cover",
-                              opacity: isSelected ? 0.8 : 1,
-                            }}
-                          />
-                        )}
-                        {isSelected && (
-                          <View
-                            style={{
-                              position: "absolute",
-                              top: 6,
-                              right: 6,
-                              backgroundColor: COLORS.primary,
-                              borderRadius: 12,
-                              width: 24,
-                              height: 24,
-                              justifyContent: "center",
-                              alignItems: "center",
-                              borderWidth: 2,
-                              borderColor: COLORS.white,
-                            }}
-                          >
-                            <MaterialCommunityIcons name="check" size={14} color={COLORS.white} />
-                          </View>
-                        )}
-                      </TouchableOpacity>
+                        isSelected={isSelected}
+                        availableWidth={listAvailableWidth}
+                      />
                     );
                   }}
                   ListEmptyComponent={
@@ -582,7 +551,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 24,
+    // paddingHorizontal: 24, // Removed to allow 90% width control
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
@@ -599,8 +568,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   imagesContainer: {
-    width: "100%",
-    maxWidth: 400,
+    width: "90%", // Match other dialogs
     height: "80%",
     maxHeight: 700,
     alignItems: "center",
@@ -610,8 +578,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   formContainer: {
-    width: "100%",
-    maxWidth: 400,
+    width: "90%", // Match other dialogs
     alignItems: "center",
     backgroundColor: COLORS.background,
     borderRadius: 20,

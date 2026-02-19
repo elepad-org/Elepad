@@ -14,6 +14,7 @@ import { COLORS, SHADOWS } from "@/styles/base";
 import fondoRecuerdos from "@/assets/images/fondoRecuerdos.png";
 import eleDef from "@/assets/images/ele-def.png";
 
+
 const screenWidth = Dimensions.get("window").width;
 
 type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
@@ -31,6 +32,9 @@ interface RecuerdoItemProps {
   item: Recuerdo;
   numColumns: number;
   onPress: (item: Recuerdo) => void;
+  onLongPress?: (item: Recuerdo) => void; // New prop
+  availableWidth?: number; // New prop
+  isSelected?: boolean; // New prop
 }
 
 const VideoItem = ({
@@ -71,15 +75,16 @@ const VideoItem = ({
 };
 
 const RecuerdoItemComponent = React.memo(
-  ({ item, numColumns, onPress }: RecuerdoItemProps) => {
+  ({ item, numColumns, onPress, onLongPress, availableWidth, isSelected }: RecuerdoItemProps) => {
     const spacing = 20; // Espacio total horizontal del contenedor (padding)
     const gap = 8; // Espacio entre items
-    const itemSize = (screenWidth - spacing * 2) / numColumns - gap;
 
-    // Factor de escala para ajustar tamaños cuando hay más columnas
-    const scale = 2 / numColumns; // 1 para 2 columnas, ~0.67 para 3 columnas
+    // Use availableWidth if provided, otherwise default to screenWidth - padding
+    const containerWidth = availableWidth ?? (screenWidth - spacing * 2);
+    const itemSize = containerWidth / numColumns - gap;
 
-    // Factor de altura variable para estética Pinterest-like
+    // ... scale and heightFactor logic remains same
+    const scale = 2 / numColumns;
     const heightFactor =
       item.tipo === "audio"
         ? 0.54
@@ -87,7 +92,7 @@ const RecuerdoItemComponent = React.memo(
           ? 0.4
           : item.tipo === "imagen" || item.tipo === "video"
             ? 1.05 + (item.id.length % 3) * 0.05
-            : 0.8 + (item.id.length % 5) * 0.08; // 0.85 para audio (cassette completo), 0.4 para texto, 1.05 a 1.1 para imágenes y videos
+            : 0.8 + (item.id.length % 5) * 0.08;
     const itemHeight = itemSize * heightFactor;
 
     const isMedia = item.tipo === "imagen" || item.tipo === "video";
@@ -95,22 +100,24 @@ const RecuerdoItemComponent = React.memo(
     return (
       <TouchableOpacity
         onPress={() => onPress(item)}
+        onLongPress={() => onLongPress && onLongPress(item)} // Handle long press
+        delayLongPress={300}
         activeOpacity={0.8}
         style={{
           width: itemSize,
           height: itemHeight,
-          marginBottom: gap, // Separación vertical
-          marginHorizontal: gap / 2, // Margen horizontal para centrar el gap
+          marginBottom: gap,
+          marginHorizontal: gap / 2,
           paddingTop: isMedia ? 6 : 0,
           paddingLeft: isMedia ? 6 : 0,
           paddingRight: isMedia ? 6 : 0,
-          paddingBottom: 0, // No padding abajo
+          paddingBottom: 0,
           overflow: "hidden",
           borderRadius: 8,
-          backgroundColor: isMedia ? "#FFFFFF" : "#F5F5F5", // Blanco para imágenes y videos, gris para otros
-          borderWidth: 1,
-          borderColor: "rgba(0,0,0,0.05)", // Borde sutil sombreado
-          ...SHADOWS.light, // Sombra para polaroid
+          backgroundColor: isMedia ? "#FFFFFF" : "#F5F5F5",
+          borderWidth: isSelected ? 3 : 1, // Start Thick border if selected
+          borderColor: isSelected ? COLORS.primary : "rgba(0,0,0,0.05)", // Primary color if selected
+          ...SHADOWS.light,
         }}
       >
         {isMedia && item.miniatura ? (
@@ -374,7 +381,8 @@ const RecuerdoItemComponent = React.memo(
       prevProps.item.id === nextProps.item.id &&
       prevProps.numColumns === nextProps.numColumns &&
       prevProps.item.titulo === nextProps.item.titulo &&
-      prevProps.item.miniatura === nextProps.item.miniatura
+      prevProps.item.miniatura === nextProps.item.miniatura &&
+      prevProps.isSelected === nextProps.isSelected
     );
   },
 );
