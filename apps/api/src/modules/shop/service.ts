@@ -1,9 +1,14 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/supabase-types";
 import { HTTPException } from "hono/http-exception";
+import { NotificationsService } from "../notifications/service";
 
 export class ShopService {
-  constructor(private supabase: SupabaseClient<Database>) {}
+  private notificationsService: NotificationsService;
+
+  constructor(private supabase: SupabaseClient<Database>) {
+    this.notificationsService = new NotificationsService(supabase);
+  }
 
   /**
    * Get all active shop items
@@ -203,6 +208,34 @@ export class ShopService {
             source: "purchase",
             reference_id: itemId
         });
+
+    // 4. Si es un regalo, crear notificación para el receptor
+    if (recipientUserId && finalRecipientId !== userId) {
+      try {
+        // Obtener nombre del comprador
+        const { data: buyerData } = await this.supabase
+          .from("users")
+          .select("displayName")
+          .eq("id", userId)
+          .single();
+
+        const buyerName = buyerData?.displayName || "Alguien";
+        const itemTypeName = itemData.type === "sticker" ? "sticker" : itemData.type === "frame" ? "marco" : "item";
+
+        await this.notificationsService.createNotification({
+          userId: finalRecipientId,
+          actorId: userId,
+          eventType: "gift_received",
+          entityType: "shop_item",
+          entityId: itemId,
+          title: `${buyerName} te regaló un ${itemTypeName}`,
+          body: itemData.title,
+        });
+      } catch (notifError) {
+        // No fallar la compra si falla la notificación
+        console.error("Error creating gift notification:", notifError);
+      }
+    }
 
     return {
         success: true,
