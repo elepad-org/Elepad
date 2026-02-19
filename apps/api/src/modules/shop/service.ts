@@ -71,8 +71,11 @@ export class ShopService {
   /**
    * Process a purchase for a user
    * Critical: Uses RPC or strict checks for data integrity
+   * @param userId - El usuario que realiza la compra (quien paga)
+   * @param itemId - El item a comprar
+   * @param recipientUserId - El usuario que recibirá el item (opcional)
    */
-  async buyItem(userId: string, itemId: string) {
+  async buyItem(userId: string, itemId: string, recipientUserId?: string) {
     // 1. Fetch Item Details & User Balance
     // We do this inside a Postgres Function (RPC) ideally for atomicity,
     // but standard Supabase client logic works if we are careful with race conditions.
@@ -80,14 +83,14 @@ export class ShopService {
     // Let's implement this logic client-side first for simplicity, but acknowledge the race condition risk.
     // Given the low frequency of transactions, a strict check-then-write flow is acceptable for MVP.
     
-    // Check if user is Elder
+    // Check if user is Elder (el que compra debe ser elder)
     // (Assuming middleware checks auth, but business logic requires Elder for earning points.
     //  Can non-elders buy? The prompt said "Solo los elder pueden jugar juegos y ganar puntos",
     //  implies only they participate in this economy. We'll enforce Elder only just in case.)
     
     const { data: userData, error: userError } = await this.supabase
         .from("users")
-        .select("points_balance, elder")
+        .select("points_balance, elder, groupId")
         .eq("id", userId)
         .single();
     
@@ -97,6 +100,32 @@ export class ShopService {
 
     if (!userData.elder) {
         throw new HTTPException(403, { message: "Only elders can purchase items" });
+    }
+
+    // Si hay un recipientUserId, validar que sea del mismo grupo y NO sea elder
+    let finalRecipientId = userId; // Por defecto, el comprador es el receptor
+    if (recipientUserId) {
+      const { data: recipientData, error: recipientError } = await this.supabase
+        .from("users")
+        .select("id, groupId, elder")
+        .eq("id", recipientUserId)
+        .single();
+      
+      if (recipientError || !recipientData) {
+        throw new HTTPException(404, { message: "Recipient user not found" });
+      }
+
+      // Validar que esté en el mismo grupo familiar
+      if (recipientData.groupId !== userData.groupId) {
+        throw new HTTPException(403, { message: "Recipient must be in the same family group" });
+      }
+
+      // Validar que el receptor NO sea abuelo
+      if (recipientData.elder) {
+        throw new HTTPException(400, { message: "Cannot purchase items for other elders" });
+      }
+
+      finalRecipientId = recipientUserId;
     }
 
     // Check if item exists and is active
@@ -114,16 +143,16 @@ export class ShopService {
         throw new HTTPException(400, { message: "Item is no longer available" });
     }
 
-    // Check if already owned
+    // Check if already owned (by the final recipient)
     const { data: ownedData } = await this.supabase
         .from("user_inventory")
         .select("id")
-        .eq("user_id", userId)
+        .eq("user_id", finalRecipientId)
         .eq("item_id", itemId)
         .single();
 
     if (ownedData) {
-        throw new HTTPException(400, { message: "You already own this item" });
+        throw new HTTPException(400, { message: recipientUserId ? "The recipient already owns this item" : "You already own this item" });
     }
 
     // Check balance
@@ -137,21 +166,21 @@ export class ShopService {
     // To be perfectly safe, we SHOULD use an RPC, but let's stick to TS logic if we trust the load is low.
     // If you want 100% safety, we can create a PL/SQL function `purchase_item`.
     
-    // 1. Deduct Points
+    // 1. Deduct Points (from the buyer, not the recipient)
     const { error: updateError } = await this.supabase
         .from("users")
         .update({ points_balance: userData.points_balance - itemData.cost })
-        .eq("id", userId);
+        .eq("id", userId); // Siempre deduce puntos del comprador
 
     if (updateError) {
         throw new Error("Failed to update user balance");
     }
 
-    // 2. Add to Inventory
+    // 2. Add to Inventory (to the final recipient)
     const { data: inventoryItem, error: inventoryError } = await this.supabase
         .from("user_inventory")
         .insert({
-            user_id: userId,
+            user_id: finalRecipientId, // El item va al receptor final
             item_id: itemId,
             equipped: false
         })
@@ -165,11 +194,11 @@ export class ShopService {
         throw new Error("Failed to add item to inventory");
     }
 
-    // 3. Log Transaction
+    // 3. Log Transaction (registrar quién compró y para quién)
     await this.supabase
         .from("point_transactions")
         .insert({
-            user_id: userId,
+            user_id: userId, // Quien compró
             amount: -itemData.cost, // Negative for spending
             source: "purchase",
             reference_id: itemId

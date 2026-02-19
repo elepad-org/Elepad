@@ -55,6 +55,7 @@ export const PointTransactionSchema = z
 export const BuyItemRequestSchema = z
   .object({
     itemId: z.string().uuid(),
+    recipientUserId: z.string().uuid().optional(), // Para comprar para otra persona
   })
   .openapi("BuyItemRequest");
 

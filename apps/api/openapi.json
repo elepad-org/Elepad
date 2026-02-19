@@ -1492,6 +1492,10 @@
           "itemId": {
             "type": "string",
             "format": "uuid"
+          },
+          "recipientUserId": {
+            "type": "string",
+            "format": "uuid"
           }
         },
         "required": [

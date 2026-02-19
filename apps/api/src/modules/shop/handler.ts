@@ -108,11 +108,11 @@ shopApp.openapi(
     },
   },
   async (c) => {
-    const { itemId } = c.req.valid("json");
+    const { itemId, recipientUserId } = c.req.valid("json");
     const userId = c.var.user.id;
     
     try {
-        const result = await c.var.shopService.buyItem(userId, itemId);
+        const result = await c.var.shopService.buyItem(userId, itemId, recipientUserId);
         return c.json(result, 200);
     } catch (e: unknown) {
         // If service threw an HTTPException, we could rethrow or handle here.

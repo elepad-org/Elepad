@@ -525,6 +525,7 @@ export interface BuyItemResponse {
 
 export interface BuyItemRequest {
   itemId: string;
+  recipientUserId?: string;
 }
 
 export interface UserBalance {
