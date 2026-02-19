@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, memo } from "react";
-import { View, useWindowDimensions, Keyboard, Animated, InteractionManager } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { View, useWindowDimensions, Keyboard, Animated, InteractionManager, BackHandler, Platform } from "react-native";
+import { useLocalSearchParams, useRouter, useNavigation } from "expo-router";
 import { TabView, SceneMap } from "react-native-tab-view";
 import HomeScreen from "./home";
 import JuegosScreen from "./juegos";
@@ -39,6 +39,7 @@ function TabLayoutContent() {
   const layout = useWindowDimensions();
   const params = useLocalSearchParams();
   const router = useRouter();
+  const navigation = useNavigation();
   const [index, setIndex] = useState(0);
   const { userElepad, userElepadLoading } = useAuth();
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
@@ -71,6 +72,22 @@ function TabLayoutContent() {
   }, [params.tab, routes]);
 
 
+
+  // En Android, interceptar el botón/gesto atrás para salir de la app
+  // en vez de volver al stack anterior (ej: pantalla index/login)
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      // Solo interceptar si la pantalla de tabs está enfocada (no cuando hay
+      // screens apilados encima, como albums o album-viewer)
+      if (!navigation.isFocused()) return false;
+      BackHandler.exitApp();
+      return true;
+    });
+
+    return () => backHandler.remove();
+  }, [navigation]);
 
   const renderScene = useMemo(() => SceneMap({
     home: HomeScreen,

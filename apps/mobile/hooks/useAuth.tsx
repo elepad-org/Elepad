@@ -19,6 +19,8 @@ import {
   isSameLocalDate,
 } from "@/lib/dateHelpers";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useQueryClient } from "@tanstack/react-query";
+import { clearPendingAlbums } from "@/hooks/usePendingAlbums";
 
 type AuthContext = {
   user: User | null;
@@ -54,6 +56,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [sessionReady, setSessionReady] = useState(false); // Nuevo: indica si la sesión ya se intentó cargar
   const [streak, setStreak] = useState<StreakState | null>(null);
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   // Register push notifications when user is authenticated
   usePushNotifications(user?.id);
@@ -559,6 +562,11 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       setSession(null);
       setUser(null);
       setUserElepad(null);
+      setStreak(null);
+      // Limpiar toda la cache de React Query para que no queden datos del usuario anterior
+      queryClient.clear();
+      // Limpiar álbumes pendientes
+      clearPendingAlbums();
       // Redirigir siempre a login
       router.replace("/");
     }

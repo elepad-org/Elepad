@@ -148,15 +148,18 @@ export default function CreateAlbumDialog({
     }
 
     try {
-      const orderedMemoryIds = selectedMemories
-        .sort((a, b) => a.order - b.order)
-        .map((m) => m.id);
+      const orderedMemories = [...selectedMemories].sort((a, b) => a.order - b.order);
+      const orderedMemoryIds = orderedMemories.map((m) => m.id);
+
+      // Use the first selected image as cover preview while the album is being generated
+      const firstImageUrl = orderedMemories[0]?.mediaUrl ?? null;
 
       await createAlbum({
         title: title.trim(),
         description: description.trim() || undefined,
         memoryIds: orderedMemoryIds,
         tags: selectedTags,
+        coverPreviewUrl: firstImageUrl,
       });
     } catch (err) {
       console.error("Error en handleCreateAlbum:", err);
