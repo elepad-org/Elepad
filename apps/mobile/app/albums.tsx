@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import Animated, { ZoomIn } from "react-native-reanimated";
 import {
   View,
@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { COLORS, STYLES } from "@/styles/base";
 import { useAuth } from "@/hooks/useAuth";
-import { useGetMemories, Album } from "@elepad/api-client";
+import { useGetMemories, Album, useGetFamilyGroupIdGroupMembers, GetFamilyGroupIdGroupMembers200 } from "@elepad/api-client";
 import CreateAlbumDialog from "@/components/Recuerdos/CreateAlbumDialog";
 import AlbumCard from "@/components/shared/AlbumCard";
 import { useAlbumCreation } from "@/hooks/useAlbumCreation";
@@ -69,6 +69,55 @@ export default function AlbumsScreen() {
   const memories = Array.isArray(memoriesResponse?.data)
     ? memoriesResponse.data
     : [];
+
+  // Fetch family members for the preview
+  const membersQuery = useGetFamilyGroupIdGroupMembers(groupId, {
+    query: { enabled: !!groupId },
+  });
+
+  const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
+    const resp = membersQuery.data as
+      | { data?: GetFamilyGroupIdGroupMembers200 }
+      | GetFamilyGroupIdGroupMembers200
+      | undefined;
+    if (!resp) return undefined;
+    return (
+      (resp as { data?: GetFamilyGroupIdGroupMembers200 }).data ??
+      (resp as GetFamilyGroupIdGroupMembers200)
+    );
+  };
+
+  const groupInfo = selectGroupInfo();
+  const groupMembers = useMemo(() => {
+    if (!groupInfo)
+      return [] as Array<{
+        id: string;
+        displayName: string;
+        avatarUrl?: string | null;
+        activeFrameUrl?: string | null;
+      }>;
+
+    const raw = [groupInfo.owner, ...groupInfo.members];
+    const byId = new Map<
+      string,
+      {
+        id: string;
+        displayName: string;
+        avatarUrl?: string | null;
+        activeFrameUrl?: string | null;
+      }
+    >();
+    for (const m of raw) {
+      if (!m?.id) continue;
+      byId.set(m.id, {
+        id: m.id,
+        displayName: m.displayName,
+        avatarUrl: m.avatarUrl ?? null,
+        activeFrameUrl: m.activeFrameUrl ?? null,
+      });
+    }
+    return Array.from(byId.values());
+  }, [groupInfo]);
 
   // Extract albums from the query
   const albums: Album[] = unwrapAlbums(albumsQuery.data);
@@ -188,6 +237,7 @@ export default function AlbumsScreen() {
         visible={albumDialogVisible}
         onDismiss={() => setAlbumDialogVisible(false)}
         memories={memories}
+        familyMembers={groupMembers}
       />
     </View>
   );
