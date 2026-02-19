@@ -517,6 +517,11 @@ export interface UserInventory {
   item?: ShopItem;
 }
 
+export interface ItemOwnership {
+  itemId: string;
+  ownerUserIds: string[];
+}
+
 export interface BuyItemResponse {
   success: boolean;
   newBalance: number;
@@ -525,6 +530,7 @@ export interface BuyItemResponse {
 
 export interface BuyItemRequest {
   itemId: string;
+  recipientUserId?: string;
 }
 
 export interface UserBalance {
@@ -11213,6 +11219,218 @@ export function useGetShopInventory<
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getGetShopInventoryQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get which family members own a specific item
+ */
+export type getShopItemsItemIdOwnershipResponse200 = {
+  data: ItemOwnership;
+  status: 200;
+};
+
+export type getShopItemsItemIdOwnershipResponse400 = {
+  data: Error;
+  status: 400;
+};
+
+export type getShopItemsItemIdOwnershipResponse404 = {
+  data: Error;
+  status: 404;
+};
+
+export type getShopItemsItemIdOwnershipResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type getShopItemsItemIdOwnershipResponseSuccess =
+  getShopItemsItemIdOwnershipResponse200 & {
+    headers: Headers;
+  };
+export type getShopItemsItemIdOwnershipResponseError = (
+  | getShopItemsItemIdOwnershipResponse400
+  | getShopItemsItemIdOwnershipResponse404
+  | getShopItemsItemIdOwnershipResponse500
+) & {
+  headers: Headers;
+};
+
+export type getShopItemsItemIdOwnershipResponse =
+  | getShopItemsItemIdOwnershipResponseSuccess
+  | getShopItemsItemIdOwnershipResponseError;
+
+export const getGetShopItemsItemIdOwnershipUrl = (itemId: string) => {
+  return `/shop/items/${itemId}/ownership`;
+};
+
+export const getShopItemsItemIdOwnership = async (
+  itemId: string,
+  options?: RequestInit
+): Promise<getShopItemsItemIdOwnershipResponse> => {
+  return rnFetch<getShopItemsItemIdOwnershipResponse>(
+    getGetShopItemsItemIdOwnershipUrl(itemId),
+    {
+      ...options,
+      method: "GET",
+    }
+  );
+};
+
+export const getGetShopItemsItemIdOwnershipQueryKey = (itemId: string) => {
+  return [`/shop/items/${itemId}/ownership`] as const;
+};
+
+export const getGetShopItemsItemIdOwnershipQueryOptions = <
+  TData = Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>,
+  TError = Error
+>(
+  itemId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  }
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetShopItemsItemIdOwnershipQueryKey(itemId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>
+  > = ({ signal }) =>
+    getShopItemsItemIdOwnership(itemId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!itemId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetShopItemsItemIdOwnershipQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>
+>;
+export type GetShopItemsItemIdOwnershipQueryError = Error;
+
+export function useGetShopItemsItemIdOwnership<
+  TData = Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>,
+  TError = Error
+>(
+  itemId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>,
+          TError,
+          Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetShopItemsItemIdOwnership<
+  TData = Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>,
+  TError = Error
+>(
+  itemId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>,
+          TError,
+          Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetShopItemsItemIdOwnership<
+  TData = Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>,
+  TError = Error
+>(
+  itemId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get which family members own a specific item
+ */
+
+export function useGetShopItemsItemIdOwnership<
+  TData = Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>,
+  TError = Error
+>(
+  itemId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetShopItemsItemIdOwnershipQueryOptions(
+    itemId,
+    options
+  );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,

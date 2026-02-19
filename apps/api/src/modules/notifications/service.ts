@@ -2,8 +2,8 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/supabase-types";
 import { PushTokensService } from "../pushTokens/service";
 
-export type EventType = "mention" | "achievement" | "activity_reminder" | "activity_assigned" | "reaction";
-export type EntityType = "memory" | "activity" | "puzzle" | "achievement";
+export type EventType = "mention" | "achievement" | "activity_reminder" | "activity_assigned" | "reaction" | "gift_received";
+export type EntityType = "memory" | "activity" | "puzzle" | "achievement" | "shop_item";
 
 // Expo Push Notification Response Types
 interface ExpoPushTicket {
