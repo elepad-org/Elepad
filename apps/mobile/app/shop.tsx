@@ -777,14 +777,6 @@ export default function ShopScreen() {
                         styles.modalConfirmBtn,
                         {
                           backgroundColor: COLORS.primary,
-                          opacity:
-                            pressed ||
-                            isBuying ||
-                            (balanceData?.pointsBalance ?? 0) <
-                              selectedItem.cost ||
-                            (buyForOthers && !recipientUserId)
-                              ? 0.7
-                              : 1,
                         },
                       ]}
                     >
@@ -1143,13 +1135,20 @@ const styles = StyleSheet.create({
   },
   modalConfirmBtn: {
     borderRadius: 16,
-    height: 54,
     justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 12, // Adjust padding to match text size
+    paddingHorizontal: 16,
+    width: "100%", // Ensure full width
   },
   modalCancelBtn: {
     borderRadius: 16,
-    height: 54,
     justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 12, // Adjust padding to match text size
+    paddingHorizontal: 16,
+    width: "100%", // Ensure full width
+    alignSelf: "stretch", // Stretch to container width
   },
   errorBanner: {
     flexDirection: "row",
