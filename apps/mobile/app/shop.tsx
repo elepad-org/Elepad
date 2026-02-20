@@ -817,7 +817,7 @@ export default function ShopScreen() {
                         color={COLORS.error}
                       />
                       <Text style={styles.insufficientPoints}>
-                        No tienes suficientes puntos para este item.
+                        No tienes suficientes puntos.
                       </Text>
                     </View>
                   )}
@@ -1157,6 +1157,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.red + "10",
     paddingVertical: 10,
     paddingHorizontal: 16,
+    marginHorizontal: "10%",
     borderRadius: 12,
     marginTop: 16,
     gap: 8,

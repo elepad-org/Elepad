@@ -11273,14 +11273,14 @@ export const getGetShopItemsItemIdOwnershipUrl = (itemId: string) => {
 
 export const getShopItemsItemIdOwnership = async (
   itemId: string,
-  options?: RequestInit
+  options?: RequestInit,
 ): Promise<getShopItemsItemIdOwnershipResponse> => {
   return rnFetch<getShopItemsItemIdOwnershipResponse>(
     getGetShopItemsItemIdOwnershipUrl(itemId),
     {
       ...options,
       method: "GET",
-    }
+    },
   );
 };
 
@@ -11290,7 +11290,7 @@ export const getGetShopItemsItemIdOwnershipQueryKey = (itemId: string) => {
 
 export const getGetShopItemsItemIdOwnershipQueryOptions = <
   TData = Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>,
-  TError = Error
+  TError = Error,
 >(
   itemId: string,
   options?: {
@@ -11302,7 +11302,7 @@ export const getGetShopItemsItemIdOwnershipQueryOptions = <
       >
     >;
     request?: SecondParameter<typeof rnFetch>;
-  }
+  },
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -11333,7 +11333,7 @@ export type GetShopItemsItemIdOwnershipQueryError = Error;
 
 export function useGetShopItemsItemIdOwnership<
   TData = Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>,
-  TError = Error
+  TError = Error,
 >(
   itemId: string,
   options: {
@@ -11354,13 +11354,13 @@ export function useGetShopItemsItemIdOwnership<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetShopItemsItemIdOwnership<
   TData = Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>,
-  TError = Error
+  TError = Error,
 >(
   itemId: string,
   options?: {
@@ -11381,13 +11381,13 @@ export function useGetShopItemsItemIdOwnership<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetShopItemsItemIdOwnership<
   TData = Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>,
-  TError = Error
+  TError = Error,
 >(
   itemId: string,
   options?: {
@@ -11400,7 +11400,7 @@ export function useGetShopItemsItemIdOwnership<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
@@ -11410,7 +11410,7 @@ export function useGetShopItemsItemIdOwnership<
 
 export function useGetShopItemsItemIdOwnership<
   TData = Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>,
-  TError = Error
+  TError = Error,
 >(
   itemId: string,
   options?: {
@@ -11423,13 +11423,13 @@ export function useGetShopItemsItemIdOwnership<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getGetShopItemsItemIdOwnershipQueryOptions(
     itemId,
-    options
+    options,
   );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
