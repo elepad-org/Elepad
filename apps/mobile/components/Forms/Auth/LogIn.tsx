@@ -15,7 +15,7 @@ import googleLogo from "@/assets/images/google.png";
 import { Link } from "expo-router";
 import { COLORS } from "@/styles/base";
 import { useToast } from "@/components/shared/Toast";
-import { getUsersId } from "@elepad/api-client/src/gen/client";
+//import { getUsersId } from "@elepad/api-client/src/gen/client";
 
 export default function LogIn() {
   const router = useRouter();
@@ -106,7 +106,7 @@ export default function LogIn() {
         options: { redirectTo },
       });
 
-      if (error) {
+      /* if (error) {
         showError(error.message);
         return;
       }
@@ -133,10 +133,10 @@ export default function LogIn() {
           }
 
           if (sessionData?.session) {
-            /* 
-            console.log("✅ Sesión PKCE establecida, redirigiendo a home");
-            router.replace("/(tabs)/home"); 
-            */
+             
+            //console.log("✅ Sesión PKCE establecida, redirigiendo a home");
+            //router.replace("/(tabs)/home"); 
+            
 
             const userId = sessionData.session.user.id;
             // Verificar que el correo de Google esté registrado en Elepad
@@ -163,6 +163,84 @@ export default function LogIn() {
                 showError("No se pudo verificar tu cuenta. Inténtalo de nuevo.");
               }
             }
+          } */
+      if (error) {
+        showError(error.message);
+        return;
+      }
+
+      console.log(data);
+
+      const authUrl = data?.url;
+      console.log(authUrl);
+      if (authUrl) {
+        // Abre el browser del telefono
+        const result = await WebBrowser.openAuthSessionAsync(
+          authUrl,
+          redirectTo,
+        );
+        console.log(result);
+        if (result.type === "success" && result.url) {
+          //Se parsea la URL que devuelve, ya que tiene los tokens de sesion
+          const parseParams = (u: string) => {
+            try {
+              const params: Record<string, string> = {};
+              const hashIndex = u.indexOf("#");
+              const queryIndex = u.indexOf("?");
+              const raw =
+                hashIndex !== -1
+                  ? u.substring(hashIndex + 1)
+                  : queryIndex !== -1
+                    ? u.substring(queryIndex + 1)
+                    : "";
+              raw.split("&").forEach((pair) => {
+                const [k, v] = pair.split("=");
+                if (k && v)
+                  params[decodeURIComponent(k)] = decodeURIComponent(v);
+              });
+              return params;
+            } catch (e) {
+              console.log(e);
+              return {} as Record<string, string>;
+            }
+          };
+
+          const params = parseParams(result.url);
+          const access_token = params["access_token"];
+          const refresh_token = params["refresh_token"];
+
+          try {
+            await supabase.auth.setSession({
+              access_token,
+              refresh_token,
+            });
+          } catch (e) {
+            console.warn("No se pudo establecer la sesión con los tokens:", e);
+          }
+
+          // Confirma usuario y redirige al inicio
+          try {
+            const userRes = await supabase.auth.getUser();
+            const user = userRes?.data?.user;
+            if (user) {
+              router.replace("/(tabs)/home");
+              return;
+            } else {
+              toast.showToast({
+                message:
+                  "Ocurrió un error al intentar iniciar sesión. Inténtalo de nuevo.",
+                type: "error",
+              });
+              router.replace("/login");
+            }
+          } catch (error) {
+            console.warn("No se pudo verificar el usuario de OAuth:", error);
+            toast.showToast({
+              message:
+                "Ocurrió un error al intentar iniciar sesión. Inténtalo de nuevo.",
+              type: "error",
+            });
+            router.replace("/login");
           }
         }
       }
@@ -233,7 +311,10 @@ export default function LogIn() {
         </Button>
 
         <Link href="/forgot-password" asChild>
-          <TouchableOpacity style={styles.forgotPasswordCentered} disabled={loading}>
+          <TouchableOpacity
+            style={styles.forgotPasswordCentered}
+            disabled={loading}
+          >
             <Text style={styles.forgotPasswordText}>
               ¿Olvidaste tu contraseña?
             </Text>

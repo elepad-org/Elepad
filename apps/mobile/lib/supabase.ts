@@ -72,7 +72,7 @@ export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
     persistSession: true,
     detectSessionInUrl: false,
     // Configuración adicional para mejorar el comportamiento en producción
-    storageKey: 'elepad-auth-token',
-    flowType: 'pkce',
+    //storageKey: 'elepad-auth-token',
+    //flowType: 'pkce',
   },
 });
