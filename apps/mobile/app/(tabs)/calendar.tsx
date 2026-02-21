@@ -6,6 +6,7 @@ import { useCalendarTour } from "@/hooks/tours/useCalendarTour";
 import { useTabContext } from "@/context/TabContext";
 import CalendarCard from "@/components/Calendar/CalendarCard";
 import ActivityForm from "@/components/Calendar/ActivityForm";
+import { useActivitiesRealtime } from "@/hooks/useActivitiesRealtime";
 import {
   usePostActivities,
   usePatchActivitiesId,
@@ -46,6 +47,14 @@ function CalendarScreenContent() {
   const [selectedDay, setSelectedDay] = useState<string>(getTodayLocal());
 
   const { activeTab } = useTabContext();
+
+  // Suscripción Realtime: refresca automáticamente cuando algún familiar
+  // crea, edita o elimina una actividad (WebSocket, sin polling).
+  // Solo activo cuando el tab Calendario está en primer plano.
+  useActivitiesRealtime(
+    activitiesQuery.queryKey as readonly unknown[],
+    activeTab === "calendar",
+  );
 
   //  // Tour hook
   //  // Tour hook
