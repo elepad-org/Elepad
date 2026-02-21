@@ -1153,12 +1153,14 @@ export default function RecuerdoDetailDialog({
 
               {recuerdo.tipo === "audio" && (
                 <View>
-                  {/* Botón para voltear - arriba del cassette */}
+                  {/* Contenedor de controles frontales: girar + play */}
                   <View
                     style={{
                       alignItems: "center",
                       paddingTop: 12,
                       paddingBottom: 8,
+                      flexDirection: "row",
+                      justifyContent: "center",
                     }}
                   >
                     <TouchableOpacity
@@ -1175,6 +1177,27 @@ export default function RecuerdoDetailDialog({
                       <IconButton
                         icon="swap-horizontal"
                         size={28}
+                        iconColor="#ffffff"
+                        style={{ margin: 0 }}
+                      />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      onPress={handleFrontPlay}
+                      activeOpacity={0.7}
+                      style={{
+                        marginLeft: 12,
+                        backgroundColor: "rgba(0, 0, 0, 0.6)",
+                        width: 40,
+                        height: 40,
+                        borderRadius: 20,
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <IconButton
+                        icon="play"
+                        size={20}
                         iconColor="#ffffff"
                         style={{ margin: 0 }}
                       />
@@ -1320,36 +1343,14 @@ export default function RecuerdoDetailDialog({
                           )}
                         </View>
 
-                        {/* Botón Play frontal */}
-                        <TouchableOpacity
-                          onPress={handleFrontPlay}
-                          activeOpacity={0.7}
-                          style={{
-                            alignSelf: "center",
-                            marginTop: 6,
-                            marginBottom: 6,
-                            width: 32,
-                            height: 32,
-                            borderRadius: 16,
-                            backgroundColor: COLORS.primary,
-                            justifyContent: "center",
-                            alignItems: "center",
-                            ...SHADOWS.medium,
-                          }}
-                        >
-                          <IconButton
-                            icon="play"
-                            size={16}
-                            iconColor="#1a1a1a"
-                            style={{ margin: 0 }}
-                          />
-                        </TouchableOpacity>
 
                         {/* Diseño del cassette - réplica exacta de la miniatura */}
                         <View
                           style={{
+                            flex: 1,
                             justifyContent: "center",
                             alignItems: "center",
+                            marginTop: 12,
                           }}
                         >
                           <View
