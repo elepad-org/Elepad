@@ -23,6 +23,7 @@ import { GAMES_INFO } from "@/constants/gamesInfo";
 import { GameInstructions } from "@/components/shared/GameInstructions";
 import AttemptCard from "@/components/Historial/AttemptCard";
 import { useAuth } from "@/hooks/useAuth";
+import { BackButton } from "@/components/shared/BackButton";
 
 interface Achievement {
   id: string;
@@ -221,13 +222,17 @@ export default function GameDetailScreen() {
           backgroundColor={COLORS.background}
         />
 
+        {/* Header con back button */}
+        <View style={styles.headerRow}>
+          <BackButton size={28} />
+          <Text style={styles.headerTitle}>{gameInfo.title}</Text>
+        </View>
+
         <ScrollView
           contentContainerStyle={STYLES.contentContainer}
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.fullWidthContainer}>
-            {/* Título del juego */}
-            <Text style={[styles.title]}>{gameInfo.title}</Text>
 
             {/* Descripción del Juego */}
             <Card style={[styles.gameCard, { marginBottom: 16 }]}>
@@ -624,6 +629,21 @@ const styles = StyleSheet.create({
   fullWidthContainer: {
     width: "100%",
     paddingHorizontal: 0,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingTop: 20,
+    paddingBottom: 12,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontFamily: FONT.bold,
+    color: COLORS.text,
+    letterSpacing: -0.5,
+    marginLeft: 8,
+    flex: 1,
   },
   title: {
     paddingHorizontal: 24,
