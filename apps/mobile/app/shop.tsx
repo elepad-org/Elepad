@@ -613,6 +613,7 @@ export default function ShopScreen() {
                           setBuyForOthers(false);
                           setRecipientUserId("");
                         }}
+                        disabled={(balanceData?.pointsBalance ?? 0) < selectedItem.cost}
                         style={({ pressed }) => [
                           {
                             flex: 1,
@@ -626,7 +627,12 @@ export default function ShopScreen() {
                             backgroundColor: !buyForOthers
                               ? COLORS.primary + "15"
                               : "transparent",
-                            opacity: pressed ? 0.7 : 1,
+                            opacity:
+                              (balanceData?.pointsBalance ?? 0) < selectedItem.cost
+                                ? 0.4
+                                : pressed
+                                  ? 0.7
+                                  : 1,
                           },
                         ]}
                       >
@@ -659,10 +665,19 @@ export default function ShopScreen() {
                             backgroundColor: buyForOthers
                               ? COLORS.primary + "15"
                               : "transparent",
-                            opacity: pressed ? 0.7 : 1,
+                            opacity:
+                              (balanceData?.pointsBalance ?? 0) < selectedItem.cost ||
+                              availableRecipients.length === 0
+                                ? 0.4
+                                : pressed
+                                  ? 0.7
+                                  : 1,
                           },
                         ]}
-                        disabled={availableRecipients.length === 0}
+                        disabled={
+                          availableRecipients.length === 0 ||
+                          (balanceData?.pointsBalance ?? 0) < selectedItem.cost
+                        }
                       >
                         <Text
                           style={{
@@ -671,7 +686,8 @@ export default function ShopScreen() {
                             fontSize: 13,
                             color: buyForOthers
                               ? COLORS.primary
-                              : availableRecipients.length === 0
+                              : availableRecipients.length === 0 ||
+                                  (balanceData?.pointsBalance ?? 0) < selectedItem.cost
                                 ? COLORS.textSecondary + "50"
                                 : COLORS.textSecondary,
                           }}
@@ -766,46 +782,37 @@ export default function ShopScreen() {
                       </Pressable>
                     )
                   ) : (
-                    <Pressable
-                      onPress={handleBuy}
-                      disabled={
-                        isBuying ||
-                        (balanceData?.pointsBalance ?? 0) < selectedItem.cost ||
-                        (buyForOthers && !recipientUserId)
-                      }
-                      style={({}) => [
-                        styles.modalConfirmBtn,
-                        {
-                          backgroundColor: COLORS.primary,
-                        },
-                      ]}
-                    >
-                      {isBuying ? (
-                        <ActivityIndicator size="small" color={COLORS.white} />
-                      ) : (
-                        <Text
-                          style={{
-                            color: COLORS.white,
-                            fontFamily: FONT.bold,
-                            fontSize: 16,
-                            textAlign: "center",
-                          }}
-                        >
-                          {buyForOthers ? "Regalar" : "Canjear"}
-                        </Text>
-                      )}
-                    </Pressable>
+                    (balanceData?.pointsBalance ?? 0) >= selectedItem.cost && (
+                      <Pressable
+                        onPress={handleBuy}
+                        disabled={
+                          isBuying ||
+                          (buyForOthers && !recipientUserId)
+                        }
+                        style={({}) => [
+                          styles.modalConfirmBtn,
+                          {
+                            backgroundColor: COLORS.primary,
+                          },
+                        ]}
+                      >
+                        {isBuying ? (
+                          <ActivityIndicator size="small" color={COLORS.white} />
+                        ) : (
+                          <Text
+                            style={{
+                              color: COLORS.white,
+                              fontFamily: FONT.bold,
+                              fontSize: 16,
+                              textAlign: "center",
+                            }}
+                          >
+                            {buyForOthers ? "Regalar" : "Canjear"}
+                          </Text>
+                        )}
+                      </Pressable>
+                    )
                   )}
-
-                  <Button
-                    mode="text"
-                    onPress={() => setSelectedItem(null)}
-                    style={styles.modalCancelBtn}
-                    textColor={COLORS.textSecondary}
-                    labelStyle={{ fontFamily: FONT.semiBold }}
-                  >
-                    Quizás luego
-                  </Button>
                 </View>
 
                 {(balanceData?.pointsBalance ?? 0) < selectedItem.cost &&
