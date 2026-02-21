@@ -490,6 +490,20 @@ export default function RecuerdoDetailDialog({
     setIsFlipped(!isFlipped);
   };
 
+  const handleFrontPlay = () => {
+    // Girar al reverso
+    if (!isFlipped) {
+      Animated.timing(flipAnimation, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+      setIsFlipped(true);
+    }
+    // Reproducir audio
+    playAudio();
+  };
+
   const frontOpacity = flipAnimation.interpolate({
     inputRange: [0, 1],
     outputRange: [1, 0],
@@ -1306,13 +1320,36 @@ export default function RecuerdoDetailDialog({
                           )}
                         </View>
 
+                        {/* Botón Play frontal */}
+                        <TouchableOpacity
+                          onPress={handleFrontPlay}
+                          activeOpacity={0.7}
+                          style={{
+                            alignSelf: "center",
+                            marginTop: 6,
+                            marginBottom: 6,
+                            width: 32,
+                            height: 32,
+                            borderRadius: 16,
+                            backgroundColor: COLORS.primary,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            ...SHADOWS.medium,
+                          }}
+                        >
+                          <IconButton
+                            icon="play"
+                            size={16}
+                            iconColor="#1a1a1a"
+                            style={{ margin: 0 }}
+                          />
+                        </TouchableOpacity>
+
                         {/* Diseño del cassette - réplica exacta de la miniatura */}
                         <View
                           style={{
-                            flex: 1,
                             justifyContent: "center",
                             alignItems: "center",
-                            marginTop: 12,
                           }}
                         >
                           <View
