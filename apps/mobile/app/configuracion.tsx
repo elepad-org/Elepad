@@ -1,9 +1,11 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   StatusBar,
   ScrollView,
   View,
   TouchableOpacity,
+  Pressable,
+  Alert,
 } from "react-native";
 import {
   Button,
@@ -13,7 +15,9 @@ import {
   Portal,
   Dialog,
   Text,
+  Modal,
 } from "react-native-paper";
+import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/hooks/useAuth";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
@@ -21,12 +25,28 @@ import { UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import ProfileHeader from "@/components/ProfileHeader";
 import { LoadingProfile, ChangePasswordModal, EditNameModal, BackButton } from "@/components/shared";
 import { useRouter } from "expo-router";
-import { COLORS, STYLES, FONT } from "@/styles/base";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { COLORS, STYLES, FONT, SHADOWS } from "@/styles/base";
 import { useToast } from "@/components/shared/Toast";
+import {
+  useGetShopInventory,
+  useGetShopItems,
+  usePostShopEquip,
+} from "@elepad/api-client";
 
 export default function ConfiguracionScreen() {
   const router = useRouter();
   const { showToast } = useToast();
+
+  // helper to unwrap react-query results
+  const normalizeData = (data: unknown) => {
+    if (!data) return undefined;
+    if (Array.isArray(data)) return data;
+    if (typeof data === "object" && data !== null && "data" in data) {
+      return (data as { data: unknown }).data;
+    }
+    return data;
+  };
 
   const {
     userElepad,
@@ -35,6 +55,50 @@ export default function ConfiguracionScreen() {
     userElepadLoading,
     updateUserTimezone,
   } = useAuth();
+  // shop hooks for frames
+  const inventoryResponse = useGetShopInventory();
+  const inventoryData = normalizeData(inventoryResponse.data) as
+    | Array<{ itemId: string; equipped?: boolean }>
+    | undefined;
+  const itemsResponse = useGetShopItems();
+  const itemsDataRaw = normalizeData(itemsResponse.data);
+  const itemsData = Array.isArray(itemsDataRaw) ? itemsDataRaw : [];
+
+  // derive owned frames
+  const ownedFrames = useMemo(() => {
+    if (!inventoryData || !itemsData) return [];
+    if (!Array.isArray(inventoryData) || !Array.isArray(itemsData)) return [];
+    return inventoryData
+      .map((inv) => itemsData.find((it: any) => it.id === inv.itemId))
+      .filter((it: any) => it && it.type === "frame") as Array<{
+      id: string;
+      title: string;
+      assetUrl: string;
+    }>;
+  }, [inventoryData, itemsData]);
+
+  const hasFrames = ownedFrames.length > 0;
+
+  const { mutate: equipItem, isPending: isEquipping } = usePostShopEquip({
+    mutation: {
+      onSuccess: (res, variables) => {
+        showToast({ message: "¡Marco equipado con éxito!", type: "success" });
+        // variables.data.itemId contains the id that was equipped
+        const equipped = ownedFrames.find((f) => f.id === variables.data.itemId);
+        if (equipped) {
+          setPreviewFrameUrl(equipped.assetUrl);
+        }
+        setFrameModalVisible(false);
+        refreshUserElepad();
+      },
+      onError: (error: Error) => {
+        const message =
+          (error as { response?: { data?: { message?: string } } })?.response
+            ?.data?.message || "No se pudo equipar el marco.";
+        Alert.alert("Error", message);
+      },
+    },
+  });
 
   // Mostrar loading si está cargando o si no hay usuario aún
   const showLoading = userElepadLoading || !userElepad;
@@ -65,6 +129,16 @@ export default function ConfiguracionScreen() {
   const [timezoneDialogVisible, setTimezoneDialogVisible] = useState(false);
   const [changePasswordModalVisible, setChangePasswordModalVisible] =
     useState(false);
+  const [frameModalVisible, setFrameModalVisible] = useState(false);
+  const [previewFrameUrl, setPreviewFrameUrl] = useState<string | null>(
+    activeFrameUrl || null,
+  );
+
+  // keep preview in sync when active changes
+  useEffect(() => {
+    setPreviewFrameUrl(activeFrameUrl || null);
+  }, [activeFrameUrl]);
+
   const getInitials = (name: string) =>
     name
       .split(/\s+/)
@@ -183,7 +257,7 @@ export default function ConfiguracionScreen() {
           name={displayName}
           email={email}
           avatarUrl={avatarUrl}
-          frameUrl={activeFrameUrl} // Pass the frame URL
+          frameUrl={(frameModalVisible ? previewFrameUrl : activeFrameUrl) || undefined} // convert null to undefined
           onEditPhoto={() => setPhotoOpen(true)}
         />
 
@@ -326,6 +400,79 @@ export default function ConfiguracionScreen() {
             }}
             showToast={showToast}
           />
+
+          {/* frame picker modal triggered by floating button */}
+          <Modal
+            visible={frameModalVisible}
+            onDismiss={() => setFrameModalVisible(false)}
+            contentContainerStyle={{
+              backgroundColor: COLORS.white,
+              margin: 20,
+              borderRadius: 12,
+              padding: 16,
+              maxHeight: "80%",
+            }}
+          >
+            <Text style={[STYLES.heading, { textAlign: "center" }]}>Elegir marco</Text>
+            <ScrollView>
+              {ownedFrames.map((frame) => (
+                <Pressable
+                  key={frame.id}
+                  onPress={() => setPreviewFrameUrl(frame.assetUrl)}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    paddingVertical: 12,
+                    borderBottomWidth: 1,
+                    borderColor: COLORS.border,
+                  }}
+                >
+                  <Image
+                    source={{ uri: frame.assetUrl }}
+                    style={{ width: 50, height: 50, borderRadius: 8 }}
+                    contentFit="contain"
+                  />
+                  <Text style={{ marginLeft: 12, flex: 1 }}>{frame.title}</Text>
+                  <Button
+                    mode="contained"
+                    disabled={isEquipping || activeFrameUrl === frame.assetUrl}
+                    onPress={() => {
+                      equipItem({ data: { itemId: frame.id } });
+                    }}
+                    style={{ marginLeft: 8 }}
+                  >
+                    {activeFrameUrl === frame.assetUrl ? "Equipado" : "Usar"}
+                  </Button>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </Modal>
+
+          {/* floating button */}
+          {hasFrames && (
+            <TouchableOpacity
+              onPress={() => setFrameModalVisible(true)}
+              style={{
+                position: "absolute",
+                bottom: 24,
+                right: 24,
+                width: 56,
+                height: 56,
+                borderRadius: 28,
+                backgroundColor: COLORS.primary,
+                justifyContent: "center",
+                alignItems: "center",
+                ...SHADOWS.medium,
+                zIndex: 1000,
+              }}
+            >
+              <MaterialCommunityIcons
+                name={"image-frame-outline" as any}
+                size={28}
+                color="#fff"
+              />
+            </TouchableOpacity>
+          )}
         </Portal>
       </ScrollView>
     </SafeAreaView>
