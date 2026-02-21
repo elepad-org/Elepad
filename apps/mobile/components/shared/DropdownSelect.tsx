@@ -23,6 +23,7 @@ interface DropdownSelectProps {
   style?: object;
   showLabel?: boolean;
   buttonStyle?: object;
+  error?: boolean;
 }
 
 export default function DropdownSelect({
@@ -35,6 +36,7 @@ export default function DropdownSelect({
   style = {},
   showLabel = true,
   buttonStyle = {},
+  error = false,
 }: DropdownSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [anchorPosition, setAnchorPosition] = useState<
@@ -83,7 +85,7 @@ export default function DropdownSelect({
         <TouchableOpacity
           onPress={handleOpen}
           disabled={disabled}
-          style={[localStyles.button, buttonStyle]}
+          style={[localStyles.button, error && localStyles.buttonError, buttonStyle]}
         >
           <View style={localStyles.buttonContent}>
             {selectedOption?.icon ? (
@@ -183,6 +185,11 @@ const localStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     backgroundColor: COLORS.background,
+  },
+  buttonError: {
+    borderColor: "#e53935",
+    borderWidth: 2,
+    backgroundColor: "#e5393508",
   },
   buttonContent: {
     flexDirection: "row",
