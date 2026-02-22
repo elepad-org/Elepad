@@ -1,9 +1,11 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   StatusBar,
   ScrollView,
   View,
   TouchableOpacity,
+  Pressable,
+  Alert,
 } from "react-native";
 import {
   Button,
@@ -13,20 +15,41 @@ import {
   Portal,
   Dialog,
   Text,
+  Modal,
 } from "react-native-paper";
+import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/hooks/useAuth";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
+import { useGetFamilyGroupIdGroupMembers } from "@elepad/api-client";
 import { UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import ProfileHeader from "@/components/ProfileHeader";
-import { LoadingProfile, ChangePasswordModal, EditNameModal, BackButton } from "@/components/shared";
+import PolaroidPreview from "@/components/Recuerdos/PolaroidPreview";
+import { LoadingProfile, ChangePasswordModal, EditNameModal, BackButton, EditProfileModal } from "@/components/shared";
 import { useRouter } from "expo-router";
-import { COLORS, STYLES, FONT } from "@/styles/base";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { COLORS, STYLES, FONT, SHADOWS } from "@/styles/base";
 import { useToast } from "@/components/shared/Toast";
+import {
+  useGetShopInventory,
+  useGetShopItems,
+  usePostShopEquip,
+  usePostShopUnequip,
+} from "@elepad/api-client";
 
 export default function ConfiguracionScreen() {
   const router = useRouter();
   const { showToast } = useToast();
+
+  // helper to unwrap react-query results
+  const normalizeData = (data: unknown) => {
+    if (!data) return undefined;
+    if (Array.isArray(data)) return data;
+    if (typeof data === "object" && data !== null && "data" in data) {
+      return (data as { data: unknown }).data;
+    }
+    return data;
+  };
 
   const {
     userElepad,
@@ -35,29 +58,100 @@ export default function ConfiguracionScreen() {
     userElepadLoading,
     updateUserTimezone,
   } = useAuth();
+  // shop hooks for frames
+  const inventoryResponse = useGetShopInventory();
+  const inventoryData = normalizeData(inventoryResponse.data) as
+    | Array<{ itemId: string; equipped?: boolean }>
+    | undefined;
+  const itemsResponse = useGetShopItems();
+  const itemsDataRaw = normalizeData(itemsResponse.data);
+  const itemsData = Array.isArray(itemsDataRaw) ? itemsDataRaw : [];
+
+  // derive owned frames
+  const ownedFrames = useMemo(() => {
+    if (!inventoryData || !itemsData) return [];
+    if (!Array.isArray(inventoryData) || !Array.isArray(itemsData)) return [];
+    return inventoryData
+      .map((inv) => itemsData.find((it: { id: string, type: string }) => it.id === inv.itemId))
+      .filter((it: { type: string } | undefined) => it && it.type === "frame") as Array<{
+        id: string;
+        title: string;
+        assetUrl: string;
+      }>;
+  }, [inventoryData, itemsData]);
+
+  const hasFrames = ownedFrames.length > 0;
+
+  const { mutate: equipItem, isPending: isEquipping } = usePostShopEquip({
+    mutation: {
+      onSuccess: (res, variables) => {
+        showToast({ message: "¡Marco equipado con éxito!", type: "success" });
+        // variables.data.itemId contains the id that was equipped
+        const equipped = ownedFrames.find((f) => f.id === variables.data.itemId);
+        if (equipped) {
+          setPreviewFrameUrl(equipped.assetUrl);
+        }
+        setFrameModalVisible(false);
+        refreshUserElepad();
+      },
+      onError: (error: Error) => {
+        const message =
+          (error as { response?: { data?: { message?: string } } })?.response
+            ?.data?.message || "No se pudo equipar el marco.";
+        Alert.alert("Error", message);
+      },
+    },
+  });
+
+  const { mutate: unequipItem, isPending: isUnequipping } = usePostShopUnequip({
+    mutation: {
+      onSuccess: () => {
+        showToast({ message: "¡Marco desequipado con éxito!", type: "success" });
+        setPreviewFrameUrl(null);
+        setFrameModalVisible(false);
+        refreshUserElepad();
+      },
+      onError: (error: Error) => {
+        const message =
+          (error as { response?: { data?: { message?: string } } })?.response
+            ?.data?.message || "No se pudo desequipar el marco.";
+        Alert.alert("Error", message);
+      },
+    },
+  });
 
   // Mostrar loading si está cargando o si no hay usuario aún
   const showLoading = userElepadLoading || !userElepad;
-
-  // Si está cargando, mostrar solo el spinner centrado
-  if (showLoading) {
-    return (
-      <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
-        <StatusBar
-          barStyle="dark-content"
-          backgroundColor={COLORS.background}
-        />
-        <LoadingProfile />
-      </SafeAreaView>
-    );
-  }
 
   const displayName = userElepad?.displayName?.trim() || "Usuario";
   const email = userElepad?.email || "-";
   const avatarUrl = userElepad?.avatarUrl || "";
   const activeFrameUrl = userElepad?.activeFrameUrl;
+  const groupId = userElepad?.groupId;
+
+  // Fetch optional group info for the family name
+  const membersQuery = useGetFamilyGroupIdGroupMembers(groupId ?? "", {
+    query: { enabled: !!groupId },
+  });
+
+  // Normaliza la respuesta del hook (envuelta en {data} o directa)
+  const groupInfo = (() => {
+    const resp = membersQuery.data as unknown; // Quick cast since type is internal
+    if (!resp) return undefined;
+
+    type GroupResponse = { data?: { name: string } } | { name: string };
+    const checkedResp = resp as GroupResponse;
+
+    if ('name' in checkedResp) {
+      return checkedResp;
+    }
+    return checkedResp.data;
+  })();
+  const familyName = groupInfo?.name || "Sin familia";
 
   const [editNameModalVisible, setEditNameModalVisible] = useState(false);
+  const [editProfileModalVisible, setEditProfileModalVisible] = useState(false);
+  const [photoPreviewVisible, setPhotoPreviewVisible] = useState(false);
   const [photoOpen, setPhotoOpen] = useState(false);
   const [timezone, setTimezone] = useState(
     userElepad?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -65,6 +159,17 @@ export default function ConfiguracionScreen() {
   const [timezoneDialogVisible, setTimezoneDialogVisible] = useState(false);
   const [changePasswordModalVisible, setChangePasswordModalVisible] =
     useState(false);
+  const [frameModalVisible, setFrameModalVisible] = useState(false);
+  const [processingFrameId, setProcessingFrameId] = useState<string | null>(null);
+  const [previewFrameUrl, setPreviewFrameUrl] = useState<string | null>(
+    activeFrameUrl || null,
+  );
+
+  // keep preview in sync when active changes
+  useEffect(() => {
+    setPreviewFrameUrl(activeFrameUrl || null);
+  }, [activeFrameUrl]);
+
   const getInitials = (name: string) =>
     name
       .split(/\s+/)
@@ -135,22 +240,34 @@ export default function ConfiguracionScreen() {
       updateUserTimezone(
         userElepad.timezone || "America/Argentina/Buenos_Aires",
       );
-      const msg =
-        e instanceof Error ? e.message : "Error al actualizar zona horaria";
+      const errMessage = e instanceof Error ? e.message : "Error al actualizar zona horaria";
       showToast({
-        message: msg,
+        message: errMessage,
         type: "error",
       });
     }
   };
+
+  // Si está cargando, mostrar solo el spinner centrado
+  if (showLoading) {
+    return (
+      <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor={COLORS.background}
+        />
+        <LoadingProfile />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
       {/* Header with back button */}
-      <View style={{ 
-        paddingHorizontal: 16, 
+      <View style={{
+        paddingHorizontal: 16,
         paddingTop: 16,
         paddingBottom: 8,
         backgroundColor: COLORS.background,
@@ -160,9 +277,9 @@ export default function ConfiguracionScreen() {
           alignItems: "center",
         }}>
           <BackButton size={28} />
-          <Text style={{ 
-            fontSize: 24, 
-            fontWeight: "bold", 
+          <Text style={{
+            fontSize: 24,
+            fontWeight: "bold",
             color: COLORS.text,
             letterSpacing: -0.5,
             flex: 1,
@@ -179,22 +296,24 @@ export default function ConfiguracionScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <ProfileHeader
-          name={displayName}
-          email={email}
-          avatarUrl={avatarUrl}
-          frameUrl={activeFrameUrl} // Pass the frame URL
-          onEditPhoto={() => setPhotoOpen(true)}
-        />
+        <TouchableOpacity activeOpacity={0.8} onPress={() => setPhotoPreviewVisible(true)}>
+          <ProfileHeader
+            name={displayName}
+            email={email}
+            avatarUrl={avatarUrl}
+            frameUrl={(frameModalVisible ? previewFrameUrl : activeFrameUrl) || undefined} // convert null to undefined
+            onEditPhoto={() => setPhotoOpen(true)}
+          />
+        </TouchableOpacity>
 
         <Card style={STYLES.menuCard}>
           <List.Section>
             <List.Item
-              title="Editar nombre"
+              title="Editar Perfil"
               left={(props) => <List.Icon {...props} icon="account-edit" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
               style={{ minHeight: 60, justifyContent: "center" }}
-              onPress={() => setEditNameModalVisible(true)}
+              onPress={() => setEditProfileModalVisible(true)}
             />
             <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
             <List.Item
@@ -326,6 +445,159 @@ export default function ConfiguracionScreen() {
             }}
             showToast={showToast}
           />
+          <Modal
+            visible={photoPreviewVisible}
+            onDismiss={() => setPhotoPreviewVisible(false)}
+            contentContainerStyle={{
+              backgroundColor: "transparent",
+              margin: 0,
+              padding: 0,
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <TouchableOpacity
+              style={{
+                flex: 1,
+                width: "100%",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "rgba(0,0,0,0.7)",
+              }}
+              activeOpacity={1}
+              onPress={() => setPhotoPreviewVisible(false)}
+            >
+              <PolaroidPreview
+                memory={{
+                  id: "profile-preview",
+                  title: displayName,
+                  mediaUrl: avatarUrl || null,
+                }}
+                hideMeta={true}
+                customRows={[
+                  { label: "Correo", value: email },
+                  { label: "Familia", value: familyName }
+                ]}
+              />
+            </TouchableOpacity>
+          </Modal>
+          <EditProfileModal
+            visible={editProfileModalVisible}
+            onDismiss={() => setEditProfileModalVisible(false)}
+            displayName={displayName}
+            avatarUrl={avatarUrl}
+            activeFrameUrl={activeFrameUrl}
+            equippedFrameName={ownedFrames.find(f => f.assetUrl === activeFrameUrl)?.title}
+            onEditPhotoPress={() => {
+              setEditProfileModalVisible(false);
+              setPhotoOpen(true);
+            }}
+            onChangeFramePress={() => {
+              setEditProfileModalVisible(false);
+              setFrameModalVisible(true);
+            }}
+            onEditNamePress={() => {
+              setEditProfileModalVisible(false);
+              setEditNameModalVisible(true);
+            }}
+          />
+
+          {/* frame picker modal triggered by floating button */}
+          <Modal
+            visible={frameModalVisible}
+            onDismiss={() => setFrameModalVisible(false)}
+            contentContainerStyle={{
+              backgroundColor: COLORS.white,
+              margin: 20,
+              borderRadius: 12,
+              padding: 16,
+              maxHeight: "80%",
+            }}
+          >
+            <Text style={[STYLES.heading, { textAlign: "center" }]}>Elegir marco</Text>
+            <ScrollView>
+              {ownedFrames.map((frame) => (
+                <Pressable
+                  key={frame.id}
+                  onPress={() => setPreviewFrameUrl(frame.assetUrl)}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    paddingVertical: 12,
+                    borderBottomWidth: 1,
+                    borderColor: COLORS.border,
+                  }}
+                >
+                  <Image
+                    source={{ uri: frame.assetUrl }}
+                    style={{ width: 50, height: 50, borderRadius: 8 }}
+                    contentFit="contain"
+                  />
+                  <View style={{ marginLeft: 12, flex: 1 }}>
+                    <Text>{frame.title}</Text>
+                    {activeFrameUrl === frame.assetUrl && (
+                      <Text style={{ fontSize: 12, color: COLORS.textPlaceholder, marginTop: 2 }}>
+                        Equipado
+                      </Text>
+                    )}
+                  </View>
+                  <View style={{ flexDirection: "row", marginLeft: 8 }}>
+                    {activeFrameUrl === frame.assetUrl ? (
+                      <Button
+                        mode="outlined"
+                        disabled={isUnequipping || isEquipping}
+                        loading={isUnequipping}
+                        onPress={() => {
+                          unequipItem({ data: { itemType: "frame" } });
+                        }}
+                      >
+                        Desequipar
+                      </Button>
+                    ) : (
+                      <Button
+                        mode="contained"
+                        disabled={isEquipping || isUnequipping}
+                        loading={isEquipping && processingFrameId === frame.id}
+                        onPress={() => {
+                          setProcessingFrameId(frame.id);
+                          equipItem({ data: { itemId: frame.id } });
+                        }}
+                      >
+                        Usar
+                      </Button>
+                    )}
+                  </View>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </Modal>
+
+          {/* floating button */}
+          {hasFrames && (
+            <TouchableOpacity
+              onPress={() => setFrameModalVisible(true)}
+              style={{
+                position: "absolute",
+                bottom: 24,
+                right: 24,
+                width: 56,
+                height: 56,
+                borderRadius: 28,
+                backgroundColor: COLORS.primary,
+                justifyContent: "center",
+                alignItems: "center",
+                ...SHADOWS.medium,
+                zIndex: 1000,
+              }}
+            >
+              <MaterialCommunityIcons
+                name={"image-frame" as const}
+                size={28}
+                color="#fff"
+              />
+            </TouchableOpacity>
+          )}
         </Portal>
       </ScrollView>
     </SafeAreaView>

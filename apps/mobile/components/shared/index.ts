@@ -13,3 +13,4 @@ export { default as SuccessSnackbar } from "./SuccessSnackbar";
 export { default as ErrorSnackbar } from "./ErrorSnackbar";
 export { StyledTextInput } from "./StyledTextInput";
 export { BackButton } from "./BackButton";
+export { EditProfileModal } from "./EditProfileModal";

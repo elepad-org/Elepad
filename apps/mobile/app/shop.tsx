@@ -51,6 +51,7 @@ export default function ShopScreen() {
   const [activeFilter, setActiveFilter] = React.useState("Todos");
   const [buyForOthers, setBuyForOthers] = React.useState(false);
   const [recipientUserId, setRecipientUserId] = React.useState<string>("");
+  const [recipientError, setRecipientError] = React.useState(false);
 
   // Helpers to normalize data
   const normalizeData = (data: unknown) => {
@@ -260,7 +261,7 @@ export default function ShopScreen() {
     
     // Validar que si está en modo "comprar para otros", se haya seleccionado un destinatario
     if (buyForOthers && !recipientUserId) {
-      Alert.alert("Error", "Por favor selecciona un destinatario.");
+      setRecipientError(true);
       return;
     }
     
@@ -281,6 +282,7 @@ export default function ShopScreen() {
     setSelectedItem(null);
     setBuyForOthers(false);
     setRecipientUserId("");
+    setRecipientError(false);
   };
 
   /* Redundant declarations removed */
@@ -313,13 +315,7 @@ export default function ShopScreen() {
             pressed && { opacity: 0.9 },
           ]}
           onPress={() => {
-            if (owned) {
-              if (item.type === "frame") {
-                setSelectedItem(item);
-              }
-            } else {
-              setSelectedItem(item);
-            }
+            setSelectedItem(item);
           }}
         >
           <View style={styles.imageContainer}>
@@ -564,43 +560,234 @@ export default function ShopScreen() {
               <View style={styles.modalBody}>
                 <Text style={styles.modalTitle}>{selectedItem.title}</Text>
                 
-                {!isOwned(selectedItem.id) && (
+                {/* Costo del canje */}
+                <View style={styles.modalCostContainer}>
+                  <Text style={styles.modalCostLabel}>Costo del canje</Text>
+                  <Text style={styles.modalCostValue}>
+                    {selectedItem.cost} Puntos
+                  </Text>
+                </View>
+
+                {/* Point Info */}
+                <View style={styles.pointsInfoRow}>
+                  <View style={styles.pointsInfoItem}>
+                    <Text style={styles.pointsInfoLabel}>Tus puntos</Text>
+                    <Text style={styles.pointsInfoValue}>
+                      {balanceData?.pointsBalance ?? 0}
+                    </Text>
+                  </View>
+                  <View style={styles.pointsInfoDivider} />
+                  <View style={styles.pointsInfoItem}>
+                    <Text style={styles.pointsInfoLabel}>Restantes</Text>
+                    <Text
+                      style={[
+                        styles.pointsInfoValue,
+                        (balanceData?.pointsBalance ?? 0) <
+                          selectedItem.cost && styles.pointsNegative,
+                      ]}
+                    >
+                      {Math.max(
+                        0,
+                        (balanceData?.pointsBalance ?? 0) - selectedItem.cost,
+                      )}
+                    </Text>
+                  </View>
+                </View>
+
+{isOwned(selectedItem.id) ? (
+                  /* ── Item ya comprado ── */
                   <>
-                    {/* Costo del canje */}
-                    <View style={styles.modalCostContainer}>
-                      <Text style={styles.modalCostLabel}>Costo del canje</Text>
-                      <Text style={styles.modalCostValue}>
-                        {selectedItem.cost} Puntos
+                    {/* Botón outline para regalar (actúa como toggle) */}
+                    <Pressable
+                      onPress={() => {
+                        if (buyForOthers) {
+                          setBuyForOthers(false);
+                          setRecipientUserId("");
+                        } else {
+                          setBuyForOthers(true);
+                        }
+                      }}
+                      disabled={
+                        availableRecipients.length === 0 ||
+                        (balanceData?.pointsBalance ?? 0) < selectedItem.cost
+                      }
+                      style={({ pressed }) => [
+                        {
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 8,
+                          paddingVertical: 12,
+                          paddingHorizontal: 16,
+                          borderRadius: 16,
+                          borderWidth: 2,
+                          borderColor:
+                            availableRecipients.length === 0 ||
+                            (balanceData?.pointsBalance ?? 0) < selectedItem.cost
+                              ? COLORS.border
+                              : COLORS.primary,
+                          backgroundColor: buyForOthers
+                            ? COLORS.primary + "15"
+                            : "transparent",
+                          marginBottom: 16,
+                          opacity:
+                            availableRecipients.length === 0 ||
+                            (balanceData?.pointsBalance ?? 0) < selectedItem.cost
+                              ? 0.4
+                              : pressed
+                                ? 0.7
+                                : 1,
+                        },
+                      ]}
+                    >
+                      <MaterialCommunityIcons
+                        name="gift-outline"
+                        size={18}
+                        color={
+                          availableRecipients.length === 0 ||
+                          (balanceData?.pointsBalance ?? 0) < selectedItem.cost
+                            ? COLORS.textSecondary
+                            : COLORS.primary
+                        }
+                      />
+                      <Text
+                        style={{
+                          fontFamily: FONT.semiBold,
+                          fontSize: 14,
+                          color:
+                            availableRecipients.length === 0 ||
+                            (balanceData?.pointsBalance ?? 0) < selectedItem.cost
+                              ? COLORS.textSecondary
+                              : COLORS.primary,
+                        }}
+                      >
+                        Regalar a un familiar
+                      </Text>
+                    </Pressable>
+
+                    {/* Selector de destinatario (visible solo cuando buyForOthers) */}
+                    {buyForOthers && (
+                      <View style={{ marginBottom: 16 }}>
+                        <DropdownSelect
+                          label="Destinatari"
+                          value={recipientUserId}
+                          options={availableRecipients.map((member) => ({
+                            key: member.id,
+                            label: member.displayName,
+                            avatarUrl: member.avatarUrl || null,
+                            frameUrl: member.activeFrameUrl || null,
+                          }))}
+                          onSelect={(value) => {
+                            setRecipientUserId(value);
+                            setRecipientError(false);
+                          }}
+                          placeholder="Selecciona un familiar"
+                          showLabel={false}
+                          error={recipientError}
+                        />
+                      </View>
+                    )}
+
+                    <View style={styles.modalActions}>
+                      {/* Botón equipar (solo frames) */}
+                      {selectedItem.type === "frame" && (
+                        <Pressable
+                          onPress={handleEquip}
+                          disabled={isEquipping || isEquipped(selectedItem.id)}
+                          style={({ pressed }) => [
+                            styles.modalConfirmBtn,
+                            {
+                              backgroundColor: COLORS.primary,
+                              opacity:
+                                pressed || isEquipping || isEquipped(selectedItem.id)
+                                  ? 0.7
+                                  : 1,
+                            },
+                          ]}
+                        >
+                          {isEquipping ? (
+                            <ActivityIndicator size="small" color={COLORS.white} />
+                          ) : (
+                            <Text
+                              style={{
+                                color: COLORS.white,
+                                fontFamily: FONT.bold,
+                                fontSize: 16,
+                                textAlign: "center",
+                              }}
+                            >
+                              {isEquipped(selectedItem.id) ? "Equipado" : "Usar Marco"}
+                            </Text>
+                          )}
+                        </Pressable>
+                      )}
+
+                      {/* Botón confirmar regalo */}
+                      {buyForOthers &&
+                        (balanceData?.pointsBalance ?? 0) >= selectedItem.cost && (
+                          <Pressable
+                            onPress={handleBuy}
+                            disabled={isBuying}
+                            style={({}) => [
+                              styles.modalConfirmBtn,
+                              { backgroundColor: COLORS.primary },
+                            ]}
+                          >
+                            {isBuying ? (
+                              <ActivityIndicator size="small" color={COLORS.white} />
+                            ) : (
+                              <Text
+                                style={{
+                                  color: COLORS.white,
+                                  fontFamily: FONT.bold,
+                                  fontSize: 16,
+                                  textAlign: "center",
+                                }}
+                              >
+                                Regalar
+                              </Text>
+                            )}
+                          </Pressable>
+                        )}
+                    </View>
+
+                    {/* Banner: ya lo tienes */}
+                    <View
+                      style={[
+                        styles.errorBanner,
+                        { backgroundColor: COLORS.primary + "15", marginTop: 16 },
+                      ]}
+                    >
+                      <MaterialCommunityIcons
+                        name="check-circle"
+                        size={16}
+                        color={COLORS.primary}
+                      />
+                      <Text
+                        style={[styles.insufficientPoints, { color: COLORS.primary }]}
+                      >
+                        Ya tienes este artículo.
                       </Text>
                     </View>
 
-                    {/* Point Info */}
-                    <View style={styles.pointsInfoRow}>
-                      <View style={styles.pointsInfoItem}>
-                        <Text style={styles.pointsInfoLabel}>Tus puntos</Text>
-                        <Text style={styles.pointsInfoValue}>
-                          {balanceData?.pointsBalance ?? 0}
+                    {/* Banner: puntos insuficientes para regalar */}
+                    {(balanceData?.pointsBalance ?? 0) < selectedItem.cost && (
+                      <View style={styles.errorBanner}>
+                        <MaterialCommunityIcons
+                          name="alert-circle"
+                          size={16}
+                          color={COLORS.error}
+                        />
+                        <Text style={styles.insufficientPoints}>
+                          No tienes suficientes puntos.
                         </Text>
                       </View>
-                      <View style={styles.pointsInfoDivider} />
-                      <View style={styles.pointsInfoItem}>
-                        <Text style={styles.pointsInfoLabel}>Restantes</Text>
-                        <Text
-                          style={[
-                            styles.pointsInfoValue,
-                            (balanceData?.pointsBalance ?? 0) <
-                              selectedItem.cost && styles.pointsNegative,
-                          ]}
-                        >
-                          {Math.max(
-                            0,
-                            (balanceData?.pointsBalance ?? 0) - selectedItem.cost,
-                          )}
-                        </Text>
-                      </View>
-                    </View>
-
-                    {/* Botones para seleccionar modo de compra */}
+                    )}
+                  </>
+                ) : (
+                  /* ── Item no comprado ── */
+                  <>
+                    {/* Toggle Para mí / Regalar */}
                     <View
                       style={{
                         flexDirection: "row",
@@ -613,6 +800,7 @@ export default function ShopScreen() {
                           setBuyForOthers(false);
                           setRecipientUserId("");
                         }}
+                        disabled={(balanceData?.pointsBalance ?? 0) < selectedItem.cost}
                         style={({ pressed }) => [
                           {
                             flex: 1,
@@ -620,13 +808,16 @@ export default function ShopScreen() {
                             paddingHorizontal: 12,
                             borderRadius: 12,
                             borderWidth: 2,
-                            borderColor: !buyForOthers
-                              ? COLORS.primary
-                              : COLORS.border,
+                            borderColor: !buyForOthers ? COLORS.primary : COLORS.border,
                             backgroundColor: !buyForOthers
                               ? COLORS.primary + "15"
                               : "transparent",
-                            opacity: pressed ? 0.7 : 1,
+                            opacity:
+                              (balanceData?.pointsBalance ?? 0) < selectedItem.cost
+                                ? 0.4
+                                : pressed
+                                  ? 0.7
+                                  : 1,
                           },
                         ]}
                       >
@@ -635,9 +826,7 @@ export default function ShopScreen() {
                             textAlign: "center",
                             fontFamily: FONT.semiBold,
                             fontSize: 13,
-                            color: !buyForOthers
-                              ? COLORS.primary
-                              : COLORS.textSecondary,
+                            color: !buyForOthers ? COLORS.primary : COLORS.textSecondary,
                           }}
                         >
                           Para mí
@@ -646,6 +835,10 @@ export default function ShopScreen() {
 
                       <Pressable
                         onPress={() => setBuyForOthers(true)}
+                        disabled={
+                          availableRecipients.length === 0 ||
+                          (balanceData?.pointsBalance ?? 0) < selectedItem.cost
+                        }
                         style={({ pressed }) => [
                           {
                             flex: 1,
@@ -653,27 +846,32 @@ export default function ShopScreen() {
                             paddingHorizontal: 12,
                             borderRadius: 12,
                             borderWidth: 2,
-                            borderColor: buyForOthers
-                              ? COLORS.primary
-                              : COLORS.border,
+                            borderColor: buyForOthers ? COLORS.primary : COLORS.border,
                             backgroundColor: buyForOthers
                               ? COLORS.primary + "15"
                               : "transparent",
-                            opacity: pressed ? 0.7 : 1,
+                            opacity:
+                              (balanceData?.pointsBalance ?? 0) < selectedItem.cost ||
+                              availableRecipients.length === 0
+                                ? 0.4
+                                : pressed
+                                  ? 0.7
+                                  : 1,
                           },
                         ]}
-                        disabled={availableRecipients.length === 0}
                       >
                         <Text
                           style={{
                             textAlign: "center",
                             fontFamily: FONT.semiBold,
                             fontSize: 13,
-                            color: buyForOthers
-                              ? COLORS.primary
-                              : availableRecipients.length === 0
-                                ? COLORS.textSecondary + "50"
-                                : COLORS.textSecondary,
+                            color:
+                              buyForOthers
+                                ? COLORS.primary
+                                : availableRecipients.length === 0 ||
+                                    (balanceData?.pointsBalance ?? 0) < selectedItem.cost
+                                  ? COLORS.textSecondary + "50"
+                                  : COLORS.textSecondary,
                           }}
                         >
                           Regalar
@@ -681,7 +879,7 @@ export default function ShopScreen() {
                       </Pressable>
                     </View>
 
-                    {/* Selector de destinatario si está en modo regalo */}
+                    {/* Selector de destinatario */}
                     {buyForOthers && (
                       <View style={{ marginBottom: 16 }}>
                         <DropdownSelect
@@ -693,134 +891,60 @@ export default function ShopScreen() {
                             avatarUrl: member.avatarUrl || null,
                             frameUrl: member.activeFrameUrl || null,
                           }))}
-                          onSelect={(value) => setRecipientUserId(value)}
+                          onSelect={(value) => {
+                            setRecipientUserId(value);
+                            setRecipientError(false);
+                          }}
                           placeholder="Selecciona un familiar"
                           showLabel={false}
+                          error={recipientError}
                         />
+                      </View>
+                    )}
+
+                    <View style={styles.modalActions}>
+                      {(balanceData?.pointsBalance ?? 0) >= selectedItem.cost && (
+                        <Pressable
+                          onPress={handleBuy}
+                          disabled={isBuying}
+                          style={({}) => [
+                            styles.modalConfirmBtn,
+                            { backgroundColor: COLORS.primary },
+                          ]}
+                        >
+                          {isBuying ? (
+                            <ActivityIndicator size="small" color={COLORS.white} />
+                          ) : (
+                            <Text
+                              style={{
+                                color: COLORS.white,
+                                fontFamily: FONT.bold,
+                                fontSize: 16,
+                                textAlign: "center",
+                              }}
+                            >
+                              {buyForOthers ? "Regalar" : "Canjear"}
+                            </Text>
+                          )}
+                        </Pressable>
+                      )}
+                    </View>
+
+                    {/* Banner: puntos insuficientes */}
+                    {(balanceData?.pointsBalance ?? 0) < selectedItem.cost && (
+                      <View style={styles.errorBanner}>
+                        <MaterialCommunityIcons
+                          name="alert-circle"
+                          size={16}
+                          color={COLORS.error}
+                        />
+                        <Text style={styles.insufficientPoints}>
+                          No tienes suficientes puntos.
+                        </Text>
                       </View>
                     )}
                   </>
                 )}
-
-                <View style={styles.modalActions}>
-
-                  {isOwned(selectedItem.id) ? (
-                    selectedItem.type === "frame" ? (
-                      <Pressable
-                        onPress={handleEquip}
-                        disabled={isEquipping || isEquipped(selectedItem.id)}
-                        style={({ pressed }) => [
-                          styles.modalConfirmBtn,
-                          {
-                            backgroundColor: COLORS.primary,
-                            opacity:
-                              pressed ||
-                              isEquipping ||
-                              isEquipped(selectedItem.id)
-                                ? 0.7
-                                : 1,
-                          },
-                        ]}
-                      >
-                        {isEquipping ? (
-                          <ActivityIndicator
-                            size="small"
-                            color={COLORS.white}
-                          />
-                        ) : (
-                          <Text
-                            style={{
-                              color: COLORS.white,
-                              fontFamily: FONT.bold,
-                              fontSize: 16,
-                              textAlign: "center",
-                            }}
-                          >
-                            {isEquipped(selectedItem.id)
-                              ? "Equipado"
-                              : "Usar Marco"}
-                          </Text>
-                        )}
-                      </Pressable>
-                    ) : (
-                      <Pressable
-                        disabled={true}
-                        style={[
-                          styles.modalConfirmBtn,
-                          {
-                            backgroundColor: COLORS.primary,
-                            opacity: 0.7,
-                          },
-                        ]}
-                      >
-                        <Text
-                          style={{
-                            color: COLORS.white,
-                            fontFamily: FONT.bold,
-                            fontSize: 16,
-                            textAlign: "center",
-                          }}
-                        >
-                          Ya lo tienes
-                        </Text>
-                      </Pressable>
-                    )
-                  ) : (
-                    <Pressable
-                      onPress={handleBuy}
-                      disabled={
-                        isBuying ||
-                        (balanceData?.pointsBalance ?? 0) < selectedItem.cost ||
-                        (buyForOthers && !recipientUserId)
-                      }
-                      style={({}) => [
-                        styles.modalConfirmBtn,
-                        {
-                          backgroundColor: COLORS.primary,
-                        },
-                      ]}
-                    >
-                      {isBuying ? (
-                        <ActivityIndicator size="small" color={COLORS.white} />
-                      ) : (
-                        <Text
-                          style={{
-                            color: COLORS.white,
-                            fontFamily: FONT.bold,
-                            fontSize: 16,
-                            textAlign: "center",
-                          }}
-                        >
-                          {buyForOthers ? "Regalar" : "Canjear"}
-                        </Text>
-                      )}
-                    </Pressable>
-                  )}
-
-                  <Button
-                    mode="text"
-                    onPress={() => setSelectedItem(null)}
-                    style={styles.modalCancelBtn}
-                    textColor={COLORS.textSecondary}
-                    labelStyle={{ fontFamily: FONT.semiBold }}
-                  >
-                    Quizás luego
-                  </Button>
-                </View>
-
-                {(balanceData?.pointsBalance ?? 0) < selectedItem.cost &&
-                  !isOwned(selectedItem.id) && (
-                    <View style={styles.errorBanner}>
-                      <MaterialCommunityIcons
-                        name="alert-circle"
-                        size={16}
-                        color={COLORS.error}
-                      />
-                      <Text style={styles.insufficientPoints}>
-                        No tienes suficientes puntos.
-                      </Text>
-                    </View>
-                  )}
               </View>
             </View>
           )}

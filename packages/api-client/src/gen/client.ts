@@ -560,6 +560,25 @@ export interface GenerateCalendarBody {
   endDate: string;
 }
 
+export interface UnequipItemResponse {
+  success: boolean;
+  message: string;
+}
+
+export type UnequipItemRequestItemType =
+  (typeof UnequipItemRequestItemType)[keyof typeof UnequipItemRequestItemType];
+
+export const UnequipItemRequestItemType = {
+  sticker: "sticker",
+  frame: "frame",
+  animation: "animation",
+  other: "other",
+} as const;
+
+export interface UnequipItemRequest {
+  itemType?: UnequipItemRequestItemType;
+}
+
 export type PatchUsersIdAvatarBody = {
   avatarFile?: Blob;
 };
@@ -965,7 +984,7 @@ export const getGetHealthUrl = () => {
 };
 
 export const getHealth = async (
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getHealthResponse> => {
   return rnFetch<getHealthResponse>(getGetHealthUrl(), {
     ...options,
@@ -979,7 +998,7 @@ export const getGetHealthQueryKey = () => {
 
 export const getGetHealthQueryOptions = <
   TData = Awaited<ReturnType<typeof getHealth>>,
-  TError = unknown,
+  TError = unknown
 >(options?: {
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof getHealth>>, TError, TData>
@@ -1008,7 +1027,7 @@ export type GetHealthQueryError = unknown;
 
 export function useGetHealth<
   TData = Awaited<ReturnType<typeof getHealth>>,
-  TError = unknown,
+  TError = unknown
 >(
   options: {
     query: Partial<
@@ -1024,13 +1043,13 @@ export function useGetHealth<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetHealth<
   TData = Awaited<ReturnType<typeof getHealth>>,
-  TError = unknown,
+  TError = unknown
 >(
   options?: {
     query?: Partial<
@@ -1046,13 +1065,13 @@ export function useGetHealth<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetHealth<
   TData = Awaited<ReturnType<typeof getHealth>>,
-  TError = unknown,
+  TError = unknown
 >(
   options?: {
     query?: Partial<
@@ -1060,14 +1079,14 @@ export function useGetHealth<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetHealth<
   TData = Awaited<ReturnType<typeof getHealth>>,
-  TError = unknown,
+  TError = unknown
 >(
   options?: {
     query?: Partial<
@@ -1075,7 +1094,7 @@ export function useGetHealth<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -1116,7 +1135,7 @@ export const getGetUsersIdUrl = (id: string) => {
 
 export const getUsersId = async (
   id: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getUsersIdResponse> => {
   return rnFetch<getUsersIdResponse>(getGetUsersIdUrl(id), {
     ...options,
@@ -1130,7 +1149,7 @@ export const getGetUsersIdQueryKey = (id: string) => {
 
 export const getGetUsersIdQueryOptions = <
   TData = Awaited<ReturnType<typeof getUsersId>>,
-  TError = void,
+  TError = void
 >(
   id: string,
   options?: {
@@ -1138,7 +1157,7 @@ export const getGetUsersIdQueryOptions = <
       UseQueryOptions<Awaited<ReturnType<typeof getUsersId>>, TError, TData>
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -1167,7 +1186,7 @@ export type GetUsersIdQueryError = void;
 
 export function useGetUsersId<
   TData = Awaited<ReturnType<typeof getUsersId>>,
-  TError = void,
+  TError = void
 >(
   id: string,
   options: {
@@ -1184,13 +1203,13 @@ export function useGetUsersId<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetUsersId<
   TData = Awaited<ReturnType<typeof getUsersId>>,
-  TError = void,
+  TError = void
 >(
   id: string,
   options?: {
@@ -1207,13 +1226,13 @@ export function useGetUsersId<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetUsersId<
   TData = Awaited<ReturnType<typeof getUsersId>>,
-  TError = void,
+  TError = void
 >(
   id: string,
   options?: {
@@ -1222,14 +1241,14 @@ export function useGetUsersId<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetUsersId<
   TData = Awaited<ReturnType<typeof getUsersId>>,
-  TError = void,
+  TError = void
 >(
   id: string,
   options?: {
@@ -1238,7 +1257,7 @@ export function useGetUsersId<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -1294,7 +1313,7 @@ export const getPatchUsersIdUrl = (id: string) => {
 export const patchUsersId = async (
   id: string,
   updateUser: UpdateUser,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<patchUsersIdResponse> => {
   return rnFetch<patchUsersIdResponse>(getPatchUsersIdUrl(id), {
     ...options,
@@ -1306,7 +1325,7 @@ export const patchUsersId = async (
 
 export const getPatchUsersIdMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof patchUsersId>>,
@@ -1358,7 +1377,7 @@ export const usePatchUsersId = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof patchUsersId>>,
   TError,
@@ -1411,7 +1430,7 @@ export const getPatchUsersIdAvatarUrl = (id: string) => {
 export const patchUsersIdAvatar = async (
   id: string,
   patchUsersIdAvatarBody: PatchUsersIdAvatarBody,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<patchUsersIdAvatarResponse> => {
   const formData = new FormData();
   if (patchUsersIdAvatarBody.avatarFile !== undefined) {
@@ -1427,7 +1446,7 @@ export const patchUsersIdAvatar = async (
 
 export const getPatchUsersIdAvatarMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof patchUsersIdAvatar>>,
@@ -1479,7 +1498,7 @@ export const usePatchUsersIdAvatar = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof patchUsersIdAvatar>>,
   TError,
@@ -1488,7 +1507,7 @@ export const usePatchUsersIdAvatar = <TError = Error, TContext = unknown>(
 > => {
   return useMutation(
     getPatchUsersIdAvatarMutationOptions(options),
-    queryClient,
+    queryClient
   );
 };
 
@@ -1528,7 +1547,7 @@ export const getPostFamilyGroupCreateUrl = () => {
 
 export const postFamilyGroupCreate = async (
   newFamilyGroup: NewFamilyGroup,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postFamilyGroupCreateResponse> => {
   return rnFetch<postFamilyGroupCreateResponse>(getPostFamilyGroupCreateUrl(), {
     ...options,
@@ -1540,7 +1559,7 @@ export const postFamilyGroupCreate = async (
 
 export const getPostFamilyGroupCreateMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postFamilyGroupCreate>>,
@@ -1592,7 +1611,7 @@ export const usePostFamilyGroupCreate = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postFamilyGroupCreate>>,
   TError,
@@ -1601,7 +1620,7 @@ export const usePostFamilyGroupCreate = <TError = Error, TContext = unknown>(
 > => {
   return useMutation(
     getPostFamilyGroupCreateMutationOptions(options),
-    queryClient,
+    queryClient
   );
 };
 
@@ -1647,7 +1666,7 @@ export const getPostFamilyGroupLinkUrl = () => {
 
 export const postFamilyGroupLink = async (
   addUserWithCode: AddUserWithCode,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postFamilyGroupLinkResponse> => {
   return rnFetch<postFamilyGroupLinkResponse>(getPostFamilyGroupLinkUrl(), {
     ...options,
@@ -1659,7 +1678,7 @@ export const postFamilyGroupLink = async (
 
 export const getPostFamilyGroupLinkMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postFamilyGroupLink>>,
@@ -1711,7 +1730,7 @@ export const usePostFamilyGroupLink = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postFamilyGroupLink>>,
   TError,
@@ -1720,7 +1739,7 @@ export const usePostFamilyGroupLink = <TError = Error, TContext = unknown>(
 > => {
   return useMutation(
     getPostFamilyGroupLinkMutationOptions(options),
-    queryClient,
+    queryClient
   );
 };
 
@@ -1766,14 +1785,14 @@ export const getGetFamilyGroupIdGroupInviteUrl = (idGroup: string) => {
 
 export const getFamilyGroupIdGroupInvite = async (
   idGroup: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getFamilyGroupIdGroupInviteResponse> => {
   return rnFetch<getFamilyGroupIdGroupInviteResponse>(
     getGetFamilyGroupIdGroupInviteUrl(idGroup),
     {
       ...options,
       method: "GET",
-    },
+    }
   );
 };
 
@@ -1783,7 +1802,7 @@ export const getGetFamilyGroupIdGroupInviteQueryKey = (idGroup: string) => {
 
 export const getGetFamilyGroupIdGroupInviteQueryOptions = <
   TData = Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>,
-  TError = Error,
+  TError = Error
 >(
   idGroup: string,
   options?: {
@@ -1795,7 +1814,7 @@ export const getGetFamilyGroupIdGroupInviteQueryOptions = <
       >
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -1826,7 +1845,7 @@ export type GetFamilyGroupIdGroupInviteQueryError = Error;
 
 export function useGetFamilyGroupIdGroupInvite<
   TData = Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>,
-  TError = Error,
+  TError = Error
 >(
   idGroup: string,
   options: {
@@ -1847,13 +1866,13 @@ export function useGetFamilyGroupIdGroupInvite<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetFamilyGroupIdGroupInvite<
   TData = Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>,
-  TError = Error,
+  TError = Error
 >(
   idGroup: string,
   options?: {
@@ -1874,13 +1893,13 @@ export function useGetFamilyGroupIdGroupInvite<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetFamilyGroupIdGroupInvite<
   TData = Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>,
-  TError = Error,
+  TError = Error
 >(
   idGroup: string,
   options?: {
@@ -1893,14 +1912,14 @@ export function useGetFamilyGroupIdGroupInvite<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetFamilyGroupIdGroupInvite<
   TData = Awaited<ReturnType<typeof getFamilyGroupIdGroupInvite>>,
-  TError = Error,
+  TError = Error
 >(
   idGroup: string,
   options?: {
@@ -1913,13 +1932,13 @@ export function useGetFamilyGroupIdGroupInvite<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getGetFamilyGroupIdGroupInviteQueryOptions(
     idGroup,
-    options,
+    options
   );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
@@ -1972,14 +1991,14 @@ export const getGetFamilyGroupIdGroupMembersUrl = (idGroup: string) => {
 
 export const getFamilyGroupIdGroupMembers = async (
   idGroup: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getFamilyGroupIdGroupMembersResponse> => {
   return rnFetch<getFamilyGroupIdGroupMembersResponse>(
     getGetFamilyGroupIdGroupMembersUrl(idGroup),
     {
       ...options,
       method: "GET",
-    },
+    }
   );
 };
 
@@ -1989,7 +2008,7 @@ export const getGetFamilyGroupIdGroupMembersQueryKey = (idGroup: string) => {
 
 export const getGetFamilyGroupIdGroupMembersQueryOptions = <
   TData = Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>,
-  TError = Error,
+  TError = Error
 >(
   idGroup: string,
   options?: {
@@ -2001,7 +2020,7 @@ export const getGetFamilyGroupIdGroupMembersQueryOptions = <
       >
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -2032,7 +2051,7 @@ export type GetFamilyGroupIdGroupMembersQueryError = Error;
 
 export function useGetFamilyGroupIdGroupMembers<
   TData = Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>,
-  TError = Error,
+  TError = Error
 >(
   idGroup: string,
   options: {
@@ -2053,13 +2072,13 @@ export function useGetFamilyGroupIdGroupMembers<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetFamilyGroupIdGroupMembers<
   TData = Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>,
-  TError = Error,
+  TError = Error
 >(
   idGroup: string,
   options?: {
@@ -2080,13 +2099,13 @@ export function useGetFamilyGroupIdGroupMembers<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetFamilyGroupIdGroupMembers<
   TData = Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>,
-  TError = Error,
+  TError = Error
 >(
   idGroup: string,
   options?: {
@@ -2099,14 +2118,14 @@ export function useGetFamilyGroupIdGroupMembers<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetFamilyGroupIdGroupMembers<
   TData = Awaited<ReturnType<typeof getFamilyGroupIdGroupMembers>>,
-  TError = Error,
+  TError = Error
 >(
   idGroup: string,
   options?: {
@@ -2119,13 +2138,13 @@ export function useGetFamilyGroupIdGroupMembers<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getGetFamilyGroupIdGroupMembersQueryOptions(
     idGroup,
-    options,
+    options
   );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
@@ -2187,7 +2206,7 @@ export type removeUserFromFamilyGroupResponse =
 export const getRemoveUserFromFamilyGroupUrl = (
   idGroup: string,
   idUser: string,
-  params?: RemoveUserFromFamilyGroupParams,
+  params?: RemoveUserFromFamilyGroupParams
 ) => {
   const normalizedParams = new URLSearchParams();
 
@@ -2208,20 +2227,20 @@ export const removeUserFromFamilyGroup = async (
   idGroup: string,
   idUser: string,
   params?: RemoveUserFromFamilyGroupParams,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<removeUserFromFamilyGroupResponse> => {
   return rnFetch<removeUserFromFamilyGroupResponse>(
     getRemoveUserFromFamilyGroupUrl(idGroup, idUser, params),
     {
       ...options,
       method: "DELETE",
-    },
+    }
   );
 };
 
 export const getRemoveUserFromFamilyGroupMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof removeUserFromFamilyGroup>>,
@@ -2273,7 +2292,7 @@ export type RemoveUserFromFamilyGroupMutationError = Error;
 
 export const useRemoveUserFromFamilyGroup = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(
   options?: {
     mutation?: UseMutationOptions<
@@ -2288,7 +2307,7 @@ export const useRemoveUserFromFamilyGroup = <
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof removeUserFromFamilyGroup>>,
   TError,
@@ -2297,7 +2316,7 @@ export const useRemoveUserFromFamilyGroup = <
 > => {
   return useMutation(
     getRemoveUserFromFamilyGroupMutationOptions(options),
-    queryClient,
+    queryClient
   );
 };
 
@@ -2344,7 +2363,7 @@ export const getPatchFamilyGroupIdGroupUrl = (idGroup: string) => {
 export const patchFamilyGroupIdGroup = async (
   idGroup: string,
   updateFamilyGroup: UpdateFamilyGroup,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<patchFamilyGroupIdGroupResponse> => {
   return rnFetch<patchFamilyGroupIdGroupResponse>(
     getPatchFamilyGroupIdGroupUrl(idGroup),
@@ -2353,13 +2372,13 @@ export const patchFamilyGroupIdGroup = async (
       method: "PATCH",
       headers: { "Content-Type": "application/json", ...options?.headers },
       body: JSON.stringify(updateFamilyGroup),
-    },
+    }
   );
 };
 
 export const getPatchFamilyGroupIdGroupMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof patchFamilyGroupIdGroup>>,
@@ -2411,7 +2430,7 @@ export const usePatchFamilyGroupIdGroup = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof patchFamilyGroupIdGroup>>,
   TError,
@@ -2420,7 +2439,7 @@ export const usePatchFamilyGroupIdGroup = <TError = Error, TContext = unknown>(
 > => {
   return useMutation(
     getPatchFamilyGroupIdGroupMutationOptions(options),
-    queryClient,
+    queryClient
   );
 };
 
@@ -2479,7 +2498,7 @@ export const getTransferFamilyGroupOwnershipUrl = (idGroup: string) => {
 export const transferFamilyGroupOwnership = async (
   idGroup: string,
   transferOwnership: TransferOwnership,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<transferFamilyGroupOwnershipResponse> => {
   return rnFetch<transferFamilyGroupOwnershipResponse>(
     getTransferFamilyGroupOwnershipUrl(idGroup),
@@ -2488,13 +2507,13 @@ export const transferFamilyGroupOwnership = async (
       method: "PUT",
       headers: { "Content-Type": "application/json", ...options?.headers },
       body: JSON.stringify(transferOwnership),
-    },
+    }
   );
 };
 
 export const getTransferFamilyGroupOwnershipMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof transferFamilyGroupOwnership>>,
@@ -2538,7 +2557,7 @@ export type TransferFamilyGroupOwnershipMutationError = Error;
 
 export const useTransferFamilyGroupOwnership = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(
   options?: {
     mutation?: UseMutationOptions<
@@ -2549,7 +2568,7 @@ export const useTransferFamilyGroupOwnership = <
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof transferFamilyGroupOwnership>>,
   TError,
@@ -2558,7 +2577,7 @@ export const useTransferFamilyGroupOwnership = <
 > => {
   return useMutation(
     getTransferFamilyGroupOwnershipMutationOptions(options),
-    queryClient,
+    queryClient
   );
 };
 
@@ -2597,7 +2616,7 @@ export const getGetActivitiesIdUrl = (id: string) => {
 
 export const getActivitiesId = async (
   id: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getActivitiesIdResponse> => {
   return rnFetch<getActivitiesIdResponse>(getGetActivitiesIdUrl(id), {
     ...options,
@@ -2611,7 +2630,7 @@ export const getGetActivitiesIdQueryKey = (id: string) => {
 
 export const getGetActivitiesIdQueryOptions = <
   TData = Awaited<ReturnType<typeof getActivitiesId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options?: {
@@ -2623,7 +2642,7 @@ export const getGetActivitiesIdQueryOptions = <
       >
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -2652,7 +2671,7 @@ export type GetActivitiesIdQueryError = Error;
 
 export function useGetActivitiesId<
   TData = Awaited<ReturnType<typeof getActivitiesId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options: {
@@ -2673,13 +2692,13 @@ export function useGetActivitiesId<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetActivitiesId<
   TData = Awaited<ReturnType<typeof getActivitiesId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options?: {
@@ -2700,13 +2719,13 @@ export function useGetActivitiesId<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetActivitiesId<
   TData = Awaited<ReturnType<typeof getActivitiesId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options?: {
@@ -2719,14 +2738,14 @@ export function useGetActivitiesId<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetActivitiesId<
   TData = Awaited<ReturnType<typeof getActivitiesId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options?: {
@@ -2739,7 +2758,7 @@ export function useGetActivitiesId<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -2795,7 +2814,7 @@ export const getPatchActivitiesIdUrl = (id: string) => {
 export const patchActivitiesId = async (
   id: string,
   updateActivity: UpdateActivity,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<patchActivitiesIdResponse> => {
   return rnFetch<patchActivitiesIdResponse>(getPatchActivitiesIdUrl(id), {
     ...options,
@@ -2807,7 +2826,7 @@ export const patchActivitiesId = async (
 
 export const getPatchActivitiesIdMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof patchActivitiesId>>,
@@ -2859,7 +2878,7 @@ export const usePatchActivitiesId = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof patchActivitiesId>>,
   TError,
@@ -2905,7 +2924,7 @@ export const getDeleteActivitiesIdUrl = (id: string) => {
 
 export const deleteActivitiesId = async (
   id: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<deleteActivitiesIdResponse> => {
   return rnFetch<deleteActivitiesIdResponse>(getDeleteActivitiesIdUrl(id), {
     ...options,
@@ -2915,7 +2934,7 @@ export const deleteActivitiesId = async (
 
 export const getDeleteActivitiesIdMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteActivitiesId>>,
@@ -2967,7 +2986,7 @@ export const useDeleteActivitiesId = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof deleteActivitiesId>>,
   TError,
@@ -2976,7 +2995,7 @@ export const useDeleteActivitiesId = <TError = Error, TContext = unknown>(
 > => {
   return useMutation(
     getDeleteActivitiesIdMutationOptions(options),
-    queryClient,
+    queryClient
   );
 };
 
@@ -3011,33 +3030,33 @@ export type getActivitiesFamilyCodeIdFamilyGroupResponse =
   | getActivitiesFamilyCodeIdFamilyGroupResponseError;
 
 export const getGetActivitiesFamilyCodeIdFamilyGroupUrl = (
-  idFamilyGroup: string,
+  idFamilyGroup: string
 ) => {
   return `/activities/familyCode/${idFamilyGroup}`;
 };
 
 export const getActivitiesFamilyCodeIdFamilyGroup = async (
   idFamilyGroup: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getActivitiesFamilyCodeIdFamilyGroupResponse> => {
   return rnFetch<getActivitiesFamilyCodeIdFamilyGroupResponse>(
     getGetActivitiesFamilyCodeIdFamilyGroupUrl(idFamilyGroup),
     {
       ...options,
       method: "GET",
-    },
+    }
   );
 };
 
 export const getGetActivitiesFamilyCodeIdFamilyGroupQueryKey = (
-  idFamilyGroup: string,
+  idFamilyGroup: string
 ) => {
   return [`/activities/familyCode/${idFamilyGroup}`] as const;
 };
 
 export const getGetActivitiesFamilyCodeIdFamilyGroupQueryOptions = <
   TData = Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>,
-  TError = Error,
+  TError = Error
 >(
   idFamilyGroup: string,
   options?: {
@@ -3049,7 +3068,7 @@ export const getGetActivitiesFamilyCodeIdFamilyGroupQueryOptions = <
       >
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -3084,7 +3103,7 @@ export type GetActivitiesFamilyCodeIdFamilyGroupQueryError = Error;
 
 export function useGetActivitiesFamilyCodeIdFamilyGroup<
   TData = Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>,
-  TError = Error,
+  TError = Error
 >(
   idFamilyGroup: string,
   options: {
@@ -3105,13 +3124,13 @@ export function useGetActivitiesFamilyCodeIdFamilyGroup<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetActivitiesFamilyCodeIdFamilyGroup<
   TData = Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>,
-  TError = Error,
+  TError = Error
 >(
   idFamilyGroup: string,
   options?: {
@@ -3132,13 +3151,13 @@ export function useGetActivitiesFamilyCodeIdFamilyGroup<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetActivitiesFamilyCodeIdFamilyGroup<
   TData = Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>,
-  TError = Error,
+  TError = Error
 >(
   idFamilyGroup: string,
   options?: {
@@ -3151,14 +3170,14 @@ export function useGetActivitiesFamilyCodeIdFamilyGroup<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetActivitiesFamilyCodeIdFamilyGroup<
   TData = Awaited<ReturnType<typeof getActivitiesFamilyCodeIdFamilyGroup>>,
-  TError = Error,
+  TError = Error
 >(
   idFamilyGroup: string,
   options?: {
@@ -3171,13 +3190,13 @@ export function useGetActivitiesFamilyCodeIdFamilyGroup<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getGetActivitiesFamilyCodeIdFamilyGroupQueryOptions(
     idFamilyGroup,
-    options,
+    options
   );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
@@ -3223,7 +3242,7 @@ export const getPostActivitiesUrl = () => {
 
 export const postActivities = async (
   newActivity: NewActivity,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postActivitiesResponse> => {
   return rnFetch<postActivitiesResponse>(getPostActivitiesUrl(), {
     ...options,
@@ -3235,7 +3254,7 @@ export const postActivities = async (
 
 export const getPostActivitiesMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postActivities>>,
@@ -3287,7 +3306,7 @@ export const usePostActivities = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postActivities>>,
   TError,
@@ -3333,7 +3352,7 @@ export const getPostActivitiesGoogleCalendarEnableUrl = () => {
 
 export const postActivitiesGoogleCalendarEnable = async (
   postActivitiesGoogleCalendarEnableBody: PostActivitiesGoogleCalendarEnableBody,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postActivitiesGoogleCalendarEnableResponse> => {
   return rnFetch<postActivitiesGoogleCalendarEnableResponse>(
     getPostActivitiesGoogleCalendarEnableUrl(),
@@ -3342,13 +3361,13 @@ export const postActivitiesGoogleCalendarEnable = async (
       method: "POST",
       headers: { "Content-Type": "application/json", ...options?.headers },
       body: JSON.stringify(postActivitiesGoogleCalendarEnableBody),
-    },
+    }
   );
 };
 
 export const getPostActivitiesGoogleCalendarEnableMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postActivitiesGoogleCalendarEnable>>,
@@ -3393,7 +3412,7 @@ export type PostActivitiesGoogleCalendarEnableMutationError = Error;
 
 export const usePostActivitiesGoogleCalendarEnable = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(
   options?: {
     mutation?: UseMutationOptions<
@@ -3404,7 +3423,7 @@ export const usePostActivitiesGoogleCalendarEnable = <
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postActivitiesGoogleCalendarEnable>>,
   TError,
@@ -3413,7 +3432,7 @@ export const usePostActivitiesGoogleCalendarEnable = <
 > => {
   return useMutation(
     getPostActivitiesGoogleCalendarEnableMutationOptions(options),
-    queryClient,
+    queryClient
   );
 };
 
@@ -3452,20 +3471,20 @@ export const getPostActivitiesGoogleCalendarDisableUrl = () => {
 };
 
 export const postActivitiesGoogleCalendarDisable = async (
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postActivitiesGoogleCalendarDisableResponse> => {
   return rnFetch<postActivitiesGoogleCalendarDisableResponse>(
     getPostActivitiesGoogleCalendarDisableUrl(),
     {
       ...options,
       method: "POST",
-    },
+    }
   );
 };
 
 export const getPostActivitiesGoogleCalendarDisableMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postActivitiesGoogleCalendarDisable>>,
@@ -3507,7 +3526,7 @@ export type PostActivitiesGoogleCalendarDisableMutationError = Error;
 
 export const usePostActivitiesGoogleCalendarDisable = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(
   options?: {
     mutation?: UseMutationOptions<
@@ -3518,7 +3537,7 @@ export const usePostActivitiesGoogleCalendarDisable = <
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postActivitiesGoogleCalendarDisable>>,
   TError,
@@ -3527,7 +3546,7 @@ export const usePostActivitiesGoogleCalendarDisable = <
 > => {
   return useMutation(
     getPostActivitiesGoogleCalendarDisableMutationOptions(options),
-    queryClient,
+    queryClient
   );
 };
 
@@ -3559,14 +3578,14 @@ export const getGetActivitiesGoogleCalendarStatusUrl = () => {
 };
 
 export const getActivitiesGoogleCalendarStatus = async (
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getActivitiesGoogleCalendarStatusResponse> => {
   return rnFetch<getActivitiesGoogleCalendarStatusResponse>(
     getGetActivitiesGoogleCalendarStatusUrl(),
     {
       ...options,
       method: "GET",
-    },
+    }
   );
 };
 
@@ -3576,7 +3595,7 @@ export const getGetActivitiesGoogleCalendarStatusQueryKey = () => {
 
 export const getGetActivitiesGoogleCalendarStatusQueryOptions = <
   TData = Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
-  TError = Error,
+  TError = Error
 >(options?: {
   query?: Partial<
     UseQueryOptions<
@@ -3611,7 +3630,7 @@ export type GetActivitiesGoogleCalendarStatusQueryError = Error;
 
 export function useGetActivitiesGoogleCalendarStatus<
   TData = Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
-  TError = Error,
+  TError = Error
 >(
   options: {
     query: Partial<
@@ -3631,13 +3650,13 @@ export function useGetActivitiesGoogleCalendarStatus<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetActivitiesGoogleCalendarStatus<
   TData = Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
-  TError = Error,
+  TError = Error
 >(
   options?: {
     query?: Partial<
@@ -3657,13 +3676,13 @@ export function useGetActivitiesGoogleCalendarStatus<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetActivitiesGoogleCalendarStatus<
   TData = Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
-  TError = Error,
+  TError = Error
 >(
   options?: {
     query?: Partial<
@@ -3675,14 +3694,14 @@ export function useGetActivitiesGoogleCalendarStatus<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetActivitiesGoogleCalendarStatus<
   TData = Awaited<ReturnType<typeof getActivitiesGoogleCalendarStatus>>,
-  TError = Error,
+  TError = Error
 >(
   options?: {
     query?: Partial<
@@ -3694,7 +3713,7 @@ export function useGetActivitiesGoogleCalendarStatus<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -3756,7 +3775,7 @@ export const getGetMemoriesUrl = (params?: GetMemoriesParams) => {
 
 export const getMemories = async (
   params?: GetMemoriesParams,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getMemoriesResponse> => {
   return rnFetch<getMemoriesResponse>(getGetMemoriesUrl(params), {
     ...options,
@@ -3770,7 +3789,7 @@ export const getGetMemoriesQueryKey = (params?: GetMemoriesParams) => {
 
 export const getGetMemoriesQueryOptions = <
   TData = Awaited<ReturnType<typeof getMemories>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetMemoriesParams,
   options?: {
@@ -3778,7 +3797,7 @@ export const getGetMemoriesQueryOptions = <
       UseQueryOptions<Awaited<ReturnType<typeof getMemories>>, TError, TData>
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -3802,7 +3821,7 @@ export type GetMemoriesQueryError = Error;
 
 export function useGetMemories<
   TData = Awaited<ReturnType<typeof getMemories>>,
-  TError = Error,
+  TError = Error
 >(
   params: undefined | GetMemoriesParams,
   options: {
@@ -3819,13 +3838,13 @@ export function useGetMemories<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetMemories<
   TData = Awaited<ReturnType<typeof getMemories>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetMemoriesParams,
   options?: {
@@ -3842,13 +3861,13 @@ export function useGetMemories<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetMemories<
   TData = Awaited<ReturnType<typeof getMemories>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetMemoriesParams,
   options?: {
@@ -3857,14 +3876,14 @@ export function useGetMemories<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetMemories<
   TData = Awaited<ReturnType<typeof getMemories>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetMemoriesParams,
   options?: {
@@ -3873,7 +3892,7 @@ export function useGetMemories<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -3946,7 +3965,7 @@ export const getGetMemoriesBooksUrl = (params: GetMemoriesBooksParams) => {
 
 export const getMemoriesBooks = async (
   params: GetMemoriesBooksParams,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getMemoriesBooksResponse> => {
   return rnFetch<getMemoriesBooksResponse>(getGetMemoriesBooksUrl(params), {
     ...options,
@@ -3955,14 +3974,14 @@ export const getMemoriesBooks = async (
 };
 
 export const getGetMemoriesBooksQueryKey = (
-  params?: GetMemoriesBooksParams,
+  params?: GetMemoriesBooksParams
 ) => {
   return [`/memories/books`, ...(params ? [params] : [])] as const;
 };
 
 export const getGetMemoriesBooksQueryOptions = <
   TData = Awaited<ReturnType<typeof getMemoriesBooks>>,
-  TError = Error,
+  TError = Error
 >(
   params: GetMemoriesBooksParams,
   options?: {
@@ -3974,7 +3993,7 @@ export const getGetMemoriesBooksQueryOptions = <
       >
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -3999,7 +4018,7 @@ export type GetMemoriesBooksQueryError = Error;
 
 export function useGetMemoriesBooks<
   TData = Awaited<ReturnType<typeof getMemoriesBooks>>,
-  TError = Error,
+  TError = Error
 >(
   params: GetMemoriesBooksParams,
   options: {
@@ -4020,13 +4039,13 @@ export function useGetMemoriesBooks<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetMemoriesBooks<
   TData = Awaited<ReturnType<typeof getMemoriesBooks>>,
-  TError = Error,
+  TError = Error
 >(
   params: GetMemoriesBooksParams,
   options?: {
@@ -4047,13 +4066,13 @@ export function useGetMemoriesBooks<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetMemoriesBooks<
   TData = Awaited<ReturnType<typeof getMemoriesBooks>>,
-  TError = Error,
+  TError = Error
 >(
   params: GetMemoriesBooksParams,
   options?: {
@@ -4066,14 +4085,14 @@ export function useGetMemoriesBooks<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetMemoriesBooks<
   TData = Awaited<ReturnType<typeof getMemoriesBooks>>,
-  TError = Error,
+  TError = Error
 >(
   params: GetMemoriesBooksParams,
   options?: {
@@ -4086,7 +4105,7 @@ export function useGetMemoriesBooks<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -4148,7 +4167,7 @@ export const getCreateMemoriesBookUrl = () => {
 
 export const createMemoriesBook = async (
   newMemoriesBook: NewMemoriesBook,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<createMemoriesBookResponse> => {
   return rnFetch<createMemoriesBookResponse>(getCreateMemoriesBookUrl(), {
     ...options,
@@ -4160,7 +4179,7 @@ export const createMemoriesBook = async (
 
 export const getCreateMemoriesBookMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createMemoriesBook>>,
@@ -4212,7 +4231,7 @@ export const useCreateMemoriesBook = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof createMemoriesBook>>,
   TError,
@@ -4221,7 +4240,7 @@ export const useCreateMemoriesBook = <TError = Error, TContext = unknown>(
 > => {
   return useMutation(
     getCreateMemoriesBookMutationOptions(options),
-    queryClient,
+    queryClient
   );
 };
 
@@ -4280,7 +4299,7 @@ export const getUpdateMemoriesBookUrl = (id: string) => {
 export const updateMemoriesBook = async (
   id: string,
   updateMemoriesBook: UpdateMemoriesBook,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<updateMemoriesBookResponse> => {
   return rnFetch<updateMemoriesBookResponse>(getUpdateMemoriesBookUrl(id), {
     ...options,
@@ -4292,7 +4311,7 @@ export const updateMemoriesBook = async (
 
 export const getUpdateMemoriesBookMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateMemoriesBook>>,
@@ -4344,7 +4363,7 @@ export const useUpdateMemoriesBook = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof updateMemoriesBook>>,
   TError,
@@ -4353,7 +4372,7 @@ export const useUpdateMemoriesBook = <TError = Error, TContext = unknown>(
 > => {
   return useMutation(
     getUpdateMemoriesBookMutationOptions(options),
-    queryClient,
+    queryClient
   );
 };
 
@@ -4411,7 +4430,7 @@ export const getDeleteMemoriesBookUrl = (id: string) => {
 
 export const deleteMemoriesBook = async (
   id: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<deleteMemoriesBookResponse> => {
   return rnFetch<deleteMemoriesBookResponse>(getDeleteMemoriesBookUrl(id), {
     ...options,
@@ -4421,7 +4440,7 @@ export const deleteMemoriesBook = async (
 
 export const getDeleteMemoriesBookMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteMemoriesBook>>,
@@ -4473,7 +4492,7 @@ export const useDeleteMemoriesBook = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof deleteMemoriesBook>>,
   TError,
@@ -4482,7 +4501,7 @@ export const useDeleteMemoriesBook = <TError = Error, TContext = unknown>(
 > => {
   return useMutation(
     getDeleteMemoriesBookMutationOptions(options),
-    queryClient,
+    queryClient
   );
 };
 
@@ -4527,7 +4546,7 @@ export const getGetMemoriesIdUrl = (id: string) => {
 
 export const getMemoriesId = async (
   id: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getMemoriesIdResponse> => {
   return rnFetch<getMemoriesIdResponse>(getGetMemoriesIdUrl(id), {
     ...options,
@@ -4541,7 +4560,7 @@ export const getGetMemoriesIdQueryKey = (id: string) => {
 
 export const getGetMemoriesIdQueryOptions = <
   TData = Awaited<ReturnType<typeof getMemoriesId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options?: {
@@ -4549,7 +4568,7 @@ export const getGetMemoriesIdQueryOptions = <
       UseQueryOptions<Awaited<ReturnType<typeof getMemoriesId>>, TError, TData>
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -4578,7 +4597,7 @@ export type GetMemoriesIdQueryError = Error;
 
 export function useGetMemoriesId<
   TData = Awaited<ReturnType<typeof getMemoriesId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options: {
@@ -4595,13 +4614,13 @@ export function useGetMemoriesId<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetMemoriesId<
   TData = Awaited<ReturnType<typeof getMemoriesId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options?: {
@@ -4618,13 +4637,13 @@ export function useGetMemoriesId<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetMemoriesId<
   TData = Awaited<ReturnType<typeof getMemoriesId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options?: {
@@ -4633,14 +4652,14 @@ export function useGetMemoriesId<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetMemoriesId<
   TData = Awaited<ReturnType<typeof getMemoriesId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options?: {
@@ -4649,7 +4668,7 @@ export function useGetMemoriesId<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -4717,7 +4736,7 @@ export const getUpdateMemoryUrl = (id: string) => {
 export const updateMemory = async (
   id: string,
   updateMemory: UpdateMemory,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<updateMemoryResponse> => {
   return rnFetch<updateMemoryResponse>(getUpdateMemoryUrl(id), {
     ...options,
@@ -4729,7 +4748,7 @@ export const updateMemory = async (
 
 export const getUpdateMemoryMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateMemory>>,
@@ -4781,7 +4800,7 @@ export const useUpdateMemory = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof updateMemory>>,
   TError,
@@ -4844,7 +4863,7 @@ export const getDeleteMemoryUrl = (id: string) => {
 
 export const deleteMemory = async (
   id: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<deleteMemoryResponse> => {
   return rnFetch<deleteMemoryResponse>(getDeleteMemoryUrl(id), {
     ...options,
@@ -4854,7 +4873,7 @@ export const deleteMemory = async (
 
 export const getDeleteMemoryMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteMemory>>,
@@ -4906,7 +4925,7 @@ export const useDeleteMemory = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof deleteMemory>>,
   TError,
@@ -4970,7 +4989,7 @@ export const getCreateMemoryWithMediaUrl = () => {
 
 export const createMemoryWithMedia = async (
   createMemoryWithMediaBody: CreateMemoryWithMediaBody,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<createMemoryWithMediaResponse> => {
   const formData = new FormData();
   formData.append(`bookId`, createMemoryWithMediaBody.bookId);
@@ -4992,7 +5011,7 @@ export const createMemoryWithMedia = async (
 
 export const getCreateMemoryWithMediaMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createMemoryWithMedia>>,
@@ -5044,7 +5063,7 @@ export const useCreateMemoryWithMedia = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof createMemoryWithMedia>>,
   TError,
@@ -5053,7 +5072,7 @@ export const useCreateMemoryWithMedia = <TError = Error, TContext = unknown>(
 > => {
   return useMutation(
     getCreateMemoryWithMediaMutationOptions(options),
-    queryClient,
+    queryClient
   );
 };
 
@@ -5098,7 +5117,7 @@ export const getCreateNoteUrl = () => {
 
 export const createNote = async (
   createNote: CreateNote,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<createNoteResponse> => {
   return rnFetch<createNoteResponse>(getCreateNoteUrl(), {
     ...options,
@@ -5110,7 +5129,7 @@ export const createNote = async (
 
 export const getCreateNoteMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createNote>>,
@@ -5162,7 +5181,7 @@ export const useCreateNote = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof createNote>>,
   TError,
@@ -5220,7 +5239,7 @@ export const getAddReactionUrl = (id: string) => {
 export const addReaction = async (
   id: string,
   addReactionBody: AddReactionBody,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<addReactionResponse> => {
   return rnFetch<addReactionResponse>(getAddReactionUrl(id), {
     ...options,
@@ -5232,7 +5251,7 @@ export const addReaction = async (
 
 export const getAddReactionMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof addReaction>>,
@@ -5284,7 +5303,7 @@ export const useAddReaction = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof addReaction>>,
   TError,
@@ -5342,7 +5361,7 @@ export const getPostAlbumTranscribeUrl = () => {
 
 export const postAlbumTranscribe = async (
   postAlbumTranscribeBody: PostAlbumTranscribeBody,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postAlbumTranscribeResponse> => {
   const formData = new FormData();
   formData.append(`audio`, postAlbumTranscribeBody.audio);
@@ -5356,7 +5375,7 @@ export const postAlbumTranscribe = async (
 
 export const getPostAlbumTranscribeMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postAlbumTranscribe>>,
@@ -5408,7 +5427,7 @@ export const usePostAlbumTranscribe = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postAlbumTranscribe>>,
   TError,
@@ -5417,7 +5436,7 @@ export const usePostAlbumTranscribe = <TError = Error, TContext = unknown>(
 > => {
   return useMutation(
     getPostAlbumTranscribeMutationOptions(options),
-    queryClient,
+    queryClient
   );
 };
 
@@ -5462,7 +5481,7 @@ export const getPostAlbumCreateUrl = () => {
 
 export const postAlbumCreate = async (
   createAlbumRequest: CreateAlbumRequest,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postAlbumCreateResponse> => {
   return rnFetch<postAlbumCreateResponse>(getPostAlbumCreateUrl(), {
     ...options,
@@ -5474,7 +5493,7 @@ export const postAlbumCreate = async (
 
 export const getPostAlbumCreateMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postAlbumCreate>>,
@@ -5526,7 +5545,7 @@ export const usePostAlbumCreate = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postAlbumCreate>>,
   TError,
@@ -5581,7 +5600,7 @@ export const getGetAlbumUrl = (params?: GetAlbumParams) => {
 
 export const getAlbum = async (
   params?: GetAlbumParams,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getAlbumResponse> => {
   return rnFetch<getAlbumResponse>(getGetAlbumUrl(params), {
     ...options,
@@ -5595,7 +5614,7 @@ export const getGetAlbumQueryKey = (params?: GetAlbumParams) => {
 
 export const getGetAlbumQueryOptions = <
   TData = Awaited<ReturnType<typeof getAlbum>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetAlbumParams,
   options?: {
@@ -5603,7 +5622,7 @@ export const getGetAlbumQueryOptions = <
       UseQueryOptions<Awaited<ReturnType<typeof getAlbum>>, TError, TData>
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -5627,7 +5646,7 @@ export type GetAlbumQueryError = Error;
 
 export function useGetAlbum<
   TData = Awaited<ReturnType<typeof getAlbum>>,
-  TError = Error,
+  TError = Error
 >(
   params: undefined | GetAlbumParams,
   options: {
@@ -5644,13 +5663,13 @@ export function useGetAlbum<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetAlbum<
   TData = Awaited<ReturnType<typeof getAlbum>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetAlbumParams,
   options?: {
@@ -5667,13 +5686,13 @@ export function useGetAlbum<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetAlbum<
   TData = Awaited<ReturnType<typeof getAlbum>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetAlbumParams,
   options?: {
@@ -5682,14 +5701,14 @@ export function useGetAlbum<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetAlbum<
   TData = Awaited<ReturnType<typeof getAlbum>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetAlbumParams,
   options?: {
@@ -5698,7 +5717,7 @@ export function useGetAlbum<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -5753,7 +5772,7 @@ export const getGetAlbumIdUrl = (id: string) => {
 
 export const getAlbumId = async (
   id: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getAlbumIdResponse> => {
   return rnFetch<getAlbumIdResponse>(getGetAlbumIdUrl(id), {
     ...options,
@@ -5767,7 +5786,7 @@ export const getGetAlbumIdQueryKey = (id: string) => {
 
 export const getGetAlbumIdQueryOptions = <
   TData = Awaited<ReturnType<typeof getAlbumId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options?: {
@@ -5775,7 +5794,7 @@ export const getGetAlbumIdQueryOptions = <
       UseQueryOptions<Awaited<ReturnType<typeof getAlbumId>>, TError, TData>
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -5804,7 +5823,7 @@ export type GetAlbumIdQueryError = Error;
 
 export function useGetAlbumId<
   TData = Awaited<ReturnType<typeof getAlbumId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options: {
@@ -5821,13 +5840,13 @@ export function useGetAlbumId<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetAlbumId<
   TData = Awaited<ReturnType<typeof getAlbumId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options?: {
@@ -5844,13 +5863,13 @@ export function useGetAlbumId<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetAlbumId<
   TData = Awaited<ReturnType<typeof getAlbumId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options?: {
@@ -5859,14 +5878,14 @@ export function useGetAlbumId<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetAlbumId<
   TData = Awaited<ReturnType<typeof getAlbumId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options?: {
@@ -5875,7 +5894,7 @@ export function useGetAlbumId<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -5930,7 +5949,7 @@ export const getDeleteAlbumIdUrl = (id: string) => {
 
 export const deleteAlbumId = async (
   id: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<deleteAlbumIdResponse> => {
   return rnFetch<deleteAlbumIdResponse>(getDeleteAlbumIdUrl(id), {
     ...options,
@@ -5940,7 +5959,7 @@ export const deleteAlbumId = async (
 
 export const getDeleteAlbumIdMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteAlbumId>>,
@@ -5992,7 +6011,7 @@ export const useDeleteAlbumId = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof deleteAlbumId>>,
   TError,
@@ -6050,7 +6069,7 @@ export const getPostAlbumIdExportPdfUrl = (id: string) => {
 
 export const postAlbumIdExportPdf = async (
   id: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postAlbumIdExportPdfResponse> => {
   return rnFetch<postAlbumIdExportPdfResponse>(getPostAlbumIdExportPdfUrl(id), {
     ...options,
@@ -6060,7 +6079,7 @@ export const postAlbumIdExportPdf = async (
 
 export const getPostAlbumIdExportPdfMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postAlbumIdExportPdf>>,
@@ -6112,7 +6131,7 @@ export const usePostAlbumIdExportPdf = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postAlbumIdExportPdf>>,
   TError,
@@ -6121,7 +6140,7 @@ export const usePostAlbumIdExportPdf = <TError = Error, TContext = unknown>(
 > => {
   return useMutation(
     getPostAlbumIdExportPdfMutationOptions(options),
-    queryClient,
+    queryClient
   );
 };
 
@@ -6151,7 +6170,7 @@ export const getGetFrequenciesUrl = () => {
 };
 
 export const getFrequencies = async (
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getFrequenciesResponse> => {
   return rnFetch<getFrequenciesResponse>(getGetFrequenciesUrl(), {
     ...options,
@@ -6165,7 +6184,7 @@ export const getGetFrequenciesQueryKey = () => {
 
 export const getGetFrequenciesQueryOptions = <
   TData = Awaited<ReturnType<typeof getFrequencies>>,
-  TError = Error,
+  TError = Error
 >(options?: {
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof getFrequencies>>, TError, TData>
@@ -6194,7 +6213,7 @@ export type GetFrequenciesQueryError = Error;
 
 export function useGetFrequencies<
   TData = Awaited<ReturnType<typeof getFrequencies>>,
-  TError = Error,
+  TError = Error
 >(
   options: {
     query: Partial<
@@ -6210,13 +6229,13 @@ export function useGetFrequencies<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetFrequencies<
   TData = Awaited<ReturnType<typeof getFrequencies>>,
-  TError = Error,
+  TError = Error
 >(
   options?: {
     query?: Partial<
@@ -6232,13 +6251,13 @@ export function useGetFrequencies<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetFrequencies<
   TData = Awaited<ReturnType<typeof getFrequencies>>,
-  TError = Error,
+  TError = Error
 >(
   options?: {
     query?: Partial<
@@ -6246,14 +6265,14 @@ export function useGetFrequencies<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetFrequencies<
   TData = Awaited<ReturnType<typeof getFrequencies>>,
-  TError = Error,
+  TError = Error
 >(
   options?: {
     query?: Partial<
@@ -6261,7 +6280,7 @@ export function useGetFrequencies<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -6310,7 +6329,7 @@ export const getPostFrequenciesUrl = () => {
 
 export const postFrequencies = async (
   newFrequency: NewFrequency,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postFrequenciesResponse> => {
   return rnFetch<postFrequenciesResponse>(getPostFrequenciesUrl(), {
     ...options,
@@ -6322,7 +6341,7 @@ export const postFrequencies = async (
 
 export const getPostFrequenciesMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postFrequencies>>,
@@ -6374,7 +6393,7 @@ export const usePostFrequencies = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postFrequencies>>,
   TError,
@@ -6419,7 +6438,7 @@ export const getGetFrequenciesIdUrl = (id: string) => {
 
 export const getFrequenciesId = async (
   id: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getFrequenciesIdResponse> => {
   return rnFetch<getFrequenciesIdResponse>(getGetFrequenciesIdUrl(id), {
     ...options,
@@ -6433,7 +6452,7 @@ export const getGetFrequenciesIdQueryKey = (id: string) => {
 
 export const getGetFrequenciesIdQueryOptions = <
   TData = Awaited<ReturnType<typeof getFrequenciesId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options?: {
@@ -6445,7 +6464,7 @@ export const getGetFrequenciesIdQueryOptions = <
       >
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -6474,7 +6493,7 @@ export type GetFrequenciesIdQueryError = Error;
 
 export function useGetFrequenciesId<
   TData = Awaited<ReturnType<typeof getFrequenciesId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options: {
@@ -6495,13 +6514,13 @@ export function useGetFrequenciesId<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetFrequenciesId<
   TData = Awaited<ReturnType<typeof getFrequenciesId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options?: {
@@ -6522,13 +6541,13 @@ export function useGetFrequenciesId<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetFrequenciesId<
   TData = Awaited<ReturnType<typeof getFrequenciesId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options?: {
@@ -6541,14 +6560,14 @@ export function useGetFrequenciesId<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetFrequenciesId<
   TData = Awaited<ReturnType<typeof getFrequenciesId>>,
-  TError = Error,
+  TError = Error
 >(
   id: string,
   options?: {
@@ -6561,7 +6580,7 @@ export function useGetFrequenciesId<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -6602,7 +6621,7 @@ export type getActivityCompletionsResponse =
   | getActivityCompletionsResponseError;
 
 export const getGetActivityCompletionsUrl = (
-  params?: GetActivityCompletionsParams,
+  params?: GetActivityCompletionsParams
 ) => {
   const normalizedParams = new URLSearchParams();
 
@@ -6621,26 +6640,26 @@ export const getGetActivityCompletionsUrl = (
 
 export const getActivityCompletions = async (
   params?: GetActivityCompletionsParams,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getActivityCompletionsResponse> => {
   return rnFetch<getActivityCompletionsResponse>(
     getGetActivityCompletionsUrl(params),
     {
       ...options,
       method: "GET",
-    },
+    }
   );
 };
 
 export const getGetActivityCompletionsQueryKey = (
-  params?: GetActivityCompletionsParams,
+  params?: GetActivityCompletionsParams
 ) => {
   return [`/activity-completions`, ...(params ? [params] : [])] as const;
 };
 
 export const getGetActivityCompletionsQueryOptions = <
   TData = Awaited<ReturnType<typeof getActivityCompletions>>,
-  TError = GetActivityCompletions500,
+  TError = GetActivityCompletions500
 >(
   params?: GetActivityCompletionsParams,
   options?: {
@@ -6652,7 +6671,7 @@ export const getGetActivityCompletionsQueryOptions = <
       >
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -6678,7 +6697,7 @@ export type GetActivityCompletionsQueryError = GetActivityCompletions500;
 
 export function useGetActivityCompletions<
   TData = Awaited<ReturnType<typeof getActivityCompletions>>,
-  TError = GetActivityCompletions500,
+  TError = GetActivityCompletions500
 >(
   params: undefined | GetActivityCompletionsParams,
   options: {
@@ -6699,13 +6718,13 @@ export function useGetActivityCompletions<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetActivityCompletions<
   TData = Awaited<ReturnType<typeof getActivityCompletions>>,
-  TError = GetActivityCompletions500,
+  TError = GetActivityCompletions500
 >(
   params?: GetActivityCompletionsParams,
   options?: {
@@ -6726,13 +6745,13 @@ export function useGetActivityCompletions<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetActivityCompletions<
   TData = Awaited<ReturnType<typeof getActivityCompletions>>,
-  TError = GetActivityCompletions500,
+  TError = GetActivityCompletions500
 >(
   params?: GetActivityCompletionsParams,
   options?: {
@@ -6745,7 +6764,7 @@ export function useGetActivityCompletions<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
@@ -6755,7 +6774,7 @@ export function useGetActivityCompletions<
 
 export function useGetActivityCompletions<
   TData = Awaited<ReturnType<typeof getActivityCompletions>>,
-  TError = GetActivityCompletions500,
+  TError = GetActivityCompletions500
 >(
   params?: GetActivityCompletionsParams,
   options?: {
@@ -6768,7 +6787,7 @@ export function useGetActivityCompletions<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -6814,7 +6833,7 @@ export const getPostActivityCompletionsToggleUrl = () => {
 
 export const postActivityCompletionsToggle = async (
   postActivityCompletionsToggleBody: PostActivityCompletionsToggleBody,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postActivityCompletionsToggleResponse> => {
   return rnFetch<postActivityCompletionsToggleResponse>(
     getPostActivityCompletionsToggleUrl(),
@@ -6823,13 +6842,13 @@ export const postActivityCompletionsToggle = async (
       method: "POST",
       headers: { "Content-Type": "application/json", ...options?.headers },
       body: JSON.stringify(postActivityCompletionsToggleBody),
-    },
+    }
   );
 };
 
 export const getPostActivityCompletionsToggleMutationOptions = <
   TError = PostActivityCompletionsToggle500,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postActivityCompletionsToggle>>,
@@ -6878,7 +6897,7 @@ export type PostActivityCompletionsToggleMutationError =
  */
 export const usePostActivityCompletionsToggle = <
   TError = PostActivityCompletionsToggle500,
-  TContext = unknown,
+  TContext = unknown
 >(
   options?: {
     mutation?: UseMutationOptions<
@@ -6889,7 +6908,7 @@ export const usePostActivityCompletionsToggle = <
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postActivityCompletionsToggle>>,
   TError,
@@ -6898,7 +6917,7 @@ export const usePostActivityCompletionsToggle = <
 > => {
   return useMutation(
     getPostActivityCompletionsToggleMutationOptions(options),
-    queryClient,
+    queryClient
   );
 };
 
@@ -6926,7 +6945,7 @@ export const getGetGamesUrl = () => {
 };
 
 export const getGames = async (
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getGamesResponse> => {
   return rnFetch<getGamesResponse>(getGetGamesUrl(), {
     ...options,
@@ -6940,7 +6959,7 @@ export const getGetGamesQueryKey = () => {
 
 export const getGetGamesQueryOptions = <
   TData = Awaited<ReturnType<typeof getGames>>,
-  TError = Error,
+  TError = Error
 >(options?: {
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof getGames>>, TError, TData>
@@ -6969,7 +6988,7 @@ export type GetGamesQueryError = Error;
 
 export function useGetGames<
   TData = Awaited<ReturnType<typeof getGames>>,
-  TError = Error,
+  TError = Error
 >(
   options: {
     query: Partial<
@@ -6985,13 +7004,13 @@ export function useGetGames<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetGames<
   TData = Awaited<ReturnType<typeof getGames>>,
-  TError = Error,
+  TError = Error
 >(
   options?: {
     query?: Partial<
@@ -7007,13 +7026,13 @@ export function useGetGames<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetGames<
   TData = Awaited<ReturnType<typeof getGames>>,
-  TError = Error,
+  TError = Error
 >(
   options?: {
     query?: Partial<
@@ -7021,14 +7040,14 @@ export function useGetGames<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetGames<
   TData = Awaited<ReturnType<typeof getGames>>,
-  TError = Error,
+  TError = Error
 >(
   options?: {
     query?: Partial<
@@ -7036,7 +7055,7 @@ export function useGetGames<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -7085,7 +7104,7 @@ export const getGetGamesGameNameUrl = (gameName: string) => {
 
 export const getGamesGameName = async (
   gameName: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getGamesGameNameResponse> => {
   return rnFetch<getGamesGameNameResponse>(getGetGamesGameNameUrl(gameName), {
     ...options,
@@ -7099,7 +7118,7 @@ export const getGetGamesGameNameQueryKey = (gameName: string) => {
 
 export const getGetGamesGameNameQueryOptions = <
   TData = Awaited<ReturnType<typeof getGamesGameName>>,
-  TError = Error,
+  TError = Error
 >(
   gameName: string,
   options?: {
@@ -7111,7 +7130,7 @@ export const getGetGamesGameNameQueryOptions = <
       >
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -7141,7 +7160,7 @@ export type GetGamesGameNameQueryError = Error;
 
 export function useGetGamesGameName<
   TData = Awaited<ReturnType<typeof getGamesGameName>>,
-  TError = Error,
+  TError = Error
 >(
   gameName: string,
   options: {
@@ -7162,13 +7181,13 @@ export function useGetGamesGameName<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetGamesGameName<
   TData = Awaited<ReturnType<typeof getGamesGameName>>,
-  TError = Error,
+  TError = Error
 >(
   gameName: string,
   options?: {
@@ -7189,13 +7208,13 @@ export function useGetGamesGameName<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetGamesGameName<
   TData = Awaited<ReturnType<typeof getGamesGameName>>,
-  TError = Error,
+  TError = Error
 >(
   gameName: string,
   options?: {
@@ -7208,14 +7227,14 @@ export function useGetGamesGameName<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetGamesGameName<
   TData = Awaited<ReturnType<typeof getGamesGameName>>,
-  TError = Error,
+  TError = Error
 >(
   gameName: string,
   options?: {
@@ -7228,7 +7247,7 @@ export function useGetGamesGameName<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -7277,7 +7296,7 @@ export const getPostPuzzlesMemoryUrl = () => {
 
 export const postPuzzlesMemory = async (
   newMemoryPuzzle: NewMemoryPuzzle,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postPuzzlesMemoryResponse> => {
   return rnFetch<postPuzzlesMemoryResponse>(getPostPuzzlesMemoryUrl(), {
     ...options,
@@ -7289,7 +7308,7 @@ export const postPuzzlesMemory = async (
 
 export const getPostPuzzlesMemoryMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postPuzzlesMemory>>,
@@ -7341,7 +7360,7 @@ export const usePostPuzzlesMemory = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postPuzzlesMemory>>,
   TError,
@@ -7386,7 +7405,7 @@ export const getPostPuzzlesSudokuUrl = () => {
 
 export const postPuzzlesSudoku = async (
   newSudokuPuzzle: NewSudokuPuzzle,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postPuzzlesSudokuResponse> => {
   return rnFetch<postPuzzlesSudokuResponse>(getPostPuzzlesSudokuUrl(), {
     ...options,
@@ -7398,7 +7417,7 @@ export const postPuzzlesSudoku = async (
 
 export const getPostPuzzlesSudokuMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postPuzzlesSudoku>>,
@@ -7450,7 +7469,7 @@ export const usePostPuzzlesSudoku = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postPuzzlesSudoku>>,
   TError,
@@ -7495,7 +7514,7 @@ export const getPostPuzzlesNetUrl = () => {
 
 export const postPuzzlesNet = async (
   newNetPuzzle: NewNetPuzzle,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postPuzzlesNetResponse> => {
   return rnFetch<postPuzzlesNetResponse>(getPostPuzzlesNetUrl(), {
     ...options,
@@ -7507,7 +7526,7 @@ export const postPuzzlesNet = async (
 
 export const getPostPuzzlesNetMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postPuzzlesNet>>,
@@ -7559,7 +7578,7 @@ export const usePostPuzzlesNet = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postPuzzlesNet>>,
   TError,
@@ -7604,7 +7623,7 @@ export const getPostPuzzlesFocusUrl = () => {
 
 export const postPuzzlesFocus = async (
   newFocusPuzzle: NewFocusPuzzle,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postPuzzlesFocusResponse> => {
   return rnFetch<postPuzzlesFocusResponse>(getPostPuzzlesFocusUrl(), {
     ...options,
@@ -7616,7 +7635,7 @@ export const postPuzzlesFocus = async (
 
 export const getPostPuzzlesFocusMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postPuzzlesFocus>>,
@@ -7668,7 +7687,7 @@ export const usePostPuzzlesFocus = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postPuzzlesFocus>>,
   TError,
@@ -7703,7 +7722,7 @@ export type getPuzzlesRecentGameTypeResponse =
 
 export const getGetPuzzlesRecentGameTypeUrl = (
   gameType: GameType,
-  params?: GetPuzzlesRecentGameTypeParams,
+  params?: GetPuzzlesRecentGameTypeParams
 ) => {
   const normalizedParams = new URLSearchParams();
 
@@ -7723,27 +7742,27 @@ export const getGetPuzzlesRecentGameTypeUrl = (
 export const getPuzzlesRecentGameType = async (
   gameType: GameType,
   params?: GetPuzzlesRecentGameTypeParams,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getPuzzlesRecentGameTypeResponse> => {
   return rnFetch<getPuzzlesRecentGameTypeResponse>(
     getGetPuzzlesRecentGameTypeUrl(gameType, params),
     {
       ...options,
       method: "GET",
-    },
+    }
   );
 };
 
 export const getGetPuzzlesRecentGameTypeQueryKey = (
   gameType: GameType,
-  params?: GetPuzzlesRecentGameTypeParams,
+  params?: GetPuzzlesRecentGameTypeParams
 ) => {
   return [`/puzzles/recent/${gameType}`, ...(params ? [params] : [])] as const;
 };
 
 export const getGetPuzzlesRecentGameTypeQueryOptions = <
   TData = Awaited<ReturnType<typeof getPuzzlesRecentGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   params?: GetPuzzlesRecentGameTypeParams,
@@ -7756,7 +7775,7 @@ export const getGetPuzzlesRecentGameTypeQueryOptions = <
       >
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -7788,7 +7807,7 @@ export type GetPuzzlesRecentGameTypeQueryError = Error;
 
 export function useGetPuzzlesRecentGameType<
   TData = Awaited<ReturnType<typeof getPuzzlesRecentGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   params: undefined | GetPuzzlesRecentGameTypeParams,
@@ -7810,13 +7829,13 @@ export function useGetPuzzlesRecentGameType<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetPuzzlesRecentGameType<
   TData = Awaited<ReturnType<typeof getPuzzlesRecentGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   params?: GetPuzzlesRecentGameTypeParams,
@@ -7838,13 +7857,13 @@ export function useGetPuzzlesRecentGameType<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetPuzzlesRecentGameType<
   TData = Awaited<ReturnType<typeof getPuzzlesRecentGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   params?: GetPuzzlesRecentGameTypeParams,
@@ -7858,14 +7877,14 @@ export function useGetPuzzlesRecentGameType<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetPuzzlesRecentGameType<
   TData = Awaited<ReturnType<typeof getPuzzlesRecentGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   params?: GetPuzzlesRecentGameTypeParams,
@@ -7879,14 +7898,14 @@ export function useGetPuzzlesRecentGameType<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getGetPuzzlesRecentGameTypeQueryOptions(
     gameType,
     params,
-    options,
+    options
   );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
@@ -7932,7 +7951,7 @@ export const getPostAttemptsStartUrl = () => {
 
 export const postAttemptsStart = async (
   startAttempt: StartAttempt,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postAttemptsStartResponse> => {
   return rnFetch<postAttemptsStartResponse>(getPostAttemptsStartUrl(), {
     ...options,
@@ -7944,7 +7963,7 @@ export const postAttemptsStart = async (
 
 export const getPostAttemptsStartMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postAttemptsStart>>,
@@ -7996,7 +8015,7 @@ export const usePostAttemptsStart = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postAttemptsStart>>,
   TError,
@@ -8055,7 +8074,7 @@ export const getPostAttemptsAttemptIdFinishUrl = (attemptId: string) => {
 export const postAttemptsAttemptIdFinish = async (
   attemptId: string,
   finishAttempt: FinishAttempt,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postAttemptsAttemptIdFinishResponse> => {
   return rnFetch<postAttemptsAttemptIdFinishResponse>(
     getPostAttemptsAttemptIdFinishUrl(attemptId),
@@ -8064,13 +8083,13 @@ export const postAttemptsAttemptIdFinish = async (
       method: "POST",
       headers: { "Content-Type": "application/json", ...options?.headers },
       body: JSON.stringify(finishAttempt),
-    },
+    }
   );
 };
 
 export const getPostAttemptsAttemptIdFinishMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postAttemptsAttemptIdFinish>>,
@@ -8114,7 +8133,7 @@ export type PostAttemptsAttemptIdFinishMutationError = Error;
 
 export const usePostAttemptsAttemptIdFinish = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(
   options?: {
     mutation?: UseMutationOptions<
@@ -8125,7 +8144,7 @@ export const usePostAttemptsAttemptIdFinish = <
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postAttemptsAttemptIdFinish>>,
   TError,
@@ -8134,7 +8153,7 @@ export const usePostAttemptsAttemptIdFinish = <
 > => {
   return useMutation(
     getPostAttemptsAttemptIdFinishMutationOptions(options),
-    queryClient,
+    queryClient
   );
 };
 
@@ -8174,14 +8193,14 @@ export const getGetAttemptsAttemptIdUrl = (attemptId: string) => {
 
 export const getAttemptsAttemptId = async (
   attemptId: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getAttemptsAttemptIdResponse> => {
   return rnFetch<getAttemptsAttemptIdResponse>(
     getGetAttemptsAttemptIdUrl(attemptId),
     {
       ...options,
       method: "GET",
-    },
+    }
   );
 };
 
@@ -8191,7 +8210,7 @@ export const getGetAttemptsAttemptIdQueryKey = (attemptId: string) => {
 
 export const getGetAttemptsAttemptIdQueryOptions = <
   TData = Awaited<ReturnType<typeof getAttemptsAttemptId>>,
-  TError = Error,
+  TError = Error
 >(
   attemptId: string,
   options?: {
@@ -8203,7 +8222,7 @@ export const getGetAttemptsAttemptIdQueryOptions = <
       >
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -8234,7 +8253,7 @@ export type GetAttemptsAttemptIdQueryError = Error;
 
 export function useGetAttemptsAttemptId<
   TData = Awaited<ReturnType<typeof getAttemptsAttemptId>>,
-  TError = Error,
+  TError = Error
 >(
   attemptId: string,
   options: {
@@ -8255,13 +8274,13 @@ export function useGetAttemptsAttemptId<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetAttemptsAttemptId<
   TData = Awaited<ReturnType<typeof getAttemptsAttemptId>>,
-  TError = Error,
+  TError = Error
 >(
   attemptId: string,
   options?: {
@@ -8282,13 +8301,13 @@ export function useGetAttemptsAttemptId<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetAttemptsAttemptId<
   TData = Awaited<ReturnType<typeof getAttemptsAttemptId>>,
-  TError = Error,
+  TError = Error
 >(
   attemptId: string,
   options?: {
@@ -8301,14 +8320,14 @@ export function useGetAttemptsAttemptId<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetAttemptsAttemptId<
   TData = Awaited<ReturnType<typeof getAttemptsAttemptId>>,
-  TError = Error,
+  TError = Error
 >(
   attemptId: string,
   options?: {
@@ -8321,7 +8340,7 @@ export function useGetAttemptsAttemptId<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -8382,7 +8401,7 @@ export const getGetAttemptsUrl = (params?: GetAttemptsParams) => {
 
 export const getAttempts = async (
   params?: GetAttemptsParams,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getAttemptsResponse> => {
   return rnFetch<getAttemptsResponse>(getGetAttemptsUrl(params), {
     ...options,
@@ -8396,7 +8415,7 @@ export const getGetAttemptsQueryKey = (params?: GetAttemptsParams) => {
 
 export const getGetAttemptsQueryOptions = <
   TData = Awaited<ReturnType<typeof getAttempts>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetAttemptsParams,
   options?: {
@@ -8404,7 +8423,7 @@ export const getGetAttemptsQueryOptions = <
       UseQueryOptions<Awaited<ReturnType<typeof getAttempts>>, TError, TData>
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -8428,7 +8447,7 @@ export type GetAttemptsQueryError = Error;
 
 export function useGetAttempts<
   TData = Awaited<ReturnType<typeof getAttempts>>,
-  TError = Error,
+  TError = Error
 >(
   params: undefined | GetAttemptsParams,
   options: {
@@ -8445,13 +8464,13 @@ export function useGetAttempts<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetAttempts<
   TData = Awaited<ReturnType<typeof getAttempts>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetAttemptsParams,
   options?: {
@@ -8468,13 +8487,13 @@ export function useGetAttempts<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetAttempts<
   TData = Awaited<ReturnType<typeof getAttempts>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetAttemptsParams,
   options?: {
@@ -8483,14 +8502,14 @@ export function useGetAttempts<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetAttempts<
   TData = Awaited<ReturnType<typeof getAttempts>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetAttemptsParams,
   options?: {
@@ -8499,7 +8518,7 @@ export function useGetAttempts<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -8545,7 +8564,7 @@ export type getAttemptsStatsGameTypeResponse =
 
 export const getGetAttemptsStatsGameTypeUrl = (
   gameType: GameType,
-  params?: GetAttemptsStatsGameTypeParams,
+  params?: GetAttemptsStatsGameTypeParams
 ) => {
   const normalizedParams = new URLSearchParams();
 
@@ -8565,27 +8584,27 @@ export const getGetAttemptsStatsGameTypeUrl = (
 export const getAttemptsStatsGameType = async (
   gameType: GameType,
   params?: GetAttemptsStatsGameTypeParams,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getAttemptsStatsGameTypeResponse> => {
   return rnFetch<getAttemptsStatsGameTypeResponse>(
     getGetAttemptsStatsGameTypeUrl(gameType, params),
     {
       ...options,
       method: "GET",
-    },
+    }
   );
 };
 
 export const getGetAttemptsStatsGameTypeQueryKey = (
   gameType: GameType,
-  params?: GetAttemptsStatsGameTypeParams,
+  params?: GetAttemptsStatsGameTypeParams
 ) => {
   return [`/attempts/stats/${gameType}`, ...(params ? [params] : [])] as const;
 };
 
 export const getGetAttemptsStatsGameTypeQueryOptions = <
   TData = Awaited<ReturnType<typeof getAttemptsStatsGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   params?: GetAttemptsStatsGameTypeParams,
@@ -8598,7 +8617,7 @@ export const getGetAttemptsStatsGameTypeQueryOptions = <
       >
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -8630,7 +8649,7 @@ export type GetAttemptsStatsGameTypeQueryError = Error;
 
 export function useGetAttemptsStatsGameType<
   TData = Awaited<ReturnType<typeof getAttemptsStatsGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   params: undefined | GetAttemptsStatsGameTypeParams,
@@ -8652,13 +8671,13 @@ export function useGetAttemptsStatsGameType<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetAttemptsStatsGameType<
   TData = Awaited<ReturnType<typeof getAttemptsStatsGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   params?: GetAttemptsStatsGameTypeParams,
@@ -8680,13 +8699,13 @@ export function useGetAttemptsStatsGameType<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetAttemptsStatsGameType<
   TData = Awaited<ReturnType<typeof getAttemptsStatsGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   params?: GetAttemptsStatsGameTypeParams,
@@ -8700,14 +8719,14 @@ export function useGetAttemptsStatsGameType<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetAttemptsStatsGameType<
   TData = Awaited<ReturnType<typeof getAttemptsStatsGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   params?: GetAttemptsStatsGameTypeParams,
@@ -8721,14 +8740,14 @@ export function useGetAttemptsStatsGameType<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getGetAttemptsStatsGameTypeQueryOptions(
     gameType,
     params,
-    options,
+    options
   );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
@@ -8764,7 +8783,7 @@ export type getAttemptsLeaderboardGameTypeResponse =
 
 export const getGetAttemptsLeaderboardGameTypeUrl = (
   gameType: GameType,
-  params?: GetAttemptsLeaderboardGameTypeParams,
+  params?: GetAttemptsLeaderboardGameTypeParams
 ) => {
   const normalizedParams = new URLSearchParams();
 
@@ -8784,20 +8803,20 @@ export const getGetAttemptsLeaderboardGameTypeUrl = (
 export const getAttemptsLeaderboardGameType = async (
   gameType: GameType,
   params?: GetAttemptsLeaderboardGameTypeParams,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getAttemptsLeaderboardGameTypeResponse> => {
   return rnFetch<getAttemptsLeaderboardGameTypeResponse>(
     getGetAttemptsLeaderboardGameTypeUrl(gameType, params),
     {
       ...options,
       method: "GET",
-    },
+    }
   );
 };
 
 export const getGetAttemptsLeaderboardGameTypeQueryKey = (
   gameType: GameType,
-  params?: GetAttemptsLeaderboardGameTypeParams,
+  params?: GetAttemptsLeaderboardGameTypeParams
 ) => {
   return [
     `/attempts/leaderboard/${gameType}`,
@@ -8807,7 +8826,7 @@ export const getGetAttemptsLeaderboardGameTypeQueryKey = (
 
 export const getGetAttemptsLeaderboardGameTypeQueryOptions = <
   TData = Awaited<ReturnType<typeof getAttemptsLeaderboardGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   params?: GetAttemptsLeaderboardGameTypeParams,
@@ -8820,7 +8839,7 @@ export const getGetAttemptsLeaderboardGameTypeQueryOptions = <
       >
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -8855,7 +8874,7 @@ export type GetAttemptsLeaderboardGameTypeQueryError = Error;
 
 export function useGetAttemptsLeaderboardGameType<
   TData = Awaited<ReturnType<typeof getAttemptsLeaderboardGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   params: undefined | GetAttemptsLeaderboardGameTypeParams,
@@ -8877,13 +8896,13 @@ export function useGetAttemptsLeaderboardGameType<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetAttemptsLeaderboardGameType<
   TData = Awaited<ReturnType<typeof getAttemptsLeaderboardGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   params?: GetAttemptsLeaderboardGameTypeParams,
@@ -8905,13 +8924,13 @@ export function useGetAttemptsLeaderboardGameType<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetAttemptsLeaderboardGameType<
   TData = Awaited<ReturnType<typeof getAttemptsLeaderboardGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   params?: GetAttemptsLeaderboardGameTypeParams,
@@ -8925,14 +8944,14 @@ export function useGetAttemptsLeaderboardGameType<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetAttemptsLeaderboardGameType<
   TData = Awaited<ReturnType<typeof getAttemptsLeaderboardGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   params?: GetAttemptsLeaderboardGameTypeParams,
@@ -8946,14 +8965,14 @@ export function useGetAttemptsLeaderboardGameType<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getGetAttemptsLeaderboardGameTypeQueryOptions(
     gameType,
     params,
-    options,
+    options
   );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
@@ -8993,14 +9012,14 @@ export const getGetAchievementsGameTypeUrl = (gameType: GameType) => {
 
 export const getAchievementsGameType = async (
   gameType: GameType,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getAchievementsGameTypeResponse> => {
   return rnFetch<getAchievementsGameTypeResponse>(
     getGetAchievementsGameTypeUrl(gameType),
     {
       ...options,
       method: "GET",
-    },
+    }
   );
 };
 
@@ -9010,7 +9029,7 @@ export const getGetAchievementsGameTypeQueryKey = (gameType: GameType) => {
 
 export const getGetAchievementsGameTypeQueryOptions = <
   TData = Awaited<ReturnType<typeof getAchievementsGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   options?: {
@@ -9022,7 +9041,7 @@ export const getGetAchievementsGameTypeQueryOptions = <
       >
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -9053,7 +9072,7 @@ export type GetAchievementsGameTypeQueryError = Error;
 
 export function useGetAchievementsGameType<
   TData = Awaited<ReturnType<typeof getAchievementsGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   options: {
@@ -9074,13 +9093,13 @@ export function useGetAchievementsGameType<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetAchievementsGameType<
   TData = Awaited<ReturnType<typeof getAchievementsGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   options?: {
@@ -9101,13 +9120,13 @@ export function useGetAchievementsGameType<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetAchievementsGameType<
   TData = Awaited<ReturnType<typeof getAchievementsGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   options?: {
@@ -9120,14 +9139,14 @@ export function useGetAchievementsGameType<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetAchievementsGameType<
   TData = Awaited<ReturnType<typeof getAchievementsGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   options?: {
@@ -9140,13 +9159,13 @@ export function useGetAchievementsGameType<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getGetAchievementsGameTypeQueryOptions(
     gameType,
-    options,
+    options
   );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
@@ -9186,14 +9205,14 @@ export const getGetAchievementsUserGameTypeUrl = (gameType: GameType) => {
 
 export const getAchievementsUserGameType = async (
   gameType: GameType,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getAchievementsUserGameTypeResponse> => {
   return rnFetch<getAchievementsUserGameTypeResponse>(
     getGetAchievementsUserGameTypeUrl(gameType),
     {
       ...options,
       method: "GET",
-    },
+    }
   );
 };
 
@@ -9203,7 +9222,7 @@ export const getGetAchievementsUserGameTypeQueryKey = (gameType: GameType) => {
 
 export const getGetAchievementsUserGameTypeQueryOptions = <
   TData = Awaited<ReturnType<typeof getAchievementsUserGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   options?: {
@@ -9215,7 +9234,7 @@ export const getGetAchievementsUserGameTypeQueryOptions = <
       >
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -9246,7 +9265,7 @@ export type GetAchievementsUserGameTypeQueryError = Error;
 
 export function useGetAchievementsUserGameType<
   TData = Awaited<ReturnType<typeof getAchievementsUserGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   options: {
@@ -9267,13 +9286,13 @@ export function useGetAchievementsUserGameType<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetAchievementsUserGameType<
   TData = Awaited<ReturnType<typeof getAchievementsUserGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   options?: {
@@ -9294,13 +9313,13 @@ export function useGetAchievementsUserGameType<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetAchievementsUserGameType<
   TData = Awaited<ReturnType<typeof getAchievementsUserGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   options?: {
@@ -9313,14 +9332,14 @@ export function useGetAchievementsUserGameType<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetAchievementsUserGameType<
   TData = Awaited<ReturnType<typeof getAchievementsUserGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   options?: {
@@ -9333,13 +9352,13 @@ export function useGetAchievementsUserGameType<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getGetAchievementsUserGameTypeQueryOptions(
     gameType,
-    options,
+    options
   );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
@@ -9379,26 +9398,26 @@ export const getGetAchievementsProgressGameTypeUrl = (gameType: GameType) => {
 
 export const getAchievementsProgressGameType = async (
   gameType: GameType,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getAchievementsProgressGameTypeResponse> => {
   return rnFetch<getAchievementsProgressGameTypeResponse>(
     getGetAchievementsProgressGameTypeUrl(gameType),
     {
       ...options,
       method: "GET",
-    },
+    }
   );
 };
 
 export const getGetAchievementsProgressGameTypeQueryKey = (
-  gameType: GameType,
+  gameType: GameType
 ) => {
   return [`/achievements/progress/${gameType}`] as const;
 };
 
 export const getGetAchievementsProgressGameTypeQueryOptions = <
   TData = Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   options?: {
@@ -9410,7 +9429,7 @@ export const getGetAchievementsProgressGameTypeQueryOptions = <
       >
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -9442,7 +9461,7 @@ export type GetAchievementsProgressGameTypeQueryError = Error;
 
 export function useGetAchievementsProgressGameType<
   TData = Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   options: {
@@ -9463,13 +9482,13 @@ export function useGetAchievementsProgressGameType<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetAchievementsProgressGameType<
   TData = Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   options?: {
@@ -9490,13 +9509,13 @@ export function useGetAchievementsProgressGameType<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetAchievementsProgressGameType<
   TData = Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   options?: {
@@ -9509,14 +9528,14 @@ export function useGetAchievementsProgressGameType<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetAchievementsProgressGameType<
   TData = Awaited<ReturnType<typeof getAchievementsProgressGameType>>,
-  TError = Error,
+  TError = Error
 >(
   gameType: GameType,
   options?: {
@@ -9529,13 +9548,13 @@ export function useGetAchievementsProgressGameType<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getGetAchievementsProgressGameTypeQueryOptions(
     gameType,
-    options,
+    options
   );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
@@ -9582,20 +9601,20 @@ export const getPostAchievementsCheckAttemptIdUrl = (attemptId: string) => {
 
 export const postAchievementsCheckAttemptId = async (
   attemptId: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postAchievementsCheckAttemptIdResponse> => {
   return rnFetch<postAchievementsCheckAttemptIdResponse>(
     getPostAchievementsCheckAttemptIdUrl(attemptId),
     {
       ...options,
       method: "POST",
-    },
+    }
   );
 };
 
 export const getPostAchievementsCheckAttemptIdMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postAchievementsCheckAttemptId>>,
@@ -9639,7 +9658,7 @@ export type PostAchievementsCheckAttemptIdMutationError = Error;
 
 export const usePostAchievementsCheckAttemptId = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(
   options?: {
     mutation?: UseMutationOptions<
@@ -9650,7 +9669,7 @@ export const usePostAchievementsCheckAttemptId = <
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postAchievementsCheckAttemptId>>,
   TError,
@@ -9659,7 +9678,7 @@ export const usePostAchievementsCheckAttemptId = <
 > => {
   return useMutation(
     getPostAchievementsCheckAttemptIdMutationOptions(options),
-    queryClient,
+    queryClient
   );
 };
 
@@ -9702,7 +9721,7 @@ export const getGetStreaksMeUrl = (params?: GetStreaksMeParams) => {
 
 export const getStreaksMe = async (
   params?: GetStreaksMeParams,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getStreaksMeResponse> => {
   return rnFetch<getStreaksMeResponse>(getGetStreaksMeUrl(params), {
     ...options,
@@ -9716,7 +9735,7 @@ export const getGetStreaksMeQueryKey = (params?: GetStreaksMeParams) => {
 
 export const getGetStreaksMeQueryOptions = <
   TData = Awaited<ReturnType<typeof getStreaksMe>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetStreaksMeParams,
   options?: {
@@ -9724,7 +9743,7 @@ export const getGetStreaksMeQueryOptions = <
       UseQueryOptions<Awaited<ReturnType<typeof getStreaksMe>>, TError, TData>
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -9748,7 +9767,7 @@ export type GetStreaksMeQueryError = Error;
 
 export function useGetStreaksMe<
   TData = Awaited<ReturnType<typeof getStreaksMe>>,
-  TError = Error,
+  TError = Error
 >(
   params: undefined | GetStreaksMeParams,
   options: {
@@ -9765,13 +9784,13 @@ export function useGetStreaksMe<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetStreaksMe<
   TData = Awaited<ReturnType<typeof getStreaksMe>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetStreaksMeParams,
   options?: {
@@ -9788,13 +9807,13 @@ export function useGetStreaksMe<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetStreaksMe<
   TData = Awaited<ReturnType<typeof getStreaksMe>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetStreaksMeParams,
   options?: {
@@ -9803,14 +9822,14 @@ export function useGetStreaksMe<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetStreaksMe<
   TData = Awaited<ReturnType<typeof getStreaksMe>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetStreaksMeParams,
   options?: {
@@ -9819,7 +9838,7 @@ export function useGetStreaksMe<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -9872,7 +9891,7 @@ export const getGetStreaksHistoryUrl = (params?: GetStreaksHistoryParams) => {
 
 export const getStreaksHistory = async (
   params?: GetStreaksHistoryParams,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getStreaksHistoryResponse> => {
   return rnFetch<getStreaksHistoryResponse>(getGetStreaksHistoryUrl(params), {
     ...options,
@@ -9881,14 +9900,14 @@ export const getStreaksHistory = async (
 };
 
 export const getGetStreaksHistoryQueryKey = (
-  params?: GetStreaksHistoryParams,
+  params?: GetStreaksHistoryParams
 ) => {
   return [`/streaks/history`, ...(params ? [params] : [])] as const;
 };
 
 export const getGetStreaksHistoryQueryOptions = <
   TData = Awaited<ReturnType<typeof getStreaksHistory>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetStreaksHistoryParams,
   options?: {
@@ -9900,7 +9919,7 @@ export const getGetStreaksHistoryQueryOptions = <
       >
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -9925,7 +9944,7 @@ export type GetStreaksHistoryQueryError = Error;
 
 export function useGetStreaksHistory<
   TData = Awaited<ReturnType<typeof getStreaksHistory>>,
-  TError = Error,
+  TError = Error
 >(
   params: undefined | GetStreaksHistoryParams,
   options: {
@@ -9946,13 +9965,13 @@ export function useGetStreaksHistory<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetStreaksHistory<
   TData = Awaited<ReturnType<typeof getStreaksHistory>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetStreaksHistoryParams,
   options?: {
@@ -9973,13 +9992,13 @@ export function useGetStreaksHistory<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetStreaksHistory<
   TData = Awaited<ReturnType<typeof getStreaksHistory>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetStreaksHistoryParams,
   options?: {
@@ -9992,14 +10011,14 @@ export function useGetStreaksHistory<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 
 export function useGetStreaksHistory<
   TData = Awaited<ReturnType<typeof getStreaksHistory>>,
-  TError = Error,
+  TError = Error
 >(
   params?: GetStreaksHistoryParams,
   options?: {
@@ -10012,7 +10031,7 @@ export function useGetStreaksHistory<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -10057,7 +10076,7 @@ export const getGetNotificationsUrl = (params?: GetNotificationsParams) => {
 
 export const getNotifications = async (
   params?: GetNotificationsParams,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getNotificationsResponse> => {
   return rnFetch<getNotificationsResponse>(getGetNotificationsUrl(params), {
     ...options,
@@ -10066,14 +10085,14 @@ export const getNotifications = async (
 };
 
 export const getGetNotificationsQueryKey = (
-  params?: GetNotificationsParams,
+  params?: GetNotificationsParams
 ) => {
   return [`/notifications`, ...(params ? [params] : [])] as const;
 };
 
 export const getGetNotificationsQueryOptions = <
   TData = Awaited<ReturnType<typeof getNotifications>>,
-  TError = unknown,
+  TError = unknown
 >(
   params?: GetNotificationsParams,
   options?: {
@@ -10085,7 +10104,7 @@ export const getGetNotificationsQueryOptions = <
       >
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -10110,7 +10129,7 @@ export type GetNotificationsQueryError = unknown;
 
 export function useGetNotifications<
   TData = Awaited<ReturnType<typeof getNotifications>>,
-  TError = unknown,
+  TError = unknown
 >(
   params: undefined | GetNotificationsParams,
   options: {
@@ -10131,13 +10150,13 @@ export function useGetNotifications<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetNotifications<
   TData = Awaited<ReturnType<typeof getNotifications>>,
-  TError = unknown,
+  TError = unknown
 >(
   params?: GetNotificationsParams,
   options?: {
@@ -10158,13 +10177,13 @@ export function useGetNotifications<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetNotifications<
   TData = Awaited<ReturnType<typeof getNotifications>>,
-  TError = unknown,
+  TError = unknown
 >(
   params?: GetNotificationsParams,
   options?: {
@@ -10177,7 +10196,7 @@ export function useGetNotifications<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
@@ -10187,7 +10206,7 @@ export function useGetNotifications<
 
 export function useGetNotifications<
   TData = Awaited<ReturnType<typeof getNotifications>>,
-  TError = unknown,
+  TError = unknown
 >(
   params?: GetNotificationsParams,
   options?: {
@@ -10200,7 +10219,7 @@ export function useGetNotifications<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -10234,14 +10253,14 @@ export const getGetNotificationsUnreadCountUrl = () => {
 };
 
 export const getNotificationsUnreadCount = async (
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getNotificationsUnreadCountResponse> => {
   return rnFetch<getNotificationsUnreadCountResponse>(
     getGetNotificationsUnreadCountUrl(),
     {
       ...options,
       method: "GET",
-    },
+    }
   );
 };
 
@@ -10251,7 +10270,7 @@ export const getGetNotificationsUnreadCountQueryKey = () => {
 
 export const getGetNotificationsUnreadCountQueryOptions = <
   TData = Awaited<ReturnType<typeof getNotificationsUnreadCount>>,
-  TError = unknown,
+  TError = unknown
 >(options?: {
   query?: Partial<
     UseQueryOptions<
@@ -10286,7 +10305,7 @@ export type GetNotificationsUnreadCountQueryError = unknown;
 
 export function useGetNotificationsUnreadCount<
   TData = Awaited<ReturnType<typeof getNotificationsUnreadCount>>,
-  TError = unknown,
+  TError = unknown
 >(
   options: {
     query: Partial<
@@ -10306,13 +10325,13 @@ export function useGetNotificationsUnreadCount<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetNotificationsUnreadCount<
   TData = Awaited<ReturnType<typeof getNotificationsUnreadCount>>,
-  TError = unknown,
+  TError = unknown
 >(
   options?: {
     query?: Partial<
@@ -10332,13 +10351,13 @@ export function useGetNotificationsUnreadCount<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetNotificationsUnreadCount<
   TData = Awaited<ReturnType<typeof getNotificationsUnreadCount>>,
-  TError = unknown,
+  TError = unknown
 >(
   options?: {
     query?: Partial<
@@ -10350,7 +10369,7 @@ export function useGetNotificationsUnreadCount<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
@@ -10360,7 +10379,7 @@ export function useGetNotificationsUnreadCount<
 
 export function useGetNotificationsUnreadCount<
   TData = Awaited<ReturnType<typeof getNotificationsUnreadCount>>,
-  TError = unknown,
+  TError = unknown
 >(
   options?: {
     query?: Partial<
@@ -10372,7 +10391,7 @@ export function useGetNotificationsUnreadCount<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -10407,20 +10426,20 @@ export const getPatchNotificationsIdReadUrl = (id: string) => {
 
 export const patchNotificationsIdRead = async (
   id: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<patchNotificationsIdReadResponse> => {
   return rnFetch<patchNotificationsIdReadResponse>(
     getPatchNotificationsIdReadUrl(id),
     {
       ...options,
       method: "PATCH",
-    },
+    }
   );
 };
 
 export const getPatchNotificationsIdReadMutationOptions = <
   TError = unknown,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof patchNotificationsIdRead>>,
@@ -10467,7 +10486,7 @@ export type PatchNotificationsIdReadMutationError = unknown;
  */
 export const usePatchNotificationsIdRead = <
   TError = unknown,
-  TContext = unknown,
+  TContext = unknown
 >(
   options?: {
     mutation?: UseMutationOptions<
@@ -10478,7 +10497,7 @@ export const usePatchNotificationsIdRead = <
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof patchNotificationsIdRead>>,
   TError,
@@ -10487,7 +10506,7 @@ export const usePatchNotificationsIdRead = <
 > => {
   return useMutation(
     getPatchNotificationsIdReadMutationOptions(options),
-    queryClient,
+    queryClient
   );
 };
 
@@ -10511,20 +10530,20 @@ export const getPatchNotificationsReadAllUrl = () => {
 };
 
 export const patchNotificationsReadAll = async (
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<patchNotificationsReadAllResponse> => {
   return rnFetch<patchNotificationsReadAllResponse>(
     getPatchNotificationsReadAllUrl(),
     {
       ...options,
       method: "PATCH",
-    },
+    }
   );
 };
 
 export const getPatchNotificationsReadAllMutationOptions = <
   TError = unknown,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof patchNotificationsReadAll>>,
@@ -10569,7 +10588,7 @@ export type PatchNotificationsReadAllMutationError = unknown;
  */
 export const usePatchNotificationsReadAll = <
   TError = unknown,
-  TContext = unknown,
+  TContext = unknown
 >(
   options?: {
     mutation?: UseMutationOptions<
@@ -10580,7 +10599,7 @@ export const usePatchNotificationsReadAll = <
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof patchNotificationsReadAll>>,
   TError,
@@ -10589,7 +10608,7 @@ export const usePatchNotificationsReadAll = <
 > => {
   return useMutation(
     getPatchNotificationsReadAllMutationOptions(options),
-    queryClient,
+    queryClient
   );
 };
 
@@ -10614,20 +10633,20 @@ export const getDeleteNotificationsIdUrl = (id: string) => {
 
 export const deleteNotificationsId = async (
   id: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<deleteNotificationsIdResponse> => {
   return rnFetch<deleteNotificationsIdResponse>(
     getDeleteNotificationsIdUrl(id),
     {
       ...options,
       method: "DELETE",
-    },
+    }
   );
 };
 
 export const getDeleteNotificationsIdMutationOptions = <
   TError = unknown,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteNotificationsId>>,
@@ -10682,7 +10701,7 @@ export const useDeleteNotificationsId = <TError = unknown, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof deleteNotificationsId>>,
   TError,
@@ -10691,7 +10710,7 @@ export const useDeleteNotificationsId = <TError = unknown, TContext = unknown>(
 > => {
   return useMutation(
     getDeleteNotificationsIdMutationOptions(options),
-    queryClient,
+    queryClient
   );
 };
 
@@ -10727,7 +10746,7 @@ export const getPostDevicesRegisterUrl = () => {
 
 export const postDevicesRegister = async (
   postDevicesRegisterBody: PostDevicesRegisterBody,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postDevicesRegisterResponse> => {
   return rnFetch<postDevicesRegisterResponse>(getPostDevicesRegisterUrl(), {
     ...options,
@@ -10739,7 +10758,7 @@ export const postDevicesRegister = async (
 
 export const getPostDevicesRegisterMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postDevicesRegister>>,
@@ -10794,7 +10813,7 @@ export const usePostDevicesRegister = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postDevicesRegister>>,
   TError,
@@ -10803,7 +10822,7 @@ export const usePostDevicesRegister = <TError = Error, TContext = unknown>(
 > => {
   return useMutation(
     getPostDevicesRegisterMutationOptions(options),
-    queryClient,
+    queryClient
   );
 };
 
@@ -10837,7 +10856,7 @@ export const getDeletePushTokensUrl = () => {
 
 export const deletePushTokens = async (
   deletePushTokensBody: DeletePushTokensBody,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<deletePushTokensResponse> => {
   return rnFetch<deletePushTokensResponse>(getDeletePushTokensUrl(), {
     ...options,
@@ -10849,7 +10868,7 @@ export const deletePushTokens = async (
 
 export const getDeletePushTokensMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deletePushTokens>>,
@@ -10904,7 +10923,7 @@ export const useDeletePushTokens = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof deletePushTokens>>,
   TError,
@@ -10943,7 +10962,7 @@ export const getGetShopItemsUrl = () => {
 };
 
 export const getShopItems = async (
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getShopItemsResponse> => {
   return rnFetch<getShopItemsResponse>(getGetShopItemsUrl(), {
     ...options,
@@ -10957,7 +10976,7 @@ export const getGetShopItemsQueryKey = () => {
 
 export const getGetShopItemsQueryOptions = <
   TData = Awaited<ReturnType<typeof getShopItems>>,
-  TError = Error,
+  TError = Error
 >(options?: {
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof getShopItems>>, TError, TData>
@@ -10986,7 +11005,7 @@ export type GetShopItemsQueryError = Error;
 
 export function useGetShopItems<
   TData = Awaited<ReturnType<typeof getShopItems>>,
-  TError = Error,
+  TError = Error
 >(
   options: {
     query: Partial<
@@ -11002,13 +11021,13 @@ export function useGetShopItems<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetShopItems<
   TData = Awaited<ReturnType<typeof getShopItems>>,
-  TError = Error,
+  TError = Error
 >(
   options?: {
     query?: Partial<
@@ -11024,13 +11043,13 @@ export function useGetShopItems<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetShopItems<
   TData = Awaited<ReturnType<typeof getShopItems>>,
-  TError = Error,
+  TError = Error
 >(
   options?: {
     query?: Partial<
@@ -11038,7 +11057,7 @@ export function useGetShopItems<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
@@ -11048,7 +11067,7 @@ export function useGetShopItems<
 
 export function useGetShopItems<
   TData = Awaited<ReturnType<typeof getShopItems>>,
-  TError = Error,
+  TError = Error
 >(
   options?: {
     query?: Partial<
@@ -11056,7 +11075,7 @@ export function useGetShopItems<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -11099,7 +11118,7 @@ export const getGetShopInventoryUrl = () => {
 };
 
 export const getShopInventory = async (
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getShopInventoryResponse> => {
   return rnFetch<getShopInventoryResponse>(getGetShopInventoryUrl(), {
     ...options,
@@ -11113,7 +11132,7 @@ export const getGetShopInventoryQueryKey = () => {
 
 export const getGetShopInventoryQueryOptions = <
   TData = Awaited<ReturnType<typeof getShopInventory>>,
-  TError = Error,
+  TError = Error
 >(options?: {
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof getShopInventory>>, TError, TData>
@@ -11142,7 +11161,7 @@ export type GetShopInventoryQueryError = Error;
 
 export function useGetShopInventory<
   TData = Awaited<ReturnType<typeof getShopInventory>>,
-  TError = Error,
+  TError = Error
 >(
   options: {
     query: Partial<
@@ -11162,13 +11181,13 @@ export function useGetShopInventory<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetShopInventory<
   TData = Awaited<ReturnType<typeof getShopInventory>>,
-  TError = Error,
+  TError = Error
 >(
   options?: {
     query?: Partial<
@@ -11188,13 +11207,13 @@ export function useGetShopInventory<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetShopInventory<
   TData = Awaited<ReturnType<typeof getShopInventory>>,
-  TError = Error,
+  TError = Error
 >(
   options?: {
     query?: Partial<
@@ -11206,7 +11225,7 @@ export function useGetShopInventory<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
@@ -11216,7 +11235,7 @@ export function useGetShopInventory<
 
 export function useGetShopInventory<
   TData = Awaited<ReturnType<typeof getShopInventory>>,
-  TError = Error,
+  TError = Error
 >(
   options?: {
     query?: Partial<
@@ -11228,7 +11247,7 @@ export function useGetShopInventory<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -11287,14 +11306,14 @@ export const getGetShopItemsItemIdOwnershipUrl = (itemId: string) => {
 
 export const getShopItemsItemIdOwnership = async (
   itemId: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getShopItemsItemIdOwnershipResponse> => {
   return rnFetch<getShopItemsItemIdOwnershipResponse>(
     getGetShopItemsItemIdOwnershipUrl(itemId),
     {
       ...options,
       method: "GET",
-    },
+    }
   );
 };
 
@@ -11304,7 +11323,7 @@ export const getGetShopItemsItemIdOwnershipQueryKey = (itemId: string) => {
 
 export const getGetShopItemsItemIdOwnershipQueryOptions = <
   TData = Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>,
-  TError = Error,
+  TError = Error
 >(
   itemId: string,
   options?: {
@@ -11316,7 +11335,7 @@ export const getGetShopItemsItemIdOwnershipQueryOptions = <
       >
     >;
     request?: SecondParameter<typeof rnFetch>;
-  },
+  }
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
@@ -11347,7 +11366,7 @@ export type GetShopItemsItemIdOwnershipQueryError = Error;
 
 export function useGetShopItemsItemIdOwnership<
   TData = Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>,
-  TError = Error,
+  TError = Error
 >(
   itemId: string,
   options: {
@@ -11368,13 +11387,13 @@ export function useGetShopItemsItemIdOwnership<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetShopItemsItemIdOwnership<
   TData = Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>,
-  TError = Error,
+  TError = Error
 >(
   itemId: string,
   options?: {
@@ -11395,13 +11414,13 @@ export function useGetShopItemsItemIdOwnership<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetShopItemsItemIdOwnership<
   TData = Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>,
-  TError = Error,
+  TError = Error
 >(
   itemId: string,
   options?: {
@@ -11414,7 +11433,7 @@ export function useGetShopItemsItemIdOwnership<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
@@ -11424,7 +11443,7 @@ export function useGetShopItemsItemIdOwnership<
 
 export function useGetShopItemsItemIdOwnership<
   TData = Awaited<ReturnType<typeof getShopItemsItemIdOwnership>>,
-  TError = Error,
+  TError = Error
 >(
   itemId: string,
   options?: {
@@ -11437,13 +11456,13 @@ export function useGetShopItemsItemIdOwnership<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getGetShopItemsItemIdOwnershipQueryOptions(
     itemId,
-    options,
+    options
   );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
@@ -11504,7 +11523,7 @@ export const getPostShopBuyUrl = () => {
 
 export const postShopBuy = async (
   buyItemRequest: BuyItemRequest,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postShopBuyResponse> => {
   return rnFetch<postShopBuyResponse>(getPostShopBuyUrl(), {
     ...options,
@@ -11516,7 +11535,7 @@ export const postShopBuy = async (
 
 export const getPostShopBuyMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postShopBuy>>,
@@ -11571,7 +11590,7 @@ export const usePostShopBuy = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postShopBuy>>,
   TError,
@@ -11610,7 +11629,7 @@ export const getGetShopBalanceUrl = () => {
 };
 
 export const getShopBalance = async (
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<getShopBalanceResponse> => {
   return rnFetch<getShopBalanceResponse>(getGetShopBalanceUrl(), {
     ...options,
@@ -11624,7 +11643,7 @@ export const getGetShopBalanceQueryKey = () => {
 
 export const getGetShopBalanceQueryOptions = <
   TData = Awaited<ReturnType<typeof getShopBalance>>,
-  TError = Error,
+  TError = Error
 >(options?: {
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof getShopBalance>>, TError, TData>
@@ -11653,7 +11672,7 @@ export type GetShopBalanceQueryError = Error;
 
 export function useGetShopBalance<
   TData = Awaited<ReturnType<typeof getShopBalance>>,
-  TError = Error,
+  TError = Error
 >(
   options: {
     query: Partial<
@@ -11669,13 +11688,13 @@ export function useGetShopBalance<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetShopBalance<
   TData = Awaited<ReturnType<typeof getShopBalance>>,
-  TError = Error,
+  TError = Error
 >(
   options?: {
     query?: Partial<
@@ -11691,13 +11710,13 @@ export function useGetShopBalance<
       >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetShopBalance<
   TData = Awaited<ReturnType<typeof getShopBalance>>,
-  TError = Error,
+  TError = Error
 >(
   options?: {
     query?: Partial<
@@ -11705,7 +11724,7 @@ export function useGetShopBalance<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
@@ -11715,7 +11734,7 @@ export function useGetShopBalance<
 
 export function useGetShopBalance<
   TData = Awaited<ReturnType<typeof getShopBalance>>,
-  TError = Error,
+  TError = Error
 >(
   options?: {
     query?: Partial<
@@ -11723,7 +11742,7 @@ export function useGetShopBalance<
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -11781,7 +11800,7 @@ export const getPostShopEquipUrl = () => {
 
 export const postShopEquip = async (
   equipItemRequest: EquipItemRequest,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<postShopEquipResponse> => {
   return rnFetch<postShopEquipResponse>(getPostShopEquipUrl(), {
     ...options,
@@ -11793,7 +11812,7 @@ export const postShopEquip = async (
 
 export const getPostShopEquipMutationOptions = <
   TError = Error,
-  TContext = unknown,
+  TContext = unknown
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof postShopEquip>>,
@@ -11848,7 +11867,7 @@ export const usePostShopEquip = <TError = Error, TContext = unknown>(
     >;
     request?: SecondParameter<typeof rnFetch>;
   },
-  queryClient?: QueryClient,
+  queryClient?: QueryClient
 ): UseMutationResult<
   Awaited<ReturnType<typeof postShopEquip>>,
   TError,
@@ -12188,3 +12207,118 @@ export function useGetCalendarFeedCalendarId<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * @summary Unequip an item (e.g. Frame) by type
+ */
+export type postShopUnequipResponse200 = {
+  data: UnequipItemResponse;
+  status: 200;
+};
+
+export type postShopUnequipResponse400 = {
+  data: Error;
+  status: 400;
+};
+
+export type postShopUnequipResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type postShopUnequipResponseSuccess = postShopUnequipResponse200 & {
+  headers: Headers;
+};
+export type postShopUnequipResponseError = (
+  | postShopUnequipResponse400
+  | postShopUnequipResponse500
+) & {
+  headers: Headers;
+};
+
+export type postShopUnequipResponse =
+  | postShopUnequipResponseSuccess
+  | postShopUnequipResponseError;
+
+export const getPostShopUnequipUrl = () => {
+  return `/shop/unequip`;
+};
+
+export const postShopUnequip = async (
+  unequipItemRequest: UnequipItemRequest,
+  options?: RequestInit
+): Promise<postShopUnequipResponse> => {
+  return rnFetch<postShopUnequipResponse>(getPostShopUnequipUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(unequipItemRequest),
+  });
+};
+
+export const getPostShopUnequipMutationOptions = <
+  TError = Error,
+  TContext = unknown
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postShopUnequip>>,
+    TError,
+    { data: UnequipItemRequest },
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postShopUnequip>>,
+  TError,
+  { data: UnequipItemRequest },
+  TContext
+> => {
+  const mutationKey = ["postShopUnequip"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postShopUnequip>>,
+    { data: UnequipItemRequest }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postShopUnequip(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostShopUnequipMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postShopUnequip>>
+>;
+export type PostShopUnequipMutationBody = UnequipItemRequest;
+export type PostShopUnequipMutationError = Error;
+
+/**
+ * @summary Unequip an item (e.g. Frame) by type
+ */
+export const usePostShopUnequip = <TError = Error, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postShopUnequip>>,
+      TError,
+      { data: UnequipItemRequest },
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof postShopUnequip>>,
+  TError,
+  { data: UnequipItemRequest },
+  TContext
+> => {
+  return useMutation(getPostShopUnequipMutationOptions(options), queryClient);
+};

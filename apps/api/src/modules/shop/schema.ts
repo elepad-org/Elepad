@@ -93,3 +93,16 @@ export const ItemOwnershipSchema = z
     ownerUserIds: z.array(z.string().uuid()),
   })
   .openapi("ItemOwnership");
+
+export const UnequipItemRequestSchema = z
+  .object({
+    itemType: ShopItemTypeEnum.optional().default("frame"), // Support specifying the type
+  })
+  .openapi("UnequipItemRequest");
+
+export const UnequipItemResponseSchema = z
+  .object({
+    success: z.boolean(),
+    message: z.string(),
+  })
+  .openapi("UnequipItemResponse");

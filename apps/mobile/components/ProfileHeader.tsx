@@ -1,6 +1,6 @@
 import { StyleSheet, View } from "react-native";
-import { Avatar, IconButton, Text } from "react-native-paper";
-import { COLORS, STYLES } from "@/styles/base";
+import { Avatar, Text } from "react-native-paper";
+import { STYLES } from "@/styles/base";
 
 export type ProfileHeaderProps = {
   name: string;
@@ -30,7 +30,6 @@ export const ProfileHeader = ({
   email,
   avatarUrl,
   size = 112,
-  onEditPhoto,
   frameUrl,
 }: ProfileHeaderProps) => {
   return (
@@ -71,16 +70,6 @@ export const ProfileHeader = ({
           </View>
         )}
 
-        {onEditPhoto ? (
-          <IconButton
-            icon="camera"
-            size={15}
-            onPress={onEditPhoto}
-            iconColor="#fff"
-            containerColor={COLORS.primary}
-            style={[styles.avatarBadge, { zIndex: 20 }]}
-          />
-        ) : null}
       </View>
       <Text variant="titleLarge" style={STYLES.heading}>
         {name}

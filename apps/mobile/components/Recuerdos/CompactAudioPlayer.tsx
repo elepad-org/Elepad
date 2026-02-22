@@ -139,6 +139,20 @@ export default function CompactAudioPlayer({
     }).start();
   };
 
+  const handleFrontPlay = () => {
+    // Girar al reverso
+    if (!isFlipped) {
+      setIsFlipped(true);
+      Animated.timing(flipAnimation, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }).start();
+    }
+    // Reproducir audio
+    playAudio();
+  };
+
   const handleSliderChange = (value: number) => {
     try {
       player.seekTo(value);
@@ -281,10 +295,34 @@ export default function CompactAudioPlayer({
               </Text>
             </View>
 
+            {/* Botón Play frontal */}
+            <TouchableOpacity
+              onPress={handleFrontPlay}
+              activeOpacity={0.7}
+              style={{
+                alignSelf: "center",
+                marginTop: 5,
+                marginBottom: 5,
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                backgroundColor: COLORS.primary,
+                justifyContent: "center",
+                alignItems: "center",
+                ...SHADOWS.medium,
+              }}
+            >
+              <IconButton
+                icon="play"
+                size={16}
+                iconColor="#1a1a1a"
+                style={{ margin: 0 }}
+              />
+            </TouchableOpacity>
+
             {/* Diseño del cassette */}
             <View
               style={{
-                flex: 1,
                 justifyContent: "center",
                 alignItems: "center",
               }}

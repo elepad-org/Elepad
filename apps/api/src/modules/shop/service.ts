@@ -93,15 +93,15 @@ export class ShopService {
       acquiredAt: inv.acquired_at,
       item: inv.item
         ? {
-            id: inv.item.id,
-            title: inv.item.title,
-            description: inv.item.description,
-            cost: inv.item.cost,
-            type: inv.item.type,
-            assetUrl: inv.item.asset_url,
-            isActive: inv.item.is_active || true,
-            createdAt: inv.item.created_at,
-          }
+          id: inv.item.id,
+          title: inv.item.title,
+          description: inv.item.description,
+          cost: inv.item.cost,
+          type: inv.item.type,
+          assetUrl: inv.item.asset_url,
+          isActive: inv.item.is_active || true,
+          createdAt: inv.item.created_at,
+        }
         : undefined,
     }));
   }
@@ -120,24 +120,24 @@ export class ShopService {
     // However, the BEST way to prevent race conditions (double spend) is using a Database Function (RPC).
     // Let's implement this logic client-side first for simplicity, but acknowledge the race condition risk.
     // Given the low frequency of transactions, a strict check-then-write flow is acceptable for MVP.
-    
+
     // Check if user is Elder (el que compra debe ser elder)
     // (Assuming middleware checks auth, but business logic requires Elder for earning points.
     //  Can non-elders buy? The prompt said "Solo los elder pueden jugar juegos y ganar puntos",
     //  implies only they participate in this economy. We'll enforce Elder only just in case.)
-    
+
     const { data: userData, error: userError } = await this.supabase
-        .from("users")
-        .select("points_balance, elder, groupId")
-        .eq("id", userId)
-        .single();
-    
+      .from("users")
+      .select("points_balance, elder, groupId")
+      .eq("id", userId)
+      .single();
+
     if (userError || !userData) {
-         throw new HTTPException(404, { message: "User not found" });
+      throw new HTTPException(404, { message: "User not found" });
     }
 
     if (!userData.elder) {
-        throw new HTTPException(403, { message: "Only elders can purchase items" });
+      throw new HTTPException(403, { message: "Only elders can purchase items" });
     }
 
     // Si hay un recipientUserId, validar que sea del mismo grupo y NO sea elder
@@ -148,7 +148,7 @@ export class ShopService {
         .select("id, groupId, elder")
         .eq("id", recipientUserId)
         .single();
-      
+
       if (recipientError || !recipientData) {
         throw new HTTPException(404, { message: "Recipient user not found" });
       }
@@ -168,34 +168,34 @@ export class ShopService {
 
     // Check if item exists and is active
     const { data: itemData, error: itemError } = await this.supabase
-        .from("shop_items")
-        .select("*")
-        .eq("id", itemId)
-        .single();
+      .from("shop_items")
+      .select("*")
+      .eq("id", itemId)
+      .single();
 
     if (itemError || !itemData) {
-        throw new HTTPException(404, { message: "Item not found" });
+      throw new HTTPException(404, { message: "Item not found" });
     }
 
     if (!itemData.is_active) {
-        throw new HTTPException(400, { message: "Item is no longer available" });
+      throw new HTTPException(400, { message: "Item is no longer available" });
     }
 
     // Check if already owned (by the final recipient)
     const { data: ownedData } = await this.supabase
-        .from("user_inventory")
-        .select("id")
-        .eq("user_id", finalRecipientId)
-        .eq("item_id", itemId)
-        .single();
+      .from("user_inventory")
+      .select("id")
+      .eq("user_id", finalRecipientId)
+      .eq("item_id", itemId)
+      .single();
 
     if (ownedData) {
-        throw new HTTPException(400, { message: recipientUserId ? "The recipient already owns this item" : "You already own this item" });
+      throw new HTTPException(400, { message: recipientUserId ? "The recipient already owns this item" : "You already own this item" });
     }
 
     // Check balance
     if (userData.points_balance < itemData.cost) {
-        throw new HTTPException(400, { message: "Insufficient points" });
+      throw new HTTPException(400, { message: "Insufficient points" });
     }
 
     // --- EXECUTE TRANSACTION ---
@@ -203,44 +203,44 @@ export class ShopService {
     // We will do optimistic checks and sequential writes. 
     // To be perfectly safe, we SHOULD use an RPC, but let's stick to TS logic if we trust the load is low.
     // If you want 100% safety, we can create a PL/SQL function `purchase_item`.
-    
+
     // 1. Deduct Points (from the buyer, not the recipient)
     const { error: updateError } = await this.supabase
-        .from("users")
-        .update({ points_balance: userData.points_balance - itemData.cost })
-        .eq("id", userId); // Siempre deduce puntos del comprador
+      .from("users")
+      .update({ points_balance: userData.points_balance - itemData.cost })
+      .eq("id", userId); // Siempre deduce puntos del comprador
 
     if (updateError) {
-        throw new Error("Failed to update user balance");
+      throw new Error("Failed to update user balance");
     }
 
     // 2. Add to Inventory (to the final recipient)
     const { data: inventoryItem, error: inventoryError } = await this.supabase
-        .from("user_inventory")
-        .insert({
-            user_id: finalRecipientId, // El item va al receptor final
-            item_id: itemId,
-            equipped: false
-        })
-        .select()
-        .single();
+      .from("user_inventory")
+      .insert({
+        user_id: finalRecipientId, // El item va al receptor final
+        item_id: itemId,
+        equipped: false
+      })
+      .select()
+      .single();
 
     if (inventoryError) {
-        // Critical Logic Error: Money taken but no item given.
-        // In a real app, we'd refund here. 
-        console.error("CRITICAL: Failed to give item after charging!", userId, itemId);
-        throw new Error("Failed to add item to inventory");
+      // Critical Logic Error: Money taken but no item given.
+      // In a real app, we'd refund here. 
+      console.error("CRITICAL: Failed to give item after charging!", userId, itemId);
+      throw new Error("Failed to add item to inventory");
     }
 
     // 3. Log Transaction (registrar quién compró y para quién)
     await this.supabase
-        .from("point_transactions")
-        .insert({
-            user_id: userId, // Quien compró
-            amount: -itemData.cost, // Negative for spending
-            source: "purchase",
-            reference_id: itemId
-        });
+      .from("point_transactions")
+      .insert({
+        user_id: userId, // Quien compró
+        amount: -itemData.cost, // Negative for spending
+        source: "purchase",
+        reference_id: itemId
+      });
 
     // 4. Si es un regalo, crear notificación para el receptor
     if (recipientUserId && finalRecipientId !== userId) {
@@ -271,35 +271,35 @@ export class ShopService {
     }
 
     return {
-        success: true,
-        newBalance: userData.points_balance - itemData.cost,
-        inventoryItem: {
-             id: inventoryItem.id,
-            userId: inventoryItem.user_id,
-            itemId: inventoryItem.item_id,
-            equipped: inventoryItem.equipped || false,
-            acquiredAt: inventoryItem.acquired_at,
-            item: {
-                id: itemData.id,
-                title: itemData.title,
-                description: itemData.description,
-                cost: itemData.cost,
-                type: itemData.type,
-                assetUrl: itemData.asset_url,
-                isActive: itemData.is_active || true,
-                createdAt: itemData.created_at,
-            }
+      success: true,
+      newBalance: userData.points_balance - itemData.cost,
+      inventoryItem: {
+        id: inventoryItem.id,
+        userId: inventoryItem.user_id,
+        itemId: inventoryItem.item_id,
+        equipped: inventoryItem.equipped || false,
+        acquiredAt: inventoryItem.acquired_at,
+        item: {
+          id: itemData.id,
+          title: itemData.title,
+          description: itemData.description,
+          cost: itemData.cost,
+          type: itemData.type,
+          assetUrl: itemData.asset_url,
+          isActive: itemData.is_active || true,
+          createdAt: itemData.created_at,
         }
+      }
     };
   }
 
   async getBalance(userId: string) {
-      const { data, error } = await this.supabase
-        .from("users")
-        .select("points_balance")
-        .eq("id", userId)
-        .single();
-    
+    const { data, error } = await this.supabase
+      .from("users")
+      .select("points_balance")
+      .eq("id", userId)
+      .single();
+
     if (error) throw error;
     return { pointsBalance: data.points_balance };
   }
@@ -334,7 +334,7 @@ export class ShopService {
       .select("id, item:shop_items!inner(type)")
       .eq("user_id", userId)
       .eq("item.type", "frame");
-    
+
     if (allUserFrames && allUserFrames.length > 0) {
       const idsToUnequip = allUserFrames.map(f => f.id);
       await this.supabase
@@ -354,5 +354,33 @@ export class ShopService {
     }
 
     return { success: true, message: "Frame equipped successfully" };
+  }
+
+  /**
+   * Unequip all items of a specific type (e.g. Frames)
+   */
+  async unequipItemType(userId: string, itemType: "frame" | "sticker" | "animation" | "other" = "frame") {
+    // 1. Find all inventory items of the given type for this user
+    const { data: allUserItems } = await this.supabase
+      .from("user_inventory")
+      .select("id, item:shop_items!inner(type)")
+      .eq("user_id", userId)
+      .eq("item.type", itemType);
+
+    if (allUserItems && allUserItems.length > 0) {
+      const idsToUnequip = allUserItems.map(f => f.id);
+
+      // 2. Set equipped to false
+      const { error: updateError } = await this.supabase
+        .from("user_inventory")
+        .update({ equipped: false })
+        .in("id", idsToUnequip);
+
+      if (updateError) {
+        throw new Error(`Error unequipping item: ${updateError.message}`);
+      }
+    }
+
+    return { success: true, message: "Items unequipped successfully" };
   }
 }

@@ -22,9 +22,14 @@ interface PolaroidPreviewProps {
     displayName: string;
     avatarUrl?: string | null;
   }>;
+  hideMeta?: boolean;
+  customRows?: Array<{
+    label: string;
+    value: string;
+  }>;
 }
 
-export default function PolaroidPreview({ memory, familyMembers = [] }: PolaroidPreviewProps) {
+export default function PolaroidPreview({ memory, familyMembers = [], hideMeta = false, customRows = [] }: PolaroidPreviewProps) {
   const formatDate = (date: Date | string | undefined | null) => {
     if (!date) return "";
     const d = new Date(date);
@@ -95,27 +100,45 @@ export default function PolaroidPreview({ memory, familyMembers = [] }: Polaroid
           />
         )}
 
-        <Text
-          style={{
-            fontSize: 13,
-            color: COLORS.textSecondary,
-            marginTop: 8,
-            fontFamily: FONT.regular,
-          }}
-        >
-          Subido por: {memory.autorNombre || "Desconocido"}
-        </Text>
+        {!hideMeta && (
+          <>
+            <Text
+              style={{
+                fontSize: 13,
+                color: COLORS.textSecondary,
+                marginTop: 8,
+                fontFamily: FONT.regular,
+              }}
+            >
+              Subido por: {memory.autorNombre || "Desconocido"}
+            </Text>
 
-        <Text
-          style={{
-            fontSize: 13,
-            color: COLORS.textSecondary,
-            marginTop: 8,
-            fontFamily: FONT.regular,
-          }}
-        >
-          {formatDate(memory.fecha)}
-        </Text>
+            <Text
+              style={{
+                fontSize: 13,
+                color: COLORS.textSecondary,
+                marginTop: 8,
+                fontFamily: FONT.regular,
+              }}
+            >
+              {formatDate(memory.fecha)}
+            </Text>
+          </>
+        )}
+
+        {customRows.map((row, index) => (
+          <Text
+            key={index}
+            style={{
+              fontSize: 13,
+              color: COLORS.textSecondary,
+              marginTop: 8,
+              fontFamily: FONT.regular,
+            }}
+          >
+            {row.label}: {row.value}
+          </Text>
+        ))}
       </View>
     </View>
   );

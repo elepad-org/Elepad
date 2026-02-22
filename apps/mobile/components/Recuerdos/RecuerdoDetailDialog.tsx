@@ -490,6 +490,20 @@ export default function RecuerdoDetailDialog({
     setIsFlipped(!isFlipped);
   };
 
+  const handleFrontPlay = () => {
+    // Girar al reverso
+    if (!isFlipped) {
+      Animated.timing(flipAnimation, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+      setIsFlipped(true);
+    }
+    // Reproducir audio
+    playAudio();
+  };
+
   const frontOpacity = flipAnimation.interpolate({
     inputRange: [0, 1],
     outputRange: [1, 0],
@@ -1139,12 +1153,14 @@ export default function RecuerdoDetailDialog({
 
               {recuerdo.tipo === "audio" && (
                 <View>
-                  {/* Botón para voltear - arriba del cassette */}
+                  {/* Contenedor de controles frontales: girar + play */}
                   <View
                     style={{
                       alignItems: "center",
                       paddingTop: 12,
                       paddingBottom: 8,
+                      flexDirection: "row",
+                      justifyContent: "center",
                     }}
                   >
                     <TouchableOpacity
@@ -1161,6 +1177,27 @@ export default function RecuerdoDetailDialog({
                       <IconButton
                         icon="swap-horizontal"
                         size={28}
+                        iconColor="#ffffff"
+                        style={{ margin: 0 }}
+                      />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      onPress={handleFrontPlay}
+                      activeOpacity={0.7}
+                      style={{
+                        marginLeft: 12,
+                        backgroundColor: "rgba(0, 0, 0, 0.6)",
+                        width: 40,
+                        height: 40,
+                        borderRadius: 20,
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <IconButton
+                        icon="play"
+                        size={20}
                         iconColor="#ffffff"
                         style={{ margin: 0 }}
                       />
@@ -1305,6 +1342,7 @@ export default function RecuerdoDetailDialog({
                             />
                           )}
                         </View>
+
 
                         {/* Diseño del cassette - réplica exacta de la miniatura */}
                         <View

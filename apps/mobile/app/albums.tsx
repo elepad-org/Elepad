@@ -151,7 +151,7 @@ export default function AlbumsScreen() {
     const interval = setInterval(() => {
       console.log("🔄 Polling álbumes (hay pendientes)...");
       albumsQuery.refetch();
-    }, 15000); // every 15s
+    }, 10000); // every 10s
 
     return () => clearInterval(interval);
   }, [pendingAlbums.length, albumsQuery]);

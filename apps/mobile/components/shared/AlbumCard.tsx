@@ -170,7 +170,6 @@ export default function AlbumCard({
               size="small"
               color={COLORS.primary}
             />
-            <Text style={styles.pendingText}>Generando álbum…</Text>
           </View>
         </View>
       </View>
