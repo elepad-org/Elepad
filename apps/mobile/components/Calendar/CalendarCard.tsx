@@ -20,6 +20,7 @@ import {
   getActivitiesFamilyCodeIdFamilyGroupResponse,
   GetFamilyGroupIdGroupMembers200,
 } from "@elepad/api-client";
+import ExportCalendarModal from "./ExportCalendarModal";
 
 // --- Tipos y Constantes ---
 
@@ -349,6 +350,8 @@ export default function CalendarCard(props: CalendarCardProps) {
 
   const { userElepad, streak } = useAuth();
   const today = getTodayLocal();
+
+  const [exportModalVisible, setExportModalVisible] = useState(false);
 
   // Cambiar al día de la actividad cuando se recibe desde notificaciones
   useEffect(() => {
@@ -713,6 +716,15 @@ export default function CalendarCard(props: CalendarCardProps) {
             />
           </View>
           <IconButton
+            icon="calendar-export"
+            size={24}
+            mode="outlined"
+            onPress={() => setExportModalVisible(true)}
+            style={{ margin: 0 }}
+            containerColor={COLORS.primary}
+            iconColor={COLORS.white}
+          />
+          <IconButton
             icon="calendar-today"
             size={24}
             mode="contained"
@@ -778,6 +790,11 @@ export default function CalendarCard(props: CalendarCardProps) {
         visible={errorSnackbar.visible}
         onDismiss={() => setErrorSnackbar({ visible: false, message: "" })}
         message={errorSnackbar.message}
+      />
+      <ExportCalendarModal
+        visible={exportModalVisible}
+        onClose={() => setExportModalVisible(false)}
+        userId={idUser}
       />
     </View>
   );

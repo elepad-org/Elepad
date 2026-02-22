@@ -23,10 +23,8 @@ import { Text, Dialog, Button, Portal } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CancelButton from "@/components/shared/CancelButton";
 import { useToast } from "@/components/shared/Toast";
-import ExportCalendarModal from "@/components/Calendar/ExportCalendarModal";
 import { toLocalDateString, getTodayLocal } from "@/lib/dateHelpers";
 import { useQueryClient } from "@tanstack/react-query";
-
 
 function CalendarScreenContent() {
   const { userElepad } = useAuth();
@@ -40,7 +38,7 @@ function CalendarScreenContent() {
   const [googleCalendarEnabled] = useState(false);
 
   const [formVisible, setFormVisible] = useState(false);
-  const [exportModalVisible, setExportModalVisible] = useState(false);
+
   const [editing, setEditing] = useState<Partial<Activity> | null>(null);
   const [selectedElderId, setSelectedElderId] = useState<string | null>(null);
   const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(familyCode);
@@ -60,13 +58,12 @@ function CalendarScreenContent() {
 
   //  // Tour hook
   //  // Tour hook
-  const { headerRef, addButtonRef, calendarViewRef, taskListRef } = useCalendarTour({
-    activeTab,
-    activitiesLoading: activitiesQuery.isLoading,
-  });
+  const { headerRef, addButtonRef, calendarViewRef, taskListRef } =
+    useCalendarTour({
+      activeTab,
+      activitiesLoading: activitiesQuery.isLoading,
+    });
   // ------------------
-
-
 
   // Normaliza la respuesta del hook (envuelta en {data} o directa)
   const selectGroupInfo = (): GetFamilyGroupIdGroupMembers200 | undefined => {
@@ -138,10 +135,17 @@ function CalendarScreenContent() {
         // Invalidar caché para forzar actualización inmediata
         // Usar la queryKey provista por el hook para invalidar exactamente esa query
         try {
-          queryClient.invalidateQueries({ queryKey: activitiesQuery.queryKey as readonly unknown[] });
+          queryClient.invalidateQueries({
+            queryKey: activitiesQuery.queryKey as readonly unknown[],
+          });
         } catch (err) {
-          console.warn("invalidateQueries with queryKey failed, falling back:", err);
-          queryClient.invalidateQueries({ queryKey: ["/activities/family-code/{id}/family-group"] });
+          console.warn(
+            "invalidateQueries with queryKey failed, falling back:",
+            err,
+          );
+          queryClient.invalidateQueries({
+            queryKey: ["/activities/family-code/{id}/family-group"],
+          });
           queryClient.invalidateQueries({ queryKey: ["/activities"] });
         }
       },
@@ -170,10 +174,17 @@ function CalendarScreenContent() {
         setEditing(null);
         // Invalidar caché para forzar actualización inmediata
         try {
-          queryClient.invalidateQueries({ queryKey: activitiesQuery.queryKey as readonly unknown[] });
+          queryClient.invalidateQueries({
+            queryKey: activitiesQuery.queryKey as readonly unknown[],
+          });
         } catch (err) {
-          console.warn("invalidateQueries with queryKey failed, falling back:", err);
-          queryClient.invalidateQueries({ queryKey: ["/activities/family-code/{id}/family-group"] });
+          console.warn(
+            "invalidateQueries with queryKey failed, falling back:",
+            err,
+          );
+          queryClient.invalidateQueries({
+            queryKey: ["/activities/family-code/{id}/family-group"],
+          });
           queryClient.invalidateQueries({ queryKey: ["/activities"] });
         }
       },
@@ -196,10 +207,17 @@ function CalendarScreenContent() {
         });
         // Invalidar caché para forzar actualización inmediata
         try {
-          queryClient.invalidateQueries({ queryKey: activitiesQuery.queryKey as readonly unknown[] });
+          queryClient.invalidateQueries({
+            queryKey: activitiesQuery.queryKey as readonly unknown[],
+          });
         } catch (err) {
-          console.warn("invalidateQueries with queryKey failed, falling back:", err);
-          queryClient.invalidateQueries({ queryKey: ["/activities/family-code/{id}/family-group"] });
+          console.warn(
+            "invalidateQueries with queryKey failed, falling back:",
+            err,
+          );
+          queryClient.invalidateQueries({
+            queryKey: ["/activities/family-code/{id}/family-group"],
+          });
           queryClient.invalidateQueries({ queryKey: ["/activities"] });
         }
       },
@@ -331,30 +349,25 @@ function CalendarScreenContent() {
           }}
         >
           <View ref={headerRef}>
-            <Text
-              style={baseStyles.superHeading}
-              suppressHighlighting={true}
-            >
+            <Text style={baseStyles.superHeading} suppressHighlighting={true}>
               Calendario
             </Text>
           </View>
 
-          <View ref={addButtonRef} style={{ flexDirection: "row", gap: 8 }}>
-            <Button
-              mode="outlined"
-              onPress={() => setExportModalVisible(true)}
-              style={{ borderRadius: 12 }}
-              icon="calendar-export"
-            >
-              Exportar
-            </Button>
+          <View ref={addButtonRef}>
             <Button
               mode="contained"
               onPress={() => {
                 // Combinar el día seleccionado con la hora actual
                 const now = new Date();
                 const [year, month, day] = selectedDay.split("-").map(Number);
-                const startDate = new Date(year, month - 1, day, now.getHours(), now.getMinutes());
+                const startDate = new Date(
+                  year,
+                  month - 1,
+                  day,
+                  now.getHours(),
+                  now.getMinutes(),
+                );
                 setEditing({ startsAt: startDate.toISOString() });
                 setFormVisible(true);
               }}
@@ -445,12 +458,6 @@ function CalendarScreenContent() {
           </Dialog.Actions>
         </Dialog>
       </Portal>
-
-      <ExportCalendarModal
-        visible={exportModalVisible}
-        onClose={() => setExportModalVisible(false)}
-        userId={idUser}
-      />
     </SafeAreaView>
   );
 }
@@ -458,4 +465,3 @@ function CalendarScreenContent() {
 export default function CalendarScreen() {
   return <CalendarScreenContent />;
 }
-
