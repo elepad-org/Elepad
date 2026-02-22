@@ -546,6 +546,20 @@ export interface EquipItemRequest {
   itemId: string;
 }
 
+export interface GenerateCalendarResponse {
+  calendarId: string;
+  feedUrl: string;
+  message: string;
+}
+
+export interface GenerateCalendarBody {
+  userId: string;
+  /** @pattern ^\d{4}-\d{2}-\d{2}$ */
+  startDate: string;
+  /** @pattern ^\d{4}-\d{2}-\d{2}$ */
+  endDate: string;
+}
+
 export type PatchUsersIdAvatarBody = {
   avatarFile?: Blob;
 };
@@ -11843,3 +11857,334 @@ export const usePostShopEquip = <TError = Error, TContext = unknown>(
 > => {
   return useMutation(getPostShopEquipMutationOptions(options), queryClient);
 };
+
+export type postCalendarGenerateResponse201 = {
+  data: GenerateCalendarResponse;
+  status: 201;
+};
+
+export type postCalendarGenerateResponse400 = {
+  data: Error;
+  status: 400;
+};
+
+export type postCalendarGenerateResponse401 = {
+  data: Error;
+  status: 401;
+};
+
+export type postCalendarGenerateResponse403 = {
+  data: Error;
+  status: 403;
+};
+
+export type postCalendarGenerateResponse404 = {
+  data: Error;
+  status: 404;
+};
+
+export type postCalendarGenerateResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type postCalendarGenerateResponseSuccess =
+  postCalendarGenerateResponse201 & {
+    headers: Headers;
+  };
+export type postCalendarGenerateResponseError = (
+  | postCalendarGenerateResponse400
+  | postCalendarGenerateResponse401
+  | postCalendarGenerateResponse403
+  | postCalendarGenerateResponse404
+  | postCalendarGenerateResponse500
+) & {
+  headers: Headers;
+};
+
+export type postCalendarGenerateResponse =
+  | postCalendarGenerateResponseSuccess
+  | postCalendarGenerateResponseError;
+
+export const getPostCalendarGenerateUrl = () => {
+  return `/calendar/generate`;
+};
+
+export const postCalendarGenerate = async (
+  generateCalendarBody: GenerateCalendarBody,
+  options?: RequestInit,
+): Promise<postCalendarGenerateResponse> => {
+  return rnFetch<postCalendarGenerateResponse>(getPostCalendarGenerateUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(generateCalendarBody),
+  });
+};
+
+export const getPostCalendarGenerateMutationOptions = <
+  TError = Error,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postCalendarGenerate>>,
+    TError,
+    { data: GenerateCalendarBody },
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postCalendarGenerate>>,
+  TError,
+  { data: GenerateCalendarBody },
+  TContext
+> => {
+  const mutationKey = ["postCalendarGenerate"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postCalendarGenerate>>,
+    { data: GenerateCalendarBody }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postCalendarGenerate(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostCalendarGenerateMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postCalendarGenerate>>
+>;
+export type PostCalendarGenerateMutationBody = GenerateCalendarBody;
+export type PostCalendarGenerateMutationError = Error;
+
+export const usePostCalendarGenerate = <TError = Error, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postCalendarGenerate>>,
+      TError,
+      { data: GenerateCalendarBody },
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof postCalendarGenerate>>,
+  TError,
+  { data: GenerateCalendarBody },
+  TContext
+> => {
+  return useMutation(
+    getPostCalendarGenerateMutationOptions(options),
+    queryClient,
+  );
+};
+
+export type getCalendarFeedCalendarIdResponse200 = {
+  data: string;
+  status: 200;
+};
+
+export type getCalendarFeedCalendarIdResponse404 = {
+  data: Error;
+  status: 404;
+};
+
+export type getCalendarFeedCalendarIdResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type getCalendarFeedCalendarIdResponseSuccess =
+  getCalendarFeedCalendarIdResponse200 & {
+    headers: Headers;
+  };
+export type getCalendarFeedCalendarIdResponseError = (
+  | getCalendarFeedCalendarIdResponse404
+  | getCalendarFeedCalendarIdResponse500
+) & {
+  headers: Headers;
+};
+
+export type getCalendarFeedCalendarIdResponse =
+  | getCalendarFeedCalendarIdResponseSuccess
+  | getCalendarFeedCalendarIdResponseError;
+
+export const getGetCalendarFeedCalendarIdUrl = (calendarId: string) => {
+  return `/calendar/feed/${calendarId}`;
+};
+
+export const getCalendarFeedCalendarId = async (
+  calendarId: string,
+  options?: RequestInit,
+): Promise<getCalendarFeedCalendarIdResponse> => {
+  return rnFetch<getCalendarFeedCalendarIdResponse>(
+    getGetCalendarFeedCalendarIdUrl(calendarId),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetCalendarFeedCalendarIdQueryKey = (calendarId: string) => {
+  return [`/calendar/feed/${calendarId}`] as const;
+};
+
+export const getGetCalendarFeedCalendarIdQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCalendarFeedCalendarId>>,
+  TError = Error,
+>(
+  calendarId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getCalendarFeedCalendarId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetCalendarFeedCalendarIdQueryKey(calendarId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getCalendarFeedCalendarId>>
+  > = ({ signal }) =>
+    getCalendarFeedCalendarId(calendarId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!calendarId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCalendarFeedCalendarId>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetCalendarFeedCalendarIdQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCalendarFeedCalendarId>>
+>;
+export type GetCalendarFeedCalendarIdQueryError = Error;
+
+export function useGetCalendarFeedCalendarId<
+  TData = Awaited<ReturnType<typeof getCalendarFeedCalendarId>>,
+  TError = Error,
+>(
+  calendarId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getCalendarFeedCalendarId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCalendarFeedCalendarId>>,
+          TError,
+          Awaited<ReturnType<typeof getCalendarFeedCalendarId>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetCalendarFeedCalendarId<
+  TData = Awaited<ReturnType<typeof getCalendarFeedCalendarId>>,
+  TError = Error,
+>(
+  calendarId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getCalendarFeedCalendarId>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCalendarFeedCalendarId>>,
+          TError,
+          Awaited<ReturnType<typeof getCalendarFeedCalendarId>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetCalendarFeedCalendarId<
+  TData = Awaited<ReturnType<typeof getCalendarFeedCalendarId>>,
+  TError = Error,
+>(
+  calendarId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getCalendarFeedCalendarId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetCalendarFeedCalendarId<
+  TData = Awaited<ReturnType<typeof getCalendarFeedCalendarId>>,
+  TError = Error,
+>(
+  calendarId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getCalendarFeedCalendarId>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetCalendarFeedCalendarIdQueryOptions(
+    calendarId,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}

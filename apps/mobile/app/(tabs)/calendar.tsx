@@ -22,6 +22,7 @@ import { Text, Dialog, Button, Portal } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CancelButton from "@/components/shared/CancelButton";
 import { useToast } from "@/components/shared/Toast";
+import ExportCalendarModal from "@/components/Calendar/ExportCalendarModal";
 import { toLocalDateString, getTodayLocal } from "@/lib/dateHelpers";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -38,6 +39,7 @@ function CalendarScreenContent() {
   const [googleCalendarEnabled] = useState(false);
 
   const [formVisible, setFormVisible] = useState(false);
+  const [exportModalVisible, setExportModalVisible] = useState(false);
   const [editing, setEditing] = useState<Partial<Activity> | null>(null);
   const [selectedElderId, setSelectedElderId] = useState<string | null>(null);
   const activitiesQuery = useGetActivitiesFamilyCodeIdFamilyGroup(familyCode);
@@ -328,7 +330,15 @@ function CalendarScreenContent() {
             </Text>
           </View>
 
-          <View ref={addButtonRef}>
+          <View ref={addButtonRef} style={{ flexDirection: "row", gap: 8 }}>
+            <Button
+              mode="outlined"
+              onPress={() => setExportModalVisible(true)}
+              style={{ borderRadius: 12 }}
+              icon="calendar-export"
+            >
+              Exportar
+            </Button>
             <Button
               mode="contained"
               onPress={() => {
@@ -426,6 +436,12 @@ function CalendarScreenContent() {
           </Dialog.Actions>
         </Dialog>
       </Portal>
+
+      <ExportCalendarModal
+        visible={exportModalVisible}
+        onClose={() => setExportModalVisible(false)}
+        userId={idUser}
+      />
     </SafeAreaView>
   );
 }
