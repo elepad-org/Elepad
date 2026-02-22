@@ -1,8 +1,11 @@
 import { useState, useCallback } from "react";
 import { View, StyleSheet, ScrollView, Platform } from "react-native";
-import { Button, Dialog, Portal, Text, TextInput } from "react-native-paper";
+import { Button, Dialog, Portal, Text } from "react-native-paper";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import * as Clipboard from "expo-clipboard";
+import { File, Directory, Paths } from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
+import * as IntentLauncher from "expo-intent-launcher";
+import * as Sharing from "expo-sharing";
 import { COLORS } from "@/styles/base";
 import {
   usePostCalendarGenerate,
@@ -45,15 +48,64 @@ export default function ExportCalendarModal({
 
   // Result / error state
   const [feedUrl, setFeedUrl] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [isOpeningFile, setIsOpeningFile] = useState(false);
+
+  const downloadAndOpenIcs = useCallback(
+    async (url: string) => {
+      setIsOpeningFile(true);
+      try {
+        showToast({
+          message: "Abriendo archivo de calendario...",
+          type: "info",
+        });
+
+        const destDir = new Directory(Paths.cache);
+        destDir.create({ idempotent: true, intermediates: true });
+
+        const targetFile = new File(
+          `${destDir.uri.replace(/\/+$/, "")}/calendar.ics`,
+        );
+
+        const output = await File.downloadFileAsync(url, targetFile, {
+          idempotent: true,
+        });
+
+        if (Platform.OS === "android") {
+          const savedUri = await FileSystem.getContentUriAsync(output.uri);
+          await IntentLauncher.startActivityAsync(
+            "android.intent.action.VIEW",
+            {
+              data: savedUri,
+              flags: 1,
+              type: "text/calendar",
+            },
+          );
+        } else {
+          await Sharing.shareAsync(output.uri, {
+            mimeType: "text/calendar",
+            UTI: "com.apple.ical.ics",
+          });
+        }
+      } catch (err) {
+        console.error("Error opening ICS file:", err);
+        showToast({
+          message: "No se pudo abrir el archivo. Copia la URL manualmente.",
+          type: "error",
+        });
+      } finally {
+        setIsOpeningFile(false);
+      }
+    },
+    [showToast],
+  );
 
   const generateCalendarMutation = usePostCalendarGenerate({
     mutation: {
       onSuccess: (result) => {
         const response = result as unknown as GenerateCalendarResponse;
         setFeedUrl(response.feedUrl);
-        setSuccessMessage(response.message);
+        downloadAndOpenIcs(response.feedUrl);
       },
       onError: (error) => {
         const message =
@@ -74,8 +126,8 @@ export default function ExportCalendarModal({
   const handleClose = useCallback(() => {
     // Reset state on close
     setFeedUrl(null);
-    setSuccessMessage(null);
     setValidationError(null);
+    setIsOpeningFile(false);
     generateCalendarMutation.reset();
     onClose();
   }, [onClose, generateCalendarMutation]);
@@ -91,7 +143,6 @@ export default function ExportCalendarModal({
     }
 
     setFeedUrl(null);
-    setSuccessMessage(null);
     generateCalendarMutation.mutate({
       data: {
         userId,
@@ -101,25 +152,15 @@ export default function ExportCalendarModal({
     });
   }, [userId, startDate, endDate, generateCalendarMutation]);
 
-  const handleCopyUrl = useCallback(async () => {
-    if (!feedUrl) return;
-    await Clipboard.setStringAsync(feedUrl);
-    showToast({ message: "URL copiada al portapapeles", type: "success" });
-  }, [feedUrl, showToast]);
-
   return (
     <>
       <Portal>
         <Dialog visible={visible} onDismiss={handleClose} style={styles.dialog}>
-          <Dialog.Title style={styles.title}>
-            Exportar a Google Calendar
-          </Dialog.Title>
-
-          <Dialog.ScrollArea style={styles.scrollArea}>
+          <Dialog.Content style={{ paddingBottom: 15 }}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
               {/* ── Date selectors ── */}
               <Text style={styles.sectionLabel}>
-                Selecciona el rango de fechas
+                Selecciona el rango de fechas a exportar
               </Text>
 
               <View style={styles.dateRow}>
@@ -156,73 +197,61 @@ export default function ExportCalendarModal({
                 </View>
               </View>
 
-              {/* ── Error message ── */}
+              {/* Error message */}
               {errorMessage ? (
                 <View style={styles.errorBox}>
                   <Text style={styles.errorText}>{errorMessage}</Text>
                 </View>
               ) : null}
 
-              {/* ── Loading indicator ── */}
               {isLoading ? (
                 <View style={styles.loadingBox}>
                   <Text style={styles.loadingText}>Generando archivo...</Text>
                 </View>
               ) : null}
 
-              {/* ── Result section ── */}
-              {feedUrl ? (
-                <View style={styles.resultBox}>
-                  <Text style={styles.successMessage}>{successMessage}</Text>
-
-                  <Text style={styles.resultLabel}>URL de tu calendario:</Text>
-                  <TextInput
-                    value={feedUrl}
-                    multiline
-                    editable={false}
-                    mode="outlined"
-                    style={styles.urlInput}
-                    outlineColor={COLORS.primary}
-                    activeOutlineColor={COLORS.primary}
-                    dense
-                  />
-
-                  <Text style={styles.hint}>
-                    Copia esta URL y pégala en la sección{" "}
-                    <Text style={styles.hintBold}>Desde URL</Text> de tu
-                    Google Calendar para sincronizar tus actividades.
-                  </Text>
-
-                  <Button
-                    mode="contained"
-                    icon="content-copy"
-                    onPress={handleCopyUrl}
-                    buttonColor={COLORS.primary}
-                    textColor={COLORS.white}
-                    style={styles.copyButton}
-                  >
-                    Copiar URL
-                  </Button>
+              {isOpeningFile ? (
+                <View style={styles.loadingBox}>
+                  <Text style={styles.loadingText}>Abriendo archivo...</Text>
                 </View>
               ) : null}
             </ScrollView>
-          </Dialog.ScrollArea>
+          </Dialog.Content>
 
           <Dialog.Actions style={styles.actions}>
-            <CancelButton onPress={handleClose} />
+            <View style={{ width: 120 }}>
+              <CancelButton onPress={onClose} />
+            </View>
             {!feedUrl ? (
-              <Button
-                mode="contained"
-                onPress={handleGenerate}
-                buttonColor={COLORS.primary}
-                textColor={COLORS.white}
-                style={styles.confirmButton}
-                loading={isLoading}
-                disabled={isLoading}
-              >
-                Confirmar exportación
-              </Button>
-            ) : null}
+              <View style={{ width: 120 }}>
+                <Button
+                  mode="contained"
+                  onPress={handleGenerate}
+                  buttonColor={COLORS.primary}
+                  textColor={COLORS.white}
+                  style={styles.confirmButton}
+                  loading={isLoading}
+                  disabled={isLoading}
+                >
+                  Exportar
+                </Button>
+              </View>
+            ) : (
+              <View style={{ width: 150 }}>
+                <Button
+                  mode="contained"
+                  icon="calendar-import"
+                  onPress={() => downloadAndOpenIcs(feedUrl)}
+                  buttonColor={COLORS.primary}
+                  textColor={COLORS.white}
+                  style={styles.confirmButton}
+                  loading={isOpeningFile}
+                  disabled={isOpeningFile}
+                >
+                  Abrir
+                </Button>
+              </View>
+            )}
           </Dialog.Actions>
         </Dialog>
       </Portal>
@@ -267,7 +296,7 @@ const styles = StyleSheet.create({
     width: "92%",
     alignSelf: "center",
     borderRadius: 20,
-    maxHeight: "90%",
+    maxHeight: "100%",
   },
   title: {
     fontSize: 17,
@@ -299,17 +328,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.textSecondary,
     marginBottom: 4,
+    textAlign: "center",
   },
   dateButton: {
     borderColor: COLORS.border,
     borderRadius: 12,
+    justifyContent: "center",
   },
   dateButtonContent: {
     height: 44,
   },
   dateButtonLabel: {
-    fontSize: 13,
-    color: COLORS.text,
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    marginTop: 6,
+    textAlign: "center",
   },
   errorBox: {
     backgroundColor: "#fde8e8",
@@ -360,10 +393,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   actions: {
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    gap: 10,
-    flexDirection: "column",
+    paddingBottom: 30,
+    paddingHorizontal: 24,
+    paddingTop: 10,
+    justifyContent: "space-between",
   },
   confirmButton: {
     borderRadius: 12,
