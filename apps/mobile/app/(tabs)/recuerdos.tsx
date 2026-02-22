@@ -103,7 +103,7 @@ const memoryToRecuerdo = (
     miniatura:
       (memory.mimeType?.startsWith("image/") ||
         memory.mimeType?.startsWith("video/")) &&
-      memory.mediaUrl
+        memory.mediaUrl
         ? memory.mediaUrl
         : undefined,
     titulo: memory.title || undefined,
@@ -407,9 +407,8 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al crear el baúl: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al crear el baúl: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -426,9 +425,8 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al actualizar el baúl: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al actualizar el baúl: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -445,9 +443,8 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al eliminar el baúl: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al eliminar el baúl: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -477,9 +474,8 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al actualizar el recuerdo: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al actualizar el recuerdo: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -499,9 +495,8 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       showToast({
-        message: `Error al eliminar el recuerdo: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al eliminar el recuerdo: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -542,9 +537,8 @@ export default function RecuerdosScreen() {
     onError: (error) => {
       console.error("Upload mutation onError:", error);
       showToast({
-        message: `Error al subir el recuerdo: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al subir el recuerdo: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -583,9 +577,8 @@ export default function RecuerdosScreen() {
     onError: (error) => {
       console.error("Create note mutation onError:", error);
       showToast({
-        message: `Error al crear la nota: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al crear la nota: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     },
@@ -619,8 +612,8 @@ export default function RecuerdosScreen() {
     const memoriesData = Array.isArray(memoriesPayload)
       ? memoriesPayload
       : memoriesPayload &&
-          typeof memoriesPayload === "object" &&
-          "data" in (memoriesPayload as Record<string, unknown>)
+        typeof memoriesPayload === "object" &&
+        "data" in (memoriesPayload as Record<string, unknown>)
         ? (memoriesPayload as { data: unknown }).data
         : [];
 
@@ -706,9 +699,8 @@ export default function RecuerdosScreen() {
     deleteMemoryMutation.isPending;
 
   const emptyTitle = memberFilterId
-    ? `${
-        memberNameById[memberFilterId] || "Este miembro"
-      } aún no ha subido recuerdos`
+    ? `${memberNameById[memberFilterId] || "Este miembro"
+    } aún no ha subido recuerdos`
     : "No hay recuerdos aún";
 
   const emptySubtitle = memberFilterId
@@ -895,9 +887,8 @@ export default function RecuerdosScreen() {
       }
     } catch (error) {
       showToast({
-        message: `Error al preparar el archivo: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
+        message: `Error al preparar el archivo: ${error instanceof Error ? error.message : "Error desconocido"
+          }`,
         type: "error",
       });
     }
@@ -1057,8 +1048,8 @@ export default function RecuerdosScreen() {
   const booksData = Array.isArray(booksPayload)
     ? booksPayload
     : booksPayload &&
-        typeof booksPayload === "object" &&
-        "data" in (booksPayload as Record<string, unknown>)
+      typeof booksPayload === "object" &&
+      "data" in (booksPayload as Record<string, unknown>)
       ? (booksPayload as { data: unknown }).data
       : [];
 
@@ -1169,43 +1160,42 @@ export default function RecuerdosScreen() {
           />
         </View>
 
-        {isBooksLoading && books.length === 0 ? (
-          <View style={{ ...STYLES.center, paddingHorizontal: 24 }}>
-            <ActivityIndicator size="large" color={COLORS.primary} />
-            <Text style={{ ...STYLES.subheading, marginTop: 14 }}>
-              Cargando baúles...
-            </Text>
-          </View>
-        ) : books.length === 0 ? (
-          <View
-            style={{ flex: 1, alignItems: "center", marginTop: emptyLogoTop }}
-            ref={listRef}
-          >
-            <Image
-              source={eleEmpthy}
-              style={{
-                width: 180,
-                height: 180,
-                borderRadius: 18,
-                marginBottom: 16,
-              }}
-            />
-            <Text style={STYLES.heading}>Todavía no hay baúles</Text>
-            <Text style={{ ...STYLES.subheading, paddingHorizontal: 24 }}>
-              Crea un baúl para agrupar tus recuerdos.
-            </Text>
-            <Button
-              mode="contained"
-              onPress={openCreateBookDialog}
-              style={{ ...STYLES.buttonPrimary, width: "60%" }}
-              icon="plus"
-              disabled={!groupId}
+        <View style={{ flex: 1 }} ref={listRef}>
+          {isBooksLoading && books.length === 0 ? (
+            <View style={{ ...STYLES.center, paddingHorizontal: 24, flex: 1 }}>
+              <ActivityIndicator size="large" color={COLORS.primary} />
+              <Text style={{ ...STYLES.subheading, marginTop: 14 }}>
+                Cargando baúles...
+              </Text>
+            </View>
+          ) : books.length === 0 ? (
+            <View
+              style={{ flex: 1, alignItems: "center", marginTop: emptyLogoTop }}
             >
-              Crear baúl
-            </Button>
-          </View>
-        ) : (
-          <View style={{ flex: 1 }} ref={listRef}>
+              <Image
+                source={eleEmpthy}
+                style={{
+                  width: 180,
+                  height: 180,
+                  borderRadius: 18,
+                  marginBottom: 16,
+                }}
+              />
+              <Text style={STYLES.heading}>Todavía no hay baúles</Text>
+              <Text style={{ ...STYLES.subheading, paddingHorizontal: 24 }}>
+                Crea un baúl para agrupar tus recuerdos.
+              </Text>
+              <Button
+                mode="contained"
+                onPress={openCreateBookDialog}
+                style={{ ...STYLES.buttonPrimary, width: "60%" }}
+                icon="plus"
+                disabled={!groupId}
+              >
+                Crear baúl
+              </Button>
+            </View>
+          ) : (
             <FlatList
               key={`${booksNumColumns}-${booksSortOrder}`} // Forzar re-render al cambiar columnas o orden
               data={books}
@@ -1264,8 +1254,8 @@ export default function RecuerdosScreen() {
                 );
               }}
             />
-          </View>
-        )}
+          )}
+        </View>
 
         {renderBookDialogs()}
 
@@ -1748,7 +1738,7 @@ export default function RecuerdosScreen() {
           hasNext={
             selectedRecuerdo
               ? recuerdos.findIndex((r) => r.id === selectedRecuerdo.id) <
-                recuerdos.length - 1
+              recuerdos.length - 1
               : false
           }
           hasPrev={

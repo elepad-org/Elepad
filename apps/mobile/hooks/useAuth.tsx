@@ -114,7 +114,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     if (userElepadRef.current?.id !== userId) {
       setUserElepadLoading(true);
     }
-    
+
     let u: ElepadUser | null = null;
     let attempts = 0;
     const maxAttempts = 15; // 15 intentos ~ 15 segundos max
@@ -134,7 +134,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
           const timeoutPromise = new Promise<never>((_, reject) =>
             setTimeout(() => reject(new Error("User fetch timeout")), 8000),
           );
-          
+
           res = await Promise.race([userPromise, timeoutPromise]);
         } catch (err) {
           fetchError = err;
@@ -142,75 +142,75 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
         // Analizar resultado
         if (fetchError) {
-           console.warn(`⚠️ Error fetching user (Intento ${attempts}/${maxAttempts}):`, fetchError);
-           
-           // Si el error es 401, la sesión es inválida. Forzamos signOut.
-           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-           if ((fetchError as any).status === 401) {
-              console.error("❌ Token inválido detectado (401) en loadElepadUserById. Limpiando sesión corrupta.");
-              // Forzar limpieza
-              await signOut();
-              return null;
-           }
+          console.warn(`⚠️ Error fetching user (Intento ${attempts}/${maxAttempts}):`, fetchError);
 
-           // Si falla la red, esperamos y reintentamos
-           if (attempts < maxAttempts) {
-              await new Promise((r) => setTimeout(r, 1000));
-              continue;
-           }
+          // Si el error es 401, la sesión es inválida. Forzamos signOut.
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          if ((fetchError as any).status === 401) {
+            console.error("❌ Token inválido detectado (401) en loadElepadUserById. Limpiando sesión corrupta.");
+            // Forzar limpieza
+            await signOut();
+            return null;
+          }
+
+          // Si falla la red, esperamos y reintentamos
+          if (attempts < maxAttempts) {
+            await new Promise((r) => setTimeout(r, 1000));
+            continue;
+          }
         } else {
-           // Si no hubo error de fetch, revisamos la respuesta
-           // La respuesta puede venir wrappeada en { data: ... } o ser directa
-           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-           const status = (res as any)?.status;
-           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-           let data = (res as any)?.data;
-           
-           // Si res parece ser el objeto usuario directamente (tiene id), lo usamos
-           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-           if (!data && (res as any)?.id) {
-              data = res;
-           }
-           
-           // Caso 1: Usuario encontrado
-           if (data && (status === 200 || status === undefined)) {
-              const tempUser = data as ElepadUser;
-              
-              // Verificamos si tiene groupId (esencial para la app)
-              if (tempUser.groupId) {
-                 u = tempUser;
-                 break; // ¡ÉXITO COMPLETO!
-              } else {
-                 console.log(`👤 Usuario encontrado pero sin Grupo. (Intento ${attempts}/${maxAttempts}) - Esperando vinculación...`);
-                 // Backoff: Si ya existe el usuario pero no el grupo, esperamos más tiempo (2s)
-                 // para no saturar la red mientras se crea el grupo.
-                 await new Promise((r) => setTimeout(r, 2000));
-                 continue;
-              }
-           } 
-           // Caso 2: 404 Not Found
-           else if (status === 404) {
-              console.log(`Running... 404 User Not Found (Intento ${attempts}/${maxAttempts})`);
-           } 
-           // Caso 3: Otros errores
-           else {
-              console.log(`⚠️ Respuesta inesperada: Status ${status}`, res);
-           }
-           
-           // Si llegamos aquí es porque no tuvimos éxito completo (break)
-           // Esperamos y reintentamos si quedan intentos
-           if (attempts < maxAttempts) {
-              await new Promise((r) => setTimeout(r, 1000));
+          // Si no hubo error de fetch, revisamos la respuesta
+          // La respuesta puede venir wrappeada en { data: ... } o ser directa
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const status = (res as any)?.status;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          let data = (res as any)?.data;
+
+          // Si res parece ser el objeto usuario directamente (tiene id), lo usamos
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          if (!data && (res as any)?.id) {
+            data = res;
+          }
+
+          // Caso 1: Usuario encontrado
+          if (data && (status === 200 || status === undefined)) {
+            const tempUser = data as ElepadUser;
+
+            // Verificamos si tiene groupId (esencial para la app)
+            if (tempUser.groupId) {
+              u = tempUser;
+              break; // ¡ÉXITO COMPLETO!
+            } else {
+              console.log(`👤 Usuario encontrado pero sin Grupo. (Intento ${attempts}/${maxAttempts}) - Esperando vinculación...`);
+              // Backoff: Si ya existe el usuario pero no el grupo, esperamos más tiempo (2s)
+              // para no saturar la red mientras se crea el grupo.
+              await new Promise((r) => setTimeout(r, 2000));
               continue;
-           }
+            }
+          }
+          // Caso 2: 404 Not Found
+          else if (status === 404) {
+            console.log(`Running... 404 User Not Found (Intento ${attempts}/${maxAttempts})`);
+          }
+          // Caso 3: Otros errores
+          else {
+            console.log(`⚠️ Respuesta inesperada: Status ${status}`, res);
+          }
+
+          // Si llegamos aquí es porque no tuvimos éxito completo (break)
+          // Esperamos y reintentamos si quedan intentos
+          if (attempts < maxAttempts) {
+            await new Promise((r) => setTimeout(r, 1000));
+            continue;
+          }
         }
       }
 
       console.log("🏁 Fin de búsqueda de usuario. Resultado:", u ? "✅ ÉXITO" : "❌ FALLÓ");
-      
+
       if (!u) {
         setUserElepad(null);
-        return null; 
+        return null;
       }
 
       // Fetch equipped frame (Inventario)
@@ -233,7 +233,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       }
 
       setUserElepad(u);
-      return u; 
+      return u;
     } catch (err) {
       console.error("❌ Error fatal en loadElepadUserById:", err);
       setUserElepad(null);
@@ -368,13 +368,13 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     const setData = async () => {
       try {
         console.log("🔄 Iniciando carga de sesión...");
-        
+
         // Timeout aumentado a 30s para producción (AsyncStorage puede ser lento)
         const sessionPromise = supabase.auth.getSession();
-        const timeoutPromise = new Promise<never>((_, reject) => 
+        const timeoutPromise = new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error('Session timeout')), 30000)
         );
-        
+
         const result = await Promise.race([
           sessionPromise,
           timeoutPromise
@@ -386,9 +386,9 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
             return { data: { session: null }, error: fallbackErr };
           });
         });
-        
+
         const { data: { session }, error } = result;
-        
+
         if (error) {
           console.error("❌ Error obteniendo sesión:", error);
         } else if (session) {
@@ -396,11 +396,11 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         } else {
           console.log("ℹ️ No hay sesión guardada");
         }
-        
+
         setSession(session);
         setUser(session?.user ?? null);
         setSessionReady(true); // ✅ Marcar sesión como lista (con o sin usuario)
-        
+
         if (session?.user) {
           // No esperamos a que cargue el perfil para liberar el loading inicial
           // Esto permite que la UI navegue a home y muestre skeletons
@@ -462,38 +462,38 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
             console.log("⏳ Esperando 2s antes de cargar perfil para permitir inicialización post-hilo...");
             await new Promise((resolve) => setTimeout(resolve, 2000));
           }
-          
+
           // Solo recargar usuario si NO es un simple USER_UPDATED
           if (event !== "USER_UPDATED") {
             // NO esperar a que termine, para no bloquear el evento (especialmente SIGNED_IN que puede venir de signUp)
             loadElepadUserById(session.user.id).then((user) => {
-               // Intentar redirección AQUÍ, cuando la promesa se resuelva
-                if (
-                  user &&
-                  (event === "SIGNED_IN" || event === "INITIAL_SESSION") &&
-                  hasInitialized.current &&
-                  !hasRedirectedAfterSignIn.current
-                ) {
-                    console.log(`✅ Redirigiendo a home después de ${event} (Usuario listo, carga asíncrona)`);
-                    hasRedirectedAfterSignIn.current = true;
-                    router.replace("/(tabs)/home");
-                } else if (!user && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
-                    console.log(`⏳ Usuario no listo aún tras carga asíncrona.`);
-                }
+              // Intentar redirección AQUÍ, cuando la promesa se resuelva
+              if (
+                user &&
+                (event === "SIGNED_IN" || event === "INITIAL_SESSION") &&
+                hasInitialized.current &&
+                !hasRedirectedAfterSignIn.current
+              ) {
+                console.log(`✅ Redirigiendo a home después de ${event} (Usuario listo, carga asíncrona)`);
+                hasRedirectedAfterSignIn.current = true;
+                router.replace("/(tabs)/home");
+              } else if (!user && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
+                console.log(`⏳ Usuario no listo aún tras carga asíncrona.`);
+              }
             });
           } else {
-             // En caso de USER_UPDATED, solo actualizamos referencia si es necesario,
-             // pero no forzamos redirect aquí típicamente. La redirección principal
-             // debe ocurrir en SIGNED_IN o INITIAL_SESSION.
+            // En caso de USER_UPDATED, solo actualizamos referencia si es necesario,
+            // pero no forzamos redirect aquí típicamente. La redirección principal
+            // debe ocurrir en SIGNED_IN o INITIAL_SESSION.
           }
-          
+
           /* 
             IMPORTANTE: Eliminamos la redirección INMEDIATA que dependía del `await`.
             Ahora la redirección ocurre:
             1. En el .then() de loadElepadUserById
             2. O en el useEffect reactivo de userElepad
           */
-          
+
         } else {
           setUserElepad(null);
           setUserElepadLoading(false);
@@ -514,33 +514,18 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     };
   }, []);
 
-  // Efecto de respaldo: Redirigir cuando userElepad esté listo si se quedó pendiente
-  useEffect(() => {
-    if (
-      session?.user && 
-      userElepad && 
-      hasInitialized.current && 
-      !hasRedirectedAfterSignIn.current
-    ) {
-       console.log("✅ Redirigiendo a home (Efecto reactivo: Usuario ya cargado)");
-       hasRedirectedAfterSignIn.current = true;
-       router.replace("/(tabs)/home");
-    }
-  }, [session, userElepad]);
+  // Efecto de respaldo eliminado porque entraba en conflicto con cerrar sesión
 
 
   async function signOut() {
     try {
       console.log("Cerrando sesión:", user?.email);
-      
-      // Limpiar estado local primero para evitar re-renders durante el signOut
-      setSession(null);
-      setUser(null);
-      setUserElepad(null);
-      
+
+      // NO limpiar el estado local ANTES de Supabase para no disparar el useEffect general anticipadamente
+
       // Intentar signOut de Supabase
       const { error } = await supabase.auth.signOut();
-      
+
       if (error) {
         // Ignoramos sesión no encontrada
         const maybeCode = (error as unknown as { code?: string }).code;
@@ -556,19 +541,20 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         await AsyncStorage.removeItem('elepad-auth-token');
         console.log("✅ Token de sesión eliminado forzosamente del storage (limpieza post-signout)");
       } catch (storageError) {
-         console.error("❌ Error eliminando token del storage:", storageError);
+        console.error("❌ Error eliminando token del storage:", storageError);
       }
-      
-      setSession(null);
-      setUser(null);
-      setUserElepad(null);
-      setStreak(null);
+
+      // Redirigir SIEMPRE al login usando router.replace en vez de push
+      // Lo hacemos antes de setear variables a null para evitar que componentes que
+      // dependan de useAuth fallen por "Rendered fewer hooks than expected" 
+      router.replace("/");
+
       // Limpiar toda la cache de React Query para que no queden datos del usuario anterior
       queryClient.clear();
       // Limpiar álbumes pendientes
       clearPendingAlbums();
-      // Redirigir siempre a login
-      router.replace("/");
+
+      // Dejamos que el onAuthStateChange en SIGNED_OUT termine de blanquear los estados
     }
   }
 

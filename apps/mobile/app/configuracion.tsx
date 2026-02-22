@@ -123,19 +123,6 @@ export default function ConfiguracionScreen() {
   // Mostrar loading si está cargando o si no hay usuario aún
   const showLoading = userElepadLoading || !userElepad;
 
-  // Si está cargando, mostrar solo el spinner centrado
-  if (showLoading) {
-    return (
-      <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
-        <StatusBar
-          barStyle="dark-content"
-          backgroundColor={COLORS.background}
-        />
-        <LoadingProfile />
-      </SafeAreaView>
-    );
-  }
-
   const displayName = userElepad?.displayName?.trim() || "Usuario";
   const email = userElepad?.email || "-";
   const avatarUrl = userElepad?.avatarUrl || "";
@@ -260,6 +247,19 @@ export default function ConfiguracionScreen() {
       });
     }
   };
+
+  // Si está cargando, mostrar solo el spinner centrado
+  if (showLoading) {
+    return (
+      <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor={COLORS.background}
+        />
+        <LoadingProfile />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={STYLES.safeArea} edges={["top", "left", "right"]}>
