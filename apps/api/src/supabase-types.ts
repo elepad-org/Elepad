@@ -925,6 +925,41 @@ export type Database = {
           },
         ]
       }
+      user_calendars: {
+        Row: {
+          createdAt: string
+          endDate: string
+          id: string
+          startDate: string
+          storagePath: string
+          userId: string
+        }
+        Insert: {
+          createdAt?: string
+          endDate: string
+          id?: string
+          startDate: string
+          storagePath: string
+          userId: string
+        }
+        Update: {
+          createdAt?: string
+          endDate?: string
+          id?: string
+          startDate?: string
+          storagePath?: string
+          userId?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_calendars_userId_fkey"
+            columns: ["userId"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_google_tokens: {
         Row: {
           access_token: string
@@ -1101,6 +1136,10 @@ export type Database = {
           refresh_token: string
           scope: string
         }[]
+      }
+      is_same_family_group: {
+        Args: { target_user_id: string }
+        Returns: boolean
       }
       store_google_tokens: {
         Args: {
