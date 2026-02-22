@@ -9,6 +9,8 @@ import {
   EquipItemRequestSchema,
   EquipItemResponseSchema,
   ItemOwnershipSchema,
+  UnequipItemRequestSchema,
+  UnequipItemResponseSchema,
 } from "./schema";
 import { openApiErrorResponse } from "@/utils/api-error";
 
@@ -157,47 +159,47 @@ shopApp.openapi(
   async (c) => {
     const { itemId, recipientUserId } = c.req.valid("json");
     const userId = c.var.user.id;
-    
+
     try {
-        const result = await c.var.shopService.buyItem(userId, itemId, recipientUserId);
-        return c.json(result, 200);
+      const result = await c.var.shopService.buyItem(userId, itemId, recipientUserId);
+      return c.json(result, 200);
     } catch (e: unknown) {
-        // If service threw an HTTPException, we could rethrow or handle here.
-        // Hono catches HTTPExceptions automatically, so regular errors need mapping.
-        const errorMessage = e instanceof Error ? e.message : String(e);
-        if (errorMessage === "Insufficient points" || errorMessage === "You already own this item") {
-             return c.json({ error: { message: errorMessage } }, 400);
-        }
-        throw e;
+      // If service threw an HTTPException, we could rethrow or handle here.
+      // Hono catches HTTPExceptions automatically, so regular errors need mapping.
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      if (errorMessage === "Insufficient points" || errorMessage === "You already own this item") {
+        return c.json({ error: { message: errorMessage } }, 400);
+      }
+      throw e;
     }
   }
 );
 
 // 4. Get Balance (Convenience)
 shopApp.openapi(
-    {
-      method: "get",
-      path: "/shop/balance",
-      tags: ["shop"],
-      summary: "Get user point balance",
-      responses: {
-        200: {
-          description: "User current points balance",
-          content: {
-            "application/json": {
-              schema: UserBalanceSchema,
-            },
+  {
+    method: "get",
+    path: "/shop/balance",
+    tags: ["shop"],
+    summary: "Get user point balance",
+    responses: {
+      200: {
+        description: "User current points balance",
+        content: {
+          "application/json": {
+            schema: UserBalanceSchema,
           },
         },
-        500: openApiErrorResponse("Internal server error"),
       },
+      500: openApiErrorResponse("Internal server error"),
     },
-    async (c) => {
-      const userId = c.var.user.id;
-      const balance = await c.var.shopService.getBalance(userId);
-      return c.json(balance, 200);
-    }
-  );
+  },
+  async (c) => {
+    const userId = c.var.user.id;
+    const balance = await c.var.shopService.getBalance(userId);
+    return c.json(balance, 200);
+  }
+);
 
 // 5. Equip Item
 shopApp.openapi(
@@ -237,9 +239,52 @@ shopApp.openapi(
       const result = await c.var.shopService.equipItem(userId, itemId);
       return c.json(result, 200);
     } catch (e: unknown) {
-        // Hono catches HTTPExceptions automatically. For others, map them.
-        const errorMessage = e instanceof Error ? e.message : String(e);
-        return c.json({ error: { message: errorMessage } }, 400);
+      // Hono catches HTTPExceptions automatically. For others, map them.
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      return c.json({ error: { message: errorMessage } }, 400);
+    }
+  }
+);
+
+// 6. Unequip Item
+shopApp.openapi(
+  {
+    method: "post",
+    path: "/shop/unequip",
+    tags: ["shop"],
+    summary: "Unequip an item (e.g. Frame) by type",
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: UnequipItemRequestSchema,
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        description: "Items unequipped successfully",
+        content: {
+          "application/json": {
+            schema: UnequipItemResponseSchema,
+          },
+        },
+      },
+      400: openApiErrorResponse("Invalid request"),
+      500: openApiErrorResponse("Internal server error"),
+    },
+  },
+  async (c) => {
+    const { itemType } = c.req.valid("json");
+    const userId = c.var.user.id;
+
+    try {
+      const result = await c.var.shopService.unequipItemType(userId, itemType);
+      return c.json(result, 200);
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      return c.json({ error: { message: errorMessage } }, 400);
     }
   }
 );

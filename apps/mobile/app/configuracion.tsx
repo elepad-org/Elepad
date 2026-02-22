@@ -21,9 +21,11 @@ import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/hooks/useAuth";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
+import { useGetFamilyGroupIdGroupMembers } from "@elepad/api-client";
 import { UpdatePhotoDialog } from "@/components/PerfilDialogs";
 import ProfileHeader from "@/components/ProfileHeader";
-import { LoadingProfile, ChangePasswordModal, EditNameModal, BackButton } from "@/components/shared";
+import PolaroidPreview from "@/components/Recuerdos/PolaroidPreview";
+import { LoadingProfile, ChangePasswordModal, EditNameModal, BackButton, EditProfileModal } from "@/components/shared";
 import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS, STYLES, FONT, SHADOWS } from "@/styles/base";
@@ -32,6 +34,7 @@ import {
   useGetShopInventory,
   useGetShopItems,
   usePostShopEquip,
+  usePostShopUnequip,
 } from "@elepad/api-client";
 
 export default function ConfiguracionScreen() {
@@ -69,12 +72,12 @@ export default function ConfiguracionScreen() {
     if (!inventoryData || !itemsData) return [];
     if (!Array.isArray(inventoryData) || !Array.isArray(itemsData)) return [];
     return inventoryData
-      .map((inv) => itemsData.find((it: any) => it.id === inv.itemId))
-      .filter((it: any) => it && it.type === "frame") as Array<{
-      id: string;
-      title: string;
-      assetUrl: string;
-    }>;
+      .map((inv) => itemsData.find((it: { id: string, type: string }) => it.id === inv.itemId))
+      .filter((it: { type: string } | undefined) => it && it.type === "frame") as Array<{
+        id: string;
+        title: string;
+        assetUrl: string;
+      }>;
   }, [inventoryData, itemsData]);
 
   const hasFrames = ownedFrames.length > 0;
@@ -100,6 +103,23 @@ export default function ConfiguracionScreen() {
     },
   });
 
+  const { mutate: unequipItem, isPending: isUnequipping } = usePostShopUnequip({
+    mutation: {
+      onSuccess: () => {
+        showToast({ message: "¡Marco desequipado con éxito!", type: "success" });
+        setPreviewFrameUrl(null);
+        setFrameModalVisible(false);
+        refreshUserElepad();
+      },
+      onError: (error: Error) => {
+        const message =
+          (error as { response?: { data?: { message?: string } } })?.response
+            ?.data?.message || "No se pudo desequipar el marco.";
+        Alert.alert("Error", message);
+      },
+    },
+  });
+
   // Mostrar loading si está cargando o si no hay usuario aún
   const showLoading = userElepadLoading || !userElepad;
 
@@ -120,8 +140,31 @@ export default function ConfiguracionScreen() {
   const email = userElepad?.email || "-";
   const avatarUrl = userElepad?.avatarUrl || "";
   const activeFrameUrl = userElepad?.activeFrameUrl;
+  const groupId = userElepad?.groupId;
+
+  // Fetch optional group info for the family name
+  const membersQuery = useGetFamilyGroupIdGroupMembers(groupId ?? "", {
+    query: { enabled: !!groupId },
+  });
+
+  // Normaliza la respuesta del hook (envuelta en {data} o directa)
+  const groupInfo = (() => {
+    const resp = membersQuery.data as unknown; // Quick cast since type is internal
+    if (!resp) return undefined;
+
+    type GroupResponse = { data?: { name: string } } | { name: string };
+    const checkedResp = resp as GroupResponse;
+
+    if ('name' in checkedResp) {
+      return checkedResp;
+    }
+    return checkedResp.data;
+  })();
+  const familyName = groupInfo?.name || "Sin familia";
 
   const [editNameModalVisible, setEditNameModalVisible] = useState(false);
+  const [editProfileModalVisible, setEditProfileModalVisible] = useState(false);
+  const [photoPreviewVisible, setPhotoPreviewVisible] = useState(false);
   const [photoOpen, setPhotoOpen] = useState(false);
   const [timezone, setTimezone] = useState(
     userElepad?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -209,10 +252,9 @@ export default function ConfiguracionScreen() {
       updateUserTimezone(
         userElepad.timezone || "America/Argentina/Buenos_Aires",
       );
-      const msg =
-        e instanceof Error ? e.message : "Error al actualizar zona horaria";
+      const errMessage = e instanceof Error ? e.message : "Error al actualizar zona horaria";
       showToast({
-        message: msg,
+        message: errMessage,
         type: "error",
       });
     }
@@ -223,8 +265,8 @@ export default function ConfiguracionScreen() {
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.background} />
 
       {/* Header with back button */}
-      <View style={{ 
-        paddingHorizontal: 16, 
+      <View style={{
+        paddingHorizontal: 16,
         paddingTop: 16,
         paddingBottom: 8,
         backgroundColor: COLORS.background,
@@ -234,9 +276,9 @@ export default function ConfiguracionScreen() {
           alignItems: "center",
         }}>
           <BackButton size={28} />
-          <Text style={{ 
-            fontSize: 24, 
-            fontWeight: "bold", 
+          <Text style={{
+            fontSize: 24,
+            fontWeight: "bold",
             color: COLORS.text,
             letterSpacing: -0.5,
             flex: 1,
@@ -253,22 +295,24 @@ export default function ConfiguracionScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <ProfileHeader
-          name={displayName}
-          email={email}
-          avatarUrl={avatarUrl}
-          frameUrl={(frameModalVisible ? previewFrameUrl : activeFrameUrl) || undefined} // convert null to undefined
-          onEditPhoto={() => setPhotoOpen(true)}
-        />
+        <TouchableOpacity activeOpacity={0.8} onPress={() => setPhotoPreviewVisible(true)}>
+          <ProfileHeader
+            name={displayName}
+            email={email}
+            avatarUrl={avatarUrl}
+            frameUrl={(frameModalVisible ? previewFrameUrl : activeFrameUrl) || undefined} // convert null to undefined
+            onEditPhoto={() => setPhotoOpen(true)}
+          />
+        </TouchableOpacity>
 
         <Card style={STYLES.menuCard}>
           <List.Section>
             <List.Item
-              title="Editar nombre"
+              title="Editar Perfil"
               left={(props) => <List.Icon {...props} icon="account-edit" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
               style={{ minHeight: 60, justifyContent: "center" }}
-              onPress={() => setEditNameModalVisible(true)}
+              onPress={() => setEditProfileModalVisible(true)}
             />
             <Divider style={{ backgroundColor: COLORS.textPlaceholder }} />
             <List.Item
@@ -400,6 +444,63 @@ export default function ConfiguracionScreen() {
             }}
             showToast={showToast}
           />
+          <Modal
+            visible={photoPreviewVisible}
+            onDismiss={() => setPhotoPreviewVisible(false)}
+            contentContainerStyle={{
+              backgroundColor: "transparent",
+              margin: 0,
+              padding: 0,
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <TouchableOpacity
+              style={{
+                flex: 1,
+                width: "100%",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "rgba(0,0,0,0.7)",
+              }}
+              activeOpacity={1}
+              onPress={() => setPhotoPreviewVisible(false)}
+            >
+              <PolaroidPreview
+                memory={{
+                  id: "profile-preview",
+                  title: displayName,
+                  mediaUrl: avatarUrl || null,
+                }}
+                hideMeta={true}
+                customRows={[
+                  { label: "Correo", value: email },
+                  { label: "Familia", value: familyName }
+                ]}
+              />
+            </TouchableOpacity>
+          </Modal>
+          <EditProfileModal
+            visible={editProfileModalVisible}
+            onDismiss={() => setEditProfileModalVisible(false)}
+            displayName={displayName}
+            avatarUrl={avatarUrl}
+            activeFrameUrl={activeFrameUrl}
+            equippedFrameName={ownedFrames.find(f => f.assetUrl === activeFrameUrl)?.title}
+            onEditPhotoPress={() => {
+              setEditProfileModalVisible(false);
+              setPhotoOpen(true);
+            }}
+            onChangeFramePress={() => {
+              setEditProfileModalVisible(false);
+              setFrameModalVisible(true);
+            }}
+            onEditNamePress={() => {
+              setEditProfileModalVisible(false);
+              setEditNameModalVisible(true);
+            }}
+          />
 
           {/* frame picker modal triggered by floating button */}
           <Modal
@@ -433,16 +534,29 @@ export default function ConfiguracionScreen() {
                     contentFit="contain"
                   />
                   <Text style={{ marginLeft: 12, flex: 1 }}>{frame.title}</Text>
-                  <Button
-                    mode="contained"
-                    disabled={isEquipping || activeFrameUrl === frame.assetUrl}
-                    onPress={() => {
-                      equipItem({ data: { itemId: frame.id } });
-                    }}
-                    style={{ marginLeft: 8 }}
-                  >
-                    {activeFrameUrl === frame.assetUrl ? "Equipado" : "Usar"}
-                  </Button>
+                  <View style={{ flexDirection: "row", marginLeft: 8 }}>
+                    {activeFrameUrl === frame.assetUrl && (
+                      <Button
+                        mode="outlined"
+                        disabled={isUnequipping}
+                        onPress={() => {
+                          unequipItem({ data: { itemType: "frame" } });
+                        }}
+                        style={{ marginRight: 8 }}
+                      >
+                        Desequipar
+                      </Button>
+                    )}
+                    <Button
+                      mode="contained"
+                      disabled={isEquipping || activeFrameUrl === frame.assetUrl}
+                      onPress={() => {
+                        equipItem({ data: { itemId: frame.id } });
+                      }}
+                    >
+                      {activeFrameUrl === frame.assetUrl ? "Equipado" : "Usar"}
+                    </Button>
+                  </View>
                 </Pressable>
               ))}
             </ScrollView>
@@ -467,7 +581,7 @@ export default function ConfiguracionScreen() {
               }}
             >
               <MaterialCommunityIcons
-                name={"image-frame-outline" as any}
+                name={"image-frame" as const}
                 size={28}
                 color="#fff"
               />

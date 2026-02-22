@@ -546,6 +546,25 @@ export interface EquipItemRequest {
   itemId: string;
 }
 
+export interface UnequipItemResponse {
+  success: boolean;
+  message: string;
+}
+
+export type UnequipItemRequestItemType =
+  (typeof UnequipItemRequestItemType)[keyof typeof UnequipItemRequestItemType];
+
+export const UnequipItemRequestItemType = {
+  sticker: "sticker",
+  frame: "frame",
+  animation: "animation",
+  other: "other",
+} as const;
+
+export interface UnequipItemRequest {
+  itemType?: UnequipItemRequestItemType;
+}
+
 export type PatchUsersIdAvatarBody = {
   avatarFile?: Blob;
 };
@@ -11842,4 +11861,119 @@ export const usePostShopEquip = <TError = Error, TContext = unknown>(
   TContext
 > => {
   return useMutation(getPostShopEquipMutationOptions(options), queryClient);
+};
+
+/**
+ * @summary Unequip an item (e.g. Frame) by type
+ */
+export type postShopUnequipResponse200 = {
+  data: UnequipItemResponse;
+  status: 200;
+};
+
+export type postShopUnequipResponse400 = {
+  data: Error;
+  status: 400;
+};
+
+export type postShopUnequipResponse500 = {
+  data: Error;
+  status: 500;
+};
+
+export type postShopUnequipResponseSuccess = postShopUnequipResponse200 & {
+  headers: Headers;
+};
+export type postShopUnequipResponseError = (
+  | postShopUnequipResponse400
+  | postShopUnequipResponse500
+) & {
+  headers: Headers;
+};
+
+export type postShopUnequipResponse =
+  | postShopUnequipResponseSuccess
+  | postShopUnequipResponseError;
+
+export const getPostShopUnequipUrl = () => {
+  return `/shop/unequip`;
+};
+
+export const postShopUnequip = async (
+  unequipItemRequest: UnequipItemRequest,
+  options?: RequestInit
+): Promise<postShopUnequipResponse> => {
+  return rnFetch<postShopUnequipResponse>(getPostShopUnequipUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(unequipItemRequest),
+  });
+};
+
+export const getPostShopUnequipMutationOptions = <
+  TError = Error,
+  TContext = unknown
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postShopUnequip>>,
+    TError,
+    { data: UnequipItemRequest },
+    TContext
+  >;
+  request?: SecondParameter<typeof rnFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof postShopUnequip>>,
+  TError,
+  { data: UnequipItemRequest },
+  TContext
+> => {
+  const mutationKey = ["postShopUnequip"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postShopUnequip>>,
+    { data: UnequipItemRequest }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return postShopUnequip(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type PostShopUnequipMutationResult = NonNullable<
+  Awaited<ReturnType<typeof postShopUnequip>>
+>;
+export type PostShopUnequipMutationBody = UnequipItemRequest;
+export type PostShopUnequipMutationError = Error;
+
+/**
+ * @summary Unequip an item (e.g. Frame) by type
+ */
+export const usePostShopUnequip = <TError = Error, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postShopUnequip>>,
+      TError,
+      { data: UnequipItemRequest },
+      TContext
+    >;
+    request?: SecondParameter<typeof rnFetch>;
+  },
+  queryClient?: QueryClient
+): UseMutationResult<
+  Awaited<ReturnType<typeof postShopUnequip>>,
+  TError,
+  { data: UnequipItemRequest },
+  TContext
+> => {
+  return useMutation(getPostShopUnequipMutationOptions(options), queryClient);
 };
