@@ -173,6 +173,7 @@ export default function ConfiguracionScreen() {
   const [changePasswordModalVisible, setChangePasswordModalVisible] =
     useState(false);
   const [frameModalVisible, setFrameModalVisible] = useState(false);
+  const [processingFrameId, setProcessingFrameId] = useState<string | null>(null);
   const [previewFrameUrl, setPreviewFrameUrl] = useState<string | null>(
     activeFrameUrl || null,
   );
@@ -533,29 +534,39 @@ export default function ConfiguracionScreen() {
                     style={{ width: 50, height: 50, borderRadius: 8 }}
                     contentFit="contain"
                   />
-                  <Text style={{ marginLeft: 12, flex: 1 }}>{frame.title}</Text>
-                  <View style={{ flexDirection: "row", marginLeft: 8 }}>
+                  <View style={{ marginLeft: 12, flex: 1 }}>
+                    <Text>{frame.title}</Text>
                     {activeFrameUrl === frame.assetUrl && (
+                      <Text style={{ fontSize: 12, color: COLORS.textPlaceholder, marginTop: 2 }}>
+                        Equipado
+                      </Text>
+                    )}
+                  </View>
+                  <View style={{ flexDirection: "row", marginLeft: 8 }}>
+                    {activeFrameUrl === frame.assetUrl ? (
                       <Button
                         mode="outlined"
-                        disabled={isUnequipping}
+                        disabled={isUnequipping || isEquipping}
+                        loading={isUnequipping}
                         onPress={() => {
                           unequipItem({ data: { itemType: "frame" } });
                         }}
-                        style={{ marginRight: 8 }}
                       >
                         Desequipar
                       </Button>
+                    ) : (
+                      <Button
+                        mode="contained"
+                        disabled={isEquipping || isUnequipping}
+                        loading={isEquipping && processingFrameId === frame.id}
+                        onPress={() => {
+                          setProcessingFrameId(frame.id);
+                          equipItem({ data: { itemId: frame.id } });
+                        }}
+                      >
+                        Usar
+                      </Button>
                     )}
-                    <Button
-                      mode="contained"
-                      disabled={isEquipping || activeFrameUrl === frame.assetUrl}
-                      onPress={() => {
-                        equipItem({ data: { itemId: frame.id } });
-                      }}
-                    >
-                      {activeFrameUrl === frame.assetUrl ? "Equipado" : "Usar"}
-                    </Button>
                   </View>
                 </Pressable>
               ))}
