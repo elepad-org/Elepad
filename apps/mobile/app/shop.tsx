@@ -285,6 +285,12 @@ export default function ShopScreen() {
     setRecipientError(false);
   };
 
+  // Helper: whether user has enough points for the currently selected item
+  const hasEnoughPoints = React.useMemo(() => {
+    if (!selectedItem) return false;
+    return (balanceData?.pointsBalance ?? 0) >= selectedItem.cost;
+  }, [selectedItem, balanceData]);
+
   /* Redundant declarations removed */
 
   const renderItem = ({
@@ -597,76 +603,55 @@ export default function ShopScreen() {
 {isOwned(selectedItem.id) ? (
                   /* ── Item ya comprado ── */
                   <>
-                    {/* Botón outline para regalar (actúa como toggle) */}
-                    <Pressable
-                      onPress={() => {
-                        if (buyForOthers) {
-                          setBuyForOthers(false);
-                          setRecipientUserId("");
-                        } else {
-                          setBuyForOthers(true);
-                        }
-                      }}
-                      disabled={
-                        availableRecipients.length === 0 ||
-                        (balanceData?.pointsBalance ?? 0) < selectedItem.cost
-                      }
-                      style={({ pressed }) => [
-                        {
-                          flexDirection: "row",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: 8,
-                          paddingVertical: 12,
-                          paddingHorizontal: 16,
-                          borderRadius: 16,
-                          borderWidth: 2,
-                          borderColor:
-                            availableRecipients.length === 0 ||
-                            (balanceData?.pointsBalance ?? 0) < selectedItem.cost
-                              ? COLORS.border
-                              : COLORS.primary,
-                          backgroundColor: buyForOthers
-                            ? COLORS.primary + "15"
-                            : "transparent",
-                          marginBottom: 16,
-                          opacity:
-                            availableRecipients.length === 0 ||
-                            (balanceData?.pointsBalance ?? 0) < selectedItem.cost
-                              ? 0.4
-                              : pressed
-                                ? 0.7
-                                : 1,
-                        },
-                      ]}
-                    >
-                      <MaterialCommunityIcons
-                        name="gift-outline"
-                        size={18}
-                        color={
-                          availableRecipients.length === 0 ||
-                          (balanceData?.pointsBalance ?? 0) < selectedItem.cost
-                            ? COLORS.textSecondary
-                            : COLORS.primary
-                        }
-                      />
-                      <Text
-                        style={{
-                          fontFamily: FONT.semiBold,
-                          fontSize: 14,
-                          color:
-                            availableRecipients.length === 0 ||
-                            (balanceData?.pointsBalance ?? 0) < selectedItem.cost
-                              ? COLORS.textSecondary
-                              : COLORS.primary,
+                    {/* Botón outline para regalar (actúa como toggle) - ocultar si no hay puntos suficientes */}
+                    {hasEnoughPoints && (
+                      <Pressable
+                        onPress={() => {
+                          if (buyForOthers) {
+                            setBuyForOthers(false);
+                            setRecipientUserId("");
+                          } else {
+                            setBuyForOthers(true);
+                          }
                         }}
+                        disabled={availableRecipients.length === 0}
+                        style={({ pressed }) => [
+                          {
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 8,
+                            paddingVertical: 12,
+                            paddingHorizontal: 16,
+                            borderRadius: 16,
+                            borderWidth: 2,
+                            borderColor:
+                              availableRecipients.length === 0 ? COLORS.border : COLORS.primary,
+                            backgroundColor: buyForOthers ? COLORS.primary + "15" : "transparent",
+                            marginBottom: 16,
+                            opacity: availableRecipients.length === 0 ? 0.4 : pressed ? 0.7 : 1,
+                          },
+                        ]}
                       >
-                        Regalar a un familiar
-                      </Text>
-                    </Pressable>
+                        <MaterialCommunityIcons
+                          name="gift-outline"
+                          size={18}
+                          color={availableRecipients.length === 0 ? COLORS.textSecondary : COLORS.primary}
+                        />
+                        <Text
+                          style={{
+                            fontFamily: FONT.semiBold,
+                            fontSize: 14,
+                            color: availableRecipients.length === 0 ? COLORS.textSecondary : COLORS.primary,
+                          }}
+                        >
+                          Regalar a un familiar
+                        </Text>
+                      </Pressable>
+                    )}
 
                     {/* Selector de destinatario (visible solo cuando buyForOthers) */}
-                    {buyForOthers && (
+                    {buyForOthers && hasEnoughPoints && (
                       <View style={{ marginBottom: 16 }}>
                         <DropdownSelect
                           label="Destinatari"
@@ -787,14 +772,15 @@ export default function ShopScreen() {
                 ) : (
                   /* ── Item no comprado ── */
                   <>
-                    {/* Toggle Para mí / Regalar */}
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        gap: 8,
-                        marginBottom: 16,
-                      }}
-                    >
+                    {/* Toggle Para mí / Regalar - ocultar si no hay puntos suficientes */}
+                    {hasEnoughPoints && (
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          gap: 8,
+                          marginBottom: 16,
+                        }}
+                      >
                       <Pressable
                         onPress={() => {
                           setBuyForOthers(false);
@@ -878,9 +864,10 @@ export default function ShopScreen() {
                         </Text>
                       </Pressable>
                     </View>
+                    )}
 
                     {/* Selector de destinatario */}
-                    {buyForOthers && (
+                    {buyForOthers && hasEnoughPoints && (
                       <View style={{ marginBottom: 16 }}>
                         <DropdownSelect
                           label="Destinatari"
