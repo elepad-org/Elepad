@@ -1345,7 +1345,9 @@ export default function RecuerdoDetailDialog({
 
 
                         {/* Diseño del cassette - réplica exacta de la miniatura */}
-                        <View
+                        <TouchableOpacity
+                          onPress={handleFrontPlay}
+                          activeOpacity={0.8}
                           style={{
                             flex: 1,
                             justifyContent: "center",
@@ -1431,7 +1433,7 @@ export default function RecuerdoDetailDialog({
                               />
                             </View>
                           </View>
-                        </View>
+                        </TouchableOpacity>
                       </View>
                     </Animated.View>
 
