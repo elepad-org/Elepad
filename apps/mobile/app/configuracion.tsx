@@ -16,6 +16,7 @@ import {
   Dialog,
   Text,
   Modal,
+  ActivityIndicator,
 } from "react-native-paper";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -23,6 +24,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
 import { useGetFamilyGroupIdGroupMembers } from "@elepad/api-client";
 import { UpdatePhotoDialog } from "@/components/PerfilDialogs";
+import eleEnmarcadoImage from "@/assets/images/ele-enmarcado.png";
 import ProfileHeader from "@/components/ProfileHeader";
 import PolaroidPreview from "@/components/Recuerdos/PolaroidPreview";
 import { LoadingProfile, ChangePasswordModal, EditNameModal, BackButton, EditProfileModal } from "@/components/shared";
@@ -66,6 +68,8 @@ export default function ConfiguracionScreen() {
   const itemsDataRaw = normalizeData(itemsResponse.data);
   const itemsData = Array.isArray(itemsDataRaw) ? itemsDataRaw : [];
 
+  const isLoadingFrames = inventoryResponse.isLoading || itemsResponse.isLoading;
+
   // derive owned frames
   const ownedFrames = useMemo(() => {
     if (!inventoryData || !itemsData) return [];
@@ -78,6 +82,8 @@ export default function ConfiguracionScreen() {
         assetUrl: string;
       }>;
   }, [inventoryData, itemsData]);
+
+  const hasFrames = ownedFrames.length > 0;
 
   const { mutate: equipItem, isPending: isEquipping } = usePostShopEquip({
     mutation: {
@@ -513,61 +519,112 @@ export default function ConfiguracionScreen() {
             }}
           >
             <Text style={[STYLES.heading, { textAlign: "center" }]}>Elegir marco</Text>
-            <ScrollView>
-              {ownedFrames.map((frame, index) => (
-                <Pressable
-                  key={frame.id}
-                  onPress={() => setPreviewFrameUrl(frame.assetUrl)}
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    paddingVertical: 12,
-                    borderBottomWidth: index === ownedFrames.length - 1 ? 0 : 1,
-                    borderColor: COLORS.border,
-                  }}
-                >
-                  <Image
-                    source={{ uri: frame.assetUrl }}
-                    style={{ width: 50, height: 50, borderRadius: 8 }}
-                    contentFit="contain"
-                  />
-                  <View style={{ marginLeft: 12, flex: 1 }}>
-                    <Text>{frame.title}</Text>
-                    {activeFrameUrl === frame.assetUrl && (
-                      <Text style={{ fontSize: 12, color: COLORS.textPlaceholder, marginTop: 2 }}>
-                        Equipado
-                      </Text>
-                    )}
+            {isLoadingFrames ? (
+              <View style={{ alignItems: "center", paddingVertical: 40 }}>
+                <ActivityIndicator size="large" color={COLORS.primary} />
+                <Text style={{ marginTop: 16, color: COLORS.textSecondary }}>Cargando marcos...</Text>
+              </View>
+            ) : hasFrames ? (
+              <ScrollView>
+                {ownedFrames.map((frame, index) => (
+                  <Pressable
+                    key={frame.id}
+                    onPress={() => setPreviewFrameUrl(frame.assetUrl)}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      paddingVertical: 12,
+                      borderBottomWidth: index === ownedFrames.length - 1 ? 0 : 1,
+                      borderColor: COLORS.border,
+                    }}
+                  >
+                    <Image
+                      source={{ uri: frame.assetUrl }}
+                      style={{ width: 100, height: 100, borderRadius: 8 }}
+                      contentFit="contain"
+                    />
+                    <View style={{ marginLeft: 12, flex: 1 }}>
+                      <Text>{frame.title}</Text>
+                      {activeFrameUrl === frame.assetUrl && (
+                        <Text style={{ fontSize: 12, color: COLORS.textPlaceholder, marginTop: 2 }}>
+                          Equipado
+                        </Text>
+                      )}
+                    </View>
+                    <View style={{ flexDirection: "row", marginLeft: 8 }}>
+                      {activeFrameUrl === frame.assetUrl ? (
+                        <Button
+                          mode="outlined"
+                          disabled={isUnequipping || isEquipping}
+                          loading={isUnequipping}
+                          onPress={() => {
+                            unequipItem({ data: { itemType: "frame" } });
+                          }}
+                        >
+                          Desequipar
+                        </Button>
+                      ) : (
+                        <Button
+                          mode="contained"
+                          disabled={isEquipping || isUnequipping}
+                          loading={isEquipping && processingFrameId === frame.id}
+                          onPress={() => {
+                            setProcessingFrameId(frame.id);
+                            equipItem({ data: { itemId: frame.id } });
+                          }}
+                        >
+                          Usar
+                        </Button>
+                      )}
+                    </View>
+                  </Pressable>
+                ))}
+              </ScrollView>
+            ) : (
+              <View style={{ alignItems: "center", paddingVertical: 24, paddingHorizontal: 16 }}>
+                <Image
+                  source={eleEnmarcadoImage}
+                  style={{ width: 180, height: 180, marginBottom: 16 }}
+                  contentFit="contain"
+                />
+                <Text style={{ textAlign: "center", fontSize: 15, color: COLORS.textSecondary, marginBottom: 24, paddingHorizontal: 10 }}>
+                  {userElepad?.elder ? (
+                    "¡Para obtener divertidos marcos para tu perfil, jugá, obtené puntos y canjealos en la tienda!"
+                  ) : (
+                    "Para obtener divertidos marcos para tu perfil, pídele a tus Adultos Mayores que te lo obsequien desde la tienda."
+                  )}
+                </Text>
+                {userElepad?.elder && (
+                  <View style={{ flexDirection: "row", gap: 12, justifyContent: "center", width: "100%" }}>
+                    <Button
+                      mode="outlined"
+                      onPress={() => {
+                        setFrameModalVisible(false);
+                        router.push("/shop");
+                      }}
+                      style={{ flex: 1, borderColor: COLORS.primary }}
+                      textColor={COLORS.primary}
+                    >
+                      Ir a tienda
+                    </Button>
+                    <Button
+                      mode="outlined"
+                      onPress={() => {
+                        setFrameModalVisible(false);
+                        router.navigate({
+                          pathname: "/(tabs)/home",
+                          params: { tab: "juegos" },
+                        });
+                      }}
+                      style={{ flex: 1, borderColor: COLORS.primary }}
+                      textColor={COLORS.primary}
+                    >
+                      Ir a juegos
+                    </Button>
                   </View>
-                  <View style={{ flexDirection: "row", marginLeft: 8 }}>
-                    {activeFrameUrl === frame.assetUrl ? (
-                      <Button
-                        mode="outlined"
-                        disabled={isUnequipping || isEquipping}
-                        loading={isUnequipping}
-                        onPress={() => {
-                          unequipItem({ data: { itemType: "frame" } });
-                        }}
-                      >
-                        Desequipar
-                      </Button>
-                    ) : (
-                      <Button
-                        mode="contained"
-                        disabled={isEquipping || isUnequipping}
-                        loading={isEquipping && processingFrameId === frame.id}
-                        onPress={() => {
-                          setProcessingFrameId(frame.id);
-                          equipItem({ data: { itemId: frame.id } });
-                        }}
-                      >
-                        Usar
-                      </Button>
-                    )}
-                  </View>
-                </Pressable>
-              ))}
-            </ScrollView>
+                )}
+              </View>
+            )}
           </Modal>
 
         </Portal>
