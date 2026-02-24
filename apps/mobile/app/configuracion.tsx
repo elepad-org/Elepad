@@ -27,8 +27,7 @@ import ProfileHeader from "@/components/ProfileHeader";
 import PolaroidPreview from "@/components/Recuerdos/PolaroidPreview";
 import { LoadingProfile, ChangePasswordModal, EditNameModal, BackButton, EditProfileModal } from "@/components/shared";
 import { useRouter } from "expo-router";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { COLORS, STYLES, FONT, SHADOWS } from "@/styles/base";
+import { COLORS, STYLES, FONT } from "@/styles/base";
 import { useToast } from "@/components/shared/Toast";
 import {
   useGetShopInventory,
@@ -79,8 +78,6 @@ export default function ConfiguracionScreen() {
         assetUrl: string;
       }>;
   }, [inventoryData, itemsData]);
-
-  const hasFrames = ownedFrames.length > 0;
 
   const { mutate: equipItem, isPending: isEquipping } = usePostShopEquip({
     mutation: {
@@ -517,7 +514,7 @@ export default function ConfiguracionScreen() {
           >
             <Text style={[STYLES.heading, { textAlign: "center" }]}>Elegir marco</Text>
             <ScrollView>
-              {ownedFrames.map((frame) => (
+              {ownedFrames.map((frame, index) => (
                 <Pressable
                   key={frame.id}
                   onPress={() => setPreviewFrameUrl(frame.assetUrl)}
@@ -525,7 +522,7 @@ export default function ConfiguracionScreen() {
                     flexDirection: "row",
                     alignItems: "center",
                     paddingVertical: 12,
-                    borderBottomWidth: 1,
+                    borderBottomWidth: index === ownedFrames.length - 1 ? 0 : 1,
                     borderColor: COLORS.border,
                   }}
                 >
@@ -573,31 +570,6 @@ export default function ConfiguracionScreen() {
             </ScrollView>
           </Modal>
 
-          {/* floating button */}
-          {hasFrames && (
-            <TouchableOpacity
-              onPress={() => setFrameModalVisible(true)}
-              style={{
-                position: "absolute",
-                bottom: 24,
-                right: 24,
-                width: 56,
-                height: 56,
-                borderRadius: 28,
-                backgroundColor: COLORS.primary,
-                justifyContent: "center",
-                alignItems: "center",
-                ...SHADOWS.medium,
-                zIndex: 1000,
-              }}
-            >
-              <MaterialCommunityIcons
-                name={"image-frame" as const}
-                size={28}
-                color="#fff"
-              />
-            </TouchableOpacity>
-          )}
         </Portal>
       </ScrollView>
     </SafeAreaView>
