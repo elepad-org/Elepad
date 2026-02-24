@@ -1727,7 +1727,11 @@ export default function RecuerdoDetailDialog({
           )}
         </Dialog>
 
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center" }}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1, justifyContent: "center" }}
+          keyboardVerticalOffset={-41}
+        >
           <Dialog
             visible={editVisible}
             onDismiss={() => setEditVisible(false)}

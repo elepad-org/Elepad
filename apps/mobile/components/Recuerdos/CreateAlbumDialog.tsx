@@ -220,9 +220,10 @@ export default function CreateAlbumDialog({
       onRequestClose={handleDismiss}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
-      >
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.container}
+          keyboardVerticalOffset={-41}
+        >
         <TouchableOpacity
           style={styles.backdrop}
           activeOpacity={1}

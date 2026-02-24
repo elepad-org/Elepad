@@ -1,5 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
-import { View, StyleSheet, ScrollView, Animated, Platform, KeyboardAvoidingView } from "react-native";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  Animated,
+  Platform,
+  KeyboardAvoidingView,
+} from "react-native";
 import { useRef } from "react";
 import { Button, Dialog, Portal, Text, Menu } from "react-native-paper";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -151,10 +158,10 @@ const PaperDateTimeWeb = ({
         >
           {value
             ? value.toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: false,
-            })
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              })
             : "--:--"}
         </Button>
       </View>
@@ -342,7 +349,11 @@ export default function ActivityForm({
   return (
     <>
       <Portal>
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center" }}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1, justifyContent: "center" }}
+          keyboardVerticalOffset={-41}
+        >
           <Dialog
             visible={visible}
             onDismiss={onClose}

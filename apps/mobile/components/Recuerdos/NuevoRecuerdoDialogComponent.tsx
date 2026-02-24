@@ -62,7 +62,11 @@ export default function NuevoRecuerdoDialogComponent({
     onFileSelected
   ) {
     return (
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center" }}>
+      <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1, justifyContent: "center" }}
+          keyboardVerticalOffset={-41}
+        >
         <Dialog
           visible={visible}
           onDismiss={onCancel}
@@ -95,7 +99,11 @@ export default function NuevoRecuerdoDialogComponent({
 
   if (step === "create" && selectedTipo) {
     return (
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center" }}>
+      <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1, justifyContent: "center" }}
+          keyboardVerticalOffset={-41}
+        >
         <Dialog
           visible={visible}
           onDismiss={onCancel}
@@ -149,7 +157,11 @@ export default function NuevoRecuerdoDialogComponent({
   }
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center" }}>
+    <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1, justifyContent: "center" }}
+          keyboardVerticalOffset={-41}
+        >
       <Dialog
         visible={visible}
         onDismiss={hideDialog}

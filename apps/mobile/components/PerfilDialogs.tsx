@@ -37,7 +37,11 @@ export function EditNameDialog({
   const theme = useTheme();
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center" }}>
+    <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1, justifyContent: "center" }}
+          keyboardVerticalOffset={-41}
+        >
       <Dialog
         visible={visible}
         onDismiss={onCancel}
