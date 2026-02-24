@@ -356,12 +356,10 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
       hasPlayedToday: true,
     });
 
-    // 🌐 Sincronizar con backend en background (sin await para no bloquear)
-    syncStreak().catch((err) => {
-      console.error("❌ Error sincronizando racha:", err);
-      // Revertir en caso de error
-      streakQuery.refetch();
-    });
+    // NOTA: No llamamos a syncStreak() aquí porque la actualización a la API (submitScore) 
+    // ocurre en paralelo o después. Si hacemos syncStreak() devolvemos datos "viejos" 
+    // pisando la actualización optimista a false y causando dobles renders del modal de celebración. 
+    // Las invalidaciones de queries en cada juego se encargan de hacer el refetch cuando es seguro.
   };
 
   useEffect(() => {
