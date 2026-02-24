@@ -8,6 +8,7 @@ import {
   Modal,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
 } from "react-native";
 import { Button, Text } from "react-native-paper";
 import { Image } from "expo-image";
@@ -232,257 +233,251 @@ export default function CreateAlbumDialog({
             step === "form" ? styles.formContainer : styles.imagesContainer
           }
         >
-          <Text style={styles.modalTitle}>
-            {step === "form"
-              ? "Crear nuevo álbum"
-              : step === "select"
-                ? "Seleccionar Fotos"
-                : "Ordenar Fotos"}
-          </Text>
-          <Text style={styles.subtitle}>
-            {step === "form"
-              ? "Ingresa los datos del álbum"
-              : step === "select"
-                ? `${selectedMemories.length} foto(s) seleccionada(s)`
-                : "Toca para ver, arrastra desde la derecha para ordenar"}
-          </Text>
+          {step === "form" && (
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} style={{ width: "100%" }}>
+              <Text style={styles.modalTitle}>Crear nuevo álbum</Text>
+              <Text style={styles.subtitle}>Ingresa los datos del álbum</Text>
+              <View style={styles.contentFormContainer}>
+                <View style={{ width: "100%" }}>
+                  <StyledTextInput
+                    label="Título"
+                    placeholder=""
+                    value={title}
+                    onChangeText={setTitle}
+                    keyboardType="default"
+                    autoCapitalize="sentences"
+                    returnKeyType="next"
+                    marginBottom={16}
+                  />
 
-          <View
-            style={
-              step === "form"
-                ? styles.contentFormContainer
-                : styles.contentImagesContainer
-            }
-          >
-            {step === "form" && (
-              <View style={{ width: "100%" }}>
-                <StyledTextInput
-                  label="Título"
-                  placeholder=""
-                  value={title}
-                  onChangeText={setTitle}
-                  keyboardType="default"
-                  autoCapitalize="sentences"
-                  returnKeyType="next"
-                  marginBottom={16}
-                />
+                  <StyledTextInput
+                    label="Descripción"
+                    placeholder=""
+                    value={description}
+                    onChangeText={setDescription}
+                    keyboardType="default"
+                    autoCapitalize="sentences"
+                    returnKeyType="done"
+                    marginBottom={16}
+                  />
 
-                <StyledTextInput
-                  label="Descripción"
-                  placeholder=""
-                  value={description}
-                  onChangeText={setDescription}
-                  keyboardType="default"
-                  autoCapitalize="sentences"
-                  returnKeyType="done"
-                  marginBottom={16}
-                />
-
-                <Text style={styles.tagsLabel}>
-                  Temática del álbum (selecciona 1-2)
-                </Text>
-                <View style={styles.tagsContainer}>
-                  {THEME_TAGS.map((tag) => {
-                    const isSelected = selectedTags.includes(tag);
-                    return (
-                      <TouchableOpacity
-                        key={tag}
-                        onPress={() => handleToggleTag(tag)}
-                        style={[
-                          styles.tagChip,
-                          isSelected && styles.tagChipSelected,
-                        ]}
-                      >
-                        <Text
+                  <Text style={styles.tagsLabel}>
+                    Temática del álbum (selecciona 1-2)
+                  </Text>
+                  <View style={styles.tagsContainer}>
+                    {THEME_TAGS.map((tag) => {
+                      const isSelected = selectedTags.includes(tag);
+                      return (
+                        <TouchableOpacity
+                          key={tag}
+                          onPress={() => handleToggleTag(tag)}
                           style={[
-                            styles.tagText,
-                            isSelected && styles.tagTextSelected,
+                            styles.tagChip,
+                            isSelected && styles.tagChipSelected,
                           ]}
                         >
-                          {tag}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-              </View>
-            )}
+                          <Text
+                            style={[
+                              styles.tagText,
+                              isSelected && styles.tagTextSelected,
+                            ]}
+                          >
+                            {tag}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
 
-
-            {step === "select" && (
-              <View style={{ flex: 1, width: "100%" }}>
-                <FlatList
-                  data={imageMemories}
-                  keyExtractor={(item) => item.id}
-                  numColumns={3}
-                  columnWrapperStyle={{
-                    justifyContent: "flex-start",
-                    // We remove gap here because RecuerdoItemComponent handles margins
-                  }}
-                  contentContainerStyle={{
-                    paddingBottom: 20,
-                    // RecuerdoItemComponent expects to manage its own spacing relative to container width
-                    // The container has padding 28. width is 90% of screen.
-                  }}
-                  scrollEnabled={true}
-                  renderItem={({ item }) => {
-                    const isSelected = selectedMemories.some(
-                      (m) => m.id === item.id,
-                    );
-
-                    // Available width calculation:
-                    // Dialog width is 90% of screen.
-                    // Container padding is 28 on each side => 56 total.
-                    const modalWidth = SCREEN_WIDTH * 0.9;
-                    const listAvailableWidth = modalWidth - 56;
-
-                    return (
-                      <RecuerdoItemComponent
-                        item={{
-                          ...item,
-                          fecha: new Date(item.createdAt), // Ensure date compatibility if needed
-                          contenido: item.mediaUrl || "", // mapping
-                          miniatura: item.mediaUrl || undefined,
-                          titulo: item.title || undefined,
-                          tipo: "imagen",
-                        }}
-                        numColumns={3}
-                        onPress={() => handleToggleMemory(item)}
-                        onLongPress={() => setPreviewMemory(item)}
-                        isSelected={isSelected}
-                        availableWidth={listAvailableWidth}
-                      />
-                    );
-                  }}
-                  ListEmptyComponent={
-                    <View
-                      style={{
-                        flex: 1,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        paddingVertical: 40,
-                        width: "100%",
-                      }}
-                    >
-                      <Text
-                        style={{
-                          ...STYLES.subheading,
-                          textAlign: "center",
-                        }}
-                      >
-                        No hay fotos disponibles. Crea algunos recuerdos
-                        primero.
-                      </Text>
+                  <View style={styles.buttonContainer}>
+                    <View style={{ width: 120 }}>
+                      <CancelButton onPress={handleDismiss} text="Cancelar" />
                     </View>
-                  }
-                />
+                    <View style={{ width: 120 }}>
+                      <Button
+                        mode="contained"
+                        onPress={() => setStep("select")}
+                        disabled={
+                          !title.trim() || selectedTags.length === 0 || isCreating
+                        }
+                        buttonColor={COLORS.primary}
+                        textColor={COLORS.white}
+                        style={{ borderRadius: 12 }}
+                      >
+                        Siguiente
+                      </Button>
+                    </View>
+                  </View>
+                </View>
               </View>
-            )}
+            </ScrollView>
+          )}
 
-            {step === "reorder" && (
-              <GestureHandlerRootView style={{ flex: 1, width: "100%" }}>
-                <DraggableFlatList
-                  data={selectedMemories}
-                  onDragEnd={({ data }) => {
-                    const reordered = data.map((item, idx) => ({
-                      ...item,
-                      order: idx,
-                    }));
-                    setSelectedMemories(reordered);
-                  }}
-                  keyExtractor={(item) => item.id}
-                  renderItem={renderDraggableItem}
-                  containerStyle={{ flex: 1, overflow: "visible" }}
-                  activationDistance={20}
-                  autoscrollThreshold={50}
-                  animationConfig={{
-                    damping: 20,
-                    mass: 0.2,
-                    stiffness: 100,
-                    overshootClamping: false,
-                  }}
-                  scrollEnabled={true}
-                  contentContainerStyle={{ paddingBottom: 20 }}
-                />
-              </GestureHandlerRootView>
-            )}
-          </View>
+          {step !== "form" && (
+            <>
+              <Text style={styles.modalTitle}>
+                {step === "select" ? "Seleccionar Fotos" : "Ordenar Fotos"}
+              </Text>
+              <Text style={styles.subtitle}>
+                {step === "select"
+                  ? `${selectedMemories.length} foto(s) seleccionada(s)`
+                  : "Toca para ver, arrastra desde la derecha para ordenar"}
+              </Text>
+              <View style={styles.contentImagesContainer}>
+                {step === "select" && (
+                  <View style={{ flex: 1, width: "100%" }}>
+                    <FlatList
+                      data={imageMemories}
+                      keyExtractor={(item) => item.id}
+                      numColumns={3}
+                      columnWrapperStyle={{
+                        justifyContent: "flex-start",
+                        // We remove gap here because RecuerdoItemComponent handles margins
+                      }}
+                      contentContainerStyle={{
+                        paddingBottom: 20,
+                        // RecuerdoItemComponent expects to manage its own spacing relative to container width
+                        // The container has padding 28. width is 90% of screen.
+                      }}
+                      scrollEnabled={true}
+                      renderItem={({ item }) => {
+                        const isSelected = selectedMemories.some(
+                          (m) => m.id === item.id,
+                        );
 
-          <View style={styles.buttonContainer}>
-            {step === "form" && (
-              <>
-                <View style={{ width: 120 }}>
-                  <CancelButton onPress={handleDismiss} text="Cancelar" />
-                </View>
-                <View style={{ width: 120 }}>
-                  <Button
-                    mode="contained"
-                    onPress={() => setStep("select")}
-                    disabled={
-                      !title.trim() || selectedTags.length === 0 || isCreating
-                    }
-                    buttonColor={COLORS.primary}
-                    textColor={COLORS.white}
-                    style={{ borderRadius: 12 }}
-                  >
-                    Siguiente
-                  </Button>
-                </View>
-              </>
-            )}
+                        // Available width calculation:
+                        // Dialog width is 90% of screen.
+                        // Container padding is 28 on each side => 56 total.
+                        const modalWidth = SCREEN_WIDTH * 0.9;
+                        const listAvailableWidth = modalWidth - 56;
 
-            {step === "select" && (
-              <>
-                <View style={{ width: 120 }}>
-                  <Button
-                    mode="outlined"
-                    onPress={() => setStep("form")}
-                    disabled={isCreating}
-                    style={{ borderRadius: 12, borderColor: COLORS.border }}
-                    textColor={COLORS.primary}
-                  >
-                    Atrás
-                  </Button>
-                </View>
-                <View style={{ width: 120 }}>
-                  <Button
-                    mode="contained"
-                    onPress={() => setStep("reorder")}
-                    disabled={selectedMemories.length === 0 || isCreating}
-                    buttonColor={COLORS.primary}
-                    textColor={COLORS.white}
-                    style={{ borderRadius: 12 }}
-                  >
-                    Siguiente
-                  </Button>
-                </View>
-              </>
-            )}
+                        return (
+                          <RecuerdoItemComponent
+                            item={{
+                              ...item,
+                              fecha: new Date(item.createdAt), // Ensure date compatibility if needed
+                              contenido: item.mediaUrl || "", // mapping
+                              miniatura: item.mediaUrl || undefined,
+                              titulo: item.title || undefined,
+                              tipo: "imagen",
+                            }}
+                            numColumns={3}
+                            onPress={() => handleToggleMemory(item)}
+                            onLongPress={() => setPreviewMemory(item)}
+                            isSelected={isSelected}
+                            availableWidth={listAvailableWidth}
+                          />
+                        );
+                      }}
+                      ListEmptyComponent={
+                        <View
+                          style={{
+                            flex: 1,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            paddingVertical: 40,
+                            width: "100%",
+                          }}
+                        >
+                          <Text
+                            style={{
+                              ...STYLES.subheading,
+                              textAlign: "center",
+                            }}
+                          >
+                            No hay fotos disponibles. Crea algunos recuerdos
+                            primero.
+                          </Text>
+                        </View>
+                      }
+                    />
+                  </View>
+                )}
 
-            {step === "reorder" && (
-              <>
-                <View style={{ width: 120 }}>
-                  <Button
-                    mode="outlined"
-                    onPress={() => setStep("select")}
-                    disabled={isCreating}
-                    style={{ borderRadius: 12, borderColor: COLORS.border }}
-                    textColor={COLORS.primary}
-                  >
-                    Atrás
-                  </Button>
-                </View>
-                <View style={{ width: 120 }}>
-                  <SaveButton
-                    onPress={handleCreateAlbum}
-                    text="Crear"
-                    disabled={isCreating}
-                    loading={isCreating}
-                  />
-                </View>
-              </>
-            )}
-          </View>
+                {step === "reorder" && (
+                  <GestureHandlerRootView style={{ flex: 1, width: "100%" }}>
+                    <DraggableFlatList
+                      data={selectedMemories}
+                      onDragEnd={({ data }) => {
+                        const reordered = data.map((item, idx) => ({
+                          ...item,
+                          order: idx,
+                        }));
+                        setSelectedMemories(reordered);
+                      }}
+                      keyExtractor={(item) => item.id}
+                      renderItem={renderDraggableItem}
+                      containerStyle={{ flex: 1, overflow: "visible" }}
+                      activationDistance={20}
+                      autoscrollThreshold={50}
+                      animationConfig={{
+                        damping: 20,
+                        mass: 0.2,
+                        stiffness: 100,
+                        overshootClamping: false,
+                      }}
+                      scrollEnabled={true}
+                      contentContainerStyle={{ paddingBottom: 20 }}
+                    />
+                  </GestureHandlerRootView>
+                )}
+              </View>
+
+              <View style={styles.buttonContainer}>
+                {step === "select" && (
+                  <>
+                    <View style={{ width: 120 }}>
+                      <Button
+                        mode="outlined"
+                        onPress={() => setStep("form")}
+                        disabled={isCreating}
+                        style={{ borderRadius: 12, borderColor: COLORS.border }}
+                        textColor={COLORS.primary}
+                      >
+                        Atrás
+                      </Button>
+                    </View>
+                    <View style={{ width: 120 }}>
+                      <Button
+                        mode="contained"
+                        onPress={() => setStep("reorder")}
+                        disabled={selectedMemories.length === 0 || isCreating}
+                        buttonColor={COLORS.primary}
+                        textColor={COLORS.white}
+                        style={{ borderRadius: 12 }}
+                      >
+                        Siguiente
+                      </Button>
+                    </View>
+                  </>
+                )}
+
+                {step === "reorder" && (
+                  <>
+                    <View style={{ width: 120 }}>
+                      <Button
+                        mode="outlined"
+                        onPress={() => setStep("select")}
+                        disabled={isCreating}
+                        style={{ borderRadius: 12, borderColor: COLORS.border }}
+                        textColor={COLORS.primary}
+                      >
+                        Atrás
+                      </Button>
+                    </View>
+                    <View style={{ width: 120 }}>
+                      <SaveButton
+                        onPress={handleCreateAlbum}
+                        text="Crear"
+                        disabled={isCreating}
+                        loading={isCreating}
+                      />
+                    </View>
+                  </>
+                )}
+              </View>
+            </>
+          )}
         </View>
 
         {/* Modal de procesamiento de álbum */}

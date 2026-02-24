@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
+import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { Dialog, Text, TextInput, Portal } from "react-native-paper";
 import { COLORS } from "@/styles/base";
 import { supabase } from "@/lib/supabase";
@@ -165,87 +165,90 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             borderRadius: 20,
             backgroundColor: "#ffffff",
             alignSelf: "center",
+            maxHeight: "90%",
           }}
         >
-          <Dialog.Title style={styles.title}>Cambiar contraseña</Dialog.Title>
-          <Dialog.Content style={{ paddingBottom: 15 }}>
-            <Text variant="bodyMedium" style={styles.description}>
-              Ingresa tu contraseña actual y la nueva contraseña que deseas
-              utilizar.
-            </Text>
+          <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <Dialog.Title style={styles.title}>Cambiar contraseña</Dialog.Title>
+            <Dialog.Content style={{ paddingBottom: 15 }}>
+              <Text variant="bodyMedium" style={styles.description}>
+                Ingresa tu contraseña actual y la nueva contraseña que deseas
+                utilizar.
+              </Text>
 
-            <StyledTextInput
-              label="Contraseña actual"
-              value={currentPassword}
-              onChangeText={setCurrentPassword}
-              secureTextEntry={!showCurrentPassword}
-              marginBottom={16}
-              right={
-                <TextInput.Icon
-                  icon={showCurrentPassword ? "eye-off" : "eye"}
-                  onPress={() => setShowCurrentPassword(!showCurrentPassword)}
-                />
-              }
-            />
-
-            <StyledTextInput
-              label="Nueva contraseña"
-              value={newPassword}
-              onChangeText={setNewPassword}
-              secureTextEntry={!showNewPassword}
-              marginBottom={16}
-              right={
-                <TextInput.Icon
-                  icon={showNewPassword ? "eye-off" : "eye"}
-                  onPress={() => setShowNewPassword(!showNewPassword)}
-                />
-              }
-            />
-
-            <StyledTextInput
-              label="Confirmar nueva contraseña"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry={!showConfirmPassword}
-              right={
-                <TextInput.Icon
-                  icon={showConfirmPassword ? "eye-off" : "eye"}
-                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                />
-              }
-            />
-
-            <Text variant="bodySmall" style={styles.hint}>
-              • La contraseña debe tener al menos 6 caracteres
-            </Text>
-          </Dialog.Content>
-          <Dialog.Actions
-            style={{
-              paddingBottom: 30,
-              paddingHorizontal: 24,
-              paddingTop: 10,
-              justifyContent: "space-between",
-            }}
-          >
-            <View style={{ width: 120 }}>
-              <CancelButton onPress={handleDismiss} disabled={loading} />
-            </View>
-            <View style={{ width: 120 }}>
-              <SaveButton
-                onPress={handleChangePassword}
-                loading={loading}
-                disabled={
-                  loading ||
-                  !currentPassword.trim() ||
-                  !newPassword.trim() ||
-                  !confirmPassword.trim() ||
-                  newPassword.length < 6 ||
-                  newPassword !== confirmPassword
+              <StyledTextInput
+                label="Contraseña actual"
+                value={currentPassword}
+                onChangeText={setCurrentPassword}
+                secureTextEntry={!showCurrentPassword}
+                marginBottom={16}
+                right={
+                  <TextInput.Icon
+                    icon={showCurrentPassword ? "eye-off" : "eye"}
+                    onPress={() => setShowCurrentPassword(!showCurrentPassword)}
+                  />
                 }
-                text="Cambiar"
               />
-            </View>
-          </Dialog.Actions>
+
+              <StyledTextInput
+                label="Nueva contraseña"
+                value={newPassword}
+                onChangeText={setNewPassword}
+                secureTextEntry={!showNewPassword}
+                marginBottom={16}
+                right={
+                  <TextInput.Icon
+                    icon={showNewPassword ? "eye-off" : "eye"}
+                    onPress={() => setShowNewPassword(!showNewPassword)}
+                  />
+                }
+              />
+
+              <StyledTextInput
+                label="Confirmar nueva contraseña"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry={!showConfirmPassword}
+                right={
+                  <TextInput.Icon
+                    icon={showConfirmPassword ? "eye-off" : "eye"}
+                    onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                  />
+                }
+              />
+
+              <Text variant="bodySmall" style={styles.hint}>
+                • La contraseña debe tener al menos 6 caracteres
+              </Text>
+            </Dialog.Content>
+            <Dialog.Actions
+              style={{
+                paddingBottom: 30,
+                paddingHorizontal: 24,
+                paddingTop: 10,
+                justifyContent: "space-between",
+              }}
+            >
+              <View style={{ width: 120 }}>
+                <CancelButton onPress={handleDismiss} disabled={loading} />
+              </View>
+              <View style={{ width: 120 }}>
+                <SaveButton
+                  onPress={handleChangePassword}
+                  loading={loading}
+                  disabled={
+                    loading ||
+                    !currentPassword.trim() ||
+                    !newPassword.trim() ||
+                    !confirmPassword.trim() ||
+                    newPassword.length < 6 ||
+                    newPassword !== confirmPassword
+                  }
+                  text="Cambiar"
+                />
+              </View>
+            </Dialog.Actions>
+          </ScrollView>
         </Dialog>
       </KeyboardAvoidingView>
     </Portal>
