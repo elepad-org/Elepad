@@ -6,6 +6,8 @@ import {
   FlatList,
   Dimensions,
   Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Button, Text } from "react-native-paper";
 import { Image } from "expo-image";
@@ -216,7 +218,10 @@ export default function CreateAlbumDialog({
       transparent={true}
       onRequestClose={handleDismiss}
     >
-      <View style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
+      >
         <TouchableOpacity
           style={styles.backdrop}
           activeOpacity={1}
@@ -548,7 +553,7 @@ export default function CreateAlbumDialog({
           </Modal>
         )}
 
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

@@ -8,6 +8,8 @@ import {
   ActivityIndicator,
   Alert,
   Pressable,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -554,59 +556,61 @@ export default function FamilyGroup() {
             );
           })()}
           <Portal>
-            <Dialog
-              visible={isEditing}
-              onDismiss={() => {
-                setIsEditing(false);
-                setNewGroupName(groupInfo?.name || "");
-              }}
-              style={{ backgroundColor: COLORS.background }}
-            >
-              <Dialog.Title>Editar nombre del grupo</Dialog.Title>
-              <Dialog.Content>
-                <StyledTextInput
-                  value={newGroupName}
-                  label="Nombre del grupo"
-                  onChangeText={setNewGroupName}
-                  autoFocus
-                />
-              </Dialog.Content>
-              <Dialog.Actions
-                style={{
-                  paddingHorizontal: 16,
-                  paddingBottom: 12,
+            <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center" }}>
+              <Dialog
+                visible={isEditing}
+                onDismiss={() => {
+                  setIsEditing(false);
+                  setNewGroupName(groupInfo?.name || "");
                 }}
+                style={{ backgroundColor: COLORS.background }}
               >
-                <View
+                <Dialog.Title>Editar nombre del grupo</Dialog.Title>
+                <Dialog.Content>
+                  <StyledTextInput
+                    value={newGroupName}
+                    label="Nombre del grupo"
+                    onChangeText={setNewGroupName}
+                    autoFocus
+                  />
+                </Dialog.Content>
+                <Dialog.Actions
                   style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    width: "100%",
-                    gap: 12,
+                    paddingHorizontal: 16,
+                    paddingBottom: 12,
                   }}
                 >
-                  <View style={{ width: 120 }}>
-                    <CancelButton
-                      onPress={() => {
-                        setIsEditing(false);
-                        setNewGroupName(groupInfo?.name || "");
-                      }}
-                      disabled={patchFamilyGroup.isPending}
-                    />
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      width: "100%",
+                      gap: 12,
+                    }}
+                  >
+                    <View style={{ width: 120 }}>
+                      <CancelButton
+                        onPress={() => {
+                          setIsEditing(false);
+                          setNewGroupName(groupInfo?.name || "");
+                        }}
+                        disabled={patchFamilyGroup.isPending}
+                      />
+                    </View>
+                    <View style={{ width: 120 }}>
+                      <SaveButton
+                        onPress={handleSaveGroupName}
+                        loading={patchFamilyGroup.isPending}
+                        disabled={
+                          !newGroupName.trim() || patchFamilyGroup.isPending
+                        }
+                      />
+                    </View>
                   </View>
-                  <View style={{ width: 120 }}>
-                    <SaveButton
-                      onPress={handleSaveGroupName}
-                      loading={patchFamilyGroup.isPending}
-                      disabled={
-                        !newGroupName.trim() || patchFamilyGroup.isPending
-                      }
-                    />
-                  </View>
-                </View>
-              </Dialog.Actions>
-            </Dialog>
+                </Dialog.Actions>
+              </Dialog>
+            </KeyboardAvoidingView>
           </Portal>
           {/* Mostramos los miembros del grupo Familiar */}
           <Card style={[STYLES.titleCard, { marginBottom: 6 }]}>

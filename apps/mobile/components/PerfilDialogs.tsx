@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, Platform, View } from "react-native";
+import { Alert, Platform, View, KeyboardAvoidingView } from "react-native";
 import {
   Avatar,
   Button,
@@ -37,56 +37,58 @@ export function EditNameDialog({
   const theme = useTheme();
 
   return (
-    <Dialog
-      visible={visible}
-      onDismiss={onCancel}
-      style={{ backgroundColor: theme.colors.surface }}
-    >
-      <Dialog.Title style={{ color: theme.colors.onSurface }}>
-        {title}
-      </Dialog.Title>
-      <Dialog.Content>
-        <StyledTextInput
-          label="Nombre"
-          value={name}
-          onChangeText={onChange}
-          left={<TextInput.Icon icon="account" />}
-          autoFocus
-          theme={{
-            colors: {
-              primary: theme.colors.primary,
-            },
-          }}
-        />
-      </Dialog.Content>
-      <Dialog.Actions
-        style={{
-          flexDirection: "column",
-          gap: 12,
-          paddingHorizontal: 20,
-          paddingBottom: 12,
-        }}
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center" }}>
+      <Dialog
+        visible={visible}
+        onDismiss={onCancel}
+        style={{ backgroundColor: theme.colors.surface }}
       >
-        <Button
-          onPress={onCancel}
-          textColor={theme.colors.onSurface}
-          style={{ width: "100%", borderRadius: 12 }}
+        <Dialog.Title style={{ color: theme.colors.onSurface }}>
+          {title}
+        </Dialog.Title>
+        <Dialog.Content>
+          <StyledTextInput
+            label="Nombre"
+            value={name}
+            onChangeText={onChange}
+            left={<TextInput.Icon icon="account" />}
+            autoFocus
+            theme={{
+              colors: {
+                primary: theme.colors.primary,
+              },
+            }}
+          />
+        </Dialog.Content>
+        <Dialog.Actions
+          style={{
+            flexDirection: "column",
+            gap: 12,
+            paddingHorizontal: 20,
+            paddingBottom: 12,
+          }}
         >
-          Cancelar
-        </Button>
-        <Button
-          mode="contained"
-          loading={!!saving}
-          disabled={!!disabled || !name.trim()}
-          onPress={onSubmit}
-          buttonColor={theme.colors.primary}
-          textColor={theme.colors.onPrimary}
-          style={{ width: "100%", borderRadius: 12 }}
-        >
-          Guardar
-        </Button>
-      </Dialog.Actions>
-    </Dialog>
+          <Button
+            onPress={onCancel}
+            textColor={theme.colors.onSurface}
+            style={{ width: "100%", borderRadius: 12 }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            mode="contained"
+            loading={!!saving}
+            disabled={!!disabled || !name.trim()}
+            onPress={onSubmit}
+            buttonColor={theme.colors.primary}
+            textColor={theme.colors.onPrimary}
+            style={{ width: "100%", borderRadius: 12 }}
+          >
+            Guardar
+          </Button>
+        </Dialog.Actions>
+      </Dialog>
+    </KeyboardAvoidingView>
   );
 }
 

@@ -1,4 +1,4 @@
-import { Pressable, View } from "react-native";
+import { Pressable, View, KeyboardAvoidingView, Platform } from "react-native";
 import { Dialog, Text, Divider, Icon } from "react-native-paper";
 import { STYLES, COLORS } from "@/styles/base";
 import ImagePickerComponent from "./ImagePickerComponent";
@@ -62,185 +62,191 @@ export default function NuevoRecuerdoDialogComponent({
     onFileSelected
   ) {
     return (
-      <Dialog
-        visible={visible}
-        onDismiss={onCancel}
-        style={{
-          backgroundColor: COLORS.background,
-          width: "90%",
-          alignSelf: "center",
-          borderRadius: 16,
-        }}
-      >
-        <MetadataInputComponent
-          onSave={(title, caption) => {
-            // Usar el mimeType que se recibió del archivo seleccionado
-            onSave({
-              contenido: selectedFileUri,
-              titulo: title,
-              caption: caption,
-              mimeType: selectedFileMimeType,
-            });
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center" }}>
+        <Dialog
+          visible={visible}
+          onDismiss={onCancel}
+          style={{
+            backgroundColor: COLORS.background,
+            width: "90%",
+            alignSelf: "center",
+            borderRadius: 16,
           }}
-          onCancel={onCancel}
-          isUploading={isUploading}
-          familyMembers={familyMembers}
-          currentUserId={currentUserId}
-        />
-      </Dialog>
-    );
-  }
-
-  if (step === "create" && selectedTipo) {
-    return (
-      <Dialog
-        visible={visible}
-        onDismiss={onCancel}
-        style={{
-          backgroundColor: COLORS.background,
-          width: "90%",
-          alignSelf: "center",
-          borderRadius: 16,
-        }}
-      >
-        {selectedTipo === "imagen" && (
-          <ImagePickerComponent
-            onImageSelected={(uri: string, mimeType?: string) => {
-              if (onFileSelected) {
-                onFileSelected(uri, mimeType);
-              } else {
-                onSave({ contenido: uri, mimeType });
-              }
+        >
+          <MetadataInputComponent
+            onSave={(title, caption) => {
+              // Usar el mimeType que se recibió del archivo seleccionado
+              onSave({
+                contenido: selectedFileUri,
+                titulo: title,
+                caption: caption,
+                mimeType: selectedFileMimeType,
+              });
             }}
-            onCancel={onCancel}
-            isUploading={isUploading}
-          />
-        )}
-        {selectedTipo === "texto" && (
-          <TextNoteComponent
-            onSaveText={(titulo, contenido) =>
-              onSave({ contenido, titulo, caption: contenido })
-            }
             onCancel={onCancel}
             isUploading={isUploading}
             familyMembers={familyMembers}
             currentUserId={currentUserId}
           />
-        )}
-        {selectedTipo === "audio" && (
-          <AudioRecorderComponent
-            onAudioRecorded={(uri: string) => {
-              if (onFileSelected) {
-                onFileSelected(uri, "audio/m4a");
-              } else {
-                onSave({ contenido: uri, mimeType: "audio/m4a" });
+        </Dialog>
+      </KeyboardAvoidingView>
+    );
+  }
+
+  if (step === "create" && selectedTipo) {
+    return (
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center" }}>
+        <Dialog
+          visible={visible}
+          onDismiss={onCancel}
+          style={{
+            backgroundColor: COLORS.background,
+            width: "90%",
+            alignSelf: "center",
+            borderRadius: 16,
+          }}
+        >
+          {selectedTipo === "imagen" && (
+            <ImagePickerComponent
+              onImageSelected={(uri: string, mimeType?: string) => {
+                if (onFileSelected) {
+                  onFileSelected(uri, mimeType);
+                } else {
+                  onSave({ contenido: uri, mimeType });
+                }
+              }}
+              onCancel={onCancel}
+              isUploading={isUploading}
+            />
+          )}
+          {selectedTipo === "texto" && (
+            <TextNoteComponent
+              onSaveText={(titulo, contenido) =>
+                onSave({ contenido, titulo, caption: contenido })
               }
-            }}
-            onCancel={onCancel}
-            isUploading={isUploading}
-          />
-        )}
-      </Dialog>
+              onCancel={onCancel}
+              isUploading={isUploading}
+              familyMembers={familyMembers}
+              currentUserId={currentUserId}
+            />
+          )}
+          {selectedTipo === "audio" && (
+            <AudioRecorderComponent
+              onAudioRecorded={(uri: string) => {
+                if (onFileSelected) {
+                  onFileSelected(uri, "audio/m4a");
+                } else {
+                  onSave({ contenido: uri, mimeType: "audio/m4a" });
+                }
+              }}
+              onCancel={onCancel}
+              isUploading={isUploading}
+            />
+          )}
+        </Dialog>
+      </KeyboardAvoidingView>
     );
   }
 
   return (
-    <Dialog
-      visible={visible}
-      onDismiss={hideDialog}
-      style={{
-        backgroundColor: COLORS.background,
-        width: "90%",
-        alignSelf: "center",
-        paddingVertical: 14,
-        borderRadius: 16,
-      }}
-    >
-      <Dialog.Title style={STYLES.heading}>Nuevo recuerdo</Dialog.Title>
-      <Dialog.Content style={{ paddingBottom: 8 }}>
-        <Text style={{ ...STYLES.subheading, marginBottom: 14 }}>
-          Selecciona el tipo de recuerdo que quieres subir
-        </Text>
-        <Pressable
-          style={({ pressed }) => ({
-            flexDirection: "row",
-            alignItems: "center",
-            paddingVertical: 12,
-            paddingHorizontal: 8,
-            borderRadius: 8,
-            backgroundColor: pressed
-              ? COLORS.backgroundSecondary
-              : "transparent",
-            opacity: pressed ? 0.8 : 1,
-            marginBottom: 4,
-          })}
-          onPress={() => onSelectTipo("imagen")}
-        >
-          <View style={{ marginRight: 12 }}>
-            <Icon source="image" size={24} color={COLORS.primary} />
-          </View>
-          <Text style={STYLES.paragraphText}>Imagen o Video</Text>
-        </Pressable>
-
-        <Divider
-          style={{ backgroundColor: COLORS.textPlaceholder, opacity: 0.2 }}
-        />
-
-        <Pressable
-          style={({ pressed }) => ({
-            flexDirection: "row",
-            alignItems: "center",
-            paddingVertical: 12,
-            paddingHorizontal: 8,
-            borderRadius: 8,
-            backgroundColor: pressed
-              ? COLORS.backgroundSecondary
-              : "transparent",
-            opacity: pressed ? 0.8 : 1,
-            marginVertical: 4,
-          })}
-          onPress={() => onSelectTipo("texto")}
-        >
-          <View style={{ marginRight: 12 }}>
-            <Icon source="text" size={24} color={COLORS.primary} />
-          </View>
-          <Text style={STYLES.paragraphText}>Nota</Text>
-        </Pressable>
-
-        <Divider
-          style={{ backgroundColor: COLORS.textPlaceholder, opacity: 0.2 }}
-        />
-
-        <Pressable
-          style={({ pressed }) => ({
-            flexDirection: "row",
-            alignItems: "center",
-            paddingVertical: 12,
-            paddingHorizontal: 8,
-            borderRadius: 8,
-            backgroundColor: pressed
-              ? COLORS.backgroundSecondary
-              : "transparent",
-            opacity: pressed ? 0.8 : 1,
-            marginTop: 4,
-          })}
-          onPress={() => onSelectTipo("audio")}
-        >
-          <View style={{ marginRight: 12 }}>
-            <Icon source="microphone" size={24} color={COLORS.primary} />
-          </View>
-          <Text style={STYLES.paragraphText}>Audio</Text>
-        </Pressable>
-      </Dialog.Content>
-      <Dialog.Actions
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center" }}>
+      <Dialog
+        visible={visible}
+        onDismiss={hideDialog}
         style={{
-          paddingBottom: 12,
-          paddingHorizontal: 24,
-          justifyContent: "center",
+          backgroundColor: COLORS.background,
+          width: "90%",
+          alignSelf: "center",
+          paddingVertical: 14,
+          borderRadius: 16,
         }}
       >
-        <CancelButton onPress={hideDialog} />
-      </Dialog.Actions>
-    </Dialog>
+        <Dialog.Title style={STYLES.heading}>Nuevo recuerdo</Dialog.Title>
+        <Dialog.Content style={{ paddingBottom: 8 }}>
+          <Text style={{ ...STYLES.subheading, marginBottom: 14 }}>
+            Selecciona el tipo de recuerdo que quieres subir
+          </Text>
+          <Pressable
+            style={({ pressed }) => ({
+              flexDirection: "row",
+              alignItems: "center",
+              paddingVertical: 12,
+              paddingHorizontal: 8,
+              borderRadius: 8,
+              backgroundColor: pressed
+                ? COLORS.backgroundSecondary
+                : "transparent",
+              opacity: pressed ? 0.8 : 1,
+              marginBottom: 4,
+            })}
+            onPress={() => onSelectTipo("imagen")}
+          >
+            <View style={{ marginRight: 12 }}>
+              <Icon source="image" size={24} color={COLORS.primary} />
+            </View>
+            <Text style={STYLES.paragraphText}>Imagen o Video</Text>
+          </Pressable>
+
+          <Divider
+            style={{ backgroundColor: COLORS.textPlaceholder, opacity: 0.2 }}
+          />
+
+          <Pressable
+            style={({ pressed }) => ({
+              flexDirection: "row",
+              alignItems: "center",
+              paddingVertical: 12,
+              paddingHorizontal: 8,
+              borderRadius: 8,
+              backgroundColor: pressed
+                ? COLORS.backgroundSecondary
+                : "transparent",
+              opacity: pressed ? 0.8 : 1,
+              marginVertical: 4,
+            })}
+            onPress={() => onSelectTipo("texto")}
+          >
+            <View style={{ marginRight: 12 }}>
+              <Icon source="text" size={24} color={COLORS.primary} />
+            </View>
+            <Text style={STYLES.paragraphText}>Nota</Text>
+          </Pressable>
+
+          <Divider
+            style={{ backgroundColor: COLORS.textPlaceholder, opacity: 0.2 }}
+          />
+
+          <Pressable
+            style={({ pressed }) => ({
+              flexDirection: "row",
+              alignItems: "center",
+              paddingVertical: 12,
+              paddingHorizontal: 8,
+              borderRadius: 8,
+              backgroundColor: pressed
+                ? COLORS.backgroundSecondary
+                : "transparent",
+              opacity: pressed ? 0.8 : 1,
+              marginTop: 4,
+            })}
+            onPress={() => onSelectTipo("audio")}
+          >
+            <View style={{ marginRight: 12 }}>
+              <Icon source="microphone" size={24} color={COLORS.primary} />
+            </View>
+            <Text style={STYLES.paragraphText}>Audio</Text>
+          </Pressable>
+        </Dialog.Content>
+        <Dialog.Actions
+          style={{
+            paddingBottom: 12,
+            paddingHorizontal: 24,
+            justifyContent: "center",
+          }}
+        >
+          <CancelButton onPress={hideDialog} />
+        </Dialog.Actions>
+      </Dialog>
+    </KeyboardAvoidingView>
   );
 }

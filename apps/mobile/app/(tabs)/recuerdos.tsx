@@ -10,6 +10,8 @@ import {
   Pressable,
   BackHandler,
   Dimensions,
+  Platform,
+  KeyboardAvoidingView,
 } from "react-native";
 import {
   Text,
@@ -48,7 +50,6 @@ import {
 } from "@tanstack/react-query";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { COLORS, STYLES, LAYOUT } from "@/styles/base";
-import { Platform } from "react-native";
 import { uriToBlob } from "@/lib/uriToBlob";
 
 import MasonryList from "@react-native-seoul/masonry-list";
@@ -917,74 +918,76 @@ export default function RecuerdosScreen() {
 
     return (
       <Portal>
-        <Dialog
-          visible={bookDialogVisible}
-          onDismiss={() => {
-            setBookDialogVisible(false);
-            setEditingBook(null);
-          }}
-          style={{
-            backgroundColor: COLORS.background,
-            width: "92%",
-            alignSelf: "center",
-            borderRadius: 16,
-          }}
-        >
-          <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
-            {bookDialogMode === "create" ? "Nuevo baúl" : "Modificar baúl"}
-          </Dialog.Title>
-          <Dialog.Content style={{ paddingBottom: 12 }}>
-            <StyledTextInput
-              label="Nombre"
-              value={bookFormTitle}
-              onChangeText={setBookFormTitle}
-              marginBottom={12}
-            />
-            <StyledTextInput
-              label="Descripción"
-              value={bookFormDescription}
-              onChangeText={setBookFormDescription}
-              multiline
-              numberOfLines={3}
-              marginBottom={12}
-            />
-          </Dialog.Content>
-          <Dialog.Actions
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center" }}>
+          <Dialog
+            visible={bookDialogVisible}
+            onDismiss={() => {
+              setBookDialogVisible(false);
+              setEditingBook(null);
+            }}
             style={{
-              paddingBottom: 30,
-              paddingHorizontal: 24,
-              paddingTop: 0,
-              justifyContent: "space-between",
+              backgroundColor: COLORS.background,
+              width: "92%",
+              alignSelf: "center",
+              borderRadius: 16,
             }}
           >
-            <View style={{ width: 120 }}>
-              <CancelButton
-                onPress={() => {
-                  setBookDialogVisible(false);
-                  setEditingBook(null);
-                }}
-                disabled={
-                  createBookMutation.isPending || updateBookMutation.isPending
-                }
+            <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
+              {bookDialogMode === "create" ? "Nuevo baúl" : "Modificar baúl"}
+            </Dialog.Title>
+            <Dialog.Content style={{ paddingBottom: 12 }}>
+              <StyledTextInput
+                label="Nombre"
+                value={bookFormTitle}
+                onChangeText={setBookFormTitle}
+                marginBottom={12}
               />
-            </View>
-            <View style={{ width: 120 }}>
-              <SaveButton
-                onPress={submitBookDialog}
-                loading={
-                  createBookMutation.isPending || updateBookMutation.isPending
-                }
-                disabled={
-                  !groupId ||
-                  !bookFormTitle.trim() ||
-                  createBookMutation.isPending ||
-                  updateBookMutation.isPending ||
-                  deleteBookMutation.isPending
-                }
+              <StyledTextInput
+                label="Descripción"
+                value={bookFormDescription}
+                onChangeText={setBookFormDescription}
+                multiline
+                numberOfLines={3}
+                marginBottom={12}
               />
-            </View>
-          </Dialog.Actions>
-        </Dialog>
+            </Dialog.Content>
+            <Dialog.Actions
+              style={{
+                paddingBottom: 30,
+                paddingHorizontal: 24,
+                paddingTop: 0,
+                justifyContent: "space-between",
+              }}
+            >
+              <View style={{ width: 120 }}>
+                <CancelButton
+                  onPress={() => {
+                    setBookDialogVisible(false);
+                    setEditingBook(null);
+                  }}
+                  disabled={
+                    createBookMutation.isPending || updateBookMutation.isPending
+                  }
+                />
+              </View>
+              <View style={{ width: 120 }}>
+                <SaveButton
+                  onPress={submitBookDialog}
+                  loading={
+                    createBookMutation.isPending || updateBookMutation.isPending
+                  }
+                  disabled={
+                    !groupId ||
+                    !bookFormTitle.trim() ||
+                    createBookMutation.isPending ||
+                    updateBookMutation.isPending ||
+                    deleteBookMutation.isPending
+                  }
+                />
+              </View>
+            </Dialog.Actions>
+          </Dialog>
+        </KeyboardAvoidingView>
 
         <Dialog
           visible={!!bookToDelete}

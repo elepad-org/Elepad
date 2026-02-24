@@ -6,6 +6,8 @@ import {
   ImageBackground,
   TouchableOpacity,
   Pressable,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Image } from "expo-image";
 import Reanimated, {
@@ -224,13 +226,13 @@ export default function RecuerdoDetailDialog({
   // Get user's sticker inventory to check if they have any stickers
   const inventoryResponse = useGetShopInventory();
   const inventoryData = normalizeData(inventoryResponse.data);
-  
+
   // Check if user has at least one sticker
   const hasStickers = Array.isArray(inventoryData)
     ? (inventoryData as Array<{ item?: { type: string }; type?: string }>).some((item) => {
-        const itemType = item.item?.type || item.type;
-        return itemType === "Sticker" || itemType === "sticker";
-      })
+      const itemType = item.item?.type || item.type;
+      return itemType === "Sticker" || itemType === "sticker";
+    })
     : false;
 
   // Can react if user is elder OR has at least one sticker
@@ -1725,73 +1727,75 @@ export default function RecuerdoDetailDialog({
           )}
         </Dialog>
 
-        <Dialog
-          visible={editVisible}
-          onDismiss={() => setEditVisible(false)}
-          style={{
-            backgroundColor: COLORS.background,
-            width: "92%",
-            alignSelf: "center",
-            borderRadius: 16,
-          }}
-        >
-          <Dialog.Title
-            style={{ ...STYLES.heading, paddingTop: 8 }}
-          >
-            Modificar recuerdo
-          </Dialog.Title>
-          <Dialog.Content>
-            <StyledTextInput
-              label="Título"
-              value={editTitle}
-              onChangeText={setEditTitle}
-              marginBottom={16}
-            />
-            <View
-              style={{
-                backgroundColor: COLORS.backgroundSecondary,
-                borderRadius: 16,
-                overflow: "hidden",
-              }}
-            >
-              <MentionInput
-                label="Descripción"
-                value={editDescription}
-                onChangeText={setEditDescription}
-                mode="flat"
-                inputStyle={{ backgroundColor: "transparent" }}
-                outlineColor="transparent"
-                activeOutlineColor="transparent"
-                multiline
-                numberOfLines={3}
-                familyMembers={familyMembers}
-                currentUserId={currentUserId}
-              />
-            </View>
-          </Dialog.Content>
-          <Dialog.Actions
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center" }}>
+          <Dialog
+            visible={editVisible}
+            onDismiss={() => setEditVisible(false)}
             style={{
-              paddingBottom: 30,
-              paddingHorizontal: 24,
-              paddingTop: 0,
-              justifyContent: "space-between",
+              backgroundColor: COLORS.background,
+              width: "92%",
+              alignSelf: "center",
+              borderRadius: 16,
             }}
           >
-            <View style={{ width: 120 }}>
-              <CancelButton
-                onPress={() => setEditVisible(false)}
-                disabled={isMutating}
+            <Dialog.Title
+              style={{ ...STYLES.heading, paddingTop: 8 }}
+            >
+              Modificar recuerdo
+            </Dialog.Title>
+            <Dialog.Content>
+              <StyledTextInput
+                label="Título"
+                value={editTitle}
+                onChangeText={setEditTitle}
+                marginBottom={16}
               />
-            </View>
-            <View style={{ width: 120 }}>
-              <SaveButton
-                onPress={submitEdit}
-                loading={isMutating}
-                disabled={isMutating}
-              />
-            </View>
-          </Dialog.Actions>
-        </Dialog>
+              <View
+                style={{
+                  backgroundColor: COLORS.backgroundSecondary,
+                  borderRadius: 16,
+                  overflow: "hidden",
+                }}
+              >
+                <MentionInput
+                  label="Descripción"
+                  value={editDescription}
+                  onChangeText={setEditDescription}
+                  mode="flat"
+                  inputStyle={{ backgroundColor: "transparent" }}
+                  outlineColor="transparent"
+                  activeOutlineColor="transparent"
+                  multiline
+                  numberOfLines={3}
+                  familyMembers={familyMembers}
+                  currentUserId={currentUserId}
+                />
+              </View>
+            </Dialog.Content>
+            <Dialog.Actions
+              style={{
+                paddingBottom: 30,
+                paddingHorizontal: 24,
+                paddingTop: 0,
+                justifyContent: "space-between",
+              }}
+            >
+              <View style={{ width: 120 }}>
+                <CancelButton
+                  onPress={() => setEditVisible(false)}
+                  disabled={isMutating}
+                />
+              </View>
+              <View style={{ width: 120 }}>
+                <SaveButton
+                  onPress={submitEdit}
+                  loading={isMutating}
+                  disabled={isMutating}
+                />
+              </View>
+            </Dialog.Actions>
+          </Dialog>
+        </KeyboardAvoidingView>
 
         <Dialog
           visible={deleteConfirmVisible}
