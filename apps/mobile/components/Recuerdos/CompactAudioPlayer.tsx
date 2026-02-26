@@ -207,11 +207,14 @@ export default function CompactAudioPlayer({
         marginBottom: 10,
       }}
     >
-      {/* Botón para voltear */}
+      {/* Botones de control: Flip y Play */}
       <View
         style={{
+          flexDirection: "row",
           alignItems: "center",
+          justifyContent: "center",
           paddingBottom: 8,
+          gap: 12,
         }}
       >
         <TouchableOpacity
@@ -227,6 +230,24 @@ export default function CompactAudioPlayer({
         >
           <IconButton
             icon="swap-horizontal"
+            size={28}
+            iconColor="#ffffff"
+            style={{ margin: 0 }}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={handleFrontPlay}
+          style={{
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <IconButton
+            icon={isPlaying ? "pause" : "play"}
             size={28}
             iconColor="#ffffff"
             style={{ margin: 0 }}
@@ -295,34 +316,11 @@ export default function CompactAudioPlayer({
               </Text>
             </View>
 
-            {/* Botón Play frontal */}
-            <TouchableOpacity
-              onPress={handleFrontPlay}
-              activeOpacity={0.7}
-              style={{
-                alignSelf: "center",
-                marginTop: 5,
-                marginBottom: 5,
-                width: 32,
-                height: 32,
-                borderRadius: 16,
-                backgroundColor: COLORS.primary,
-                justifyContent: "center",
-                alignItems: "center",
-                ...SHADOWS.medium,
-              }}
-            >
-              <IconButton
-                icon="play"
-                size={16}
-                iconColor="#1a1a1a"
-                style={{ margin: 0 }}
-              />
-            </TouchableOpacity>
 
-            {/* Diseño del cassette */}
+            {/* Cintas centradas en el espacio restante */}
             <View
               style={{
+                flex: 1,
                 justifyContent: "center",
                 alignItems: "center",
               }}
