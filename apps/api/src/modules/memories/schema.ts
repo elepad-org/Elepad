@@ -50,6 +50,9 @@ export const MemorySchema = z
     caption: z.string().nullable(),
     mediaUrl: z.string().nullable(),
     mimeType: z.string().nullable(),
+    spotifyTrackId: z.string().nullable().optional(),
+    spotifyUri: z.string().nullable().optional(),
+    spotifyData: z.any().nullable().optional(), // jsonb data from Spotify
     createdAt: z.string().datetime(), // timestamp with time zone como string ISO
   })
   .openapi("Memory");
@@ -66,6 +69,9 @@ export const NewMemorySchema = z
     caption: z.string().optional(),
     mediaUrl: z.string().optional(),
     mimeType: z.string().optional(),
+    spotifyTrackId: z.string().optional(),
+    spotifyUri: z.string().optional(),
+    spotifyData: z.any().optional(),
   })
   .openapi("NewMemory");
 
@@ -149,3 +155,19 @@ export const AddReactionSchema = z
   .openapi("AddReaction");
 
 export type AddReaction = z.infer<typeof AddReactionSchema>;
+
+// Schema para crear un recuerdo con Spotify
+export const CreateSpotifyMemorySchema = z
+  .object({
+    bookId: z.string().uuid(),
+    groupId: z.string().uuid(),
+    title: z.string().min(1).optional(),
+    caption: z.string().optional(),
+    spotifyTrackId: z.string().min(1).openapi({
+      description: "Spotify track ID",
+      example: "3n3Ppam7vgaVa1iaRUc9Lp",
+    }),
+  })
+  .openapi("CreateSpotifyMemory");
+
+export type CreateSpotifyMemory = z.infer<typeof CreateSpotifyMemorySchema>;
