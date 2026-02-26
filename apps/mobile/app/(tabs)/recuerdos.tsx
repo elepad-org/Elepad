@@ -265,6 +265,9 @@ export default function RecuerdosScreen() {
     "none" | "person" | "type"
   >("none");
 
+  // Track upload placeholder visibility manually to avoid flash of stale image
+  const [showUploadPlaceholder, setShowUploadPlaceholder] = useState(false);
+
   // --- Books Filter State ---
   const [booksSortOrder, setBooksSortOrder] = useState<"desc" | "asc">("desc");
   const [booksNumColumns, setBooksNumColumns] = useState(1);
@@ -520,11 +523,14 @@ export default function RecuerdosScreen() {
         throw error;
       }
     },
-    onSuccess: () => {
-      // Refrescar la lista de memorias
-      refetchMemories();
+    onSuccess: async () => {
+      // Refrescar la lista de memorias y esperar a que termine
+      await refetchMemories();
       // Invalidar query global de memorias (para el Home)
       queryClient.invalidateQueries({ queryKey: ["/memories"] });
+
+      // Ahora que los datos frescos llegaron, quitar el placeholder
+      setShowUploadPlaceholder(false);
 
       showToast({ message: "Recuerdo agregado exitosamente", type: "success" });
 
@@ -537,6 +543,7 @@ export default function RecuerdosScreen() {
     },
     onError: (error) => {
       console.error("Upload mutation onError:", error);
+      setShowUploadPlaceholder(false);
       showToast({
         message: `Error al subir el recuerdo: ${error instanceof Error ? error.message : "Error desconocido"
           }`,
@@ -603,7 +610,7 @@ export default function RecuerdosScreen() {
   }, [refetchBooks]);
 
   // Stabilize memories derivation to prevent re-renders
-  const recuerdos = useMemo(() => {
+  const recuerdosBase = useMemo(() => {
     // Extraer los datos de la respuesta
     const memoriesPayload =
       memoriesResponse && "data" in memoriesResponse
@@ -635,6 +642,28 @@ export default function RecuerdosScreen() {
         }
       });
   }, [memoriesResponse, memberNameById, sortOrder, typeFilter]);
+
+  // Placeholder item while uploading
+  const uploadingPlaceholder: Recuerdo | null = useMemo(() => {
+    if (!showUploadPlaceholder) return null;
+    return {
+      id: "__uploading__",
+      tipo: "imagen" as RecuerdoTipo,
+      contenido: "",
+      titulo: undefined,
+      fecha: new Date(),
+    };
+  }, [showUploadPlaceholder]);
+
+  const recuerdos = useMemo(() => {
+    if (uploadingPlaceholder && sortOrder === "desc") {
+      return [uploadingPlaceholder, ...recuerdosBase];
+    }
+    if (uploadingPlaceholder && sortOrder === "asc") {
+      return [...recuerdosBase, uploadingPlaceholder];
+    }
+    return recuerdosBase;
+  }, [recuerdosBase, uploadingPlaceholder, sortOrder]);
 
   const params = useLocalSearchParams();
   const { memoryId, bookId } = params;
@@ -884,6 +913,7 @@ export default function RecuerdosScreen() {
           image: fileData,
         };
 
+        setShowUploadPlaceholder(true);
         await uploadMemoryMutation.mutateAsync(uploadData);
       }
     } catch (error) {
@@ -1677,16 +1707,21 @@ export default function RecuerdosScreen() {
           numColumns={numColumns}
           refreshing={refreshing}
           onRefresh={onRefresh}
-          renderItem={({ item, i }) => (
-            <Animated.View entering={ZoomIn.delay(i * 25).springify()}>
-              <RecuerdoItemComponent
-                item={item as Recuerdo}
-                numColumns={numColumns}
-                onPress={handleRecuerdoPress}
-              />
-            </Animated.View>
-          )}
-          key={`masonry-${numColumns}-${sortOrder}-${isFocused}`}
+          renderItem={({ item, i }) => {
+            const recuerdo = item as Recuerdo;
+            const isUploadingItem = recuerdo.id === "__uploading__";
+            return (
+              <Animated.View entering={ZoomIn.delay(i * 25).springify()}>
+                <RecuerdoItemComponent
+                  item={recuerdo}
+                  numColumns={numColumns}
+                  onPress={isUploadingItem ? () => { } : handleRecuerdoPress}
+                  isLoading={isUploadingItem}
+                />
+              </Animated.View>
+            );
+          }}
+          key={`masonry-${numColumns}-${sortOrder}-${isFocused}-${typeFilter}-${memberFilterId || "all"}`}
           contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8 }}
           onEndReached={() => {
             if (hasNextPage && !isFetchingNextPage) {

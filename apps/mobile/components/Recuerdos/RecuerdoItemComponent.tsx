@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   TouchableOpacity,
   View,
@@ -6,13 +6,16 @@ import {
   ImageBackground,
   StyleProp,
   ViewStyle,
+  Animated,
+  Easing,
 } from "react-native";
 import { Image } from "expo-image";
-import { Text, IconButton } from "react-native-paper";
+import { Text, IconButton, ActivityIndicator } from "react-native-paper";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { COLORS, SHADOWS } from "@/styles/base";
 import fondoRecuerdos from "@/assets/images/fondoRecuerdos.png";
 import eleDef from "@/assets/images/ele-def.png";
+import eleLoading from "@/assets/images/ele-celular-loading.png";
 
 
 const screenWidth = Dimensions.get("window").width;
@@ -32,9 +35,10 @@ interface RecuerdoItemProps {
   item: Recuerdo;
   numColumns: number;
   onPress: (item: Recuerdo) => void;
-  onLongPress?: (item: Recuerdo) => void; // New prop
-  availableWidth?: number; // New prop
-  isSelected?: boolean; // New prop
+  onLongPress?: (item: Recuerdo) => void;
+  availableWidth?: number;
+  isSelected?: boolean;
+  isLoading?: boolean;
 }
 
 const VideoItem = ({
@@ -75,7 +79,7 @@ const VideoItem = ({
 };
 
 const RecuerdoItemComponent = React.memo(
-  ({ item, numColumns, onPress, onLongPress, availableWidth, isSelected }: RecuerdoItemProps) => {
+  ({ item, numColumns, onPress, onLongPress, availableWidth, isSelected, isLoading }: RecuerdoItemProps) => {
     const spacing = 20; // Espacio total horizontal del contenedor (padding)
     const gap = 8; // Espacio entre items
 
@@ -83,7 +87,6 @@ const RecuerdoItemComponent = React.memo(
     const containerWidth = availableWidth ?? (screenWidth - spacing * 2);
     const itemSize = containerWidth / numColumns - gap;
 
-    // ... scale and heightFactor logic remains same
     const scale = 2 / numColumns;
     const heightFactor =
       item.tipo === "audio"
@@ -97,10 +100,107 @@ const RecuerdoItemComponent = React.memo(
 
     const isMedia = item.tipo === "imagen" || item.tipo === "video";
 
+    // Pulse animation for loading state
+    const pulseAnim = useRef(new Animated.Value(1)).current;
+    useEffect(() => {
+      if (!isLoading) return;
+      const pulse = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.05,
+            duration: 800,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 800,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      pulse.start();
+      return () => pulse.stop();
+    }, [isLoading]);
+
+    // Loading placeholder
+    if (isLoading) {
+      return (
+        <View
+          style={{
+            width: itemSize,
+            height: itemHeight,
+            marginBottom: gap,
+            marginHorizontal: gap / 2,
+            paddingTop: 6,
+            paddingLeft: 6,
+            paddingRight: 6,
+            paddingBottom: 0,
+            overflow: "hidden",
+            borderRadius: 8,
+            backgroundColor: "#FFFFFF",
+            borderWidth: 1,
+            borderColor: COLORS.primary + "40",
+            ...SHADOWS.light,
+          }}
+        >
+          <View style={{ width: "100%", height: "100%" }}>
+            <View
+              style={{
+                position: "relative",
+                height: "80%",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: COLORS.background,
+                borderRadius: 2,
+              }}
+            >
+              <Animated.Image
+                source={eleLoading}
+                style={{
+                  width: "60%",
+                  height: "60%",
+                  transform: [{ scale: pulseAnim }],
+                }}
+                resizeMode="contain"
+              />
+              <ActivityIndicator
+                size="small"
+                color={COLORS.primary}
+                style={{ position: "absolute", bottom: 6 }}
+              />
+            </View>
+            <View
+              style={{
+                height: "20%",
+                justifyContent: "center",
+                alignItems: "flex-start",
+              }}
+            >
+              <Text
+                numberOfLines={1}
+                style={{
+                  fontSize: 11 * scale,
+                  color: COLORS.textSecondary,
+                  textAlign: "left",
+                  paddingHorizontal: 10 * scale,
+                  fontFamily: "Montserrat",
+                  fontWeight: "600",
+                }}
+              >
+                Subiendo...
+              </Text>
+            </View>
+          </View>
+        </View>
+      );
+    }
+
     return (
       <TouchableOpacity
         onPress={() => onPress(item)}
-        onLongPress={() => onLongPress && onLongPress(item)} // Handle long press
+        onLongPress={() => onLongPress && onLongPress(item)}
         delayLongPress={300}
         activeOpacity={0.8}
         style={{
@@ -115,14 +215,14 @@ const RecuerdoItemComponent = React.memo(
           overflow: "hidden",
           borderRadius: 8,
           backgroundColor: isMedia ? "#FFFFFF" : "#F5F5F5",
-          borderWidth: isSelected ? 3 : 1, // Start Thick border if selected
-          borderColor: isSelected ? COLORS.primary : "rgba(0,0,0,0.05)", // Primary color if selected
+          borderWidth: isSelected ? 3 : 1,
+          borderColor: isSelected ? COLORS.primary : "rgba(0,0,0,0.05)",
           ...SHADOWS.light,
         }}
       >
         {isMedia && item.miniatura ? (
-          <View style={{ flex: 1, width: "100%", height: "100%" }}>
-            <View style={{ position: "relative", flex: 4 }}>
+          <View style={{ width: "100%", height: "100%" }}>
+            <View style={{ position: "relative", height: "80%" }}>
               {item.tipo === "video" && item.miniatura ? (
                 <VideoItem
                   uri={item.miniatura}
@@ -140,7 +240,7 @@ const RecuerdoItemComponent = React.memo(
                   style={{
                     width: "100%",
                     height: "100%",
-                    borderRadius: 2, // BorderRadius pequeño para polaroid
+                    borderRadius: 2,
                   }}
                   contentFit="cover"
                   transition={200}
@@ -182,10 +282,10 @@ const RecuerdoItemComponent = React.memo(
             </View>
             <View
               style={{
-                flex: 1,
+                height: "20%",
                 justifyContent: "center",
                 alignItems: "flex-start",
-                backgroundColor: "transparent", // Parte blanca abajo
+                backgroundColor: "transparent",
               }}
             >
               {item.titulo && (
@@ -196,7 +296,7 @@ const RecuerdoItemComponent = React.memo(
                     color: "#000000",
                     textAlign: "left",
                     paddingHorizontal: 10 * scale,
-                    fontFamily: "Montserrat", // Fuente principal de la app
+                    fontFamily: "Montserrat",
                     fontWeight: "600",
                   }}
                 >
@@ -382,7 +482,8 @@ const RecuerdoItemComponent = React.memo(
       prevProps.numColumns === nextProps.numColumns &&
       prevProps.item.titulo === nextProps.item.titulo &&
       prevProps.item.miniatura === nextProps.item.miniatura &&
-      prevProps.isSelected === nextProps.isSelected
+      prevProps.isSelected === nextProps.isSelected &&
+      prevProps.isLoading === nextProps.isLoading
     );
   },
 );
