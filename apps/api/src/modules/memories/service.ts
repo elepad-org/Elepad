@@ -7,6 +7,7 @@ import {
   Memory,
   CreateMemoryWithImage,
   CreateNote,
+  CreateSpotifyMemory,
   UpdateMemory,
   UpdateMemoriesBook,
   MemoryWithReactions,
@@ -18,14 +19,17 @@ import {
 } from "@/services/storage";
 import { MentionsService } from "@/services/mentions";
 import { NotificationsService } from "@/modules/notifications/service";
+import { SpotifyService } from "@/modules/spotify/service";
 
 export class MemoriesService {
   private mentionsService: MentionsService;
   private notificationsService: NotificationsService;
+  private spotifyService: SpotifyService;
 
   constructor(private supabase: SupabaseClient<Database>) {
     this.mentionsService = new MentionsService(supabase);
     this.notificationsService = new NotificationsService(supabase);
+    this.spotifyService = new SpotifyService(supabase);
   }
 
   private async assertUserInGroup(userId: string, groupId: string) {
@@ -473,6 +477,102 @@ export class MemoriesService {
     } catch (error) {
       console.error("Error syncing mentions or creating notifications:", error);
       // Don't throw - mentions and notifications are not critical
+    }
+
+    return data;
+  }
+
+  /**
+   * Create a new memory with Spotify track
+   */
+  async createSpotifyMemory(
+    spotifyData: CreateSpotifyMemory,
+    userId: string
+  ): Promise<Memory> {
+    // Verify user belongs to the group
+    await this.assertUserInGroup(userId, spotifyData.groupId);
+
+    // Get track data from Spotify
+    const trackData = await this.spotifyService.getTrack(
+      spotifyData.spotifyTrackId
+    );
+
+    if (!trackData) {
+      throw new ApiException(404, "Spotify track not found");
+    }
+
+    // Build Spotify URI
+    const spotifyUri = `spotify:track:${spotifyData.spotifyTrackId}`;
+
+    // Create title if not provided (use track name and artist)
+    const title =
+      spotifyData.title ||
+      `${trackData.name} - ${trackData.artists?.map((a: any) => a.name).join(", ") || ""}`;
+
+    const newMemory: NewMemory = {
+      bookId: spotifyData.bookId,
+      groupId: spotifyData.groupId,
+      createdBy: userId,
+      title: title,
+      caption: spotifyData.caption,
+      mediaUrl: trackData.album?.images?.[0]?.url || null, // Use album cover as mediaUrl
+      mimeType: "audio/spotify", // Special mime type to identify Spotify memories
+      spotifyTrackId: spotifyData.spotifyTrackId,
+      spotifyUri: spotifyUri,      spotifyData: trackData,
+    };
+
+    const { data, error } = await this.supabase
+      .from("memories")
+      .insert(newMemory)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error creating Spotify memory:", error);
+      throw new ApiException(500, "Error creating Spotify memory");
+    }
+
+    if (!data) {
+      throw new ApiException(500, "Failed to create Spotify memory");
+    }
+
+    // Sync mentions from title and caption
+    try {
+      await this.mentionsService.syncMentions(
+        "memory",
+        data.id,
+        title,
+        spotifyData.caption
+      );
+
+      // Extract mentioned user IDs and create notifications
+      const mentionedIds = [
+        ...this.mentionsService.extractMentionIds(title),
+        ...this.mentionsService.extractMentionIds(spotifyData.caption),
+      ];
+
+      if (mentionedIds.length > 0) {
+        // Get the actor's name
+        const { data: actor, error: actorError } = await this.supabase
+          .from("users")
+          .select("displayName")
+          .eq("id", userId)
+          .single();
+
+        if (!actorError && actor) {
+          await this.notificationsService.notifyMentionedUsers(
+            mentionedIds,
+            userId,
+            actor.displayName || "Un usuario",
+            "memory",
+            data.id,
+            title
+          );
+        }
+      }
+    } catch (mentionError) {
+      console.error("Error syncing mentions for Spotify memory:", mentionError);
+      // Don't fail the memory creation if mention sync fails
     }
 
     return data;

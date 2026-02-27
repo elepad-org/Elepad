@@ -24,6 +24,7 @@ import { notificationsApp } from "./modules/notifications/handler.js";
 import { albumApp } from "./modules/memoriesAlbum/handler.js";
 import { pushTokensApp } from "./modules/pushTokens/handler.js";
 import { calendarApp } from "./modules/calendar/handler.js";
+import { spotifyApp } from "./modules/spotify/handler.js";
 import { ScheduledEvent, ExecutionContext } from "@cloudflare/workers-types";
 
 // Configurar fetch personalizado para Node.js en desarrollo
@@ -147,6 +148,9 @@ app.route("/", shopApp);
 app.use("/calendar/generate", withAuth);
 app.route("/", calendarApp);
 
+app.use("/spotify/*", withAuth);
+app.route("/", spotifyApp);
+
 // OpenAPI spec.
 app.doc("/openapi.json", {
   openapi: "3.1.0",
@@ -166,6 +170,7 @@ app.doc("/openapi.json", {
     { name: "notifications" },
     { name: "push-tokens" },
     { name: "calendar" },
+    { name: "spotify" },
   ],
 });
 

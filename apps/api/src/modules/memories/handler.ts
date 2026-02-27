@@ -1,6 +1,7 @@
 import { OpenAPIHono, z } from "@hono/zod-openapi";
 import {
   CreateNoteSchema,
+  CreateSpotifyMemorySchema,
   MemoriesBookSchema,
   MemoryFiltersSchema,
   MemorySchema,
@@ -519,6 +520,51 @@ memoriesApp.openapi(
     );
 
     return c.json(createdNote, 201);
+  }
+);
+
+// POST /memories/spotify - Crear un recuerdo con una canción de Spotify
+memoriesApp.openapi(
+  {
+    method: "post",
+    path: "/memories/spotify",
+    tags: ["memories"],
+    operationId: "createSpotifyMemory",
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: CreateSpotifyMemorySchema,
+          },
+        },
+        required: true,
+      },
+    },
+    responses: {
+      201: {
+        description: "Spotify memory created successfully",
+        content: {
+          "application/json": {
+            schema: MemorySchema,
+          },
+        },
+      },
+      400: openApiErrorResponse("Invalid request"),
+      401: openApiErrorResponse("Unauthorized"),
+      404: openApiErrorResponse("Spotify track not found"),
+      500: openApiErrorResponse("Internal Server Error"),
+    },
+  },
+  async (c) => {
+    const spotifyData = c.req.valid("json");
+    const user = c.var.user;
+
+    const createdMemory = await c.var.memoriesService.createSpotifyMemory(
+      spotifyData,
+      user.id
+    );
+
+    return c.json(createdMemory, 201);
   }
 );
 
