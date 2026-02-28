@@ -388,6 +388,17 @@
             "type": "string",
             "nullable": true
           },
+          "spotifyTrackId": {
+            "type": "string",
+            "nullable": true
+          },
+          "spotifyUri": {
+            "type": "string",
+            "nullable": true
+          },
+          "spotifyData": {
+            "nullable": true
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -522,6 +533,37 @@
           "bookId",
           "groupId",
           "title"
+        ]
+      },
+      "CreateSpotifyMemory": {
+        "type": "object",
+        "properties": {
+          "bookId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "groupId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "caption": {
+            "type": "string"
+          },
+          "spotifyTrackId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Spotify track ID",
+            "example": "3n3Ppam7vgaVa1iaRUc9Lp"
+          }
+        },
+        "required": [
+          "bookId",
+          "groupId",
+          "spotifyTrackId"
         ]
       },
       "Transcription": {
@@ -1631,6 +1673,125 @@
           "userId",
           "startDate",
           "endDate"
+        ]
+      },
+      "SpotifyArtistResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "popularity": {
+            "type": "number"
+          },
+          "followers": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "total"
+            ]
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string"
+                },
+                "height": {
+                  "type": "number"
+                },
+                "width": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "url",
+                "height",
+                "width"
+              ]
+            }
+          },
+          "external_urls": {
+            "type": "object",
+            "properties": {
+              "spotify": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "spotify"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "genres",
+          "popularity",
+          "followers",
+          "images",
+          "external_urls"
+        ]
+      },
+      "SpotifyArtistRequest": {
+        "type": "object",
+        "properties": {
+          "artistId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Spotify artist ID",
+            "example": "4Z8W4fKeB5YxbusRsdQVPb"
+          }
+        },
+        "required": [
+          "artistId"
+        ]
+      },
+      "SpotifySearchRequest": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Search query",
+            "example": "Creep"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "track",
+              "artist",
+              "album"
+            ],
+            "default": "track",
+            "description": "Type of search"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 0,
+            "exclusiveMinimum": true,
+            "maximum": 50,
+            "default": 20,
+            "description": "Number of results to return"
+          }
+        },
+        "required": [
+          "query"
         ]
       }
     },
@@ -3645,6 +3806,76 @@
           },
           "401": {
             "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/memories/spotify": {
+      "post": {
+        "tags": [
+          "memories"
+        ],
+        "operationId": "createSpotifyMemory",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSpotifyMemory"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Spotify memory created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Memory"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Spotify track not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -6496,6 +6727,147 @@
           },
           "500": {
             "description": "Error interno del servidor",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/spotify/artist": {
+      "post": {
+        "tags": [
+          "spotify"
+        ],
+        "summary": "Get artist data from Spotify",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SpotifyArtistRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Artist data from Spotify",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpotifyArtistResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Artist not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/spotify/search": {
+      "post": {
+        "tags": [
+          "spotify"
+        ],
+        "summary": "Search tracks, artists or albums on Spotify",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SpotifySearchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Search results from Spotify",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tracks": {
+                      "nullable": true
+                    },
+                    "artists": {
+                      "nullable": true
+                    },
+                    "albums": {
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
