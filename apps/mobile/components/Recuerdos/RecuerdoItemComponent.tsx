@@ -17,7 +17,7 @@ import eleDef from "@/assets/images/ele-def.png";
 
 const screenWidth = Dimensions.get("window").width;
 
-type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
+type RecuerdoTipo = "imagen" | "texto" | "audio" | "video" | "spotify";
 
 interface Recuerdo {
   id: string;
@@ -88,11 +88,13 @@ const RecuerdoItemComponent = React.memo(
     const heightFactor =
       item.tipo === "audio"
         ? 0.54
-        : item.tipo === "texto"
-          ? 0.4
-          : item.tipo === "imagen" || item.tipo === "video"
-            ? 1.05 + (item.id.length % 3) * 0.05
-            : 0.8 + (item.id.length % 5) * 0.08;
+        : item.tipo === "spotify"
+          ? 0.54
+          : item.tipo === "texto"
+            ? 0.4
+            : item.tipo === "imagen" || item.tipo === "video"
+              ? 1.05 + (item.id.length % 3) * 0.05
+              : 0.8 + (item.id.length % 5) * 0.08;
     const itemHeight = itemSize * heightFactor;
 
     const isMedia = item.tipo === "imagen" || item.tipo === "video";
@@ -114,7 +116,7 @@ const RecuerdoItemComponent = React.memo(
           paddingBottom: 0,
           overflow: "hidden",
           borderRadius: 8,
-          backgroundColor: isMedia ? "#FFFFFF" : "#F5F5F5",
+          backgroundColor: isMedia ? "#FFFFFF" : item.tipo === "spotify" ? "#191414" : "#F5F5F5",
           borderWidth: isSelected ? 3 : 1, // Start Thick border if selected
           borderColor: isSelected ? COLORS.primary : "rgba(0,0,0,0.05)", // Primary color if selected
           ...SHADOWS.light,
@@ -330,6 +332,51 @@ const RecuerdoItemComponent = React.memo(
                   />
                 </View>
               </View>
+            </View>
+          </View>
+        ) : item.tipo === "spotify" ? (
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: "#191414",
+              borderRadius: 4,
+              padding: 8 * scale,
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            {/* Portada del álbum */}
+            {item.miniatura && (
+              <Image
+                source={{ uri: item.miniatura }}
+                style={{
+                  width: itemSize * 0.7,
+                  height: itemSize * 0.7,
+                  borderRadius: 8,
+                  marginBottom: 6,
+                }}
+                contentFit="cover"
+                transition={200}
+                cachePolicy="memory-disk"
+              />
+            )}
+            {/* Título de la canción */}
+            <Text
+              numberOfLines={2}
+              style={{
+                fontSize: 11 * scale,
+                color: "#fff",
+                textAlign: "center",
+                fontFamily: "Montserrat",
+                fontWeight: "700",
+                marginBottom: 2,
+              }}
+            >
+              {item.titulo || "Canción de Spotify"}
+            </Text>
+            {/* Logo de Spotify */}
+            <View style={{ alignItems: "center", marginTop: 2 }}>
+              <IconButton icon="spotify" size={20 * scale} iconColor="#1DB954" style={{ margin: 0 }} />
             </View>
           </View>
         ) : item.tipo === "texto" ? (

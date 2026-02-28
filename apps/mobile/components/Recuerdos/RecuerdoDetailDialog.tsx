@@ -45,7 +45,7 @@ import cassetteSound from "@/assets/sounds/cassette-play-sound-effect.mp3";
 
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
-type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
+type RecuerdoTipo = "imagen" | "texto" | "audio" | "video" | "spotify";
 
 interface Recuerdo {
   id: string;

@@ -4,10 +4,11 @@ import { STYLES, COLORS } from "@/styles/base";
 import ImagePickerComponent from "./ImagePickerComponent";
 import TextNoteComponent from "./TextNoteComponent";
 import AudioRecorderComponent from "./AudioRecorderComponent";
+import SpotifySearchComponent from "./SpotifySearchComponent";
 import MetadataInputComponent from "./MetadataInputComponent";
 import CancelButton from "../shared/CancelButton";
 
-type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
+type RecuerdoTipo = "imagen" | "texto" | "audio" | "video" | "spotify";
 
 interface FamilyMember {
   id: string;
@@ -21,6 +22,8 @@ interface RecuerdoData {
   titulo?: string;
   caption?: string;
   mimeType?: string;
+  spotifyTrackId?: string;
+  spotifyData?: any;
 }
 
 interface NuevoRecuerdoDialogProps {
@@ -140,6 +143,20 @@ export default function NuevoRecuerdoDialogComponent({
             isUploading={isUploading}
           />
         )}
+        {selectedTipo === "spotify" && (
+          <SpotifySearchComponent
+            onTrackSelected={(trackId: string, trackData: any) => {
+              onSave({
+                contenido: trackId,
+                spotifyTrackId: trackId,
+                spotifyData: trackData,
+                mimeType: "audio/spotify",
+              });
+            }}
+            onCancel={onCancel}
+            isUploading={isUploading}
+          />
+        )}
       </Dialog>
     );
   }
@@ -230,6 +247,31 @@ export default function NuevoRecuerdoDialogComponent({
             <Icon source="microphone" size={24} color={COLORS.primary} />
           </View>
           <Text style={STYLES.paragraphText}>Audio</Text>
+        </Pressable>
+
+        <Divider
+          style={{ backgroundColor: COLORS.textPlaceholder, opacity: 0.2 }}
+        />
+
+        <Pressable
+          style={({ pressed }) => ({
+            flexDirection: "row",
+            alignItems: "center",
+            paddingVertical: 12,
+            paddingHorizontal: 8,
+            borderRadius: 8,
+            backgroundColor: pressed
+              ? COLORS.backgroundSecondary
+              : "transparent",
+            opacity: pressed ? 0.8 : 1,
+            marginTop: 4,
+          })}
+          onPress={() => onSelectTipo("spotify")}
+        >
+          <View style={{ marginRight: 12 }}>
+            <Icon source="spotify" size={24} color={"#1DB954"} />
+          </View>
+          <Text style={STYLES.paragraphText}>Música de Spotify</Text>
         </Pressable>
       </Dialog.Content>
       <Dialog.Actions

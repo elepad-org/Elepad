@@ -94,13 +94,11 @@ spotifyApp.openapi(
     },
     responses: {
       200: {
-        description: "Search results from Spotify",
+        description: "Track search results from Spotify",
         content: {
           "application/json": {
             schema: z.object({
-              tracks: z.any().optional(),
-              artists: z.any().optional(),
-              albums: z.any().optional(),
+              tracks: z.any(),
             }),
           },
         },
@@ -119,9 +117,9 @@ spotifyApp.openapi(
     const body = await c.req.json();
     const validated = SpotifySearchRequestSchema.parse(body);
 
+    // call service search with only tracks, replicate what test-spotify-api.js does
     const searchResults = await c.var.spotifyService.search(
       validated.query,
-      validated.type,
       validated.limit
     );
 

@@ -5,6 +5,11 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+  console.log("CWD:", process.cwd());
+  console.log("SPOTIFY_CLIENT_ID:", process.env.SPOTIFY_CLIENT_ID);
+  console.log("SPOTIFY_CLIENT_SECRET:", process.env.SPOTIFY_CLIENT_SECRET);
+
+
 export class SpotifyService {
   private supabase: SupabaseClient<Database>;
   private spotifyClientId: string;
@@ -18,9 +23,11 @@ export class SpotifyService {
     this.spotifyClientSecret = process.env.SPOTIFY_CLIENT_SECRET || "";
 
     if (!this.spotifyClientId || !this.spotifyClientSecret) {
+      console.log(process.env.SPOTIFY_CLIENT_SECRET)
       console.warn("⚠️ Spotify credentials not configured");
     }
-  }
+  } 
+
 
   /**
    * Get Spotify access token using client credentials flow
@@ -143,39 +150,35 @@ export class SpotifyService {
   /**
    * Search on Spotify (tracks, artists, albums)
    */
-  async search(
-    query: string,
-    type: "track" | "artist" | "album" = "track",
-    limit: number = 20
-  ): Promise<any> {
-    const accessToken = await this.getAccessToken();
+async search(
+  query: string,
+  limit: number = 20
+): Promise<any> {
+  // always search tracks, matching the behaviour of the standalone test
+  const accessToken = await this.getAccessToken();
 
-    try {
-      const params = new URLSearchParams({
-        q: query,
-        type: type,
-        limit: limit.toString(),
-      });
+  const safeQuery = query.trim();
+  const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(
+    safeQuery
+  )}&type=track&limit=${limit}`;
 
-      const response = await fetch(
-        `https://api.spotify.com/v1/search?${params.toString()}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+  console.log("FINAL URL:", url);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
 
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("Error searching on Spotify:", error);
-      throw new ApiException(500, "Error searching on Spotify");
-    }
+  const raw = await response.text();
+  console.log("STATUS:", response.status);
+  console.log("RAW BODY:", raw);
+
+  if (!response.ok) {
+    throw new Error("Spotify search failed");
   }
+
+  return JSON.parse(raw);
+}
 }
