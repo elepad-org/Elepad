@@ -219,20 +219,18 @@ export default function CreateAlbumDialog({
       transparent={true}
       onRequestClose={handleDismiss}
     >
-      <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.container}
-          keyboardVerticalOffset={-41}
-        >
+      <View style={styles.container}>
         <TouchableOpacity
           style={styles.backdrop}
           activeOpacity={1}
           onPress={handleDismiss}
         />
-        <View
+        <KeyboardAvoidingView
+          behavior="padding"
           style={
             step === "form" ? styles.formContainer : styles.imagesContainer
           }
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
         >
           {step === "form" && (
             <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} style={{ width: "100%" }}>
@@ -331,6 +329,8 @@ export default function CreateAlbumDialog({
                       data={imageMemories}
                       keyExtractor={(item) => item.id}
                       numColumns={3}
+                      keyboardShouldPersistTaps="handled"
+                      keyboardDismissMode="on-drag"
                       columnWrapperStyle={{
                         justifyContent: "flex-start",
                         // We remove gap here because RecuerdoItemComponent handles margins
@@ -409,6 +409,8 @@ export default function CreateAlbumDialog({
                       keyExtractor={(item) => item.id}
                       renderItem={renderDraggableItem}
                       containerStyle={{ flex: 1, overflow: "visible" }}
+                      keyboardShouldPersistTaps="handled"
+                      keyboardDismissMode="on-drag"
                       activationDistance={20}
                       autoscrollThreshold={50}
                       animationConfig={{
@@ -479,7 +481,8 @@ export default function CreateAlbumDialog({
               </View>
             </>
           )}
-        </View>
+        </KeyboardAvoidingView>
+      </View>
 
         {/* Modal de procesamiento de álbum */}
         <Modal
@@ -548,8 +551,6 @@ export default function CreateAlbumDialog({
             </View>
           </Modal>
         )}
-
-      </KeyboardAvoidingView>
     </Modal>
   );
 }
@@ -559,6 +560,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    
     // paddingHorizontal: 24, // Removed to allow 90% width control
   },
   backdrop: {
@@ -626,6 +628,7 @@ const styles = StyleSheet.create({
     width: "100%",
     marginTop: 20,
     gap: 8,
+    paddingBottom: 20
   },
   draggableItem: {
     flexDirection: "row",
