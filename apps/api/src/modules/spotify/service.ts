@@ -160,7 +160,7 @@ async search(
   const safeQuery = query.trim();
   const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(
     safeQuery
-  )}&type=track&limit=2`;
+  )}&type=track&limit=4`;
 
   console.log("FINAL URL:", url);
 

@@ -271,7 +271,7 @@ export default function NuevoRecuerdoDialogComponent({
           <View style={{ marginRight: 12 }}>
             <Icon source="spotify" size={24} color={"#1DB954"} />
           </View>
-          <Text style={STYLES.paragraphText}>Música de Spotify</Text>
+          <Text style={STYLES.paragraphText}>Canción de Spotify</Text>
         </Pressable>
       </Dialog.Content>
       <Dialog.Actions

@@ -4,11 +4,11 @@ import {
   Dialog,
   Text,
   ActivityIndicator,
-  IconButton,
 } from "react-native-paper";
 import { STYLES, COLORS } from "@/styles/base";
 import { StyledTextInput } from "../shared";
 import CancelButton from "../shared/CancelButton";
+import SaveButton from "../shared/SaveButton";
 import { usePostSpotifySearch } from "@elepad/api-client";
 
 interface SpotifyTrack {
@@ -36,6 +36,7 @@ export default function SpotifySearchComponent({
 }: SpotifySearchComponentProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SpotifyTrack[]>([]);
+  const [selectedTrack, setSelectedTrack] = useState<SpotifyTrack | null>(null);
 
   const searchMutation = usePostSpotifySearch();
 
@@ -64,30 +65,41 @@ export default function SpotifySearchComponent({
     }
   };
 
+  const handleSaveTrack = () => {
+    if (selectedTrack) {
+      onTrackSelected(selectedTrack.id, selectedTrack);
+    }
+  };
+
   const renderTrackItem = ({ item }: { item: SpotifyTrack }) => {
     const albumCover = item.album?.images?.[2]?.url || item.album?.images?.[0]?.url;
     const artistsText = item.artists?.map((a) => a.name).join(", ") || "Artista desconocido";
+    const isSelected = selectedTrack?.id === item.id;
 
     return (
       <Pressable
-        onPress={() => onTrackSelected(item.id, item)}
+        onPress={() => setSelectedTrack(item)}
         style={({ pressed }) => ({
           flexDirection: "row",
-          padding: 12,
-          backgroundColor: pressed
+          padding: 10,
+          backgroundColor: isSelected
+            ? COLORS.primary + "20"
+            : pressed
             ? COLORS.backgroundSecondary
             : "transparent",
           borderRadius: 8,
-          marginBottom: 8,
+          marginBottom: 4,
+          borderWidth: 2,
+          borderColor: isSelected ? COLORS.primary : "transparent",
         })}
-        disabled={isUploading}
+        disabled={isUploading || searchMutation.isPending}
       >
         {albumCover && (
           <Image
             source={{ uri: albumCover }}
             style={{
-              width: 50,
-              height: 50,
+              width: 65,
+              height: 65,
               borderRadius: 4,
               marginRight: 12,
             }}
@@ -95,7 +107,11 @@ export default function SpotifySearchComponent({
         )}
         <View style={{ flex: 1, justifyContent: "center" }}>
           <Text
-            style={STYLES.paragraphText}
+            style={{
+              ...STYLES.paragraphText,
+              color: "#000",
+              fontWeight: "600",
+            }}
             numberOfLines={1}
             ellipsizeMode="tail"
           >
@@ -105,7 +121,8 @@ export default function SpotifySearchComponent({
             style={{
             
               color: COLORS.textSecondary,
-              marginTop: 2,
+              marginTop: 1,
+              fontSize: 13,
             }}
             numberOfLines={1}
             ellipsizeMode="tail"
@@ -125,40 +142,23 @@ export default function SpotifySearchComponent({
             {item.album?.name || ""}
           </Text>
         </View>
-        <View style={{ justifyContent: "center" }}>
-          <IconButton
-            icon="music"
-            size={20}
-            iconColor={COLORS.primary}
-          />
-        </View>
       </Pressable>
     );
   };
 
   return (
     <>
-      <Dialog.Title style={STYLES.heading}>Buscar en Spotify</Dialog.Title>
+      <Dialog.Title style={{ ...STYLES.heading, marginBottom: 16 }}>Buscar en Spotify</Dialog.Title>
       <Dialog.Content style={{ paddingBottom: 12 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
-          <View style={{ flex: 1, marginRight: 8 }}>
-            <StyledTextInput
-              label="Buscar canción o artista"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              onSubmitEditing={handleSearch}
-              autoFocus
-              returnKeyType="search"
-            />
-          </View>
-          <IconButton
-            icon="magnify"
-            size={28}
-            iconColor={COLORS.primary}
-            onPress={handleSearch}
-            disabled={searchMutation.isPending || isUploading}
-          />
-        </View>
+        <StyledTextInput
+          label="Nombre de la canción"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          onSubmitEditing={handleSearch}
+          returnKeyType="search"
+          disabled={searchMutation.isPending || isUploading}
+          marginBottom={16}
+        />
 
         {searchMutation.isPending && (
           <View style={{ paddingVertical: 32, alignItems: "center" }}>
@@ -178,7 +178,7 @@ export default function SpotifySearchComponent({
         )}
 
         {!searchMutation.isPending && searchResults.length === 0 && searchQuery.trim() === "" && (
-          <View style={{ paddingVertical: 32, alignItems: "center" }}>
+          <View style={{ paddingVertical: 12, alignItems: "center" }}>
             <Text style={{ ...STYLES.paragraphText, color: COLORS.textPlaceholder, textAlign: "center" }}>
               Busca tu canción favorita en Spotify para agregarla como recuerdo
             </Text>
@@ -208,10 +208,20 @@ export default function SpotifySearchComponent({
         style={{
           paddingBottom: 12,
           paddingHorizontal: 24,
-          justifyContent: "center",
+          justifyContent: "space-between",
         }}
       >
-        <CancelButton onPress={onCancel} disabled={isUploading} />
+        <View style={{ width: 120 }}>
+          <CancelButton onPress={onCancel} disabled={isUploading || searchMutation.isPending} />
+        </View>
+        <View style={{ width: 120 }}>
+          <SaveButton
+            onPress={handleSaveTrack}
+            text="Guardar"
+            disabled={!selectedTrack || isUploading || searchMutation.isPending}
+            loading={isUploading}
+          />
+        </View>
       </Dialog.Actions>
     </>
   );
