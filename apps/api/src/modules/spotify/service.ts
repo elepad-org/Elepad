@@ -152,7 +152,7 @@ export class SpotifyService {
    */
 async search(
   query: string,
-  limit: number = 20
+  limit: number = 1
 ): Promise<any> {
   // always search tracks, matching the behaviour of the standalone test
   const accessToken = await this.getAccessToken();
@@ -160,7 +160,7 @@ async search(
   const safeQuery = query.trim();
   const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(
     safeQuery
-  )}&type=track&limit=${limit}`;
+  )}&type=track&limit=2`;
 
   console.log("FINAL URL:", url);
 

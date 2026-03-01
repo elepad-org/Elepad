@@ -51,12 +51,12 @@ export default function SpotifySearchComponent({
       });
 
       // El resultado viene en result.tracks.items (la API siempre devolverá `tracks`)
-      if (result.data && 'tracks' in result.data) {
-        const tracks = (result.data as any).tracks?.items ?? [];
+      if (result && 'tracks' in result) {
+        const tracks = (result as any).tracks?.items ?? [];
         setSearchResults(tracks);
       }
 
-      console.log("Spotify search results:", result.data);
+      console.log("Spotify search results:", result);
       
     } catch (error) {
       console.error("Error searching Spotify:", error);
