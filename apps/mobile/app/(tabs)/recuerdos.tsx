@@ -1692,6 +1692,21 @@ export default function RecuerdosScreen() {
                               : "transparent",
                         }}
                       />
+                      <Menu.Item
+                        leadingIcon="music"
+                        onPress={() => {
+                          setTypeFilter("spotify");
+                          setFilterMenuVisible(false);
+                          setFilterSubMode("none");
+                        }}
+                        title="Canciones Spotify"
+                        style={{
+                          backgroundColor:
+                            typeFilter === "spotify"
+                              ? COLORS.primary + "20"
+                              : "transparent",
+                        }}
+                      />
                     </>
                   );
                 }

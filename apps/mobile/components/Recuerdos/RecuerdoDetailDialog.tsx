@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Pressable,
   Alert,
+  Linking,
 } from "react-native";
 import { Image } from "expo-image";
 import Reanimated, {
@@ -1845,10 +1846,12 @@ export default function RecuerdoDetailDialog({
                   <View style={{ padding: 14, paddingBottom: 0 }}>
                     <Pressable
                       onPress={() => {
-                        // Open Spotify if available
-                        if ((recuerdo as any).spotifyUri) {
-                          // In a real implementation, would use Linking.openURL with spotify: URI
-                          handleShare();
+                        // Open Spotify track URL
+                        const spotifyUrl = (recuerdo as any).spotifyData?.external_urls?.spotify;
+                        if (spotifyUrl) {
+                          Linking.openURL(spotifyUrl).catch((error) => {
+                            console.error("Error opening Spotify URL:", error);
+                          });
                         }
                       }}
                       style={{ opacity: 1 }}
