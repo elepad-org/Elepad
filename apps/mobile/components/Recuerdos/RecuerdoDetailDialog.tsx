@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   View,
   Dimensions,
@@ -58,6 +58,7 @@ interface Recuerdo {
   autorId?: string;
   autorNombre?: string;
   fecha: Date;
+  spotifyData?: any;
   reactions?: {
     id: string;
     userId: string;
@@ -96,6 +97,7 @@ const ReactionItem = ({
   reaction,
   member,
   onPress,
+  borderColor = COLORS.white,
 }: {
   reaction: {
     id: string;
@@ -109,6 +111,7 @@ const ReactionItem = ({
     avatarUrl?: string | null;
   };
   onPress: (stickerUrl: string | null) => void;
+  borderColor?: string;
 }) => {
   const handlePress = () => {
     onPress(reaction.stickerUrl);
@@ -130,7 +133,7 @@ const ReactionItem = ({
               height: 36,
               borderRadius: 18,
               borderWidth: 2,
-              borderColor: COLORS.white,
+              borderColor: borderColor,
             }}
           />
         ) : (
@@ -143,7 +146,7 @@ const ReactionItem = ({
               alignItems: "center",
               justifyContent: "center",
               borderWidth: 2,
-              borderColor: COLORS.white,
+              borderColor: borderColor,
             }}
           >
             <Text
@@ -309,6 +312,8 @@ export default function RecuerdoDetailDialog({
 
   // Ref para capturar la vista y estado de compartir
   const viewRef = useRef<View>(null);
+  const spotifyViewRef = useRef<View>(null);
+  const spotifyDownloadRef = useRef<View>(null);
 
   // SIEMPRE crear los players (regla de hooks), pero con valores seguros
   const audioUrl =
@@ -600,6 +605,18 @@ export default function RecuerdoDetailDialog({
         showToast?.({ message: 'Nota guardada en la galería', type: 'success' });
         return;
       }
+
+      // Para Spotify, capturar como imagen y guardar (sin reacciones)
+      if (recuerdo.tipo === "spotify" && spotifyDownloadRef.current) {
+        const uri = await captureRef(spotifyDownloadRef, {
+          format: "png",
+          quality: 1,
+        });
+
+        await MediaLibrary.createAssetAsync(uri);
+        showToast?.({ message: 'Canción guardada en la galería', type: 'success' });
+        return;
+      }
     } catch (error) {
       console.error('Error al descargar:', error);
       showToast?.({ message: 'Error al descargar', type: 'error' });
@@ -611,7 +628,8 @@ export default function RecuerdoDetailDialog({
       recuerdo.tipo !== "imagen" &&
       recuerdo.tipo !== "texto" &&
       recuerdo.tipo !== "video" &&
-      recuerdo.tipo !== "audio"
+      recuerdo.tipo !== "audio" &&
+      recuerdo.tipo !== "spotify"
     )
       return;
 
@@ -660,6 +678,25 @@ export default function RecuerdoDetailDialog({
           mimeType: "audio/m4a",
           dialogTitle: recuerdo.titulo || "Compartir audio",
           UTI: "public.audio",
+        });
+        return;
+      }
+
+      // Para Spotify, capturar como imagen (similar a imagen/texto)
+      if (recuerdo.tipo === "spotify" && spotifyViewRef.current) {
+        const uri = await captureRef(spotifyViewRef, {
+          format: "png",
+          quality: 1,
+        });
+
+        const songName = recuerdo.spotifyData?.name || recuerdo.titulo?.split(" - ")?.[0] || "Canción";
+        const message = `${songName}. ${recuerdo.autorNombre || "Alguien"
+          } te invita a usar Elepad.`;
+
+        await shareAsync(uri, {
+          mimeType: "image/png",
+          dialogTitle: message,
+          UTI: "public.png",
         });
         return;
       }
@@ -952,6 +989,21 @@ export default function RecuerdoDetailDialog({
     onDismiss();
   };
 
+  // Debug logs para Spotify
+  React.useEffect(() => {
+    if (recuerdo.tipo === "spotify") {
+      console.log("=== DEBUG SPOTIFY DETAIL ===");
+      console.log("Recuerdo completo:", JSON.stringify(recuerdo, null, 2));
+      console.log("spotifyData:", recuerdo.spotifyData);
+      console.log("spotifyData.name:", recuerdo.spotifyData?.name);
+      console.log("spotifyData.artists:", recuerdo.spotifyData?.artists);
+      console.log("spotifyData.album:", recuerdo.spotifyData?.album);
+      console.log("spotifyData.album.images:", recuerdo.spotifyData?.album?.images);
+      console.log("titulo:", recuerdo.titulo);
+      console.log("miniatura:", recuerdo.miniatura);
+    }
+  }, [recuerdo]);
+
   return (
     <Portal>
       <>
@@ -1046,6 +1098,103 @@ export default function RecuerdoDetailDialog({
             </View>
           )}
 
+        {/* SHADOW VIEW FOR SPOTIFY DOWNLOAD - Off-screen rendering without reactions */}
+        {recuerdo.tipo === "spotify" && recuerdo.miniatura && (
+          <View
+            style={{
+              position: "absolute",
+              top: screenWidth * 3,
+              left: 0,
+              zIndex: -100,
+            }}
+          >
+            <View
+              ref={spotifyDownloadRef}
+              collapsable={false}
+              style={{
+                backgroundColor: "#191414",
+                borderRadius: 0,
+                width: screenWidth * 0.92,
+                overflow: "hidden",
+                opacity: 1,
+              }}
+            >
+              <View style={{ padding: 14, paddingBottom: 0 }}>
+                <Image
+                  source={{ uri: recuerdo.spotifyData?.album?.images?.[0]?.url || recuerdo.miniatura }}
+                  style={{
+                    width: "100%",
+                    height: screenWidth * 0.84,
+                    borderRadius: 8,
+                    backgroundColor: "#191414",
+                  }}
+                  contentFit="cover"
+                />
+              </View>
+
+              <View style={{ padding: 20, paddingTop: 16, backgroundColor: "#191414" }}>
+                <View style={{ marginBottom: 12 }}>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      color: "#ffffff",
+                      fontFamily: "Montserrat",
+                      fontWeight: "700",
+                      marginBottom: 4,
+                    }}
+                    numberOfLines={2}
+                  >
+                    {recuerdo.spotifyData?.name || recuerdo.titulo?.split(" - ")?.[0] || "Canción de Spotify"}
+                  </Text>
+
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      color: "#b3b3b3",
+                      fontFamily: "Montserrat",
+                      fontWeight: "400",
+                    }}
+                    numberOfLines={1}
+                  >
+                    {recuerdo.spotifyData?.artists?.[0]?.name || recuerdo.titulo?.split(" - ")?.[1] || "Artista desconocido"}
+                  </Text>
+                </View>
+
+                <Text
+                  style={{
+                    fontSize: 13,
+                    color: "#ffffff",
+                    marginTop: 6,
+                    fontFamily: FONT.regular,
+                  }}
+                >
+                  Subido por: {recuerdo.autorNombre || "Desconocido"}
+                </Text>
+
+                <Text
+                  style={{
+                    fontSize: 13,
+                    color: "#ffffff",
+                    marginTop: 4,
+                    fontFamily: FONT.regular,
+                  }}
+                >
+                  {recuerdo.fecha.toLocaleDateString("es-ES", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                  {" · "}
+                  {recuerdo.fecha.toLocaleTimeString("es-ES", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
+
         <Dialog
           visible={visible}
           onDismiss={handleDismiss}
@@ -1068,7 +1217,9 @@ export default function RecuerdoDetailDialog({
                   backgroundColor:
                     recuerdo.tipo === "audio" || recuerdo.tipo === "texto"
                       ? "transparent"
-                      : COLORS.white,
+                      : recuerdo.tipo === "spotify"
+                        ? "#191414"
+                        : COLORS.white,
                   borderRadius: 10,
                   width: screenWidth * 0.92,
                   elevation: 0,
@@ -1687,269 +1838,197 @@ export default function RecuerdoDetailDialog({
                 </View>
               )}
               {recuerdo.tipo === "spotify" && recuerdo.miniatura && (
-                <View>
-                  {/* Contenedor de controles: girar + compartir */}
-                  <View
-                    style={{
-                      alignItems: "center",
-                      paddingTop: 12,
-                      paddingBottom: 8,
-                      flexDirection: "row",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <TouchableOpacity
-                      onPress={toggleFlip}
-                      style={{
-                        backgroundColor: "rgba(0, 0, 0, 0.6)",
-                        width: 40,
-                        height: 40,
-                        borderRadius: 20,
-                        justifyContent: "center",
-                        alignItems: "center",
+                <View
+                  ref={spotifyViewRef}
+                  collapsable={false}
+                >
+                  <View style={{ padding: 14, paddingBottom: 0 }}>
+                    <Pressable
+                      onPress={() => {
+                        // Open Spotify if available
+                        if ((recuerdo as any).spotifyUri) {
+                          // In a real implementation, would use Linking.openURL with spotify: URI
+                          handleShare();
+                        }
                       }}
+                      style={{ opacity: 1 }}
+                      android_ripple={null}
                     >
-                      <IconButton
-                        icon="swap-horizontal"
-                        size={28}
-                        iconColor="#ffffff"
-                        style={{ margin: 0 }}
+                      <Image
+                        source={{ uri: recuerdo.spotifyData?.album?.images?.[0]?.url || recuerdo.miniatura }}
+                        style={{
+                          width: "100%",
+                          height: screenWidth * 0.84,
+                          borderRadius: 8,
+                          backgroundColor: "#191414",
+                        }}
+                        contentFit="cover"
                       />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      onPress={handleShare}
-                      activeOpacity={0.7}
-                      style={{
-                        marginLeft: 12,
-                        backgroundColor: "rgba(0, 0, 0, 0.6)",
-                        width: 40,
-                        height: 40,
-                        borderRadius: 20,
-                        justifyContent: "center",
-                        alignItems: "center",
-                      }}
-                    >
-                      <IconButton
-                        icon="share-variant"
-                        size={20}
-                        iconColor="#ffffff"
-                        style={{ margin: 0 }}
-                      />
-                    </TouchableOpacity>
+                    </Pressable>
                   </View>
 
-                  <View
-                    style={{
-                      minHeight: 100,
-                      backgroundColor: "#191414",
-                      borderTopLeftRadius: 8,
-                      borderTopRightRadius: 8,
-                      overflow: "hidden",
-                    }}
-                  >
-                    {/* Frente de la tarjeta Spotify */}
-                    <Animated.View
-                      pointerEvents={isFlipped ? "none" : "auto"}
-                      style={[
-                        {
-                          position: "absolute",
-                          width: "100%",
-                          top: 0,
-                          left: 0,
-                        },
-                        frontAnimatedStyle,
-                      ]}
+                  {/* Información debajo de la imagen */}
+                  <View style={{ padding: 20, paddingTop: 16, backgroundColor: "#191414" }}>
+                    {/* Header con título y acciones */}
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "flex-start",
+                        justifyContent: "space-between",
+                        marginBottom: 12,
+                      }}
                     >
-                      <View
-                        style={{
-                          backgroundColor: "#191414",
-                          paddingTop: 12,
-                          paddingBottom: 12,
-                          paddingHorizontal: 12,
-                          borderRadius: 8,
-                          minHeight: 100,
-                          borderWidth: 1,
-                          borderColor: "#1DB954",
-                          ...SHADOWS.medium,
-                          flexDirection: "row",
-                          alignItems: "center",
-                        }}
-                      >
-                        {/* Portada del álbum */}
-                        {recuerdo.miniatura && (
-                          <Image
-                            source={{ uri: recuerdo.miniatura }}
-                            style={{
-                              width: 65,
-                              height: 65,
-                              borderRadius: 4,
-                              marginRight: 12,
-                            }}
-                            contentFit="cover"
+                      <View style={{ flex: 1, paddingRight: 8 }}>
+                        {/* Nombre de la canción (grande, negrita) */}
+                        <Text
+                          style={{
+                            fontSize: 18,
+                            color: "#ffffff",
+                            fontFamily: "Montserrat",
+                            fontWeight: "700",
+                            marginBottom: 4,
+                          }}
+                          numberOfLines={2}
+                        >
+                          {recuerdo.spotifyData?.name || recuerdo.titulo?.split(" - ")?.[0] || "Canción de Spotify"}
+                        </Text>
+
+                        {/* Artista (abajo, sin negrita) */}
+                        <Text
+                          style={{
+                            fontSize: 14,
+                            color: "#b3b3b3",
+                            fontFamily: "Montserrat",
+                            fontWeight: "400",
+                          }}
+                          numberOfLines={1}
+                        >
+                          {recuerdo.spotifyData?.artists?.[0]?.name || recuerdo.titulo?.split(" - ")?.[1] || "Artista desconocido"}
+                        </Text>
+                      </View>
+
+                      {/* Acciones (share + menú) */}
+                      <View style={{ flexDirection: "row", alignItems: "center" }}>
+                        <TouchableOpacity
+                          onPress={handleShare}
+                          disabled={isMutating}
+                          activeOpacity={0.6}
+                          style={{ padding: 8 }}
+                        >
+                          <MaterialCommunityIcons
+                            name="share-variant"
+                            size={22}
+                            color="#888888"
                           />
-                        )}
+                        </TouchableOpacity>
 
-                        {/* Información de la canción a la derecha */}
-                        <View style={{ flex: 1, justifyContent: "center" }}>
-                          <Text
-                            numberOfLines={2}
-                            style={{
-                              fontSize: 14,
-                              color: "#ffffff",
-                              fontFamily: "Montserrat",
-                              fontWeight: "700",
-                              marginBottom: 4,
+                        {menuMounted && (
+                          <Menu
+                            visible={menuVisible}
+                            onDismiss={closeMenu}
+                            contentStyle={{
+                              backgroundColor: "#2a2a2a",
+                              borderRadius: 12,
                             }}
-                            ellipsizeMode="tail"
+                            anchor={
+                              <IconButton
+                                icon="dots-horizontal"
+                                size={20}
+                                iconColor="#888888"
+                                style={{ margin: 0 }}
+                                onPress={() => setMenuVisible(true)}
+                                disabled={isMutating}
+                              />
+                            }
                           >
-                            {recuerdo.titulo || "Canción de Spotify"}
-                          </Text>
-                          {recuerdo.descripcion && (
-                            <Text
-                              numberOfLines={1}
-                              style={{
-                                fontSize: 12,
-                                color: "#b3b3b3",
-                                fontFamily: "Montserrat",
-                                fontWeight: "500",
+                            <Menu.Item
+                              leadingIcon="download"
+                              title="Descargar"
+                              titleStyle={{ color: "#ffffff" }}
+                              onPress={() => {
+                                closeMenu();
+                                handleDownload();
                               }}
-                              ellipsizeMode="tail"
-                            >
-                              {recuerdo.descripcion}
-                            </Text>
-                          )}
-                        </View>
-
-                        {/* Logo de Spotify a la derecha */}
-                        <IconButton
-                          icon="spotify"
-                          size={24}
-                          iconColor="#1DB954"
-                          style={{ margin: 0 }}
-                        />
+                              disabled={isMutating}
+                            />
+                            {recuerdo.autorId === currentUserId && (
+                              <Menu.Item
+                                leadingIcon="trash-can"
+                                title="Eliminar"
+                                titleStyle={{ color: "#ffffff" }}
+                                onPress={openDeleteConfirm}
+                                disabled={isMutating}
+                              />
+                            )}
+                          </Menu>
+                        )}
                       </View>
-                    </Animated.View>
+                    </View>
 
-                    {/* Espalda de la tarjeta - Información */}
-                    <Animated.View
-                      pointerEvents={!isFlipped ? "none" : "auto"}
-                      style={[
-                        {
-                          position: "absolute",
-                          width: "100%",
-                          top: 0,
-                          left: 0,
-                        },
-                        backAnimatedStyle,
-                      ]}
+                    {/* Subido por - en blanco */}
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        color: "#ffffff",
+                        marginTop: 6,
+                        fontFamily: FONT.regular,
+                      }}
                     >
+                      Subido por: {recuerdo.autorNombre || "Desconocido"}
+                    </Text>
+
+                    {/* Fecha y hora - en blanco */}
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        color: "#ffffff",
+                        marginTop: 4,
+                        fontFamily: FONT.regular,
+                      }}
+                    >
+                      {recuerdo.fecha.toLocaleDateString("es-ES", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                      {" · "}
+                      {recuerdo.fecha.toLocaleTimeString("es-ES", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </Text>
+
+                    {/* Reacciones */}
+                    {recuerdo.reactions && recuerdo.reactions.length > 0 && (
                       <View
                         style={{
-                          backgroundColor: "#191414",
-                          paddingTop: 12,
-                          paddingBottom: 12,
-                          paddingHorizontal: 12,
-                          borderRadius: 8,
-                          minHeight: 100,
-                          borderWidth: 1,
-                          borderColor: "#1DB954",
-                          ...SHADOWS.medium,
-                          justifyContent: "center",
+                          marginTop: 16,
+                          flexDirection: "row",
+                          flexWrap: "wrap",
+                          gap: 8,
                         }}
                       >
-                        {/* Información del recuerdo */}
-                        <View style={{ flex: 1, justifyContent: "center" }}>
-                          <Text
-                            style={{
-                              fontSize: 13,
-                              color: "#ffffff",
-                              fontFamily: "Montserrat",
-                              fontWeight: "700",
-                              marginBottom: 4,
-                            }}
-                            numberOfLines={1}
-                          >
-                            {recuerdo.autorNombre || "Desconocido"}
-                          </Text>
-
-                          <Text
-                            style={{
-                              fontSize: 11,
-                              color: "#b3b3b3",
-                              fontFamily: FONT.regular,
-                            }}
-                            numberOfLines={1}
-                          >
-                            {new Date(recuerdo.fecha).toLocaleDateString()}
-                          </Text>
-                        </View>
-
-                        {/* Botón eliminar si es propietario */}
-                        {currentUserId === recuerdo.autorId && (
-                          <TouchableOpacity
-                            onPress={() => {
-                              Alert.alert(
-                                "Eliminar recuerdo",
-                                "¿Estás seguro que quieres eliminar este recuerdo?",
-                                [
-                                  { text: "Cancelar", style: "cancel" },
-                                  {
-                                    text: "Eliminar",
-                                    onPress: async () => {
-                                      try {
-                                        await onDeleteRecuerdo(recuerdo.id);
-                                        handleDismiss();
-                                        showToast?.({
-                                          message: "Recuerdo eliminado",
-                                          type: "success",
-                                        });
-                                      } catch (error) {
-                                        showToast?.({
-                                          message: "Error al eliminar",
-                                          type: "error",
-                                        });
-                                      }
-                                    },
-                                    style: "destructive",
-                                  },
-                                ],
-                              );
-                            }}
-                            style={{
-                              backgroundColor: "rgba(255, 52, 52, 0.1)",
-                              borderWidth: 1,
-                              borderColor: "#FF3434",
-                              borderRadius: 6,
-                              paddingVertical: 8,
-                              alignItems: "center",
-                            }}
-                          >
-                            <Text
-                              style={{
-                                color: "#FF3434",
-                                fontSize: 12,
-                                fontWeight: "600",
+                        {recuerdo.reactions.map((reaction) => {
+                          const member = familyMembers.find(
+                            (m) => m.id === reaction.userId
+                          );
+                          if (!member) return null;
+                          return (
+                            <ReactionItem
+                              key={reaction.id}
+                              reaction={reaction}
+                              member={member}
+                              borderColor="#1DB954"
+                              onPress={(stickerUrl) => {
+                                if (stickerUrl) {
+                                  setLastReactedStickerUrl(stickerUrl);
+                                }
                               }}
-                            >
-                              Eliminar recuerdo
-                            </Text>
-                          </TouchableOpacity>
-                        )}
+                            />
+                          );
+                        })}
                       </View>
-                    </Animated.View>
-                  </View>
-
-                  {/* Reacciones */}
-                  <View
-                    style={{
-                      backgroundColor: COLORS.white,
-                      borderBottomLeftRadius: 10,
-                      borderBottomRightRadius: 10,
-                      padding: 16,
-                    }}
-                  >
-                    {renderInfoBlock(false)}
+                    )}
                   </View>
                 </View>
               )}

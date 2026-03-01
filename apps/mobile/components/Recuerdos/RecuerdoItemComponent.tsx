@@ -26,6 +26,7 @@ interface Recuerdo {
   miniatura?: string;
   titulo?: string;
   fecha: Date;
+  spotifyData?: any;
 }
 
 interface RecuerdoItemProps {
@@ -348,14 +349,14 @@ const RecuerdoItemComponent = React.memo(
             }}
           >
             {/* Portada del álbum a la izquierda */}
-            {item.miniatura && (
+            {(item.spotifyData?.album?.images || item.miniatura) && (
               <Image
                 source={{ uri: item.miniatura }}
                 style={{
                   width: itemSize * 0.35,
                   height: itemSize * 0.35,
                   borderRadius: 4,
-                  marginRight: 6 * scale,
+                  marginRight: 12 * scale,
                   flexShrink: 0,
                 }}
                 contentFit="cover"
@@ -372,20 +373,28 @@ const RecuerdoItemComponent = React.memo(
                 height: itemSize * 0.35,
               }}
             >
-              {/* Título arriba */}
-              <Text
-                numberOfLines={2}
-                style={{
-                  fontSize: 11 * scale,
-                  color: "#fff",
-                  textAlign: "left",
-                  fontFamily: "Montserrat",
-                  fontWeight: "700",
-                  flex: 1,
-                }}
-              >
-                {item.titulo || "Canción de Spotify"}
-              </Text>
+              {/* Título y artista */}
+              <View style={{ flex: 1, justifyContent: "center" }}>
+                <Text
+                  numberOfLines={2}
+                  style={{
+                    fontSize: 11 * scale,
+                    color: "#fff",
+                    textAlign: "left",
+                    fontFamily: "Montserrat",
+                    fontWeight: "700",
+                  }}
+                >
+                  {item.spotifyData?.name  ||  "Canción de Spotify"}{" · "}
+                  {item.spotifyData?.artists && item.spotifyData.artists.length > 0 && (
+                    <>
+                      <Text style={{ fontWeight: "400", color: "#fff", }}>
+                        {item.spotifyData.artists[0].name}
+                      </Text>
+                    </>
+                  )}
+                </Text>
+              </View>
               {/* Logo de Spotify abajo, centrado */}
               <View style={{ alignItems: "center", width: "100%" }}>
                 <IconButton icon="spotify" size={16 * scale} iconColor="#1DB954" style={{ margin: 0, padding: 0 }} />

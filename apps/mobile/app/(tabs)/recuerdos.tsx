@@ -117,6 +117,7 @@ const memoryToRecuerdo = (
     autorId: memory.createdBy,
     autorNombre: memberNameById[memory.createdBy] || undefined,
     fecha: new Date(memory.createdAt),
+    spotifyData: (memory as any).spotifyData,
     reactions: (memory.reactions || []).map(
       (r: {
         id: string;
@@ -143,6 +144,7 @@ interface Recuerdo {
   autorId?: string;
   autorNombre?: string;
   fecha: Date;
+  spotifyData?: any;
   reactions?: {
     id: string;
     userId: string;
