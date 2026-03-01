@@ -42,8 +42,9 @@ export default function SpotifySearchComponent({
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
 
-    // Limpiar resultados previos antes de buscar
+    // Limpiar resultados y selección previos antes de buscar
     setSearchResults([]);
+    setSelectedTrack(null);
 
     try {
       const result = await searchMutation.mutateAsync({
