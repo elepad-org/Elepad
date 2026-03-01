@@ -683,8 +683,8 @@ export default function RecuerdoDetailDialog({
       }
 
       // Para Spotify, capturar como imagen (similar a imagen/texto)
-      if (recuerdo.tipo === "spotify" && spotifyViewRef.current) {
-        const uri = await captureRef(spotifyViewRef, {
+      if (recuerdo.tipo === "spotify" && spotifyDownloadRef.current) {
+        const uri = await captureRef(spotifyDownloadRef, {
           format: "png",
           quality: 1,
         });
@@ -1927,7 +1927,7 @@ export default function RecuerdoDetailDialog({
                             visible={menuVisible}
                             onDismiss={closeMenu}
                             contentStyle={{
-                              backgroundColor: "#2a2a2a",
+                              backgroundColor: COLORS.white,
                               borderRadius: 12,
                             }}
                             anchor={
@@ -1944,7 +1944,6 @@ export default function RecuerdoDetailDialog({
                             <Menu.Item
                               leadingIcon="download"
                               title="Descargar"
-                              titleStyle={{ color: "#ffffff" }}
                               onPress={() => {
                                 closeMenu();
                                 handleDownload();
@@ -1955,7 +1954,6 @@ export default function RecuerdoDetailDialog({
                               <Menu.Item
                                 leadingIcon="trash-can"
                                 title="Eliminar"
-                                titleStyle={{ color: "#ffffff" }}
                                 onPress={openDeleteConfirm}
                                 disabled={isMutating}
                               />
@@ -1965,11 +1963,11 @@ export default function RecuerdoDetailDialog({
                       </View>
                     </View>
 
-                    {/* Subido por - en blanco */}
+                    {/* Subido por - gris como el icono */}
                     <Text
                       style={{
                         fontSize: 13,
-                        color: "#ffffff",
+                        color: "#888888",
                         marginTop: 6,
                         fontFamily: FONT.regular,
                       }}
@@ -1977,11 +1975,11 @@ export default function RecuerdoDetailDialog({
                       Subido por: {recuerdo.autorNombre || "Desconocido"}
                     </Text>
 
-                    {/* Fecha y hora - en blanco */}
+                    {/* Fecha y hora - gris como el icono */}
                     <Text
                       style={{
                         fontSize: 13,
-                        color: "#ffffff",
+                        color: "#888888",
                         marginTop: 4,
                         fontFamily: FONT.regular,
                       }}
