@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { View, FlatList, Pressable, Image } from "react-native";
 import {
-  Dialog,
   Text,
   ActivityIndicator,
 } from "react-native-paper";
@@ -42,6 +41,9 @@ export default function SpotifySearchComponent({
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
+
+    // Limpiar resultados previos antes de buscar
+    setSearchResults([]);
 
     try {
       const result = await searchMutation.mutateAsync({
@@ -147,68 +149,75 @@ export default function SpotifySearchComponent({
   };
 
   return (
-    <>
-      <Dialog.Title style={{ ...STYLES.heading, marginBottom: 16 }}>Buscar en Spotify</Dialog.Title>
-      <Dialog.Content style={{ paddingBottom: 12 }}>
-        <StyledTextInput
-          label="Nombre de la canción"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          onSubmitEditing={handleSearch}
-          returnKeyType="search"
-          disabled={searchMutation.isPending || isUploading}
-          marginBottom={16}
+    <View
+      style={{
+        backgroundColor: COLORS.background,
+        padding: 20,
+        borderRadius: 20,
+      }}
+    >
+      <Text style={{ ...STYLES.heading, marginBottom: 16 }}>Buscar en Spotify</Text>
+
+      <StyledTextInput
+        label="Nombre de la canción"
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        onSubmitEditing={handleSearch}
+        returnKeyType="search"
+        disabled={searchMutation.isPending || isUploading}
+        marginBottom={16}
+      />
+
+      {searchMutation.isPending && (
+        <View style={{ paddingVertical: 32, alignItems: "center" }}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+          <Text style={{  marginTop: 12, color: COLORS.textSecondary }}>
+            Buscando en Spotify...
+          </Text>
+        </View>
+      )}
+
+      {!searchMutation.isPending && searchResults.length === 0 && searchQuery.trim() !== "" && (
+        <View style={{ paddingVertical: 32, alignItems: "center" }}>
+          <Text style={{ ...STYLES.paragraphText, color: COLORS.textSecondary }}>
+            No se encontraron resultados
+          </Text>
+        </View>
+      )}
+
+      {!searchMutation.isPending && searchResults.length === 0 && searchQuery.trim() === "" && (
+        <View style={{ paddingVertical: 12, alignItems: "center" }}>
+          <Text style={{ ...STYLES.paragraphText, color: COLORS.textPlaceholder, textAlign: "center" }}>
+            Busca una canción de Spotify para agregarla como recuerdo.
+          </Text>
+        </View>
+      )}
+
+      {searchResults.length > 0 && (
+        <FlatList
+          data={searchResults}
+          renderItem={renderTrackItem}
+          keyExtractor={(item) => item.id}
+          style={{ maxHeight: 400 }}
+          showsVerticalScrollIndicator={true}
         />
+      )}
 
-        {searchMutation.isPending && (
-          <View style={{ paddingVertical: 32, alignItems: "center" }}>
-            <ActivityIndicator size="large" color={COLORS.primary} />
-            <Text style={{  marginTop: 12, color: COLORS.textSecondary }}>
-              Buscando en Spotify...
-            </Text>
-          </View>
-        )}
+      {isUploading && (
+        <View style={{ paddingVertical: 32, alignItems: "center" }}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+          <Text style={{  marginTop: 12, color: COLORS.textSecondary }}>
+            Guardando recuerdo...
+          </Text>
+        </View>
+      )}
 
-        {!searchMutation.isPending && searchResults.length === 0 && searchQuery.trim() !== "" && (
-          <View style={{ paddingVertical: 32, alignItems: "center" }}>
-            <Text style={{ ...STYLES.paragraphText, color: COLORS.textSecondary }}>
-              No se encontraron resultados
-            </Text>
-          </View>
-        )}
-
-        {!searchMutation.isPending && searchResults.length === 0 && searchQuery.trim() === "" && (
-          <View style={{ paddingVertical: 12, alignItems: "center" }}>
-            <Text style={{ ...STYLES.paragraphText, color: COLORS.textPlaceholder, textAlign: "center" }}>
-              Busca tu canción favorita en Spotify para agregarla como recuerdo
-            </Text>
-          </View>
-        )}
-
-        {searchResults.length > 0 && (
-          <FlatList
-            data={searchResults}
-            renderItem={renderTrackItem}
-            keyExtractor={(item) => item.id}
-            style={{ maxHeight: 400 }}
-            showsVerticalScrollIndicator={true}
-          />
-        )}
-
-        {isUploading && (
-          <View style={{ paddingVertical: 32, alignItems: "center" }}>
-            <ActivityIndicator size="large" color={COLORS.primary} />
-            <Text style={{  marginTop: 12, color: COLORS.textSecondary }}>
-              Guardando recuerdo...
-            </Text>
-          </View>
-        )}
-      </Dialog.Content>
-      <Dialog.Actions
+      <View
         style={{
-          paddingBottom: 12,
-          paddingHorizontal: 24,
+          flexDirection: "row",
           justifyContent: "space-between",
+          alignItems: "center",
+          marginTop: 16,
         }}
       >
         <View style={{ width: 120 }}>
@@ -222,7 +231,7 @@ export default function SpotifySearchComponent({
             loading={isUploading}
           />
         </View>
-      </Dialog.Actions>
-    </>
+      </View>
+    </View>
   );
 }
