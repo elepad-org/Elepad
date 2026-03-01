@@ -6,9 +6,11 @@ import {
   Animated,
   Platform,
   KeyboardAvoidingView,
+  Modal,
+  TouchableOpacity,
 } from "react-native";
 import { useRef } from "react";
-import { Button, Dialog, Portal, Text, Menu } from "react-native-paper";
+import { Button, Text, Menu, Portal } from "react-native-paper";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { StyledTextInput } from "../shared";
 import {
@@ -348,25 +350,30 @@ export default function ActivityForm({
 
   return (
     <>
-      <Portal>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={{ flex: 1, justifyContent: "center" }}
-          keyboardVerticalOffset={-41}
-        >
-          <Dialog
-            visible={visible}
-            onDismiss={onClose}
-            style={{
-              backgroundColor: COLORS.background,
-              width: "92%",
-              alignSelf: "center",
-              borderRadius: 20,
-              maxHeight: "100%",
-            }}
-          >
-            <Animated.View style={{ opacity: fadeAnim }}>
-              <Dialog.Content style={{ paddingBottom: 15 }}>
+      <Modal
+        visible={visible}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={onClose}
+      >
+        <Portal.Host>
+          <View style={styles.modalContainer}>
+            <TouchableOpacity
+              style={styles.modalBackdrop}
+              activeOpacity={1}
+              onPress={onClose}
+            />
+            <KeyboardAvoidingView
+              behavior="padding"
+              style={styles.modalContent}
+              keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+            >
+              <Animated.View style={{ opacity: fadeAnim }}>
+                <ScrollView
+                  keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={false}
+                  style={styles.scrollContent}
+                >
                 <StyledTextInput
                   key={`title-${visible}-${initial?.id || "new"}`}
                   label="Título"
@@ -526,15 +533,8 @@ export default function ActivityForm({
                 />
 
                 {error && <Text style={styles.error}>{error}</Text>}
-              </Dialog.Content>
-              <Dialog.Actions
-                style={{
-                  paddingBottom: 30,
-                  paddingHorizontal: 24,
-                  paddingTop: 10,
-                  justifyContent: "space-between",
-                }}
-              >
+              </ScrollView>
+              <View style={styles.modalActions}>
                 <View style={{ width: 120 }}>
                   <CancelButton onPress={onClose} />
                 </View>
@@ -550,33 +550,29 @@ export default function ActivityForm({
                     loading={saving}
                   />
                 </View>
-              </Dialog.Actions>
+              </View>
             </Animated.View>
-          </Dialog>
-        </KeyboardAvoidingView>
-      </Portal>
-      <Portal>
-        <Dialog
-          visible={showFrequencyModal}
-          onDismiss={() => setShowFrequencyModal(false)}
-          style={{
-            backgroundColor: COLORS.background,
-            width: "92%",
-            alignSelf: "center",
-            borderRadius: 20,
-          }}
-        >
-          <Dialog.Title
-            style={{
-              textAlign: "center",
-              color: COLORS.primary,
-              fontWeight: "bold",
-              fontSize: 20,
-            }}
-          >
-            Seleccionar frecuencia
-          </Dialog.Title>
-          <Dialog.Content>
+          </KeyboardAvoidingView>
+        </View>
+        </Portal.Host>
+      </Modal>
+
+      <Modal
+        visible={showFrequencyModal}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowFrequencyModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <TouchableOpacity
+            style={styles.modalBackdrop}
+            activeOpacity={1}
+            onPress={() => setShowFrequencyModal(false)}
+          />
+          <View style={styles.frequencyModalContent}>
+            <Text style={styles.frequencyModalTitle}>
+              Seleccionar frecuencia
+            </Text>
             <ScrollView style={{ maxHeight: 310 }}>
               {frequencies.map((freq) => (
                 <Button
@@ -606,14 +602,55 @@ export default function ActivityForm({
                 </Button>
               ))}
             </ScrollView>
-          </Dialog.Content>
-        </Dialog>
-      </Portal>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "92%",
+    maxHeight: "90%",
+    backgroundColor: COLORS.background,
+    borderRadius: 20,
+    padding: 24,
+    zIndex: 1,
+  },
+  scrollContent: {
+    width: "100%",
+  },
+  modalActions: {
+    paddingTop: 20,
+    paddingBottom: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  frequencyModalContent: {
+    width: "92%",
+    backgroundColor: COLORS.background,
+    borderRadius: 20,
+    padding: 24,
+    zIndex: 1,
+  },
+  frequencyModalTitle: {
+    textAlign: "center",
+    color: COLORS.primary,
+    fontWeight: "bold",
+    fontSize: 20,
+    marginBottom: 16,
+  },
   titleInput: {
     backgroundColor: COLORS.backgroundSecondary,
   },
@@ -630,6 +667,8 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 8,
     marginBottom: 16,
+    width: "100%"
+    
   },
   destinatarioLabel: {
     fontSize: 12,

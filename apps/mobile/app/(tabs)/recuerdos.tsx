@@ -12,11 +12,13 @@ import {
   Dimensions,
   Platform,
   KeyboardAvoidingView,
+  Modal,
+  TouchableOpacity,
+  StyleSheet,
 } from "react-native";
 import {
   Text,
   Portal,
-  Dialog,
   Button,
   ActivityIndicator,
   IconButton,
@@ -947,132 +949,129 @@ export default function RecuerdosScreen() {
     if (!bookDialogVisible && !bookToDelete) return null;
 
     return (
-      <Portal>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={{ flex: 1, justifyContent: "center" }}
-          keyboardVerticalOffset={-41}
-        >
-          <Dialog
-            visible={bookDialogVisible}
-            onDismiss={() => {
-              setBookDialogVisible(false);
-              setEditingBook(null);
-            }}
-            style={{
-              backgroundColor: COLORS.background,
-              width: "92%",
-              alignSelf: "center",
-              borderRadius: 16,
-            }}
-          >
-            <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
-              {bookDialogMode === "create" ? "Nuevo baúl" : "Modificar baúl"}
-            </Dialog.Title>
-            <Dialog.Content style={{ paddingBottom: 12 }}>
-              <StyledTextInput
-                label="Nombre"
-                value={bookFormTitle}
-                onChangeText={setBookFormTitle}
-                marginBottom={12}
-              />
-              <StyledTextInput
-                label="Descripción"
-                value={bookFormDescription}
-                onChangeText={setBookFormDescription}
-                multiline
-                numberOfLines={3}
-                marginBottom={12}
-              />
-            </Dialog.Content>
-            <Dialog.Actions
-              style={{
-                paddingBottom: 30,
-                paddingHorizontal: 24,
-                paddingTop: 0,
-                justifyContent: "space-between",
-              }}
-            >
-              <View style={{ width: 120 }}>
-                <CancelButton
-                  onPress={() => {
-                    setBookDialogVisible(false);
-                    setEditingBook(null);
-                  }}
-                  disabled={
-                    createBookMutation.isPending || updateBookMutation.isPending
-                  }
-                />
-              </View>
-              <View style={{ width: 120 }}>
-                <SaveButton
-                  onPress={submitBookDialog}
-                  loading={
-                    createBookMutation.isPending || updateBookMutation.isPending
-                  }
-                  disabled={
-                    !groupId ||
-                    !bookFormTitle.trim() ||
-                    createBookMutation.isPending ||
-                    updateBookMutation.isPending ||
-                    deleteBookMutation.isPending
-                  }
-                />
-              </View>
-            </Dialog.Actions>
-          </Dialog>
-        </KeyboardAvoidingView>
-
-        <Dialog
-          visible={!!bookToDelete}
-          onDismiss={() => setBookToDelete(null)}
-          style={{
-            backgroundColor: COLORS.background,
-            width: "90%",
-            alignSelf: "center",
-            borderRadius: 16,
+      <>
+        {/* Modal de crear/editar baúl */}
+        <Modal
+          visible={bookDialogVisible}
+          animationType="fade"
+          transparent={true}
+          onRequestClose={() => {
+            setBookDialogVisible(false);
+            setEditingBook(null);
           }}
         >
-          <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8 }}>
-            Eliminar baúl
-          </Dialog.Title>
-          <Dialog.Content>
-            <Text style={{ ...STYLES.subheading, marginTop: 0 }}>
-              Esto eliminará también los recuerdos dentro del baúl.
-            </Text>
-          </Dialog.Content>
-          <Dialog.Actions
-            style={{
-              paddingBottom: 30,
-              paddingHorizontal: 24,
-              paddingTop: 0,
-              justifyContent: "space-between",
-            }}
-          >
-            <View style={{ width: 120 }}>
-              <CancelButton
-                onPress={() => setBookToDelete(null)}
-                disabled={deleteBookMutation.isPending}
-              />
+          <View style={modalStyles.container}>
+            <TouchableOpacity
+              style={modalStyles.backdrop}
+              activeOpacity={1}
+              onPress={() => {
+                setBookDialogVisible(false);
+                setEditingBook(null);
+              }}
+            />
+            <KeyboardAvoidingView
+              behavior="padding"
+              style={modalStyles.content}
+              keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+            >
+              <Text style={modalStyles.title}>
+                {bookDialogMode === "create" ? "Nuevo baúl" : "Modificar baúl"}
+              </Text>
+              <View style={{ marginTop: 16, marginBottom: 24 }}>
+                <StyledTextInput
+                  label="Nombre"
+                  value={bookFormTitle}
+                  onChangeText={setBookFormTitle}
+                  marginBottom={12}
+                />
+                <StyledTextInput
+                  label="Descripción"
+                  value={bookFormDescription}
+                  onChangeText={setBookFormDescription}
+                  multiline
+                  numberOfLines={3}
+                  marginBottom={12}
+                />
+              </View>
+              <View style={modalStyles.actions}>
+                <View style={{ width: 120 }}>
+                  <CancelButton
+                    onPress={() => {
+                      setBookDialogVisible(false);
+                      setEditingBook(null);
+                    }}
+                    disabled={
+                      createBookMutation.isPending || updateBookMutation.isPending
+                    }
+                  />
+                </View>
+                <View style={{ width: 120 }}>
+                  <SaveButton
+                    onPress={submitBookDialog}
+                    loading={
+                      createBookMutation.isPending || updateBookMutation.isPending
+                    }
+                    disabled={
+                      !groupId ||
+                      !bookFormTitle.trim() ||
+                      createBookMutation.isPending ||
+                      updateBookMutation.isPending ||
+                      deleteBookMutation.isPending
+                    }
+                  />
+                </View>
+              </View>
+            </KeyboardAvoidingView>
+          </View>
+        </Modal>
+
+        {/* Modal de confirmación de eliminación de baúl */}
+        <Modal
+          visible={!!bookToDelete}
+          animationType="fade"
+          transparent={true}
+          onRequestClose={() => setBookToDelete(null)}
+        >
+          <View style={modalStyles.container}>
+            <TouchableOpacity
+              style={modalStyles.backdrop}
+              activeOpacity={1}
+              onPress={() => setBookToDelete(null)}
+            />
+            <View style={modalStyles.dialogContent}>
+              <Text style={[STYLES.heading, { fontSize: 18, marginBottom: 16 }]}>
+                Eliminar baúl
+              </Text>
+              <Text style={{ ...STYLES.subheading, marginTop: 0 }}>
+                Esto eliminará también los recuerdos dentro del baúl.
+              </Text>
+              <View style={modalStyles.actions}>
+                <View style={{ width: 120 }}>
+                  <CancelButton
+                    onPress={() => setBookToDelete(null)}
+                    disabled={deleteBookMutation.isPending}
+                  />
+                </View>
+                <View style={{ width: 120 }}>
+                  <SaveButton
+                    text="Eliminar"
+                    onPress={() => {
+                      if (!bookToDelete) return;
+                      deleteBookMutation.mutate(bookToDelete.id);
+                    }}
+                    loading={deleteBookMutation.isPending}
+                    disabled={
+                      deleteBookMutation.isPending ||
+                      createBookMutation.isPending ||
+                      updateBookMutation.isPending
+                    }
+                  />
+                </View>
+              </View>
             </View>
-            <View style={{ width: 120 }}>
-              <SaveButton
-                text="Eliminar"
-                onPress={() => {
-                  if (!bookToDelete) return;
-                  deleteBookMutation.mutate(bookToDelete.id);
-                }}
-                loading={deleteBookMutation.isPending}
-                disabled={
-                  deleteBookMutation.isPending ||
-                  createBookMutation.isPending ||
-                  updateBookMutation.isPending
-                }
-              />
-            </View>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
+          </View>
+        </Modal>
+      </>
     );
   };
 
@@ -1838,3 +1837,46 @@ export default function RecuerdosScreen() {
     </SafeAreaView>
   );
 }
+
+const modalStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  backdrop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  content: {
+    backgroundColor: COLORS.background,
+    width: "92%",
+    borderRadius: 16,
+    padding: 24,
+    paddingTop: 20,
+    maxWidth: 500,
+  },
+  dialogContent: {
+    backgroundColor: COLORS.background,
+    width: "90%",
+    borderRadius: 16,
+    padding: 24,
+    paddingTop: 20,
+    maxWidth: 500,
+  },
+  title: {
+    ...STYLES.heading,
+    fontSize: 20,
+    marginBottom: 0,
+  },
+  actions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 8,
+    paddingBottom: 20
+  },
+});

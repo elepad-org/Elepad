@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
-import { Dialog, Text, Portal } from "react-native-paper";
+import { View, StyleSheet, KeyboardAvoidingView, Platform, Modal, TouchableOpacity } from "react-native";
+import { Text } from "react-native-paper";
 import { COLORS, STYLES } from "@/styles/base";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
 import CancelButton from "./CancelButton";
@@ -100,27 +100,27 @@ export const EditNameModal: React.FC<EditNameModalProps> = ({
   };
 
   return (
-    <Portal>
-      <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={{ flex: 1, justifyContent: "center" }}
-          keyboardVerticalOffset={-41}
+    <Modal
+      visible={visible}
+      animationType="fade"
+      transparent={true}
+      onRequestClose={handleDismiss}
+    >
+      <View style={modalStyles.container}>
+        <TouchableOpacity
+          style={modalStyles.backdrop}
+          activeOpacity={1}
+          onPress={handleDismiss}
+        />
+        <KeyboardAvoidingView
+          behavior="padding"
+          style={modalStyles.content}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
         >
-        <Dialog
-          visible={visible}
-          onDismiss={handleDismiss}
-          style={{
-            backgroundColor: COLORS.background,
-            width: "90%",
-            alignSelf: "center",
-            borderRadius: 16,
-            paddingVertical: 14,
-          }}
-        >
-          <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8, marginBottom: 4, textAlign: "center" }}>
+          <Text style={modalStyles.title}>
             Editar nombre
-          </Dialog.Title>
-          <Dialog.Content style={{ paddingBottom: 15, paddingTop: 8 }}>
+          </Text>
+          <View style={{ paddingBottom: 15, paddingTop: 8 }}>
             <Text variant="bodyMedium" style={styles.description}>
               Ingresa tu nuevo nombre
             </Text>
@@ -132,15 +132,8 @@ export const EditNameModal: React.FC<EditNameModalProps> = ({
               autoFocus
               marginBottom={0}
             />
-          </Dialog.Content>
-          <Dialog.Actions
-            style={{
-              paddingBottom: 30,
-              paddingHorizontal: 24,
-              paddingTop: 10,
-              justifyContent: "space-between",
-            }}
-          >
+          </View>
+          <View style={modalStyles.actions}>
             <View style={{ width: 120 }}>
               <CancelButton onPress={handleDismiss} disabled={saving} />
             </View>
@@ -156,10 +149,10 @@ export const EditNameModal: React.FC<EditNameModalProps> = ({
                 text="Guardar"
               />
             </View>
-          </Dialog.Actions>
-        </Dialog>
-      </KeyboardAvoidingView>
-    </Portal>
+          </View>
+        </KeyboardAvoidingView>
+      </View>
+    </Modal>
   );
 };
 
@@ -169,5 +162,41 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     lineHeight: 22,
     textAlign: "center",
+  },
+});
+
+const modalStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  backdrop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  content: {
+    backgroundColor: COLORS.background,
+    width: "90%",
+    borderRadius: 16,
+    padding: 24,
+    paddingVertical: 20,
+    maxWidth: 500,
+  },
+  title: {
+    ...STYLES.heading,
+    fontSize: 20,
+    textAlign: "center",
+    marginBottom: 4,
+  },
+  actions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingTop: 10,
+    paddingBottom: 30,
   },
 });

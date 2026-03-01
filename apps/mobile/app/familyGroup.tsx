@@ -10,15 +10,16 @@ import {
   Pressable,
   KeyboardAvoidingView,
   Platform,
+  Modal,
+  TouchableOpacity,
+  StyleSheet,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   Button,
-  Portal,
   Text,
   TextInput,
   IconButton,
-  Dialog,
   Card,
 } from "react-native-paper";
 import { router } from "expo-router";
@@ -555,67 +556,61 @@ export default function FamilyGroup() {
               </>
             );
           })()}
-          <Portal>
-            <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={{ flex: 1, justifyContent: "center" }}
-          keyboardVerticalOffset={-41}
-        >
-              <Dialog
-                visible={isEditing}
-                onDismiss={() => {
+          <Modal
+            visible={isEditing}
+            animationType="fade"
+            transparent={true}
+            onRequestClose={() => {
+              setIsEditing(false);
+              setNewGroupName(groupInfo?.name || "");
+            }}
+          >
+            <View style={modalStyles.container}>
+              <TouchableOpacity
+                style={modalStyles.backdrop}
+                activeOpacity={1}
+                onPress={() => {
                   setIsEditing(false);
                   setNewGroupName(groupInfo?.name || "");
                 }}
-                style={{ backgroundColor: COLORS.background }}
+              />
+              <KeyboardAvoidingView
+                behavior="padding"
+                style={modalStyles.content}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
               >
-                <Dialog.Title>Editar nombre del grupo</Dialog.Title>
-                <Dialog.Content>
+                <Text style={modalStyles.title}>Editar nombre del grupo</Text>
+                <View style={{ marginTop: 16, marginBottom: 24 }}>
                   <StyledTextInput
                     value={newGroupName}
                     label="Nombre del grupo"
                     onChangeText={setNewGroupName}
                     autoFocus
                   />
-                </Dialog.Content>
-                <Dialog.Actions
-                  style={{
-                    paddingHorizontal: 16,
-                    paddingBottom: 12,
-                  }}
-                >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      width: "100%",
-                      gap: 12,
-                    }}
-                  >
-                    <View style={{ width: 120 }}>
-                      <CancelButton
-                        onPress={() => {
-                          setIsEditing(false);
-                          setNewGroupName(groupInfo?.name || "");
-                        }}
-                        disabled={patchFamilyGroup.isPending}
-                      />
-                    </View>
-                    <View style={{ width: 120 }}>
-                      <SaveButton
-                        onPress={handleSaveGroupName}
-                        loading={patchFamilyGroup.isPending}
-                        disabled={
-                          !newGroupName.trim() || patchFamilyGroup.isPending
-                        }
-                      />
-                    </View>
+                </View>
+                <View style={modalStyles.actions}>
+                  <View style={{ width: 120 }}>
+                    <CancelButton
+                      onPress={() => {
+                        setIsEditing(false);
+                        setNewGroupName(groupInfo?.name || "");
+                      }}
+                      disabled={patchFamilyGroup.isPending}
+                    />
                   </View>
-                </Dialog.Actions>
-              </Dialog>
-            </KeyboardAvoidingView>
-          </Portal>
+                  <View style={{ width: 120 }}>
+                    <SaveButton
+                      onPress={handleSaveGroupName}
+                      loading={patchFamilyGroup.isPending}
+                      disabled={
+                        !newGroupName.trim() || patchFamilyGroup.isPending
+                      }
+                    />
+                  </View>
+                </View>
+              </KeyboardAvoidingView>
+            </View>
+          </Modal>
           {/* Mostramos los miembros del grupo Familiar */}
           <Card style={[STYLES.titleCard, { marginBottom: 6 }]}>
             <Card.Content>
@@ -1073,22 +1068,23 @@ export default function FamilyGroup() {
             </Button>
           </View>
         </View>
-        <Portal>
-          <Dialog
-            visible={confirmVisible}
-            onDismiss={closeConfirm}
-            style={{
-              alignSelf: "center",
-              width: "90%",
-              backgroundColor: COLORS.background,
-            }}
-          >
-            <Dialog.Title>
-              <Text style={[STYLES.heading, { fontSize: 18, paddingTop: 15 }]}>
+        {/* Modal de confirmación de eliminar miembro */}
+        <Modal
+          visible={confirmVisible}
+          animationType="fade"
+          transparent={true}
+          onRequestClose={closeConfirm}
+        >
+          <View style={modalStyles.container}>
+            <TouchableOpacity
+              style={modalStyles.backdrop}
+              activeOpacity={1}
+              onPress={closeConfirm}
+            />
+            <View style={modalStyles.dialogContent}>
+              <Text style={[STYLES.heading, { fontSize: 18, marginBottom: 16 }]}>
                 Eliminar miembro
               </Text>
-            </Dialog.Title>
-            <Dialog.Content>
               <Text style={[STYLES.subheading]}>
                 ¿Está seguro que desea eliminar a {""}
                 <Text style={[STYLES.paragraphText, { fontWeight: "700" }]}>
@@ -1096,66 +1092,62 @@ export default function FamilyGroup() {
                 </Text>{" "}
                 del grupo?
               </Text>
-            </Dialog.Content>
-            <Dialog.Actions
-              style={{
-                justifyContent: "space-between",
-                paddingHorizontal: 16,
-                paddingBottom: 16,
-              }}
-            >
-              <Button
-                mode="contained"
-                onPress={closeConfirm}
-                style={[
-                  STYLES.buttonPrimary,
-                  { width: "40%", marginTop: 0, backgroundColor: COLORS.white },
-                ]}
-                labelStyle={{ color: COLORS.text }}
-                contentStyle={STYLES.buttonContent}
-              >
-                No
-              </Button>
-              <Button
-                mode="contained"
-                onPress={confirmRemove}
-                style={[
-                  STYLES.buttonPrimary,
-                  {
-                    width: "40%",
-                    backgroundColor: COLORS.secondary,
-                    marginTop: 0,
-                    opacity: removeMember.isPending ? 0.7 : 1,
-                  },
-                ]}
-                labelStyle={{
-                  color: COLORS.white,
-                  fontFamily: "Montserrat_500Medium",
-                }}
-                contentStyle={STYLES.buttonContent}
-                disabled={removeMember.isPending}
-              >
-                Si
-              </Button>
-            </Dialog.Actions>
-          </Dialog>
+              <View style={modalStyles.dialogActions}>
+                <Button
+                  mode="contained"
+                  onPress={closeConfirm}
+                  style={[
+                    STYLES.buttonPrimary,
+                    { width: "40%", marginTop: 0, backgroundColor: COLORS.white },
+                  ]}
+                  labelStyle={{ color: COLORS.text }}
+                  contentStyle={STYLES.buttonContent}
+                >
+                  No
+                </Button>
+                <Button
+                  mode="contained"
+                  onPress={confirmRemove}
+                  style={[
+                    STYLES.buttonPrimary,
+                    {
+                      width: "40%",
+                      backgroundColor: COLORS.secondary,
+                      marginTop: 0,
+                      opacity: removeMember.isPending ? 0.7 : 1,
+                    },
+                  ]}
+                  labelStyle={{
+                    color: COLORS.white,
+                    fontFamily: "Montserrat_500Medium",
+                  }}
+                  contentStyle={STYLES.buttonContent}
+                  disabled={removeMember.isPending}
+                >
+                  Si
+                </Button>
+              </View>
+            </View>
+          </View>
+        </Modal>
 
-          {/* Diálogo para seleccionar nuevo owner */}
-          <Dialog
-            visible={transferDialogVisible}
-            onDismiss={closeTransferDialog}
-            style={{
-              alignSelf: "center",
-              width: "90%",
-              backgroundColor: COLORS.background,
-            }}
-          >
-            <Dialog.Title>
-              <Text style={[STYLES.heading, { fontSize: 18, paddingTop: 15 }]}>
+        {/* Modal para seleccionar nuevo owner */}
+        <Modal
+          visible={transferDialogVisible}
+          animationType="fade"
+          transparent={true}
+          onRequestClose={closeTransferDialog}
+        >
+          <View style={modalStyles.container}>
+            <TouchableOpacity
+              style={modalStyles.backdrop}
+              activeOpacity={1}
+              onPress={closeTransferDialog}
+            />
+            <View style={modalStyles.dialogContent}>
+              <Text style={[STYLES.heading, { fontSize: 18, marginBottom: 16 }]}>
                 Transferir administración
               </Text>
-            </Dialog.Title>
-            <Dialog.Content>
               <Text style={[STYLES.subheading]}>
                 Selecciona el miembro que será el nuevo administrador del grupo:
               </Text>
@@ -1234,45 +1226,41 @@ export default function FamilyGroup() {
                   ));
                 })()}
               </ScrollView>
-            </Dialog.Content>
-            <Dialog.Actions
-              style={{
-                justifyContent: "center",
-                paddingHorizontal: 16,
-                paddingBottom: 16,
-              }}
-            >
-              <Button
-                mode="contained"
-                onPress={closeTransferDialog}
-                style={[
-                  STYLES.buttonPrimary,
-                  { marginTop: 0, backgroundColor: COLORS.white },
-                ]}
-                labelStyle={{ color: COLORS.text }}
-                contentStyle={STYLES.buttonContent}
-              >
-                Cancelar
-              </Button>
-            </Dialog.Actions>
-          </Dialog>
+              <View style={{ marginTop: 16 }}>
+                <Button
+                  mode="contained"
+                  onPress={closeTransferDialog}
+                  style={[
+                    STYLES.buttonPrimary,
+                    { marginTop: 0, backgroundColor: COLORS.white },
+                  ]}
+                  labelStyle={{ color: COLORS.text }}
+                  contentStyle={STYLES.buttonContent}
+                >
+                  Cancelar
+                </Button>
+              </View>
+            </View>
+          </View>
+        </Modal>
 
-          {/* Diálogo de confirmación de transferencia */}
-          <Dialog
-            visible={confirmTransferVisible}
-            onDismiss={closeConfirmTransfer}
-            style={{
-              alignSelf: "center",
-              width: "90%",
-              backgroundColor: COLORS.background,
-            }}
-          >
-            <Dialog.Title>
-              <Text style={[STYLES.heading, { fontSize: 18, paddingTop: 15 }]}>
+        {/* Modal de confirmación de transferencia */}
+        <Modal
+          visible={confirmTransferVisible}
+          animationType="fade"
+          transparent={true}
+          onRequestClose={closeConfirmTransfer}
+        >
+          <View style={modalStyles.container}>
+            <TouchableOpacity
+              style={modalStyles.backdrop}
+              activeOpacity={1}
+              onPress={closeConfirmTransfer}
+            />
+            <View style={modalStyles.dialogContent}>
+              <Text style={[STYLES.heading, { fontSize: 18, marginBottom: 16 }]}>
                 Confirmar transferencia
               </Text>
-            </Dialog.Title>
-            <Dialog.Content>
               <Text style={[STYLES.subheading]}>
                 ¿Está seguro que desea transferir la administración del grupo a{" "}
                 <Text style={[STYLES.paragraphText, { fontWeight: "700" }]}>
@@ -1294,72 +1282,68 @@ export default function FamilyGroup() {
                 ⚠️ Una vez realizada la transferencia, usted dejará de ser el
                 administrador y no podrá deshacer esta operación.
               </Text>
-            </Dialog.Content>
-            <Dialog.Actions
-              style={{
-                justifyContent: "space-between",
-                paddingHorizontal: 16,
-                paddingBottom: 16,
-              }}
-            >
-              <Button
-                mode="contained"
-                onPress={closeConfirmTransfer}
-                style={[
-                  STYLES.buttonPrimary,
-                  { width: "40%", marginTop: 0, backgroundColor: COLORS.white },
-                ]}
-                labelStyle={{ color: COLORS.text }}
-                contentStyle={STYLES.buttonContent}
-              >
-                Cancelar
-              </Button>
-              <Button
-                mode="contained"
-                onPress={confirmTransferOwnership}
-                style={[
-                  STYLES.buttonPrimary,
-                  {
-                    width: "40%",
-                    backgroundColor: COLORS.secondary,
-                    marginTop: 0,
-                    opacity: transferOwnership.isPending ? 0.7 : 1,
-                  },
-                ]}
-                labelStyle={{
-                  color: COLORS.white,
-                  fontFamily: "Montserrat_500Medium",
-                }}
-                contentStyle={STYLES.buttonContent}
-                disabled={transferOwnership.isPending}
-                loading={transferOwnership.isPending}
-              >
-                Transferir
-              </Button>
-            </Dialog.Actions>
-          </Dialog>
+              <View style={modalStyles.dialogActions}>
+                <Button
+                  mode="contained"
+                  onPress={closeConfirmTransfer}
+                  style={[
+                    STYLES.buttonPrimary,
+                    { width: "40%", marginTop: 0, backgroundColor: COLORS.white },
+                  ]}
+                  labelStyle={{ color: COLORS.text }}
+                  contentStyle={STYLES.buttonContent}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  mode="contained"
+                  onPress={confirmTransferOwnership}
+                  style={[
+                    STYLES.buttonPrimary,
+                    {
+                      width: "40%",
+                      backgroundColor: COLORS.secondary,
+                      marginTop: 0,
+                      opacity: transferOwnership.isPending ? 0.7 : 1,
+                    },
+                  ]}
+                  labelStyle={{
+                    color: COLORS.white,
+                    fontFamily: "Montserrat_500Medium",
+                  }}
+                  contentStyle={STYLES.buttonContent}
+                  disabled={transferOwnership.isPending}
+                  loading={transferOwnership.isPending}
+                >
+                  Transferir
+                </Button>
+              </View>
+            </View>
+          </View>
+        </Modal>
 
-          {/* Avatar Modal */}
-          <Dialog
-            visible={avatarModalVisible}
-            onDismiss={closeAvatarModal}
-            style={{
-              alignSelf: "center",
-              width: "90%",
-              backgroundColor: COLORS.background,
-            }}
-          >
-            <Dialog.Title>
+        {/* Modal de Avatar */}
+        <Modal
+          visible={avatarModalVisible}
+          animationType="fade"
+          transparent={true}
+          onRequestClose={closeAvatarModal}
+        >
+          <View style={modalStyles.container}>
+            <TouchableOpacity
+              style={modalStyles.backdrop}
+              activeOpacity={1}
+              onPress={closeAvatarModal}
+            />
+            <View style={modalStyles.dialogContent}>
               <Text
                 style={[
                   STYLES.heading,
-                  { fontSize: 18, paddingTop: 15, textAlign: "center" },
+                  { fontSize: 18, textAlign: "center", marginBottom: 16 },
                 ]}
               >
                 {selectedMemberName}
               </Text>
-            </Dialog.Title>
-            <Dialog.Content>
               <View style={styles.avatarModalContent}>
                 <View
                   style={{
@@ -1400,35 +1384,36 @@ export default function FamilyGroup() {
                   )}
                 </View>
               </View>
-            </Dialog.Content>
-            <Dialog.Actions style={{ justifyContent: "center" }}>
-              <Button
-                mode="outlined"
-                onPress={closeAvatarModal}
-                style={styles.avatarModalButton}
-              >
-                Cerrar
-              </Button>
-            </Dialog.Actions>
-          </Dialog>
+              <View style={{ alignItems: "center", marginTop: 16 }}>
+                <Button
+                  mode="outlined"
+                  onPress={closeAvatarModal}
+                  style={styles.avatarModalButton}
+                >
+                  Cerrar
+                </Button>
+              </View>
+            </View>
+          </View>
+        </Modal>
 
-          {/* Modal de opciones para salir del grupo */}
-          <Dialog
-            visible={exitOptionsVisible}
-            onDismiss={() => setExitOptionsVisible(false)}
-            dismissable={true}
-            style={{
-              alignSelf: "center",
-              width: "90%",
-              backgroundColor: COLORS.background,
-            }}
-          >
-            <Dialog.Title>
-              <Text style={[STYLES.heading, { fontSize: 18, paddingTop: 15 }]}>
+        {/* Modal de opciones para salir del grupo */}
+        <Modal
+          visible={exitOptionsVisible}
+          animationType="fade"
+          transparent={true}
+          onRequestClose={() => setExitOptionsVisible(false)}
+        >
+          <View style={modalStyles.container}>
+            <TouchableOpacity
+              style={modalStyles.backdrop}
+              activeOpacity={1}
+              onPress={() => setExitOptionsVisible(false)}
+            />
+            <View style={modalStyles.dialogContent}>
+              <Text style={[STYLES.heading, { fontSize: 18, marginBottom: 16 }]}>
                 Salir del grupo familiar
               </Text>
-            </Dialog.Title>
-            <Dialog.Content>
               {!showJoinCodeInput ? (
                 <>
                   <Text
@@ -1520,9 +1505,9 @@ export default function FamilyGroup() {
                   </View>
                 </>
               )}
-            </Dialog.Content>
-          </Dialog>
-        </Portal>
+            </View>
+          </View>
+        </Modal>
       </ScrollView>
     </View>
   );
@@ -1584,3 +1569,51 @@ const styles = {
     minWidth: 100,
   },
 };
+
+const modalStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  content: {
+    width: "90%",
+    backgroundColor: COLORS.background,
+    borderRadius: 20,
+    padding: 24,
+    zIndex: 1,
+  },
+  dialogContent: {
+    width: "90%",
+    backgroundColor: COLORS.background,
+    borderRadius: 20,
+    padding: 24,
+    zIndex: 1,
+    maxHeight: "80%",
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: COLORS.text,
+    textAlign: "center",
+  },
+  actions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    gap: 12,
+    paddingBottom: 20
+  },
+  dialogActions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    marginTop: 24,
+    gap: 12,
+    
+  },
+});

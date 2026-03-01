@@ -214,7 +214,7 @@ export default function AudioRecorderComponent({
     <View
       style={{
         backgroundColor: COLORS.background,
-        padding: 20,
+        paddingBottom: 20,
         borderRadius: 20,
       }}
     >
@@ -372,7 +372,7 @@ export default function AudioRecorderComponent({
       )}
 
       {!audioUri && (
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <View style={{ alignItems: "center" }}>
           <View style={{ width: 120 }}>
             <CancelButton onPress={onCancel} disabled={isUploading} />
           </View>

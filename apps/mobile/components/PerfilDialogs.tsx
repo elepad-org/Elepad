@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, Platform, View, KeyboardAvoidingView } from "react-native";
+import { Alert, Platform, View, KeyboardAvoidingView, Modal, TouchableOpacity, StyleSheet } from "react-native";
 import {
   Avatar,
   Button,
@@ -37,20 +37,27 @@ export function EditNameDialog({
   const theme = useTheme();
 
   return (
-    <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={{ flex: 1, justifyContent: "center" }}
-          keyboardVerticalOffset={-41}
+    <Modal
+      visible={visible}
+      animationType="fade"
+      transparent={true}
+      onRequestClose={onCancel}
+    >
+      <View style={perfilModalStyles.container}>
+        <TouchableOpacity
+          style={perfilModalStyles.backdrop}
+          activeOpacity={1}
+          onPress={onCancel}
+        />
+        <KeyboardAvoidingView
+          behavior="padding"
+          style={[perfilModalStyles.content, { backgroundColor: theme.colors.surface }]}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
         >
-      <Dialog
-        visible={visible}
-        onDismiss={onCancel}
-        style={{ backgroundColor: theme.colors.surface }}
-      >
-        <Dialog.Title style={{ color: theme.colors.onSurface }}>
-          {title}
-        </Dialog.Title>
-        <Dialog.Content>
+          <Text style={[perfilModalStyles.title, { color: theme.colors.onSurface }]}>
+            {title}
+          </Text>
+          <View style={{ marginBottom: 16 }}>
           <StyledTextInput
             label="Nombre"
             value={name}
@@ -63,36 +70,30 @@ export function EditNameDialog({
               },
             }}
           />
-        </Dialog.Content>
-        <Dialog.Actions
-          style={{
-            flexDirection: "column",
-            gap: 12,
-            paddingHorizontal: 20,
-            paddingBottom: 12,
-          }}
-        >
-          <Button
-            onPress={onCancel}
-            textColor={theme.colors.onSurface}
-            style={{ width: "100%", borderRadius: 12 }}
-          >
-            Cancelar
-          </Button>
-          <Button
-            mode="contained"
-            loading={!!saving}
-            disabled={!!disabled || !name.trim()}
-            onPress={onSubmit}
-            buttonColor={theme.colors.primary}
-            textColor={theme.colors.onPrimary}
-            style={{ width: "100%", borderRadius: 12 }}
-          >
-            Guardar
-          </Button>
-        </Dialog.Actions>
-      </Dialog>
-    </KeyboardAvoidingView>
+          </View>
+          <View style={perfilModalStyles.actions}>
+            <Button
+              onPress={onCancel}
+              textColor={theme.colors.onSurface}
+              style={{ width: "100%", borderRadius: 12 }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              mode="contained"
+              loading={!!saving}
+              disabled={!!disabled || !name.trim()}
+              onPress={onSubmit}
+              buttonColor={theme.colors.primary}
+              textColor={theme.colors.onPrimary}
+              style={{ width: "100%", borderRadius: 12 }}
+            >
+              Guardar
+            </Button>
+          </View>
+        </KeyboardAvoidingView>
+      </View>
+    </Modal>
   );
 }
 
@@ -311,3 +312,37 @@ export function UpdatePhotoDialog({
     </Dialog>
   );
 }
+
+const perfilModalStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  backdrop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  content: {
+    width: "90%",
+    borderRadius: 16,
+    padding: 24,
+    paddingTop: 20,
+    maxWidth: 500,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "600",
+    marginBottom: 16,
+  },
+  actions: {
+    flexDirection: "column",
+    gap: 12,
+    paddingTop: 12,
+    paddingBottom: 12,
+  },
+});

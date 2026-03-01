@@ -8,6 +8,8 @@ import {
   Pressable,
   KeyboardAvoidingView,
   Platform,
+  Modal,
+  StyleSheet,
 } from "react-native";
 import { Image } from "expo-image";
 import Reanimated, {
@@ -1727,125 +1729,158 @@ export default function RecuerdoDetailDialog({
           )}
         </Dialog>
 
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={{ flex: 1, justifyContent: "center" }}
-          keyboardVerticalOffset={-41}
+        {/* Modal de edición */}
+        <Modal
+          visible={editVisible}
+          animationType="fade"
+          transparent={true}
+          onRequestClose={() => setEditVisible(false)}
         >
-          <Dialog
-            visible={editVisible}
-            onDismiss={() => setEditVisible(false)}
-            style={{
-              backgroundColor: COLORS.background,
-              width: "92%",
-              alignSelf: "center",
-              borderRadius: 16,
-            }}
-          >
-            <Dialog.Title
-              style={{ ...STYLES.heading, paddingTop: 8 }}
+          <View style={modalStyles.container}>
+            <TouchableOpacity
+              style={modalStyles.backdrop}
+              activeOpacity={1}
+              onPress={() => setEditVisible(false)}
+            />
+            <KeyboardAvoidingView
+              behavior="padding"
+              style={modalStyles.content}
+              keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
             >
-              Modificar recuerdo
-            </Dialog.Title>
-            <Dialog.Content>
-              <StyledTextInput
-                label="Título"
-                value={editTitle}
-                onChangeText={setEditTitle}
-                marginBottom={16}
-              />
-              <View
-                style={{
-                  backgroundColor: COLORS.backgroundSecondary,
-                  borderRadius: 16,
-                  overflow: "hidden",
-                }}
-              >
-                <MentionInput
-                  label="Descripción"
-                  value={editDescription}
-                  onChangeText={setEditDescription}
-                  mode="flat"
-                  inputStyle={{ backgroundColor: "transparent" }}
-                  outlineColor="transparent"
-                  activeOutlineColor="transparent"
-                  multiline
-                  numberOfLines={3}
-                  familyMembers={familyMembers}
-                  currentUserId={currentUserId}
+              <Text style={modalStyles.title}>
+                Modificar recuerdo
+              </Text>
+              <View style={{ marginTop: 16, marginBottom: 24 }}>
+                <StyledTextInput
+                  label="Título"
+                  value={editTitle}
+                  onChangeText={setEditTitle}
+                  marginBottom={16}
                 />
+                <View
+                  style={{
+                    backgroundColor: COLORS.backgroundSecondary,
+                    borderRadius: 16,
+                    overflow: "hidden",
+                  }}
+                >
+                  <MentionInput
+                    label="Descripción"
+                    value={editDescription}
+                    onChangeText={setEditDescription}
+                    mode="flat"
+                    inputStyle={{ backgroundColor: "transparent" }}
+                    outlineColor="transparent"
+                    activeOutlineColor="transparent"
+                    multiline
+                    numberOfLines={3}
+                    familyMembers={familyMembers}
+                    currentUserId={currentUserId}
+                  />
+                </View>
               </View>
-            </Dialog.Content>
-            <Dialog.Actions
-              style={{
-                paddingBottom: 30,
-                paddingHorizontal: 24,
-                paddingTop: 0,
-                justifyContent: "space-between",
-              }}
-            >
-              <View style={{ width: 120 }}>
-                <CancelButton
-                  onPress={() => setEditVisible(false)}
-                  disabled={isMutating}
-                />
+              <View style={modalStyles.actions}>
+                <View style={{ width: 120 }}>
+                  <CancelButton
+                    onPress={() => setEditVisible(false)}
+                    disabled={isMutating}
+                  />
+                </View>
+                <View style={{ width: 120 }}>
+                  <SaveButton
+                    onPress={submitEdit}
+                    loading={isMutating}
+                    disabled={isMutating}
+                  />
+                </View>
               </View>
-              <View style={{ width: 120 }}>
-                <SaveButton
-                  onPress={submitEdit}
-                  loading={isMutating}
-                  disabled={isMutating}
-                />
-              </View>
-            </Dialog.Actions>
-          </Dialog>
-        </KeyboardAvoidingView>
+            </KeyboardAvoidingView>
+          </View>
+        </Modal>
 
-        <Dialog
+        {/* Modal de confirmación de eliminación */}
+        <Modal
           visible={deleteConfirmVisible}
-          onDismiss={() => setDeleteConfirmVisible(false)}
-          style={{
-            backgroundColor: COLORS.background,
-            width: "90%",
-            alignSelf: "center",
-            borderRadius: 16,
-          }}
+          animationType="fade"
+          transparent={true}
+          onRequestClose={() => setDeleteConfirmVisible(false)}
         >
-          <Dialog.Title
-            style={{ ...STYLES.heading, paddingTop: 8 }}
-          >
-            Eliminar recuerdo
-          </Dialog.Title>
-          <Dialog.Content>
-            <Text style={{ ...STYLES.subheading, marginTop: 0 }}>
-              ¿Seguro que querés eliminar este recuerdo definitivamente?
-            </Text>
-          </Dialog.Content>
-          <Dialog.Actions
-            style={{
-              paddingBottom: 30,
-              paddingHorizontal: 24,
-              paddingTop: 0,
-              justifyContent: "space-between",
-            }}
-          >
-            <View style={{ width: 120 }}>
-              <CancelButton
-                onPress={() => setDeleteConfirmVisible(false)}
-                disabled={isMutating}
-              />
+          <View style={modalStyles.container}>
+            <TouchableOpacity
+              style={modalStyles.backdrop}
+              activeOpacity={1}
+              onPress={() => setDeleteConfirmVisible(false)}
+            />
+            <View style={modalStyles.dialogContent}>
+              <Text style={[STYLES.heading, { fontSize: 18, marginBottom: 16 }]}>
+                Eliminar recuerdo
+              </Text>
+              <Text style={{ ...STYLES.subheading, marginTop: 0 }}>
+                ¿Seguro que querés eliminar este recuerdo definitivamente?
+              </Text>
+              <View style={modalStyles.actions}>
+                <View style={{ width: 120 }}>
+                  <CancelButton
+                    onPress={() => setDeleteConfirmVisible(false)}
+                    disabled={isMutating}
+                  />
+                </View>
+                <View style={{ width: 120 }}>
+                  <SaveButton
+                    text="Eliminar"
+                    onPress={confirmDelete}
+                    loading={isMutating}
+                    disabled={isMutating}
+                  />
+                </View>
+              </View>
             </View>
-            <View style={{ width: 120 }}>
-              <SaveButton
-                text="Eliminar"
-                onPress={confirmDelete}
-                loading={isMutating}
-                disabled={isMutating}
-              />
-            </View>
-          </Dialog.Actions>
-        </Dialog>
+          </View>
+        </Modal>
       </>
     </Portal>
   );
 }
+
+const modalStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  backdrop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  content: {
+    backgroundColor: COLORS.background,
+    width: "92%",
+    borderRadius: 16,
+    padding: 24,
+    paddingTop: 20,
+    maxWidth: 500,
+  },
+  dialogContent: {
+    backgroundColor: COLORS.background,
+    width: "90%",
+    borderRadius: 16,
+    padding: 24,
+    paddingTop: 20,
+    maxWidth: 500,
+  },
+  title: {
+    ...STYLES.heading,
+    fontSize: 20,
+    marginBottom: 0,
+  },
+  actions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 8,
+    paddingBottom: 20
+  },
+});
