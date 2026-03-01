@@ -24,6 +24,7 @@ interface RecuerdoData {
   mimeType?: string;
   spotifyTrackId?: string;
   spotifyData?: any;
+  miniatura?: string;
 }
 
 interface NuevoRecuerdoDialogProps {
@@ -146,10 +147,18 @@ export default function NuevoRecuerdoDialogComponent({
         {selectedTipo === "spotify" && (
           <SpotifySearchComponent
             onTrackSelected={(trackId: string, trackData: any) => {
+              // Extraer URL de la imagen del álbum
+              const albumImageUrl = trackData.album?.images?.[0]?.url;
+              // Extraer nombre de los artistas
+              const artistsText = trackData.artists?.map((a: any) => a.name).join(", ") || "";
+              
               onSave({
                 contenido: trackId,
                 spotifyTrackId: trackId,
                 spotifyData: trackData,
+                titulo: trackData.name,
+                caption: artistsText,
+                miniatura: albumImageUrl,
                 mimeType: "audio/spotify",
               });
             }}

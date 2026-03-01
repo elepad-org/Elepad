@@ -107,7 +107,8 @@ const memoryToRecuerdo = (
     contenido: memory.mediaUrl || memory.caption || "",
     miniatura:
       (memory.mimeType?.startsWith("image/") ||
-        memory.mimeType?.startsWith("video/")) &&
+        memory.mimeType?.startsWith("video/") ||
+        memory.mimeType === "audio/spotify") &&
         memory.mediaUrl
         ? memory.mediaUrl
         : undefined,

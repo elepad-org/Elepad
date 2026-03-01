@@ -89,7 +89,7 @@ const RecuerdoItemComponent = React.memo(
       item.tipo === "audio"
         ? 0.54
         : item.tipo === "spotify"
-          ? 0.54
+          ? 0.42
           : item.tipo === "texto"
             ? 0.4
             : item.tipo === "imagen" || item.tipo === "video"
@@ -340,43 +340,56 @@ const RecuerdoItemComponent = React.memo(
               flex: 1,
               backgroundColor: "#191414",
               borderRadius: 4,
-              padding: 8 * scale,
-              justifyContent: "space-between",
+              paddingHorizontal: 4 * scale,
+              paddingVertical: 2 * scale,
+              flexDirection: "row",
+              justifyContent: "flex-start",
               alignItems: "center",
             }}
           >
-            {/* Portada del álbum */}
+            {/* Portada del álbum a la izquierda */}
             {item.miniatura && (
               <Image
                 source={{ uri: item.miniatura }}
                 style={{
-                  width: itemSize * 0.7,
-                  height: itemSize * 0.7,
-                  borderRadius: 8,
-                  marginBottom: 6,
+                  width: itemSize * 0.35,
+                  height: itemSize * 0.35,
+                  borderRadius: 4,
+                  marginRight: 6 * scale,
+                  flexShrink: 0,
                 }}
                 contentFit="cover"
                 transition={200}
                 cachePolicy="memory-disk"
               />
             )}
-            {/* Título de la canción */}
-            <Text
-              numberOfLines={2}
+            {/* Información de la canción a la derecha */}
+            <View
               style={{
-                fontSize: 11 * scale,
-                color: "#fff",
-                textAlign: "center",
-                fontFamily: "Montserrat",
-                fontWeight: "700",
-                marginBottom: 2,
+                flex: 1,
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                height: itemSize * 0.35,
               }}
             >
-              {item.titulo || "Canción de Spotify"}
-            </Text>
-            {/* Logo de Spotify */}
-            <View style={{ alignItems: "center", marginTop: 2 }}>
-              <IconButton icon="spotify" size={20 * scale} iconColor="#1DB954" style={{ margin: 0 }} />
+              {/* Título arriba */}
+              <Text
+                numberOfLines={2}
+                style={{
+                  fontSize: 11 * scale,
+                  color: "#fff",
+                  textAlign: "left",
+                  fontFamily: "Montserrat",
+                  fontWeight: "700",
+                  flex: 1,
+                }}
+              >
+                {item.titulo || "Canción de Spotify"}
+              </Text>
+              {/* Logo de Spotify abajo, centrado */}
+              <View style={{ alignItems: "center", width: "100%" }}>
+                <IconButton icon="spotify" size={16 * scale} iconColor="#1DB954" style={{ margin: 0, padding: 0 }} />
+              </View>
             </View>
           </View>
         ) : item.tipo === "texto" ? (

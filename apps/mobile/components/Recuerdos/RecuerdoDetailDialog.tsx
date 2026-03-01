@@ -6,6 +6,7 @@ import {
   ImageBackground,
   TouchableOpacity,
   Pressable,
+  Alert,
 } from "react-native";
 import { Image } from "expo-image";
 import Reanimated, {
@@ -299,6 +300,7 @@ export default function RecuerdoDetailDialog({
       translateX.value = 0;
     }
     swipeDirection.current = null;
+    setIsFlipped(false);
   }, [recuerdo?.id]);
 
   // Estado para el flip del cassette
@@ -935,6 +937,7 @@ export default function RecuerdoDetailDialog({
 
   const handleDismiss = () => {
     setLastReactedStickerUrl(null);
+    setIsFlipped(false);
     if (shouldUseAudio) {
       stopAudio();
     }
@@ -1680,6 +1683,273 @@ export default function RecuerdoDetailDialog({
                         </View>
                       </View>
                     </Animated.View>
+                  </View>
+                </View>
+              )}
+              {recuerdo.tipo === "spotify" && recuerdo.miniatura && (
+                <View>
+                  {/* Contenedor de controles: girar + compartir */}
+                  <View
+                    style={{
+                      alignItems: "center",
+                      paddingTop: 12,
+                      paddingBottom: 8,
+                      flexDirection: "row",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <TouchableOpacity
+                      onPress={toggleFlip}
+                      style={{
+                        backgroundColor: "rgba(0, 0, 0, 0.6)",
+                        width: 40,
+                        height: 40,
+                        borderRadius: 20,
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <IconButton
+                        icon="swap-horizontal"
+                        size={28}
+                        iconColor="#ffffff"
+                        style={{ margin: 0 }}
+                      />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      onPress={handleShare}
+                      activeOpacity={0.7}
+                      style={{
+                        marginLeft: 12,
+                        backgroundColor: "rgba(0, 0, 0, 0.6)",
+                        width: 40,
+                        height: 40,
+                        borderRadius: 20,
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <IconButton
+                        icon="share-variant"
+                        size={20}
+                        iconColor="#ffffff"
+                        style={{ margin: 0 }}
+                      />
+                    </TouchableOpacity>
+                  </View>
+
+                  <View
+                    style={{
+                      minHeight: 100,
+                      backgroundColor: "#191414",
+                      borderTopLeftRadius: 8,
+                      borderTopRightRadius: 8,
+                      overflow: "hidden",
+                    }}
+                  >
+                    {/* Frente de la tarjeta Spotify */}
+                    <Animated.View
+                      pointerEvents={isFlipped ? "none" : "auto"}
+                      style={[
+                        {
+                          position: "absolute",
+                          width: "100%",
+                          top: 0,
+                          left: 0,
+                        },
+                        frontAnimatedStyle,
+                      ]}
+                    >
+                      <View
+                        style={{
+                          backgroundColor: "#191414",
+                          paddingTop: 12,
+                          paddingBottom: 12,
+                          paddingHorizontal: 12,
+                          borderRadius: 8,
+                          minHeight: 100,
+                          borderWidth: 1,
+                          borderColor: "#1DB954",
+                          ...SHADOWS.medium,
+                          flexDirection: "row",
+                          alignItems: "center",
+                        }}
+                      >
+                        {/* Portada del álbum */}
+                        {recuerdo.miniatura && (
+                          <Image
+                            source={{ uri: recuerdo.miniatura }}
+                            style={{
+                              width: 65,
+                              height: 65,
+                              borderRadius: 4,
+                              marginRight: 12,
+                            }}
+                            contentFit="cover"
+                          />
+                        )}
+
+                        {/* Información de la canción a la derecha */}
+                        <View style={{ flex: 1, justifyContent: "center" }}>
+                          <Text
+                            numberOfLines={2}
+                            style={{
+                              fontSize: 14,
+                              color: "#ffffff",
+                              fontFamily: "Montserrat",
+                              fontWeight: "700",
+                              marginBottom: 4,
+                            }}
+                            ellipsizeMode="tail"
+                          >
+                            {recuerdo.titulo || "Canción de Spotify"}
+                          </Text>
+                          {recuerdo.descripcion && (
+                            <Text
+                              numberOfLines={1}
+                              style={{
+                                fontSize: 12,
+                                color: "#b3b3b3",
+                                fontFamily: "Montserrat",
+                                fontWeight: "500",
+                              }}
+                              ellipsizeMode="tail"
+                            >
+                              {recuerdo.descripcion}
+                            </Text>
+                          )}
+                        </View>
+
+                        {/* Logo de Spotify a la derecha */}
+                        <IconButton
+                          icon="spotify"
+                          size={24}
+                          iconColor="#1DB954"
+                          style={{ margin: 0 }}
+                        />
+                      </View>
+                    </Animated.View>
+
+                    {/* Espalda de la tarjeta - Información */}
+                    <Animated.View
+                      pointerEvents={!isFlipped ? "none" : "auto"}
+                      style={[
+                        {
+                          position: "absolute",
+                          width: "100%",
+                          top: 0,
+                          left: 0,
+                        },
+                        backAnimatedStyle,
+                      ]}
+                    >
+                      <View
+                        style={{
+                          backgroundColor: "#191414",
+                          paddingTop: 12,
+                          paddingBottom: 12,
+                          paddingHorizontal: 12,
+                          borderRadius: 8,
+                          minHeight: 100,
+                          borderWidth: 1,
+                          borderColor: "#1DB954",
+                          ...SHADOWS.medium,
+                          justifyContent: "center",
+                        }}
+                      >
+                        {/* Información del recuerdo */}
+                        <View style={{ flex: 1, justifyContent: "center" }}>
+                          <Text
+                            style={{
+                              fontSize: 13,
+                              color: "#ffffff",
+                              fontFamily: "Montserrat",
+                              fontWeight: "700",
+                              marginBottom: 4,
+                            }}
+                            numberOfLines={1}
+                          >
+                            {recuerdo.autorNombre || "Desconocido"}
+                          </Text>
+
+                          <Text
+                            style={{
+                              fontSize: 11,
+                              color: "#b3b3b3",
+                              fontFamily: FONT.regular,
+                            }}
+                            numberOfLines={1}
+                          >
+                            {new Date(recuerdo.fecha).toLocaleDateString()}
+                          </Text>
+                        </View>
+
+                        {/* Botón eliminar si es propietario */}
+                        {currentUserId === recuerdo.autorId && (
+                          <TouchableOpacity
+                            onPress={() => {
+                              Alert.alert(
+                                "Eliminar recuerdo",
+                                "¿Estás seguro que quieres eliminar este recuerdo?",
+                                [
+                                  { text: "Cancelar", style: "cancel" },
+                                  {
+                                    text: "Eliminar",
+                                    onPress: async () => {
+                                      try {
+                                        await onDeleteRecuerdo(recuerdo.id);
+                                        handleDismiss();
+                                        showToast?.({
+                                          message: "Recuerdo eliminado",
+                                          type: "success",
+                                        });
+                                      } catch (error) {
+                                        showToast?.({
+                                          message: "Error al eliminar",
+                                          type: "error",
+                                        });
+                                      }
+                                    },
+                                    style: "destructive",
+                                  },
+                                ],
+                              );
+                            }}
+                            style={{
+                              backgroundColor: "rgba(255, 52, 52, 0.1)",
+                              borderWidth: 1,
+                              borderColor: "#FF3434",
+                              borderRadius: 6,
+                              paddingVertical: 8,
+                              alignItems: "center",
+                            }}
+                          >
+                            <Text
+                              style={{
+                                color: "#FF3434",
+                                fontSize: 12,
+                                fontWeight: "600",
+                              }}
+                            >
+                              Eliminar recuerdo
+                            </Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    </Animated.View>
+                  </View>
+
+                  {/* Reacciones */}
+                  <View
+                    style={{
+                      backgroundColor: COLORS.white,
+                      borderBottomLeftRadius: 10,
+                      borderBottomRightRadius: 10,
+                      padding: 16,
+                    }}
+                  >
+                    {renderInfoBlock(false)}
                   </View>
                 </View>
               )}
