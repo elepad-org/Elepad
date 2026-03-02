@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { View, FlatList, Pressable, Image } from "react-native";
+import { View, FlatList, Pressable, Image, Keyboard } from "react-native";
 import {
   Text,
   ActivityIndicator,
+  TextInput as PaperTextInput,
 } from "react-native-paper";
 import { STYLES, COLORS } from "@/styles/base";
 import { StyledTextInput } from "../shared";
@@ -61,7 +62,7 @@ export default function SpotifySearchComponent({
       }
 
       console.log("Spotify search results:", result);
-      
+
     } catch (error) {
       console.error("Error searching Spotify:", error);
       setSearchResults([]);
@@ -88,8 +89,8 @@ export default function SpotifySearchComponent({
           backgroundColor: isSelected
             ? COLORS.primary + "20"
             : pressed
-            ? COLORS.backgroundSecondary
-            : "transparent",
+              ? COLORS.backgroundSecondary
+              : "transparent",
           borderRadius: 8,
           marginBottom: 4,
           borderWidth: 2,
@@ -122,7 +123,7 @@ export default function SpotifySearchComponent({
           </Text>
           <Text
             style={{
-            
+
               color: COLORS.textSecondary,
               marginTop: 1,
               fontSize: 13,
@@ -134,7 +135,7 @@ export default function SpotifySearchComponent({
           </Text>
           <Text
             style={{
-              
+
               color: COLORS.textPlaceholder,
               marginTop: 2,
               fontSize: 11,
@@ -167,12 +168,22 @@ export default function SpotifySearchComponent({
         returnKeyType="search"
         disabled={searchMutation.isPending || isUploading}
         marginBottom={6}
+        right={
+          <PaperTextInput.Icon
+            icon="magnify"
+            onPress={() => {
+              Keyboard.dismiss();
+              handleSearch();
+            }}
+            disabled={searchMutation.isPending || isUploading || !searchQuery.trim()}
+          />
+        }
       />
 
       {searchMutation.isPending && (
         <View style={{ paddingVertical: 32, alignItems: "center" }}>
           <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={{  marginTop: 12, color: COLORS.textSecondary }}>
+          <Text style={{ marginTop: 12, color: COLORS.textSecondary }}>
             Buscando en Spotify...
           </Text>
         </View>
@@ -204,14 +215,7 @@ export default function SpotifySearchComponent({
         />
       )}
 
-      {isUploading && (
-        <View style={{ paddingVertical: 32, alignItems: "center" }}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={{  marginTop: 12, color: COLORS.textSecondary }}>
-            Guardando recuerdo...
-          </Text>
-        </View>
-      )}
+
 
       <View
         style={{
@@ -228,7 +232,7 @@ export default function SpotifySearchComponent({
         <View style={{ width: 120 }}>
           <SaveButton
             onPress={handleSaveTrack}
-            text="Guardar"
+            text={isUploading ? "Guardando..." : "Guardar"}
             disabled={!selectedTrack || isUploading || searchMutation.isPending}
             loading={isUploading}
           />
