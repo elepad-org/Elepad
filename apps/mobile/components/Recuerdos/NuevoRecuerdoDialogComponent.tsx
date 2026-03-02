@@ -101,7 +101,6 @@ export default function NuevoRecuerdoDialogComponent({
               style={styles.modalContent}
               keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
             >
-            
               <MetadataInputComponent
                 onSave={(title, caption) => {
                   // Usar el mimeType que se recibió del archivo seleccionado
@@ -116,9 +115,7 @@ export default function NuevoRecuerdoDialogComponent({
                 isUploading={isUploading}
                 familyMembers={familyMembers}
                 currentUserId={currentUserId}
-                
               />
-              
             </KeyboardAvoidingView>
           </View>
         </Portal.Host>
@@ -134,65 +131,84 @@ export default function NuevoRecuerdoDialogComponent({
         transparent={true}
         onRequestClose={onCancel}
       >
-        {selectedTipo === "imagen" && (
-          <ImagePickerComponent
-            onImageSelected={(uri: string, mimeType?: string) => {
-              if (onFileSelected) {
-                onFileSelected(uri, mimeType);
-              } else {
-                onSave({ contenido: uri, mimeType });
-              }
-            }}
-            onCancel={onCancel}
-            isUploading={isUploading}
-          />
-        )}
-        {selectedTipo === "texto" && (
-          <TextNoteComponent
-            onSaveText={(titulo, contenido) =>
-              onSave({ contenido, titulo, caption: contenido })
-            }
-            onCancel={onCancel}
-            isUploading={isUploading}
-            familyMembers={familyMembers}
-            currentUserId={currentUserId}
-          />
-        )}
-        {selectedTipo === "audio" && (
-          <AudioRecorderComponent
-            onAudioRecorded={(uri: string) => {
-              if (onFileSelected) {
-                onFileSelected(uri, "audio/m4a");
-              } else {
-                onSave({ contenido: uri, mimeType: "audio/m4a" });
-              }
-            }}
-            onCancel={onCancel}
-            isUploading={isUploading}
-          />
-        )}
-        {selectedTipo === "spotify" && (
-          <SpotifySearchComponent
-            onTrackSelected={(trackId: string, trackData: SpotifyTrackData) => {
-              // Extraer URL de la imagen del álbum
-              const albumImageUrl = trackData.album?.images?.[0]?.url;
-              // Extraer nombre de los artistas
-              const artistsText = trackData.artists?.map((a) => a.name).join(", ") || "";
-              
-              onSave({
-                contenido: trackId,
-                spotifyTrackId: trackId,
-                spotifyData: trackData,
-                titulo: trackData.name,
-                caption: artistsText,
-                miniatura: albumImageUrl,
-                mimeType: "audio/spotify",
-              });
-            }}
-            onCancel={onCancel}
-            isUploading={isUploading}
-          />
-        )}
+        <Portal.Host>
+          <View style={styles.modalContainer}>
+            <TouchableOpacity
+              style={styles.modalBackdrop}
+              activeOpacity={1}
+              onPress={onCancel}
+            />
+            <KeyboardAvoidingView
+              behavior="padding"
+              style={styles.modalContent}
+              keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+            >
+              {selectedTipo === "imagen" && (
+                <ImagePickerComponent
+                  onImageSelected={(uri: string, mimeType?: string) => {
+                    if (onFileSelected) {
+                      onFileSelected(uri, mimeType);
+                    } else {
+                      onSave({ contenido: uri, mimeType });
+                    }
+                  }}
+                  onCancel={onCancel}
+                  isUploading={isUploading}
+                />
+              )}
+              {selectedTipo === "texto" && (
+                <TextNoteComponent
+                  onSaveText={(titulo, contenido) =>
+                    onSave({ contenido, titulo, caption: contenido })
+                  }
+                  onCancel={onCancel}
+                  isUploading={isUploading}
+                  familyMembers={familyMembers}
+                  currentUserId={currentUserId}
+                />
+              )}
+              {selectedTipo === "audio" && (
+                <AudioRecorderComponent
+                  onAudioRecorded={(uri: string) => {
+                    if (onFileSelected) {
+                      onFileSelected(uri, "audio/m4a");
+                    } else {
+                      onSave({ contenido: uri, mimeType: "audio/m4a" });
+                    }
+                  }}
+                  onCancel={onCancel}
+                  isUploading={isUploading}
+                />
+              )}
+              {selectedTipo === "spotify" && (
+                <SpotifySearchComponent
+                  onTrackSelected={(
+                    trackId: string,
+                    trackData: SpotifyTrackData,
+                  ) => {
+                    // Extraer URL de la imagen del álbum
+                    const albumImageUrl = trackData.album?.images?.[0]?.url;
+                    // Extraer nombre de los artistas
+                    const artistsText =
+                      trackData.artists?.map((a) => a.name).join(", ") || "";
+
+                    onSave({
+                      contenido: trackId,
+                      spotifyTrackId: trackId,
+                      spotifyData: trackData,
+                      titulo: trackData.name,
+                      caption: artistsText,
+                      miniatura: albumImageUrl,
+                      mimeType: "audio/spotify",
+                    });
+                  }}
+                  onCancel={onCancel}
+                  isUploading={isUploading}
+                />
+              )}
+            </KeyboardAvoidingView>
+          </View>
+        </Portal.Host>
       </Modal>
     );
   }

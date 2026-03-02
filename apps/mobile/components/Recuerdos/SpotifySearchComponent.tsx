@@ -84,7 +84,7 @@ export default function SpotifySearchComponent({
         onPress={() => setSelectedTrack(item)}
         style={({ pressed }) => ({
           flexDirection: "row",
-          padding: 10,
+          padding: 0,
           backgroundColor: isSelected
             ? COLORS.primary + "20"
             : pressed
@@ -153,11 +153,11 @@ export default function SpotifySearchComponent({
     <View
       style={{
         backgroundColor: COLORS.background,
-        padding: 20,
+        padding: 0,
         borderRadius: 20,
       }}
     >
-      <Text style={{ ...STYLES.heading, marginBottom: 16 }}>Buscar en Spotify</Text>
+      <Text style={{ ...STYLES.heading, marginBottom: 5 }}>Buscar en Spotify</Text>
 
       <StyledTextInput
         label="Nombre de la canción"
@@ -166,7 +166,7 @@ export default function SpotifySearchComponent({
         onSubmitEditing={handleSearch}
         returnKeyType="search"
         disabled={searchMutation.isPending || isUploading}
-        marginBottom={16}
+        marginBottom={6}
       />
 
       {searchMutation.isPending && (
@@ -219,6 +219,7 @@ export default function SpotifySearchComponent({
           justifyContent: "space-between",
           alignItems: "center",
           marginTop: 16,
+          paddingBottom: 20
         }}
       >
         <View style={{ width: 120 }}>

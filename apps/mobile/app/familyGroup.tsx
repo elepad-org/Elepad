@@ -715,7 +715,7 @@ export default function FamilyGroup() {
                                 { textAlign: "left", marginTop: 0 },
                               ]}
                             >
-                              Dueño
+                              Administrador
                             </Text>
                           </View>
                         </View>
