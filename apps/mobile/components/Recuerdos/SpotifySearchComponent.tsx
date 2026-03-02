@@ -256,18 +256,7 @@ export default function SpotifySearchComponent({
           marginBottom={6}
           disabled={isUploading}
         />
-
-        <Text
-          style={{
-            color: COLORS.textPlaceholder,
-            fontSize: 12,
-            marginBottom: 12,
-            textAlign: "center",
-          }}
-        >
-          Podés agregar un comentario o dejarlo vacío
-        </Text>
-
+        
         <View
           style={{
             flexDirection: "row",
