@@ -1182,6 +1182,21 @@ export default function RecuerdoDetailDialog({
                   </Text>
                 </View>
 
+                {/* Descripción del usuario si existe (download shadow) */}
+                {!!recuerdo.descripcion && (
+                  <Text
+                    style={{
+                      fontSize: 15,
+                      color: "#b3b3b3",
+                      marginTop: 8,
+                      fontFamily: FONT.regular,
+                      lineHeight: 22,
+                    }}
+                  >
+                    {recuerdo.descripcion}
+                  </Text>
+                )}
+
                 <Text
                   style={{
                     fontSize: 13,
@@ -1975,17 +1990,40 @@ export default function RecuerdoDetailDialog({
                               disabled={isMutating}
                             />
                             {recuerdo.autorId === currentUserId && (
-                              <Menu.Item
-                                leadingIcon="trash-can"
-                                title="Eliminar"
-                                onPress={openDeleteConfirm}
-                                disabled={isMutating}
-                              />
+                              <>
+                                <Menu.Item
+                                  leadingIcon="pencil"
+                                  title="Modificar"
+                                  onPress={openEdit}
+                                  disabled={isMutating}
+                                />
+                                <Menu.Item
+                                  leadingIcon="trash-can"
+                                  title="Eliminar"
+                                  onPress={openDeleteConfirm}
+                                  disabled={isMutating}
+                                />
+                              </>
                             )}
                           </Menu>
                         )}
                       </View>
                     </View>
+
+                    {/* Descripción del usuario si existe */}
+                    {!!recuerdo.descripcion && (
+                      <HighlightedMentionText
+                        text={recuerdo.descripcion}
+                        familyMembers={familyMembers}
+                        style={{
+                          fontSize: 15,
+                          color: "#b3b3b3",
+                          marginTop: 8,
+                          lineHeight: 22,
+                          textAlign: "left",
+                        }}
+                      />
+                    )}
 
                     {/* Subido por - gris como el icono */}
                     <Text
@@ -2019,6 +2057,45 @@ export default function RecuerdoDetailDialog({
                         minute: "2-digit",
                       })}
                     </Text>
+
+                    {/* Botón Escuchar en Spotify */}
+                    <Pressable
+                      onPress={() => {
+                        const spotifyUrl = recuerdo?.spotifyData?.external_urls?.spotify;
+                        if (spotifyUrl) {
+                          Linking.openURL(spotifyUrl).catch((error) => {
+                            console.error("Error opening Spotify URL:", error);
+                          });
+                        }
+                      }}
+                      style={({ pressed }) => ({
+                        alignSelf: "flex-end",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        backgroundColor: pressed ? "#1aa34a" : "#1DB954",
+                        borderRadius: 20,
+                        paddingHorizontal: 14,
+                        paddingVertical: 7,
+                        marginTop: 14,
+                      })}
+                    >
+                      <MaterialCommunityIcons
+                        name="spotify"
+                        size={18}
+                        color="#fff"
+                        style={{ marginRight: 6 }}
+                      />
+                      <Text
+                        style={{
+                          color: "#fff",
+                          fontSize: 13,
+                          fontWeight: "700",
+                          fontFamily: "Montserrat",
+                        }}
+                      >
+                        Escuchar
+                      </Text>
+                    </Pressable>
 
                     {/* Reacciones */}
                     {recuerdo.reactions && recuerdo.reactions.length > 0 && (

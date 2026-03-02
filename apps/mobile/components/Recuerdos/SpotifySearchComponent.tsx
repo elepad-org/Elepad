@@ -4,6 +4,7 @@ import {
   Text,
   ActivityIndicator,
   TextInput as PaperTextInput,
+  IconButton,
 } from "react-native-paper";
 import { STYLES, COLORS } from "@/styles/base";
 import { StyledTextInput } from "../shared";
@@ -24,7 +25,7 @@ interface SpotifyTrack {
 }
 
 interface SpotifySearchComponentProps {
-  onTrackSelected: (trackId: string, trackData: SpotifyTrack) => void;
+  onTrackSelected: (trackId: string, trackData: SpotifyTrack, description?: string) => void;
   onCancel: () => void;
   isUploading?: boolean;
 }
@@ -37,6 +38,9 @@ export default function SpotifySearchComponent({
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SpotifyTrack[]>([]);
   const [selectedTrack, setSelectedTrack] = useState<SpotifyTrack | null>(null);
+  // Step: "search" = buscar/seleccionar, "description" = agregar descripción opcional
+  const [step, setStep] = useState<"search" | "description">("search");
+  const [description, setDescription] = useState("");
 
   const searchMutation = usePostSpotifySearch();
 
@@ -69,9 +73,21 @@ export default function SpotifySearchComponent({
     }
   };
 
+  const handleContinueToDescription = () => {
+    if (selectedTrack) {
+      setStep("description");
+    }
+  };
+
+  const handleBackToSearch = () => {
+    setStep("search");
+    setDescription("");
+  };
+
   const handleSaveTrack = () => {
     if (selectedTrack) {
-      onTrackSelected(selectedTrack.id, selectedTrack);
+      const desc = description.trim() || undefined;
+      onTrackSelected(selectedTrack.id, selectedTrack, desc);
     }
   };
 
@@ -150,6 +166,138 @@ export default function SpotifySearchComponent({
     );
   };
 
+  // Paso 2: Modal intermedio con preview de la canción y descripción opcional
+  if (step === "description" && selectedTrack) {
+    const albumCover = selectedTrack.album?.images?.[0]?.url || selectedTrack.album?.images?.[1]?.url;
+    const artistsText = selectedTrack.artists?.map((a) => a.name).join(", ") || "Artista desconocido";
+
+    return (
+      <View
+        style={{
+          backgroundColor: COLORS.background,
+          padding: 0,
+          borderRadius: 20,
+        }}
+      >
+        <Text style={{ ...STYLES.heading, marginBottom: 12 }}>Agregar recuerdo</Text>
+
+        {/* Preview de la canción seleccionada */}
+        <View
+          style={{
+            flexDirection: "row",
+            backgroundColor: "#191414",
+            borderRadius: 12,
+            padding: 12,
+            marginBottom: 16,
+            alignItems: "center",
+          }}
+        >
+          {albumCover && (
+            <Image
+              source={{ uri: albumCover }}
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: 6,
+                marginRight: 12,
+              }}
+            />
+          )}
+          <View style={{ flex: 1 }}>
+            <Text
+              style={{
+                color: "#fff",
+                fontWeight: "700",
+                fontSize: 15,
+                fontFamily: "Montserrat",
+              }}
+              numberOfLines={1}
+            >
+              {selectedTrack.name}
+            </Text>
+            <Text
+              style={{
+                color: "#b3b3b3",
+                fontSize: 13,
+                marginTop: 2,
+              }}
+              numberOfLines={1}
+            >
+              {artistsText}
+            </Text>
+            {selectedTrack.album?.name && (
+              <Text
+                style={{
+                  color: "#666",
+                  fontSize: 11,
+                  marginTop: 2,
+                }}
+                numberOfLines={1}
+              >
+                {selectedTrack.album.name}
+              </Text>
+            )}
+          </View>
+          <IconButton
+            icon="spotify"
+            size={22}
+            iconColor="#1DB954"
+            style={{ margin: 0 }}
+          />
+        </View>
+
+        {/* Input de descripción opcional */}
+        <StyledTextInput
+          label="Descripción (opcional)"
+          value={description}
+          onChangeText={setDescription}
+          multiline
+          numberOfLines={3}
+          marginBottom={6}
+          disabled={isUploading}
+        />
+
+        <Text
+          style={{
+            color: COLORS.textPlaceholder,
+            fontSize: 12,
+            marginBottom: 12,
+            textAlign: "center",
+          }}
+        >
+          Podés agregar un comentario o dejarlo vacío
+        </Text>
+
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginTop: 8,
+            paddingBottom: 20,
+          }}
+        >
+          <View style={{ width: 120 }}>
+            <CancelButton
+              onPress={handleBackToSearch}
+              disabled={isUploading}
+              text="Volver"
+            />
+          </View>
+          <View style={{ width: 120 }}>
+            <SaveButton
+              onPress={handleSaveTrack}
+              text={isUploading ? "Guardando..." : "Guardar"}
+              disabled={isUploading}
+              loading={isUploading}
+            />
+          </View>
+        </View>
+      </View>
+    );
+  }
+
+  // Paso 1: Búsqueda y selección de canción
   return (
     <View
       style={{
@@ -231,10 +379,9 @@ export default function SpotifySearchComponent({
         </View>
         <View style={{ width: 120 }}>
           <SaveButton
-            onPress={handleSaveTrack}
-            text={isUploading ? "Guardando..." : "Guardar"}
+            onPress={handleContinueToDescription}
+            text="Continuar"
             disabled={!selectedTrack || isUploading || searchMutation.isPending}
-            loading={isUploading}
           />
         </View>
       </View>

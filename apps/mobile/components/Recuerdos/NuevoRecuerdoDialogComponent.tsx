@@ -185,19 +185,17 @@ export default function NuevoRecuerdoDialogComponent({
                   onTrackSelected={(
                     trackId: string,
                     trackData: SpotifyTrackData,
+                    description?: string,
                   ) => {
                     // Extraer URL de la imagen del álbum
                     const albumImageUrl = trackData.album?.images?.[0]?.url;
-                    // Extraer nombre de los artistas
-                    const artistsText =
-                      trackData.artists?.map((a) => a.name).join(", ") || "";
 
                     onSave({
                       contenido: trackId,
                       spotifyTrackId: trackId,
                       spotifyData: trackData,
                       titulo: trackData.name,
-                      caption: artistsText,
+                      caption: description || undefined,
                       miniatura: albumImageUrl,
                       mimeType: "audio/spotify",
                     });
