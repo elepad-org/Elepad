@@ -447,7 +447,8 @@ const RecuerdoItemComponent = React.memo(
         ) : item.tipo === "spotify" ? (
           <View
             style={{
-              flex: 1,
+              width: "100%",
+              height: "100%",
               backgroundColor: "#191414",
               borderRadius: 4,
               paddingHorizontal: 4 * scale,
@@ -462,11 +463,10 @@ const RecuerdoItemComponent = React.memo(
               <Image
                 source={{ uri: item.miniatura }}
                 style={{
-                  width: itemSize * 0.35,
-                  height: itemSize * 0.35,
+                  width: "35%",
+                  aspectRatio: 1,
                   borderRadius: 4,
                   marginRight: 12 * scale,
-                  flexShrink: 0,
                 }}
                 contentFit="cover"
                 transition={200}
@@ -476,14 +476,14 @@ const RecuerdoItemComponent = React.memo(
             {/* Información de la canción a la derecha */}
             <View
               style={{
-                flex: 1,
+                width: "55%",
+                height: "85%",
                 justifyContent: "space-between",
                 alignItems: "flex-start",
-                height: itemSize * 0.35,
               }}
             >
               {/* Título y artista */}
-              <View style={{ flex: 1, justifyContent: "center" }}>
+              <View style={{ height: "70%", justifyContent: "center" }}>
                 <Text
                   numberOfLines={2}
                   style={{
@@ -494,7 +494,7 @@ const RecuerdoItemComponent = React.memo(
                     fontWeight: "700",
                   }}
                 >
-                  {item.spotifyData?.name  ||  "Canción de Spotify"}{" · "}
+                  {item.spotifyData?.name || "Canción de Spotify"}{" · "}
                   {item.spotifyData?.artists && item.spotifyData.artists.length > 0 && (
                     <>
                       <Text style={{ fontWeight: "400", color: "#fff", }}>
@@ -505,7 +505,7 @@ const RecuerdoItemComponent = React.memo(
                 </Text>
               </View>
               {/* Logo de Spotify abajo, centrado */}
-              <View style={{ alignItems: "center", width: "100%" }}>
+              <View style={{ height: "30%", alignItems: "center", width: "100%", justifyContent: "center" }}>
                 <IconButton icon="spotify" size={16 * scale} iconColor="#1DB954" style={{ margin: 0, padding: 0 }} />
               </View>
             </View>
