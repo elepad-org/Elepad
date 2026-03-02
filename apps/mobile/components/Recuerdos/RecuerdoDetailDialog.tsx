@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   View,
   Dimensions,
@@ -6,10 +6,8 @@ import {
   ImageBackground,
   TouchableOpacity,
   Pressable,
-  KeyboardAvoidingView,
-  Platform,
-  Modal,
-  StyleSheet,
+  Alert,
+  Linking,
 } from "react-native";
 import { Image } from "expo-image";
 import Reanimated, {
@@ -49,7 +47,7 @@ import cassetteSound from "@/assets/sounds/cassette-play-sound-effect.mp3";
 
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
-type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
+type RecuerdoTipo = "imagen" | "texto" | "audio" | "video" | "spotify";
 
 interface Recuerdo {
   id: string;
@@ -61,6 +59,7 @@ interface Recuerdo {
   autorId?: string;
   autorNombre?: string;
   fecha: Date;
+  spotifyData?: any;
   reactions?: {
     id: string;
     userId: string;
@@ -99,6 +98,7 @@ const ReactionItem = ({
   reaction,
   member,
   onPress,
+  borderColor = COLORS.white,
 }: {
   reaction: {
     id: string;
@@ -112,6 +112,7 @@ const ReactionItem = ({
     avatarUrl?: string | null;
   };
   onPress: (stickerUrl: string | null) => void;
+  borderColor?: string;
 }) => {
   const handlePress = () => {
     onPress(reaction.stickerUrl);
@@ -133,7 +134,7 @@ const ReactionItem = ({
               height: 36,
               borderRadius: 18,
               borderWidth: 2,
-              borderColor: COLORS.white,
+              borderColor: borderColor,
             }}
           />
         ) : (
@@ -146,7 +147,7 @@ const ReactionItem = ({
               alignItems: "center",
               justifyContent: "center",
               borderWidth: 2,
-              borderColor: COLORS.white,
+              borderColor: borderColor,
             }}
           >
             <Text
@@ -303,6 +304,7 @@ export default function RecuerdoDetailDialog({
       translateX.value = 0;
     }
     swipeDirection.current = null;
+    setIsFlipped(false);
   }, [recuerdo?.id]);
 
   // Estado para el flip del cassette
@@ -311,6 +313,8 @@ export default function RecuerdoDetailDialog({
 
   // Ref para capturar la vista y estado de compartir
   const viewRef = useRef<View>(null);
+  const spotifyViewRef = useRef<View>(null);
+  const spotifyDownloadRef = useRef<View>(null);
 
   // SIEMPRE crear los players (regla de hooks), pero con valores seguros
   const audioUrl =
@@ -602,6 +606,18 @@ export default function RecuerdoDetailDialog({
         showToast?.({ message: 'Nota guardada en la galería', type: 'success' });
         return;
       }
+
+      // Para Spotify, capturar como imagen y guardar (sin reacciones)
+      if (recuerdo.tipo === "spotify" && spotifyDownloadRef.current) {
+        const uri = await captureRef(spotifyDownloadRef, {
+          format: "png",
+          quality: 1,
+        });
+
+        await MediaLibrary.createAssetAsync(uri);
+        showToast?.({ message: 'Canción guardada en la galería', type: 'success' });
+        return;
+      }
     } catch (error) {
       console.error('Error al descargar:', error);
       showToast?.({ message: 'Error al descargar', type: 'error' });
@@ -613,7 +629,8 @@ export default function RecuerdoDetailDialog({
       recuerdo.tipo !== "imagen" &&
       recuerdo.tipo !== "texto" &&
       recuerdo.tipo !== "video" &&
-      recuerdo.tipo !== "audio"
+      recuerdo.tipo !== "audio" &&
+      recuerdo.tipo !== "spotify"
     )
       return;
 
@@ -662,6 +679,25 @@ export default function RecuerdoDetailDialog({
           mimeType: "audio/m4a",
           dialogTitle: recuerdo.titulo || "Compartir audio",
           UTI: "public.audio",
+        });
+        return;
+      }
+
+      // Para Spotify, capturar como imagen (similar a imagen/texto)
+      if (recuerdo.tipo === "spotify" && spotifyDownloadRef.current) {
+        const uri = await captureRef(spotifyDownloadRef, {
+          format: "png",
+          quality: 1,
+        });
+
+        const songName = recuerdo.spotifyData?.name || recuerdo.titulo?.split(" - ")?.[0] || "Canción";
+        const message = `${songName}. ${recuerdo.autorNombre || "Alguien"
+          } te invita a usar Elepad.`;
+
+        await shareAsync(uri, {
+          mimeType: "image/png",
+          dialogTitle: message,
+          UTI: "public.png",
         });
         return;
       }
@@ -939,6 +975,7 @@ export default function RecuerdoDetailDialog({
 
   const handleDismiss = () => {
     setLastReactedStickerUrl(null);
+    setIsFlipped(false);
     if (shouldUseAudio) {
       stopAudio();
     }
@@ -952,6 +989,21 @@ export default function RecuerdoDetailDialog({
     }
     onDismiss();
   };
+
+  // Debug logs para Spotify
+  React.useEffect(() => {
+    if (recuerdo.tipo === "spotify") {
+      console.log("=== DEBUG SPOTIFY DETAIL ===");
+      console.log("Recuerdo completo:", JSON.stringify(recuerdo, null, 2));
+      console.log("spotifyData:", recuerdo.spotifyData);
+      console.log("spotifyData.name:", recuerdo.spotifyData?.name);
+      console.log("spotifyData.artists:", recuerdo.spotifyData?.artists);
+      console.log("spotifyData.album:", recuerdo.spotifyData?.album);
+      console.log("spotifyData.album.images:", recuerdo.spotifyData?.album?.images);
+      console.log("titulo:", recuerdo.titulo);
+      console.log("miniatura:", recuerdo.miniatura);
+    }
+  }, [recuerdo]);
 
   return (
     <Portal>
@@ -1047,6 +1099,103 @@ export default function RecuerdoDetailDialog({
             </View>
           )}
 
+        {/* SHADOW VIEW FOR SPOTIFY DOWNLOAD - Off-screen rendering without reactions */}
+        {recuerdo.tipo === "spotify" && recuerdo.miniatura && (
+          <View
+            style={{
+              position: "absolute",
+              top: screenWidth * 3,
+              left: 0,
+              zIndex: -100,
+            }}
+          >
+            <View
+              ref={spotifyDownloadRef}
+              collapsable={false}
+              style={{
+                backgroundColor: "#191414",
+                borderRadius: 0,
+                width: screenWidth * 0.92,
+                overflow: "hidden",
+                opacity: 1,
+              }}
+            >
+              <View style={{ padding: 14, paddingBottom: 0 }}>
+                <Image
+                  source={{ uri: recuerdo.spotifyData?.album?.images?.[0]?.url || recuerdo.miniatura }}
+                  style={{
+                    width: "100%",
+                    height: screenWidth * 0.84,
+                    borderRadius: 8,
+                    backgroundColor: "#191414",
+                  }}
+                  contentFit="cover"
+                />
+              </View>
+
+              <View style={{ padding: 20, paddingTop: 16, backgroundColor: "#191414" }}>
+                <View style={{ marginBottom: 12 }}>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      color: "#ffffff",
+                      fontFamily: "Montserrat",
+                      fontWeight: "700",
+                      marginBottom: 4,
+                    }}
+                    numberOfLines={2}
+                  >
+                    {recuerdo.spotifyData?.name || recuerdo.titulo?.split(" - ")?.[0] || "Canción de Spotify"}
+                  </Text>
+
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      color: "#b3b3b3",
+                      fontFamily: "Montserrat",
+                      fontWeight: "400",
+                    }}
+                    numberOfLines={1}
+                  >
+                    {recuerdo.spotifyData?.artists?.[0]?.name || recuerdo.titulo?.split(" - ")?.[1] || "Artista desconocido"}
+                  </Text>
+                </View>
+
+                <Text
+                  style={{
+                    fontSize: 13,
+                    color: "#ffffff",
+                    marginTop: 6,
+                    fontFamily: FONT.regular,
+                  }}
+                >
+                  Subido por: {recuerdo.autorNombre || "Desconocido"}
+                </Text>
+
+                <Text
+                  style={{
+                    fontSize: 13,
+                    color: "#ffffff",
+                    marginTop: 4,
+                    fontFamily: FONT.regular,
+                  }}
+                >
+                  {recuerdo.fecha.toLocaleDateString("es-ES", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                  {" · "}
+                  {recuerdo.fecha.toLocaleTimeString("es-ES", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
+
         <Dialog
           visible={visible}
           onDismiss={handleDismiss}
@@ -1069,7 +1218,9 @@ export default function RecuerdoDetailDialog({
                   backgroundColor:
                     recuerdo.tipo === "audio" || recuerdo.tipo === "texto"
                       ? "transparent"
-                      : COLORS.white,
+                      : recuerdo.tipo === "spotify"
+                        ? "#191414"
+                        : COLORS.white,
                   borderRadius: 10,
                   width: screenWidth * 0.92,
                   elevation: 0,
@@ -1684,6 +1835,201 @@ export default function RecuerdoDetailDialog({
                         </View>
                       </View>
                     </Animated.View>
+                  </View>
+                </View>
+              )}
+              {recuerdo.tipo === "spotify" && recuerdo.miniatura && (
+                <View
+                  ref={spotifyViewRef}
+                  collapsable={false}
+                >
+                  <View style={{ padding: 14, paddingBottom: 0 }}>
+                    <Pressable
+                      onPress={() => {
+                        // Open Spotify track URL
+                        const spotifyUrl = (recuerdo as any).spotifyData?.external_urls?.spotify;
+                        if (spotifyUrl) {
+                          Linking.openURL(spotifyUrl).catch((error) => {
+                            console.error("Error opening Spotify URL:", error);
+                          });
+                        }
+                      }}
+                      style={{ opacity: 1 }}
+                      android_ripple={null}
+                    >
+                      <Image
+                        source={{ uri: recuerdo.spotifyData?.album?.images?.[0]?.url || recuerdo.miniatura }}
+                        style={{
+                          width: "100%",
+                          height: screenWidth * 0.84,
+                          borderRadius: 8,
+                          backgroundColor: "#191414",
+                        }}
+                        contentFit="cover"
+                      />
+                    </Pressable>
+                  </View>
+
+                  {/* Información debajo de la imagen */}
+                  <View style={{ padding: 20, paddingTop: 16, backgroundColor: "#191414" }}>
+                    {/* Header con título y acciones */}
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "flex-start",
+                        justifyContent: "space-between",
+                        marginBottom: 12,
+                      }}
+                    >
+                      <View style={{ flex: 1, paddingRight: 8 }}>
+                        {/* Nombre de la canción (grande, negrita) */}
+                        <Text
+                          style={{
+                            fontSize: 18,
+                            color: "#ffffff",
+                            fontFamily: "Montserrat",
+                            fontWeight: "700",
+                            marginBottom: 4,
+                          }}
+                          numberOfLines={2}
+                        >
+                          {recuerdo.spotifyData?.name || recuerdo.titulo?.split(" - ")?.[0] || "Canción de Spotify"}
+                        </Text>
+
+                        {/* Artista (abajo, sin negrita) */}
+                        <Text
+                          style={{
+                            fontSize: 14,
+                            color: "#b3b3b3",
+                            fontFamily: "Montserrat",
+                            fontWeight: "400",
+                          }}
+                          numberOfLines={1}
+                        >
+                          {recuerdo.spotifyData?.artists?.[0]?.name || recuerdo.titulo?.split(" - ")?.[1] || "Artista desconocido"}
+                        </Text>
+                      </View>
+
+                      {/* Acciones (share + menú) */}
+                      <View style={{ flexDirection: "row", alignItems: "center" }}>
+                        <TouchableOpacity
+                          onPress={handleShare}
+                          disabled={isMutating}
+                          activeOpacity={0.6}
+                          style={{ padding: 8 }}
+                        >
+                          <MaterialCommunityIcons
+                            name="share-variant"
+                            size={22}
+                            color="#888888"
+                          />
+                        </TouchableOpacity>
+
+                        {menuMounted && (
+                          <Menu
+                            visible={menuVisible}
+                            onDismiss={closeMenu}
+                            contentStyle={{
+                              backgroundColor: COLORS.white,
+                              borderRadius: 12,
+                            }}
+                            anchor={
+                              <IconButton
+                                icon="dots-horizontal"
+                                size={20}
+                                iconColor="#888888"
+                                style={{ margin: 0 }}
+                                onPress={() => setMenuVisible(true)}
+                                disabled={isMutating}
+                              />
+                            }
+                          >
+                            <Menu.Item
+                              leadingIcon="download"
+                              title="Descargar"
+                              onPress={() => {
+                                closeMenu();
+                                handleDownload();
+                              }}
+                              disabled={isMutating}
+                            />
+                            {recuerdo.autorId === currentUserId && (
+                              <Menu.Item
+                                leadingIcon="trash-can"
+                                title="Eliminar"
+                                onPress={openDeleteConfirm}
+                                disabled={isMutating}
+                              />
+                            )}
+                          </Menu>
+                        )}
+                      </View>
+                    </View>
+
+                    {/* Subido por - gris como el icono */}
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        color: "#888888",
+                        marginTop: 6,
+                        fontFamily: FONT.regular,
+                      }}
+                    >
+                      Subido por: {recuerdo.autorNombre || "Desconocido"}
+                    </Text>
+
+                    {/* Fecha y hora - gris como el icono */}
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        color: "#888888",
+                        marginTop: 4,
+                        fontFamily: FONT.regular,
+                      }}
+                    >
+                      {recuerdo.fecha.toLocaleDateString("es-ES", {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                      {" · "}
+                      {recuerdo.fecha.toLocaleTimeString("es-ES", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </Text>
+
+                    {/* Reacciones */}
+                    {recuerdo.reactions && recuerdo.reactions.length > 0 && (
+                      <View
+                        style={{
+                          marginTop: 16,
+                          flexDirection: "row",
+                          flexWrap: "wrap",
+                          gap: 8,
+                        }}
+                      >
+                        {recuerdo.reactions.map((reaction) => {
+                          const member = familyMembers.find(
+                            (m) => m.id === reaction.userId
+                          );
+                          if (!member) return null;
+                          return (
+                            <ReactionItem
+                              key={reaction.id}
+                              reaction={reaction}
+                              member={member}
+                              borderColor="#1DB954"
+                              onPress={(stickerUrl) => {
+                                if (stickerUrl) {
+                                  setLastReactedStickerUrl(stickerUrl);
+                                }
+                              }}
+                            />
+                          );
+                        })}
+                      </View>
+                    )}
                   </View>
                 </View>
               )}

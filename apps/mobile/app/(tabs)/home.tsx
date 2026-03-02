@@ -824,13 +824,71 @@ const HomeScreen = () => {
             <Animated.View entering={FadeIn.duration(800)}>
               {(() => {
                 const isAudio = lastMemory.mimeType?.startsWith("audio/");
+                const isSpotify = lastMemory.mimeType === "audio/spotify";
                 const hasMedia =
                   lastMemory.mediaUrl &&
                   lastMemory.mimeType &&
                   (lastMemory.mimeType.startsWith("image/") ||
                     lastMemory.mimeType.startsWith("video/"));
 
-                // Si es audio, mostrar reproductor
+                // Si es Spotify, mostrar widget especial
+                if (isSpotify && lastMemory.mediaUrl) {
+                  const spotifyData = (lastMemory as any).spotifyData;
+                  return (
+                    <Pressable
+                      onPress={() =>
+                        router.navigate({
+                          pathname: "/(tabs)/recuerdos",
+                          params: {
+                            tab: "recuerdos",
+                            memoryId: lastMemory.id,
+                            bookId: lastMemory.bookId,
+                          },
+                        })
+                      }
+                      style={styles.spotifyCard}
+                    >
+                      <View style={styles.spotifyCardContent}>
+                        {/* Imagen del álbum */}
+                        <Image
+                          source={{ uri: spotifyData?.album?.images?.[0]?.url || lastMemory.mediaUrl }}
+                          style={styles.spotifyImage}
+                          contentFit="cover"
+                          transition={200}
+                          cachePolicy="memory-disk"
+                        />
+
+                        {/* Información */}
+                        <View style={styles.spotifyInfo}>
+                          {/* Canción (negrita) · Artista (sin negrita) */}
+                          <Text
+                            numberOfLines={2}
+                            style={styles.spotifyText}
+                          >
+                            <Text style={styles.spotifySongName}>
+                              {spotifyData?.name || lastMemory.title?.split(" - ")?.[0] || "Canción"}
+                            </Text>
+                            <Text style={styles.spotifyDot}> · </Text>
+                            <Text style={styles.spotifyArtist}>
+                              {spotifyData?.artists?.[0]?.name || lastMemory.title?.split(" - ")?.[1] || "Artista"}
+                            </Text>
+                          </Text>
+
+                          {/* Fecha */}
+                          <Text style={styles.spotifyDate}>
+                            {formatInUserTimezone(
+                              lastMemory.createdAt,
+                              "d 'de' MMMM 'de' yyyy",
+                              userElepad?.timezone,
+                            )}
+                          </Text>
+                        </View>
+                      </View>
+                    </Pressable>
+                  );
+                }
+
+                // Si es audio (pero no Spotify), mostrar reproductor
                 if (isAudio && lastMemory.mediaUrl) {
                   return (
                     <Pressable
@@ -1485,6 +1543,60 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontWeight: "500",
     marginTop: 2,
+  },
+
+  // Spotify Card Styles
+  spotifyCard: {
+    backgroundColor: "#191414",
+    borderRadius: 8,
+    overflow: "hidden",
+    marginHorizontal: 20,
+    marginBottom: 28,
+    ...SHADOWS.card,
+  },
+  spotifyCardContent: {
+    flexDirection: "column",
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+  },
+  spotifyImage: {
+    width: "100%",
+    aspectRatio: 1,
+    borderRadius: 8,
+    marginBottom: 4,
+  },
+  spotifyInfo: {
+    padding: 12,
+    backgroundColor: "#191414",
+    alignItems: "flex-start",
+    width: "100%",
+  },
+  spotifyText: {
+    fontSize: 15,
+    marginBottom: 8,
+    lineHeight: 20,
+    textAlign: "left",
+  },
+  spotifySongName: {
+    fontWeight: "700",
+    color: "#ffffff",
+    fontSize: 16,
+  },
+  spotifyDot: {
+    fontWeight: "700",
+    color: "#ffffff",
+    fontSize: 13,
+  },
+  spotifyArtist: {
+    fontWeight: "400",
+    color: "#ffffff",
+    fontSize: 14,
+  },
+  spotifyDate: {
+    fontSize: 12,
+    color: "#888888",
+    fontFamily: FONT.regular,
+    textAlign: "left",
   },
 });
 

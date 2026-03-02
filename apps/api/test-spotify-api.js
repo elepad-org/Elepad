@@ -58,6 +58,41 @@ async function getArtistData(artistId) {
   }
 }
 
-// Replace with the Spotify ID of the artist you want to test
-const artistId = '4Z8W4fKeB5YxbusRsdQVPb'; // Example: Radiohead
-getArtistData(artistId);
+async function searchArtistByName(name) {
+  const accessToken = await getAccessToken();
+
+  const response = await fetch(
+    `https://api.spotify.com/v1/search?q=${encodeURIComponent(name)}&type=artist&limit=1`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  const data = await response.json();
+  console.log(JSON.stringify(data, null, 2));
+}
+
+async function searchTrackByName(name) {
+  const accessToken = await getAccessToken();
+
+  const response = await fetch(
+    `https://api.spotify.com/v1/search?q=${encodeURIComponent(name)}&type=track&limit=5`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  const data = await response.json();
+  console.log(JSON.stringify(data, null, 2));
+}
+
+
+
+const artistId = 'Duki'; // Example: Radiohead
+searchTrackByName(artistId);

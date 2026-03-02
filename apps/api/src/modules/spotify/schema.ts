@@ -37,15 +37,12 @@ export const SpotifyArtistResponseSchema = z
 
 export type SpotifyArtistResponse = z.infer<typeof SpotifyArtistResponseSchema>;
 
-// Schema for searching tracks
+// Schema for searching tracks (only)
 export const SpotifySearchRequestSchema = z
   .object({
     query: z.string().min(1).openapi({
-      description: "Search query",
+      description: "Search query (track name)",
       example: "Creep",
-    }),
-    type: z.enum(["track", "artist", "album"]).default("track").openapi({
-      description: "Type of search",
     }),
     limit: z.coerce.number().int().positive().max(50).default(20).openapi({
       description: "Number of results to return",

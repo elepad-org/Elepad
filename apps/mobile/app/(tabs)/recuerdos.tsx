@@ -34,6 +34,7 @@ import {
   createMemoriesBook,
   createMemoryWithMedia,
   createNote,
+  createSpotifyMemory,
   deleteMemory,
   deleteMemoriesBook,
   GetFamilyGroupIdGroupMembers200,
@@ -71,13 +72,15 @@ import { useRecuerdosTour } from "@/hooks/tours/useRecuerdosTour";
 import { useTabContext } from "@/context/TabContext";
 
 // Tipos de recuerdos
-type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
+type RecuerdoTipo = "imagen" | "texto" | "audio" | "video" | "spotify";
 
 interface RecuerdoData {
   contenido: string; // URI del archivo o texto
   titulo?: string;
   caption?: string;
   mimeType?: string;
+  spotifyTrackId?: string;
+  spotifyData?: any;
 }
 
 // Función auxiliar para convertir Memory a Recuerdo para compatibilidad con componentes existentes
@@ -90,6 +93,8 @@ const memoryToRecuerdo = (
   if (memory.mimeType) {
     if (memory.mimeType.startsWith("image/")) {
       tipo = "imagen";
+    } else if (memory.mimeType === "audio/spotify") {
+      tipo = "spotify";
     } else if (memory.mimeType.startsWith("audio/")) {
       tipo = "audio";
     } else if (memory.mimeType.startsWith("video/")) {
@@ -105,7 +110,8 @@ const memoryToRecuerdo = (
     contenido: memory.mediaUrl || memory.caption || "",
     miniatura:
       (memory.mimeType?.startsWith("image/") ||
-        memory.mimeType?.startsWith("video/")) &&
+        memory.mimeType?.startsWith("video/") ||
+        memory.mimeType === "audio/spotify") &&
         memory.mediaUrl
         ? memory.mediaUrl
         : undefined,
@@ -114,6 +120,7 @@ const memoryToRecuerdo = (
     autorId: memory.createdBy,
     autorNombre: memberNameById[memory.createdBy] || undefined,
     fecha: new Date(memory.createdAt),
+    spotifyData: (memory as any).spotifyData,
     reactions: (memory.reactions || []).map(
       (r: {
         id: string;
@@ -140,6 +147,7 @@ interface Recuerdo {
   autorId?: string;
   autorNombre?: string;
   fecha: Date;
+  spotifyData?: any;
   reactions?: {
     id: string;
     userId: string;
@@ -594,6 +602,45 @@ export default function RecuerdosScreen() {
     },
   });
 
+  // Hook de mutación para crear recuerdos de Spotify
+  const createSpotifyMemoryMutation = useMutation({
+    mutationFn: async (data: {
+      bookId: string;
+      groupId: string;
+      spotifyTrackId: string;
+      title?: string;
+      caption?: string;
+    }) => {
+      try {
+        const result = await createSpotifyMemory(data);
+        return result;
+      } catch (error) {
+        console.error("Error al crear recuerdo de Spotify:", error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      // Invalidate global memories query for Home
+      queryClient.invalidateQueries({ queryKey: ["/memories"] });
+
+      showToast({ message: "Canción agregada exitosamente", type: "success" });
+
+      // Reset dialog state
+      setDialogVisible(false);
+      setCurrentStep("select");
+      setSelectedTipo(null);
+      setSelectedFileUri(null);
+      setSelectedMimeType(null);
+    },
+    onError: (error) => {
+      console.error("Create Spotify memory mutation onError:", error);
+      showToast({
+        message: `Error al crear recuerdo de Spotify: ${error instanceof Error ? error.message : "Error desconocido"}`,
+        type: "error",
+      });
+    },
+  });
+
   // Función para cargar recuerdos (mantiene el patrón original)
   const cargarRecuerdos = useCallback(async () => {
     try {
@@ -727,6 +774,7 @@ export default function RecuerdosScreen() {
     memoriesLoading ||
     uploadMemoryMutation.isPending ||
     createNoteMutation.isPending ||
+    createSpotifyMemoryMutation.isPending ||
     updateMemoryMutation.isPending ||
     deleteMemoryMutation.isPending;
 
@@ -869,6 +917,25 @@ export default function RecuerdosScreen() {
         };
 
         await createNoteMutation.mutateAsync(noteData);
+      } else if (selectedTipo === "spotify") {
+        // Para Spotify, usar el endpoint de createSpotifyMemory
+        if (!data.spotifyTrackId) {
+          showToast({
+            message: "No se ha seleccionado ninguna canción",
+            type: "error",
+          });
+          return;
+        }
+
+        const spotifyData = {
+          bookId: selectedBook.id,
+          groupId,
+          spotifyTrackId: data.spotifyTrackId,
+          title: data.titulo,
+          caption: data.caption,
+        };
+
+        await createSpotifyMemoryMutation.mutateAsync(spotifyData);
       } else {
         // Para archivos multimedia, usar el endpoint de createMemoryWithMedia
         let fileData: Blob;
@@ -1661,6 +1728,21 @@ export default function RecuerdosScreen() {
                               : "transparent",
                         }}
                       />
+                      <Menu.Item
+                        leadingIcon="music"
+                        onPress={() => {
+                          setTypeFilter("spotify");
+                          setFilterMenuVisible(false);
+                          setFilterSubMode("none");
+                        }}
+                        title="Canciones Spotify"
+                        style={{
+                          backgroundColor:
+                            typeFilter === "spotify"
+                              ? COLORS.primary + "20"
+                              : "transparent",
+                        }}
+                      />
                     </>
                   );
                 }
@@ -1754,7 +1836,9 @@ export default function RecuerdosScreen() {
           onSave={handleGuardarRecuerdo}
           onCancel={handleCancelar}
           isUploading={
-            uploadMemoryMutation.isPending || createNoteMutation.isPending
+            uploadMemoryMutation.isPending ||
+            createNoteMutation.isPending ||
+            createSpotifyMemoryMutation.isPending
           }
           selectedFileUri={selectedFileUri || undefined}
           selectedFileMimeType={selectedMimeType || undefined}

@@ -690,7 +690,8 @@ export class MemoriesService {
     }
 
     // If the memory has a media URL, delete it from Storage first
-    if (memory.mediaUrl && memory.mimeType && memory.mimeType !== "text/note") {
+    // Skip for notes and Spotify memories (which don't have Storage media)
+    if (memory.mediaUrl && memory.mimeType && !["text/note", "audio/spotify"].includes(memory.mimeType)) {
       try {
         await deleteMemoryMediaByPublicUrl(this.supabase, memory.mediaUrl);
       } catch (error) {

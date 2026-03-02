@@ -20,7 +20,7 @@ import eleLoading from "@/assets/images/ele-celular-loading.png";
 
 const screenWidth = Dimensions.get("window").width;
 
-type RecuerdoTipo = "imagen" | "texto" | "audio" | "video";
+type RecuerdoTipo = "imagen" | "texto" | "audio" | "video" | "spotify";
 
 interface Recuerdo {
   id: string;
@@ -29,6 +29,7 @@ interface Recuerdo {
   miniatura?: string;
   titulo?: string;
   fecha: Date;
+  spotifyData?: any;
 }
 
 interface RecuerdoItemProps {
@@ -91,11 +92,13 @@ const RecuerdoItemComponent = React.memo(
     const heightFactor =
       item.tipo === "audio"
         ? 0.54
-        : item.tipo === "texto"
-          ? 0.4
-          : item.tipo === "imagen" || item.tipo === "video"
-            ? 1.05 + (item.id.length % 3) * 0.05
-            : 0.8 + (item.id.length % 5) * 0.08;
+        : item.tipo === "spotify"
+          ? 0.42
+          : item.tipo === "texto"
+            ? 0.4
+            : item.tipo === "imagen" || item.tipo === "video"
+              ? 1.05 + (item.id.length % 3) * 0.05
+              : 0.8 + (item.id.length % 5) * 0.08;
     const itemHeight = itemSize * heightFactor;
 
     const isMedia = item.tipo === "imagen" || item.tipo === "video";
@@ -214,9 +217,9 @@ const RecuerdoItemComponent = React.memo(
           paddingBottom: 0,
           overflow: "hidden",
           borderRadius: 8,
-          backgroundColor: isMedia ? "#FFFFFF" : "#F5F5F5",
-          borderWidth: isSelected ? 3 : 1,
-          borderColor: isSelected ? COLORS.primary : "rgba(0,0,0,0.05)",
+          backgroundColor: isMedia ? "#FFFFFF" : item.tipo === "spotify" ? "#191414" : "#F5F5F5",
+          borderWidth: isSelected ? 3 : 1, // Start Thick border if selected
+          borderColor: isSelected ? COLORS.primary : "rgba(0,0,0,0.05)", // Primary color if selected
           ...SHADOWS.light,
         }}
       >
@@ -429,6 +432,72 @@ const RecuerdoItemComponent = React.memo(
                     }}
                   />
                 </View>
+              </View>
+            </View>
+          </View>
+        ) : item.tipo === "spotify" ? (
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: "#191414",
+              borderRadius: 4,
+              paddingHorizontal: 4 * scale,
+              paddingVertical: 2 * scale,
+              flexDirection: "row",
+              justifyContent: "flex-start",
+              alignItems: "center",
+            }}
+          >
+            {/* Portada del álbum a la izquierda */}
+            {(item.spotifyData?.album?.images || item.miniatura) && (
+              <Image
+                source={{ uri: item.miniatura }}
+                style={{
+                  width: itemSize * 0.35,
+                  height: itemSize * 0.35,
+                  borderRadius: 4,
+                  marginRight: 12 * scale,
+                  flexShrink: 0,
+                }}
+                contentFit="cover"
+                transition={200}
+                cachePolicy="memory-disk"
+              />
+            )}
+            {/* Información de la canción a la derecha */}
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                height: itemSize * 0.35,
+              }}
+            >
+              {/* Título y artista */}
+              <View style={{ flex: 1, justifyContent: "center" }}>
+                <Text
+                  numberOfLines={2}
+                  style={{
+                    fontSize: 11 * scale,
+                    color: "#fff",
+                    textAlign: "left",
+                    fontFamily: "Montserrat",
+                    fontWeight: "700",
+                  }}
+                >
+                  {item.spotifyData?.name  ||  "Canción de Spotify"}{" · "}
+                  {item.spotifyData?.artists && item.spotifyData.artists.length > 0 && (
+                    <>
+                      <Text style={{ fontWeight: "400", color: "#fff", }}>
+                        {item.spotifyData.artists[0].name}
+                      </Text>
+                    </>
+                  )}
+                </Text>
+              </View>
+              {/* Logo de Spotify abajo, centrado */}
+              <View style={{ alignItems: "center", width: "100%" }}>
+                <IconButton icon="spotify" size={16 * scale} iconColor="#1DB954" style={{ margin: 0, padding: 0 }} />
               </View>
             </View>
           </View>
