@@ -870,7 +870,7 @@ const HomeScreen = () => {
                             </Text>
                             <Text style={styles.spotifyDot}> · </Text>
                             <Text style={styles.spotifyArtist}>
-                              {spotifyData?.artists?.[0]?.name || lastMemory.title?.split(" - ")?.[1] || "Artista"}
+                              {spotifyData?.artists?.map((a: { name: string }) => a.name).join(", ") || lastMemory.title?.split(" - ")?.[1] || "Artista"}
                             </Text>
                           </Text>
 

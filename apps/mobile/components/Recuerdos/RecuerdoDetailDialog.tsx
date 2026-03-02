@@ -1178,7 +1178,7 @@ export default function RecuerdoDetailDialog({
                     }}
                     numberOfLines={1}
                   >
-                    {recuerdo.spotifyData?.artists?.[0]?.name || recuerdo.titulo?.split(" - ")?.[1] || "Artista desconocido"}
+                    {recuerdo.spotifyData?.artists?.map(a => a.name).join(", ") || recuerdo.titulo?.split(" - ")?.[1] || "Artista desconocido"}
                   </Text>
                 </View>
 
@@ -1942,7 +1942,7 @@ export default function RecuerdoDetailDialog({
                           }}
                           numberOfLines={1}
                         >
-                          {recuerdo.spotifyData?.artists?.[0]?.name || recuerdo.titulo?.split(" - ")?.[1] || "Artista desconocido"}
+                          {recuerdo.spotifyData?.artists?.map(a => a.name).join(", ") || recuerdo.titulo?.split(" - ")?.[1] || "Artista desconocido"}
                         </Text>
                       </View>
 
@@ -2037,65 +2037,70 @@ export default function RecuerdoDetailDialog({
                       Subido por: {recuerdo.autorNombre || "Desconocido"}
                     </Text>
 
-                    {/* Fecha y hora - gris como el icono */}
-                    <Text
+                    {/* Fecha/hora + botón Escuchar en la misma fila */}
+                    <View
                       style={{
-                        fontSize: 13,
-                        color: "#888888",
-                        marginTop: 4,
-                        fontFamily: FONT.regular,
-                      }}
-                    >
-                      {recuerdo.fecha.toLocaleDateString("es-ES", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })}
-                      {" · "}
-                      {recuerdo.fecha.toLocaleTimeString("es-ES", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </Text>
-
-                    {/* Botón Escuchar en Spotify */}
-                    <Pressable
-                      onPress={() => {
-                        const spotifyUrl = recuerdo?.spotifyData?.external_urls?.spotify;
-                        if (spotifyUrl) {
-                          Linking.openURL(spotifyUrl).catch((error) => {
-                            console.error("Error opening Spotify URL:", error);
-                          });
-                        }
-                      }}
-                      style={({ pressed }) => ({
-                        alignSelf: "flex-end",
                         flexDirection: "row",
                         alignItems: "center",
-                        backgroundColor: pressed ? "#1aa34a" : "#1DB954",
-                        borderRadius: 20,
-                        paddingHorizontal: 14,
-                        paddingVertical: 7,
-                        marginTop: 14,
-                      })}
+                        justifyContent: "space-between",
+                        marginTop: 4,
+                      }}
                     >
-                      <MaterialCommunityIcons
-                        name="spotify"
-                        size={18}
-                        color="#fff"
-                        style={{ marginRight: 6 }}
-                      />
                       <Text
                         style={{
-                          color: "#fff",
                           fontSize: 13,
-                          fontWeight: "700",
-                          fontFamily: "Montserrat",
+                          color: "#888888",
+                          fontFamily: FONT.regular,
                         }}
                       >
-                        Escuchar
+                        {recuerdo.fecha.toLocaleDateString("es-ES", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                        {" · "}
+                        {recuerdo.fecha.toLocaleTimeString("es-ES", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </Text>
-                    </Pressable>
+
+                      <Pressable
+                        onPress={() => {
+                          const spotifyUrl = recuerdo?.spotifyData?.external_urls?.spotify;
+                          if (spotifyUrl) {
+                            Linking.openURL(spotifyUrl).catch((error) => {
+                              console.error("Error opening Spotify URL:", error);
+                            });
+                          }
+                        }}
+                        style={({ pressed }) => ({
+                          flexDirection: "row",
+                          alignItems: "center",
+                          backgroundColor: pressed ? "#1aa34a" : "#1DB954",
+                          borderRadius: 20,
+                          paddingHorizontal: 12,
+                          paddingVertical: 5,
+                        })}
+                      >
+                        <MaterialCommunityIcons
+                          name="spotify"
+                          size={16}
+                          color="#fff"
+                          style={{ marginRight: 5 }}
+                        />
+                        <Text
+                          style={{
+                            color: "#fff",
+                            fontSize: 12,
+                            fontWeight: "700",
+                            fontFamily: "Montserrat",
+                          }}
+                        >
+                          Escuchar
+                        </Text>
+                      </Pressable>
+                    </View>
 
                     {/* Reacciones */}
                     {recuerdo.reactions && recuerdo.reactions.length > 0 && (

@@ -498,7 +498,7 @@ const RecuerdoItemComponent = React.memo(
                   {item.spotifyData?.artists && item.spotifyData.artists.length > 0 && (
                     <>
                       <Text style={{ fontWeight: "400", color: "#fff", }}>
-                        {item.spotifyData.artists[0].name}
+                        {item.spotifyData.artists.map(a => a.name).join(", ")}
                       </Text>
                     </>
                   )}
