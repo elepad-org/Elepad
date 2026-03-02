@@ -8,6 +8,10 @@ import {
   Pressable,
   Alert,
   Linking,
+  StyleSheet,
+  Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Image } from "expo-image";
 import Reanimated, {

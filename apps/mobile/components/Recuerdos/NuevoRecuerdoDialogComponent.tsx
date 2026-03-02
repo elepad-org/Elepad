@@ -184,7 +184,7 @@ export default function NuevoRecuerdoDialogComponent({
             isUploading={isUploading}
           />
         )}
-      </Dialog>
+      </Modal>
     );
   }
 
