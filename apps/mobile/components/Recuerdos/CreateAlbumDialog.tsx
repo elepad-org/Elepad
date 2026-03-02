@@ -361,6 +361,7 @@ export default function CreateAlbumDialog({
                               miniatura: item.mediaUrl || undefined,
                               titulo: item.title || undefined,
                               tipo: "imagen",
+                              spotifyData: undefined,
                             }}
                             numColumns={3}
                             onPress={() => handleToggleMemory(item)}

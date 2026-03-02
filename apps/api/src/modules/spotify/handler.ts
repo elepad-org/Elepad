@@ -119,8 +119,7 @@ spotifyApp.openapi(
 
     // call service search with only tracks, replicate what test-spotify-api.js does
     const searchResults = await c.var.spotifyService.search(
-      validated.query,
-      validated.limit
+      validated.query
     );
 
     return c.json(searchResults, 200);

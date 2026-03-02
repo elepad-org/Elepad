@@ -22,6 +22,15 @@ const screenWidth = Dimensions.get("window").width;
 
 type RecuerdoTipo = "imagen" | "texto" | "audio" | "video" | "spotify";
 
+interface SpotifyTrackData {
+  id: string;
+  name: string;
+  artists?: Array<{ name: string }>;
+  album?: { images?: Array<{ url: string }>; name?: string };
+  uri?: string;
+  external_urls?: { spotify: string };
+}
+
 interface Recuerdo {
   id: string;
   tipo: RecuerdoTipo;
@@ -29,7 +38,7 @@ interface Recuerdo {
   miniatura?: string;
   titulo?: string;
   fecha: Date;
-  spotifyData?: any;
+  spotifyData?: SpotifyTrackData;
 }
 
 interface RecuerdoItemProps {

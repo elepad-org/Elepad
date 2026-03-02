@@ -6,7 +6,6 @@ import {
   ImageBackground,
   TouchableOpacity,
   Pressable,
-  Alert,
   Linking,
   StyleSheet,
   Modal,
@@ -53,6 +52,24 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
 type RecuerdoTipo = "imagen" | "texto" | "audio" | "video" | "spotify";
 
+interface SpotifyArtist {
+  name: string;
+}
+
+interface SpotifyAlbum {
+  name?: string;
+  images?: Array<{ url: string }>;
+}
+
+interface SpotifyTrackData {
+  id: string;
+  name: string;
+  artists?: SpotifyArtist[];
+  album?: SpotifyAlbum;
+  uri?: string;
+  external_urls?: { spotify: string };
+}
+
 interface Recuerdo {
   id: string;
   tipo: RecuerdoTipo;
@@ -63,7 +80,7 @@ interface Recuerdo {
   autorId?: string;
   autorNombre?: string;
   fecha: Date;
-  spotifyData?: any;
+  spotifyData?: SpotifyTrackData;
   reactions?: {
     id: string;
     userId: string;
@@ -1851,7 +1868,7 @@ export default function RecuerdoDetailDialog({
                     <Pressable
                       onPress={() => {
                         // Open Spotify track URL
-                        const spotifyUrl = (recuerdo as any).spotifyData?.external_urls?.spotify;
+                        const spotifyUrl = recuerdo?.spotifyData?.external_urls?.spotify;
                         if (spotifyUrl) {
                           Linking.openURL(spotifyUrl).catch((error) => {
                             console.error("Error opening Spotify URL:", error);

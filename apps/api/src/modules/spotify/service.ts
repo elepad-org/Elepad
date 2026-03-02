@@ -157,9 +157,8 @@ export class SpotifyService {
    * Search on Spotify (tracks, artists, albums)
    */
 async search(
-  query: string,
-  limit: number = 1
-): Promise<any> {
+  query: string
+): Promise<SpotifySearchResult> {
   // always search tracks, matching the behaviour of the standalone test
   const accessToken = await this.getAccessToken();
 

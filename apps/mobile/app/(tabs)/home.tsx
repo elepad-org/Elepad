@@ -833,7 +833,7 @@ const HomeScreen = () => {
 
                 // Si es Spotify, mostrar widget especial
                 if (isSpotify && lastMemory.mediaUrl) {
-                  const spotifyData = (lastMemory as any).spotifyData;
+                  const spotifyData = lastMemory.spotifyData;
                   return (
                     <Pressable
                       onPress={() =>

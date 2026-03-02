@@ -74,13 +74,22 @@ import { useTabContext } from "@/context/TabContext";
 // Tipos de recuerdos
 type RecuerdoTipo = "imagen" | "texto" | "audio" | "video" | "spotify";
 
+interface SpotifyTrackData {
+  id: string;
+  name: string;
+  artists?: Array<{ name: string }>;
+  album?: { images?: Array<{ url: string }>; name?: string };
+  uri?: string;
+  external_urls?: { spotify: string };
+}
+
 interface RecuerdoData {
   contenido: string; // URI del archivo o texto
   titulo?: string;
   caption?: string;
   mimeType?: string;
   spotifyTrackId?: string;
-  spotifyData?: any;
+  spotifyData?: SpotifyTrackData;
 }
 
 // Función auxiliar para convertir Memory a Recuerdo para compatibilidad con componentes existentes
@@ -120,7 +129,7 @@ const memoryToRecuerdo = (
     autorId: memory.createdBy,
     autorNombre: memberNameById[memory.createdBy] || undefined,
     fecha: new Date(memory.createdAt),
-    spotifyData: (memory as any).spotifyData,
+    spotifyData: memory.spotifyData as SpotifyTrackData | undefined,
     reactions: (memory.reactions || []).map(
       (r: {
         id: string;
@@ -147,7 +156,7 @@ interface Recuerdo {
   autorId?: string;
   autorNombre?: string;
   fecha: Date;
-  spotifyData?: any;
+  spotifyData?: SpotifyTrackData;
   reactions?: {
     id: string;
     userId: string;

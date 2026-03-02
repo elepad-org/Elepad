@@ -56,7 +56,7 @@ export default function SpotifySearchComponent({
 
       // El resultado viene en result.tracks.items (la API siempre devolverá `tracks`)
       if (result && 'tracks' in result) {
-        const tracks = (result as any).tracks?.items ?? [];
+        const tracks = (result.tracks as { items: SpotifyTrack[] } | undefined)?.items ?? [];
         setSearchResults(tracks);
       }
 

@@ -25,13 +25,22 @@ interface FamilyMember {
   activeFrameUrl?: string | null;
 }
 
+interface SpotifyTrackData {
+  id: string;
+  name: string;
+  artists?: Array<{ name: string }>;
+  album?: { images?: Array<{ url: string }>; name?: string };
+  uri?: string;
+  external_urls?: { spotify: string };
+}
+
 interface RecuerdoData {
   contenido: string; // URI del archivo o texto
   titulo?: string;
   caption?: string;
   mimeType?: string;
   spotifyTrackId?: string;
-  spotifyData?: any;
+  spotifyData?: SpotifyTrackData;
   miniatura?: string;
 }
 
@@ -164,11 +173,11 @@ export default function NuevoRecuerdoDialogComponent({
         )}
         {selectedTipo === "spotify" && (
           <SpotifySearchComponent
-            onTrackSelected={(trackId: string, trackData: any) => {
+            onTrackSelected={(trackId: string, trackData: SpotifyTrackData) => {
               // Extraer URL de la imagen del álbum
               const albumImageUrl = trackData.album?.images?.[0]?.url;
               // Extraer nombre de los artistas
-              const artistsText = trackData.artists?.map((a: any) => a.name).join(", ") || "";
+              const artistsText = trackData.artists?.map((a) => a.name).join(", ") || "";
               
               onSave({
                 contenido: trackId,

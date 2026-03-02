@@ -30,7 +30,7 @@ export interface SpotifyTrack {
 }
 
 export interface SpotifySearchResult {
-  tracks?: {
+  tracks: {
     items: SpotifyTrack[];
     total: number;
     limit: number;
