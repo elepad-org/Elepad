@@ -26,13 +26,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { shareAsync } from "expo-sharing";
 import * as FileSystem from "expo-file-system/legacy";
 import * as MediaLibrary from "expo-media-library";
-import {
-  Dialog,
-  Portal,
-  Text,
-  IconButton,
-  Menu
-} from "react-native-paper";
+import { Dialog, Portal, Text, IconButton, Menu } from "react-native-paper";
 import { COLORS, STYLES, FONT, SHADOWS } from "@/styles/base";
 import { useAudioPlayer } from "expo-audio";
 import { VideoView, useVideoPlayer } from "expo-video";
@@ -219,7 +213,6 @@ export default function RecuerdoDetailDialog({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
-
   const [isPlayingEffect, setIsPlayingEffect] = useState(false);
   const effectPlayer = useAudioPlayer(cassetteSound);
 
@@ -253,10 +246,12 @@ export default function RecuerdoDetailDialog({
 
   // Check if user has at least one sticker
   const hasStickers = Array.isArray(inventoryData)
-    ? (inventoryData as Array<{ item?: { type: string }; type?: string }>).some((item) => {
-      const itemType = item.item?.type || item.type;
-      return itemType === "Sticker" || itemType === "sticker";
-    })
+    ? (inventoryData as Array<{ item?: { type: string }; type?: string }>).some(
+        (item) => {
+          const itemType = item.item?.type || item.type;
+          return itemType === "Sticker" || itemType === "sticker";
+        },
+      )
     : false;
 
   // Can react if user is elder OR has at least one sticker
@@ -561,8 +556,11 @@ export default function RecuerdoDetailDialog({
     try {
       // Solicitar permisos
       const { status } = await MediaLibrary.requestPermissionsAsync();
-      if (status !== 'granted') {
-        showToast?.({ message: 'Permiso de almacenamiento denegado', type: 'error' });
+      if (status !== "granted") {
+        showToast?.({
+          message: "Permiso de almacenamiento denegado",
+          type: "error",
+        });
         return;
       }
 
@@ -577,7 +575,10 @@ export default function RecuerdoDetailDialog({
         );
 
         await MediaLibrary.createAssetAsync(downloadResult.uri);
-        showToast?.({ message: 'Video guardado en la galería', type: 'success' });
+        showToast?.({
+          message: "Video guardado en la galería",
+          type: "success",
+        });
         return;
       }
 
@@ -597,7 +598,10 @@ export default function RecuerdoDetailDialog({
         );
 
         await MediaLibrary.createAssetAsync(downloadResult.uri);
-        showToast?.({ message: 'Audio guardado en la galería', type: 'success' });
+        showToast?.({
+          message: "Audio guardado en la galería",
+          type: "success",
+        });
         return;
       }
 
@@ -612,7 +616,10 @@ export default function RecuerdoDetailDialog({
         );
 
         await MediaLibrary.createAssetAsync(downloadResult.uri);
-        showToast?.({ message: 'Imagen guardada en la galería', type: 'success' });
+        showToast?.({
+          message: "Imagen guardada en la galería",
+          type: "success",
+        });
         return;
       }
 
@@ -624,7 +631,10 @@ export default function RecuerdoDetailDialog({
         });
 
         await MediaLibrary.createAssetAsync(uri);
-        showToast?.({ message: 'Nota guardada en la galería', type: 'success' });
+        showToast?.({
+          message: "Nota guardada en la galería",
+          type: "success",
+        });
         return;
       }
 
@@ -636,12 +646,15 @@ export default function RecuerdoDetailDialog({
         });
 
         await MediaLibrary.createAssetAsync(uri);
-        showToast?.({ message: 'Canción guardada en la galería', type: 'success' });
+        showToast?.({
+          message: "Canción guardada en la galería",
+          type: "success",
+        });
         return;
       }
     } catch (error) {
-      console.error('Error al descargar:', error);
-      showToast?.({ message: 'Error al descargar', type: 'error' });
+      console.error("Error al descargar:", error);
+      showToast?.({ message: "Error al descargar", type: "error" });
     }
   };
 
@@ -711,9 +724,13 @@ export default function RecuerdoDetailDialog({
           quality: 1,
         });
 
-        const songName = recuerdo.spotifyData?.name || recuerdo.titulo?.split(" - ")?.[0] || "Canción";
-        const message = `${songName}. ${recuerdo.autorNombre || "Alguien"
-          } te invita a usar Elepad.`;
+        const songName =
+          recuerdo.spotifyData?.name ||
+          recuerdo.titulo?.split(" - ")?.[0] ||
+          "Canción";
+        const message = `${songName}. ${
+          recuerdo.autorNombre || "Alguien"
+        } te invita a usar Elepad.`;
 
         await shareAsync(uri, {
           mimeType: "image/png",
@@ -729,8 +746,9 @@ export default function RecuerdoDetailDialog({
         quality: 1,
       });
 
-      const message = `${recuerdo.titulo || "Recuerdo"}. ${recuerdo.autorNombre || "Alguien"
-        } te invita a usar Elepad.`;
+      const message = `${recuerdo.titulo || "Recuerdo"}. ${
+        recuerdo.autorNombre || "Alguien"
+      } te invita a usar Elepad.`;
 
       await shareAsync(uri, {
         mimeType: "image/png",
@@ -772,19 +790,19 @@ export default function RecuerdoDetailDialog({
             recuerdo.tipo === "texto" ||
             recuerdo.tipo === "video" ||
             recuerdo.tipo === "audio") && (
-              <TouchableOpacity
-                onPress={handleShare}
-                disabled={isMutating}
-                activeOpacity={0.6}
-                style={{ padding: 8 }}
-              >
-                <MaterialCommunityIcons
-                  name="share-variant"
-                  size={22}
-                  color={COLORS.textSecondary || "#757575"}
-                />
-              </TouchableOpacity>
-            )}
+            <TouchableOpacity
+              onPress={handleShare}
+              disabled={isMutating}
+              activeOpacity={0.6}
+              style={{ padding: 8 }}
+            >
+              <MaterialCommunityIcons
+                name="share-variant"
+                size={22}
+                color={COLORS.textSecondary || "#757575"}
+              />
+            </TouchableOpacity>
+          )}
 
           {menuMounted && (
             <Menu
@@ -956,7 +974,7 @@ export default function RecuerdoDetailDialog({
     } catch (error) {
       console.error("Error toggling audio:", error);
     }
-  };
+  }
 
   function stopAudio() {
     if (!shouldUseAudio) return;
@@ -974,7 +992,7 @@ export default function RecuerdoDetailDialog({
     } catch (error) {
       console.error("Error stopping audio:", error);
     }
-  };
+  }
 
   function handleSliderChange(value: number) {
     if (!shouldUseAudio) return;
@@ -985,7 +1003,7 @@ export default function RecuerdoDetailDialog({
     } catch (error) {
       console.error("Error seeking:", error);
     }
-  };
+  }
 
   const formatTime = (seconds: number) => {
     if (!seconds || isNaN(seconds)) return "0:00";
@@ -1020,7 +1038,10 @@ export default function RecuerdoDetailDialog({
       console.log("spotifyData.name:", recuerdo.spotifyData?.name);
       console.log("spotifyData.artists:", recuerdo.spotifyData?.artists);
       console.log("spotifyData.album:", recuerdo.spotifyData?.album);
-      console.log("spotifyData.album.images:", recuerdo.spotifyData?.album?.images);
+      console.log(
+        "spotifyData.album.images:",
+        recuerdo.spotifyData?.album?.images,
+      );
       console.log("titulo:", recuerdo.titulo);
       console.log("miniatura:", recuerdo.miniatura);
     }
@@ -1033,92 +1054,92 @@ export default function RecuerdoDetailDialog({
         {(recuerdo.tipo === "imagen" ||
           recuerdo.tipo === "texto" ||
           recuerdo.tipo === "video") && (
+          <View
+            style={{
+              position: "absolute",
+              top: screenWidth * 3, // Way off screen
+              left: 0,
+              zIndex: -100,
+            }}
+          >
             <View
+              ref={viewRef}
+              collapsable={false}
               style={{
-                position: "absolute",
-                top: screenWidth * 3, // Way off screen
-                left: 0,
-                zIndex: -100,
+                backgroundColor:
+                  recuerdo.tipo === "texto" ? "transparent" : COLORS.white,
+                borderRadius: 0,
+                width: screenWidth * 0.92,
+                overflow: "hidden",
+                opacity: 1,
               }}
             >
-              <View
-                ref={viewRef}
-                collapsable={false}
-                style={{
-                  backgroundColor:
-                    recuerdo.tipo === "texto" ? "transparent" : COLORS.white,
-                  borderRadius: 0,
-                  width: screenWidth * 0.92,
-                  overflow: "hidden",
-                  opacity: 1,
-                }}
-              >
-                {recuerdo.tipo === "texto" ? (
-                  <ImageBackground
-                    source={fondoRecuerdos}
-                    resizeMode="cover"
-                    style={{
-                      padding: 10,
-                      justifyContent: "center",
-                      minHeight: 200,
-                      width: screenWidth * 0.92,
-                    }}
-                  >
-                    {renderInfoBlock(false)}
-                  </ImageBackground>
-                ) : (
-                  <View>
-                    <View style={{ padding: 14, paddingBottom: 0 }}>
-                      {recuerdo.tipo === "imagen" && recuerdo.miniatura && (
-                        <Image
-                          source={{ uri: recuerdo.miniatura }}
-                          style={{
-                            width: "100%",
-                            height: screenWidth * 0.84,
-                            borderRadius: 0,
-                          }}
-                          contentFit="cover"
-                        />
-                      )}
-                      {recuerdo.tipo === "video" && (
-                        <View
-                          style={{
-                            width: "100%",
-                            height: screenWidth * 0.84,
-                            borderRadius: 0,
-                            backgroundColor: "#000",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            overflow: "hidden",
-                          }}
-                        >
-                          {recuerdo.miniatura ? (
-                            <Image
-                              source={{ uri: recuerdo.miniatura }}
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                position: "absolute",
-                              }}
-                              contentFit="cover"
-                            />
-                          ) : null}
-                          <MaterialCommunityIcons
-                            name="play-circle-outline"
-                            size={64}
-                            color="rgba(255,255,255,0.8)"
-                            style={{ zIndex: 10 }}
+              {recuerdo.tipo === "texto" ? (
+                <ImageBackground
+                  source={fondoRecuerdos}
+                  resizeMode="cover"
+                  style={{
+                    padding: 10,
+                    justifyContent: "center",
+                    minHeight: 200,
+                    width: screenWidth * 0.92,
+                  }}
+                >
+                  {renderInfoBlock(false)}
+                </ImageBackground>
+              ) : (
+                <View>
+                  <View style={{ padding: 14, paddingBottom: 0 }}>
+                    {recuerdo.tipo === "imagen" && recuerdo.miniatura && (
+                      <Image
+                        source={{ uri: recuerdo.miniatura }}
+                        style={{
+                          width: "100%",
+                          height: screenWidth * 0.84,
+                          borderRadius: 0,
+                        }}
+                        contentFit="cover"
+                      />
+                    )}
+                    {recuerdo.tipo === "video" && (
+                      <View
+                        style={{
+                          width: "100%",
+                          height: screenWidth * 0.84,
+                          borderRadius: 0,
+                          backgroundColor: "#000",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {recuerdo.miniatura ? (
+                          <Image
+                            source={{ uri: recuerdo.miniatura }}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              position: "absolute",
+                            }}
+                            contentFit="cover"
                           />
-                        </View>
-                      )}
-                    </View>
-                    {/* Render info WITHOUT actions for the screenshot */}
-                    {renderInfoBlock(false)}
+                        ) : null}
+                        <MaterialCommunityIcons
+                          name="play-circle-outline"
+                          size={64}
+                          color="rgba(255,255,255,0.8)"
+                          style={{ zIndex: 10 }}
+                        />
+                      </View>
+                    )}
                   </View>
-                )}
-              </View>
+                  {/* Render info WITHOUT actions for the screenshot */}
+                  {renderInfoBlock(false)}
+                </View>
+              )}
             </View>
-          )}
+          </View>
+        )}
 
         {/* SHADOW VIEW FOR SPOTIFY DOWNLOAD - Off-screen rendering without reactions */}
         {recuerdo.tipo === "spotify" && recuerdo.miniatura && (
@@ -1143,7 +1164,11 @@ export default function RecuerdoDetailDialog({
             >
               <View style={{ padding: 14, paddingBottom: 0 }}>
                 <Image
-                  source={{ uri: recuerdo.spotifyData?.album?.images?.[0]?.url || recuerdo.miniatura }}
+                  source={{
+                    uri:
+                      recuerdo.spotifyData?.album?.images?.[0]?.url ||
+                      recuerdo.miniatura,
+                  }}
                   style={{
                     width: "100%",
                     height: screenWidth * 0.84,
@@ -1154,7 +1179,13 @@ export default function RecuerdoDetailDialog({
                 />
               </View>
 
-              <View style={{ padding: 20, paddingTop: 16, backgroundColor: "#191414" }}>
+              <View
+                style={{
+                  padding: 20,
+                  paddingTop: 16,
+                  backgroundColor: "#191414",
+                }}
+              >
                 <View style={{ marginBottom: 12 }}>
                   <Text
                     style={{
@@ -1166,7 +1197,9 @@ export default function RecuerdoDetailDialog({
                     }}
                     numberOfLines={2}
                   >
-                    {recuerdo.spotifyData?.name || recuerdo.titulo?.split(" - ")?.[0] || "Canción de Spotify"}
+                    {recuerdo.spotifyData?.name ||
+                      recuerdo.titulo?.split(" - ")?.[0] ||
+                      "Canción de Spotify"}
                   </Text>
 
                   <Text
@@ -1409,7 +1442,7 @@ export default function RecuerdoDetailDialog({
                       pointerEvents={isFlipped ? "none" : "auto"}
                       style={[
                         {
-                          position: "absolute",
+                          position: isFlipped ? "absolute" : "relative",
                           width: "100%",
                           top: 0,
                           left: 0,
@@ -1534,7 +1567,6 @@ export default function RecuerdoDetailDialog({
                           )}
                         </View>
 
-
                         {/* Diseño del cassette - réplica exacta de la miniatura */}
                         <TouchableOpacity
                           onPress={handleFrontPlay}
@@ -1633,7 +1665,7 @@ export default function RecuerdoDetailDialog({
                       pointerEvents={isFlipped ? "auto" : "none"}
                       style={[
                         {
-                          position: "absolute",
+                          position: isFlipped ? "relative" : "absolute",
                           width: "100%",
                           top: 0,
                           left: 0,
@@ -1875,15 +1907,13 @@ export default function RecuerdoDetailDialog({
                 </View>
               )}
               {recuerdo.tipo === "spotify" && recuerdo.miniatura && (
-                <View
-                  ref={spotifyViewRef}
-                  collapsable={false}
-                >
+                <View ref={spotifyViewRef} collapsable={false}>
                   <View style={{ padding: 14, paddingBottom: 0 }}>
                     <Pressable
                       onPress={() => {
                         // Open Spotify track URL
-                        const spotifyUrl = recuerdo?.spotifyData?.external_urls?.spotify;
+                        const spotifyUrl =
+                          recuerdo?.spotifyData?.external_urls?.spotify;
                         if (spotifyUrl) {
                           Linking.openURL(spotifyUrl).catch((error) => {
                             console.error("Error opening Spotify URL:", error);
@@ -1894,7 +1924,11 @@ export default function RecuerdoDetailDialog({
                       android_ripple={null}
                     >
                       <Image
-                        source={{ uri: recuerdo.spotifyData?.album?.images?.[0]?.url || recuerdo.miniatura }}
+                        source={{
+                          uri:
+                            recuerdo.spotifyData?.album?.images?.[0]?.url ||
+                            recuerdo.miniatura,
+                        }}
                         style={{
                           width: "100%",
                           height: screenWidth * 0.84,
@@ -1907,7 +1941,13 @@ export default function RecuerdoDetailDialog({
                   </View>
 
                   {/* Información debajo de la imagen */}
-                  <View style={{ padding: 20, paddingTop: 16, backgroundColor: "#191414" }}>
+                  <View
+                    style={{
+                      padding: 20,
+                      paddingTop: 16,
+                      backgroundColor: "#191414",
+                    }}
+                  >
                     {/* Header con título y acciones */}
                     <View
                       style={{
@@ -1929,7 +1969,9 @@ export default function RecuerdoDetailDialog({
                           }}
                           numberOfLines={2}
                         >
-                          {recuerdo.spotifyData?.name || recuerdo.titulo?.split(" - ")?.[0] || "Canción de Spotify"}
+                          {recuerdo.spotifyData?.name ||
+                            recuerdo.titulo?.split(" - ")?.[0] ||
+                            "Canción de Spotify"}
                         </Text>
 
                         {/* Artista (abajo, sin negrita) */}
@@ -1947,7 +1989,9 @@ export default function RecuerdoDetailDialog({
                       </View>
 
                       {/* Acciones (share + menú) */}
-                      <View style={{ flexDirection: "row", alignItems: "center" }}>
+                      <View
+                        style={{ flexDirection: "row", alignItems: "center" }}
+                      >
                         <TouchableOpacity
                           onPress={handleShare}
                           disabled={isMutating}
@@ -2114,7 +2158,7 @@ export default function RecuerdoDetailDialog({
                       >
                         {recuerdo.reactions.map((reaction) => {
                           const member = familyMembers.find(
-                            (m) => m.id === reaction.userId
+                            (m) => m.id === reaction.userId,
                           );
                           if (!member) return null;
                           return (
@@ -2196,9 +2240,7 @@ export default function RecuerdoDetailDialog({
               style={modalStyles.content}
               keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
             >
-              <Text style={modalStyles.title}>
-                Modificar recuerdo
-              </Text>
+              <Text style={modalStyles.title}>Modificar recuerdo</Text>
               <View style={{ marginTop: 16, marginBottom: 24 }}>
                 <StyledTextInput
                   label="Título"
@@ -2261,7 +2303,9 @@ export default function RecuerdoDetailDialog({
               onPress={() => setDeleteConfirmVisible(false)}
             />
             <View style={modalStyles.dialogContent}>
-              <Text style={[STYLES.heading, { fontSize: 18, marginBottom: 16 }]}>
+              <Text
+                style={[STYLES.heading, { fontSize: 18, marginBottom: 16 }]}
+              >
                 Eliminar recuerdo
               </Text>
               <Text style={{ ...STYLES.subheading, marginTop: 0 }}>
@@ -2330,6 +2374,6 @@ const modalStyles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 8,
-    paddingBottom: 20
+    paddingBottom: 20,
   },
 });

@@ -661,6 +661,13 @@ export default function CalendarCard(props: CalendarCardProps) {
     }
   };
 
+  const renderDay = React.useCallback(
+    (dayProps: DayComponentProps) => (
+      <DayComponent {...dayProps} onPress={(d) => onDayChange(d.dateString)} />
+    ),
+    [onDayChange],
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
@@ -668,12 +675,7 @@ export default function CalendarCard(props: CalendarCardProps) {
           <Calendar
             onDayPress={(d: DateData) => onDayChange(d.dateString)}
             markedDates={marked}
-            dayComponent={(dayProps) => (
-              <DayComponent
-                {...dayProps}
-                onPress={(d) => onDayChange(d.dateString)}
-              />
-            )}
+            dayComponent={renderDay}
             enableSwipeMonths
             style={styles.calendar}
             theme={{
