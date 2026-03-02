@@ -1,7 +1,16 @@
 import { useEffect, useState, useCallback } from "react";
-import { View, StyleSheet, ScrollView, Animated, Platform } from "react-native";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  Animated,
+  Platform,
+  KeyboardAvoidingView,
+  Modal,
+  TouchableOpacity,
+} from "react-native";
 import { useRef } from "react";
-import { Button, Dialog, Portal, Text, Menu } from "react-native-paper";
+import { Button, Text, Menu, Portal } from "react-native-paper";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { StyledTextInput } from "../shared";
 import {
@@ -151,10 +160,10 @@ const PaperDateTimeWeb = ({
         >
           {value
             ? value.toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: false,
-            })
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              })
             : "--:--"}
         </Button>
       </View>
@@ -341,229 +350,229 @@ export default function ActivityForm({
 
   return (
     <>
-      <Portal>
-        <Dialog
-          visible={visible}
-          onDismiss={onClose}
-          style={{
-            backgroundColor: COLORS.background,
-            width: "92%",
-            alignSelf: "center",
-            borderRadius: 20,
-            maxHeight: "100%",
-          }}
-        >
-          <Animated.View style={{ opacity: fadeAnim }}>
-            <Dialog.Content style={{ paddingBottom: 15 }}>
-              <StyledTextInput
-                key={`title-${visible}-${initial?.id || "new"}`}
-                label="Título"
-                defaultValue={title}
-                onChangeText={setTitle}
-                placeholder={initial ? "Agregar evento" : "Nuevo evento"}
-                marginBottom={16}
-                autoFocus={!initial || !initial.id}
-              />
+      <Modal
+        visible={visible}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={onClose}
+      >
+        <Portal.Host>
+          <View style={styles.modalContainer}>
+            <TouchableOpacity
+              style={styles.modalBackdrop}
+              activeOpacity={1}
+              onPress={onClose}
+            />
+            <KeyboardAvoidingView
+              behavior="padding"
+              style={styles.modalContent}
+              keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+            >
+              <Animated.View style={{ opacity: fadeAnim }}>
+                <ScrollView
+                  keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={false}
+                  style={styles.scrollContent}
+                >
+                <StyledTextInput
+                  key={`title-${visible}-${initial?.id || "new"}`}
+                  label="Título"
+                  defaultValue={title}
+                  onChangeText={setTitle}
+                  placeholder={initial ? "Agregar evento" : "Nuevo evento"}
+                  marginBottom={16}
+                  autoFocus={!initial || !initial.id}
+                />
 
-              {/* Selector de destinatario - solo visible para familiares (no elders) */}
-              {!isElder && elders.length > 0 && (
-                <View style={styles.destinatarioWrapper}>
-                  <Text style={styles.destinatarioLabel}>
-                    Para (destinatario)
-                  </Text>
-                  <DropdownSelect
-                    label="Para (destinatario)"
-                    value={assignedTo || ""}
-                    options={elders.map((elder) => ({
-                      key: elder.id,
-                      label: elder.displayName,
-                      avatarUrl: elder.avatarUrl || null,
-                      frameUrl: elder.activeFrameUrl || null,
-                    }))}
-                    onSelect={(value) => setAssignedTo(value)}
-                    placeholder="Seleccionar adulto mayor"
-                    showLabel={false}
-                    buttonStyle={{
-                      backgroundColor: "transparent",
-                      borderColor: "transparent",
-                      borderRadius: 0,
-                    }}
+                {/* Selector de destinatario - solo visible para familiares (no elders) */}
+                {!isElder && elders.length > 0 && (
+                  <View style={styles.destinatarioWrapper}>
+                    <Text style={styles.destinatarioLabel}>
+                      Para (destinatario)
+                    </Text>
+                    <DropdownSelect
+                      label="Para (destinatario)"
+                      value={assignedTo || ""}
+                      options={elders.map((elder) => ({
+                        key: elder.id,
+                        label: elder.displayName,
+                        avatarUrl: elder.avatarUrl || null,
+                        frameUrl: elder.activeFrameUrl || null,
+                      }))}
+                      onSelect={(value) => setAssignedTo(value)}
+                      placeholder="Seleccionar adulto mayor"
+                      showLabel={false}
+                      buttonStyle={{
+                        backgroundColor: "transparent",
+                        borderColor: "transparent",
+                        borderRadius: 0,
+                      }}
+                    />
+                  </View>
+                )}
+
+                <View style={styles.inputWrapper}>
+                  <MentionInput
+                    label="Descripción"
+                    value={description}
+                    onChangeText={setDescription}
+                    placeholder="Descripción (opcional)"
+                    multiline
+                    numberOfLines={3}
+                    familyMembers={familyMembers}
+                    currentUserId={currentUserId}
+                    mode="flat"
+                    outlineColor="transparent"
+                    activeOutlineColor="transparent"
+                    inputStyle={{ backgroundColor: "transparent" }}
                   />
                 </View>
-              )}
 
-              <View style={styles.inputWrapper}>
-                <MentionInput
-                  label="Descripción"
-                  value={description}
-                  onChangeText={setDescription}
-                  placeholder="Descripción (opcional)"
-                  multiline
-                  numberOfLines={3}
-                  familyMembers={familyMembers}
-                  currentUserId={currentUserId}
-                  mode="flat"
-                  outlineColor="transparent"
-                  activeOutlineColor="transparent"
-                  inputStyle={{ backgroundColor: "transparent" }}
-                />
-              </View>
+                <View style={styles.dateRow}>
+                  {Platform.OS === "web" ? (
+                    <>
+                      <PaperDateTimeWeb
+                        label="Inicio"
+                        value={startsAtDate}
+                        onChange={(d: Date | undefined) =>
+                          setStartsAtDate(d || new Date())
+                        }
+                      />
+                      <PaperDateTimeWeb
+                        label="Fin"
+                        value={endsAtDate}
+                        onChange={(d: Date | undefined) => setEndsAtDate(d)}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <View style={styles.dateColumn}>
+                        <Button
+                          mode="outlined"
+                          onPress={() => setShowStartPicker(true)}
+                          style={styles.pickerButton}
+                          icon="calendar"
+                          contentStyle={{ paddingVertical: 4 }}
+                        >
+                          Inicio
+                        </Button>
+                        <Text style={styles.dateText}>
+                          {formatDateTime(startsAtDate)}
+                        </Text>
+                      </View>
 
-              <View style={styles.dateRow}>
-                {Platform.OS === "web" ? (
-                  <>
-                    <PaperDateTimeWeb
-                      label="Inicio"
-                      value={startsAtDate}
-                      onChange={(d: Date | undefined) =>
-                        setStartsAtDate(d || new Date())
-                      }
-                    />
-                    <PaperDateTimeWeb
-                      label="Fin"
-                      value={endsAtDate}
-                      onChange={(d: Date | undefined) => setEndsAtDate(d)}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <View style={styles.dateColumn}>
-                      <Button
-                        mode="outlined"
-                        onPress={() => setShowStartPicker(true)}
-                        style={styles.pickerButton}
-                        icon="calendar"
-                        contentStyle={{ paddingVertical: 4 }}
-                      >
-                        Inicio
-                      </Button>
-                      <Text style={styles.dateText}>
-                        {formatDateTime(startsAtDate)}
-                      </Text>
-                    </View>
+                      <View style={styles.dateColumn}>
+                        <Button
+                          mode="outlined"
+                          onPress={() => setShowEndPicker(true)}
+                          style={styles.pickerButton}
+                          icon="calendar"
+                          contentStyle={{ paddingVertical: 4 }}
+                        >
+                          Fin
+                        </Button>
+                        <Text style={styles.dateText}>
+                          {endsAtDate
+                            ? formatDateTime(endsAtDate)
+                            : "No definido"}
+                        </Text>
+                      </View>
+                    </>
+                  )}
+                </View>
 
-                    <View style={styles.dateColumn}>
-                      <Button
-                        mode="outlined"
-                        onPress={() => setShowEndPicker(true)}
-                        style={styles.pickerButton}
-                        icon="calendar"
-                        contentStyle={{ paddingVertical: 4 }}
-                      >
-                        Fin
-                      </Button>
-                      <Text style={styles.dateText}>
-                        {endsAtDate
-                          ? formatDateTime(endsAtDate)
-                          : "No definido"}
-                      </Text>
-                    </View>
-                  </>
-                )}
-              </View>
-
-              <Menu
-                visible={showFrequencyMenu}
-                onDismiss={() => setShowFrequencyMenu((prev) => !prev)}
-                contentStyle={{
-                  backgroundColor: COLORS.background,
-                  borderRadius: 12,
-                  maxHeight: 300,
-                }}
-                anchor={
-                  <Button
-                    mode="outlined"
-                    onPress={() => setShowFrequencyModal(true)}
-                    icon="repeat"
-                  >
-                    Frecuencia: {frequencyLabel}
-                  </Button>
-                }
-              >
-                {frequencies.map((freq: Frequency) => (
-                  <Menu.Item
-                    key={freq.id}
-                    onPress={() => {
-                      setFrequencyId(freq.id);
-                      setShowFrequencyMenu((prev) => !prev);
-                    }}
-                    title={freq.label}
-                  />
-                ))}
-              </Menu>
-
-              <DateTimePickerModal
-                isVisible={showStartPicker}
-                date={startsAtDate}
-                mode="datetime"
-                onConfirm={(date) => {
-                  setShowStartPicker(false);
-                  setStartsAtDate(date);
-                }}
-                onCancel={() => setShowStartPicker(false)}
-              />
-              <DateTimePickerModal
-                isVisible={showEndPicker}
-                date={endsAtDate ?? new Date()}
-                mode="datetime"
-                onConfirm={(date) => {
-                  setShowEndPicker(false);
-                  setEndsAtDate(date);
-                }}
-                onCancel={() => setShowEndPicker(false)}
-              />
-
-              {error && <Text style={styles.error}>{error}</Text>}
-            </Dialog.Content>
-            <Dialog.Actions
-              style={{
-                paddingBottom: 30,
-                paddingHorizontal: 24,
-                paddingTop: 10,
-                justifyContent: "space-between",
-              }}
-            >
-              <View style={{ width: 120 }}>
-                <CancelButton onPress={onClose} />
-              </View>
-              <View style={{ width: 120 }}>
-                <SaveButton
-                  onPress={handleSave}
-                  disabled={
-                    saving ||
-                    !title.trim() ||
-                    !startsAtDate ||
-                    (!isElder && !assignedTo)
+                <Menu
+                  visible={showFrequencyMenu}
+                  onDismiss={() => setShowFrequencyMenu((prev) => !prev)}
+                  contentStyle={{
+                    backgroundColor: COLORS.background,
+                    borderRadius: 12,
+                    maxHeight: 300,
+                  }}
+                  anchor={
+                    <Button
+                      mode="outlined"
+                      onPress={() => setShowFrequencyModal(true)}
+                      icon="repeat"
+                    >
+                      Frecuencia: {frequencyLabel}
+                    </Button>
                   }
-                  loading={saving}
+                >
+                  {frequencies.map((freq: Frequency) => (
+                    <Menu.Item
+                      key={freq.id}
+                      onPress={() => {
+                        setFrequencyId(freq.id);
+                        setShowFrequencyMenu((prev) => !prev);
+                      }}
+                      title={freq.label}
+                    />
+                  ))}
+                </Menu>
+
+                <DateTimePickerModal
+                  isVisible={showStartPicker}
+                  date={startsAtDate}
+                  mode="datetime"
+                  onConfirm={(date) => {
+                    setShowStartPicker(false);
+                    setStartsAtDate(date);
+                  }}
+                  onCancel={() => setShowStartPicker(false)}
                 />
+                <DateTimePickerModal
+                  isVisible={showEndPicker}
+                  date={endsAtDate ?? new Date()}
+                  mode="datetime"
+                  onConfirm={(date) => {
+                    setShowEndPicker(false);
+                    setEndsAtDate(date);
+                  }}
+                  onCancel={() => setShowEndPicker(false)}
+                />
+
+                {error && <Text style={styles.error}>{error}</Text>}
+              </ScrollView>
+              <View style={styles.modalActions}>
+                <View style={{ width: 120 }}>
+                  <CancelButton onPress={onClose} />
+                </View>
+                <View style={{ width: 120 }}>
+                  <SaveButton
+                    onPress={handleSave}
+                    disabled={
+                      saving ||
+                      !title.trim() ||
+                      !startsAtDate ||
+                      (!isElder && !assignedTo)
+                    }
+                    loading={saving}
+                  />
+                </View>
               </View>
-            </Dialog.Actions>
-          </Animated.View>
-        </Dialog>
-      </Portal>
-      <Portal>
-        <Dialog
-          visible={showFrequencyModal}
-          onDismiss={() => setShowFrequencyModal(false)}
-          style={{
-            backgroundColor: COLORS.background,
-            width: "92%",
-            alignSelf: "center",
-            borderRadius: 20,
-          }}
-        >
-          <Dialog.Title
-            style={{
-              textAlign: "center",
-              color: COLORS.primary,
-              fontWeight: "bold",
-              fontSize: 20,
-            }}
-          >
-            Seleccionar frecuencia
-          </Dialog.Title>
-          <Dialog.Content>
+            </Animated.View>
+          </KeyboardAvoidingView>
+        </View>
+        </Portal.Host>
+      </Modal>
+
+      <Modal
+        visible={showFrequencyModal}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowFrequencyModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <TouchableOpacity
+            style={styles.modalBackdrop}
+            activeOpacity={1}
+            onPress={() => setShowFrequencyModal(false)}
+          />
+          <View style={styles.frequencyModalContent}>
+            <Text style={styles.frequencyModalTitle}>
+              Seleccionar frecuencia
+            </Text>
             <ScrollView style={{ maxHeight: 310 }}>
               {frequencies.map((freq) => (
                 <Button
@@ -593,14 +602,55 @@ export default function ActivityForm({
                 </Button>
               ))}
             </ScrollView>
-          </Dialog.Content>
-        </Dialog>
-      </Portal>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "92%",
+    maxHeight: "90%",
+    backgroundColor: COLORS.background,
+    borderRadius: 20,
+    padding: 24,
+    zIndex: 1,
+  },
+  scrollContent: {
+    width: "100%",
+  },
+  modalActions: {
+    paddingTop: 20,
+    paddingBottom: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  frequencyModalContent: {
+    width: "92%",
+    backgroundColor: COLORS.background,
+    borderRadius: 20,
+    padding: 24,
+    zIndex: 1,
+  },
+  frequencyModalTitle: {
+    textAlign: "center",
+    color: COLORS.primary,
+    fontWeight: "bold",
+    fontSize: 20,
+    marginBottom: 16,
+  },
   titleInput: {
     backgroundColor: COLORS.backgroundSecondary,
   },
@@ -617,6 +667,8 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 8,
     marginBottom: 16,
+    width: "100%"
+    
   },
   destinatarioLabel: {
     fontSize: 12,

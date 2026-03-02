@@ -20,6 +20,7 @@ import {
 import { MentionsService } from "@/services/mentions";
 import { NotificationsService } from "@/modules/notifications/service";
 import { SpotifyService } from "@/modules/spotify/service";
+import type { SpotifyTrack } from "@/modules/spotify/types";
 
 export class MemoriesService {
   private mentionsService: MentionsService;
@@ -493,7 +494,7 @@ export class MemoriesService {
     await this.assertUserInGroup(userId, spotifyData.groupId);
 
     // Get track data from Spotify
-    const trackData = await this.spotifyService.getTrack(
+    const trackData: SpotifyTrack = await this.spotifyService.getTrack(
       spotifyData.spotifyTrackId
     );
 
@@ -505,9 +506,13 @@ export class MemoriesService {
     const spotifyUri = `spotify:track:${spotifyData.spotifyTrackId}`;
 
     // Create title if not provided (use track name and artist)
+    const artistNames = trackData.artists
+      ? trackData.artists.map((a) => a.name).join(", ")
+      : "";
+
     const title =
       spotifyData.title ||
-      `${trackData.name} - ${trackData.artists?.map((a: any) => a.name).join(", ") || ""}`;
+      `${trackData.name} - ${artistNames}`;
 
     const newMemory: NewMemory = {
       bookId: spotifyData.bookId,
@@ -515,7 +520,7 @@ export class MemoriesService {
       createdBy: userId,
       title: title,
       caption: spotifyData.caption,
-      mediaUrl: trackData.album?.images?.[0]?.url || null, // Use album cover as mediaUrl
+      mediaUrl: trackData.album?.images?.[0]?.url || undefined, // Use album cover as mediaUrl
       mimeType: "audio/spotify", // Special mime type to identify Spotify memories
       spotifyTrackId: spotifyData.spotifyTrackId,
       spotifyUri: spotifyUri,      spotifyData: trackData,

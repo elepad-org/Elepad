@@ -14,9 +14,8 @@ import {
   View,
   Dimensions,
   Platform,
-  Modal,
 } from "react-native";
-import { Text, Icon } from "react-native-paper";
+import { Text, Icon, Portal } from "react-native-paper";
 import { useSegments } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { COLORS, SHADOWS, FONT } from "@/styles/base";
@@ -267,7 +266,7 @@ const Toast = ({
                 height: 8,
                 backgroundColor:
                   CONFETTI_COLORS_PALETTE[
-                    index % CONFETTI_COLORS_PALETTE.length
+                  index % CONFETTI_COLORS_PALETTE.length
                   ],
                 borderRadius: 4,
                 transform: [
@@ -377,7 +376,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
   >({
     visible: false,
     message: "",
-    onDismiss: () => {},
+    onDismiss: () => { },
     // withNavbar left undefined to allow auto-detection in component
   });
 
@@ -411,15 +410,16 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
   return (
     <ToastContext.Provider value={{ showToast, hideToast }}>
       {children}
-      <Modal
-        visible={toastConfig.visible}
-        transparent
-        animationType="none"
-        statusBarTranslucent
-        onRequestClose={hideToast}
-      >
-        <Toast {...toastConfig} onDismiss={hideToast} />
-      </Modal>
+      {toastConfig.visible && (
+        <Portal>
+          <View
+            pointerEvents="box-none"
+            style={StyleSheet.absoluteFill}
+          >
+            <Toast {...toastConfig} onDismiss={hideToast} />
+          </View>
+        </Portal>
+      )}
     </ToastContext.Provider>
   );
 };

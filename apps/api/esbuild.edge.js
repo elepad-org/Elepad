@@ -64,6 +64,7 @@ await build({
     "get-stream",
     "yargs-parser",
     "ws",
+    "ics",
   ],
 });
 

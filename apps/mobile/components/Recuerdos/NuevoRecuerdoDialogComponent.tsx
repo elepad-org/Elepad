@@ -1,5 +1,13 @@
-import { Pressable, View } from "react-native";
-import { Dialog, Text, Divider, Icon } from "react-native-paper";
+import {
+  Pressable,
+  View,
+  KeyboardAvoidingView,
+  Platform,
+  Modal,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
+import { Dialog, Text, Divider, Icon, Portal } from "react-native-paper";
 import { STYLES, COLORS } from "@/styles/base";
 import ImagePickerComponent from "./ImagePickerComponent";
 import TextNoteComponent from "./TextNoteComponent";
@@ -66,46 +74,56 @@ export default function NuevoRecuerdoDialogComponent({
     onFileSelected
   ) {
     return (
-      <Dialog
+      <Modal
         visible={visible}
-        onDismiss={onCancel}
-        style={{
-          backgroundColor: COLORS.background,
-          width: "90%",
-          alignSelf: "center",
-          borderRadius: 16,
-        }}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={onCancel}
       >
-        <MetadataInputComponent
-          onSave={(title, caption) => {
-            // Usar el mimeType que se recibió del archivo seleccionado
-            onSave({
-              contenido: selectedFileUri,
-              titulo: title,
-              caption: caption,
-              mimeType: selectedFileMimeType,
-            });
-          }}
-          onCancel={onCancel}
-          isUploading={isUploading}
-          familyMembers={familyMembers}
-          currentUserId={currentUserId}
-        />
-      </Dialog>
+        <Portal.Host>
+          <View style={styles.modalContainer}>
+            <TouchableOpacity
+              style={styles.modalBackdrop}
+              activeOpacity={1}
+              onPress={onCancel}
+            />
+            <KeyboardAvoidingView
+              behavior="padding"
+              style={styles.modalContent}
+              keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+            >
+            
+              <MetadataInputComponent
+                onSave={(title, caption) => {
+                  // Usar el mimeType que se recibió del archivo seleccionado
+                  onSave({
+                    contenido: selectedFileUri,
+                    titulo: title,
+                    caption: caption,
+                    mimeType: selectedFileMimeType,
+                  });
+                }}
+                onCancel={onCancel}
+                isUploading={isUploading}
+                familyMembers={familyMembers}
+                currentUserId={currentUserId}
+                
+              />
+              
+            </KeyboardAvoidingView>
+          </View>
+        </Portal.Host>
+      </Modal>
     );
   }
 
   if (step === "create" && selectedTipo) {
     return (
-      <Dialog
+      <Modal
         visible={visible}
-        onDismiss={onCancel}
-        style={{
-          backgroundColor: COLORS.background,
-          width: "90%",
-          alignSelf: "center",
-          borderRadius: 16,
-        }}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={onCancel}
       >
         {selectedTipo === "imagen" && (
           <ImagePickerComponent
@@ -295,3 +313,23 @@ export default function NuevoRecuerdoDialogComponent({
     </Dialog>
   );
 }
+
+const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "90%",
+    backgroundColor: COLORS.background,
+    borderRadius: 16,
+    padding: 24,
+    zIndex: 1,
+    maxHeight: "90%",
+  },
+});

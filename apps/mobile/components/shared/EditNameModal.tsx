@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet } from "react-native";
-import { Dialog, Text, Portal } from "react-native-paper";
+import { View, StyleSheet, KeyboardAvoidingView, Platform, Modal, TouchableOpacity } from "react-native";
+import { Text } from "react-native-paper";
 import { COLORS, STYLES } from "@/styles/base";
 import { patchUsersId } from "@elepad/api-client/src/gen/client";
 import CancelButton from "./CancelButton";
@@ -44,7 +44,7 @@ export const EditNameModal: React.FC<EditNameModalProps> = ({
 
   const handleSave = async () => {
     const next = formName.trim();
-    
+
     if (!next) {
       showToast({
         message: "El nombre no puede estar vacío",
@@ -71,14 +71,14 @@ export const EditNameModal: React.FC<EditNameModalProps> = ({
       await patchUsersId(userId, {
         displayName: next,
       });
-      
+
       showToast({
         message: "Nombre actualizado correctamente",
         type: "success",
       });
-      
+
       onDismiss();
-      
+
       if (onSuccess) {
         await onSuccess();
       }
@@ -100,60 +100,59 @@ export const EditNameModal: React.FC<EditNameModalProps> = ({
   };
 
   return (
-    <Portal>
-      <Dialog
-        visible={visible}
-        onDismiss={handleDismiss}
-        style={{
-          backgroundColor: COLORS.background,
-          width: "90%",
-          alignSelf: "center",
-          borderRadius: 16,
-          paddingVertical: 14,
-        }}
-      >
-        <Dialog.Title style={{ ...STYLES.heading, paddingTop: 8, marginBottom: 4, textAlign: "center" }}>
-          Editar nombre
-        </Dialog.Title>
-        <Dialog.Content style={{ paddingBottom: 15, paddingTop: 8 }}>
-          <Text variant="bodyMedium" style={styles.description}>
-            Ingresa tu nuevo nombre
-          </Text>
-
-          <StyledTextInput
-            label="Nombre"
-            value={formName}
-            onChangeText={setFormName}
-            autoFocus
-            marginBottom={0}
-          />
-        </Dialog.Content>
-        <Dialog.Actions
-          style={{
-            paddingBottom: 30,
-            paddingHorizontal: 24,
-            paddingTop: 10,
-            justifyContent: "space-between",
-          }}
+    <Modal
+      visible={visible}
+      animationType="fade"
+      transparent={true}
+      onRequestClose={handleDismiss}
+    >
+      <View style={modalStyles.container}>
+        <TouchableOpacity
+          style={modalStyles.backdrop}
+          activeOpacity={1}
+          onPress={handleDismiss}
+        />
+        <KeyboardAvoidingView
+          behavior="padding"
+          style={modalStyles.content}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
         >
-          <View style={{ width: 120 }}>
-            <CancelButton onPress={handleDismiss} disabled={saving} />
-          </View>
-          <View style={{ width: 120 }}>
-            <SaveButton
-              onPress={handleSave}
-              loading={saving}
-              disabled={
-                saving ||
-                !formName.trim() ||
-                formName.trim() === currentName
-              }
-              text="Guardar"
+          <Text style={modalStyles.title}>
+            Editar nombre
+          </Text>
+          <View style={{ paddingBottom: 15, paddingTop: 8 }}>
+            <Text variant="bodyMedium" style={styles.description}>
+              Ingresa tu nuevo nombre
+            </Text>
+
+            <StyledTextInput
+              label="Nombre"
+              value={formName}
+              onChangeText={setFormName}
+              autoFocus
+              marginBottom={0}
             />
           </View>
-        </Dialog.Actions>
-      </Dialog>
-    </Portal>
+          <View style={modalStyles.actions}>
+            <View style={{ width: 120 }}>
+              <CancelButton onPress={handleDismiss} disabled={saving} />
+            </View>
+            <View style={{ width: 120 }}>
+              <SaveButton
+                onPress={handleSave}
+                loading={saving}
+                disabled={
+                  saving ||
+                  !formName.trim() ||
+                  formName.trim() === currentName
+                }
+                text="Guardar"
+              />
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </View>
+    </Modal>
   );
 };
 
@@ -163,5 +162,41 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     lineHeight: 22,
     textAlign: "center",
+  },
+});
+
+const modalStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  backdrop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  content: {
+    backgroundColor: COLORS.background,
+    width: "90%",
+    borderRadius: 16,
+    padding: 24,
+    paddingVertical: 20,
+    maxWidth: 500,
+  },
+  title: {
+    ...STYLES.heading,
+    fontSize: 20,
+    textAlign: "center",
+    marginBottom: 4,
+  },
+  actions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingTop: 10,
+    paddingBottom: 30,
   },
 });

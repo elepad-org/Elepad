@@ -9,7 +9,7 @@ import Animated, {
   withSpring,
   withDelay,
 } from "react-native-reanimated";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useStreakHistory } from "@/hooks/useStreak";
 
@@ -118,8 +118,13 @@ export default function StreakCelebrationModal({
     return status;
   }, [historyData, startOfWeek, streak]);
 
+  // Ref para evitar que la animación se reinicie por re-renders dentro del modal
+  const hasAnimatedRef = useRef(false);
+
   useEffect(() => {
-    if (visible) {
+    if (visible && !hasAnimatedRef.current) {
+      hasAnimatedRef.current = true;
+
       // Reset
       opacity.value = 0;
       numberOpacity.value = 0;
@@ -181,8 +186,11 @@ export default function StreakCelebrationModal({
           );
         }, delay);
       });
+    } else if (!visible) {
+      // Resetear la guarda cuando el modal se cierra, para la próxima apertura
+      hasAnimatedRef.current = false;
     }
-  }, [visible, opacity, confettiValues]);
+  }, [visible]);
 
   const containerAnimatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,

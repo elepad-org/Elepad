@@ -96,7 +96,6 @@ Si en el código hay deuda técnica o cambios pendientes, se lo debe señalar co
 Se utiliza Husky para configurar hooks de Git:
 
 - Formatear el código con Prettier antes de un `git commit`.
-- Instalar dependencias después de un `git pull`.
 
 ## 🚀 Despliegue
 

@@ -42,7 +42,7 @@ export default function TextNoteComponent({
     <View
       style={{
         backgroundColor: COLORS.background,
-        padding: 20,
+        padding: 0,
         borderRadius: 20,
       }}
     >
@@ -90,6 +90,7 @@ export default function TextNoteComponent({
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
+          paddingBottom: 20
         }}
       >
         <View style={{ width: 120 }}>

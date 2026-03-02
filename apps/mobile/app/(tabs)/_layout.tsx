@@ -40,36 +40,41 @@ function TabLayoutContent() {
   const params = useLocalSearchParams();
   const router = useRouter();
   const navigation = useNavigation();
-  const [index, setIndex] = useState(0);
   const { userElepad, userElepadLoading } = useAuth();
+  const isElder = userElepad?.elder === true;
+
+  const routes = useMemo(() =>
+    isElder ? elderRoutes : nonElderRoutes
+    , [isElder]);
+
+  const [index, setIndex] = useState(() => {
+    // Inicializar el tab correcto basándose en los parámetros de ruta para evitar un "flash" del tab 0 (Home)
+    if (params.tab) {
+      const tabIndex = routes.findIndex((route) => route.key === params.tab);
+      return tabIndex !== -1 ? tabIndex : 0;
+    }
+    return 0;
+  });
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const { state: tourState } = useTourContext();
   // Removed useTabContext from here to prevent re-renders
-
-  const isElder = userElepad?.elder === true;
 
   // Detectar si es una pantalla muy grande (desktop/web)
   // Usamos 1024px como breakpoint para que tablets usen el tab bar
   // y solo pantallas de PC/desktop muestren el sidebar
   const isLargeScreen = layout.width >= 1024;
 
-  const routes = useMemo(() =>
-    isElder ? elderRoutes : nonElderRoutes
-    , [isElder]);
-
-  // Escuchar cambios en el parámetro 'tab' para cambiar de tab programáticamente
+  // Escuchar cambios subsecuentes en el parámetro 'tab' para cambiar de tab programáticamente
   useEffect(() => {
     if (params.tab) {
       const tabIndex = routes.findIndex((route) => route.key === params.tab);
-      if (tabIndex !== -1) {
+      if (tabIndex !== -1 && tabIndex !== index) {
         setIndex(tabIndex);
       }
-      // Limpiar el parámetro después de cambiar el tab
-      setTimeout(() => {
-        router.setParams({ tab: undefined });
-      }, 100);
+      // Limpiar el parámetro inmediatamente para evitar re-renders lentos en los tabs hijos
+      router.setParams({ tab: undefined });
     }
-  }, [params.tab, routes]);
+  }, [params.tab, routes, index, router]);
 
 
 

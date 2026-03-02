@@ -3,6 +3,12 @@ import { Database } from "@/supabase-types";
 import { ApiException } from "@/utils/api-error";
 import dotenv from "dotenv";
 
+import {
+  SpotifyArtist,
+  SpotifyTrack,
+  SpotifySearchResult,
+} from "./types";
+
 dotenv.config();
 
   console.log("CWD:", process.cwd());
@@ -80,7 +86,7 @@ export class SpotifyService {
   /**
    * Get artist data from Spotify API
    */
-  async getArtist(artistId: string): Promise<any> {
+  async getArtist(artistId: string): Promise<SpotifyArtist> {
     const accessToken = await this.getAccessToken();
 
     try {
@@ -101,7 +107,7 @@ export class SpotifyService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as SpotifyArtist;
       return data;
     } catch (error) {
       if (error instanceof ApiException) {
@@ -115,7 +121,7 @@ export class SpotifyService {
   /**
    * Get track data from Spotify API
    */
-  async getTrack(trackId: string): Promise<any> {
+  async getTrack(trackId: string): Promise<SpotifyTrack> {
     const accessToken = await this.getAccessToken();
 
     try {
@@ -136,7 +142,7 @@ export class SpotifyService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as SpotifyTrack;
       return data;
     } catch (error) {
       if (error instanceof ApiException) {
