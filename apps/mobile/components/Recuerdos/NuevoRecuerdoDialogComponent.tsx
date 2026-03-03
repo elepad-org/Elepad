@@ -99,7 +99,7 @@ export default function NuevoRecuerdoDialogComponent({
             <KeyboardAvoidingView
               behavior="padding"
               style={styles.modalContent}
-              keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+            // keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
             >
               <MetadataInputComponent
                 onSave={(title, caption) => {
@@ -141,7 +141,7 @@ export default function NuevoRecuerdoDialogComponent({
             <KeyboardAvoidingView
               behavior="padding"
               style={styles.modalContent}
-              keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+            // keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
             >
               {selectedTipo === "imagen" && (
                 <ImagePickerComponent

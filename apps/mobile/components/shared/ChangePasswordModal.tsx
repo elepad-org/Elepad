@@ -170,7 +170,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
         <KeyboardAvoidingView
           behavior="padding"
           style={modalStyles.content}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+        // keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
         >
           <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
             <Text style={[styles.title, modalStyles.title]}>Cambiar contraseña</Text>

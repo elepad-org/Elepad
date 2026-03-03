@@ -52,24 +52,24 @@ export function EditNameDialog({
         <KeyboardAvoidingView
           behavior="padding"
           style={[perfilModalStyles.content, { backgroundColor: theme.colors.surface }]}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+        // keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
         >
           <Text style={[perfilModalStyles.title, { color: theme.colors.onSurface }]}>
             {title}
           </Text>
           <View style={{ marginBottom: 16 }}>
-          <StyledTextInput
-            label="Nombre"
-            value={name}
-            onChangeText={onChange}
-            left={<TextInput.Icon icon="account" />}
-            autoFocus
-            theme={{
-              colors: {
-                primary: theme.colors.primary,
-              },
-            }}
-          />
+            <StyledTextInput
+              label="Nombre"
+              value={name}
+              onChangeText={onChange}
+              left={<TextInput.Icon icon="account" />}
+              autoFocus
+              theme={{
+                colors: {
+                  primary: theme.colors.primary,
+                },
+              }}
+            />
           </View>
           <View style={perfilModalStyles.actions}>
             <Button

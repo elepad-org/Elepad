@@ -1048,7 +1048,7 @@ export default function RecuerdosScreen() {
             <KeyboardAvoidingView
               behavior="padding"
               style={modalStyles.content}
-              keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+            // keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
             >
               <Text style={modalStyles.title}>
                 {bookDialogMode === "create" ? "Nuevo baúl" : "Modificar baúl"}

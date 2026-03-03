@@ -115,7 +115,7 @@ export const EditNameModal: React.FC<EditNameModalProps> = ({
         <KeyboardAvoidingView
           behavior="padding"
           style={modalStyles.content}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+        // keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
         >
           <Text style={modalStyles.title}>
             Editar nombre

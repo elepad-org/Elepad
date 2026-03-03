@@ -230,7 +230,7 @@ export default function CreateAlbumDialog({
           style={
             step === "form" ? styles.formContainer : styles.imagesContainer
           }
-          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+        // keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
         >
           {step === "form" && (
             <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} style={{ width: "100%" }}>
@@ -485,73 +485,73 @@ export default function CreateAlbumDialog({
         </KeyboardAvoidingView>
       </View>
 
-        {/* Modal de procesamiento de álbum */}
+      {/* Modal de procesamiento de álbum */}
+      <Modal
+        visible={!!processingAlbumTitle}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => { }}
+      >
+        <View style={styles.container}>
+          <TouchableOpacity
+            style={styles.backdrop}
+            activeOpacity={1}
+            disabled={true}
+          />
+          <View style={[styles.formContainer, { maxHeight: "50%" }]}>
+            <Text style={styles.processingTitle}>Creando Álbum</Text>
+
+            <Text style={styles.processingDescription}>
+              Estamos generando tu álbum {processingAlbumTitle}.
+            </Text>
+            <Text style={styles.processingDescription}>
+              Te enviaremos una notificación cuando esté listo.
+            </Text>
+
+            <View style={{ marginTop: 24, width: "100%" }}>
+              <SaveButton
+                onPress={() => {
+                  dismissProcessingDialog();
+                  handleDismiss();
+                }}
+                text="Aceptar"
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Preview Modal */}
+      {previewMemory && (
         <Modal
-          visible={!!processingAlbumTitle}
-          animationType="fade"
+          visible={true}
           transparent={true}
-          onRequestClose={() => { }}
+          animationType="fade"
+          onRequestClose={() => setPreviewMemory(null)}
         >
-          <View style={styles.container}>
+          <View style={styles.previewContainer}>
             <TouchableOpacity
               style={styles.backdrop}
               activeOpacity={1}
-              disabled={true}
+              onPress={() => setPreviewMemory(null)}
             />
-            <View style={[styles.formContainer, { maxHeight: "50%" }]}>
-              <Text style={styles.processingTitle}>Creando Álbum</Text>
-
-              <Text style={styles.processingDescription}>
-                Estamos generando tu álbum {processingAlbumTitle}.
-              </Text>
-              <Text style={styles.processingDescription}>
-                Te enviaremos una notificación cuando esté listo.
-              </Text>
-
-              <View style={{ marginTop: 24, width: "100%" }}>
-                <SaveButton
-                  onPress={() => {
-                    dismissProcessingDialog();
-                    handleDismiss();
-                  }}
-                  text="Aceptar"
-                />
-              </View>
+            <View style={styles.previewContent}>
+              <PolaroidPreview
+                memory={{
+                  id: previewMemory.id,
+                  title: previewMemory.title,
+                  description: previewMemory.caption,
+                  mediaUrl: previewMemory.mediaUrl,
+                  mimeType: previewMemory.mimeType,
+                  autorNombre: getAuhorName(previewMemory.createdBy),
+                  fecha: new Date(previewMemory.createdAt),
+                }}
+                familyMembers={familyMembers}
+              />
             </View>
           </View>
         </Modal>
-
-        {/* Preview Modal */}
-        {previewMemory && (
-          <Modal
-            visible={true}
-            transparent={true}
-            animationType="fade"
-            onRequestClose={() => setPreviewMemory(null)}
-          >
-            <View style={styles.previewContainer}>
-              <TouchableOpacity
-                style={styles.backdrop}
-                activeOpacity={1}
-                onPress={() => setPreviewMemory(null)}
-              />
-              <View style={styles.previewContent}>
-                <PolaroidPreview
-                  memory={{
-                    id: previewMemory.id,
-                    title: previewMemory.title,
-                    description: previewMemory.caption,
-                    mediaUrl: previewMemory.mediaUrl,
-                    mimeType: previewMemory.mimeType,
-                    autorNombre: getAuhorName(previewMemory.createdBy),
-                    fecha: new Date(previewMemory.createdAt),
-                  }}
-                  familyMembers={familyMembers}
-                />
-              </View>
-            </View>
-          </Modal>
-        )}
+      )}
     </Modal>
   );
 }
@@ -561,7 +561,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    
+
     // paddingHorizontal: 24, // Removed to allow 90% width control
   },
   backdrop: {
