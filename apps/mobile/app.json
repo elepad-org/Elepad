@@ -23,7 +23,6 @@
         "foregroundImage": "./assets/images/ele-def-fondo-cuad.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
       "package": "com.elepadorg.elepad",
       "permissions": [
         "android.permission.POST_NOTIFICATIONS",
@@ -88,7 +87,11 @@
           "photosPermission": "Permitir a Elepad guardar tus recuerdos en la galería.",
           "savePhotosPermission": "Permitir a Elepad guardar fotos y videos en tu galería.",
           "isAccessMediaLocationEnabled": true,
-          "granularPermissions": ["audio", "photo", "video"]
+          "granularPermissions": [
+            "audio",
+            "photo",
+            "video"
+          ]
         }
       ],
       "expo-build-properties",
@@ -99,7 +102,7 @@
             {
               "name": "RecentPhotos",
               "label": "Recuerdos del grupo",
-              "minWidth": "250dp", 
+              "minWidth": "250dp",
               "minHeight": "100dp",
               "description": "Muestra las fotos más recientes del grupo familiar",
               "previewImage": "./assets/images/elepad-polaroid.png",
