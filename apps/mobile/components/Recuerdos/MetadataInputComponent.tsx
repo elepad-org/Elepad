@@ -50,11 +50,11 @@ export default function MetadataInputComponent({
     >
       <Text style={STYLES.heading}>Detalles del recuerdo</Text>
       <Text style={{ ...STYLES.subheading, marginBottom: 16 }}>
-        Agrega un título obligatorio y descripción (opcional)
+        Debe agregar un título
       </Text>
 
       <StyledTextInput
-        label="Título"
+        label="Título *"
         value={title}
         onChangeText={setTitle}
         placeholder="Título obligatorio (Ej: Día en la playa)"
@@ -71,7 +71,7 @@ export default function MetadataInputComponent({
         }}
       >
         <MentionInput
-          label="Descripción"
+          label="Descripción (opcional)"
           value={caption}
           onChangeText={setCaption}
           placeholder="Describe tu recuerdo... Usa @ para mencionar"

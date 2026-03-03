@@ -52,7 +52,7 @@ export function EditNameDialog({
         <KeyboardAvoidingView
           behavior="padding"
           style={[perfilModalStyles.content, { backgroundColor: theme.colors.surface }]}
-        // keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
         >
           <Text style={[perfilModalStyles.title, { color: theme.colors.onSurface }]}>
             {title}
@@ -329,6 +329,7 @@ const perfilModalStyles = StyleSheet.create({
   },
   content: {
     width: "90%",
+    maxHeight: "20%",
     borderRadius: 16,
     padding: 24,
     paddingTop: 20,

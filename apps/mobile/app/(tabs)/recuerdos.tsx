@@ -1048,7 +1048,7 @@ export default function RecuerdosScreen() {
             <KeyboardAvoidingView
               behavior="padding"
               style={modalStyles.content}
-            // keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+             keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
             >
               <Text style={modalStyles.title}>
                 {bookDialogMode === "create" ? "Nuevo baúl" : "Modificar baúl"}
@@ -1948,6 +1948,7 @@ const modalStyles = StyleSheet.create({
   content: {
     backgroundColor: COLORS.background,
     width: "92%",
+    maxHeight: "52%",
     borderRadius: 16,
     padding: 24,
     paddingTop: 20,

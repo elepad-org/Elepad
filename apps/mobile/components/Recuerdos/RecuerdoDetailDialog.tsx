@@ -2236,10 +2236,10 @@ export default function RecuerdoDetailDialog({
             <KeyboardAvoidingView
               behavior="padding"
               style={modalStyles.content}
-            // keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+              keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
             >
               <Text style={modalStyles.title}>Modificar recuerdo</Text>
-              <View style={{ marginTop: 16, marginBottom: 24 }}>
+              <View style={{ marginTop: 16, marginBottom: 15 }}>
                 <StyledTextInput
                   label="Título"
                   value={editTitle}
@@ -2302,7 +2302,7 @@ export default function RecuerdoDetailDialog({
             />
             <View style={modalStyles.dialogContent}>
               <Text
-                style={[STYLES.heading, { fontSize: 18, marginBottom: 16 }]}
+                style={[STYLES.heading, { fontSize: 18, marginBottom: 16, marginTop: 15 }]}
               >
                 Eliminar recuerdo
               </Text>
@@ -2350,6 +2350,7 @@ const modalStyles = StyleSheet.create({
   content: {
     backgroundColor: COLORS.background,
     width: "92%",
+    maxHeight: "53%",
     borderRadius: 16,
     padding: 24,
     paddingTop: 20,
@@ -2360,7 +2361,8 @@ const modalStyles = StyleSheet.create({
     width: "90%",
     borderRadius: 16,
     padding: 24,
-    paddingTop: 20,
+    paddingTop: 10,
+    paddingBottom: 10,
     maxWidth: 500,
   },
   title: {
@@ -2371,7 +2373,7 @@ const modalStyles = StyleSheet.create({
   actions: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 8,
+    marginTop: 12,
     paddingBottom: 20,
   },
 });

@@ -170,11 +170,11 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
         <KeyboardAvoidingView
           behavior="padding"
           style={modalStyles.content}
-        // keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
         >
           <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
             <Text style={[styles.title, modalStyles.title]}>Cambiar contraseña</Text>
-            <View style={{ paddingBottom: 15 }}>
+            <View style={{ paddingBottom: 0 }}>
               <Text variant="bodyMedium" style={styles.description}>
                 Ingresa tu contraseña actual y la nueva contraseña que deseas
                 utilizar.
@@ -297,9 +297,10 @@ const modalStyles = StyleSheet.create({
     width: "92%",
     borderRadius: 20,
     padding: 24,
+    paddingBottom: 0,
     paddingTop: 20,
     maxWidth: 500,
-    maxHeight: "90%",
+    maxHeight: "75%",
   },
   title: {
     fontSize: 20,
@@ -310,6 +311,6 @@ const modalStyles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     paddingTop: 10,
-    paddingBottom: 30,
+    paddingBottom: 10,
   },
 });

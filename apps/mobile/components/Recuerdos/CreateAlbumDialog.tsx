@@ -230,7 +230,7 @@ export default function CreateAlbumDialog({
           style={
             step === "form" ? styles.formContainer : styles.imagesContainer
           }
-        // keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
         >
           {step === "form" && (
             <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} style={{ width: "100%" }}>
@@ -590,10 +590,11 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     width: "90%", // Match other dialogs
+    maxHeight: "92%",
     alignItems: "center",
     backgroundColor: COLORS.background,
     borderRadius: 20,
-    padding: 28,
+    padding: 20,
     zIndex: 1,
   },
   modalTitle: {

@@ -48,11 +48,11 @@ export default function TextNoteComponent({
     >
       <Text style={STYLES.heading}>Detalles del recuerdo</Text>
       <Text style={{ ...STYLES.subheading, marginBottom: 16 }}>
-        Agrega un título y descripción
+        Debes agregar un título
       </Text>
 
       <StyledTextInput
-        label="Título"
+        label="Título *"
         value={title}
         onChangeText={setTitle}
         placeholder="Ej: Recordatorio importante"
@@ -69,7 +69,7 @@ export default function TextNoteComponent({
         }}
       >
         <MentionInput
-          label="Descripción"
+          label="Descripción (opcional)"
           value={content}
           onChangeText={setContent}
           placeholder="Describe tu recuerdo... Usa @ para mencionar"

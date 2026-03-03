@@ -366,7 +366,7 @@ export default function ActivityForm({
             <KeyboardAvoidingView
               behavior="padding"
               style={styles.modalContent}
-            // keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+              keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
             >
               <Animated.View style={{ opacity: fadeAnim }}>
                 <ScrollView
@@ -621,7 +621,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: "92%",
-    maxHeight: "90%",
+    maxHeight: "70%",
     backgroundColor: COLORS.background,
     borderRadius: 20,
     padding: 24,

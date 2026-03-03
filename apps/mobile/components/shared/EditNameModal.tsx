@@ -115,12 +115,12 @@ export const EditNameModal: React.FC<EditNameModalProps> = ({
         <KeyboardAvoidingView
           behavior="padding"
           style={modalStyles.content}
-        // keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
         >
           <Text style={modalStyles.title}>
             Editar nombre
           </Text>
-          <View style={{ paddingBottom: 15, paddingTop: 8 }}>
+          <View style={{ paddingBottom: 10, paddingTop: 8 }}>
             <Text variant="bodyMedium" style={styles.description}>
               Ingresa tu nuevo nombre
             </Text>
@@ -182,8 +182,10 @@ const modalStyles = StyleSheet.create({
   content: {
     backgroundColor: COLORS.background,
     width: "90%",
+    maxHeight: "43%",
     borderRadius: 16,
     padding: 24,
+    paddingBottom: 0,
     paddingVertical: 20,
     maxWidth: 500,
   },
@@ -197,6 +199,6 @@ const modalStyles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     paddingTop: 10,
-    paddingBottom: 30,
+    paddingBottom: 13,
   },
 });

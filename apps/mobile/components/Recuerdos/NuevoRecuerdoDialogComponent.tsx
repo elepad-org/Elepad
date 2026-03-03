@@ -99,7 +99,7 @@ export default function NuevoRecuerdoDialogComponent({
             <KeyboardAvoidingView
               behavior="padding"
               style={styles.modalContent}
-            // keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+             keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
             >
               <MetadataInputComponent
                 onSave={(title, caption) => {
@@ -141,7 +141,7 @@ export default function NuevoRecuerdoDialogComponent({
             <KeyboardAvoidingView
               behavior="padding"
               style={styles.modalContent}
-            // keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+             keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
             >
               {selectedTipo === "imagen" && (
                 <ImagePickerComponent
@@ -353,6 +353,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 24,
     zIndex: 1,
-    maxHeight: "90%",
+    maxHeight: "60%",
   },
 });
